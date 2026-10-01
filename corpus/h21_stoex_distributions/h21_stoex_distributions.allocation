@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h21_stoex_distributions_allocation1" entityName="h21_stoex_distributions">
+  <targetResourceEnvironment_Allocation href="h21_stoex_distributions.resourceenvironment#/"/>
+  <system_Allocation href="h21_stoex_distributions.system#_h21_stoex_distributions_system1"/>
+  <allocationContexts_Allocation id="_h21_stoex_distributions_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h21_stoex_distributions.resourceenvironment#_h21_stoex_distributions_rc1"/>
+    <assemblyContext_AllocationContext href="h21_stoex_distributions.system#_h21_stoex_distributions_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

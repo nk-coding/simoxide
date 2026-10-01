@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: defaultUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_reliability/default.usagemodel#_TIc8ICjhEeKEJ8UeV7BBTw">
+    <usageScenario href="default.usagemodel#_TIc8ICjhEeKEJ8UeV7BBTw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_start->execute [_UpPZcCjhEeKEJ8UeV7BBTw]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_reliability/default.usagemodel#_UpPZcCjhEeKEJ8UeV7BBTw">
+    <entryLevelSystemCall href="default.usagemodel#_UpPZcCjhEeKEJ8UeV7BBTw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_start.execute"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_reliability/default.repository#_EQjwQCjgEeKEJ8UeV7BBTw">
+    <role xsi:type="repository:OperationProvidedRole" href="default.system#_4EF98CjgEeKEJ8UeV7BBTw"/>
+    <operationSignature href="default.repository#_EQjwQCjgEeKEJ8UeV7BBTw"/>
+    <system href="default.system#_27xD8CjgEeKEJ8UeV7BBTw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in aName" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_reliability/default.resourceenvironment#_CrQw8CjhEeKEJ8UeV7BBTw">
+    <activeResource href="default.resourceenvironment#_CrQw8CjhEeKEJ8UeV7BBTw"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

@@ -1,0 +1,921 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,0.0,0.4568103297385003
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,0.70961223,0.35545022646646024
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,0.742506399,0.06917142602901788
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,0.798780678,1.5816165061840015
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,1.853761406,0.9424669326113445
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,2.178304815,0.032697856556839766
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,2.233299643,0.8209737890744555
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,2.374966341,0.8036666093333072
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,2.536468621,0.296247805946702
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,3.233504621,1.9464066646413354
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,3.587932751,0.05718514185922628
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,3.696124722,0.5940741610791307
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,4.485395635,0.20226553102706352
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,4.664106803,0.01745846911160188
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,4.793999367,0.2903086082136247
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,5.167085826,0.8185977805493015
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,5.422870906,0.5060040261556349
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,5.902235891,0.08376100491388701
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,5.9707889,0.12992244414831114
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,6.771175808,0.787040492450496
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,7.019476122,0.969578473891623
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,8.237303513,1.6381700873016138
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,8.267340456,1.070837523948972
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,8.27668054,0.4963074348342364
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,9.459651677,0.3368781716307489
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,9.864604724,0.36748509223973713
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,9.952848232,0.9397082626886586
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,10.135150172,1.4546375569137846
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,10.220068379,1.4753181926145875
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,11.112533172,0.7268229106824127
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,11.142893399,0.17382347928685818
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,11.193141909,0.5222879626158184
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,11.328844197,0.5314101846596357
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,11.50995086,2.6367459697824795
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,11.579538594,2.241019302906537
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,12.191223107,1.4096398418989178
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,12.210260314,1.3536099917260977
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,12.482569935,0.028448891035744578
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,13.051323573,2.417227603277858
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,13.402040869,2.1848588764943364
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,13.789759163,0.4893522274310713
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,13.879043798,0.16223620847236758
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,14.201772536,2.459779654077076
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,14.440354216,0.7098621420594846
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,15.611604484,3.2291426671304553
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,16.49686119,0.5322538271888457
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,16.679677692,0.9207359994084917
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,17.820260466,0.17302400347407648
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,18.512802564,0.052682629505712585
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,18.632926548,1.1778887354098961
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,19.243307121,1.0497458161863873
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,20.966396564,0.25243713067221224
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,21.036438196,0.9301794008087434
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,21.521816418,0.3403108464022727
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,21.611963041,0.6047217731931158
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,21.93771431,2.018138203486851
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,21.942066661,0.40597093480970375
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,22.009299474,4.478971741562599
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,22.159934127,0.15976981276755178
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,22.454163507,0.7973656923542771
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,22.468620712,0.22536059592751118
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,22.526750928,0.2513268027834351
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,22.633827585,0.4727984077981093
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,22.731782499,0.7780893152727713
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,23.441152718,2.4890016439118634
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,23.511554888,0.5686971826909952
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,23.727228018,1.3752833690246227
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,23.762939316,0.6058720216296765
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,23.963064643,0.6393144740695563
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,24.15817432,0.18938003346767865
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,24.887626819,2.1265550393797072
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,24.982582182,0.7095265821048236
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,25.163821469,0.429476642458671
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,25.239045932,0.03801435474159307
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,25.566461166,0.5779322868584242
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,25.629301745,0.9880537698810196
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,25.801321953,0.36321093896364903
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,25.855695077,0.6685165540297809
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,26.147364089,7.1591100285260705
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,26.981026407,1.7601639528665813
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,27.038370705,0.20610484325995604
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,27.594421548,0.22657795484223997
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,27.996250017,0.09665374302914623
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,28.116434953,2.0809054709904946
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,30.302787531,0.5383801555894372
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,31.228167606,2.335847610465813
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,31.309874806,0.043594667865025305
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,31.574959832,1.0756621623501625
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,31.666887682,2.9066867646256265
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,31.889708607,1.8800958517303983
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,31.985736218,0.21336519282707228
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,32.136518931,2.309204132224146
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,32.553420509,1.5646358480841263
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,32.652092004,0.8953394147897463
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,32.673398562,0.15526114647329067
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,32.911127588,0.012576394710515795
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,33.254388099,1.2682924746720696
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,33.291013253,0.08214666766432946
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,33.394689572,1.8379132042086035
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,33.76516342,0.5631715352595322
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,33.902144077,1.925745924035589
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,35.105315019,0.3371128301844884
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,36.071987461,0.2165777972109178
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,36.26587916,4.550252509805993
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,36.280202971,0.9774808882004437
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Resource Demand Tuple,36.992844901,0.3548341476315008
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,0.456810329,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,0.70961223,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,3.17863295,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,3.233504621,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,6.100711344,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,6.771175808,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,7.989054595,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,8.237303513,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,11.193141909,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,11.937657545,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,12.482569935,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,12.518131048,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,13.051323573,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,14.750535629,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,20.293052937,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,20.966396564,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,22.159934127,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,22.230872485,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,22.526750928,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,23.270308408,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,23.511554888,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,23.673239517,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,23.727228018,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,24.731387565,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,24.887626819,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,24.900901923,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,24.982582182,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,25.855695077,3.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,25.885029897,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,26.147364089,3.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,26.15611977,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,27.398016471,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,27.594421548,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,27.877643991,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,27.996250017,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,28.073276016,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,31.889708607,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,32.673398562,3.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,33.02588024,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,33.291013253,3.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,35.921890756,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],State of Active Resource Tuple,37.000516225,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Utilization of Active Resource Tuple,3.9999999999999996,0.9230816069999996
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Utilization of Active Resource Tuple,7.999999999999999,0.8296475327499995
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Utilization of Active Resource Tuple,11.999999999999998,0.9406741217499993
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Utilization of Active Resource Tuple,15.999999999999998,0.9999999999999996
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Utilization of Active Resource Tuple,19.999999999999996,0.9999999999999991
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Utilization of Active Resource Tuple,23.999999999999996,0.8316640932499988
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Utilization of Active Resource Tuple,27.999999999999996,0.9999999999999989
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Utilization of Active Resource Tuple,31.999999999999996,0.9999999999999993
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Utilization of Active Resource Tuple,35.99999999999999,0.9999999999999983
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=0],Utilization of Active Resource Tuple,37.00051622499999,0.9999999999999961
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,0.742506399,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,1.065062456,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,1.853761406,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,3.054273432,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,3.587932751,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,3.645117892,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,3.696124722,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,4.290198883,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,4.485395635,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,4.687661166,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,4.793999367,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,5.084307975,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,5.167085826,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,5.179911285,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,5.422870906,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,5.985996895,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,7.019476122,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,7.5582163,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,8.267340456,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,9.338177979,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,9.459651677,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,9.796529848,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,9.864604724,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,9.8754736,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,9.952848232,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,11.328844197,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,11.351363905,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,11.50995086,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,11.91260342,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,13.402040869,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,13.760668546,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,13.789759163,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,13.810339388,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,13.879043798,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,14.12239811,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,14.201772536,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,14.309267059,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,14.440354216,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,14.467954305,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,17.600413691,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,17.820260466,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,17.993284469,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,18.512802564,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,18.565485193,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,18.632926548,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,18.840747151,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,19.243307121,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,19.810815283,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,21.036438196,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,21.218833694,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,21.521816418,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,22.633827585,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,22.886392245,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,23.762939316,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,24.516907741,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,25.163821469,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,27.385587103,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,30.197340423,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,30.302787531,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,30.841167686,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,31.228167606,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,31.985736218,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,32.911127588,3.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,32.942568574,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,33.394689572,3.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,33.484860331,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,33.76516342,3.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,35.54997185,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],State of Active Resource Tuple,37.000516225,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,7.499999999999999,0.49645024666666615
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,10.499999999999998,0.5704713115999995
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,13.499999999999998,0.7339302021333328
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,16.499999999999996,0.9644102391999987
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,19.499999999999996,0.838751173999998
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,22.499999999999996,0.6349370890666653
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,25.499999999999996,0.6651453965333325
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,28.499999999999996,0.9547438773333328
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,31.499999999999996,0.9343403962666657
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,34.49999999999999,0.9343403962666652
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=1],Utilization of Active Resource Tuple,37.00051622499999,0.929655612218796
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,0.798780678,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,0.811677825,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,2.178304815,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,2.211002671,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,2.233299643,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,2.832716426,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,4.664106803,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,4.681565272,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,5.902235891,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,5.928874932,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,5.9707889,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,5.985683606,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,8.27668054,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,8.772987974,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,10.135150172,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,10.892556494,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,11.112533172,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,11.579538594,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,11.754205156,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,12.061583756,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,12.191223107,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,15.957619607,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,16.49686119,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,17.029115017,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,21.611963041,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,21.862127264,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,21.93771431,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,22.362225267,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,22.454163507,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,22.731782499,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,22.760247611,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,23.963064643,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,24.5129922,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,25.239045932,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,25.305571052,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,25.566461166,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,26.685205591,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,26.981026407,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,27.282359005,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,28.981413604,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,31.309874806,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,31.353469473,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,31.574959832,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,32.136518931,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,32.333994853,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,32.553420509,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,33.902144077,3.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,34.819572787,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,35.105315019,3.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,35.271612853,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,36.257687761,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,36.26587916,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,36.473848296,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,36.992844901,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,37.000516225,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],State of Active Resource Tuple,37.000516225,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,1.9999999999999998,0.006448573499999997
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,2.9999999999999996,0.31605731949999993
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,3.9999999999999996,0.31605731949999993
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,4.999999999999999,0.008729234500000068
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,5.999999999999999,0.02949610800000045
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,6.999999999999999,0.020766873500000387
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,7.999999999999999,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,8.999999999999998,0.24815371700000005
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,9.999999999999998,0.24815371700000005
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,10.999999999999998,0.37870316100000057
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,11.999999999999998,0.8224365750000004
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,12.999999999999998,0.878913738499999
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,13.999999999999998,0.9351803244999985
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,14.999999999999998,0.9999999999999993
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,15.999999999999998,0.9788098034999997
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,16.999999999999996,0.7303792084999985
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,17.999999999999996,0.26612691349999895
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,18.999999999999996,0.014557508499999369
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,19.999999999999996,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,20.999999999999996,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,21.999999999999996,0.15622495649999993
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,22.999999999999996,0.6102558364999991
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,23.999999999999996,0.9540308799999982
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,24.999999999999996,0.9999999999999989
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,25.999999999999996,0.9999999999999987
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,26.999999999999996,0.9999999999999987
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,27.999999999999996,0.9999999999999988
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,28.999999999999996,0.9907068019999998
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,29.999999999999996,0.49070680199999994
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,30.999999999999996,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,31.999999999999996,0.23431741749999885
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,32.99999999999999,0.7343174174999968
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,33.99999999999999,0.999999999999997
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,34.99999999999999,0.999999999999998
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,35.99999999999999,0.9999999999999979
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,36.99999999999999,0.9999999999999978
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=2],Utilization of Active Resource Tuple,37.00051622499999,0.9999999999999959
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,2.374966341,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,2.380397184,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,2.536468621,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,2.796228338,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,10.220068379,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,10.232089816,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,11.142893399,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,12.055341597,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,12.210260314,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,15.215932652,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,15.611604484,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,15.909414497,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,16.679677692,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,16.789317423,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,21.942066661,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,21.966617596,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,22.009299474,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,22.333891611,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,22.468620712,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,23.436626946,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,23.441152718,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,24.15817432,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,24.381941942,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,25.629301745,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,25.727925029,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,25.801321953,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,26.531976108,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,27.038370705,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,27.068271555,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,28.108308959,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,28.116434953,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,28.148706205,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,31.666887682,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,32.652092004,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,33.230168636,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,33.254388099,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,36.002874657,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,36.071987461,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,36.235023496,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,36.280202971,2.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,36.310886328,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],State of Active Resource Tuple,37.000516225,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,4.999999999999999,0.05303811200000001
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,7.499999999999998,0.051951943400000006
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,9.999999999999998,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,12.499999999999998,0.2428418641999998
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,14.999999999999996,0.7428418641999994
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,17.499999999999996,0.6246764791999997
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,19.999999999999996,0.12467647919999998
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,22.499999999999996,0.07610447199999971
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,24.999999999999996,0.5751993175999993
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,27.499999999999996,0.9990948455999988
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,29.999999999999996,0.6281160421999994
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,32.49999999999999,0.294738505799999
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,34.99999999999999,0.666622463599999
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=3],Utilization of Active Resource Tuple,37.00051622499999,0.9999999999999987
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,0.0,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,0.456810329,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,0.70961223,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,0.742506399,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,0.798780678,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,0.811677825,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,1.065062456,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,1.853761406,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,2.178304815,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,2.211002671,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,2.233299643,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,2.374966341,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,2.380397184,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,2.536468621,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,2.796228338,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,2.832716426,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,3.054273432,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,3.17863295,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,3.233504621,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,3.587932751,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,3.645117892,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,3.696124722,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,3.9999999999999996,0.4054160797499996
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,4.290198883,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,4.485395635,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,4.664106803,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,4.681565272,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,4.687661166,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,4.793999367,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,5.084307975,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,5.167085826,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,5.179911285,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,5.422870906,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,5.902235891,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,5.928874932,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,5.9707889,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,5.985683606,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,5.985996895,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,6.100711344,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,6.771175808,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,7.019476122,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,7.5582163,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,7.989054595,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,7.999999999999999,0.3296904371874997
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,8.237303513,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,8.267340456,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,8.27668054,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,8.772987974,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,9.338177979,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,9.459651677,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,9.796529848,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,9.864604724,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,9.8754736,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,9.952848232,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,10.135150172,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,10.220068379,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,10.232089816,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,10.892556494,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.112533172,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.142893399,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.193141909,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.328844197,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.351363905,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.50995086,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.579538594,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.754205156,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.91260342,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.937657545,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,11.999999999999998,0.6399213404374992
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,12.055341597,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,12.061583756,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,12.191223107,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,12.210260314,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,12.482569935,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,12.518131048,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,13.051323573,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,13.402040869,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,13.760668546,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,13.789759163,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,13.810339388,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,13.879043798,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,14.12239811,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,14.201772536,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,14.309267059,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,14.440354216,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,14.467954305,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,14.750535629,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,15.215932652,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,15.611604484,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,15.909414497,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,15.957619607,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,15.999999999999998,0.9491752627499989
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,16.49686119,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,16.679677692,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,16.789317423,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,17.029115017,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,17.600413691,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,17.820260466,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,17.993284469,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,18.512802564,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,18.565485193,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,18.632926548,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,18.840747151,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,19.243307121,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,19.810815283,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,19.999999999999996,0.45270891537499913
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,20.293052937,0.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,20.966396564,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,21.036438196,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,21.218833694,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,21.521816418,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,21.611963041,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,21.862127264,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,21.93771431,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,21.942066661,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,21.966617596,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.009299474,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.159934127,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.230872485,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.333891611,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.362225267,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.454163507,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.468620712,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.526750928,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.633827585,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.731782499,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.760247611,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,22.886392245,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,23.270308408,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,23.436626946,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,23.441152718,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,23.511554888,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,23.673239517,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,23.727228018,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,23.762939316,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,23.963064643,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,23.999999999999996,0.6302339821249987
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,24.15817432,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,24.381941942,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,24.5129922,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,24.516907741,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,24.731387565,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,24.887626819,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,24.900901923,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,24.982582182,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,25.163821469,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,25.239045932,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,25.305571052,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,25.566461166,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,25.629301745,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,25.727925029,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,25.801321953,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,25.855695077,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,25.885029897,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,26.147364089,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,26.15611977,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,26.531976108,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,26.685205591,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,26.981026407,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,27.038370705,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,27.068271555,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,27.282359005,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,27.385587103,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,27.398016471,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,27.594421548,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,27.877643991,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,27.996250017,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,27.999999999999996,0.9999999999999984
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,28.073276016,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,28.108308959,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,28.116434953,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,28.148706205,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,28.981413604,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,30.197340423,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,30.302787531,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,30.841167686,0.25
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,31.228167606,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,31.309874806,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,31.353469473,0.5
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,31.574959832,0.75
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,31.666887682,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,31.889708607,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,31.985736218,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,31.999999999999996,0.5894558712499989
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,32.136518931,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,32.333994853,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,32.553420509,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,32.652092004,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,32.673398562,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,32.911127588,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,32.942568574,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,33.02588024,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,33.230168636,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,33.254388099,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,33.291013253,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,33.394689572,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,33.484860331,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,33.76516342,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,33.902144077,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,34.819572787,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,35.105315019,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,35.271612853,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,35.54997185,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,35.921890756,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,35.99999999999999,0.999999999999998
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,36.002874657,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,36.071987461,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,36.235023496,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,36.257687761,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,36.26587916,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,36.280202971,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,36.310886328,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,36.473848296,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,36.992844901,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,37.000516225,1.0
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,37.00051622499999,0.9999999999999958
+ActiveResourceMeasuringPoint[_h20_ps_multicore_prs1|replicaID=4],Utilization of Active Resource Tuple,37.000516225,1.0
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,0.456810329,0.456810329
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,0.811677825,0.06917142599999992
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,1.065062456,0.355450226
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,2.211002671,0.03269785599999997
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,2.380397184,1.581616506
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,2.796228338,0.9424669320000001
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,2.832716426,0.29624780500000014
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,3.054273432,0.820973789
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,3.17863295,0.803666609
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,3.645117892,0.05718514100000016
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,4.290198883,0.5940741610000004
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,4.681565272,0.017458469000000143
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,4.687661166,0.2022655310000001
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,5.084307975,0.29030860800000013
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,5.179911285,1.9464066640000004
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,5.928874932,0.5060040260000003
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,5.985683606,0.8185977800000002
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,5.985996895,0.0837610040000003
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,6.100711344,0.12992244399999997
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,7.5582163,0.787040492
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,7.989054595,0.9695784729999994
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,8.772987974,0.4963074340000002
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,9.338177979,1.0708375229999998
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,9.796529848,0.3368781710000004
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,9.8754736,1.6381700869999989
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,10.232089816,0.3674850920000008
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,10.892556494,0.9397082620000017
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,11.351363905,0.2084705059999994
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,11.754205156,1.619054984
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,11.91260342,1.6925350409999993
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,11.937657545,0.7445156360000009
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,12.055341597,0.7264973999999995
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,12.061583756,0.9490505840000001
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,12.518131048,0.03556111299999998
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,13.760668546,1.5504082320000006
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,13.810339388,1.6191162809999984
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,14.12239811,0.24335431200000102
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,14.309267059,2.729728464999999
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,14.467954305,0.6781951419999999
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,14.750535629,3.240584769
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,15.215932652,0.775578436
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,15.909414497,2.8580909240000008
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,15.957619607,2.5555787379999995
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,16.789317423,2.587544887
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,17.029115017,0.5322538269999981
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,17.600413691,0.9207359990000015
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,17.993284469,0.17302400299999832
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,18.565485193,0.05268262899999954
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,18.840747151,3.229142666999998
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,19.810815283,1.1778887349999998
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,20.293052937,1.049745815999998
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,21.218833694,0.25243713000000056
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,21.862127264,0.3403108460000013
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,21.966617596,0.9301794000000001
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,22.230872485,0.6189094439999998
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,22.333891611,0.17395748399999889
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,22.362225267,0.4201586060000011
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,22.760247611,0.2916268990000006
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,22.886392245,0.35964131700000124
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,23.270308408,0.6364808229999994
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,23.436626946,0.982463439
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,23.673239517,0.9414570179999977
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,24.381941942,0.8703870540000018
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,24.5129922,2.575277889999999
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,24.516907741,0.35873342100000016
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,24.731387565,0.9684482489999979
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,24.900901923,0.9378372800000001
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,25.305571052,0.06652512000000144
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,25.727925029,2.0006970109999997
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,25.885029897,0.7212084280000006
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,26.15611977,1.1735375879999985
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,26.531976108,0.7306541549999999
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,26.685205591,1.1187444249999992
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,27.068271555,1.212576477999999
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,27.282359005,3.8412062869999986
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,27.385587103,0.3472163980000005
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,27.398016471,1.768714725999999
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,27.877643991,0.28322244299999966
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,28.073276016,3.185649197
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,28.108308959,0.11205894199999733
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,28.148706205,6.139406731000001
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,28.981413604,2.0003871969999985
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,30.197340423,2.080905470000001
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,30.841167686,0.5383801549999987
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,31.353469473,0.0435946670000007
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,32.333994853,0.34825863500000054
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,32.942568574,0.03144098599999978
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,33.02588024,0.35248167799999663
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,33.230168636,1.6552088040000008
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,33.484860331,0.19384707799999745
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,34.819572787,2.167480783000002
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,35.271612853,1.5064494330000002
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,35.54997185,4.321804243999999
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,35.921890756,0.8165757370000009
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,36.002874657,4.11316605
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,36.235023496,3.681602986999998
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,36.257687761,10.110323672
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,36.310886328,3.056498228999999
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,36.473848296,0.4018608350000008
+EntryLevelSystemCallMeasuringPoint[_h20_ps_multicore_ua1],Response Time Tuple,37.000516225,4.863997294000001
+ResourceEnvironmentMeasuringPoint[/],Number of Resource Containers over Time,0.0,1.0
+ResourceURIMeasuringPoint[null|Reconfigurations],Reconfiguration Time Tuple,4.0,0.0
+ResourceURIMeasuringPoint[null|Reconfigurations],Reconfiguration Time Tuple,8.0,0.0
+ResourceURIMeasuringPoint[null|Reconfigurations],Reconfiguration Time Tuple,12.0,0.0
+ResourceURIMeasuringPoint[null|Reconfigurations],Reconfiguration Time Tuple,16.0,0.0
+ResourceURIMeasuringPoint[null|Reconfigurations],Reconfiguration Time Tuple,20.0,0.0
+ResourceURIMeasuringPoint[null|Reconfigurations],Reconfiguration Time Tuple,24.0,0.0
+ResourceURIMeasuringPoint[null|Reconfigurations],Reconfiguration Time Tuple,28.0,0.0
+ResourceURIMeasuringPoint[null|Reconfigurations],Reconfiguration Time Tuple,32.0,0.0
+ResourceURIMeasuringPoint[null|Reconfigurations],Reconfiguration Time Tuple,36.0,0.0
+ResourceURIMeasuringPoint[null|Reconfigurations],Reconfiguration Time Tuple,37.000516225,0.0
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,0.456810329,0.456810329
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,0.811677825,0.06917142599999992
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,1.065062456,0.355450226
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,2.211002671,0.03269785599999997
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,2.380397184,1.581616506
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,2.796228338,0.9424669320000001
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,2.832716426,0.29624780500000014
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,3.054273432,0.820973789
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,3.17863295,0.803666609
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,3.645117892,0.05718514100000016
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,4.290198883,0.5940741610000004
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,4.681565272,0.017458469000000143
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,4.687661166,0.2022655310000001
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,5.084307975,0.29030860800000013
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,5.179911285,1.9464066640000004
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,5.928874932,0.5060040260000003
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,5.985683606,0.8185977800000002
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,5.985996895,0.0837610040000003
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,6.100711344,0.12992244399999997
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,7.5582163,0.787040492
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,7.989054595,0.9695784729999994
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,8.772987974,0.4963074340000002
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,9.338177979,1.0708375229999998
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,9.796529848,0.3368781710000004
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,9.8754736,1.6381700869999989
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,10.232089816,0.3674850920000008
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,10.892556494,0.9397082620000017
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,11.351363905,0.2084705059999994
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,11.754205156,1.619054984
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,11.91260342,1.6925350409999993
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,11.937657545,0.7445156360000009
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,12.055341597,0.7264973999999995
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,12.061583756,0.9490505840000001
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,12.518131048,0.03556111299999998
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,13.760668546,1.5504082320000006
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,13.810339388,1.6191162809999984
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,14.12239811,0.24335431200000102
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,14.309267059,2.729728464999999
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,14.467954305,0.6781951419999999
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,14.750535629,3.240584769
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,15.215932652,0.775578436
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,15.909414497,2.8580909240000008
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,15.957619607,2.5555787379999995
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,16.789317423,2.587544887
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,17.029115017,0.5322538269999981
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,17.600413691,0.9207359990000015
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,17.993284469,0.17302400299999832
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,18.565485193,0.05268262899999954
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,18.840747151,3.229142666999998
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,19.810815283,1.1778887349999998
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,20.293052937,1.049745815999998
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,21.218833694,0.25243713000000056
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,21.862127264,0.3403108460000013
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,21.966617596,0.9301794000000001
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,22.230872485,0.6189094439999998
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,22.333891611,0.17395748399999889
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,22.362225267,0.4201586060000011
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,22.760247611,0.2916268990000006
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,22.886392245,0.35964131700000124
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,23.270308408,0.6364808229999994
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,23.436626946,0.982463439
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,23.673239517,0.9414570179999977
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,24.381941942,0.8703870540000018
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,24.5129922,2.575277889999999
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,24.516907741,0.35873342100000016
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,24.731387565,0.9684482489999979
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,24.900901923,0.9378372800000001
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,25.305571052,0.06652512000000144
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,25.727925029,2.0006970109999997
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,25.885029897,0.7212084280000006
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,26.15611977,1.1735375879999985
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,26.531976108,0.7306541549999999
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,26.685205591,1.1187444249999992
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,27.068271555,1.212576477999999
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,27.282359005,3.8412062869999986
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,27.385587103,0.3472163980000005
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,27.398016471,1.768714725999999
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,27.877643991,0.28322244299999966
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,28.073276016,3.185649197
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,28.108308959,0.11205894199999733
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,28.148706205,6.139406731000001
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,28.981413604,2.0003871969999985
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,30.197340423,2.080905470000001
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,30.841167686,0.5383801549999987
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,31.353469473,0.0435946670000007
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,32.333994853,0.34825863500000054
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,32.942568574,0.03144098599999978
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,33.02588024,0.35248167799999663
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,33.230168636,1.6552088040000008
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,33.484860331,0.19384707799999745
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,34.819572787,2.167480783000002
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,35.271612853,1.5064494330000002
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,35.54997185,4.321804243999999
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,35.921890756,0.8165757370000009
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,36.002874657,4.11316605
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,36.235023496,3.681602986999998
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,36.257687761,10.110323672
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,36.310886328,3.056498228999999
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,36.473848296,0.4018608350000008
+SystemOperationMeasuringPoint[_h20_ps_multicore_prov2|_h20_ps_multicore_sig1|_h20_ps_multicore_system1],Response Time Tuple,37.000516225,4.863997294000001
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,0.456810329,0.456810329
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,0.811677825,0.06917142599999992
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,1.065062456,0.355450226
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,2.211002671,0.03269785599999997
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,2.380397184,1.581616506
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,2.796228338,0.9424669320000001
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,2.832716426,0.29624780500000014
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,3.054273432,0.820973789
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,3.17863295,0.803666609
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,3.645117892,0.05718514100000016
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,4.290198883,0.5940741610000004
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,4.681565272,0.017458469000000143
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,4.687661166,0.2022655310000001
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,5.084307975,0.29030860800000013
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,5.179911285,1.9464066640000004
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,5.928874932,0.5060040260000003
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,5.985683606,0.8185977800000002
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,5.985996895,0.0837610040000003
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,6.100711344,0.12992244399999997
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,7.5582163,0.787040492
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,7.989054595,0.9695784729999994
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,8.772987974,0.4963074340000002
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,9.338177979,1.0708375229999998
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,9.796529848,0.3368781710000004
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,9.8754736,1.6381700869999989
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,10.232089816,0.3674850920000008
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,10.892556494,0.9397082620000017
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,11.351363905,0.2084705059999994
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,11.754205156,1.619054984
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,11.91260342,1.6925350409999993
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,11.937657545,0.7445156360000009
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,12.055341597,0.7264973999999995
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,12.061583756,0.9490505840000001
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,12.518131048,0.03556111299999998
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,13.760668546,1.5504082320000006
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,13.810339388,1.6191162809999984
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,14.12239811,0.24335431200000102
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,14.309267059,2.729728464999999
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,14.467954305,0.6781951419999999
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,14.750535629,3.240584769
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,15.215932652,0.775578436
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,15.909414497,2.8580909240000008
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,15.957619607,2.5555787379999995
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,16.789317423,2.587544887
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,17.029115017,0.5322538269999981
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,17.600413691,0.9207359990000015
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,17.993284469,0.17302400299999832
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,18.565485193,0.05268262899999954
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,18.840747151,3.229142666999998
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,19.810815283,1.1778887349999998
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,20.293052937,1.049745815999998
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,21.218833694,0.25243713000000056
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,21.862127264,0.3403108460000013
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,21.966617596,0.9301794000000001
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,22.230872485,0.6189094439999998
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,22.333891611,0.17395748399999889
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,22.362225267,0.4201586060000011
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,22.760247611,0.2916268990000006
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,22.886392245,0.35964131700000124
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,23.270308408,0.6364808229999994
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,23.436626946,0.982463439
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,23.673239517,0.9414570179999977
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,24.381941942,0.8703870540000018
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,24.5129922,2.575277889999999
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,24.516907741,0.35873342100000016
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,24.731387565,0.9684482489999979
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,24.900901923,0.9378372800000001
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,25.305571052,0.06652512000000144
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,25.727925029,2.0006970109999997
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,25.885029897,0.7212084280000006
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,26.15611977,1.1735375879999985
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,26.531976108,0.7306541549999999
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,26.685205591,1.1187444249999992
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,27.068271555,1.212576477999999
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,27.282359005,3.8412062869999986
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,27.385587103,0.3472163980000005
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,27.398016471,1.768714725999999
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,27.877643991,0.28322244299999966
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,28.073276016,3.185649197
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,28.108308959,0.11205894199999733
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,28.148706205,6.139406731000001
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,28.981413604,2.0003871969999985
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,30.197340423,2.080905470000001
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,30.841167686,0.5383801549999987
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,31.353469473,0.0435946670000007
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,32.333994853,0.34825863500000054
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,32.942568574,0.03144098599999978
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,33.02588024,0.35248167799999663
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,33.230168636,1.6552088040000008
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,33.484860331,0.19384707799999745
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,34.819572787,2.167480783000002
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,35.271612853,1.5064494330000002
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,35.54997185,4.321804243999999
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,35.921890756,0.8165757370000009
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,36.002874657,4.11316605
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,36.235023496,3.681602986999998
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,36.257687761,10.110323672
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,36.310886328,3.056498228999999
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,36.473848296,0.4018608350000008
+UsageScenarioMeasuringPoint[_h20_ps_multicore_us1],Response Time Tuple,37.000516225,4.863997294000001

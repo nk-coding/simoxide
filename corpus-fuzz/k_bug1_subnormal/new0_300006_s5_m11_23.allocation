@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_new0_300006_s5_m11_23_allocation1" entityName="new0_300006_s5_m11_23">
+  <targetResourceEnvironment_Allocation href="new0_300006_s5_m11_23.resourceenvironment#/"/>
+  <system_Allocation href="new0_300006_s5_m11_23.system#_new0_300006_s5_m11_23_system1"/>
+  <allocationContexts_Allocation id="_new0_300006_s5_m11_23_alc1" entityName="Allocation_Assembly_Composite0_0">
+    <resourceContainer_AllocationContext href="new0_300006_s5_m11_23.resourceenvironment#_new0_300006_s5_m11_23_rc1"/>
+    <assemblyContext_AllocationContext href="new0_300006_s5_m11_23.system#_new0_300006_s5_m11_23_ac3"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_new0_300006_s5_m11_23_alc2" entityName="Allocation_Assembly_Comp1_0">
+    <resourceContainer_AllocationContext href="new0_300006_s5_m11_23.resourceenvironment#_new0_300006_s5_m11_23_rc1"/>
+    <assemblyContext_AllocationContext href="new0_300006_s5_m11_23.system#_new0_300006_s5_m11_23_ac4"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_new0_300006_s5_m11_23_alc3" entityName="Allocation_Assembly_Comp1_1">
+    <resourceContainer_AllocationContext href="new0_300006_s5_m11_23.resourceenvironment#_new0_300006_s5_m11_23_rc1"/>
+    <assemblyContext_AllocationContext href="new0_300006_s5_m11_23.system#_new0_300006_s5_m11_23_ac5"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_new0_300006_s5_m11_23_alc4" entityName="Allocation_Assembly_Comp2_0">
+    <resourceContainer_AllocationContext href="new0_300006_s5_m11_23.resourceenvironment#_new0_300006_s5_m11_23_rc1"/>
+    <assemblyContext_AllocationContext href="new0_300006_s5_m11_23.system#_new0_300006_s5_m11_23_ac6"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

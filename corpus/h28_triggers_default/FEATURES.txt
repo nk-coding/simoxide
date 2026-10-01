@@ -1,0 +1,1 @@
+all monitors with triggersSelfAdaptations=true (the EMF default; attribute omitted): reconfiguration process created when the lazily created passive-resource calculators register at t=0.25 (before the initial state tuple); otherwise measurements as without triggers

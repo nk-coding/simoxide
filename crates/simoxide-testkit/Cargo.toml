@@ -1,0 +1,31 @@
+[package]
+name = "simoxide-testkit"
+description = "Differential testing infrastructure for SimOxide: palladio-trace/1 model, serializer and differ, tape replay, measurement comparison, reference runner, random PCM model generator and fuzz driver"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+simoxide-model = { workspace = true }
+# the statistical equivalence harness (`equiv`) runs both modes in process
+simoxide-sim = { workspace = true, features = ["fast"] }
+ryu = "1"
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+serde_json = "1"
+libm = "0.2"
+
+[dev-dependencies]
+# the harness tests compare with reference outputs bit for bit
+simoxide-random = { path = "../simoxide-random", features = ["hotspot-math"] }
+proptest = { version = "1", default-features = false, features = ["std"] }
+
+[features]
+default = ["hotspot-math"]
+# Bit-exact HotSpot Math.log/exp, on by default (GPL-2.0-only code; binaries built with it must
+# not be distributed, see simoxide-random's `hotspot-math` feature).
+hotspot-math = ["simoxide-sim/hotspot-math"]
+
+[[bin]]
+name = "simoxide-fuzz"
+path = "src/bin/simoxide-fuzz.rs"

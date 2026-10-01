@@ -1,0 +1,1 @@
+as t_passive_lazy_holding with triggersSelfAdaptations=true on all passive-resource specs: the state calculator's registration (before its initial tuple) creates the reconfiguration process. Expected outputs: reference/refsim batch (2026-09-29, agent L).

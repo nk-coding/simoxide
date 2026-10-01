@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_h11_fork_sync_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h11_fork_sync/h11_fork_sync.usagemodel#_h11_fork_sync_us1">
+    <usageScenario href="h11_fork_sync.usagemodel#_h11_fork_sync_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall callOp to h11_fork_sync->Provided_IService->op [_h11_fork_sync_ua1]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h11_fork_sync/h11_fork_sync.usagemodel#_h11_fork_sync_ua1">
+    <entryLevelSystemCall href="h11_fork_sync.usagemodel#_h11_fork_sync_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="h11_fork_sync.Provided_IService.op"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h11_fork_sync/h11_fork_sync.repository#_h11_fork_sync_sig1">
+    <role xsi:type="repository:OperationProvidedRole" href="h11_fork_sync.system#_h11_fork_sync_prov2"/>
+    <operationSignature href="h11_fork_sync.repository#_h11_fork_sync_sig1"/>
+    <system href="h11_fork_sync.system#_h11_fork_sync_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ServerNode"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h11_fork_sync/h11_fork_sync.resourceenvironment#_h11_fork_sync_prs1">
+    <activeResource href="h11_fork_sync.resourceenvironment#_h11_fork_sync_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [1] in ServerNode"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h11_fork_sync/h11_fork_sync.resourceenvironment#_h11_fork_sync_prs1"
+      replicaID="1">
+    <activeResource href="h11_fork_sync.resourceenvironment#_h11_fork_sync_prs1"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

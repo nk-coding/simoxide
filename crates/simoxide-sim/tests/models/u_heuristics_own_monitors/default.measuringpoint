@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    id="_OU7nYCQuEeu9sfzcH2hhAg">
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server1" resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_heuristics/default.resourceenvironment#_psq4IiINEeSC6_3TPN1J7A">
+    <activeResource href="default.resourceenvironment#_psq4IiINEeSC6_3TPN1J7A"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in server2" resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_heuristics/default.resourceenvironment#_psq4JiINEeSC6_3TPN1J7A">
+    <activeResource href="default.resourceenvironment#_psq4JiINEeSC6_3TPN1J7A"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server3" resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_heuristics/default.resourceenvironment#_psq4KiINEeSC6_3TPN1J7A">
+    <activeResource href="default.resourceenvironment#_psq4KiINEeSC6_3TPN1J7A"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: defaultUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_heuristics/default.usagemodel#_Uc-igC6OEd-Jla2o7wkBzQ">
+    <usageScenario href="default.usagemodel#_Uc-igC6OEd-Jla2o7wkBzQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: defaultUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_heuristics/quickbooking.usagemodel#_Uc-igC6OEd-Jla2o7wkBzQ">
+    <usageScenario href="quickbooking.usagemodel#_Uc-igC6OEd-Jla2o7wkBzQ"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

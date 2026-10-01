@@ -1,0 +1,17 @@
+{"emf_errors":9}
+{"resource":"monitoring.monitorrepository","roots":1}
+{"path":"/","id":"_eRIwAFIpEeW-x--luvSVjA","type":"monitorrepository:MonitorRepository","attrs":{"entityName":"aName"},"refs":{}}
+{"path":"//@monitors.0","id":"_sH988FIpEeW-x--luvSVjA","type":"monitorrepository:Monitor","attrs":{"entityName":"UsageScenario","activated":true},"refs":{"measuringPoint":"sensors.measuringpoint#//@measuringPoints.0"}}
+{"path":"//@monitors.0/@measurementSpecifications.0","id":"_TtE9kFI4EeWakYF9bsK_fA","type":"monitorrepository:MeasurementSpecification","attrs":{"triggersSelfAdaptations":true},"refs":{"metricDescription":"pathmap://METRIC_SPEC_MODELS/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"}}
+{"path":"//@monitors.1","id":"_OlQvMFI4EeWakYF9bsK_fA","type":"monitorrepository:Monitor","attrs":{"entityName":"Server1","activated":true},"refs":{"measuringPoint":"sensors.measuringpoint#//@measuringPoints.1"}}
+{"path":"//@monitors.1/@measurementSpecifications.0","id":"_INO5UFI8EeWakYF9bsK_fA","type":"monitorrepository:MeasurementSpecification","attrs":{"triggersSelfAdaptations":true},"refs":{"metricDescription":"pathmap://METRIC_SPEC_MODELS/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"}}
+{"path":"//@monitors.2","id":"_PCQNMFI4EeWakYF9bsK_fA","type":"monitorrepository:Monitor","attrs":{"entityName":"Server2","activated":true},"refs":{"measuringPoint":"sensors.measuringpoint#//@measuringPoints.2"}}
+{"path":"//@monitors.2/@measurementSpecifications.0","id":"_UbtoYFI8EeWakYF9bsK_fA","type":"monitorrepository:MeasurementSpecification","attrs":{"triggersSelfAdaptations":true},"refs":{"metricDescription":"pathmap://METRIC_SPEC_MODELS/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"}}
+{"path":"//@monitors.3","id":"_PdhM4FI4EeWakYF9bsK_fA","type":"monitorrepository:Monitor","attrs":{"entityName":"Server3","activated":true},"refs":{"measuringPoint":"sensors.measuringpoint#//@measuringPoints.3"}}
+{"path":"//@monitors.3/@measurementSpecifications.0","id":"_daVwQFI8EeWakYF9bsK_fA","type":"monitorrepository:MeasurementSpecification","attrs":{"triggersSelfAdaptations":true},"refs":{"metricDescription":"pathmap://METRIC_SPEC_MODELS/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"}}
+{"resource":"sensors.measuringpoint","roots":1}
+{"path":"/","id":"_29zTgFIoEeW-x--luvSVjA","type":"measuringpoint:MeasuringPointRepository","attrs":{},"refs":{}}
+{"path":"//@measuringPoints.0","id":null,"type":"measuringpoint:ResourceURIMeasuringPoint","attrs":{"measuringPoint":"Usagescenario","resourceURI":"platform:/resource/i/clients_overload.usagemodel#_9fFCMKnpEeO_FKTWaHXFBg"},"refs":{}}
+{"path":"//@measuringPoints.1","id":null,"type":"measuringpoint:ResourceURIMeasuringPoint","attrs":{"measuringPoint":"Server1","resourceURI":"platform:/resource/i/znn.repository#_nK7DoKnpEeO_FKTWaHXFBg"},"refs":{}}
+{"path":"//@measuringPoints.2","id":null,"type":"measuringpoint:ResourceURIMeasuringPoint","attrs":{"measuringPoint":"Server2","resourceURI":"platform:/resource/i/znn.repository#_ozmRoKnpEeO_FKTWaHXFBg"},"refs":{}}
+{"path":"//@measuringPoints.3","id":null,"type":"measuringpoint:ResourceURIMeasuringPoint","attrs":{"measuringPoint":"Server3","resourceURI":"platform:/resource/i/znn.repository#_pjNwsKnpEeO_FKTWaHXFBg"},"refs":{}}

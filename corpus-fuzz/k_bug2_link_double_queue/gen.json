@@ -1,0 +1,19 @@
+{
+  "features_changed": [
+    "multicore=0.5",
+    "multi_scenario=0.5",
+    "heavy_load=0.5",
+    "ties=0.5",
+    "deep_nesting=0.4",
+    "stoex_exotic=0.7",
+    "double_resume=0.2",
+    "hdd_rw=1",
+    "param_override=0.8",
+    "windows=0.5",
+    "nested_composite=0.6",
+    "extra_monitors=0.6"
+  ],
+  "name": "D_h_700055_s9",
+  "seed": 700055,
+  "size": 9
+}

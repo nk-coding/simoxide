@@ -1,0 +1,62 @@
+--- 5.2.2/Palladio-Analyzer-SimuCom/bundles/de.uka.ipd.sdq.simucomframework.core/src/de/uka/ipd/sdq/simucomframework/core/SimuComDefaultRandomNumberGenerator.java
++++ patched/de/uka/ipd/sdq/simucomframework/core/SimuComDefaultRandomNumberGenerator.java
+@@ -51,34 +51,21 @@
+         rndNumberGenerator = new MT19937RandomGenerator();// new MRG32k3aRandomGenerator();
+         initRandomSeed(randomSeed);
+ 
+-        this.producerThread = new Thread(new Runnable() {
+-            @Override
+-            public void run() {
+-                if (LOGGER.isDebugEnabled()) {
+-                    LOGGER.debug("Random number producer started! [Stream ID = " + myID + "]");
+-                }
+-                try {
+-                    while (!finished) {
+-                        producerQueue.put(rndNumberGenerator.nextDouble());
+-                    }
+-                } catch (InterruptedException e) {
+-                    if (LOGGER.isDebugEnabled()) {
+-                        LOGGER.debug("Bad concurrency problem", e);
+-                    }
+-                    throw new RuntimeException("Unexpected interruption of concurrent threads");
+-                }
+-                if (LOGGER.isDebugEnabled()) {
+-                    LOGGER.debug("Random number producer stopped! [Stream ID = " + myID + "]");
+-                }
+-            }
+-        });
+-        producerThread.start();
++        // REFSIM: no producer thread. The original pre-generates the SAME sequence
++        // rndNumberGenerator.nextDouble() into a FIFO queue on a separate thread; drawing synchronously
++        // yields identical values in identical order, without the leaked thread per run.
++        this.producerThread = null;
+ 
+         if (LOGGER.isDebugEnabled()) {
+             LOGGER.debug("Random number stream initialised! [Stream ID = " + myID + "]");
+         }
+     }
+ 
++    /** REFSIM: per-run reset of JVM-global state (stream counter is only used in log messages). */
++    public static void refsimReset() {
++        streamCounter = 0;
++    }
++
+     /**
+      * Set up seed of random number generator
+      * 
+@@ -123,12 +110,9 @@
+         if (LOGGER.isDebugEnabled()) {
+             LOGGER.debug("Drawing a random number from random number stream [" + myID + "]!");
+         }
+-        double d;
+-        try {
+-            d = producerQueue.take();
+-        } catch (InterruptedException e) {
+-            throw new RuntimeException("Unexpected interruption of concurrent threads");
+-        }
++        // REFSIM: synchronous draw (see constructor) + random tape
++        final double d = rndNumberGenerator.nextDouble();
++        refsim.trace.Trace.uniform(d);
+         if (LOGGER.isDebugEnabled()) {
+             LOGGER.debug("Number is: " + d);
+         }

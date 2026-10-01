@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_GgAmgBDVEe6FXrMRahCZ6g" entityName="New Allocation">
+  <targetResourceEnvironment_Allocation href="minimal.resourceenvironment#/"/>
+  <system_Allocation href="minimal.system#_CVBz0BDVEe6FXrMRahCZ6g"/>
+  <allocationContexts_Allocation id="_FsIKIBDjEe6FXrMRahCZ6g" entityName="Allocation_Assembly_BasicComponent1">
+    <resourceContainer_AllocationContext href="minimal.resourceenvironment#_9pUxUBDiEe6FXrMRahCZ6g"/>
+    <assemblyContext_AllocationContext href="minimal.system#_07_00BDiEe6FXrMRahCZ6g"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

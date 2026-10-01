@@ -1,0 +1,17 @@
+{
+  "features_changed": [
+    "multicore=0.5",
+    "multi_scenario=0.5",
+    "heavy_load=0.6",
+    "ties=0.6",
+    "deep_nesting=0.5",
+    "stoex_exotic=0.8",
+    "double_resume=0.2",
+    "hdd_rw=1",
+    "param_override=0.8",
+    "windows=0.5"
+  ],
+  "name": "c3_1_320694_s10",
+  "seed": 320694,
+  "size": 10
+}

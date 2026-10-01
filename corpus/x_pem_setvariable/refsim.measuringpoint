@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: SetVaribleUsage"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_setvariable/setvariable.usagemodel#_DGz3IAAAEdy5_5tCZjPAAA">
+    <usageScenario href="setvariable.usagemodel#_DGz3IAAAEdy5_5tCZjPAAA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to SetVariableSystem->SysProv->setVariableClient [_FcTMBDcREee78-rIUlpnPg]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_setvariable/setvariable.usagemodel#_FcTMBDcREee78-rIUlpnPg">
+    <entryLevelSystemCall href="setvariable.usagemodel#_FcTMBDcREee78-rIUlpnPg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="SetVariableSystem.SysProv.setVariableClient"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_setvariable/default.repository#_au8vBuUrEeGlYLCsyAY-rw">
+    <role xsi:type="repository:OperationProvidedRole" href="setvariable.system#_fW7TQP__Edu5_5tCZjPAAA"/>
+    <operationSignature href="default.repository#_au8vBuUrEeGlYLCsyAY-rw"/>
+    <system href="setvariable.system#_VgMesP__Edu5_5tCZjPAAA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from Client to Required_IProvidedServer_Client->serverService [_tjfKgP_9Edu5_5tCZjPAAA]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_setvariable/default.repository#_tjfKgP_9Edu5_5tCZjPAAA">
+    <externalCall href="default.repository#_tjfKgP_9Edu5_5tCZjPAAA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in server" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_setvariable/setvariable.resourceenvironment#_akVaceUrEeGlYLCsyAY-rw">
+    <activeResource href="setvariable.resourceenvironment#_akVaceUrEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

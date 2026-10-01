@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h17_set_variable_allocation1" entityName="h17_set_variable">
+  <targetResourceEnvironment_Allocation href="h17_set_variable.resourceenvironment#/"/>
+  <system_Allocation href="h17_set_variable.system#_h17_set_variable_system1"/>
+  <allocationContexts_Allocation id="_h17_set_variable_alc1" entityName="Allocation_Assembly_Front">
+    <resourceContainer_AllocationContext href="h17_set_variable.resourceenvironment#_h17_set_variable_rc1"/>
+    <assemblyContext_AllocationContext href="h17_set_variable.system#_h17_set_variable_ac1"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_h17_set_variable_alc2" entityName="Allocation_Assembly_Store">
+    <resourceContainer_AllocationContext href="h17_set_variable.resourceenvironment#_h17_set_variable_rc1"/>
+    <assemblyContext_AllocationContext href="h17_set_variable.system#_h17_set_variable_ac2"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

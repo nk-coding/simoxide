@@ -1,0 +1,10 @@
+{"emf_errors":6}
+{"resource":"e.repository","roots":1}
+{"path":"/","id":"_repo","type":"repository:Repository","attrs":{"entityName":"errors","repositoryDescription":null},"refs":{}}
+{"path":"//@components__Repository.0","id":"_c1","type":"repository:BasicComponent","attrs":{"entityName":"C1","componentType":"BUSINESS_COMPONENT"},"refs":{}}
+{"path":"//@components__Repository.0/@serviceEffectSpecifications__BasicComponent.0","id":"_s1","type":"seff:ResourceDemandingSEFF","attrs":{"seffTypeID":"1"},"refs":{}}
+{"path":"//@components__Repository.0/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.0","id":"_a1","type":"seff:StartAction","attrs":{"entityName":"aName"},"refs":{"successor_AbstractAction":"e.repository#_a2"}}
+{"path":"//@components__Repository.0/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.1","id":"_a2","type":"seff:ExternalCallAction","attrs":{"entityName":"aName","retryCount":0},"refs":{"predecessor_AbstractAction":"e.repository#_a1","successor_AbstractAction":"e.repository#_a3"}}
+{"path":"//@components__Repository.0/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.2","id":"_a3","type":"seff:StopAction","attrs":{"entityName":"aName"},"refs":{"predecessor_AbstractAction":"e.repository#_a2"}}
+{"path":"//@components__Repository.0/@passiveResource_BasicComponent.0","id":"_p1","type":"repository:PassiveResource","attrs":{"entityName":"P"},"refs":{}}
+{"path":"//@components__Repository.0/@passiveResource_BasicComponent.0/@capacity_PassiveResource","id":null,"type":"core:PCMRandomVariable","attrs":{"specification":"2"},"refs":{}}

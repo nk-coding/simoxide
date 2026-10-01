@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_h07_prob_branch_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h07_prob_branch/h07_prob_branch.usagemodel#_h07_prob_branch_us1">
+    <usageScenario href="h07_prob_branch.usagemodel#_h07_prob_branch_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall callOp to h07_prob_branch->Provided_IService->op [_h07_prob_branch_ua1]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h07_prob_branch/h07_prob_branch.usagemodel#_h07_prob_branch_ua1">
+    <entryLevelSystemCall href="h07_prob_branch.usagemodel#_h07_prob_branch_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="h07_prob_branch.Provided_IService.op"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h07_prob_branch/h07_prob_branch.repository#_h07_prob_branch_sig1">
+    <role xsi:type="repository:OperationProvidedRole" href="h07_prob_branch.system#_h07_prob_branch_prov2"/>
+    <operationSignature href="h07_prob_branch.repository#_h07_prob_branch_sig1"/>
+    <system href="h07_prob_branch.system#_h07_prob_branch_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ServerNode"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h07_prob_branch/h07_prob_branch.resourceenvironment#_h07_prob_branch_prs1">
+    <activeResource href="h07_prob_branch.resourceenvironment#_h07_prob_branch_prs1"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

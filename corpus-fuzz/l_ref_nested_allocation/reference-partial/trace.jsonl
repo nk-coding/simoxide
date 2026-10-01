@@ -1,0 +1,43 @@
+{"ev":"header","t":0.0,"format":"palladio-trace/1","run":"l_ref_nested_allocation","seed":565,"max_sim_time":29,"max_measurements":23}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_fz810010_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,0.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_fz810010_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,0.0]}
+{"ev":"spawn","t":0.0,"p":1,"kind":"OpenWorkload","name":"OpenWorkloadUserMaturationChamber","parent":0}
+{"ev":"spawn","t":0.0,"p":2,"kind":"OpenWorkloadUser","name":"OpenUser","parent":1}
+{"ev":"hold","t":0.0,"p":1,"d":0.026003982882371424}
+{"ev":"begin","t":0.0,"p":2,"type":"UsageScenario","id":"_fz810010_us1"}
+{"ev":"begin","t":0.0,"p":2,"type":"Start","id":"_fz810010_ua2"}
+{"ev":"end","t":0.0,"p":2,"type":"Start","id":"_fz810010_ua2"}
+{"ev":"begin","t":0.0,"p":2,"type":"EntryLevelSystemCall","id":"_fz810010_ua1"}
+{"ev":"begin","t":0.0,"p":2,"type":"SystemOperation","role":"_fz810010_prov3","sig":"_fz810010_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_fz810010_prov3","sig":"_fz810010_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"AssemblyOperation","ac":"_fz810010_ac1","role":"_fz810010_prov1","sig":"_fz810010_sig1"}
+{"ev":"meas","t":0.0,"mp":"ResourceURIMeasuringPoint[_fz810010_pr1|Passive Resource: Assembly_Comp0_0.pool]","metric":"State of Passive Resource Tuple","v":[0.0,1.0]}
+{"ev":"begin","t":0.0,"p":2,"type":"StartAction","id":"_fz810010_act10","ac":"_fz810010_ac1"}
+{"ev":"end","t":0.0,"p":2,"type":"StartAction","id":"_fz810010_act10","ac":"_fz810010_ac1"}
+{"ev":"begin","t":0.0,"p":2,"type":"InternalAction","id":"_fz810010_act4","ac":"_fz810010_ac1"}
+{"ev":"infra","t":0.0,"p":2,"id":"_fz810010_ic1","n":1}
+{"ev":"begin","t":0.0,"p":2,"type":"AssemblyOperation","ac":"_fz810010_ac2","role":"_fz810010_prov2","sig":"_fz810010_sig2"}
+{"ev":"begin","t":0.0,"p":2,"type":"StartAction","id":"_fz810010_act2","ac":"_fz810010_ac2"}
+{"ev":"end","t":0.0,"p":2,"type":"StartAction","id":"_fz810010_act2","ac":"_fz810010_ac2"}
+{"ev":"begin","t":0.0,"p":2,"type":"InternalAction","id":"_fz810010_act1","ac":"_fz810010_ac2"}
+{"ev":"demand","t":0.0,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_fz810010_rc2","spec":"_fz810010_prs2","sched":"FCFS","d":0.018469786483938218,"st":0.018469786483938218}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_fz810010_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.018469786483938218]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_fz810010_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.018469786,"mp":"ActiveResourceMeasuringPoint[_fz810010_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.018469786,0.0]}
+{"ev":"demand_done","t":0.018469786,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_fz810010_rc2"}
+{"ev":"end","t":0.018469786,"p":2,"type":"InternalAction","id":"_fz810010_act1","ac":"_fz810010_ac2"}
+{"ev":"end","t":0.018469786,"p":2,"type":"AssemblyOperation","ac":"_fz810010_ac2","role":"_fz810010_prov2","sig":"_fz810010_sig2"}
+{"ev":"end","t":0.018469786,"p":2,"type":"InternalAction","id":"_fz810010_act4","ac":"_fz810010_ac1"}
+{"ev":"begin","t":0.018469786,"p":2,"type":"AcquireAction","id":"_fz810010_act7","ac":"_fz810010_ac1"}
+{"ev":"acquire","t":0.018469786,"p":2,"res":"_fz810010_pr1","ac":"_fz810010_ac1","n":1,"avail":1,"queue":0}
+{"ev":"grant","t":0.018469786,"p":2,"res":"_fz810010_pr1","ac":"_fz810010_ac1","n":1,"avail":0}
+{"ev":"meas","t":0.018469786,"mp":"ResourceURIMeasuringPoint[_fz810010_pr1|Passive Resource: Assembly_Comp0_0.pool]","metric":"State of Passive Resource Tuple","v":[0.018469786,0.0]}
+{"ev":"meas","t":0.018469786,"mp":"ResourceURIMeasuringPoint[_fz810010_pr1|Passive Resource: Assembly_Comp0_0.pool]","metric":"Waiting Time Tuple","v":[0.018469786,0.0]}
+{"ev":"end","t":0.018469786,"p":2,"type":"AcquireAction","id":"_fz810010_act7","ac":"_fz810010_ac1"}
+{"ev":"begin","t":0.018469786,"p":2,"type":"InternalAction","id":"_fz810010_act5","ac":"_fz810010_ac1"}
+{"ev":"stop","t":0.018469786}
+{"ev":"meas","t":0.018469786,"mp":"ActiveResourceMeasuringPoint[_fz810010_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.018469786,0.0]}
+{"ev":"meas","t":0.018469786,"mp":"ActiveResourceMeasuringPoint[_fz810010_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.018469786,0.0]}
+{"ev":"pend","t":0.018469786,"p":1}
+{"ev":"pend","t":0.018469786,"p":2}
+{"ev":"finish","t":0.018469786,"uniforms":3,"measurements":10}

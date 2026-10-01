@@ -1,0 +1,1 @@
+Palladio-Example-Models LinkingResource_Test with its own monitors: Number of Resource Containers (initial tuple), triggers default true. Expected outputs: reference/refsim batch (2026-09-29, agent L).

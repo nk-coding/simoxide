@@ -1,0 +1,29 @@
+{"ev":"header","t":0.0,"format":"palladio-trace/1","run":"l_ref_stream_bytesize_missing","seed":18,"max_sim_time":-1,"max_measurements":50}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h19_linking_resource_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,0.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h19_linking_resource_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,0.0]}
+{"ev":"spawn","t":0.0,"p":1,"kind":"OpenWorkload","name":"OpenWorkloadUserMaturationChamber","parent":0}
+{"ev":"spawn","t":0.0,"p":2,"kind":"OpenWorkloadUser","name":"OpenUser","parent":1}
+{"ev":"hold","t":0.0,"p":1,"d":0.07025236450808872}
+{"ev":"begin","t":0.0,"p":2,"type":"UsageScenario","id":"_h19_linking_resource_us1"}
+{"ev":"begin","t":0.0,"p":2,"type":"Start","id":"_h19_linking_resource_ua2"}
+{"ev":"end","t":0.0,"p":2,"type":"Start","id":"_h19_linking_resource_ua2"}
+{"ev":"begin","t":0.0,"p":2,"type":"EntryLevelSystemCall","id":"_h19_linking_resource_ua1"}
+{"ev":"begin","t":0.0,"p":2,"type":"SystemOperation","role":"_h19_linking_resource_prov3","sig":"_h19_linking_resource_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h19_linking_resource_prov3","sig":"_h19_linking_resource_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"AssemblyOperation","ac":"_h19_linking_resource_ac1","role":"_h19_linking_resource_prov1","sig":"_h19_linking_resource_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"StartAction","id":"_h19_linking_resource_act3","ac":"_h19_linking_resource_ac1"}
+{"ev":"end","t":0.0,"p":2,"type":"StartAction","id":"_h19_linking_resource_act3","ac":"_h19_linking_resource_ac1"}
+{"ev":"begin","t":0.0,"p":2,"type":"InternalAction","id":"_h19_linking_resource_act1","ac":"_h19_linking_resource_ac1"}
+{"ev":"demand","t":0.0,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h19_linking_resource_rc1","spec":"_h19_linking_resource_prs1","sched":"PROCESSOR_SHARING","d":0.01,"st":0.01}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h19_linking_resource_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.01]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h19_linking_resource_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.01,"mp":"ActiveResourceMeasuringPoint[_h19_linking_resource_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.01,0.0]}
+{"ev":"demand_done","t":0.01,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h19_linking_resource_rc1"}
+{"ev":"end","t":0.01,"p":2,"type":"InternalAction","id":"_h19_linking_resource_act1","ac":"_h19_linking_resource_ac1"}
+{"ev":"begin","t":0.01,"p":2,"type":"ExternalCallAction","id":"_h19_linking_resource_act2","ac":"_h19_linking_resource_ac1"}
+{"ev":"stop","t":0.01}
+{"ev":"meas","t":0.01,"mp":"ActiveResourceMeasuringPoint[_h19_linking_resource_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.01,0.0]}
+{"ev":"meas","t":0.01,"mp":"ActiveResourceMeasuringPoint[_h19_linking_resource_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.01,0.0]}
+{"ev":"pend","t":0.01,"p":1}
+{"ev":"pend","t":0.01,"p":2}
+{"ev":"finish","t":0.01,"uniforms":2,"measurements":7}

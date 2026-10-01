@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" id="_repo" entityName="links">
+  <components__Repository xsi:type="repository:BasicComponent" id="_c1" entityName="C1">
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_s1" describedService__SEFF="_sig1">
+      <!-- successor declared forward only (dropped by EMF unless the target names its predecessor) -->
+      <steps_Behaviour xsi:type="seff:StartAction" id="_a1" successor_AbstractAction="_a2"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_a2" successor_AbstractAction="_a3"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_a3" predecessor_AbstractAction="_a2" successor_AbstractAction="_a4"/>
+      <!-- inconsistent: a4 claims a1 as predecessor (last write wins, a1.successor changes) -->
+      <steps_Behaviour xsi:type="seff:StopAction" id="_a4" predecessor_AbstractAction="_a1"/>
+    </serviceEffectSpecifications__BasicComponent>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_s2" describedService__SEFF="_sig2">
+      <steps_Behaviour xsi:type="seff:StopAction" id="_b3" predecessor_AbstractAction="_b2"/>
+      <steps_Behaviour xsi:type="seff:StartAction" id="_b1" successor_AbstractAction="_b2"/>
+      <steps_Behaviour xsi:type="seff:LoopAction" id="_b2" predecessor_AbstractAction="_b1" successor_AbstractAction="_b3">
+        <bodyBehaviour_Loop id="_body">
+          <steps_Behaviour xsi:type="seff:StartAction" id="_l1" successor_AbstractAction="_l2"/>
+          <steps_Behaviour xsi:type="seff:StopAction" id="_l2" predecessor_AbstractAction="_l1"/>
+        </bodyBehaviour_Loop>
+        <iterationCount_LoopAction specification="IntPMF[(1;0.5)(2;0.5)]"/>
+      </steps_Behaviour>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_if1" entityName="I">
+    <signatures__OperationInterface id="_sig1" entityName="a"/>
+    <signatures__OperationInterface id="_sig2" entityName="b"/>
+  </interfaces__Repository>
+</repository:Repository>

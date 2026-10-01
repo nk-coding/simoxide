@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: usageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_elsc_return/default.usagemodel#_LPnI8CHdEd6lJo4DCALHMw">
+    <usageScenario href="default.usagemodel#_LPnI8CHdEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to System->ValueProviderInterfaceProvidedRole->getValue [_NC8HwCHdEd6lJo4DCALHMw]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_elsc_return/default.usagemodel#_NC8HwCHdEd6lJo4DCALHMw">
+    <entryLevelSystemCall href="default.usagemodel#_NC8HwCHdEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall EntryLevelSystemCall2 to System->DelayInterfaceProvidedRole->wait [_lhUG8CgqEeuykaFStC2K4A]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_elsc_return/default.usagemodel#_lhUG8CgqEeuykaFStC2K4A">
+    <entryLevelSystemCall href="default.usagemodel#_lhUG8CgqEeuykaFStC2K4A"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="System.ValueProviderInterfaceProvidedRole.getValue"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_elsc_return/default.repository#_KjhikgzkEeCFg86gxKwVPw">
+    <role xsi:type="repository:OperationProvidedRole" href="default.system#_-r1fUCHcEd6lJo4DCALHMw"/>
+    <operationSignature href="default.repository#_KjhikgzkEeCFg86gxKwVPw"/>
+    <system href="default.system#_84D0kCHcEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="System.DelayInterfaceProvidedRole.wait"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_elsc_return/default.repository#_P0WrQCgqEeuykaFStC2K4A">
+    <role xsi:type="repository:OperationProvidedRole" href="default.system#_kPsuECgqEeuykaFStC2K4A"/>
+    <operationSignature href="default.repository#_P0WrQCgqEeuykaFStC2K4A"/>
+    <system href="default.system#_84D0kCHcEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="DELAY [0] in AppServer"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_elsc_return/default.resourceenvironment#_7ekBYCgqEeuh7MK305YPDQ">
+    <activeResource href="default.resourceenvironment#_7ekBYCgqEeuh7MK305YPDQ"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

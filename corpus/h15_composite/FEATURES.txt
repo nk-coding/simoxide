@@ -1,0 +1,1 @@
+CompositeComponent with two inner basic components (provided + inner assembly connector)

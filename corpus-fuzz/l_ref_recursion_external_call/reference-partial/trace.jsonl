@@ -1,0 +1,151 @@
+{"ev":"header","t":0.0,"format":"palladio-trace/1","run":"l_ref_recursion_external_call","seed":31,"max_sim_time":-1,"max_measurements":60}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,0.0]}
+{"ev":"spawn","t":0.0,"p":1,"kind":"OpenWorkload","name":"OpenWorkloadUserMaturationChamber","parent":0}
+{"ev":"spawn","t":0.0,"p":2,"kind":"OpenWorkloadUser","name":"OpenUser","parent":1}
+{"ev":"hold","t":0.0,"p":1,"d":0.11317935282840713}
+{"ev":"begin","t":0.0,"p":2,"type":"UsageScenario","id":"_h32_recursion_us1"}
+{"ev":"begin","t":0.0,"p":2,"type":"Start","id":"_h32_recursion_ua2"}
+{"ev":"end","t":0.0,"p":2,"type":"Start","id":"_h32_recursion_ua2"}
+{"ev":"begin","t":0.0,"p":2,"type":"EntryLevelSystemCall","id":"_h32_recursion_ua1"}
+{"ev":"begin","t":0.0,"p":2,"type":"SystemOperation","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"AssemblyOperation","ac":"_h32_recursion_ac1","role":"_h32_recursion_prov1","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"StartAction","id":"_h32_recursion_act9","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.0,"p":2,"type":"StartAction","id":"_h32_recursion_act9","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.0,"p":2,"type":"InternalAction","id":"_h32_recursion_act1","ac":"_h32_recursion_ac1"}
+{"ev":"demand","t":0.0,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1","spec":"_h32_recursion_prs1","sched":"PROCESSOR_SHARING","d":0.01861135138239425,"st":0.01861135138239425}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.01861135138239425]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.018611351,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.018611351,0.0]}
+{"ev":"demand_done","t":0.018611351,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1"}
+{"ev":"end","t":0.018611351,"p":2,"type":"InternalAction","id":"_h32_recursion_act1","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.018611351,"p":2,"type":"BranchAction","id":"_h32_recursion_act8","ac":"_h32_recursion_ac1"}
+{"ev":"branch","t":0.018611351,"p":2,"id":"_h32_recursion_act8","idx":1,"sel":"_h32_recursion_bt2"}
+{"ev":"begin","t":0.018611351,"p":2,"type":"StartAction","id":"_h32_recursion_act6","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.018611351,"p":2,"type":"StartAction","id":"_h32_recursion_act6","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.018611351,"p":2,"type":"InternalAction","id":"_h32_recursion_act5","ac":"_h32_recursion_ac1"}
+{"ev":"demand","t":0.018611351,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1","spec":"_h32_recursion_prs1","sched":"PROCESSOR_SHARING","d":0.01,"st":0.01}
+{"ev":"meas","t":0.018611351,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.018611351,0.01]}
+{"ev":"meas","t":0.018611351,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.018611351,1.0]}
+{"ev":"meas","t":0.028611351,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.028611351,0.0]}
+{"ev":"demand_done","t":0.028611351,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1"}
+{"ev":"end","t":0.028611351,"p":2,"type":"InternalAction","id":"_h32_recursion_act5","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.028611351,"p":2,"type":"BranchAction","id":"_h32_recursion_act8","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.028611351,"p":2,"type":"AssemblyOperation","ac":"_h32_recursion_ac1","role":"_h32_recursion_prov1","sig":"_h32_recursion_sig1"}
+{"ev":"end","t":0.028611351,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"end","t":0.028611351,"p":2,"type":"SystemOperation","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"meas","t":0.028611351,"mp":"SystemOperationMeasuringPoint[_h32_recursion_prov2|_h32_recursion_sig1|_h32_recursion_system1]","metric":"Response Time Tuple","v":[0.028611351,0.028611351]}
+{"ev":"end","t":0.028611351,"p":2,"type":"EntryLevelSystemCall","id":"_h32_recursion_ua1"}
+{"ev":"meas","t":0.028611351,"mp":"EntryLevelSystemCallMeasuringPoint[_h32_recursion_ua1]","metric":"Response Time Tuple","v":[0.028611351,0.028611351]}
+{"ev":"end","t":0.028611351,"p":2,"type":"UsageScenario","id":"_h32_recursion_us1"}
+{"ev":"meas","t":0.028611351,"mp":"UsageScenarioMeasuringPoint[_h32_recursion_us1]","metric":"Response Time Tuple","v":[0.028611351,0.028611351]}
+{"ev":"pend","t":0.028611351,"p":2}
+{"ev":"spawn","t":0.113179352,"p":3,"kind":"OpenWorkloadUser","name":"OpenUser","parent":1}
+{"ev":"hold","t":0.113179352,"p":1,"d":0.10527023813415132}
+{"ev":"begin","t":0.113179352,"p":3,"type":"UsageScenario","id":"_h32_recursion_us1"}
+{"ev":"begin","t":0.113179352,"p":3,"type":"Start","id":"_h32_recursion_ua2"}
+{"ev":"end","t":0.113179352,"p":3,"type":"Start","id":"_h32_recursion_ua2"}
+{"ev":"begin","t":0.113179352,"p":3,"type":"EntryLevelSystemCall","id":"_h32_recursion_ua1"}
+{"ev":"begin","t":0.113179352,"p":3,"type":"SystemOperation","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.113179352,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.113179352,"p":3,"type":"AssemblyOperation","ac":"_h32_recursion_ac1","role":"_h32_recursion_prov1","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.113179352,"p":3,"type":"StartAction","id":"_h32_recursion_act9","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.113179352,"p":3,"type":"StartAction","id":"_h32_recursion_act9","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.113179352,"p":3,"type":"InternalAction","id":"_h32_recursion_act1","ac":"_h32_recursion_ac1"}
+{"ev":"demand","t":0.113179352,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1","spec":"_h32_recursion_prs1","sched":"PROCESSOR_SHARING","d":0.2746023606491294,"st":0.2746023606491294}
+{"ev":"meas","t":0.113179352,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.113179352,0.2746023606491294]}
+{"ev":"meas","t":0.113179352,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.113179352,1.0]}
+{"ev":"spawn","t":0.21844959,"p":4,"kind":"OpenWorkloadUser","name":"OpenUser","parent":1}
+{"ev":"hold","t":0.21844959,"p":1,"d":0.01180820710035825}
+{"ev":"begin","t":0.21844959,"p":4,"type":"UsageScenario","id":"_h32_recursion_us1"}
+{"ev":"begin","t":0.21844959,"p":4,"type":"Start","id":"_h32_recursion_ua2"}
+{"ev":"end","t":0.21844959,"p":4,"type":"Start","id":"_h32_recursion_ua2"}
+{"ev":"begin","t":0.21844959,"p":4,"type":"EntryLevelSystemCall","id":"_h32_recursion_ua1"}
+{"ev":"begin","t":0.21844959,"p":4,"type":"SystemOperation","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.21844959,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.21844959,"p":4,"type":"AssemblyOperation","ac":"_h32_recursion_ac1","role":"_h32_recursion_prov1","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.21844959,"p":4,"type":"StartAction","id":"_h32_recursion_act9","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.21844959,"p":4,"type":"StartAction","id":"_h32_recursion_act9","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.21844959,"p":4,"type":"InternalAction","id":"_h32_recursion_act1","ac":"_h32_recursion_ac1"}
+{"ev":"demand","t":0.21844959,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1","spec":"_h32_recursion_prs1","sched":"PROCESSOR_SHARING","d":0.278640702002755,"st":0.278640702002755}
+{"ev":"meas","t":0.21844959,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.21844959,0.278640702002755]}
+{"ev":"meas","t":0.21844959,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.21844959,2.0]}
+{"ev":"spawn","t":0.230257797,"p":5,"kind":"OpenWorkloadUser","name":"OpenUser","parent":1}
+{"ev":"hold","t":0.230257797,"p":1,"d":0.33575040020555846}
+{"ev":"begin","t":0.230257797,"p":5,"type":"UsageScenario","id":"_h32_recursion_us1"}
+{"ev":"begin","t":0.230257797,"p":5,"type":"Start","id":"_h32_recursion_ua2"}
+{"ev":"end","t":0.230257797,"p":5,"type":"Start","id":"_h32_recursion_ua2"}
+{"ev":"begin","t":0.230257797,"p":5,"type":"EntryLevelSystemCall","id":"_h32_recursion_ua1"}
+{"ev":"begin","t":0.230257797,"p":5,"type":"SystemOperation","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.230257797,"p":5,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.230257797,"p":5,"type":"AssemblyOperation","ac":"_h32_recursion_ac1","role":"_h32_recursion_prov1","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.230257797,"p":5,"type":"StartAction","id":"_h32_recursion_act9","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.230257797,"p":5,"type":"StartAction","id":"_h32_recursion_act9","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.230257797,"p":5,"type":"InternalAction","id":"_h32_recursion_act1","ac":"_h32_recursion_ac1"}
+{"ev":"demand","t":0.230257797,"p":5,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1","spec":"_h32_recursion_prs1","sched":"PROCESSOR_SHARING","d":0.0060370993160833875,"st":0.0060370993160833875}
+{"ev":"meas","t":0.230257797,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.230257797,0.0060370993160833875]}
+{"ev":"meas","t":0.230257797,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.230257797,3.0]}
+{"ev":"meas","t":0.248369094,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.248369094,2.0]}
+{"ev":"demand_done","t":0.248369094,"p":5,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1"}
+{"ev":"end","t":0.248369094,"p":5,"type":"InternalAction","id":"_h32_recursion_act1","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.248369094,"p":5,"type":"BranchAction","id":"_h32_recursion_act8","ac":"_h32_recursion_ac1"}
+{"ev":"branch","t":0.248369094,"p":5,"id":"_h32_recursion_act8","idx":0,"sel":"_h32_recursion_bt1"}
+{"ev":"begin","t":0.248369094,"p":5,"type":"StartAction","id":"_h32_recursion_act3","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.248369094,"p":5,"type":"StartAction","id":"_h32_recursion_act3","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.248369094,"p":5,"type":"ExternalCallAction","id":"_h32_recursion_act2","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.248369094,"p":5,"type":"AssemblyOperation","ac":"_h32_recursion_ac2","role":"_h32_recursion_prov1","sig":"_h32_recursion_sig1"}
+{"ev":"begin","t":0.248369094,"p":5,"type":"StartAction","id":"_h32_recursion_act9","ac":"_h32_recursion_ac2"}
+{"ev":"end","t":0.248369094,"p":5,"type":"StartAction","id":"_h32_recursion_act9","ac":"_h32_recursion_ac2"}
+{"ev":"begin","t":0.248369094,"p":5,"type":"InternalAction","id":"_h32_recursion_act1","ac":"_h32_recursion_ac2"}
+{"ev":"demand","t":0.248369094,"p":5,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1","spec":"_h32_recursion_prs1","sched":"PROCESSOR_SHARING","d":0.05455511943996227,"st":0.05455511943996227}
+{"ev":"meas","t":0.248369094,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.248369094,0.05455511943996227]}
+{"ev":"meas","t":0.248369094,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.248369094,3.0]}
+{"ev":"meas","t":0.412034452,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.412034452,2.0]}
+{"ev":"demand_done","t":0.412034452,"p":5,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1"}
+{"ev":"end","t":0.412034452,"p":5,"type":"InternalAction","id":"_h32_recursion_act1","ac":"_h32_recursion_ac2"}
+{"ev":"begin","t":0.412034452,"p":5,"type":"BranchAction","id":"_h32_recursion_act8","ac":"_h32_recursion_ac2"}
+{"ev":"branch","t":0.412034452,"p":5,"id":"_h32_recursion_act8","idx":0,"sel":"_h32_recursion_bt1"}
+{"ev":"begin","t":0.412034452,"p":5,"type":"StartAction","id":"_h32_recursion_act3","ac":"_h32_recursion_ac2"}
+{"ev":"end","t":0.412034452,"p":5,"type":"StartAction","id":"_h32_recursion_act3","ac":"_h32_recursion_ac2"}
+{"ev":"begin","t":0.412034452,"p":5,"type":"ExternalCallAction","id":"_h32_recursion_act2","ac":"_h32_recursion_ac2"}
+{"ev":"stop","t":0.412034452}
+{"ev":"meas","t":0.412034452,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.412034452,2.0]}
+{"ev":"pend","t":0.412034452,"p":1}
+{"ev":"demand_done","t":0.412034452,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1"}
+{"ev":"end","t":0.412034452,"p":3,"type":"InternalAction","id":"_h32_recursion_act1","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.412034452,"p":3,"type":"BranchAction","id":"_h32_recursion_act8","ac":"_h32_recursion_ac1"}
+{"ev":"branch","t":0.412034452,"p":3,"id":"_h32_recursion_act8","idx":1,"sel":"_h32_recursion_bt2"}
+{"ev":"begin","t":0.412034452,"p":3,"type":"StartAction","id":"_h32_recursion_act6","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.412034452,"p":3,"type":"StartAction","id":"_h32_recursion_act6","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.412034452,"p":3,"type":"InternalAction","id":"_h32_recursion_act5","ac":"_h32_recursion_ac1"}
+{"ev":"demand","t":0.412034452,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1","spec":"_h32_recursion_prs1","sched":"PROCESSOR_SHARING","d":0.01,"st":0.01}
+{"ev":"meas","t":0.412034452,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.412034452,0.01]}
+{"ev":"demand_done","t":0.412034452,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1"}
+{"ev":"end","t":0.412034452,"p":3,"type":"InternalAction","id":"_h32_recursion_act5","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.412034452,"p":3,"type":"BranchAction","id":"_h32_recursion_act8","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.412034452,"p":3,"type":"AssemblyOperation","ac":"_h32_recursion_ac1","role":"_h32_recursion_prov1","sig":"_h32_recursion_sig1"}
+{"ev":"end","t":0.412034452,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"end","t":0.412034452,"p":3,"type":"SystemOperation","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"end","t":0.412034452,"p":3,"type":"EntryLevelSystemCall","id":"_h32_recursion_ua1"}
+{"ev":"end","t":0.412034452,"p":3,"type":"UsageScenario","id":"_h32_recursion_us1"}
+{"ev":"pend","t":0.412034452,"p":3}
+{"ev":"demand_done","t":0.412034452,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1"}
+{"ev":"end","t":0.412034452,"p":4,"type":"InternalAction","id":"_h32_recursion_act1","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.412034452,"p":4,"type":"BranchAction","id":"_h32_recursion_act8","ac":"_h32_recursion_ac1"}
+{"ev":"branch","t":0.412034452,"p":4,"id":"_h32_recursion_act8","idx":1,"sel":"_h32_recursion_bt2"}
+{"ev":"begin","t":0.412034452,"p":4,"type":"StartAction","id":"_h32_recursion_act6","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.412034452,"p":4,"type":"StartAction","id":"_h32_recursion_act6","ac":"_h32_recursion_ac1"}
+{"ev":"begin","t":0.412034452,"p":4,"type":"InternalAction","id":"_h32_recursion_act5","ac":"_h32_recursion_ac1"}
+{"ev":"demand","t":0.412034452,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1","spec":"_h32_recursion_prs1","sched":"PROCESSOR_SHARING","d":0.01,"st":0.01}
+{"ev":"meas","t":0.412034452,"mp":"ActiveResourceMeasuringPoint[_h32_recursion_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.412034452,0.01]}
+{"ev":"demand_done","t":0.412034452,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h32_recursion_rc1"}
+{"ev":"end","t":0.412034452,"p":4,"type":"InternalAction","id":"_h32_recursion_act5","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.412034452,"p":4,"type":"BranchAction","id":"_h32_recursion_act8","ac":"_h32_recursion_ac1"}
+{"ev":"end","t":0.412034452,"p":4,"type":"AssemblyOperation","ac":"_h32_recursion_ac1","role":"_h32_recursion_prov1","sig":"_h32_recursion_sig1"}
+{"ev":"end","t":0.412034452,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"end","t":0.412034452,"p":4,"type":"SystemOperation","role":"_h32_recursion_prov2","sig":"_h32_recursion_sig1"}
+{"ev":"end","t":0.412034452,"p":4,"type":"EntryLevelSystemCall","id":"_h32_recursion_ua1"}
+{"ev":"end","t":0.412034452,"p":4,"type":"UsageScenario","id":"_h32_recursion_us1"}
+{"ev":"pend","t":0.412034452,"p":4}
+{"ev":"pend","t":0.412034452,"p":5}
+{"ev":"finish","t":0.412034452,"uniforms":14,"measurements":23}

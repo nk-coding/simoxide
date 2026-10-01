@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2"
+    xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" id="_h12_fork_async_system1" entityName="h12_fork_async">
+  <assemblyContexts__ComposedStructure id="_h12_fork_async_ac1" entityName="Assembly_Server">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="h12_fork_async.repository#_h12_fork_async_comp1"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_h12_fork_async_conn1" entityName="ProvDelegation"
+      outerProvidedRole_ProvidedDelegationConnector="_h12_fork_async_prov2" assemblyContext_ProvidedDelegationConnector="_h12_fork_async_ac1">
+    <innerProvidedRole_ProvidedDelegationConnector href="h12_fork_async.repository#_h12_fork_async_prov1"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h12_fork_async_prov2" entityName="Provided_IService">
+    <providedInterface__OperationProvidedRole href="h12_fork_async.repository#_h12_fork_async_if1"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

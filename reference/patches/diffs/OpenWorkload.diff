@@ -1,0 +1,17 @@
+--- 5.2.2/Palladio-Analyzer-SimuCom/bundles/de.uka.ipd.sdq.simucomframework/src/de/uka/ipd/sdq/simucomframework/usage/OpenWorkload.java
++++ patched/de/uka/ipd/sdq/simucomframework/usage/OpenWorkload.java
+@@ -94,7 +94,13 @@
+     }
+ 
+     private void waitForNextUser() {
+-        final double interArrivalTimeSample = Context.evaluateStatic(interArrivalTime, Double.class);
++        final String prevOrigin = refsim.trace.Trace.origin("interarrival"); // REFSIM tape
++        final double interArrivalTimeSample;
++        try {
++            interArrivalTimeSample = Context.evaluateStatic(interArrivalTime, Double.class);
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+         if (LOGGER.isDebugEnabled()) {
+             LOGGER.debug("Waiting for " + interArrivalTimeSample + " before spawing the next user");
+         }

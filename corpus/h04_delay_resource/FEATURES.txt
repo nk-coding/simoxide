@@ -1,0 +1,1 @@
+DELAY resource type with Delay scheduling; UniDouble demand; closed workload with Exp think time

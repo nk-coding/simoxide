@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h09_loop_allocation1" entityName="h09_loop">
+  <targetResourceEnvironment_Allocation href="h09_loop.resourceenvironment#/"/>
+  <system_Allocation href="h09_loop.system#_h09_loop_system1"/>
+  <allocationContexts_Allocation id="_h09_loop_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h09_loop.resourceenvironment#_h09_loop_rc1"/>
+    <assemblyContext_AllocationContext href="h09_loop.system#_h09_loop_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

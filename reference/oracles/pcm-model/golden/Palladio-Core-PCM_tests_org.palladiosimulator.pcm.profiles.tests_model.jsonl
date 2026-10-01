@@ -1,0 +1,10 @@
+{"emf_errors":0}
+{"resource":"default.repository","roots":1}
+{"path":"/","id":"_Mh6NQAOdEeW7RJF7nLqWPA","type":"repository:Repository","attrs":{"entityName":"defaultRepository","repositoryDescription":null},"refs":{}}
+{"path":"//@components__Repository.0","id":"_NknAYAOdEeW7RJF7nLqWPA","type":"repository:BasicComponent","attrs":{"entityName":"ExampleComponent","componentType":"BUSINESS_COMPONENT"},"refs":{}}
+{"path":"//@components__Repository.0/@providedRoles_InterfaceProvidingEntity.0","id":"_Xk4ygAOdEeW7RJF7nLqWPA","type":"repository:OperationProvidedRole","attrs":{"entityName":"Provided_ExampleInterface_ExampleComponent"},"refs":{"providedInterface__OperationProvidedRole":"default.repository#_QYmyAAOdEeW7RJF7nLqWPA"}}
+{"path":"//@components__Repository.0/@serviceEffectSpecifications__BasicComponent.0","id":"_Xk8c4AOdEeW7RJF7nLqWPA","type":"seff:ResourceDemandingSEFF","attrs":{"seffTypeID":"1"},"refs":{"describedService__SEFF":"default.repository#_Uo3tUAOdEeW7RJF7nLqWPA"}}
+{"path":"//@components__Repository.0/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.0","id":"_Xk9D8AOdEeW7RJF7nLqWPA","type":"seff:StartAction","attrs":{"entityName":"start"},"refs":{"successor_AbstractAction":"default.repository#_Xk9D8QOdEeW7RJF7nLqWPA"}}
+{"path":"//@components__Repository.0/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.1","id":"_Xk9D8QOdEeW7RJF7nLqWPA","type":"seff:StopAction","attrs":{"entityName":"stop"},"refs":{"predecessor_AbstractAction":"default.repository#_Xk9D8AOdEeW7RJF7nLqWPA"}}
+{"path":"//@interfaces__Repository.0","id":"_QYmyAAOdEeW7RJF7nLqWPA","type":"repository:OperationInterface","attrs":{"entityName":"ExampleInterface"},"refs":{}}
+{"path":"//@interfaces__Repository.0/@signatures__OperationInterface.0","id":"_Uo3tUAOdEeW7RJF7nLqWPA","type":"repository:OperationSignature","attrs":{"entityName":"exampleOperation"},"refs":{}}

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monitorrepository:MonitorRepository xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:metricspec="http://palladiosimulator.org/MetricSpec/1.0" xmlns:monitorrepository="http://palladiosimulator.org/MonitorRepository/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" id="_fzr217_s3_monrepo" entityName="refsim default monitors">
+  <monitors id="_fzr217_s3_mon1" entityName="RT scenario Scenario0">
+    <measurementSpecifications id="_fzr217_s3_ms1_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft1_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="fzr217_s3.measuringpoint#//@measuringPoints.0"/>
+  </monitors>
+  <monitors id="_fzr217_s3_mon2" entityName="RT call call_op0_0">
+    <measurementSpecifications id="_fzr217_s3_ms2_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft2_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="fzr217_s3.measuringpoint#//@measuringPoints.1"/>
+  </monitors>
+  <monitors id="_fzr217_s3_mon3" entityName="RT call call_op0_0">
+    <measurementSpecifications id="_fzr217_s3_ms3_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft3_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="fzr217_s3.measuringpoint#//@measuringPoints.2"/>
+  </monitors>
+  <monitors id="_fzr217_s3_mon4" entityName="RT call call_op0_0">
+    <measurementSpecifications id="_fzr217_s3_ms4_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft4_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="fzr217_s3.measuringpoint#//@measuringPoints.3"/>
+  </monitors>
+  <monitors id="_fzr217_s3_mon5" entityName="RT system op op0_0">
+    <measurementSpecifications id="_fzr217_s3_ms5_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft5_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" href="fzr217_s3.measuringpoint#//@measuringPoints.4"/>
+  </monitors>
+  <monitors id="_fzr217_s3_mon6" entityName="RT external call call_op2_0">
+    <measurementSpecifications id="_fzr217_s3_ms6_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft6_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="fzr217_s3.measuringpoint#//@measuringPoints.5"/>
+  </monitors>
+  <monitors id="_fzr217_s3_mon7" entityName="resource Node0.CPU #0">
+    <measurementSpecifications id="_fzr217_s3_ms7_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft7_paDh"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_fzr217_s3_ms7_eg_F" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_eg_F0s7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft7_eg_F"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="fzr217_s3.measuringpoint#//@measuringPoints.6"/>
+  </monitors>
+  <monitors id="_fzr217_s3_mon8" entityName="resource Node0.CPU #1">
+    <measurementSpecifications id="_fzr217_s3_ms8_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft8_paDh"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="fzr217_s3.measuringpoint#//@measuringPoints.7"/>
+  </monitors>
+  <monitors id="_fzr217_s3_mon9" entityName="resource Node0.CPU #2">
+    <measurementSpecifications id="_fzr217_s3_ms9_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft9_paDh"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="fzr217_s3.measuringpoint#//@measuringPoints.8"/>
+  </monitors>
+  <monitors id="_fzr217_s3_mon10" entityName="resource Node0.CPU #3">
+    <measurementSpecifications id="_fzr217_s3_ms10_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_fzr217_s3_ft10_paDh"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="fzr217_s3.measuringpoint#//@measuringPoints.9"/>
+  </monitors>
+</monitorrepository:MonitorRepository>

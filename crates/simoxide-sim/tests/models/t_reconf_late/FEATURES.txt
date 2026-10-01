@@ -1,0 +1,1 @@
+corpus/h29_triggers_late plus the reconfiguration monitors: first run during SimuComModel.finalise. Expected outputs: reference/refsim batch (2026-09-29, agent L).

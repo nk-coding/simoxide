@@ -1,0 +1,1 @@
+4-replica PS CPU with open workload (per-core state + overall utilization measurements)

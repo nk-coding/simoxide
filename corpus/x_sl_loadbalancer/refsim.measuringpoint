@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: overloadUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_loadbalancer/overload.usagemodel#_YtqF4AEqEeS7FKokKTKFow">
+    <usageScenario href="overload.usagemodel#_YtqF4AEqEeS7FKokKTKFow"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to adpativeLoadBalancerSystem->Provided_IApplicationServer->processRequest [_cYRWcAEqEeS7FKokKTKFow]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_loadbalancer/overload.usagemodel#_cYRWcAEqEeS7FKokKTKFow">
+    <entryLevelSystemCall href="overload.usagemodel#_cYRWcAEqEeS7FKokKTKFow"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="adpativeLoadBalancerSystem.Provided_IApplicationServer.processRequest"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_loadbalancer/loadbalancer.repository#_f0xPUAEmEeS7FKokKTKFow">
+    <role xsi:type="repository:OperationProvidedRole" href="loadbalancer.system#_4A2jYAEnEeS7FKokKTKFow"/>
+    <operationSignature href="loadbalancer.repository#_f0xPUAEmEeS7FKokKTKFow"/>
+    <system href="loadbalancer.system#_lhnn8AEnEeS7FKokKTKFow"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from LoadBalancer to AC_Server1->processRequest [_8nlBcAEoEeS7FKokKTKFow]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_loadbalancer/loadbalancer.repository#_8nlBcAEoEeS7FKokKTKFow">
+    <externalCall href="loadbalancer.repository#_8nlBcAEoEeS7FKokKTKFow"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from LoadBalancer to AC_Server2->processRequest [_-fSxAAEoEeS7FKokKTKFow]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_loadbalancer/loadbalancer.repository#_-fSxAAEoEeS7FKokKTKFow">
+    <externalCall href="loadbalancer.repository#_-fSxAAEoEeS7FKokKTKFow"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in LoadBalancer"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_loadbalancer/iaas.resourceenvironment#_EKwpkAEqEeS7FKokKTKFow">
+    <activeResource href="iaas.resourceenvironment#_EKwpkAEqEeS7FKokKTKFow"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ServerNode1"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_loadbalancer/iaas.resourceenvironment#_GAVEEAEqEeS7FKokKTKFow">
+    <activeResource href="iaas.resourceenvironment#_GAVEEAEqEeS7FKokKTKFow"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="HDD [0] in ServerNode1"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_loadbalancer/iaas.resourceenvironment#_HwZ6kAEqEeS7FKokKTKFow">
+    <activeResource href="iaas.resourceenvironment#_HwZ6kAEqEeS7FKokKTKFow"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ServerNode2"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_loadbalancer/iaas.resourceenvironment#_JPnqkAEqEeS7FKokKTKFow">
+    <activeResource href="iaas.resourceenvironment#_JPnqkAEqEeS7FKokKTKFow"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="HDD [0] in ServerNode2"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_sl_loadbalancer/iaas.resourceenvironment#_K2xOkAEqEeS7FKokKTKFow">
+    <activeResource href="iaas.resourceenvironment#_K2xOkAEqEeS7FKokKTKFow"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

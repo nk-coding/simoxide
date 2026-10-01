@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resourceenvironment:ResourceEnvironment xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:resourceenvironment="http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2">
+  <resourceContainer_ResourceEnvironment id="_c0" entityName="c0"/>
+  <!-- more than 5 forward ids (ManyReference), duplicates and one existing container mixed in -->
+  <linkingResources__ResourceEnvironment id="_l1" connectedResourceContainers_LinkingResource="_c1 _c0 _c2 _c1 _c3 _c4 _c5 _c0 _c6">
+    <communicationLinkResourceSpecifications_LinkingResource id="_spec1">
+      <communicationLinkResourceType_CommunicationLinkResourceSpecification href="pathmap://PCM_MODELS/Palladio.resourcetype#_o3sScH2AEdyH8uerKnHYug"/>
+      <latency_CommunicationLinkResourceSpecification specification="0.5"/>
+      <throughput_CommunicationLinkResourceSpecification specification="1E6"/>
+    </communicationLinkResourceSpecifications_LinkingResource>
+  </linkingResources__ResourceEnvironment>
+  <!-- up to 5 forward ids (SingleReferences, inserted at their positions) -->
+  <linkingResources__ResourceEnvironment id="_l2" connectedResourceContainers_LinkingResource="_c2 _c0 _c1">
+    <communicationLinkResourceSpecifications_LinkingResource id="_spec2">
+      <communicationLinkResourceType_CommunicationLinkResourceSpecification href="platform:/plugin/org.palladiosimulator.pcm.resources/defaultModels/Palladio.resourcetype#_o3sScH2AEdyH8uerKnHYug"/>
+      <latency_CommunicationLinkResourceSpecification specification="0"/>
+      <throughput_CommunicationLinkResourceSpecification specification="10"/>
+    </communicationLinkResourceSpecifications_LinkingResource>
+  </linkingResources__ResourceEnvironment>
+  <resourceContainer_ResourceEnvironment id="_c1" entityName="c1"/>
+  <resourceContainer_ResourceEnvironment id="_c2" entityName="c2">
+    <nestedResourceContainers__ResourceContainer id="_c3" entityName="c3"/>
+  </resourceContainer_ResourceEnvironment>
+  <resourceContainer_ResourceEnvironment id="_c4" entityName="c4"/>
+  <resourceContainer_ResourceEnvironment id="_c5" entityName="c5"/>
+  <resourceContainer_ResourceEnvironment id="_c6" entityName="c6"/>
+</resourceenvironment:ResourceEnvironment>

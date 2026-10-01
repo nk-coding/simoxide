@@ -1,0 +1,27 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+license = "EPL-2.0"
+repository = "https://github.com/nk-coding/simoxide"
+
+# Internal crates: a path for the workspace, a version for packaging (crates.io resolves by version).
+[workspace.dependencies]
+simoxide-hotspot-math = { path = "crates/simoxide-hotspot-math", version = "0.1.0" }
+simoxide-model = { path = "crates/simoxide-model", version = "0.1.0" }
+simoxide-random = { path = "crates/simoxide-random", version = "0.1.0", default-features = false }
+simoxide-sched = { path = "crates/simoxide-sched", version = "0.1.0" }
+simoxide-sim = { path = "crates/simoxide-sim", version = "0.1.0", default-features = false }
+simoxide-stoex = { path = "crates/simoxide-stoex", version = "0.1.0", default-features = false }
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = "line-tables-only"
+
+[profile.bench]
+inherits = "release"

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: defaultUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_fork/fork_3.1.usagemodel#_8rfecHtQEd6J8YwisObTKw">
+    <usageScenario href="fork_3.1.usagemodel#_8rfecHtQEd6J8YwisObTKw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_IFork->fork [_xiRrsE_HEeWF5LDxE4JiAg]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_fork/fork_3.1.usagemodel#_xiRrsE_HEeWF5LDxE4JiAg">
+    <entryLevelSystemCall href="fork_3.1.usagemodel#_xiRrsE_HEeWF5LDxE4JiAg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_IFork.fork"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_fork/fork_3.1.repository#_B-1qwKfFEd-L5vB0MCctNg">
+    <role xsi:type="repository:OperationProvidedRole" href="fork_3.1.system#__cgAUE_GEeWF5LDxE4JiAg"/>
+    <operationSignature href="fork_3.1.repository#_B-1qwKfFEd-L5vB0MCctNg"/>
+    <system href="fork_3.1.system#_2PmOgHtPEd6J8YwisObTKw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="DELAY [0] in aName" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_fork/fork_3.1.resourceenvironment#_Giw1gRefEeKPEYCkJN99mA">
+    <activeResource href="fork_3.1.resourceenvironment#_Giw1gRefEeKPEYCkJN99mA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in aName" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_fork/fork_3.1.resourceenvironment#_Giw1hBefEeKPEYCkJN99mA">
+    <activeResource href="fork_3.1.resourceenvironment#_Giw1hBefEeKPEYCkJN99mA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="HDD [0] in aName" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_fork/fork_3.1.resourceenvironment#_Giw1hxefEeKPEYCkJN99mA">
+    <activeResource href="fork_3.1.resourceenvironment#_Giw1hxefEeKPEYCkJN99mA"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2"
+    xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_h14_call_chain_3_repository1" entityName="h14_call_chain_3">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h14_call_chain_3_comp1" entityName="A">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h14_call_chain_3_prov1" entityName="Provided_IA"
+        providedInterface__OperationProvidedRole="_h14_call_chain_3_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_h14_call_chain_3_req1" entityName="Required_IB"
+        requiredInterface__OperationRequiredRole="_h14_call_chain_3_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h14_call_chain_3_seff1" describedService__SEFF="_h14_call_chain_3_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h14_call_chain_3_act4" entityName="start" successor_AbstractAction="_h14_call_chain_3_act1"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h14_call_chain_3_act1" entityName="aWork" predecessor_AbstractAction="_h14_call_chain_3_act4"
+          successor_AbstractAction="_h14_call_chain_3_act2">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.02"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_h14_call_chain_3_act2" entityName="callB" predecessor_AbstractAction="_h14_call_chain_3_act1"
+          successor_AbstractAction="_h14_call_chain_3_act3" calledService_ExternalService="_h14_call_chain_3_sig2" role_ExternalService="_h14_call_chain_3_req1">
+        <inputVariableUsages__CallAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="IntPMF[(10;0.5)(20;0.5)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="size"/>
+        </inputVariableUsages__CallAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h14_call_chain_3_act3" entityName="aPost" predecessor_AbstractAction="_h14_call_chain_3_act2"
+          successor_AbstractAction="_h14_call_chain_3_act5">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.01"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h14_call_chain_3_act5" entityName="stop" predecessor_AbstractAction="_h14_call_chain_3_act3"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_h14_call_chain_3_comp2" entityName="B">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h14_call_chain_3_prov2" entityName="Provided_IB"
+        providedInterface__OperationProvidedRole="_h14_call_chain_3_if2"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_h14_call_chain_3_req2" entityName="Required_IC"
+        requiredInterface__OperationRequiredRole="_h14_call_chain_3_if3"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h14_call_chain_3_seff2" describedService__SEFF="_h14_call_chain_3_sig2">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h14_call_chain_3_act8" entityName="start" successor_AbstractAction="_h14_call_chain_3_act6"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h14_call_chain_3_act6" entityName="bWork" predecessor_AbstractAction="_h14_call_chain_3_act8"
+          successor_AbstractAction="_h14_call_chain_3_act7">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="size.VALUE * 0.002"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_h14_call_chain_3_act7" entityName="callC" predecessor_AbstractAction="_h14_call_chain_3_act6"
+          successor_AbstractAction="_h14_call_chain_3_act9" calledService_ExternalService="_h14_call_chain_3_sig3" role_ExternalService="_h14_call_chain_3_req2">
+        <inputVariableUsages__CallAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="size.VALUE * 2"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="size"/>
+        </inputVariableUsages__CallAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h14_call_chain_3_act9" entityName="stop" predecessor_AbstractAction="_h14_call_chain_3_act7"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_h14_call_chain_3_comp3" entityName="C">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h14_call_chain_3_prov3" entityName="Provided_IC"
+        providedInterface__OperationProvidedRole="_h14_call_chain_3_if3"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h14_call_chain_3_seff3" describedService__SEFF="_h14_call_chain_3_sig3">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h14_call_chain_3_act11" entityName="start" successor_AbstractAction="_h14_call_chain_3_act10"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h14_call_chain_3_act10" entityName="cWork" predecessor_AbstractAction="_h14_call_chain_3_act11"
+          successor_AbstractAction="_h14_call_chain_3_act12">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="size.VALUE * 0.001"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h14_call_chain_3_act12" entityName="stop" predecessor_AbstractAction="_h14_call_chain_3_act10"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h14_call_chain_3_if1" entityName="IA">
+    <signatures__OperationInterface id="_h14_call_chain_3_sig1" entityName="a"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h14_call_chain_3_if2" entityName="IB">
+    <signatures__OperationInterface id="_h14_call_chain_3_sig2" entityName="b">
+      <parameters__OperationSignature parameterName="size">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h14_call_chain_3_if3" entityName="IC">
+    <signatures__OperationInterface id="_h14_call_chain_3_sig3" entityName="c">
+      <parameters__OperationSignature parameterName="size">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+</repository:Repository>

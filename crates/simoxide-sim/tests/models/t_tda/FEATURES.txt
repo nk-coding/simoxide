@@ -1,0 +1,1 @@
+w_h01_ps_single with triggersSelfAdaptations=true only on the TimeDrivenAggregation (scenario response time): the reconfiguration process is created at the first window end (t=3.3, MEAS-7.2). Expected outputs: reference/refsim batch (2026-09-29, agent L).

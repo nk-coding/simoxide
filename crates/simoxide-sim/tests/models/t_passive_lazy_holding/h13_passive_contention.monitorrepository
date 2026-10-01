@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monitorrepository:MonitorRepository xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:metricspec="http://palladiosimulator.org/MetricSpec/1.0"
+    xmlns:monitorrepository="http://palladiosimulator.org/MonitorRepository/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    id="_h13_passive_contention_monrepo" entityName="refsim default monitors">
+  <monitors id="_h13_passive_contention_mon1" entityName="RT scenario Scenario">
+    <measurementSpecifications id="_h13_passive_contention_ms1_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h13_passive_contention_ft1_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="h13_passive_contention.measuringpoint#//@measuringPoints.0"/>
+  </monitors>
+  <monitors id="_h13_passive_contention_mon2" entityName="RT call callOp">
+    <measurementSpecifications id="_h13_passive_contention_ms2_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h13_passive_contention_ft2_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="h13_passive_contention.measuringpoint#//@measuringPoints.1"/>
+  </monitors>
+  <monitors id="_h13_passive_contention_mon3" entityName="RT system op op">
+    <measurementSpecifications id="_h13_passive_contention_ms3_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h13_passive_contention_ft3_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" href="h13_passive_contention.measuringpoint#//@measuringPoints.2"/>
+  </monitors>
+  <monitors id="_h13_passive_contention_mon4" entityName="resource ServerNode.CPU #0">
+    <measurementSpecifications id="_h13_passive_contention_ms4_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h13_passive_contention_ft4_paDh"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_h13_passive_contention_ms4_eg_F" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_eg_F0s7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h13_passive_contention_ft4_eg_F"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="h13_passive_contention.measuringpoint#//@measuringPoints.3"/>
+  </monitors>
+  <monitors id="_h13_passive_contention_mon5" entityName="resource ServerNode.CPU #1">
+    <measurementSpecifications id="_h13_passive_contention_ms5_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h13_passive_contention_ft5_paDh"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="h13_passive_contention.measuringpoint#//@measuringPoints.4"/>
+  </monitors>
+  <monitors id="_h13_passive_contention_mon6" entityName="passive Assembly_Server.pool">
+    <measurementSpecifications id="_h13_passive_contention_ms6_QWjA" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_QWjAYs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h13_passive_contention_ft6_QWjA"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_h13_passive_contention_ms6_zETO" triggersSelfAdaptations="true">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_zETOUs7pEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h13_passive_contention_ft6_zETO"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_h13_passive_contention_ms6_x0-p" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_x0-pks7rEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h13_passive_contention_ft6_x0-p"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" href="h13_passive_contention.measuringpoint#//@measuringPoints.5"/>
+  </monitors>
+</monitorrepository:MonitorRepository>

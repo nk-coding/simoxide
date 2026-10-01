@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" id="_repo" entityName="dup">
+  <!-- interfaces come first in the file but after components in containment (tree) order -->
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_dup" entityName="I">
+    <signatures__OperationInterface id="_sig1" entityName="a"/>
+  </interfaces__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_c0" entityName="Early">
+    <!-- resolved immediately: only the interface exists yet -->
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_r0" providedInterface__OperationProvidedRole="_dup"/>
+    <!-- forward reference: resolved at the end, against the complete tree -->
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_r1" requiredInterface__OperationRequiredRole="_dup2"/>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_dup" entityName="Late"/>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_dup2" entityName="I2"/>
+  <components__Repository xsi:type="repository:BasicComponent" id="_dup2" entityName="Late2"/>
+</repository:Repository>

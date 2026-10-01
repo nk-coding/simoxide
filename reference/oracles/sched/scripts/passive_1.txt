@@ -1,0 +1,6 @@
+# capacity 1, FIFO waiting
+passive 1
+pjob a 0 1 1.0
+pjob b 0 1 0.5
+pjob c 0.2 1 0.3 0.1 1 0.2
+pjob d 0.2 1 0.1

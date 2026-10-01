@@ -1,0 +1,12 @@
+[package]
+name = "simoxide-sched"
+description = "Active and passive resource models of SimuLizar 5.2.2 (processor sharing, FCFS, delay, simple fair passive resource), bit-exact"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+
+[dev-dependencies]
+proptest = { version = "1", default-features = false, features = ["std"] }

@@ -1,0 +1,1 @@
+corpus/h13_passive_contention with a 0.5 s usage delay before the call (passive-resource calculators created lazily at t=0.5) and triggersSelfAdaptations=true only on the holding time: the PRM recorder attaches when the holding calculator registers, after the initial state tuple. Expected outputs: reference/refsim batch (2026-09-29, agent L).

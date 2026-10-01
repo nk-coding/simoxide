@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_h19_linking_resource_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h19_linking_resource/h19_linking_resource.usagemodel#_h19_linking_resource_us1">
+    <usageScenario href="h19_linking_resource.usagemodel#_h19_linking_resource_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall callOp to h19_linking_resource->Provided_IService->op [_h19_linking_resource_ua1]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h19_linking_resource/h19_linking_resource.usagemodel#_h19_linking_resource_ua1">
+    <entryLevelSystemCall href="h19_linking_resource.usagemodel#_h19_linking_resource_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="h19_linking_resource.Provided_IService.op"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h19_linking_resource/h19_linking_resource.repository#_h19_linking_resource_sig1">
+    <role xsi:type="repository:OperationProvidedRole" href="h19_linking_resource.system#_h19_linking_resource_prov3"/>
+    <operationSignature href="h19_linking_resource.repository#_h19_linking_resource_sig1"/>
+    <system href="h19_linking_resource.system#_h19_linking_resource_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall callRemote from Client to Required_IRemote->remote [_h19_linking_resource_act2]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h19_linking_resource/h19_linking_resource.repository#_h19_linking_resource_act2">
+    <externalCall href="h19_linking_resource.repository#_h19_linking_resource_act2"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ClientNode"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h19_linking_resource/h19_linking_resource.resourceenvironment#_h19_linking_resource_prs1">
+    <activeResource href="h19_linking_resource.resourceenvironment#_h19_linking_resource_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ServerNode"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h19_linking_resource/h19_linking_resource.resourceenvironment#_h19_linking_resource_prs2">
+    <activeResource href="h19_linking_resource.resourceenvironment#_h19_linking_resource_prs2"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

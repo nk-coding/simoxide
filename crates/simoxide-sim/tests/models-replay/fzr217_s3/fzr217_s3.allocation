@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_fzr217_s3_allocation1" entityName="fzr217_s3">
+  <targetResourceEnvironment_Allocation href="fzr217_s3.resourceenvironment#/"/>
+  <system_Allocation href="fzr217_s3.system#_fzr217_s3_system1"/>
+  <allocationContexts_Allocation id="_fzr217_s3_alc1" entityName="Allocation_Assembly_Composite0_0">
+    <resourceContainer_AllocationContext href="fzr217_s3.resourceenvironment#_fzr217_s3_rc1"/>
+    <assemblyContext_AllocationContext href="fzr217_s3.system#_fzr217_s3_ac4"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_fzr217_s3_alc2" entityName="Allocation_Assembly_Comp1_0">
+    <resourceContainer_AllocationContext href="fzr217_s3.resourceenvironment#_fzr217_s3_rc1"/>
+    <assemblyContext_AllocationContext href="fzr217_s3.system#_fzr217_s3_ac5"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_fzr217_s3_alc3" entityName="Allocation_Assembly_Composite2_0">
+    <resourceContainer_AllocationContext href="fzr217_s3.resourceenvironment#_fzr217_s3_rc1"/>
+    <assemblyContext_AllocationContext href="fzr217_s3.system#_fzr217_s3_ac6"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_fzr217_s3_alc4" entityName="Allocation_Assembly_Middleware">
+    <resourceContainer_AllocationContext href="fzr217_s3.resourceenvironment#_fzr217_s3_rc1"/>
+    <assemblyContext_AllocationContext href="fzr217_s3.system#_fzr217_s3_ac7"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

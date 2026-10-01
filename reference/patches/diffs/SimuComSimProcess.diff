@@ -1,0 +1,41 @@
+--- 5.2.2/Palladio-Analyzer-SimuCom/bundles/de.uka.ipd.sdq.simucomframework.core/src/de/uka/ipd/sdq/simucomframework/core/SimuComSimProcess.java
++++ patched/de/uka/ipd/sdq/simucomframework/core/SimuComSimProcess.java
+@@ -84,6 +84,11 @@
+         }
+     }
+ 
++    /** REFSIM: per-run reset of JVM-global state, so batch runs equal fresh-JVM runs. */
++    public static void refsimReset() {
++        sessionID.set(0);
++    }
++
+     @Override
+     public void activate() {
+         this.scheduleAt(0);
+@@ -166,6 +171,9 @@
+     }
+ 
+     public void hold(final double d) {
++        if (refsim.trace.Trace.ON) { // REFSIM trace
++            refsim.trace.Trace.event("hold", this, "d", d);
++        }
+         delayResource.process(this, 1, Collections.<String, Serializable> emptyMap(), d);
+     }
+ 
+@@ -183,6 +191,7 @@
+      */
+     @Override
+     public final void lifeCycle() {
++        refsim.trace.Trace.enterProcess(this); // REFSIM trace (thread -> process)
+         addProcessToSimStatus();
+         try {
+             this.internalLifeCycle();
+@@ -212,6 +221,8 @@
+         // resultProbe.takeMeasurement(requestContext);
+         this.fireTerminated();
+         removeProcessFromSimStatus();
++        refsim.trace.Trace.processEnd(this); // REFSIM trace
++        refsim.trace.Trace.exitProcess();
+     }
+ 
+     /**

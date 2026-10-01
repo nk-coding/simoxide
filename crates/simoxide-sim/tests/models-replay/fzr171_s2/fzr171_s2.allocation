@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_fzr171_s2_allocation1" entityName="fzr171_s2">
+  <targetResourceEnvironment_Allocation href="fzr171_s2.resourceenvironment#/"/>
+  <system_Allocation href="fzr171_s2.system#_fzr171_s2_system1"/>
+  <allocationContexts_Allocation id="_fzr171_s2_alc1" entityName="Allocation_Assembly_Composite0_0">
+    <resourceContainer_AllocationContext href="fzr171_s2.resourceenvironment#_fzr171_s2_rc1"/>
+    <assemblyContext_AllocationContext href="fzr171_s2.system#_fzr171_s2_ac2"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

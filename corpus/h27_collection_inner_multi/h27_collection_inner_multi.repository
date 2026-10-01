@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2"
+    id="_h27_collection_inner_multi_repository1" entityName="h27_collection_inner_multi">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h27_collection_inner_multi_comp1" entityName="Server">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h27_collection_inner_multi_prov1"
+        entityName="Provided_IService" providedInterface__OperationProvidedRole="_h27_collection_inner_multi_if1"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h27_collection_inner_multi_seff1"
+        describedService__SEFF="_h27_collection_inner_multi_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h27_collection_inner_multi_act5" entityName="start" successor_AbstractAction="_h27_collection_inner_multi_act4"/>
+      <steps_Behaviour xsi:type="seff:CollectionIteratorAction" id="_h27_collection_inner_multi_act4" entityName="iterate"
+          predecessor_AbstractAction="_h27_collection_inner_multi_act5" successor_AbstractAction="_h27_collection_inner_multi_act6"
+          parameter_CollectionIteratorAction="//@interfaces__Repository.0/@signatures__OperationInterface.0/@parameters__OperationSignature.0">
+        <bodyBehaviour_Loop id="_h27_collection_inner_multi_rdb1">
+          <steps_Behaviour xsi:type="seff:StartAction" id="_h27_collection_inner_multi_act2" entityName="start" successor_AbstractAction="_h27_collection_inner_multi_act1"/>
+          <steps_Behaviour xsi:type="seff:InternalAction" id="_h27_collection_inner_multi_act1" entityName="perItem" predecessor_AbstractAction="_h27_collection_inner_multi_act2"
+              successor_AbstractAction="_h27_collection_inner_multi_act3">
+            <resourceDemand_Action>
+              <specification_ParametericResourceDemand specification="items.INNER.VALUE * 0.01 + items.INNER.BYTESIZE * 0.0001 + extra.NUMBER_OF_ELEMENTS * 0.001"/>
+              <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+            </resourceDemand_Action>
+          </steps_Behaviour>
+          <steps_Behaviour xsi:type="seff:StopAction" id="_h27_collection_inner_multi_act3" entityName="stop" predecessor_AbstractAction="_h27_collection_inner_multi_act1"/>
+        </bodyBehaviour_Loop>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h27_collection_inner_multi_act6" entityName="stop" predecessor_AbstractAction="_h27_collection_inner_multi_act4"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h27_collection_inner_multi_if1" entityName="IService">
+    <signatures__OperationInterface id="_h27_collection_inner_multi_sig1" entityName="op">
+      <parameters__OperationSignature dataType__Parameter="_h27_collection_inner_multi_dt1" parameterName="items"/>
+      <parameters__OperationSignature dataType__Parameter="_h27_collection_inner_multi_dt2" parameterName="extra"/>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+  <dataTypes__Repository xsi:type="repository:CollectionDataType" id="_h27_collection_inner_multi_dt1" entityName="IntList">
+    <innerType_CollectionDataType xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+  </dataTypes__Repository>
+  <dataTypes__Repository xsi:type="repository:CollectionDataType" id="_h27_collection_inner_multi_dt2" entityName="IntList2">
+    <innerType_CollectionDataType xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+  </dataTypes__Repository>
+</repository:Repository>

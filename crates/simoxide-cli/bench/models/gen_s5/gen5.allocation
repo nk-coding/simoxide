@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_gen5_allocation1" entityName="gen5">
+  <targetResourceEnvironment_Allocation href="gen5.resourceenvironment#/"/>
+  <system_Allocation href="gen5.system#_gen5_system1"/>
+  <allocationContexts_Allocation id="_gen5_alc1" entityName="Allocation_Assembly_Comp0_0">
+    <resourceContainer_AllocationContext href="gen5.resourceenvironment#_gen5_rc1"/>
+    <assemblyContext_AllocationContext href="gen5.system#_gen5_ac3"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_gen5_alc2" entityName="Allocation_Assembly_Composite1_0">
+    <resourceContainer_AllocationContext href="gen5.resourceenvironment#_gen5_rc1"/>
+    <assemblyContext_AllocationContext href="gen5.system#_gen5_ac4"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_gen5_alc3" entityName="Allocation_Assembly_Comp2_0">
+    <resourceContainer_AllocationContext href="gen5.resourceenvironment#_gen5_rc1"/>
+    <assemblyContext_AllocationContext href="gen5.system#_gen5_ac5"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_gen5_alc4" entityName="Allocation_Assembly_Comp3_0">
+    <resourceContainer_AllocationContext href="gen5.resourceenvironment#_gen5_rc1"/>
+    <assemblyContext_AllocationContext href="gen5.system#_gen5_ac6"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_gen5_alc5" entityName="Allocation_Assembly_Comp3_1">
+    <resourceContainer_AllocationContext href="gen5.resourceenvironment#_gen5_rc1"/>
+    <assemblyContext_AllocationContext href="gen5.system#_gen5_ac7"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_gen5_alc6" entityName="Allocation_Assembly_Comp4_0">
+    <resourceContainer_AllocationContext href="gen5.resourceenvironment#_gen5_rc1"/>
+    <assemblyContext_AllocationContext href="gen5.system#_gen5_ac8"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_gen5_alc7" entityName="Allocation_Assembly_Comp5_0">
+    <resourceContainer_AllocationContext href="gen5.resourceenvironment#_gen5_rc1"/>
+    <assemblyContext_AllocationContext href="gen5.system#_gen5_ac9"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_gen5_alc8" entityName="Allocation_Assembly_Comp5_1">
+    <resourceContainer_AllocationContext href="gen5.resourceenvironment#_gen5_rc1"/>
+    <assemblyContext_AllocationContext href="gen5.system#_gen5_ac10"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

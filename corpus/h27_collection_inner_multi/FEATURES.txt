@@ -1,0 +1,1 @@
+CollectionIterator with several random INNER characterisations (VALUE, BYTESIZE) of one collection plus a second collection parameter: per-iteration draw order follows java.util.HashMap iteration of the frame keys (spec ACT-5.6/5.7)

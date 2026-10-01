@@ -1,0 +1,12 @@
+--- 5.2.2/Palladio-Simulation-AbstractSimEngine/bundles/de.uka.ipd.sdq.simulation.abstractsimengine/src/de/uka/ipd/sdq/simulation/abstractsimengine/AbstractExperiment.java
++++ patched/de/uka/ipd/sdq/simulation/abstractsimengine/AbstractExperiment.java
+@@ -60,6 +60,9 @@
+         // to avoid multiple accesses. Setting isRunning to false allows all
+         // processes to clean up.
+         if (this.isRunning.compareAndSet(true, false)) {
++            if (refsim.trace.Trace.ON) { // REFSIM trace: simulation stop (stop condition met / stop requested)
++                refsim.trace.Trace.event("stop", null);
++            }
+             if (LOGGER.isEnabledFor(Level.INFO)) {
+                 LOGGER.info("Simulation stop requested!");
+             }

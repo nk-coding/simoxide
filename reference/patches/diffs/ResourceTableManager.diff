@@ -1,0 +1,53 @@
+--- 5.2.2/Palladio-Simulation-Scheduler/bundles/de.uka.ipd.sdq.scheduler/src/de/uka/ipd/sdq/scheduler/resources/active/ResourceTableManager.java
++++ patched/de/uka/ipd/sdq/scheduler/resources/active/ResourceTableManager.java
+@@ -6,7 +6,10 @@
+ import de.uka.ipd.sdq.scheduler.ISchedulableProcess;
+ 
+ public class ResourceTableManager implements IResourceTableManager {
+-    private final Map<ISchedulableProcess, AbstractActiveResource> currentResourceTable = new ConcurrentHashMap<>();
++    // REFSIM: was ConcurrentHashMap (identity-hash order). waitForProcesses() re-activates the remaining
++    // processes at simulation end in iteration order -> use insertion order (see waitForProcesses).
++    private final Map<ISchedulableProcess, AbstractActiveResource> currentResourceTable = java.util.Collections
++        .synchronizedMap(new java.util.LinkedHashMap<>());
+ 
+     @Override
+     public AbstractActiveResource getLastResource(ISchedulableProcess process) {
+@@ -30,15 +33,30 @@
+         // Activate all waiting processes to yield process completion
+         // Synchronization with process() avoids that processes are added after
+         // the activation.
+-        for (ISchedulableProcess process : currentResourceTable.keySet()) {
+-            if (!process.isFinished()) {
+-                // TODO: to avoid exceptions at the end of the simulation,
+-                // these are being caught here. Maybe something can be fixed
+-                // in the simulation so that the exception does not occur here.
+-                try {
+-                    process.activate();
+-                } catch (IllegalStateException e) {
++        // REFSIM: iterate over snapshots in insertion order (activated processes remove themselves via
++        // notifyTerminated(), and may register new ones); repeat until no unvisited process is left.
++        final java.util.Set<ISchedulableProcess> visited = java.util.Collections
++            .newSetFromMap(new java.util.IdentityHashMap<>());
++        while (true) {
++            final java.util.List<ISchedulableProcess> snapshot;
++            synchronized (currentResourceTable) {
++                snapshot = new java.util.ArrayList<>(currentResourceTable.keySet());
++            }
++            snapshot.removeIf(visited::contains);
++            if (snapshot.isEmpty()) {
++                break;
++            }
++            for (ISchedulableProcess process : snapshot) {
++                visited.add(process);
++                if (!process.isFinished()) {
++                    // TODO: to avoid exceptions at the end of the simulation,
++                    // these are being caught here. Maybe something can be fixed
++                    // in the simulation so that the exception does not occur here.
++                    try {
++                        process.activate();
++                    } catch (IllegalStateException e) {
+ 
++                    }
+                 }
+             }
+         }

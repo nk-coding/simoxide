@@ -1,0 +1,1 @@
+same model as h19 with simulate_throughput_of_linking_resources=false (payload demand 0, latency only)

@@ -1,0 +1,1 @@
+t_fixed_aggregation plus a Reconfiguration Time monitor (ReconfigurationMeasuringPoint) and a Number of Resource Containers monitor: one (t, 0.0) tuple per run of the reconfiguration process, scheduled by the FixedSizeAggregation's PRM writes (MEAS-7.2/7.3). Expected outputs: reference/refsim batch (2026-09-29, agent L).

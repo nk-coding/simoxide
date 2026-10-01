@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_h17_set_variable_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h17_set_variable/h17_set_variable.usagemodel#_h17_set_variable_us1">
+    <usageScenario href="h17_set_variable.usagemodel#_h17_set_variable_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall callOp to h17_set_variable->Provided_IService->op [_h17_set_variable_ua1]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h17_set_variable/h17_set_variable.usagemodel#_h17_set_variable_ua1">
+    <entryLevelSystemCall href="h17_set_variable.usagemodel#_h17_set_variable_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="h17_set_variable.Provided_IService.op"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h17_set_variable/h17_set_variable.repository#_h17_set_variable_sig1">
+    <role xsi:type="repository:OperationProvidedRole" href="h17_set_variable.system#_h17_set_variable_prov3"/>
+    <operationSignature href="h17_set_variable.repository#_h17_set_variable_sig1"/>
+    <system href="h17_set_variable.system#_h17_set_variable_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall callQuery from Front to Required_IQuery->query [_h17_set_variable_act1]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h17_set_variable/h17_set_variable.repository#_h17_set_variable_act1">
+    <externalCall href="h17_set_variable.repository#_h17_set_variable_act1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Node" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h17_set_variable/h17_set_variable.resourceenvironment#_h17_set_variable_prs1">
+    <activeResource href="h17_set_variable.resourceenvironment#_h17_set_variable_prs1"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

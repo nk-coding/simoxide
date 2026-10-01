@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" id="_fzr217_s3_system1" entityName="fzr217_s3">
+  <assemblyContexts__ComposedStructure id="_fzr217_s3_ac4" entityName="Assembly_Composite0_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:CompositeComponent" href="fzr217_s3.repository#_fzr217_s3_comp3"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_fzr217_s3_ac5" entityName="Assembly_Comp1_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="fzr217_s3.repository#_fzr217_s3_comp4"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_fzr217_s3_ac6" entityName="Assembly_Composite2_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:CompositeComponent" href="fzr217_s3.repository#_fzr217_s3_comp6"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_fzr217_s3_ac7" entityName="Assembly_Middleware">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="fzr217_s3.repository#_fzr217_s3_comp7"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_fzr217_s3_conn5" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_fzr217_s3_ac4" providingAssemblyContext_AssemblyConnector="_fzr217_s3_ac5">
+    <providedRole_AssemblyConnector href="fzr217_s3.repository#_fzr217_s3_prov4"/>
+    <requiredRole_AssemblyConnector href="fzr217_s3.repository#_fzr217_s3_req1"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_fzr217_s3_conn6" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_fzr217_s3_ac5" providingAssemblyContext_AssemblyConnector="_fzr217_s3_ac6">
+    <providedRole_AssemblyConnector href="fzr217_s3.repository#_fzr217_s3_prov5"/>
+    <requiredRole_AssemblyConnector href="fzr217_s3.repository#_fzr217_s3_req4"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_fzr217_s3_conn7" entityName="InfraConnector" providingAssemblyContext__AssemblyInfrastructureConnector="_fzr217_s3_ac7" requiringAssemblyContext__AssemblyInfrastructureConnector="_fzr217_s3_ac5">
+    <providedRole__AssemblyInfrastructureConnector href="fzr217_s3.repository#_fzr217_s3_prov7"/>
+    <requiredRole__AssemblyInfrastructureConnector href="fzr217_s3.repository#_fzr217_s3_req5"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_fzr217_s3_conn8" entityName="ProvDelegation" outerProvidedRole_ProvidedDelegationConnector="_fzr217_s3_prov8" assemblyContext_ProvidedDelegationConnector="_fzr217_s3_ac4">
+    <innerProvidedRole_ProvidedDelegationConnector href="fzr217_s3.repository#_fzr217_s3_prov1"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_fzr217_s3_prov8" entityName="Provided_IService0">
+    <providedInterface__OperationProvidedRole href="fzr217_s3.repository#_fzr217_s3_if1"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

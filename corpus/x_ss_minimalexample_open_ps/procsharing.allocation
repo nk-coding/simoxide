@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_tXqAYDpcEe2X64dUiNq4UA" entityName="New Allocation">
+  <targetResourceEnvironment_Allocation href="procsharing.resourceenvironment#/"/>
+  <system_Allocation href="default.system#_84D0kCHcEd6lJo4DCALHMw"/>
+  <allocationContexts_Allocation id="_0YN5EDpcEe2X64dUiNq4UA" entityName="Allocation_EspressoAccounting">
+    <resourceContainer_AllocationContext href="procsharing.resourceenvironment#_fUQ-IDpcEe2X64dUiNq4UA"/>
+    <assemblyContext_AllocationContext href="default.system#_9c3KwCHcEd6lJo4DCALHMw"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

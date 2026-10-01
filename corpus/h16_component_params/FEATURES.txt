@@ -1,0 +1,1 @@
+component parameter default (size.VALUE=10) vs assembly-context override (20); same component assembled twice

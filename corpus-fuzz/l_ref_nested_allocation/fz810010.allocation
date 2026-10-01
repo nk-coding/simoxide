@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_fz810010_allocation1" entityName="fz810010">
+  <targetResourceEnvironment_Allocation href="fz810010.resourceenvironment#/"/>
+  <system_Allocation href="fz810010.system#_fz810010_system1"/>
+  <allocationContexts_Allocation id="_fz810010_alc1" entityName="Allocation_Assembly_Comp0_0">
+    <resourceContainer_AllocationContext href="fz810010.resourceenvironment#_fz810010_nrc1"/>
+    <assemblyContext_AllocationContext href="fz810010.system#_fz810010_ac1"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_fz810010_alc2" entityName="Allocation_Assembly_Middleware">
+    <resourceContainer_AllocationContext href="fz810010.resourceenvironment#_fz810010_rc2"/>
+    <assemblyContext_AllocationContext href="fz810010.system#_fz810010_ac2"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

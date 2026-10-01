@@ -1,0 +1,1 @@
+simulate_linking_resources=true (middleware marshalling): the payload demand of every assembly-connector call is stream.BYTESIZE of the request frame / result frame (MiddlewareCompletionAwareDemandCalculator), evaluated also for calls within one container; the callees set stream.BYTESIZE of the reply

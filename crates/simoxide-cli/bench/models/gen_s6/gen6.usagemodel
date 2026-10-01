@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<usagemodel:UsageModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" xmlns:usagemodel="http://palladiosimulator.org/PalladioComponentModel/UsageModel/5.2">
+  <usageScenario_UsageModel id="_gen6_us1" entityName="Scenario0">
+    <scenarioBehaviour_UsageScenario id="_gen6_sb1" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_gen6_ua2" entityName="start" successor="_gen6_ua1"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua1" entityName="call_op0_0" successor="_gen6_ua3" predecessor="_gen6_ua2">
+        <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+        <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+        <inputParameterUsages_EntryLevelSystemCall>
+          <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+            <specification_VariableCharacterisation specification="UniInt(1, 3)"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+        </inputParameterUsages_EntryLevelSystemCall>
+        <inputParameterUsages_EntryLevelSystemCall>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="0"/>
+          </variableCharacterisation_VariableUsage>
+          <variableCharacterisation_VariableUsage type="BYTESIZE">
+            <specification_VariableCharacterisation specification="UniInt(100, 2000)"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+            <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+          </namedReference__VariableUsage>
+        </inputParameterUsages_EntryLevelSystemCall>
+        <inputParameterUsages_EntryLevelSystemCall>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="0"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+        </inputParameterUsages_EntryLevelSystemCall>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_gen6_ua3" entityName="stop" predecessor="_gen6_ua1"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.62)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_gen6_us2" entityName="Scenario1">
+    <scenarioBehaviour_UsageScenario id="_gen6_sb9" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_gen6_ua38" entityName="start" successor="_gen6_ua9"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Loop" id="_gen6_ua9" entityName="userLoop" successor="_gen6_ua10" predecessor="_gen6_ua38">
+        <loopIteration_Loop specification="IntPMF[(1;0.5)(2;0.5)]"/>
+        <bodyBehaviour_Loop id="_gen6_sb2" entityName="behaviour">
+          <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_gen6_ua7" entityName="start" successor="_gen6_ua4"/>
+          <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua4" entityName="call_op0_0" successor="_gen6_ua5" predecessor="_gen6_ua7">
+            <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+            <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+            <inputParameterUsages_EntryLevelSystemCall>
+              <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                <specification_VariableCharacterisation specification="3"/>
+              </variableCharacterisation_VariableUsage>
+              <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+            </inputParameterUsages_EntryLevelSystemCall>
+            <inputParameterUsages_EntryLevelSystemCall>
+              <variableCharacterisation_VariableUsage type="VALUE">
+                <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+              </variableCharacterisation_VariableUsage>
+              <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+              </namedReference__VariableUsage>
+            </inputParameterUsages_EntryLevelSystemCall>
+            <inputParameterUsages_EntryLevelSystemCall>
+              <variableCharacterisation_VariableUsage type="VALUE">
+                <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+              </variableCharacterisation_VariableUsage>
+              <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+            </inputParameterUsages_EntryLevelSystemCall>
+          </actions_ScenarioBehaviour>
+          <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua5" entityName="call_op0_0" successor="_gen6_ua6" predecessor="_gen6_ua4">
+            <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+            <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+            <inputParameterUsages_EntryLevelSystemCall>
+              <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                <specification_VariableCharacterisation specification="UniInt(1, 3)"/>
+              </variableCharacterisation_VariableUsage>
+              <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+            </inputParameterUsages_EntryLevelSystemCall>
+            <inputParameterUsages_EntryLevelSystemCall>
+              <variableCharacterisation_VariableUsage type="VALUE">
+                <specification_VariableCharacterisation specification="1"/>
+              </variableCharacterisation_VariableUsage>
+              <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+              </namedReference__VariableUsage>
+            </inputParameterUsages_EntryLevelSystemCall>
+            <inputParameterUsages_EntryLevelSystemCall>
+              <variableCharacterisation_VariableUsage type="VALUE">
+                <specification_VariableCharacterisation specification="IntPMF[(1;0.3)(2;0.4)(4;0.3)]"/>
+              </variableCharacterisation_VariableUsage>
+              <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+            </inputParameterUsages_EntryLevelSystemCall>
+          </actions_ScenarioBehaviour>
+          <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua6" entityName="call_op0_0" successor="_gen6_ua8" predecessor="_gen6_ua5">
+            <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+            <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+            <inputParameterUsages_EntryLevelSystemCall>
+              <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                <specification_VariableCharacterisation specification="UniInt(1, 3)"/>
+              </variableCharacterisation_VariableUsage>
+              <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+            </inputParameterUsages_EntryLevelSystemCall>
+            <inputParameterUsages_EntryLevelSystemCall>
+              <variableCharacterisation_VariableUsage type="VALUE">
+                <specification_VariableCharacterisation specification="IntPMF[(1;0.3)(2;0.4)(4;0.3)]"/>
+              </variableCharacterisation_VariableUsage>
+              <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+              </namedReference__VariableUsage>
+            </inputParameterUsages_EntryLevelSystemCall>
+            <inputParameterUsages_EntryLevelSystemCall>
+              <variableCharacterisation_VariableUsage type="VALUE">
+                <specification_VariableCharacterisation specification="IntPMF[(0;0.2)(3;0.5)(5;0.3)]"/>
+              </variableCharacterisation_VariableUsage>
+              <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+            </inputParameterUsages_EntryLevelSystemCall>
+          </actions_ScenarioBehaviour>
+          <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_gen6_ua8" entityName="stop" predecessor="_gen6_ua6"/>
+        </bodyBehaviour_Loop>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua10" entityName="call_op0_0" successor="_gen6_ua37" predecessor="_gen6_ua9">
+        <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+        <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+        <inputParameterUsages_EntryLevelSystemCall>
+          <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+            <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(4;0.5)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+        </inputParameterUsages_EntryLevelSystemCall>
+        <inputParameterUsages_EntryLevelSystemCall>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="2"/>
+          </variableCharacterisation_VariableUsage>
+          <variableCharacterisation_VariableUsage type="BYTESIZE">
+            <specification_VariableCharacterisation specification="IntPMF[(1000;0.5)(5000;0.5)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+            <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+          </namedReference__VariableUsage>
+        </inputParameterUsages_EntryLevelSystemCall>
+        <inputParameterUsages_EntryLevelSystemCall>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="UniInt(1, 4)"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+        </inputParameterUsages_EntryLevelSystemCall>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Branch" id="_gen6_ua37" entityName="userBranch" successor="_gen6_ua39" predecessor="_gen6_ua10">
+        <branchTransitions_Branch branchProbability="0.7">
+          <branchedBehaviour_BranchTransition id="_gen6_sb6" entityName="behaviour">
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_gen6_ua27" entityName="start" successor="_gen6_ua15"/>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Loop" id="_gen6_ua15" entityName="userLoop" successor="_gen6_ua16" predecessor="_gen6_ua27">
+              <loopIteration_Loop specification="UniInt(1, 3)"/>
+              <bodyBehaviour_Loop id="_gen6_sb3" entityName="behaviour">
+                <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_gen6_ua13" entityName="start" successor="_gen6_ua11"/>
+                <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua11" entityName="call_op0_0" successor="_gen6_ua12" predecessor="_gen6_ua13">
+                  <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+                  <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+                  <inputParameterUsages_EntryLevelSystemCall>
+                    <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                      <specification_VariableCharacterisation specification="1"/>
+                    </variableCharacterisation_VariableUsage>
+                    <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+                  </inputParameterUsages_EntryLevelSystemCall>
+                  <inputParameterUsages_EntryLevelSystemCall>
+                    <variableCharacterisation_VariableUsage type="VALUE">
+                      <specification_VariableCharacterisation specification="IntPMF[(0;0.2)(3;0.5)(5;0.3)]"/>
+                    </variableCharacterisation_VariableUsage>
+                    <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                      <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+                    </namedReference__VariableUsage>
+                  </inputParameterUsages_EntryLevelSystemCall>
+                  <inputParameterUsages_EntryLevelSystemCall>
+                    <variableCharacterisation_VariableUsage type="VALUE">
+                      <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+                    </variableCharacterisation_VariableUsage>
+                    <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+                  </inputParameterUsages_EntryLevelSystemCall>
+                </actions_ScenarioBehaviour>
+                <actions_ScenarioBehaviour xsi:type="usagemodel:Delay" id="_gen6_ua12" entityName="userDelay" successor="_gen6_ua14" predecessor="_gen6_ua11">
+                  <timeSpecification_Delay specification="Exp(20.0)"/>
+                </actions_ScenarioBehaviour>
+                <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_gen6_ua14" entityName="stop" predecessor="_gen6_ua12"/>
+              </bodyBehaviour_Loop>
+            </actions_ScenarioBehaviour>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua16" entityName="call_op0_0" successor="_gen6_ua26" predecessor="_gen6_ua15">
+              <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+              <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+              <inputParameterUsages_EntryLevelSystemCall>
+                <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                  <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(4;0.5)]"/>
+                </variableCharacterisation_VariableUsage>
+                <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+              </inputParameterUsages_EntryLevelSystemCall>
+              <inputParameterUsages_EntryLevelSystemCall>
+                <variableCharacterisation_VariableUsage type="VALUE">
+                  <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+                </variableCharacterisation_VariableUsage>
+                <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                  <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+                </namedReference__VariableUsage>
+              </inputParameterUsages_EntryLevelSystemCall>
+              <inputParameterUsages_EntryLevelSystemCall>
+                <variableCharacterisation_VariableUsage type="VALUE">
+                  <specification_VariableCharacterisation specification="3"/>
+                </variableCharacterisation_VariableUsage>
+                <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+              </inputParameterUsages_EntryLevelSystemCall>
+            </actions_ScenarioBehaviour>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Branch" id="_gen6_ua26" entityName="userBranch" successor="_gen6_ua28" predecessor="_gen6_ua16">
+              <branchTransitions_Branch branchProbability="0.4">
+                <branchedBehaviour_BranchTransition id="_gen6_sb4" entityName="behaviour">
+                  <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_gen6_ua20" entityName="start" successor="_gen6_ua17"/>
+                  <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua17" entityName="call_op0_0" successor="_gen6_ua18" predecessor="_gen6_ua20">
+                    <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+                    <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                        <specification_VariableCharacterisation specification="UniInt(1, 3)"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="VALUE">
+                        <specification_VariableCharacterisation specification="0"/>
+                      </variableCharacterisation_VariableUsage>
+                      <variableCharacterisation_VariableUsage type="BYTESIZE">
+                        <specification_VariableCharacterisation specification="IntPMF[(1000;0.5)(5000;0.5)]"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                        <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+                      </namedReference__VariableUsage>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="VALUE">
+                        <specification_VariableCharacterisation specification="1"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                  </actions_ScenarioBehaviour>
+                  <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua18" entityName="call_op0_0" successor="_gen6_ua19" predecessor="_gen6_ua17">
+                    <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+                    <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                        <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(4;0.5)]"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="VALUE">
+                        <specification_VariableCharacterisation specification="UniInt(1, 4)"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                        <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+                      </namedReference__VariableUsage>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="VALUE">
+                        <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                  </actions_ScenarioBehaviour>
+                  <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua19" entityName="call_op0_0" successor="_gen6_ua21" predecessor="_gen6_ua18">
+                    <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+                    <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                        <specification_VariableCharacterisation specification="2"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="VALUE">
+                        <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                        <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+                      </namedReference__VariableUsage>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="VALUE">
+                        <specification_VariableCharacterisation specification="3"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                  </actions_ScenarioBehaviour>
+                  <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_gen6_ua21" entityName="stop" predecessor="_gen6_ua19"/>
+                </branchedBehaviour_BranchTransition>
+              </branchTransitions_Branch>
+              <branchTransitions_Branch branchProbability="0.6">
+                <branchedBehaviour_BranchTransition id="_gen6_sb5" entityName="behaviour">
+                  <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_gen6_ua24" entityName="start" successor="_gen6_ua22"/>
+                  <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua22" entityName="call_op0_0" successor="_gen6_ua23" predecessor="_gen6_ua24">
+                    <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+                    <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                        <specification_VariableCharacterisation specification="UniInt(1, 3)"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="VALUE">
+                        <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                        <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+                      </namedReference__VariableUsage>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="VALUE">
+                        <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                  </actions_ScenarioBehaviour>
+                  <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua23" entityName="call_op0_0" successor="_gen6_ua25" predecessor="_gen6_ua22">
+                    <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+                    <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                        <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(4;0.5)]"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="VALUE">
+                        <specification_VariableCharacterisation specification="4"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                        <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+                      </namedReference__VariableUsage>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                    <inputParameterUsages_EntryLevelSystemCall>
+                      <variableCharacterisation_VariableUsage type="VALUE">
+                        <specification_VariableCharacterisation specification="UniInt(1, 4)"/>
+                      </variableCharacterisation_VariableUsage>
+                      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+                    </inputParameterUsages_EntryLevelSystemCall>
+                  </actions_ScenarioBehaviour>
+                  <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_gen6_ua25" entityName="stop" predecessor="_gen6_ua23"/>
+                </branchedBehaviour_BranchTransition>
+              </branchTransitions_Branch>
+            </actions_ScenarioBehaviour>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_gen6_ua28" entityName="stop" predecessor="_gen6_ua26"/>
+          </branchedBehaviour_BranchTransition>
+        </branchTransitions_Branch>
+        <branchTransitions_Branch branchProbability="0.3">
+          <branchedBehaviour_BranchTransition id="_gen6_sb8" entityName="behaviour">
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_gen6_ua35" entityName="start" successor="_gen6_ua29"/>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua29" entityName="call_op0_0" successor="_gen6_ua34" predecessor="_gen6_ua35">
+              <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+              <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+              <inputParameterUsages_EntryLevelSystemCall>
+                <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                  <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(4;0.5)]"/>
+                </variableCharacterisation_VariableUsage>
+                <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+              </inputParameterUsages_EntryLevelSystemCall>
+              <inputParameterUsages_EntryLevelSystemCall>
+                <variableCharacterisation_VariableUsage type="VALUE">
+                  <specification_VariableCharacterisation specification="5"/>
+                </variableCharacterisation_VariableUsage>
+                <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                  <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+                </namedReference__VariableUsage>
+              </inputParameterUsages_EntryLevelSystemCall>
+              <inputParameterUsages_EntryLevelSystemCall>
+                <variableCharacterisation_VariableUsage type="VALUE">
+                  <specification_VariableCharacterisation specification="UniInt(1, 4)"/>
+                </variableCharacterisation_VariableUsage>
+                <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+              </inputParameterUsages_EntryLevelSystemCall>
+            </actions_ScenarioBehaviour>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Loop" id="_gen6_ua34" entityName="userLoop" successor="_gen6_ua36" predecessor="_gen6_ua29">
+              <loopIteration_Loop specification="2"/>
+              <bodyBehaviour_Loop id="_gen6_sb7" entityName="behaviour">
+                <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_gen6_ua32" entityName="start" successor="_gen6_ua30"/>
+                <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua30" entityName="call_op0_0" successor="_gen6_ua31" predecessor="_gen6_ua32">
+                  <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+                  <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+                  <inputParameterUsages_EntryLevelSystemCall>
+                    <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                      <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(4;0.5)]"/>
+                    </variableCharacterisation_VariableUsage>
+                    <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+                  </inputParameterUsages_EntryLevelSystemCall>
+                  <inputParameterUsages_EntryLevelSystemCall>
+                    <variableCharacterisation_VariableUsage type="VALUE">
+                      <specification_VariableCharacterisation specification="IntPMF[(1;0.3)(2;0.4)(4;0.3)]"/>
+                    </variableCharacterisation_VariableUsage>
+                    <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                      <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+                    </namedReference__VariableUsage>
+                  </inputParameterUsages_EntryLevelSystemCall>
+                  <inputParameterUsages_EntryLevelSystemCall>
+                    <variableCharacterisation_VariableUsage type="VALUE">
+                      <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+                    </variableCharacterisation_VariableUsage>
+                    <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+                  </inputParameterUsages_EntryLevelSystemCall>
+                </actions_ScenarioBehaviour>
+                <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_gen6_ua31" entityName="call_op0_0" successor="_gen6_ua33" predecessor="_gen6_ua30">
+                  <providedRole_EntryLevelSystemCall href="gen6.system#_gen6_prov6"/>
+                  <operationSignature__EntryLevelSystemCall href="gen6.repository#_gen6_sig1"/>
+                  <inputParameterUsages_EntryLevelSystemCall>
+                    <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+                      <specification_VariableCharacterisation specification="2"/>
+                    </variableCharacterisation_VariableUsage>
+                    <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items0"/>
+                  </inputParameterUsages_EntryLevelSystemCall>
+                  <inputParameterUsages_EntryLevelSystemCall>
+                    <variableCharacterisation_VariableUsage type="VALUE">
+                      <specification_VariableCharacterisation specification="2"/>
+                    </variableCharacterisation_VariableUsage>
+                    <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items0">
+                      <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+                    </namedReference__VariableUsage>
+                  </inputParameterUsages_EntryLevelSystemCall>
+                  <inputParameterUsages_EntryLevelSystemCall>
+                    <variableCharacterisation_VariableUsage type="VALUE">
+                      <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+                    </variableCharacterisation_VariableUsage>
+                    <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n1"/>
+                  </inputParameterUsages_EntryLevelSystemCall>
+                </actions_ScenarioBehaviour>
+                <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_gen6_ua33" entityName="stop" predecessor="_gen6_ua31"/>
+              </bodyBehaviour_Loop>
+            </actions_ScenarioBehaviour>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_gen6_ua36" entityName="stop" predecessor="_gen6_ua34"/>
+          </branchedBehaviour_BranchTransition>
+        </branchTransitions_Branch>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_gen6_ua39" entityName="stop" predecessor="_gen6_ua37"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:ClosedWorkload" population="4">
+      <thinkTime_ClosedWorkload specification="Exp(0.017)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+</usagemodel:UsageModel>

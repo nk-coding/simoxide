@@ -1,0 +1,77 @@
+--- 5.2.2/Palladio-Analyzer-SimuLizar/bundles/org.palladiosimulator.simulizar/src/org/palladiosimulator/simulizar/utils/TransitionDeterminer.java
++++ patched/org/palladiosimulator/simulizar/utils/TransitionDeterminer.java
+@@ -51,8 +51,13 @@
+      * @return true if holds, otherwise false.
+      */
+     private boolean conditionHolds(final PCMRandomVariable condition) {
+-        return StackContext.evaluateStatic(condition.getSpecification(), Boolean.class,
+-                this.context.getStack().currentStackFrame());
++        final String prevOrigin = refsim.trace.Trace.origin("guard", condition.eContainer()); // REFSIM tape
++        try {
++            return StackContext.evaluateStatic(condition.getSpecification(), Boolean.class,
++                    this.context.getStack().currentStackFrame());
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+     }
+ 
+     /**
+@@ -88,9 +93,16 @@
+         final List<Double> summedProbabilityList = this
+                 .createSummedProbabilityList(this.extractProbabiltiesUsageModel(branchTransitions));
+ 
+-        final int transitionIndex = this.getRandomIndex(summedProbabilityList, this.config);
++        final String prevOrigin = refsim.trace.Trace.origin("branch", branchTransitions.get(0).eContainer()); // REFSIM
++        final int transitionIndex;
++        try {
++            transitionIndex = this.getRandomIndex(summedProbabilityList, this.config);
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+ 
+         final BranchTransition branchTransition = branchTransitions.get(transitionIndex);
++        refsimTraceBranch(branchTransitions.get(0).eContainer(), transitionIndex, branchTransition); // REFSIM
+         if (LOGGER.isDebugEnabled()) {
+             LOGGER.debug("Chosen branch transition " + transitionIndex + " " + branchTransition);
+         }
+@@ -134,9 +146,20 @@
+             i++;
+ 
+         }
++        refsimTraceBranch(guardedBranchTransitions.get(0).eContainer(), branchTransition == null ? -1 : i,
++                branchTransition); // REFSIM
+         return branchTransition;
+     }
+ 
++    /** REFSIM trace: selected branch transition. */
++    private void refsimTraceBranch(final org.eclipse.emf.ecore.EObject branch, final int index,
++            final org.eclipse.emf.ecore.EObject transition) {
++        if (refsim.trace.Trace.ON) {
++            refsim.trace.Trace.event("branch", this.context.getThread(), "id", refsim.trace.Trace.id(branch), "idx",
++                    index, "sel", refsim.trace.Trace.id(transition));
++        }
++    }
++
+     /**
+      * Determines a probabilistic branch transition out of a list of probabilistic branch
+      * transitions, with respect to their probabilities.
+@@ -150,10 +173,18 @@
+         final List<Double> summedProbabilityList = this
+                 .createSummedProbabilityList(this.extractProbabiltiesRDSEFF(probabilisticBranchTransitions));
+ 
+-        final int transitionIndex = this.getRandomIndex(summedProbabilityList, this.config);
++        final String prevOrigin = refsim.trace.Trace.origin("branch",
++                probabilisticBranchTransitions.get(0).eContainer()); // REFSIM
++        final int transitionIndex;
++        try {
++            transitionIndex = this.getRandomIndex(summedProbabilityList, this.config);
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+ 
+         final ProbabilisticBranchTransition branchTransition = (ProbabilisticBranchTransition) probabilisticBranchTransitions
+                 .get(transitionIndex);
++        refsimTraceBranch(probabilisticBranchTransitions.get(0).eContainer(), transitionIndex, branchTransition); // REFSIM
+         if (LOGGER.isDebugEnabled()) {
+             LOGGER.debug("Chosen branch transition " + transitionIndex + " " + branchTransition);
+         }

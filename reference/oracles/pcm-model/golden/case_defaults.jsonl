@@ -1,0 +1,29 @@
+{"emf_errors":0}
+{"resource":"d.resourceenvironment","roots":1}
+{"path":"/","id":null,"type":"resourceenvironment:ResourceEnvironment","attrs":{"entityName":"aName"},"refs":{}}
+{"path":"//@resourceContainer_ResourceEnvironment.0","id":"_c0","type":"resourceenvironment:ResourceContainer","attrs":{"entityName":"tab\tand\nnewline plus literal whitespace <&>"},"refs":{}}
+{"path":"//@resourceContainer_ResourceEnvironment.0/@activeResourceSpecifications_ResourceContainer.0","id":"_p0","type":"resourceenvironment:ProcessingResourceSpecification","attrs":{"MTTR":"2.5","MTTF":"1000.0","requiredByContainer":true,"numberOfReplicas":1},"refs":{"schedulingPolicy":"pathmap://PCM_MODELS/Palladio.resourcetype#FCFS","activeResourceType_ActiveResourceSpecification":"pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"}}
+{"path":"//@resourceContainer_ResourceEnvironment.0/@activeResourceSpecifications_ResourceContainer.0/@processingRate_ProcessingResourceSpecification","id":null,"type":"core:PCMRandomVariable","attrs":{"specification":"1000 * 2"},"refs":{}}
+{"path":"//@resourceContainer_ResourceEnvironment.0/@activeResourceSpecifications_ResourceContainer.1","id":"<generated>","type":"resourceenvironment:ProcessingResourceSpecification","attrs":{"MTTR":"0.0","MTTF":"0.0","requiredByContainer":false,"numberOfReplicas":4},"refs":{"schedulingPolicy":"pathmap://PCM_MODELS/Palladio.resourcetype#Delay","activeResourceType_ActiveResourceSpecification":"pathmap://PCM_MODELS/Palladio.resourcetype#_nvHX4KkREdyEA_b89s7q9w"}}
+{"path":"//@resourceContainer_ResourceEnvironment.0/@activeResourceSpecifications_ResourceContainer.1/@processingRate_ProcessingResourceSpecification","id":null,"type":"core:PCMRandomVariable","attrs":{"specification":null},"refs":{}}
+{"resource":"d.usagemodel","roots":1}
+{"path":"/","id":null,"type":"usagemodel:UsageModel","attrs":{},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0","id":"_us","type":"usagemodel:UsageScenario","attrs":{"entityName":"aName"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario","id":"_sb","type":"usagemodel:ScenarioBehaviour","attrs":{"entityName":"aName"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.0","id":"_st","type":"usagemodel:Start","attrs":{"entityName":"aName"},"refs":{"successor":"d.usagemodel#_br"}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.1","id":"_br","type":"usagemodel:Branch","attrs":{"entityName":"aName"},"refs":{"successor":"d.usagemodel#_sp","predecessor":"d.usagemodel#_st"}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.1/@branchTransitions_Branch.0","id":null,"type":"usagemodel:BranchTransition","attrs":{"branchProbability":"0.25"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.1/@branchTransitions_Branch.0/@branchedBehaviour_BranchTransition","id":"_bb1","type":"usagemodel:ScenarioBehaviour","attrs":{"entityName":"aName"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.1/@branchTransitions_Branch.0/@branchedBehaviour_BranchTransition/@actions_ScenarioBehaviour.0","id":"_x1","type":"usagemodel:Start","attrs":{"entityName":"aName"},"refs":{"successor":"d.usagemodel#_x2"}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.1/@branchTransitions_Branch.0/@branchedBehaviour_BranchTransition/@actions_ScenarioBehaviour.1","id":"_x2","type":"usagemodel:Stop","attrs":{"entityName":"aName"},"refs":{"predecessor":"d.usagemodel#_x1"}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.1/@branchTransitions_Branch.1","id":null,"type":"usagemodel:BranchTransition","attrs":{"branchProbability":"0.0"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.1/@branchTransitions_Branch.1/@branchedBehaviour_BranchTransition","id":"_bb2","type":"usagemodel:ScenarioBehaviour","attrs":{"entityName":"aName"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.2","id":"_sp","type":"usagemodel:Stop","attrs":{"entityName":"aName"},"refs":{"predecessor":"d.usagemodel#_br"}}
+{"path":"//@usageScenario_UsageModel.0/@workload_UsageScenario","id":null,"type":"usagemodel:ClosedWorkload","attrs":{"population":0},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@workload_UsageScenario/@thinkTime_ClosedWorkload","id":null,"type":"core:PCMRandomVariable","attrs":{"specification":"Exp(0.5)"},"refs":{}}
+{"path":"//@userData_UsageModel.0","id":null,"type":"usagemodel:UserData","attrs":{},"refs":{}}
+{"path":"//@userData_UsageModel.0/@userDataParameterUsages_UserData.0","id":null,"type":"parameter:VariableUsage","attrs":{},"refs":{}}
+{"path":"//@userData_UsageModel.0/@userDataParameterUsages_UserData.0/@variableCharacterisation_VariableUsage.0","id":null,"type":"parameter:VariableCharacterisation","attrs":{"type":"STRUCTURE"},"refs":{}}
+{"path":"//@userData_UsageModel.0/@userDataParameterUsages_UserData.0/@variableCharacterisation_VariableUsage.0/@specification_VariableCharacterisation","id":null,"type":"core:PCMRandomVariable","attrs":{"specification":"3"},"refs":{}}
+{"path":"//@userData_UsageModel.0/@userDataParameterUsages_UserData.0/@namedReference__VariableUsage","id":null,"type":"stoex:NamespaceReference","attrs":{"referenceName":"a"},"refs":{}}
+{"path":"//@userData_UsageModel.0/@userDataParameterUsages_UserData.0/@namedReference__VariableUsage/@innerReference_NamespaceReference","id":null,"type":"stoex:VariableReference","attrs":{"referenceName":"b"},"refs":{}}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: ClosedWorkloadUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_minimal/minimal.usagemodel#_LPnI8CHdEd6lJo4DCALHMw">
+    <usageScenario href="minimal.usagemodel#_LPnI8CHdEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall EntryLevelSystemCall1 to New System->Interface1ProvidedRole->method1 [_NvVLkBDjEe6FXrMRahCZ6g]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_minimal/minimal.usagemodel#_NvVLkBDjEe6FXrMRahCZ6g">
+    <entryLevelSystemCall href="minimal.usagemodel#_NvVLkBDjEe6FXrMRahCZ6g"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="New System.Interface1ProvidedRole.method1"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_minimal/minimal.repository#_k2ph4BDiEe6FXrMRahCZ6g">
+    <role xsi:type="repository:OperationProvidedRole" href="minimal.system#_z5AGwBDiEe6FXrMRahCZ6g"/>
+    <operationSignature href="minimal.repository#_k2ph4BDiEe6FXrMRahCZ6g"/>
+    <system href="minimal.system#_CVBz0BDVEe6FXrMRahCZ6g"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ResourceContainer1"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_minimal/minimal.resourceenvironment#_-dbu0BDiEe6FXrMRahCZ6g">
+    <activeResource href="minimal.resourceenvironment#_-dbu0BDiEe6FXrMRahCZ6g"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

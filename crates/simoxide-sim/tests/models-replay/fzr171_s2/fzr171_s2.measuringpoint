@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_fzr171_s2_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario0">
+    <usageScenario href="fzr171_s2.usagemodel#_fzr171_s2_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall call_op0_0 [_fzr171_s2_ua1]">
+    <entryLevelSystemCall href="fzr171_s2.usagemodel#_fzr171_s2_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="fzr171_s2.Provided_IService0.op0_0">
+    <role xsi:type="repository:OperationProvidedRole" href="fzr171_s2.system#_fzr171_s2_prov4"/>
+    <operationSignature href="fzr171_s2.repository#_fzr171_s2_sig1"/>
+    <system href="fzr171_s2.system#_fzr171_s2_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="fzr171_s2.Provided_IService0.op0_1">
+    <role xsi:type="repository:OperationProvidedRole" href="fzr171_s2.system#_fzr171_s2_prov4"/>
+    <operationSignature href="fzr171_s2.repository#_fzr171_s2_sig2"/>
+    <system href="fzr171_s2.system#_fzr171_s2_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Node0">
+    <activeResource href="fzr171_s2.resourceenvironment#_fzr171_s2_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="HDD [0] in Node0">
+    <activeResource href="fzr171_s2.resourceenvironment#_fzr171_s2_prs2"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Node1">
+    <activeResource href="fzr171_s2.resourceenvironment#_fzr171_s2_prs3"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Inner_Front0.pool">
+    <assembly href="fzr171_s2.repository#_fzr171_s2_ac1"/>
+    <passiveResource href="fzr171_s2.repository#_fzr171_s2_pr1"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

@@ -1,0 +1,24 @@
+minimized from new0_300006_s5 (seed 300006 size 4 ["multicore=0", "guarded_branch=0", "collection=0", "fork_calls=0", "usage_delay=0", "usage_branch=0", "usage_loop=0", "closed=0", "multi_scenario=0", "no_link_throughput=0", "windows=0"]), mode replay
+
+tape text differs (formatting)
+first divergence (Exact) at expected line 692 / actual line 692 after 691 equal lines (2010 vs 2010 lines compared): Changed
+  t = 1.516547151  process p=20 OpenWorkloadUser 'OpenUser' (parent p=1)
+  in UsageScenario _new0_300006_s5_m11_23_us1
+    in EntryLevelSystemCall _new0_300006_s5_m11_23_ua1
+      in SystemOperation role=_new0_300006_s5_m11_23_prov6 sig=_new0_300006_s5_m11_23_sig1
+        in AssemblyOperation role=_new0_300006_s5_m11_23_prov6 sig=_new0_300006_s5_m11_23_sig1 @_SYSTEM_ASSEMBLY_CONTEXT_
+          in AssemblyOperation role=_new0_300006_s5_m11_23_prov1 sig=_new0_300006_s5_m11_23_sig1 @_new0_300006_s5_m11_23_ac3
+            in AssemblyOperation role=_new0_300006_s5_m11_23_prov2 sig=_new0_300006_s5_m11_23_sig1 @_new0_300006_s5_m11_23_ac1
+              in InternalAction _new0_300006_s5_m11_23_act42 @_new0_300006_s5_m11_23_ac1
+  element: res=_oro4gG3fEdy4YaaT-RYrLQ rc=_new0_300006_s5_m11_23_rc1
+  context:
+        684  {"ev":"begin","t":1.516547151,"p":20,"type":"EntryLevelSystemCall","id":"_new0_300006_s5_m11_23_ua1"}
+        685  {"ev":"begin","t":1.516547151,"p":20,"type":"SystemOperation","role":"_new0_300006_s5_m11_23_prov6","sig":"_new0_300006_s5_m11_23_sig1"}
+        686  {"ev":"begin","t":1.516547151,"p":20,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_new0_300006_s5_m11_23_prov6","sig":"_new0_300006_s5_m11_23_sig1"}
+        687  {"ev":"begin","t":1.516547151,"p":20,"type":"AssemblyOperation","ac":"_new0_300006_s5_m11_23_ac3","role":"_new0_300006_s5_m11_23_prov1","sig":"_new0_300006_s5_m11_23_sig1"}
+        688  {"ev":"begin","t":1.516547151,"p":20,"type":"AssemblyOperation","ac":"_new0_300006_s5_m11_23_ac1","role":"_new0_300006_s5_m11_23_prov2","sig":"_new0_300006_s5_m11_23_sig1"}
+        689  {"ev":"begin","t":1.516547151,"p":20,"type":"StartAction","id":"_new0_300006_s5_m11_23_act53","ac":"_new0_300006_s5_m11_23_ac1"}
+        690  {"ev":"end","t":1.516547151,"p":20,"type":"StartAction","id":"_new0_300006_s5_m11_23_act53","ac":"_new0_300006_s5_m11_23_ac1"}
+        691  {"ev":"begin","t":1.516547151,"p":20,"type":"InternalAction","id":"_new0_300006_s5_m11_23_act42","ac":"_new0_300006_s5_m11_23_ac1"}
+  - expected: {"ev":"demand","t":1.516547151,"p":20,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_new0_300006_s5_m11_23_rc1","spec":"_new0_300006_s5_m11_23_prs1","sched":"FCFS","d":4.9E-324,"st":4.9E-324}
+  + actual:   {"ev":"demand","t":1.516547151,"p":20,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_new0_300006_s5_m11_23_rc1","spec":"_new0_300006_s5_m11_23_prs1","sched":"FCFS","d":5.0E-324,"st":5.0E-324}

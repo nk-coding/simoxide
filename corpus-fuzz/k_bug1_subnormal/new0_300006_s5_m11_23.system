@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" id="_new0_300006_s5_m11_23_system1" entityName="new0_300006_s5_m11_23">
+  <assemblyContexts__ComposedStructure id="_new0_300006_s5_m11_23_ac3" entityName="Assembly_Composite0_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:CompositeComponent" href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_comp3"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_new0_300006_s5_m11_23_ac4" entityName="Assembly_Comp1_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_comp4"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_new0_300006_s5_m11_23_ac5" entityName="Assembly_Comp1_1">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_comp4"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_new0_300006_s5_m11_23_ac6" entityName="Assembly_Comp2_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_comp5"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_new0_300006_s5_m11_23_conn4" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_new0_300006_s5_m11_23_ac3" providingAssemblyContext_AssemblyConnector="_new0_300006_s5_m11_23_ac5">
+    <providedRole_AssemblyConnector href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_prov4"/>
+    <requiredRole_AssemblyConnector href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_req1"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_new0_300006_s5_m11_23_conn5" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_new0_300006_s5_m11_23_ac4" providingAssemblyContext_AssemblyConnector="_new0_300006_s5_m11_23_ac6">
+    <providedRole_AssemblyConnector href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_prov5"/>
+    <requiredRole_AssemblyConnector href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_req4"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_new0_300006_s5_m11_23_conn6" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_new0_300006_s5_m11_23_ac5" providingAssemblyContext_AssemblyConnector="_new0_300006_s5_m11_23_ac6">
+    <providedRole_AssemblyConnector href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_prov5"/>
+    <requiredRole_AssemblyConnector href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_req4"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_new0_300006_s5_m11_23_conn7" entityName="ProvDelegation" outerProvidedRole_ProvidedDelegationConnector="_new0_300006_s5_m11_23_prov6" assemblyContext_ProvidedDelegationConnector="_new0_300006_s5_m11_23_ac3">
+    <innerProvidedRole_ProvidedDelegationConnector href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_prov1"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_new0_300006_s5_m11_23_prov6" entityName="Provided_IService0">
+    <providedInterface__OperationProvidedRole href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_if1"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: EspressoOrderingUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_minimum_network/default.usagemodel#_LPnI8CHdEd6lJo4DCALHMw">
+    <usageScenario href="default.usagemodel#_LPnI8CHdEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to EspressoAccountingSystem->Provided_Accounting->chargeForEspresso [_NC8HwCHdEd6lJo4DCALHMw]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_minimum_network/default.usagemodel#_NC8HwCHdEd6lJo4DCALHMw">
+    <entryLevelSystemCall href="default.usagemodel#_NC8HwCHdEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="EspressoAccountingSystem.Provided_Accounting.chargeForEspresso"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_minimum_network/default.repository#_KjhikgzkEeCFg86gxKwVPw">
+    <role xsi:type="repository:OperationProvidedRole" href="default.system#_-r1fUCHcEd6lJo4DCALHMw"/>
+    <operationSignature href="default.repository#_KjhikgzkEeCFg86gxKwVPw"/>
+    <system href="default.system#_84D0kCHcEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from RemoteClient to Required_AccountingInterface_RemoteClient->chargeForEspresso [_Aj0r0FShEeae4Nk8kZBAPw]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_minimum_network/default.repository#_Aj0r0FShEeae4Nk8kZBAPw">
+    <externalCall href="default.repository#_Aj0r0FShEeae4Nk8kZBAPw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in AppServer" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_minimum_network/My.resourceenvironment#_KFRwgCpXEeKNWc2UWjbmuw">
+    <activeResource href="My.resourceenvironment#_KFRwgCpXEeKNWc2UWjbmuw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in LoadProxy" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_minimum_network/My.resourceenvironment#_PypiQFSoEeanHbKuWlKDRQ">
+    <activeResource href="My.resourceenvironment#_PypiQFSoEeanHbKuWlKDRQ"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

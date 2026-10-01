@@ -1,0 +1,1 @@
+corpus/h01_ps_single; the scenario monitor has a VariableSizeAggregation (frequency 2, retrospection 1.5 s) with triggersSelfAdaptations=true: first PRM write when the buffer spans 1.5 s (8th response time). Expected outputs: reference/refsim batch (2026-09-29, agent L).

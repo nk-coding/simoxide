@@ -1,0 +1,1 @@
+espresso (work-simucom/models/espresso) with its own monitor repository (triggers default true). Expected outputs: reference/refsim batch (2026-09-29, agent L).

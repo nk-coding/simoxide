@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_GgAmgBDVEe6FXrMRahCZ6g" entityName="New Allocation">
+  <targetResourceEnvironment_Allocation href="delay.resourceenvironment#/"/>
+  <system_Allocation href="delay.system#_CVBz0BDVEe6FXrMRahCZ6g"/>
+</allocation:Allocation>

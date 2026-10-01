@@ -1,0 +1,1 @@
+ForkAction with 2 synchronous forked behaviours (join via SynchronisationPoint)

@@ -1,0 +1,9 @@
+# delay
+resource delay 1 1.0
+job a 0 1.0
+job b 0 1.0
+job c 0.5 0.3
+job d 0.5 0.0
+job e 0.5 1e-12
+job f 1 0.5 now 0.5 0 0.5
+job g 1 0.5 0.5 0.5

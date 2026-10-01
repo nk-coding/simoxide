@@ -1,0 +1,9 @@
+{"emf_errors":0}
+{"resource":"ExactSchedulers.resourcetype","roots":1}
+{"path":"/","id":null,"type":"resourcetype:ResourceRepository","attrs":{},"refs":{}}
+{"path":"//@schedulingPolicies__ResourceRepository.0","id":"edu.kit.ipd.sdq.pcm.simulation.scheduler.exact.winxp","type":"resourcetype:SchedulingPolicy","attrs":{"entityName":"Windows XP Scheduler"},"refs":{}}
+{"path":"//@schedulingPolicies__ResourceRepository.1","id":"edu.kit.ipd.sdq.pcm.simulation.scheduler.exact.winvista","type":"resourcetype:SchedulingPolicy","attrs":{"entityName":"Windows Vista Scheduler"},"refs":{}}
+{"path":"//@schedulingPolicies__ResourceRepository.2","id":"edu.kit.ipd.sdq.pcm.simulation.scheduler.exact.win7","type":"resourcetype:SchedulingPolicy","attrs":{"entityName":"Windows 7 Scheduler"},"refs":{}}
+{"path":"//@schedulingPolicies__ResourceRepository.3","id":"edu.kit.ipd.sdq.pcm.simulation.scheduler.exact.winserver2003","type":"resourcetype:SchedulingPolicy","attrs":{"entityName":"Windows Server 2003 Scheduler"},"refs":{}}
+{"path":"//@schedulingPolicies__ResourceRepository.4","id":"edu.kit.ipd.sdq.pcm.simulation.scheduler.exact.linux26o1","type":"resourcetype:SchedulingPolicy","attrs":{"entityName":"Linux 2.6 O(1) Scheduler"},"refs":{}}
+{"path":"//@schedulingPolicies__ResourceRepository.5","id":"edu.kit.ipd.sdq.pcm.simulation.scheduler.exact.linux26cfs","type":"resourcetype:SchedulingPolicy","attrs":{"entityName":"Linux 2.6 CFS Scheduler"},"refs":{}}

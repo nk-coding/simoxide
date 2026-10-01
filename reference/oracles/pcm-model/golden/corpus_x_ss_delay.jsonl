@@ -1,0 +1,25 @@
+{"emf_errors":0}
+{"resource":"delay.allocation","roots":1}
+{"path":"/","id":"_GgAmgBDVEe6FXrMRahCZ6g","type":"allocation:Allocation","attrs":{"entityName":"New Allocation"},"refs":{"targetResourceEnvironment_Allocation":"delay.resourceenvironment#/","system_Allocation":"delay.system#_CVBz0BDVEe6FXrMRahCZ6g"}}
+{"resource":"delay.resourceenvironment","roots":1}
+{"path":"/","id":null,"type":"resourceenvironment:ResourceEnvironment","attrs":{"entityName":"New ResourceEnvironment"},"refs":{}}
+{"resource":"delay.system","roots":1}
+{"path":"/","id":"_CVBz0BDVEe6FXrMRahCZ6g","type":"system:System","attrs":{"entityName":"New System"},"refs":{}}
+{"resource":"delay.usagemodel","roots":1}
+{"path":"/","id":null,"type":"usagemodel:UsageModel","attrs":{},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0","id":"_LPnI8CHdEd6lJo4DCALHMw","type":"usagemodel:UsageScenario","attrs":{"entityName":"ClosedWorkloadUsageScenario"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario","id":"_LPwS4CHdEd6lJo4DCALHMw","type":"usagemodel:ScenarioBehaviour","attrs":{"entityName":"defaultUsageScenarioBehaviour"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.0","id":"_LPwS4SHdEd6lJo4DCALHMw","type":"usagemodel:Start","attrs":{"entityName":"aName"},"refs":{"successor":"delay.usagemodel#_k1r2gPlSEe2_POqiFokumQ"}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.1","id":"_LPwS4iHdEd6lJo4DCALHMw","type":"usagemodel:Stop","attrs":{"entityName":"aName"},"refs":{"predecessor":"delay.usagemodel#_k1r2gPlSEe2_POqiFokumQ"}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.2","id":"_k1r2gPlSEe2_POqiFokumQ","type":"usagemodel:Delay","attrs":{"entityName":"Delay1"},"refs":{"successor":"delay.usagemodel#_LPwS4iHdEd6lJo4DCALHMw","predecessor":"delay.usagemodel#_LPwS4SHdEd6lJo4DCALHMw"}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.2/@timeSpecification_Delay","id":null,"type":"core:PCMRandomVariable","attrs":{"specification":"1.0"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@workload_UsageScenario","id":null,"type":"usagemodel:ClosedWorkload","attrs":{"population":1},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@workload_UsageScenario/@thinkTime_ClosedWorkload","id":null,"type":"core:PCMRandomVariable","attrs":{"specification":"DoublePDF[( 1.0 ; 0.6 ) ( 2.0 ; 0.2 ) ( 4.0 ; 0.2 )]"},"refs":{}}
+{"resource":"refsim.measuringpoint","roots":1}
+{"path":"/","id":"_refsim_mpr","type":"measuringpoint:MeasuringPointRepository","attrs":{},"refs":{}}
+{"path":"//@measuringPoints.0","id":null,"type":"pcmmeasuringpoint:UsageScenarioMeasuringPoint","attrs":{},"refs":{"usageScenario":"delay.usagemodel#_LPnI8CHdEd6lJo4DCALHMw"}}
+{"resource":"refsim.monitorrepository","roots":1}
+{"path":"/","id":"_refsim_monrepo","type":"monitorrepository:MonitorRepository","attrs":{"entityName":"refsim default monitors"},"refs":{}}
+{"path":"//@monitors.0","id":"_refsim_mon1","type":"monitorrepository:Monitor","attrs":{"entityName":"RT scenario ClosedWorkloadUsageScenario","activated":true},"refs":{"measuringPoint":"refsim.measuringpoint#//@measuringPoints.0"}}
+{"path":"//@monitors.0/@measurementSpecifications.0","id":"_refsim_ms1_6rYm","type":"monitorrepository:MeasurementSpecification","attrs":{"triggersSelfAdaptations":false},"refs":{"metricDescription":"pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"}}
+{"path":"//@monitors.0/@measurementSpecifications.0/@processingType","id":"_refsim_ft1_6rYm","type":"monitorrepository:FeedThrough","attrs":{},"refs":{}}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h12_fork_async_allocation1" entityName="h12_fork_async">
+  <targetResourceEnvironment_Allocation href="h12_fork_async.resourceenvironment#/"/>
+  <system_Allocation href="h12_fork_async.system#_h12_fork_async_system1"/>
+  <allocationContexts_Allocation id="_h12_fork_async_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h12_fork_async.resourceenvironment#_h12_fork_async_rc1"/>
+    <assemblyContext_AllocationContext href="h12_fork_async.system#_h12_fork_async_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

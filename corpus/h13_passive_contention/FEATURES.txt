@@ -1,0 +1,1 @@
+passive resource (capacity 2) contention: acquire / CPU demand / release with 6 closed users

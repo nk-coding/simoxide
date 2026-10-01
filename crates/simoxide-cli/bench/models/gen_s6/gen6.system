@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" id="_gen6_system1" entityName="gen6">
+  <assemblyContexts__ComposedStructure id="_gen6_ac1" entityName="Assembly_Comp0_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="gen6.repository#_gen6_comp1"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_gen6_ac2" entityName="Assembly_Comp1_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="gen6.repository#_gen6_comp2"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_gen6_ac3" entityName="Assembly_Comp2_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="gen6.repository#_gen6_comp3"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_gen6_ac4" entityName="Assembly_Comp3_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="gen6.repository#_gen6_comp4"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_gen6_ac5" entityName="Assembly_Middleware">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="gen6.repository#_gen6_comp5"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_gen6_conn1" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_gen6_ac1" providingAssemblyContext_AssemblyConnector="_gen6_ac2">
+    <providedRole_AssemblyConnector href="gen6.repository#_gen6_prov2"/>
+    <requiredRole_AssemblyConnector href="gen6.repository#_gen6_req1"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_gen6_conn2" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_gen6_ac1" providingAssemblyContext_AssemblyConnector="_gen6_ac4">
+    <providedRole_AssemblyConnector href="gen6.repository#_gen6_prov4"/>
+    <requiredRole_AssemblyConnector href="gen6.repository#_gen6_req2"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_gen6_conn3" entityName="InfraConnector" providingAssemblyContext__AssemblyInfrastructureConnector="_gen6_ac5" requiringAssemblyContext__AssemblyInfrastructureConnector="_gen6_ac1">
+    <providedRole__AssemblyInfrastructureConnector href="gen6.repository#_gen6_prov5"/>
+    <requiredRole__AssemblyInfrastructureConnector href="gen6.repository#_gen6_req4"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_gen6_conn4" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_gen6_ac2" providingAssemblyContext_AssemblyConnector="_gen6_ac3">
+    <providedRole_AssemblyConnector href="gen6.repository#_gen6_prov3"/>
+    <requiredRole_AssemblyConnector href="gen6.repository#_gen6_req3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_gen6_conn5" entityName="InfraConnector" providingAssemblyContext__AssemblyInfrastructureConnector="_gen6_ac5" requiringAssemblyContext__AssemblyInfrastructureConnector="_gen6_ac2">
+    <providedRole__AssemblyInfrastructureConnector href="gen6.repository#_gen6_prov5"/>
+    <requiredRole__AssemblyInfrastructureConnector href="gen6.repository#_gen6_req5"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_gen6_conn6" entityName="InfraConnector" providingAssemblyContext__AssemblyInfrastructureConnector="_gen6_ac5" requiringAssemblyContext__AssemblyInfrastructureConnector="_gen6_ac4">
+    <providedRole__AssemblyInfrastructureConnector href="gen6.repository#_gen6_prov5"/>
+    <requiredRole__AssemblyInfrastructureConnector href="gen6.repository#_gen6_req6"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_gen6_conn7" entityName="ProvDelegation" outerProvidedRole_ProvidedDelegationConnector="_gen6_prov6" assemblyContext_ProvidedDelegationConnector="_gen6_ac1">
+    <innerProvidedRole_ProvidedDelegationConnector href="gen6.repository#_gen6_prov1"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_gen6_prov6" entityName="Provided_IService0">
+    <providedInterface__OperationProvidedRole href="gen6.repository#_gen6_if1"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

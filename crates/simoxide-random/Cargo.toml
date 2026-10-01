@@ -1,0 +1,31 @@
+[package]
+name = "simoxide-random"
+description = "Bit-exact port of the random number generation and distribution sampling of SimuLizar 5.2.2"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+# GPL-2.0-only, see the `hotspot-math` feature
+simoxide-hotspot-math = { workspace = true, optional = true }
+
+[dev-dependencies]
+# tests/fast.rs and the `fast` unit tests run in every `cargo test`, and the golden tests need
+# HotSpot's Math.log/exp (features for tests only)
+simoxide-random = { path = ".", features = ["fast", "hotspot-math"] }
+
+[features]
+# `jmath::log`/`exp` bit-identical to HotSpot (x86-64 intrinsics) instead of correctly rounded.
+# Pulls in simoxide-hotspot-math, which is GPL-2.0-only: binaries built with this feature contain
+# GPL-2.0-only code combined with EPL-2.0 and Apache-2.0 code and must not be distributed. Off by
+# default, so that programs using the SimOxide libraries contain no GPL code unless they opt in;
+# the tools simoxide-cli and simoxide-testkit (built locally from source) turn it on by default.
+hotspot-math = ["dep:simoxide-hotspot-math"]
+# With `hotspot-math`: use the recorded AMD Zen 5 `rcpss` table in `jmath::log` instead of the
+# instruction.
+rcp-table = ["simoxide-hotspot-math?/rcp-table"]
+# Default `BracketSearch::Galloping` (same results for monotone CDFs, O(log) CDF evaluations).
+fast-bracket = []
+# `fast` module: xoshiro256++ and standard (non-inversion) samplers for SimOxide's fast mode.
+fast = []

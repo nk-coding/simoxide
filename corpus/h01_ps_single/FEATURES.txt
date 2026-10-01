@@ -1,0 +1,1 @@
+open workload Exp interarrival; one internal action with Exp CPU demand on a 1-core PS CPU

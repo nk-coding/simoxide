@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_h14_call_chain_3_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h14_call_chain_3/h14_call_chain_3.usagemodel#_h14_call_chain_3_us1">
+    <usageScenario href="h14_call_chain_3.usagemodel#_h14_call_chain_3_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall callA to h14_call_chain_3->Provided_IA->a [_h14_call_chain_3_ua1]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h14_call_chain_3/h14_call_chain_3.usagemodel#_h14_call_chain_3_ua1">
+    <entryLevelSystemCall href="h14_call_chain_3.usagemodel#_h14_call_chain_3_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="h14_call_chain_3.Provided_IA.a"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h14_call_chain_3/h14_call_chain_3.repository#_h14_call_chain_3_sig1">
+    <role xsi:type="repository:OperationProvidedRole" href="h14_call_chain_3.system#_h14_call_chain_3_prov4"/>
+    <operationSignature href="h14_call_chain_3.repository#_h14_call_chain_3_sig1"/>
+    <system href="h14_call_chain_3.system#_h14_call_chain_3_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall callB from A to Required_IB->b [_h14_call_chain_3_act2]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h14_call_chain_3/h14_call_chain_3.repository#_h14_call_chain_3_act2">
+    <externalCall href="h14_call_chain_3.repository#_h14_call_chain_3_act2"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall callC from B to Required_IC->c [_h14_call_chain_3_act7]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h14_call_chain_3/h14_call_chain_3.repository#_h14_call_chain_3_act7">
+    <externalCall href="h14_call_chain_3.repository#_h14_call_chain_3_act7"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in NodeA" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h14_call_chain_3/h14_call_chain_3.resourceenvironment#_h14_call_chain_3_prs1">
+    <activeResource href="h14_call_chain_3.resourceenvironment#_h14_call_chain_3_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in NodeB" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h14_call_chain_3/h14_call_chain_3.resourceenvironment#_h14_call_chain_3_prs2">
+    <activeResource href="h14_call_chain_3.resourceenvironment#_h14_call_chain_3_prs2"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in NodeC" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h14_call_chain_3/h14_call_chain_3.resourceenvironment#_h14_call_chain_3_prs3">
+    <activeResource href="h14_call_chain_3.resourceenvironment#_h14_call_chain_3_prs3"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

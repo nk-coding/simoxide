@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h05_open_workload_allocation1" entityName="h05_open_workload">
+  <targetResourceEnvironment_Allocation href="h05_open_workload.resourceenvironment#/"/>
+  <system_Allocation href="h05_open_workload.system#_h05_open_workload_system1"/>
+  <allocationContexts_Allocation id="_h05_open_workload_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h05_open_workload.resourceenvironment#_h05_open_workload_rc1"/>
+    <assemblyContext_AllocationContext href="h05_open_workload.system#_h05_open_workload_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

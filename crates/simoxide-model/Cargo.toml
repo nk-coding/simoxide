@@ -1,0 +1,27 @@
+[package]
+name = "simoxide-model"
+description = "Loads Palladio Component Model (PCM 5.2) XMI files into a typed, index-based representation, reproducing EMF's loading semantics"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+quick-xml = "0.38"
+memchr = "2"
+
+[dev-dependencies]
+serde_json = "1"
+
+[[example]]
+name = "pcm-dump"
+path = "examples/pcm-dump.rs"
+
+[dependencies.pprof]
+version = "0.15"
+optional = true
+default-features = false
+
+[features]
+# `load-bench bench --profile out.folded`: sampling profiler for the loading benchmark.
+profile = ["dep:pprof"]

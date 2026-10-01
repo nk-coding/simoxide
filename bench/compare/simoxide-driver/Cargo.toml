@@ -1,0 +1,19 @@
+[package]
+name = "simoxide-compare"
+description = "SimOxide driver for bench/compare (same key=value CLI and RESULT/PAR lines as the JVM drivers)"
+edition = "2024"
+version = "0.1.0"
+publish = false
+
+# not a member of the SimOxide workspace
+[workspace]
+
+[dependencies]
+simoxide-sim = { path = "../../../crates/simoxide-sim" }
+
+# identical to the SimOxide workspace release profile (simoxide is built with it)
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = "line-tables-only"

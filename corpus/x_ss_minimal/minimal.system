@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2"
+    xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" id="_CVBz0BDVEe6FXrMRahCZ6g" entityName="New System">
+  <assemblyContexts__ComposedStructure id="_07_00BDiEe6FXrMRahCZ6g" entityName="Assembly_BasicComponent1">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="minimal.repository#_i05skBDiEe6FXrMRahCZ6g"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_2uCaMBDiEe6FXrMRahCZ6g" entityName="newProvidedDelegationConnector"
+      outerProvidedRole_ProvidedDelegationConnector="_z5AGwBDiEe6FXrMRahCZ6g" assemblyContext_ProvidedDelegationConnector="_07_00BDiEe6FXrMRahCZ6g">
+    <innerProvidedRole_ProvidedDelegationConnector href="minimal.repository#_nLjjwBDiEe6FXrMRahCZ6g"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_z5AGwBDiEe6FXrMRahCZ6g" entityName="Interface1ProvidedRole">
+    <providedInterface__OperationProvidedRole href="minimal.repository#_h6nOkBDiEe6FXrMRahCZ6g"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

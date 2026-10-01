@@ -1,0 +1,1 @@
+SetVariableAction (RETURN.VALUE from IntPMF) and ExternalCall return variable usage used in a later demand

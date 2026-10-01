@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2"
+    id="_h13_passive_contention_repository1" entityName="h13_passive_contention">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h13_passive_contention_comp1" entityName="Server">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h13_passive_contention_prov1"
+        entityName="Provided_IService" providedInterface__OperationProvidedRole="_h13_passive_contention_if1"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h13_passive_contention_seff1"
+        describedService__SEFF="_h13_passive_contention_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h13_passive_contention_act5" entityName="start" successor_AbstractAction="_h13_passive_contention_act1"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h13_passive_contention_act1" entityName="pre" predecessor_AbstractAction="_h13_passive_contention_act5"
+          successor_AbstractAction="_h13_passive_contention_act2">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.01"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:AcquireAction" id="_h13_passive_contention_act2" entityName="acquire" predecessor_AbstractAction="_h13_passive_contention_act1"
+          successor_AbstractAction="_h13_passive_contention_act3" passiveresource_AcquireAction="_h13_passive_contention_pr1">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="1"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h13_passive_contention_act3" entityName="critical" predecessor_AbstractAction="_h13_passive_contention_act2"
+          successor_AbstractAction="_h13_passive_contention_act4">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Exp(4.0)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:ReleaseAction" id="_h13_passive_contention_act4" entityName="release" predecessor_AbstractAction="_h13_passive_contention_act3"
+          successor_AbstractAction="_h13_passive_contention_act6" passiveResource_ReleaseAction="_h13_passive_contention_pr1">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="1"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h13_passive_contention_act6" entityName="stop" predecessor_AbstractAction="_h13_passive_contention_act4"/>
+    </serviceEffectSpecifications__BasicComponent>
+    <passiveResource_BasicComponent id="_h13_passive_contention_pr1" entityName="pool">
+      <capacity_PassiveResource specification="2"/>
+    </passiveResource_BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h13_passive_contention_if1" entityName="IService">
+    <signatures__OperationInterface id="_h13_passive_contention_sig1" entityName="op"/>
+  </interfaces__Repository>
+</repository:Repository>

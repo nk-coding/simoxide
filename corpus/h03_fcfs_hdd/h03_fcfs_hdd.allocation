@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h03_fcfs_hdd_allocation1" entityName="h03_fcfs_hdd">
+  <targetResourceEnvironment_Allocation href="h03_fcfs_hdd.resourceenvironment#/"/>
+  <system_Allocation href="h03_fcfs_hdd.system#_h03_fcfs_hdd_system1"/>
+  <allocationContexts_Allocation id="_h03_fcfs_hdd_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h03_fcfs_hdd.resourceenvironment#_h03_fcfs_hdd_rc1"/>
+    <assemblyContext_AllocationContext href="h03_fcfs_hdd.system#_h03_fcfs_hdd_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

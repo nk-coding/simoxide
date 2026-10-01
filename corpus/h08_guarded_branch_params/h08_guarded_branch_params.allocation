@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h08_guarded_branch_params_allocation1" entityName="h08_guarded_branch_params">
+  <targetResourceEnvironment_Allocation href="h08_guarded_branch_params.resourceenvironment#/"/>
+  <system_Allocation href="h08_guarded_branch_params.system#_h08_guarded_branch_params_system1"/>
+  <allocationContexts_Allocation id="_h08_guarded_branch_params_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h08_guarded_branch_params.resourceenvironment#_h08_guarded_branch_params_rc1"/>
+    <assemblyContext_AllocationContext href="h08_guarded_branch_params.system#_h08_guarded_branch_params_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

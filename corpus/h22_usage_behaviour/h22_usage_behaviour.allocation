@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h22_usage_behaviour_allocation1" entityName="h22_usage_behaviour">
+  <targetResourceEnvironment_Allocation href="h22_usage_behaviour.resourceenvironment#/"/>
+  <system_Allocation href="h22_usage_behaviour.system#_h22_usage_behaviour_system1"/>
+  <allocationContexts_Allocation id="_h22_usage_behaviour_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h22_usage_behaviour.resourceenvironment#_h22_usage_behaviour_rc1"/>
+    <assemblyContext_AllocationContext href="h22_usage_behaviour.system#_h22_usage_behaviour_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

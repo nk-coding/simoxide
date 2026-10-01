@@ -1,0 +1,72 @@
+--- 5.2.2/Palladio-Analyzer-SimuLizar/bundles/org.palladiosimulator.simulizar/src/org/palladiosimulator/simulizar/interpreter/RDSeffPerformanceSwitch.java
++++ patched/org/palladiosimulator/simulizar/interpreter/RDSeffPerformanceSwitch.java
+@@ -74,7 +74,13 @@
+         final String specification = parametricResourceDemand.getSpecification_ParametericResourceDemand()
+                 .getSpecification();
+         final SimulatedStackframe<Object> currentStackFrame = this.context.getStack().currentStackFrame();
+-        final Double value = StackContext.evaluateStatic(specification, Double.class, currentStackFrame);
++        final String prevOrigin = refsim.trace.Trace.origin("demand", parametricResourceDemand.getAction_ParametricResourceDemand()); // REFSIM
++        final Double value;
++        try {
++            value = StackContext.evaluateStatic(specification, Double.class, currentStackFrame);
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+ 
+         var fqid = context.computeFQComponentID().getFQIDString();
+         var rcEntity = Objects.requireNonNull(allocationLookup.getAllocatedEntity(fqid),
+@@ -122,9 +128,15 @@
+         final int resourceServiceId = resourceSignature.getResourceServiceId();
+ 
+         final SimulatedStackframe<Object> currentStackFrame = this.context.getStack().currentStackFrame();
+-        final Double evaluatedDemand = NumberConverter.toDouble(
+-                StackContext.evaluateStatic(resourceCall.getNumberOfCalls__ResourceCall().getSpecification(),
+-                        Double.class, currentStackFrame));
++        final String prevOrigin = refsim.trace.Trace.origin("rescall", resourceCall); // REFSIM tape
++        final Double evaluatedDemand;
++        try {
++            evaluatedDemand = NumberConverter.toDouble(
++                    StackContext.evaluateStatic(resourceCall.getNumberOfCalls__ResourceCall().getSpecification(),
++                            Double.class, currentStackFrame));
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+         final String idRequiredResourceType = currentResourceType.getId();
+ 
+         var rcEntity = allocationLookup.getAllocatedEntity(context.computeFQComponentID()
+@@ -137,16 +149,30 @@
+     @Override
+     public InterpreterResult caseInfrastructureCall(InfrastructureCall infrastructureCall) {
+         final SimulatedStackframe<Object> currentStackFrame = this.context.getStack().currentStackFrame();
+-        final int repetitions = StackContext.evaluateStatic(
+-                infrastructureCall.getNumberOfCalls__InfrastructureCall().getSpecification(), Integer.class,
+-                currentStackFrame);
++        final String prevOrigin = refsim.trace.Trace.origin("infra", infrastructureCall); // REFSIM tape
++        final int repetitions;
++        try {
++            repetitions = StackContext.evaluateStatic(
++                    infrastructureCall.getNumberOfCalls__InfrastructureCall().getSpecification(), Integer.class,
++                    currentStackFrame);
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
++        if (refsim.trace.Trace.ON) { // REFSIM trace
++            refsim.trace.Trace.event("infra", this.context.getThread(), "id", refsim.trace.Trace.id(infrastructureCall), "n", repetitions);
++        }
+         for (int i = 0; i < repetitions; i++) {
+             final ComposedStructureInnerSwitch composedStructureSwitch = composedSwitchFactory.create(this.context,
+                     infrastructureCall.getSignature__InfrastructureCall(),
+                     infrastructureCall.getRequiredRole__InfrastructureCall());
+             // create new stack frame for input parameter
+-            SimulatedStackHelper.createAndPushNewStackFrame(this.context.getStack(),
+-                    infrastructureCall.getInputVariableUsages__CallAction());
++            final String prevParam = refsim.trace.Trace.origin("param", infrastructureCall); // REFSIM tape
++            try {
++                SimulatedStackHelper.createAndPushNewStackFrame(this.context.getStack(),
++                        infrastructureCall.getInputVariableUsages__CallAction());
++            } finally {
++                refsim.trace.Trace.origin(prevParam);
++            }
+             final AssemblyContext myContext = this.context.getAssemblyContextStack().pop();
+             composedStructureSwitch.doSwitch(myContext);
+             this.context.getAssemblyContextStack().push(myContext);

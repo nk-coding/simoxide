@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: defaultUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms_cache_usage_all.usagemodel#_boKlwLaxEeSScPJX5tIqjQ">
+    <usageScenario href="ms_cache_usage_all.usagemodel#_boKlwLaxEeSScPJX5tIqjQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_IWebGui->register [_ey6qgLaxEeSScPJX5tIqjQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms_cache_usage_all.usagemodel#_ey6qgLaxEeSScPJX5tIqjQ">
+    <entryLevelSystemCall href="ms_cache_usage_all.usagemodel#_ey6qgLaxEeSScPJX5tIqjQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_IWebGui->login [_h2PRkLaxEeSScPJX5tIqjQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms_cache_usage_all.usagemodel#_h2PRkLaxEeSScPJX5tIqjQ">
+    <entryLevelSystemCall href="ms_cache_usage_all.usagemodel#_h2PRkLaxEeSScPJX5tIqjQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_IWebGui->getFileList [_jOpO8LaxEeSScPJX5tIqjQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms_cache_usage_all.usagemodel#_jOpO8LaxEeSScPJX5tIqjQ">
+    <entryLevelSystemCall href="ms_cache_usage_all.usagemodel#_jOpO8LaxEeSScPJX5tIqjQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_IWebGui->upload [_nEUgALaxEeSScPJX5tIqjQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms_cache_usage_all.usagemodel#_nEUgALaxEeSScPJX5tIqjQ">
+    <entryLevelSystemCall href="ms_cache_usage_all.usagemodel#_nEUgALaxEeSScPJX5tIqjQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_IWebGui->download [_LSliILzKEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms_cache_usage_all.usagemodel#_LSliILzKEeSAHuL4ItXOLQ">
+    <entryLevelSystemCall href="ms_cache_usage_all.usagemodel#_LSliILzKEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_IWebGui.upload"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_Ss-eoHDwEeSqnN80MQ2uGw">
+    <role xsi:type="repository:OperationProvidedRole" href="ms_cache.system#_b9NvYHD6EeSA4fySuX9I2Q"/>
+    <operationSignature href="ms.repository#_Ss-eoHDwEeSqnN80MQ2uGw"/>
+    <system href="ms_cache.system#_oPwBYHDhEeSqnN80MQ2uGw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_IWebGui.getFileList"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_SxZroHDwEeSqnN80MQ2uGw">
+    <role xsi:type="repository:OperationProvidedRole" href="ms_cache.system#_b9NvYHD6EeSA4fySuX9I2Q"/>
+    <operationSignature href="ms.repository#_SxZroHDwEeSqnN80MQ2uGw"/>
+    <system href="ms_cache.system#_oPwBYHDhEeSqnN80MQ2uGw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_IWebGui.register"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_SzTwIHDwEeSqnN80MQ2uGw">
+    <role xsi:type="repository:OperationProvidedRole" href="ms_cache.system#_b9NvYHD6EeSA4fySuX9I2Q"/>
+    <operationSignature href="ms.repository#_SzTwIHDwEeSqnN80MQ2uGw"/>
+    <system href="ms_cache.system#_oPwBYHDhEeSqnN80MQ2uGw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_IWebGui.login"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_gMMc0HDwEeSqnN80MQ2uGw">
+    <role xsi:type="repository:OperationProvidedRole" href="ms_cache.system#_b9NvYHD6EeSA4fySuX9I2Q"/>
+    <operationSignature href="ms.repository#_gMMc0HDwEeSqnN80MQ2uGw"/>
+    <system href="ms_cache.system#_oPwBYHDhEeSqnN80MQ2uGw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_IWebGui.download"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_gQd40HDwEeSqnN80MQ2uGw">
+    <role xsi:type="repository:OperationProvidedRole" href="ms_cache.system#_b9NvYHD6EeSA4fySuX9I2Q"/>
+    <operationSignature href="ms.repository#_gQd40HDwEeSqnN80MQ2uGw"/>
+    <system href="ms_cache.system#_oPwBYHDhEeSqnN80MQ2uGw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from Facade to Required_IMediaManagement_Facade->upload [_cwo4sHQhEeSabL89DKH5bQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_cwo4sHQhEeSabL89DKH5bQ">
+    <externalCall href="ms.repository#_cwo4sHQhEeSabL89DKH5bQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from Facade to Required_IMediaManagement_Facade->getFileList [_G3_8AHQiEeSabL89DKH5bQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_G3_8AHQiEeSabL89DKH5bQ">
+    <externalCall href="ms.repository#_G3_8AHQiEeSabL89DKH5bQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from Facade to Required_IUserDB_Facade->register [_PED2wL0ZEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_PED2wL0ZEeSAHuL4ItXOLQ">
+    <externalCall href="ms.repository#_PED2wL0ZEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from Facade to Required_IUserDB_Facade->login [_K8K0UL0ZEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_K8K0UL0ZEeSAHuL4ItXOLQ">
+    <externalCall href="ms.repository#_K8K0UL0ZEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from Facade to Required_IMediaManagement_Facade->download [_dCXscHQiEeSabL89DKH5bQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_dCXscHQiEeSabL89DKH5bQ">
+    <externalCall href="ms.repository#_dCXscHQiEeSabL89DKH5bQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from UserDBAdapter to Required_IDB_UserDBAdapter->query [_-S1wUL2cEeSgr-5zKkbaOA]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_-S1wUL2cEeSgr-5zKkbaOA">
+    <externalCall href="ms.repository#_-S1wUL2cEeSgr-5zKkbaOA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from UserDBAdapter to Required_IDB_UserDBAdapter->query [_A-9YUL2dEeSgr-5zKkbaOA]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_A-9YUL2dEeSgr-5zKkbaOA">
+    <externalCall href="ms.repository#_A-9YUL2dEeSgr-5zKkbaOA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaAccess to Required_IDB_MediaAccess->query [_QOBtUL0KEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_QOBtUL0KEeSAHuL4ItXOLQ">
+    <externalCall href="ms.repository#_QOBtUL0KEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaAccess to Required_IDataStorage_MediaAccess->storeFile [_SxR3wL0LEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_SxR3wL0LEeSAHuL4ItXOLQ">
+    <externalCall href="ms.repository#_SxR3wL0LEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaAccess to Required_IDB_MediaAccess->getFileList [_6k_BoL5kEeSjpppo_XMujw]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_6k_BoL5kEeSjpppo_XMujw">
+    <externalCall href="ms.repository#_6k_BoL5kEeSjpppo_XMujw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaAccess to Required_IDataStorage_MediaAccess->getFiles [_LAT00L0WEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_LAT00L0WEeSAHuL4ItXOLQ">
+    <externalCall href="ms.repository#_LAT00L0WEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaAccess to Required_IDB_MediaAccess->query [_y6vREL0XEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_y6vREL0XEeSAHuL4ItXOLQ">
+    <externalCall href="ms.repository#_y6vREL0XEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaManagement to Required_IMediaAccess_MediaManagement->upload [_mqKtIHQiEeSabL89DKH5bQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_mqKtIHQiEeSabL89DKH5bQ">
+    <externalCall href="ms.repository#_mqKtIHQiEeSabL89DKH5bQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaManagement to Required_IDownload_MediaManagement->download [_2I7hMHQiEeSabL89DKH5bQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_2I7hMHQiEeSabL89DKH5bQ">
+    <externalCall href="ms.repository#_2I7hMHQiEeSabL89DKH5bQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaManagement to Required_IPackaging_MediaManagement->zip [_B2sgYLzTEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_B2sgYLzTEeSAHuL4ItXOLQ">
+    <externalCall href="ms.repository#_B2sgYLzTEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaManagement to Required_IMediaAccess_MediaManagement->getFileList [_8M4AoHQiEeSabL89DKH5bQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_8M4AoHQiEeSabL89DKH5bQ">
+    <externalCall href="ms.repository#_8M4AoHQiEeSabL89DKH5bQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from UserManagement to Required_IUserDB_UserManagement->addUser [_y4eKwL0YEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_y4eKwL0YEeSAHuL4ItXOLQ">
+    <externalCall href="ms.repository#_y4eKwL0YEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from UserManagement to Required_IUserDB_UserManagement->getUserData [_7d4hYL0YEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_7d4hYL0YEeSAHuL4ItXOLQ">
+    <externalCall href="ms.repository#_7d4hYL0YEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from TagWatermarking to Required_IDownload_TagWatermarking->download [_BVVtgLzYEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_BVVtgLzYEeSAHuL4ItXOLQ">
+    <externalCall href="ms.repository#_BVVtgLzYEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from Reencoding to Required_IDownload_Reencoding->download [_0E7ekHQhEeSabL89DKH5bQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_0E7ekHQhEeSabL89DKH5bQ">
+    <externalCall href="ms.repository#_0E7ekHQhEeSabL89DKH5bQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from Cache to Required_IDownload_Cache->download [_AzXr4MZ7EeSDae6OpXziLw]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_AzXr4MZ7EeSDae6OpXziLw">
+    <externalCall href="ms.repository#_AzXr4MZ7EeSDae6OpXziLw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from Cache to Required_IDownload_Cache->download [_-MFj8MHBEeSIWsmXhQZfeA]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.repository#_-MFj8MHBEeSIWsmXhQZfeA">
+    <externalCall href="ms.repository#_-MFj8MHBEeSIWsmXhQZfeA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server1" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.resourceenvironment#_cCxqsHmTEeSGtbTG2d9Ipg">
+    <activeResource href="ms.resourceenvironment#_cCxqsHmTEeSGtbTG2d9Ipg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [1] in Server1" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.resourceenvironment#_cCxqsHmTEeSGtbTG2d9Ipg"
+      replicaID="1">
+    <activeResource href="ms.resourceenvironment#_cCxqsHmTEeSGtbTG2d9Ipg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server2" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.resourceenvironment#_kkiVoLg3EeSNPorBlo7x9g">
+    <activeResource href="ms.resourceenvironment#_kkiVoLg3EeSNPorBlo7x9g"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [1] in Server2" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.resourceenvironment#_kkiVoLg3EeSNPorBlo7x9g"
+      replicaID="1">
+    <activeResource href="ms.resourceenvironment#_kkiVoLg3EeSNPorBlo7x9g"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server3" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.resourceenvironment#_J5xVgOXREeSa__lJ2-JCxw">
+    <activeResource href="ms.resourceenvironment#_J5xVgOXREeSa__lJ2-JCxw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [1] in Server3" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_ss_mediastore/ms.resourceenvironment#_J5xVgOXREeSa__lJ2-JCxw"
+      replicaID="1">
+    <activeResource href="ms.resourceenvironment#_J5xVgOXREeSa__lJ2-JCxw"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

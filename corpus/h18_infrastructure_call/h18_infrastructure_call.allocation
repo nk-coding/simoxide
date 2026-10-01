@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h18_infrastructure_call_allocation1" entityName="h18_infrastructure_call">
+  <targetResourceEnvironment_Allocation href="h18_infrastructure_call.resourceenvironment#/"/>
+  <system_Allocation href="h18_infrastructure_call.system#_h18_infrastructure_call_system1"/>
+  <allocationContexts_Allocation id="_h18_infrastructure_call_alc1" entityName="Allocation_Assembly_App">
+    <resourceContainer_AllocationContext href="h18_infrastructure_call.resourceenvironment#_h18_infrastructure_call_rc1"/>
+    <assemblyContext_AllocationContext href="h18_infrastructure_call.system#_h18_infrastructure_call_ac1"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_h18_infrastructure_call_alc2" entityName="Allocation_Assembly_Middleware">
+    <resourceContainer_AllocationContext href="h18_infrastructure_call.resourceenvironment#_h18_infrastructure_call_rc1"/>
+    <assemblyContext_AllocationContext href="h18_infrastructure_call.system#_h18_infrastructure_call_ac2"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

@@ -1,0 +1,5 @@
+# single core PS, overlapping jobs
+resource ps 1 1.0
+job a 0 1.0
+job b 0.5 0.3
+job c 0.6 2.0

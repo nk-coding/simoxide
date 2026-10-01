@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monitorrepository:MonitorRepository xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:metricspec="http://palladiosimulator.org/MetricSpec/1.0"
+    xmlns:monitorrepository="http://palladiosimulator.org/MonitorRepository/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    id="_h23_resource_call_monrepo" entityName="refsim default monitors">
+  <monitors id="_h23_resource_call_mon1" entityName="RT scenario Scenario">
+    <measurementSpecifications id="_h23_resource_call_ms1_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h23_resource_call_ft1_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="h23_resource_call.measuringpoint#//@measuringPoints.0"/>
+  </monitors>
+  <monitors id="_h23_resource_call_mon2" entityName="RT call callOp">
+    <measurementSpecifications id="_h23_resource_call_ms2_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h23_resource_call_ft2_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="h23_resource_call.measuringpoint#//@measuringPoints.1"/>
+  </monitors>
+  <monitors id="_h23_resource_call_mon3" entityName="RT system op op">
+    <measurementSpecifications id="_h23_resource_call_ms3_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h23_resource_call_ft3_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" href="h23_resource_call.measuringpoint#//@measuringPoints.2"/>
+  </monitors>
+  <monitors id="_h23_resource_call_mon4" entityName="resource ServerNode.CPU #0">
+    <measurementSpecifications id="_h23_resource_call_ms4_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h23_resource_call_ft4_paDh"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_h23_resource_call_ms4_eg_F" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_eg_F0s7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_h23_resource_call_ft4_eg_F"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="h23_resource_call.measuringpoint#//@measuringPoints.3"/>
+  </monitors>
+</monitorrepository:MonitorRepository>

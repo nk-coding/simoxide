@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_fzr217_s3_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario0">
+    <usageScenario href="fzr217_s3.usagemodel#_fzr217_s3_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall call_op0_0 [_fzr217_s3_ua1]">
+    <entryLevelSystemCall href="fzr217_s3.usagemodel#_fzr217_s3_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall call_op0_0 [_fzr217_s3_ua4]">
+    <entryLevelSystemCall href="fzr217_s3.usagemodel#_fzr217_s3_ua4"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall call_op0_0 [_fzr217_s3_ua8]">
+    <entryLevelSystemCall href="fzr217_s3.usagemodel#_fzr217_s3_ua8"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="fzr217_s3.Provided_IService0.op0_0">
+    <role xsi:type="repository:OperationProvidedRole" href="fzr217_s3.system#_fzr217_s3_prov8"/>
+    <operationSignature href="fzr217_s3.repository#_fzr217_s3_sig1"/>
+    <system href="fzr217_s3.system#_fzr217_s3_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall call_op2_0 [_fzr217_s3_act38]">
+    <externalCall href="fzr217_s3.repository#_fzr217_s3_act38"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Node0">
+    <activeResource href="fzr217_s3.resourceenvironment#_fzr217_s3_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [1] in Node0" replicaID="1">
+    <activeResource href="fzr217_s3.resourceenvironment#_fzr217_s3_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [2] in Node0" replicaID="2">
+    <activeResource href="fzr217_s3.resourceenvironment#_fzr217_s3_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [3] in Node0" replicaID="3">
+    <activeResource href="fzr217_s3.resourceenvironment#_fzr217_s3_prs1"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>
