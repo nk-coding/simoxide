@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monitorrepository:MonitorRepository xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:metricspec="http://palladiosimulator.org/MetricSpec/1.0" xmlns:monitorrepository="http://palladiosimulator.org/MonitorRepository/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" id="_D_h_700055_s9_monrepo" entityName="refsim default monitors">
+  <monitors id="_D_h_700055_s9_mon1" entityName="RT scenario Scenario0">
+    <measurementSpecifications id="_D_h_700055_s9_ms1_w0" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:TimeDrivenAggregation" id="_D_h_700055_s9_pt1_w0" windowLength="9.35" windowIncrement="3.12">
+        <statisticalCharacterization xsi:type="monitorrepository:ArithmeticMean"/>
+      </processingType>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.0"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon2" entityName="RT call call_op0_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms2_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft2_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.1"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon3" entityName="RT call call_op0_1">
+    <measurementSpecifications id="_D_h_700055_s9_ms3_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft3_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.2"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon4" entityName="RT call call_op0_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms4_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft4_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.3"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon5" entityName="RT call call_op0_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms5_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft5_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.4"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon6" entityName="RT call call_op0_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms6_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft6_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.5"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon7" entityName="RT call call_op0_1">
+    <measurementSpecifications id="_D_h_700055_s9_ms7_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft7_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.6"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon8" entityName="RT call call_op0_1">
+    <measurementSpecifications id="_D_h_700055_s9_ms8_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft8_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.7"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon9" entityName="RT system op op0_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms9_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft9_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.8"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon10" entityName="RT system op op0_1">
+    <measurementSpecifications id="_D_h_700055_s9_ms10_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft10_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.9"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon11" entityName="RT external call call_op2_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms11_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft11_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.10"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon12" entityName="RT external call call_op4_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms12_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft12_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.11"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon13" entityName="RT external call call_op4_1">
+    <measurementSpecifications id="_D_h_700055_s9_ms13_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft13_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.12"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon14" entityName="RT external call call_op1_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms14_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft14_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.13"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon15" entityName="RT external call call_op2_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms15_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft15_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.14"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon16" entityName="RT external call call_op4_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms16_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft16_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.15"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon17" entityName="RT external call call_op5_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms17_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft17_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.16"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon18" entityName="RT external call call_op5_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms18_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft18_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.17"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon19" entityName="RT external call call_op6_0">
+    <measurementSpecifications id="_D_h_700055_s9_ms19_6rYm" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft19_6rYm"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.18"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon20" entityName="resource Node0.CPU #0">
+    <measurementSpecifications id="_D_h_700055_s9_ms20_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft20_paDh"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms20_eg_F" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_eg_F0s7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft20_eg_F"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms20_w0" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_QIb6cikUEeSuf8LV7cHLgA"/>
+      <processingType xsi:type="monitorrepository:TimeDriven" id="_D_h_700055_s9_pt20_w0" windowLength="4.67" windowIncrement="2.34"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.19"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon21" entityName="resource Node1.CPU #0">
+    <measurementSpecifications id="_D_h_700055_s9_ms21_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft21_paDh"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms21_eg_F" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_eg_F0s7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft21_eg_F"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.20"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon22" entityName="resource Node1.HDD #0">
+    <measurementSpecifications id="_D_h_700055_s9_ms22_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft22_paDh"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms22_eg_F" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_eg_F0s7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft22_eg_F"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.21"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon23" entityName="resource Node2.CPU #0">
+    <measurementSpecifications id="_D_h_700055_s9_ms23_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft23_paDh"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms23_eg_F" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_eg_F0s7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft23_eg_F"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms23_w0" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_QIb6cikUEeSuf8LV7cHLgA"/>
+      <processingType xsi:type="monitorrepository:TimeDriven" id="_D_h_700055_s9_pt23_w0" windowLength="9.35" windowIncrement="9.35"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.22"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon24" entityName="resource Node2.HDD #0">
+    <measurementSpecifications id="_D_h_700055_s9_ms24_paDh" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_paDhIs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft24_paDh"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms24_eg_F" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_eg_F0s7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft24_eg_F"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.23"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon25" entityName="passive Assembly_Comp0_0.pool">
+    <measurementSpecifications id="_D_h_700055_s9_ms25_QWjA" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_QWjAYs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft25_QWjA"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms25_zETO" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_zETOUs7pEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft25_zETO"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms25_x0-p" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_x0-pks7rEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft25_x0-p"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.24"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon26" entityName="passive Assembly_Comp4_0.pool">
+    <measurementSpecifications id="_D_h_700055_s9_ms26_QWjA" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_QWjAYs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft26_QWjA"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms26_zETO" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_zETOUs7pEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft26_zETO"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms26_x0-p" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_x0-pks7rEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft26_x0-p"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.25"/>
+  </monitors>
+  <monitors id="_D_h_700055_s9_mon27" entityName="passive Assembly_Comp4_1.pool">
+    <measurementSpecifications id="_D_h_700055_s9_ms27_QWjA" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_QWjAYs7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft27_QWjA"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms27_zETO" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_zETOUs7pEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft27_zETO"/>
+    </measurementSpecifications>
+    <measurementSpecifications id="_D_h_700055_s9_ms27_x0-p" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_x0-pks7rEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_D_h_700055_s9_ft27_x0-p"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" href="D_h_700055_s9.measuringpoint#//@measuringPoints.26"/>
+  </monitors>
+</monitorrepository:MonitorRepository>

@@ -1,0 +1,1 @@
+SimuLizar MediaStore (work-simucom/models/mediastore) imported with its own monitor repository (refsim import --keep-monitors): triggersSelfAdaptations default true, TimeDrivenAggregation on an external call, inactive Fixed/VariableSize aggregations, a Reconfiguration Time monitor (130 tuples). Expected outputs: reference/refsim batch (2026-09-29, agent L).

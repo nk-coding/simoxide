@@ -1,0 +1,10 @@
+# 3 cores, rate 2
+resource ps 3 2.0
+job a 0 1.0
+job b 0.1 2.0
+job c 0.2 3.0
+job d 0.3 4.0
+job e 0.4 5.0
+job f 0.5 6.0
+job g 0.6 7.0
+job h 4.0 0.5

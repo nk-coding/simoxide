@@ -1,0 +1,1 @@
+reference abort: corpus/h32_recursion with an AssemblyOperationMeasuringPoint on Assembly_Rec1 (re-entered by the recursion) instead of the external-call monitor: MEAS-1.5 same-context abort

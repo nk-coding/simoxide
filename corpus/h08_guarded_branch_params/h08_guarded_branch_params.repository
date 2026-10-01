@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2"
+    id="_h08_guarded_branch_params_repository1" entityName="h08_guarded_branch_params">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h08_guarded_branch_params_comp1" entityName="Server">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h08_guarded_branch_params_prov1"
+        entityName="Provided_IService" providedInterface__OperationProvidedRole="_h08_guarded_branch_params_if1"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h08_guarded_branch_params_seff1"
+        describedService__SEFF="_h08_guarded_branch_params_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h08_guarded_branch_params_act11" entityName="start" successor_AbstractAction="_h08_guarded_branch_params_act10"/>
+      <steps_Behaviour xsi:type="seff:BranchAction" id="_h08_guarded_branch_params_act10" entityName="guard" predecessor_AbstractAction="_h08_guarded_branch_params_act11"
+          successor_AbstractAction="_h08_guarded_branch_params_act12">
+        <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_h08_guarded_branch_params_bt1" entityName="guard_0">
+          <branchBehaviour_BranchTransition id="_h08_guarded_branch_params_rdb1">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_h08_guarded_branch_params_act2" entityName="start" successor_AbstractAction="_h08_guarded_branch_params_act1"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_h08_guarded_branch_params_act1" entityName="few" predecessor_AbstractAction="_h08_guarded_branch_params_act2"
+                successor_AbstractAction="_h08_guarded_branch_params_act3">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="n.VALUE * 0.01"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_h08_guarded_branch_params_act3" entityName="stop" predecessor_AbstractAction="_h08_guarded_branch_params_act1"/>
+          </branchBehaviour_BranchTransition>
+          <branchCondition_GuardedBranchTransition specification="n.VALUE &lt; 3"/>
+        </branches_Branch>
+        <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_h08_guarded_branch_params_bt2" entityName="guard_1">
+          <branchBehaviour_BranchTransition id="_h08_guarded_branch_params_rdb2">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_h08_guarded_branch_params_act5" entityName="start" successor_AbstractAction="_h08_guarded_branch_params_act4"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_h08_guarded_branch_params_act4" entityName="some" predecessor_AbstractAction="_h08_guarded_branch_params_act5"
+                successor_AbstractAction="_h08_guarded_branch_params_act6">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="n.VALUE * 0.02"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_h08_guarded_branch_params_act6" entityName="stop" predecessor_AbstractAction="_h08_guarded_branch_params_act4"/>
+          </branchBehaviour_BranchTransition>
+          <branchCondition_GuardedBranchTransition specification="n.VALUE >= 3 AND n.VALUE &lt; 8"/>
+        </branches_Branch>
+        <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_h08_guarded_branch_params_bt3" entityName="guard_2">
+          <branchBehaviour_BranchTransition id="_h08_guarded_branch_params_rdb3">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_h08_guarded_branch_params_act8" entityName="start" successor_AbstractAction="_h08_guarded_branch_params_act7"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_h08_guarded_branch_params_act7" entityName="many" predecessor_AbstractAction="_h08_guarded_branch_params_act8"
+                successor_AbstractAction="_h08_guarded_branch_params_act9">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.3"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_h08_guarded_branch_params_act9" entityName="stop" predecessor_AbstractAction="_h08_guarded_branch_params_act7"/>
+          </branchBehaviour_BranchTransition>
+          <branchCondition_GuardedBranchTransition specification="n.VALUE >= 8"/>
+        </branches_Branch>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h08_guarded_branch_params_act12" entityName="stop" predecessor_AbstractAction="_h08_guarded_branch_params_act10"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h08_guarded_branch_params_if1" entityName="IService">
+    <signatures__OperationInterface id="_h08_guarded_branch_params_sig1" entityName="op">
+      <parameters__OperationSignature parameterName="n">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+</repository:Repository>

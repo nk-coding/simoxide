@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2"
+    xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_h19b_linking_no_throughput_repository1" entityName="h19b_linking_no_throughput">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h19b_linking_no_throughput_comp1" entityName="Client">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h19b_linking_no_throughput_prov1"
+        entityName="Provided_IService" providedInterface__OperationProvidedRole="_h19b_linking_no_throughput_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_h19b_linking_no_throughput_req1"
+        entityName="Required_IRemote" requiredInterface__OperationRequiredRole="_h19b_linking_no_throughput_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h19b_linking_no_throughput_seff1"
+        describedService__SEFF="_h19b_linking_no_throughput_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h19b_linking_no_throughput_act3" entityName="start" successor_AbstractAction="_h19b_linking_no_throughput_act1"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h19b_linking_no_throughput_act1" entityName="prepare" predecessor_AbstractAction="_h19b_linking_no_throughput_act3"
+          successor_AbstractAction="_h19b_linking_no_throughput_act2">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.01"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_h19b_linking_no_throughput_act2" entityName="callRemote" predecessor_AbstractAction="_h19b_linking_no_throughput_act1"
+          successor_AbstractAction="_h19b_linking_no_throughput_act4" calledService_ExternalService="_h19b_linking_no_throughput_sig2"
+          role_ExternalService="_h19b_linking_no_throughput_req1">
+        <inputVariableUsages__CallAction>
+          <variableCharacterisation_VariableUsage type="BYTESIZE">
+            <specification_VariableCharacterisation specification="IntPMF[(1000;0.5)(5000;0.5)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="data"/>
+        </inputVariableUsages__CallAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h19b_linking_no_throughput_act4" entityName="stop" predecessor_AbstractAction="_h19b_linking_no_throughput_act2"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_h19b_linking_no_throughput_comp2" entityName="RemoteServer">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h19b_linking_no_throughput_prov2"
+        entityName="Provided_IRemote" providedInterface__OperationProvidedRole="_h19b_linking_no_throughput_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h19b_linking_no_throughput_seff2"
+        describedService__SEFF="_h19b_linking_no_throughput_sig2">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h19b_linking_no_throughput_act6" entityName="start" successor_AbstractAction="_h19b_linking_no_throughput_act5"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h19b_linking_no_throughput_act5" entityName="serve" predecessor_AbstractAction="_h19b_linking_no_throughput_act6"
+          successor_AbstractAction="_h19b_linking_no_throughput_act7">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="data.BYTESIZE * 0.00001"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h19b_linking_no_throughput_act7" entityName="stop" predecessor_AbstractAction="_h19b_linking_no_throughput_act5"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h19b_linking_no_throughput_if1" entityName="IService">
+    <signatures__OperationInterface id="_h19b_linking_no_throughput_sig1" entityName="op"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h19b_linking_no_throughput_if2" entityName="IRemote">
+    <signatures__OperationInterface id="_h19b_linking_no_throughput_sig2" entityName="remote">
+      <parameters__OperationSignature parameterName="data">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+</repository:Repository>

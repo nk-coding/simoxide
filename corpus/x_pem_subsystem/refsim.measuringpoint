@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: defaultUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_subsystem/default.usagemodel#_LPnI8CHdEd6lJo4DCALHMw">
+    <usageScenario href="default.usagemodel#_LPnI8CHdEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_AnInterface->do [_NC8HwCHdEd6lJo4DCALHMw]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_subsystem/default.usagemodel#_NC8HwCHdEd6lJo4DCALHMw">
+    <entryLevelSystemCall href="default.usagemodel#_NC8HwCHdEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_AnInterface.do"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_subsystem/default.repository#_YyD8kgwuEeCAhIZrAutpSA">
+    <role xsi:type="repository:OperationProvidedRole" href="default.system#_-r1fUCHcEd6lJo4DCALHMw"/>
+    <operationSignature href="default.repository#_YyD8kgwuEeCAhIZrAutpSA"/>
+    <system href="default.system#_84D0kCHcEd6lJo4DCALHMw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in appserver" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_subsystem/My.resourceenvironment#_fYTGgbuZEfGCKp8CkUdHzA">
+    <activeResource href="My.resourceenvironment#_fYTGgbuZEfGCKp8CkUdHzA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in appServer2"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_subsystem/My.resourceenvironment#_fYTtk7uZEfGCKp8CkUdHzA">
+    <activeResource href="My.resourceenvironment#_fYTtk7uZEfGCKp8CkUdHzA"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

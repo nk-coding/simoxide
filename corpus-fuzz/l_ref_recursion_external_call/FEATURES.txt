@@ -1,0 +1,1 @@
+reference abort: corpus/h32_recursion with refsim default monitors including the response time of the recursive ExternalCallAction: the second start in the same request context aborts (Calculator: 'First measurement to the same context arrived while previous series of the same context did not complete', MEAS-1.5)

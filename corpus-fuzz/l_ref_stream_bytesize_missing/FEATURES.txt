@@ -1,0 +1,1 @@
+reference abort: simulate_linking_resources=true without stream.BYTESIZE on the request frame of the remote call (MiddlewareCompletionAwareDemandCalculator: 'Architecture specification incomplete. Stackframe is missing id stream.BYTESIZE'); model = corpus/h19_linking_resource

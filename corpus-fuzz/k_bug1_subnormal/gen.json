@@ -1,0 +1,18 @@
+{
+  "features_changed": [
+    "multicore=0",
+    "guarded_branch=0",
+    "collection=0",
+    "fork_calls=0",
+    "usage_delay=0",
+    "usage_branch=0",
+    "usage_loop=0",
+    "closed=0",
+    "multi_scenario=0",
+    "no_link_throughput=0",
+    "windows=0"
+  ],
+  "name": "new0_300006_s5_m11_23",
+  "seed": 300006,
+  "size": 4
+}

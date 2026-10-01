@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_c2_1_310803_s1_repository1" entityName="c2_1_310803_s1">
+  <components__Repository xsi:type="repository:BasicComponent" id="_c2_1_310803_s1_comp1" entityName="Comp0">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_c2_1_310803_s1_prov1" entityName="Provided_IService0" providedInterface__OperationProvidedRole="_c2_1_310803_s1_if1"/>
+    <resourceRequiredRoles__ResourceInterfaceRequiringEntity id="_c2_1_310803_s1_rreq1" entityName="HddRequired">
+      <requiredResourceInterface__ResourceRequiredRole href="pathmap://PCM_MODELS/Palladio.resourcetype#_xXv8QE5CEeCUKeckjJ_n-w"/>
+    </resourceRequiredRoles__ResourceInterfaceRequiringEntity>
+    <componentParameterUsage_ImplementationComponentType>
+      <variableCharacterisation_VariableUsage type="VALUE">
+        <specification_VariableCharacterisation specification="3"/>
+      </variableCharacterisation_VariableUsage>
+      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="cp0"/>
+    </componentParameterUsage_ImplementationComponentType>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_c2_1_310803_s1_seff1" describedService__SEFF="_c2_1_310803_s1_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_c2_1_310803_s1_act19" entityName="start" successor_AbstractAction="_c2_1_310803_s1_act17"/>
+      <steps_Behaviour xsi:type="seff:BranchAction" id="_c2_1_310803_s1_act17" entityName="branch" predecessor_AbstractAction="_c2_1_310803_s1_act19" successor_AbstractAction="_c2_1_310803_s1_act18">
+        <branches_Branch xsi:type="seff:ProbabilisticBranchTransition" id="_c2_1_310803_s1_bt1" entityName="branch_0" branchProbability="0.4">
+          <branchBehaviour_BranchTransition id="_c2_1_310803_s1_rdb1">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_c2_1_310803_s1_act2" entityName="start" successor_AbstractAction="_c2_1_310803_s1_act1"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_c2_1_310803_s1_act1" entityName="work" predecessor_AbstractAction="_c2_1_310803_s1_act2" successor_AbstractAction="_c2_1_310803_s1_act3">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="Lognorm(-4.5, 0.4)"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_c2_1_310803_s1_act3" entityName="stop" predecessor_AbstractAction="_c2_1_310803_s1_act1"/>
+          </branchBehaviour_BranchTransition>
+        </branches_Branch>
+        <branches_Branch xsi:type="seff:ProbabilisticBranchTransition" id="_c2_1_310803_s1_bt2" entityName="branch_1" branchProbability="0.1">
+          <branchBehaviour_BranchTransition id="_c2_1_310803_s1_rdb2">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_c2_1_310803_s1_act6" entityName="start" successor_AbstractAction="_c2_1_310803_s1_act4"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_c2_1_310803_s1_act4" entityName="work" predecessor_AbstractAction="_c2_1_310803_s1_act6" successor_AbstractAction="_c2_1_310803_s1_act5">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="Pois(2.0) * 0.004"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+              <resourceCall__Action id="_c2_1_310803_s1_rcall1" resourceRequiredRole__ResourceCall="_c2_1_310803_s1_rreq1">
+                <signature__ResourceCall href="pathmap://PCM_MODELS/Palladio.resourcetype#_ygMyEE5CEeCUKeckjJ_n-w"/>
+                <numberOfCalls__ResourceCall specification="UniDouble(0.005, 0.025)"/>
+              </resourceCall__Action>
+              <resourceCall__Action id="_c2_1_310803_s1_rcall2" resourceRequiredRole__ResourceCall="_c2_1_310803_s1_rreq1">
+                <signature__ResourceCall href="pathmap://PCM_MODELS/Palladio.resourcetype#_zUFtIE5CEeCUKeckjJ_n-w"/>
+                <numberOfCalls__ResourceCall specification="Exp(50.0)"/>
+              </resourceCall__Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_c2_1_310803_s1_act5" entityName="work" predecessor_AbstractAction="_c2_1_310803_s1_act4" successor_AbstractAction="_c2_1_310803_s1_act7">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.01"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="DoublePMF[(0.005;0.4)(0.02;0.6)]"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+              </resourceDemand_Action>
+              <resourceCall__Action id="_c2_1_310803_s1_rcall3" resourceRequiredRole__ResourceCall="_c2_1_310803_s1_rreq1">
+                <signature__ResourceCall href="pathmap://PCM_MODELS/Palladio.resourcetype#_zUFtIE5CEeCUKeckjJ_n-w"/>
+                <numberOfCalls__ResourceCall specification="Exp(20.0)"/>
+              </resourceCall__Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_c2_1_310803_s1_act7" entityName="stop" predecessor_AbstractAction="_c2_1_310803_s1_act5"/>
+          </branchBehaviour_BranchTransition>
+        </branches_Branch>
+        <branches_Branch xsi:type="seff:ProbabilisticBranchTransition" id="_c2_1_310803_s1_bt5" entityName="branch_2" branchProbability="0.5">
+          <branchBehaviour_BranchTransition id="_c2_1_310803_s1_rdb5">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_c2_1_310803_s1_act15" entityName="start" successor_AbstractAction="_c2_1_310803_s1_act14"/>
+            <steps_Behaviour xsi:type="seff:BranchAction" id="_c2_1_310803_s1_act14" entityName="guard" predecessor_AbstractAction="_c2_1_310803_s1_act15" successor_AbstractAction="_c2_1_310803_s1_act16">
+              <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_c2_1_310803_s1_bt3" entityName="guard_0">
+                <branchBehaviour_BranchTransition id="_c2_1_310803_s1_rdb3">
+                  <steps_Behaviour xsi:type="seff:StartAction" id="_c2_1_310803_s1_act9" entityName="start" successor_AbstractAction="_c2_1_310803_s1_act8"/>
+                  <steps_Behaviour xsi:type="seff:InternalAction" id="_c2_1_310803_s1_act8" entityName="work" predecessor_AbstractAction="_c2_1_310803_s1_act9" successor_AbstractAction="_c2_1_310803_s1_act10">
+                    <resourceDemand_Action>
+                      <specification_ParametericResourceDemand specification="GammaMoments(0.01, 0.5)"/>
+                      <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+                    </resourceDemand_Action>
+                    <resourceCall__Action id="_c2_1_310803_s1_rcall4" resourceRequiredRole__ResourceCall="_c2_1_310803_s1_rreq1">
+                      <signature__ResourceCall href="pathmap://PCM_MODELS/Palladio.resourcetype#_zUFtIE5CEeCUKeckjJ_n-w"/>
+                      <numberOfCalls__ResourceCall specification="Exp(200.0)"/>
+                    </resourceCall__Action>
+                  </steps_Behaviour>
+                  <steps_Behaviour xsi:type="seff:StopAction" id="_c2_1_310803_s1_act10" entityName="stop" predecessor_AbstractAction="_c2_1_310803_s1_act8"/>
+                </branchBehaviour_BranchTransition>
+                <branchCondition_GuardedBranchTransition specification="n0.VALUE &lt; 3"/>
+              </branches_Branch>
+              <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_c2_1_310803_s1_bt4" entityName="guard_1">
+                <branchBehaviour_BranchTransition id="_c2_1_310803_s1_rdb4">
+                  <steps_Behaviour xsi:type="seff:StartAction" id="_c2_1_310803_s1_act12" entityName="start" successor_AbstractAction="_c2_1_310803_s1_act11"/>
+                  <steps_Behaviour xsi:type="seff:InternalAction" id="_c2_1_310803_s1_act11" entityName="work" predecessor_AbstractAction="_c2_1_310803_s1_act12" successor_AbstractAction="_c2_1_310803_s1_act13">
+                    <resourceDemand_Action>
+                      <specification_ParametericResourceDemand specification="data1.BYTESIZE * 0.000002"/>
+                      <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_nvHX4KkREdyEA_b89s7q9w"/>
+                    </resourceDemand_Action>
+                  </steps_Behaviour>
+                  <steps_Behaviour xsi:type="seff:StopAction" id="_c2_1_310803_s1_act13" entityName="stop" predecessor_AbstractAction="_c2_1_310803_s1_act11"/>
+                </branchBehaviour_BranchTransition>
+                <branchCondition_GuardedBranchTransition specification="n0.VALUE &gt;= 3"/>
+              </branches_Branch>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_c2_1_310803_s1_act16" entityName="stop" predecessor_AbstractAction="_c2_1_310803_s1_act14"/>
+          </branchBehaviour_BranchTransition>
+        </branches_Branch>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:SetVariableAction" id="_c2_1_310803_s1_act18" entityName="setReturn" predecessor_AbstractAction="_c2_1_310803_s1_act17" successor_AbstractAction="_c2_1_310803_s1_act20">
+        <localVariableUsages_SetVariableAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="IntPMF[(1;0.3)(2;0.4)(4;0.3)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="RETURN"/>
+        </localVariableUsages_SetVariableAction>
+        <localVariableUsages_SetVariableAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+          </variableCharacterisation_VariableUsage>
+          <variableCharacterisation_VariableUsage type="BYTESIZE">
+            <specification_VariableCharacterisation specification="UniInt(100, 2000)"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="aux"/>
+        </localVariableUsages_SetVariableAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_c2_1_310803_s1_act20" entityName="stop" predecessor_AbstractAction="_c2_1_310803_s1_act18"/>
+    </serviceEffectSpecifications__BasicComponent>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_c2_1_310803_s1_seff2" describedService__SEFF="_c2_1_310803_s1_sig2">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_c2_1_310803_s1_act33" entityName="start" successor_AbstractAction="_c2_1_310803_s1_act27"/>
+      <steps_Behaviour xsi:type="seff:ForkAction" id="_c2_1_310803_s1_act27" entityName="fork" predecessor_AbstractAction="_c2_1_310803_s1_act33" successor_AbstractAction="_c2_1_310803_s1_act28">
+        <synchronisingBehaviours_ForkAction id="_c2_1_310803_s1_sp1">
+          <synchronousForkedBehaviours_SynchronisationPoint id="_c2_1_310803_s1_rdb7">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_c2_1_310803_s1_act22" entityName="start" successor_AbstractAction="_c2_1_310803_s1_act21"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_c2_1_310803_s1_act21" entityName="noWait" predecessor_AbstractAction="_c2_1_310803_s1_act22" successor_AbstractAction="_c2_1_310803_s1_act23">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.0"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_c2_1_310803_s1_act23" entityName="stop" predecessor_AbstractAction="_c2_1_310803_s1_act21"/>
+          </synchronousForkedBehaviours_SynchronisationPoint>
+          <synchronousForkedBehaviours_SynchronisationPoint id="_c2_1_310803_s1_rdb8">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_c2_1_310803_s1_act25" entityName="start" successor_AbstractAction="_c2_1_310803_s1_act24"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_c2_1_310803_s1_act24" entityName="noWait" predecessor_AbstractAction="_c2_1_310803_s1_act25" successor_AbstractAction="_c2_1_310803_s1_act26">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="Norm(-1.0, 0.1)"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_c2_1_310803_s1_act26" entityName="stop" predecessor_AbstractAction="_c2_1_310803_s1_act24"/>
+          </synchronousForkedBehaviours_SynchronisationPoint>
+        </synchronisingBehaviours_ForkAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_c2_1_310803_s1_act28" entityName="work" predecessor_AbstractAction="_c2_1_310803_s1_act27" successor_AbstractAction="_c2_1_310803_s1_act32">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="GammaMoments(0.01, 0.5)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+        <resourceCall__Action id="_c2_1_310803_s1_rcall5" resourceRequiredRole__ResourceCall="_c2_1_310803_s1_rreq1">
+          <signature__ResourceCall href="pathmap://PCM_MODELS/Palladio.resourcetype#_ygMyEE5CEeCUKeckjJ_n-w"/>
+          <numberOfCalls__ResourceCall specification="Min(0.02, Exp(80.0)) + 0.001"/>
+        </resourceCall__Action>
+        <resourceCall__Action id="_c2_1_310803_s1_rcall6" resourceRequiredRole__ResourceCall="_c2_1_310803_s1_rreq1">
+          <signature__ResourceCall href="pathmap://PCM_MODELS/Palladio.resourcetype#_zUFtIE5CEeCUKeckjJ_n-w"/>
+          <numberOfCalls__ResourceCall specification="data0.BYTESIZE * 0.000002"/>
+        </resourceCall__Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:LoopAction" id="_c2_1_310803_s1_act32" entityName="loop" predecessor_AbstractAction="_c2_1_310803_s1_act28" successor_AbstractAction="_c2_1_310803_s1_act34">
+        <bodyBehaviour_Loop id="_c2_1_310803_s1_rdb9">
+          <steps_Behaviour xsi:type="seff:StartAction" id="_c2_1_310803_s1_act30" entityName="start" successor_AbstractAction="_c2_1_310803_s1_act29"/>
+          <steps_Behaviour xsi:type="seff:InternalAction" id="_c2_1_310803_s1_act29" entityName="work" predecessor_AbstractAction="_c2_1_310803_s1_act30" successor_AbstractAction="_c2_1_310803_s1_act31">
+            <resourceDemand_Action>
+              <specification_ParametericResourceDemand specification="Gamma(2.0, 0.005)"/>
+              <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+            </resourceDemand_Action>
+            <resourceCall__Action id="_c2_1_310803_s1_rcall7" resourceRequiredRole__ResourceCall="_c2_1_310803_s1_rreq1">
+              <signature__ResourceCall href="pathmap://PCM_MODELS/Palladio.resourcetype#_ygMyEE5CEeCUKeckjJ_n-w"/>
+              <numberOfCalls__ResourceCall specification="cp0.VALUE * 0.002"/>
+            </resourceCall__Action>
+          </steps_Behaviour>
+          <steps_Behaviour xsi:type="seff:StopAction" id="_c2_1_310803_s1_act31" entityName="stop" predecessor_AbstractAction="_c2_1_310803_s1_act29"/>
+        </bodyBehaviour_Loop>
+        <iterationCount_LoopAction specification="IntPMF[(0;0.2)(1;0.5)(2;0.3)]"/>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_c2_1_310803_s1_act34" entityName="stop" predecessor_AbstractAction="_c2_1_310803_s1_act32"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_c2_1_310803_s1_if1" entityName="IService0">
+    <signatures__OperationInterface id="_c2_1_310803_s1_sig1" entityName="op0_0">
+      <parameters__OperationSignature parameterName="n0">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+      <parameters__OperationSignature parameterName="data1">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+      <returnType__OperationSignature xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+    </signatures__OperationInterface>
+    <signatures__OperationInterface id="_c2_1_310803_s1_sig2" entityName="op0_1">
+      <parameters__OperationSignature parameterName="data0">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+</repository:Repository>

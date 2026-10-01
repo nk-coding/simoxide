@@ -1,0 +1,1 @@
+external call chain A -> B -> C across 3 components on 3 containers (with input parameter passing)

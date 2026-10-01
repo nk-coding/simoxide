@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: defaultUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/default.usagemodel#_4N04sJuvEd6drucJ1qoe4Q">
+    <usageScenario href="default.usagemodel#_4N04sJuvEd6drucJ1qoe4Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_Interface1->doSth [_5kjbEJuvEd6drucJ1qoe4Q]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/default.usagemodel#_5kjbEJuvEd6drucJ1qoe4Q">
+    <entryLevelSystemCall href="default.usagemodel#_5kjbEJuvEd6drucJ1qoe4Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_Interface1.doSth"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/default.repository#_SSIuQLwGEeS77pO_9q9bzA">
+    <role xsi:type="repository:OperationProvidedRole" href="default.system#_aRY6IJuvEd6drucJ1qoe4Q"/>
+    <operationSignature href="default.repository#_SSIuQLwGEeS77pO_9q9bzA"/>
+    <system href="default.system#__635YJuuEd6drucJ1qoe4Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from C1 to Required_Interface2_C1->doSth [_R5qPoJuuEd6drucJ1qoe4Q]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/default.repository#_R5qPoJuuEd6drucJ1qoe4Q">
+    <externalCall href="default.repository#_R5qPoJuuEd6drucJ1qoe4Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from C1 to Required_Interface3_C1->doSth [_TxBZ4JuuEd6drucJ1qoe4Q]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/default.repository#_TxBZ4JuuEd6drucJ1qoe4Q">
+    <externalCall href="default.repository#_TxBZ4JuuEd6drucJ1qoe4Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from C2 to Required_Interface4_C2->doSth [_ZdplgJuuEd6drucJ1qoe4Q]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/default.repository#_ZdplgJuuEd6drucJ1qoe4Q">
+    <externalCall href="default.repository#_ZdplgJuuEd6drucJ1qoe4Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from C3 to Required_Interface4_C3->doSth [_3YTbYJuuEd6drucJ1qoe4Q]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/default.repository#_3YTbYJuuEd6drucJ1qoe4Q">
+    <externalCall href="default.repository#_3YTbYJuuEd6drucJ1qoe4Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server1" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k321geUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k321geUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server2" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k321heUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k321heUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server3" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k321ieUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k321ieUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server1_2.6"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k33ckeUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k33ckeUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server1_2.8"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k33cleUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k33cleUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server1_3" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k33cmeUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k33cmeUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server2_2.6"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k33cneUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k33cneUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server2_2.8"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k33coeUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k33coeUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server2_3" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k33cpeUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k33cpeUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server3_2.6"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k33cqeUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k33cqeUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server3_2.8"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k34DouUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k34DouUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server3_3" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_k34DpuUnEeGlYLCsyAY-rw">
+    <activeResource href="My.resourceenvironment#_k34DpuUnEeGlYLCsyAY-rw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="HDD [0] in Server3_3" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_optimisation/My.resourceenvironment#_waqdgLwFEeS77pO_9q9bzA">
+    <activeResource href="My.resourceenvironment#_waqdgLwFEeS77pO_9q9bzA"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

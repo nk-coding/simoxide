@@ -1,0 +1,1 @@
+t_variable_aggregation plus the reconfiguration-time and container-count monitors (resource URI with fragment): VariableSizeAggregation writes after eviction (MEAS-7.2). Expected outputs: reference/refsim batch (2026-09-29, agent L).

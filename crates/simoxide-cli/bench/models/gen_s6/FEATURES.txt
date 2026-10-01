@@ -1,0 +1,1 @@
+closed_workload, collection_iterator, collection_parameter, component_params, external_call, fork_async, fork_sync, guarded_branch, hdd, infrastructure_call, loop, multi_scenario, multicore, open_workload, parametric_dependency, passive_resource, ps_cpu, return_value, set_variable, stoex_arithmetic, stoex_distributions, stoex_pmf_pdf, usage_branch, usage_delay, usage_loop

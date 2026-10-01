@@ -1,0 +1,1 @@
+sync ForkAction whose 2 children finish without waiting (zero demand): the parent receives two Resume notes (spec SIM-4.4a / ACT-9.5), the 2nd wakes it early from the following CPU demand

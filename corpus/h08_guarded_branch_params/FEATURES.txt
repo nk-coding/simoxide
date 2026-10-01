@@ -1,0 +1,1 @@
+guarded BranchAction on an input parameter (IntPMF from the usage model); parametric demand n.VALUE * 0.01

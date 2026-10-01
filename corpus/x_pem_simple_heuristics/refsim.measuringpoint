@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: defaultUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_heuristics/default.usagemodel#_Uc-igC6OEd-Jla2o7wkBzQ">
+    <usageScenario href="default.usagemodel#_Uc-igC6OEd-Jla2o7wkBzQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_I1->plan [_Vc6VgC6OEd-Jla2o7wkBzQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_heuristics/default.usagemodel#_Vc6VgC6OEd-Jla2o7wkBzQ">
+    <entryLevelSystemCall href="default.usagemodel#_Vc6VgC6OEd-Jla2o7wkBzQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_I1.plan"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_heuristics/default.repository#_8A9Bka7LEd-Z7e7zQl8I9w">
+    <role xsi:type="repository:OperationProvidedRole" href="default.system#_WazzEC6MEd-Jla2o7wkBzQ"/>
+    <operationSignature href="default.repository#_8A9Bka7LEd-Z7e7zQl8I9w"/>
+    <system href="default.system#_VreA0C6MEd-Jla2o7wkBzQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from BusinessTripMgmt to Required_I2_C1->book [_5mRioC6JEd-Jla2o7wkBzQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_heuristics/default.repository#_5mRioC6JEd-Jla2o7wkBzQ">
+    <externalCall href="default.repository#_5mRioC6JEd-Jla2o7wkBzQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from BusinessTripMgmt to Required_I3_C1->reimburse [_6vz9kC6JEd-Jla2o7wkBzQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_heuristics/default.repository#_6vz9kC6JEd-Jla2o7wkBzQ">
+    <externalCall href="default.repository#_6vz9kC6JEd-Jla2o7wkBzQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from BookingSystem to aName->pay [_DIhMgOtZEd-m3_hR0FtH3Q]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_heuristics/default.repository#_DIhMgOtZEd-m3_hR0FtH3Q">
+    <externalCall href="default.repository#_DIhMgOtZEd-m3_hR0FtH3Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server1" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_heuristics/default.resourceenvironment#_psq4IiINEeSC6_3TPN1J7A">
+    <activeResource href="default.resourceenvironment#_psq4IiINEeSC6_3TPN1J7A"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in server2" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_heuristics/default.resourceenvironment#_psq4JiINEeSC6_3TPN1J7A">
+    <activeResource href="default.resourceenvironment#_psq4JiINEeSC6_3TPN1J7A"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server3" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_heuristics/default.resourceenvironment#_psq4KiINEeSC6_3TPN1J7A">
+    <activeResource href="default.resourceenvironment#_psq4KiINEeSC6_3TPN1J7A"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Assembly_PaymentSystem.semaphore"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_simple_heuristics/default.repository#__hz0ANrPEd-YZv0HsvRIgQ">
+    <assembly href="default.system#_Y4vOEC6MEd-Jla2o7wkBzQ"/>
+    <passiveResource href="default.repository#__hz0ANrPEd-YZv0HsvRIgQ"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

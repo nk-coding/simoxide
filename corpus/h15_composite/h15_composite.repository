@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2"
+    xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" id="_h15_composite_repository1" entityName="h15_composite">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h15_composite_comp1" entityName="Front">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h15_composite_prov1" entityName="Provided_IService"
+        providedInterface__OperationProvidedRole="_h15_composite_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_h15_composite_req1" entityName="Required_IBack"
+        requiredInterface__OperationRequiredRole="_h15_composite_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h15_composite_seff1" describedService__SEFF="_h15_composite_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h15_composite_act3" entityName="start" successor_AbstractAction="_h15_composite_act1"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h15_composite_act1" entityName="frontWork" predecessor_AbstractAction="_h15_composite_act3"
+          successor_AbstractAction="_h15_composite_act2">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Exp(20.0)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_h15_composite_act2" entityName="callBack" predecessor_AbstractAction="_h15_composite_act1"
+          successor_AbstractAction="_h15_composite_act4" calledService_ExternalService="_h15_composite_sig2" role_ExternalService="_h15_composite_req1"/>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h15_composite_act4" entityName="stop" predecessor_AbstractAction="_h15_composite_act2"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_h15_composite_comp2" entityName="Back">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h15_composite_prov2" entityName="Provided_IBack"
+        providedInterface__OperationProvidedRole="_h15_composite_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h15_composite_seff2" describedService__SEFF="_h15_composite_sig2">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h15_composite_act6" entityName="start" successor_AbstractAction="_h15_composite_act5"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h15_composite_act5" entityName="backWork" predecessor_AbstractAction="_h15_composite_act6"
+          successor_AbstractAction="_h15_composite_act7">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.03"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h15_composite_act7" entityName="stop" predecessor_AbstractAction="_h15_composite_act5"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:CompositeComponent" id="_h15_composite_comp3" entityName="Composite">
+    <assemblyContexts__ComposedStructure id="_h15_composite_ac1" entityName="Inner_Front" encapsulatedComponent__AssemblyContext="_h15_composite_comp1"/>
+    <assemblyContexts__ComposedStructure id="_h15_composite_ac2" entityName="Inner_Back" encapsulatedComponent__AssemblyContext="_h15_composite_comp2"/>
+    <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_h15_composite_conn1" entityName="Connector"
+        requiringAssemblyContext_AssemblyConnector="_h15_composite_ac1" providingAssemblyContext_AssemblyConnector="_h15_composite_ac2"
+        providedRole_AssemblyConnector="_h15_composite_prov2" requiredRole_AssemblyConnector="_h15_composite_req1"/>
+    <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_h15_composite_conn2" entityName="ProvDelegation"
+        innerProvidedRole_ProvidedDelegationConnector="_h15_composite_prov1" outerProvidedRole_ProvidedDelegationConnector="_h15_composite_prov3"
+        assemblyContext_ProvidedDelegationConnector="_h15_composite_ac1"/>
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h15_composite_prov3" entityName="Provided_IService"
+        providedInterface__OperationProvidedRole="_h15_composite_if1"/>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h15_composite_if1" entityName="IService">
+    <signatures__OperationInterface id="_h15_composite_sig1" entityName="op"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h15_composite_if2" entityName="IBack">
+    <signatures__OperationInterface id="_h15_composite_sig2" entityName="back"/>
+  </interfaces__Repository>
+</repository:Repository>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h28_triggers_default_allocation1" entityName="h28_triggers_default">
+  <targetResourceEnvironment_Allocation href="h28_triggers_default.resourceenvironment#/"/>
+  <system_Allocation href="h28_triggers_default.system#_h28_triggers_default_system1"/>
+  <allocationContexts_Allocation id="_h28_triggers_default_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h28_triggers_default.resourceenvironment#_h28_triggers_default_rc1"/>
+    <assemblyContext_AllocationContext href="h28_triggers_default.system#_h28_triggers_default_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

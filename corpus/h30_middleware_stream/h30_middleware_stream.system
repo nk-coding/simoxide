@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2"
+    xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" id="_h30_middleware_stream_system1" entityName="h30_middleware_stream">
+  <assemblyContexts__ComposedStructure id="_h30_middleware_stream_ac1" entityName="Assembly_Client">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="h30_middleware_stream.repository#_h30_middleware_stream_comp1"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_h30_middleware_stream_ac2" entityName="Assembly_RemoteServer">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="h30_middleware_stream.repository#_h30_middleware_stream_comp2"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_h30_middleware_stream_ac3" entityName="Assembly_LocalHelper">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="h30_middleware_stream.repository#_h30_middleware_stream_comp3"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_h30_middleware_stream_conn1" entityName="Connector"
+      requiringAssemblyContext_AssemblyConnector="_h30_middleware_stream_ac1" providingAssemblyContext_AssemblyConnector="_h30_middleware_stream_ac2">
+    <providedRole_AssemblyConnector href="h30_middleware_stream.repository#_h30_middleware_stream_prov2"/>
+    <requiredRole_AssemblyConnector href="h30_middleware_stream.repository#_h30_middleware_stream_req1"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_h30_middleware_stream_conn2" entityName="Connector"
+      requiringAssemblyContext_AssemblyConnector="_h30_middleware_stream_ac1" providingAssemblyContext_AssemblyConnector="_h30_middleware_stream_ac3">
+    <providedRole_AssemblyConnector href="h30_middleware_stream.repository#_h30_middleware_stream_prov3"/>
+    <requiredRole_AssemblyConnector href="h30_middleware_stream.repository#_h30_middleware_stream_req2"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_h30_middleware_stream_conn3" entityName="ProvDelegation"
+      outerProvidedRole_ProvidedDelegationConnector="_h30_middleware_stream_prov4" assemblyContext_ProvidedDelegationConnector="_h30_middleware_stream_ac1">
+    <innerProvidedRole_ProvidedDelegationConnector href="h30_middleware_stream.repository#_h30_middleware_stream_prov1"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h30_middleware_stream_prov4" entityName="Provided_IService">
+    <providedInterface__OperationProvidedRole href="h30_middleware_stream.repository#_h30_middleware_stream_if1"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

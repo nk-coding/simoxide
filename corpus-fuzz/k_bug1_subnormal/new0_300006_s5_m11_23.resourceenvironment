@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resourceenvironment:ResourceEnvironment xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:resourceenvironment="http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2" entityName="new0_300006_s5_m11_23">
+  <resourceContainer_ResourceEnvironment id="_new0_300006_s5_m11_23_rc1" entityName="Node0">
+    <activeResourceSpecifications_ResourceContainer id="_new0_300006_s5_m11_23_prs1">
+      <schedulingPolicy href="pathmap://PCM_MODELS/Palladio.resourcetype#FCFS"/>
+      <activeResourceType_ActiveResourceSpecification href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+      <processingRate_ProcessingResourceSpecification specification="1.0"/>
+    </activeResourceSpecifications_ResourceContainer>
+  </resourceContainer_ResourceEnvironment>
+</resourceenvironment:ResourceEnvironment>

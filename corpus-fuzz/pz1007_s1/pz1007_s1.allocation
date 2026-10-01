@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_pz1007_s1_allocation1" entityName="pz1007_s1">
+  <targetResourceEnvironment_Allocation href="pz1007_s1.resourceenvironment#/"/>
+  <system_Allocation href="pz1007_s1.system#_pz1007_s1_system1"/>
+  <allocationContexts_Allocation id="_pz1007_s1_alc1" entityName="Allocation_Assembly_Composite0_0">
+    <resourceContainer_AllocationContext href="pz1007_s1.resourceenvironment#_pz1007_s1_rc1"/>
+    <assemblyContext_AllocationContext href="pz1007_s1.system#_pz1007_s1_ac3"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

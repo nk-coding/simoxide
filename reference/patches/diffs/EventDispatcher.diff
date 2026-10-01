@@ -1,0 +1,12 @@
+--- 5.2.2/Palladio-Analyzer-SimuLizar/bundles/org.palladiosimulator.simulizar/src/org/palladiosimulator/simulizar/interpreter/EventDispatcher.java
++++ patched/org/palladiosimulator/simulizar/interpreter/EventDispatcher.java
+@@ -143,6 +143,9 @@
+ 		SEFF_NOTIFICATOR_SELECTOR::doSwitch);
+     
+     public <T extends EObject> void firePassedEvent(final ModelElementPassedEvent<T> event) {
++        if (refsim.trace.Trace.ON) { // REFSIM trace (before the listeners, i.e. before probes measure)
++            refsim.trace.SimulizarHooks.passed(event);
++        }
+ 		NOTIFICATOR_SELECTOR_SWITCHES.stream()
+ 			.map(sw -> sw.apply(event.getModelElement()))
+ 			.filter(Optional::isPresent).map(Optional::get).findFirst()

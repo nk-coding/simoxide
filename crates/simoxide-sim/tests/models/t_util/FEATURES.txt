@@ -1,0 +1,1 @@
+w_h01_ps_single with triggersSelfAdaptations=true only on the utilisation (TimeDriven) spec: reconfiguration process created right after the first utilisation tuple (t=4.0). Expected outputs: reference/refsim batch (2026-09-29, agent L).

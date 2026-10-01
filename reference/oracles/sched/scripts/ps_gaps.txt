@@ -1,0 +1,10 @@
+# arrivals closer than MathTools epsilon (1e-5): lost service time
+resource ps 1 1.0
+job a 0 1.0
+job b 0.000001 1.0
+job c 0.000005 1.0
+job d 0.0000099 0.5
+job e 0.00001 0.5
+job f 0.000011 0.5
+job g 3.5 0.00001
+job h 3.500001 0.000001

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" id="_c3_1_320694_s10_system1" entityName="c3_1_320694_s10">
+  <assemblyContexts__ComposedStructure id="_c3_1_320694_s10_ac4" entityName="Assembly_Composite0_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:CompositeComponent" href="c3_1_320694_s10.repository#_c3_1_320694_s10_comp2"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_c3_1_320694_s10_ac5" entityName="Assembly_Comp1_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="c3_1_320694_s10.repository#_c3_1_320694_s10_comp3"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_c3_1_320694_s10_ac6" entityName="Assembly_Comp2_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="c3_1_320694_s10.repository#_c3_1_320694_s10_comp4"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_c3_1_320694_s10_ac7" entityName="Assembly_Composite3_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:CompositeComponent" href="c3_1_320694_s10.repository#_c3_1_320694_s10_comp7"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_c3_1_320694_s10_ac8" entityName="Assembly_Comp4_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="c3_1_320694_s10.repository#_c3_1_320694_s10_comp8"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_c3_1_320694_s10_ac9" entityName="Assembly_Comp4_1">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="c3_1_320694_s10.repository#_c3_1_320694_s10_comp8"/>
+    <configParameterUsages__AssemblyContext>
+      <variableCharacterisation_VariableUsage type="VALUE">
+        <specification_VariableCharacterisation specification="9"/>
+      </variableCharacterisation_VariableUsage>
+      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="cp0"/>
+    </configParameterUsages__AssemblyContext>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_c3_1_320694_s10_ac10" entityName="Assembly_Middleware">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="c3_1_320694_s10.repository#_c3_1_320694_s10_comp9"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_c3_1_320694_s10_conn7" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac4" providingAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac6">
+    <providedRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_prov4"/>
+    <requiredRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_req1"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_c3_1_320694_s10_conn8" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac4" providingAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac5">
+    <providedRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_prov3"/>
+    <requiredRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_req3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_c3_1_320694_s10_conn9" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac5" providingAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac6">
+    <providedRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_prov4"/>
+    <requiredRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_req5"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_c3_1_320694_s10_conn10" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac5" providingAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac7">
+    <providedRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_prov5"/>
+    <requiredRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_req6"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_c3_1_320694_s10_conn11" entityName="InfraConnector" providingAssemblyContext__AssemblyInfrastructureConnector="_c3_1_320694_s10_ac10" requiringAssemblyContext__AssemblyInfrastructureConnector="_c3_1_320694_s10_ac5">
+    <providedRole__AssemblyInfrastructureConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_prov9"/>
+    <requiredRole__AssemblyInfrastructureConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_req11"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_c3_1_320694_s10_conn12" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac6" providingAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac7">
+    <providedRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_prov5"/>
+    <requiredRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_req7"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_c3_1_320694_s10_conn13" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac7" providingAssemblyContext_AssemblyConnector="_c3_1_320694_s10_ac9">
+    <providedRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_prov8"/>
+    <requiredRole_AssemblyConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_req8"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_c3_1_320694_s10_conn14" entityName="ProvDelegation" outerProvidedRole_ProvidedDelegationConnector="_c3_1_320694_s10_prov10" assemblyContext_ProvidedDelegationConnector="_c3_1_320694_s10_ac4">
+    <innerProvidedRole_ProvidedDelegationConnector href="c3_1_320694_s10.repository#_c3_1_320694_s10_prov1"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_c3_1_320694_s10_prov10" entityName="Provided_IService0">
+    <providedInterface__OperationProvidedRole href="c3_1_320694_s10.repository#_c3_1_320694_s10_if1"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

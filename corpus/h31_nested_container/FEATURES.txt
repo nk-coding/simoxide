@@ -1,0 +1,1 @@
+a resource container nested in the allocation target (with its own CPU and default monitors) and a nested container of the nested one: SimuLizar 5.2.2 creates simulated containers for top-level containers only, so the nested ones are ignored

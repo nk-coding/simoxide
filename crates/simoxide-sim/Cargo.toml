@@ -1,0 +1,28 @@
+[package]
+name = "simoxide-sim"
+description = "Discrete-event simulator reproducing SimuLizar 5.2.2 event for event: IR compiler, event core, interpreter, measurements, batch API"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+simoxide-model = { workspace = true }
+simoxide-stoex = { workspace = true }
+simoxide-random = { workspace = true }
+simoxide-sched = { workspace = true }
+serde_json = "1"
+ryu = "1"
+
+[features]
+# Fast mode (`compat::Fast`, `Mode::Fast`): same semantics and statistics as the reference,
+# not its bits. Additive: the exact mode stays the default and is unchanged.
+fast = ["simoxide-random/fast"]
+# Bit-exact HotSpot Math.log/exp (GPL-2.0-only code; binaries built with it must not be
+# distributed, see simoxide-random's `hotspot-math` feature). Off by default in the libraries.
+hotspot-math = ["simoxide-random/hotspot-math", "simoxide-stoex/hotspot-math"]
+
+[dev-dependencies]
+simoxide-testkit = { path = "../simoxide-testkit" }
+# the corpus and replay tests compare with the reference bit for bit
+simoxide-random = { path = "../simoxide-random", features = ["hotspot-math"] }

@@ -1,0 +1,5 @@
+{"emf_errors":0}
+{"resource":"My.resourceenvironment","roots":1}
+{"path":"/","id":null,"type":"resourceenvironment:ResourceEnvironment","attrs":{"entityName":"resource env"},"refs":{}}
+{"path":"//@linkingResources__ResourceEnvironment.0","id":"_x_084McbEe2D_qdVD_hXpw","type":"resourceenvironment:LinkingResource","attrs":{"entityName":"aName"},"refs":{"connectedResourceContainers_LinkingResource":["My.resourceenvironment#_v72S8McbEe2D_qdVD_hXpw"]}}
+{"path":"//@resourceContainer_ResourceEnvironment.0","id":"_v72S8McbEe2D_qdVD_hXpw","type":"resourceenvironment:ResourceContainer","attrs":{"entityName":"aName"},"refs":{}}

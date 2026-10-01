@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h01_ps_single_allocation1" entityName="h01_ps_single">
+  <targetResourceEnvironment_Allocation href="h01_ps_single.resourceenvironment#/"/>
+  <system_Allocation href="h01_ps_single.system#_h01_ps_single_system1"/>
+  <allocationContexts_Allocation id="_h01_ps_single_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h01_ps_single.resourceenvironment#_h01_ps_single_rc1"/>
+    <assemblyContext_AllocationContext href="h01_ps_single.system#_h01_ps_single_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

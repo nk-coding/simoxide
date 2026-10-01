@@ -1,0 +1,44 @@
+# name | source (dir, or comma separated .usagemodel,.allocation files; relative to /home/devbox/workspace/palladio-research) | options (max=N: max_measurements; skip-external-calls: no RT monitors on external calls)
+x_espresso|work-simucom/models/espresso/default.usagemodel,work-simucom/models/espresso/default.allocation|
+x_sl_mediastore|work-simucom/models/mediastore/ms_base_usage_realistic.usagemodel,work-simucom/models/mediastore/ms_base.allocation|max=10
+x_pem_minimum|repos/Palladio-Example-Models/Minimum_Project_Example|
+x_pem_acquire|repos/Palladio-Example-Models/Acquire_Example|
+#SKIP (needs the Architectural Templates metamodel (not loaded headless)) x_pem_connected_heating|repos/Palladio-Example-Models/ConnectedHeating_Example
+x_pem_harddisk|repos/Palladio-Example-Models/HardDiskModel_Example|max=5
+x_pem_hdd_resource_signatures|repos/Palladio-Example-Models/HDDExample/HDDDemoUsingResourceSignatures|
+x_pem_hdd_infrastructure_calls|repos/Palladio-Example-Models/HDDExample/HDDDemoUsingInfrastructureCalls|
+x_pem_infrastructure|repos/Palladio-Example-Models/InfrastructureComponent_Example|max=20
+x_pem_linking_resource|repos/Palladio-Example-Models/LinkingResource_Test|
+x_pem_minimum_network|repos/Palladio-Example-Models/MinimumNetworkExample|
+x_pem_fork|repos/Palladio-Example-Models/PCMFork_Example|
+x_pem_setvariable|repos/Palladio-Example-Models/PCMSetVariable_Example|
+x_pem_reliability|repos/Palladio-Example-Models/ReliabilityTest|
+x_pem_replicated_composite|repos/Palladio-Example-Models/ReplicatedCompositeComponent_Example|
+x_pem_screencast_ms|repos/Palladio-Example-Models/ScreencastMediaStore/MediaStore.usagemodel,repos/Palladio-Example-Models/ScreencastMediaStore/MediaStore-Cacheless.allocation|max=20
+x_pem_screencast_ms_instant|repos/Palladio-Example-Models/ScreencastMediaStore/MediaStoreInstant-DownloadCache.usagemodel,repos/Palladio-Example-Models/ScreencastMediaStore/MediaStore-InstantDownloadCache.allocation|max=10
+x_pem_screencast_ms_enqueue|repos/Palladio-Example-Models/ScreencastMediaStore/MediaStoreEnqueueDownloadCache.usagemodel,repos/Palladio-Example-Models/ScreencastMediaStore/MediaStore-EnqueueDownloadCache.allocation|max=25
+x_pem_simple_heuristics|repos/Palladio-Example-Models/SimpleHeuristicsExample_Example/default.usagemodel,repos/Palladio-Example-Models/SimpleHeuristicsExample_Example/default.allocation|
+x_pem_simple_heuristics_qb|repos/Palladio-Example-Models/SimpleHeuristicsExample_Example/quickbooking.usagemodel,repos/Palladio-Example-Models/SimpleHeuristicsExample_Example/quickbooking.allocation|
+x_pem_simple_optimisation|repos/Palladio-Example-Models/SimpleOptimisation_Example/default.usagemodel,repos/Palladio-Example-Models/SimpleOptimisation_Example/default.allocation|
+#SKIP (uses a pre-5.x usage model feature (namedReference_VariableUsage)) x_pem_simple_optimisation_c4|repos/Palladio-Example-Models/SimpleOptimisation_Example/default_c4.usagemodel,repos/Palladio-Example-Models/SimpleOptimisation_Example/default.allocation
+x_pem_simple_optimisation_composites|repos/Palladio-Example-Models/SimpleOptimisation_Example/newWithComposites.usagemodel,repos/Palladio-Example-Models/SimpleOptimisation_Example/newWithComposites.allocation|
+x_pem_subsystem|repos/Palladio-Example-Models/Subsystem_Test/default.usagemodel,repos/Palladio-Example-Models/Subsystem_Test/default.allocation|
+#SKIP (SimuLizar 5.2.2 fails: "Cannot determine unique path to nested assembly context") x_pem_subsystem_twice|repos/Palladio-Example-Models/Subsystem_Test/subsystemInstantiatedTwice.usagemodel,repos/Palladio-Example-Models/Subsystem_Test/subsystemInstantiatedTwiceContentsAllocated.allocation
+x_pem_subsystem_nested|repos/Palladio-Example-Models/Subsystem_Test/nestedSubSystem.usagemodel,repos/Palladio-Example-Models/Subsystem_Test/nestedSubsystems.allocation|
+x_sl_elsc_return|repos/Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/entry-level-system-call-return-testmodel|
+x_sl_simulizar111|repos/Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/simulizar111|
+x_sl_simulizar154|repos/Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/simulizar154|
+x_sl_runconfigtest|repos/Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/runconfigtest|
+x_sl_loadbalancer|repos/Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer|
+#SKIP (PCM 5.1 namespace (not loadable by 5.2.2)) x_sl_znncom|repos/Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.znncom
+#SKIP (PCM 5.0 (sdq.ipd.uka.de) namespace) x_sl_tripplanner|repos/Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.tripplanner
+x_ss_minimal|repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/MinimalModel|
+x_ss_minimalexample|repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/minimalexample/default.usagemodel,repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/minimalexample/default.allocation|skip-external-calls
+x_ss_minimalexample_open_ps|repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/minimalexample/openworkload.usagemodel,repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/minimalexample/procsharing.allocation|skip-external-calls
+#SKIP (broken href in My.resourceenvironment) x_ss_default|repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/defaultModel
+x_ss_delay|repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/usageModelOnly|
+#SKIP (duplicate of x_pem_setvariable) x_ss_setvariable|repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/SetVariableModel
+x_ss_mediastore|repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/MediaStoreModel|max=6
+#SKIP (broken href in My.resourceenvironment) x_ss_nested_subsystem|repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/nestedSubSystemModel/nestedSubSystem.usagemodel,repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/nestedSubSystemModel/nestedSubsystems.allocation
+#SKIP (duplicate of x_pem_linking_resource) x_ss_linking|repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/LinkingResourceModel
+#SKIP (duplicate of x_pem_fork) x_ss_fork|repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/Fork_3.1Model

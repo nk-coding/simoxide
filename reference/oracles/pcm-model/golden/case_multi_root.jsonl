@@ -1,0 +1,14 @@
+{"emf_errors":2}
+{"resource":"two.repository","roots":2}
+{"path":"/","id":"_r1","type":"repository:Repository","attrs":{"entityName":"first","repositoryDescription":null},"refs":{}}
+{"path":"//@components__Repository.0","id":"<generated>","type":"repository:BasicComponent","attrs":{"entityName":"NoId","componentType":"BUSINESS_COMPONENT"},"refs":{}}
+{"path":"/1","id":"_r2","type":"repository:Repository","attrs":{"entityName":"second","repositoryDescription":null},"refs":{}}
+{"path":"/1/@components__Repository.0","id":"_k","type":"repository:BasicComponent","attrs":{"entityName":"K","componentType":"BUSINESS_COMPONENT"},"refs":{}}
+{"path":"/1/@dataTypes__Repository.0","id":"_coll","type":"repository:CollectionDataType","attrs":{"entityName":"C"},"refs":{"innerType_CollectionDataType":"pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.3"}}
+{"path":"/1/@dataTypes__Repository.1","id":"_comp","type":"repository:CompositeDataType","attrs":{"entityName":"Comp"},"refs":{"parentType_CompositeDataType":["two.repository#_comp"]}}
+{"path":"/1/@dataTypes__Repository.1/@innerDeclaration_CompositeDataType.0","id":null,"type":"repository:InnerDeclaration","attrs":{"entityName":"x"},"refs":{"datatype_InnerDeclaration":"two.repository#_coll"}}
+{"path":"/1/@dataTypes__Repository.1/@innerDeclaration_CompositeDataType.1","id":null,"type":"repository:InnerDeclaration","attrs":{"entityName":"y"},"refs":{"datatype_InnerDeclaration":"two.repository#_coll"}}
+{"resource":"two.system","roots":1}
+{"path":"/","id":"_sys","type":"system:System","attrs":{"entityName":"S"},"refs":{}}
+{"path":"//@assemblyContexts__ComposedStructure.0","id":"_ac1","type":"composition:AssemblyContext","attrs":{"entityName":"AC1"},"refs":{"encapsulatedComponent__AssemblyContext":"two.repository#//@components__Repository.0"}}
+{"path":"//@assemblyContexts__ComposedStructure.1","id":"_ac2","type":"composition:AssemblyContext","attrs":{"entityName":"AC2"},"refs":{}}

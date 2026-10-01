@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h20_ps_multicore_allocation1" entityName="h20_ps_multicore">
+  <targetResourceEnvironment_Allocation href="h20_ps_multicore.resourceenvironment#/"/>
+  <system_Allocation href="h20_ps_multicore.system#_h20_ps_multicore_system1"/>
+  <allocationContexts_Allocation id="_h20_ps_multicore_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h20_ps_multicore.resourceenvironment#_h20_ps_multicore_rc1"/>
+    <assemblyContext_AllocationContext href="h20_ps_multicore.system#_h20_ps_multicore_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

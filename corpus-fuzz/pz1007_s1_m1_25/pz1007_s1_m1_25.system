@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" id="_pz1007_s1_m1_25_system1" entityName="pz1007_s1_m1_25">
+  <assemblyContexts__ComposedStructure id="_pz1007_s1_m1_25_ac3" entityName="Assembly_Composite0_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:CompositeComponent" href="pz1007_s1_m1_25.repository#_pz1007_s1_m1_25_comp3"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_pz1007_s1_m1_25_conn3" entityName="ProvDelegation" outerProvidedRole_ProvidedDelegationConnector="_pz1007_s1_m1_25_prov5" assemblyContext_ProvidedDelegationConnector="_pz1007_s1_m1_25_ac3">
+    <innerProvidedRole_ProvidedDelegationConnector href="pz1007_s1_m1_25.repository#_pz1007_s1_m1_25_prov1"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_pz1007_s1_m1_25_prov5" entityName="Provided_IService0">
+    <providedInterface__OperationProvidedRole href="pz1007_s1_m1_25.repository#_pz1007_s1_m1_25_if1"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

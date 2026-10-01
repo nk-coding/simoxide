@@ -1,0 +1,5 @@
+# FCFS closed loop, rate 1000 (linking-resource-like)
+resource fcfs 1 1000.0
+job a 0 300 100 200 now 400
+job b 0 300 0.1 200 now 400
+job c 0.05 700 0.2 700

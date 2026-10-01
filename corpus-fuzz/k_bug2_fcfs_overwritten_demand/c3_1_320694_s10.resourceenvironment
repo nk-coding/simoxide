@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resourceenvironment:ResourceEnvironment xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:resourceenvironment="http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2" entityName="c3_1_320694_s10">
+  <linkingResources__ResourceEnvironment id="_c3_1_320694_s10_link1" entityName="LAN0" connectedResourceContainers_LinkingResource="_c3_1_320694_s10_rc1 _c3_1_320694_s10_rc2 _c3_1_320694_s10_rc3">
+    <communicationLinkResourceSpecifications_LinkingResource id="_c3_1_320694_s10_clrs1">
+      <communicationLinkResourceType_CommunicationLinkResourceSpecification href="pathmap://PCM_MODELS/Palladio.resourcetype#_o3sScH2AEdyH8uerKnHYug"/>
+      <latency_CommunicationLinkResourceSpecification specification="0.0"/>
+      <throughput_CommunicationLinkResourceSpecification specification="1000000.0"/>
+    </communicationLinkResourceSpecifications_LinkingResource>
+  </linkingResources__ResourceEnvironment>
+  <resourceContainer_ResourceEnvironment id="_c3_1_320694_s10_rc1" entityName="Node0">
+    <activeResourceSpecifications_ResourceContainer id="_c3_1_320694_s10_prs1">
+      <schedulingPolicy href="pathmap://PCM_MODELS/Palladio.resourcetype#FCFS"/>
+      <activeResourceType_ActiveResourceSpecification href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+      <processingRate_ProcessingResourceSpecification specification="2.0"/>
+    </activeResourceSpecifications_ResourceContainer>
+  </resourceContainer_ResourceEnvironment>
+  <resourceContainer_ResourceEnvironment id="_c3_1_320694_s10_rc2" entityName="Node1">
+    <activeResourceSpecifications_ResourceContainer id="_c3_1_320694_s10_prs2">
+      <schedulingPolicy href="pathmap://PCM_MODELS/Palladio.resourcetype#ProcessorSharing"/>
+      <activeResourceType_ActiveResourceSpecification href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+      <processingRate_ProcessingResourceSpecification specification="2.0"/>
+    </activeResourceSpecifications_ResourceContainer>
+  </resourceContainer_ResourceEnvironment>
+  <resourceContainer_ResourceEnvironment id="_c3_1_320694_s10_rc3" entityName="Node2">
+    <activeResourceSpecifications_ResourceContainer id="_c3_1_320694_s10_prs3">
+      <schedulingPolicy href="pathmap://PCM_MODELS/Palladio.resourcetype#FCFS"/>
+      <activeResourceType_ActiveResourceSpecification href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+      <processingRate_ProcessingResourceSpecification specification="0.5"/>
+    </activeResourceSpecifications_ResourceContainer>
+  </resourceContainer_ResourceEnvironment>
+</resourceenvironment:ResourceEnvironment>

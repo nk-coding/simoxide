@@ -1,0 +1,44 @@
+--- 5.2.2/Palladio-Analyzer-SimuCom/bundles/de.uka.ipd.sdq.simucomframework.variables/src/de/uka/ipd/sdq/simucomframework/variables/StackContext.java
++++ patched/de/uka/ipd/sdq/simucomframework/variables/StackContext.java
+@@ -83,10 +83,13 @@
+         }
+         StoExCacheEntry cacheEntry = StoExCache.singleton().getEntry(stoex);
+         Object result = null;
++        refsim.trace.Trace.evalBegin(); // REFSIM random tape: derived sample value of this evaluation
+         try {
+             result = new PCMStoExEvaluationVisitor(cacheEntry, currentFrame, mode, StoExCache.singleton()
+                     .getProbabilityFunctionFactory()).doSwitch(cacheEntry.getParsedExpression());
++            refsim.trace.Trace.evalEnd(stoex, result);
+         } catch (Exception ex) {
++            refsim.trace.Trace.evalAbort();
+             throw new StochasticExpressionEvaluationFailedException("Evaluation of expression " + stoex + " failed.",
+                     ex);
+         }
+@@ -122,10 +125,13 @@
+         }
+         StoExCacheEntry cacheEntry = StoExCache.singleton().getEntry(stoex);
+         Object result = null;
++        refsim.trace.Trace.evalBegin(); // REFSIM random tape: derived sample value of this evaluation
+         try {
+             result = new PCMStoExEvaluationVisitor(cacheEntry, currentFrame, VariableMode.EXCEPTION_ON_NOT_FOUND,
+                     StoExCache.singleton().getProbabilityFunctionFactory()).doSwitch(cacheEntry.getParsedExpression());
++            refsim.trace.Trace.evalEnd(stoex, result);
+         } catch (Exception ex) {
++            refsim.trace.Trace.evalAbort();
+             throw new StochasticExpressionEvaluationFailedException("Evaluation of expression " + stoex + " failed.",
+                     ex);
+         }
+@@ -152,10 +158,13 @@
+         }
+         StoExCacheEntry cacheEntry = StoExCache.singleton().getEntry(stoex);
+         Object result = null;
++        refsim.trace.Trace.evalBegin(); // REFSIM random tape: derived sample value of this evaluation
+         try {
+             result = new PCMStoExEvaluationVisitor(cacheEntry, currentFrame, mode, StoExCache.singleton()
+                     .getProbabilityFunctionFactory()).doSwitch(cacheEntry.getParsedExpression());
++            refsim.trace.Trace.evalEnd(stoex, result);
+         } catch (Exception ex) {
++            refsim.trace.Trace.evalAbort();
+             throw new StochasticExpressionEvaluationFailedException("Evaluation of expression " + stoex + " failed.",
+                     ex);
+         }

@@ -1,0 +1,17 @@
+--- 5.2.2/Palladio-Simulation-AbstractSimEngine/bundles/de.uka.ipd.sdq.simulation.abstractsimengine/src/de/uka/ipd/sdq/simulation/abstractsimengine/AbstractSimProcessDelegator.java
++++ patched/de/uka/ipd/sdq/simulation/abstractsimengine/AbstractSimProcessDelegator.java
+@@ -27,6 +27,14 @@
+         super(model, name);
+         this.delegate = model.getSimEngineFactory().createSimProcess(this, name);
+         this.id = generateNextID();
++        // REFSIM: trace id in creation order (+ bind the trace clock to this run's simulation control)
++        refsim.trace.Trace.bindControl(model.getSimulationControl());
++        refsim.trace.Trace.newProcess(this, name);
++    }
++
++    /** REFSIM: per-run reset of JVM-global state, so batch runs equal fresh-JVM runs. */
++    public static void refsimReset() {
++        processIdGenerator.set(0);
+     }
+ 
+     // TODO This method should be rather named getId() but there is already such a method. Thus,

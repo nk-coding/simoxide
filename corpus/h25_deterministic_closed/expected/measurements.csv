@@ -1,0 +1,395 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,0.0,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,0.0,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,0.0,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,0.0,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,2.0,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,2.2,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,2.4,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,2.6,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,3.199999999,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,3.7,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,3.9,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,4.1,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,4.300000001,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,4.9,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,5.399999999,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,5.599999998,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,5.799999998,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,6.0,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,6.600000001,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,7.100000001,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,7.300000001,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,7.500000001,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,7.700000001,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,8.3,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,8.800000001,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,9.0,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,9.2,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,9.400000002,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,10.000000003,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,10.500000003,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,10.700000003,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,10.900000003,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,11.100000003,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],Resource Demand Tuple,11.700000003,0.3
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,0.0,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,0.0,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,0.0,4.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,1.2,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,1.2,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,1.2,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,1.2,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,2.0,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,2.2,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,2.399999999,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,2.4,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,2.6,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,2.900000001,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,3.1,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,3.199999999,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,3.200000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,3.500000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,3.7,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,3.9,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,4.1,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,4.1,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,4.300000001,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,4.599999999,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,4.799999999,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,4.899999999,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,4.9,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,5.2,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,5.399999999,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,5.599999998,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,5.799999998,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,5.800000001,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,6.0,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,6.300000001,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,6.500000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,6.6,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,6.600000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,6.900000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,7.100000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,7.300000001,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,7.5,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,7.500000001,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,7.700000001,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,8.000000002,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,8.200000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,8.3,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,8.300000002,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,8.600000002,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,8.800000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,9.0,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,9.2,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,9.200000003,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,9.400000002,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,9.700000003,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,9.900000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,10.000000002,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,10.000000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,10.300000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,10.500000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,10.700000003,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,10.900000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,10.900000003,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,11.100000003,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,11.400000002,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,11.600000002,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,11.700000002,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,11.700000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0],State of Active Resource Tuple,11.700000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,1.2,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,1.2,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,1.2,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,1.2,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,2.399999999,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,2.900000001,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,3.1,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,3.200000001,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,3.500000001,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,4.1,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,4.599999999,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,4.799999999,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,4.899999999,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,5.2,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,5.800000001,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,6.300000001,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,6.500000001,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,6.6,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,6.900000001,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,7.5,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,8.000000002,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,8.200000001,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,8.300000002,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,8.600000002,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,9.200000003,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,9.700000003,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,9.900000003,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,10.000000002,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,10.300000003,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,10.900000003,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,11.400000002,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,11.600000002,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,11.700000002,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],Resource Demand Tuple,11.700000003,0.2
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,1.2,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,1.2,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,1.2,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,1.2,4.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,1.4,3.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,1.6,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,1.8,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,2.0,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,2.399999999,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,2.599999999,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,2.900000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,3.1,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,3.1,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,3.200000001,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,3.3,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,3.5,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,3.500000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,3.700000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,4.1,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,4.3,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,4.599999999,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,4.799999999,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,4.799999999,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,4.899999999,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,4.999999998,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,5.199999998,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,5.2,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,5.4,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,5.800000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,6.000000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,6.300000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,6.500000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,6.500000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,6.6,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,6.700000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,6.900000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,6.900000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,7.100000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,7.5,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,7.7,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,8.000000002,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,8.200000001,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,8.200000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,8.300000002,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,8.4,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,8.6,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,8.600000002,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,8.800000002,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,9.200000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,9.400000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,9.700000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,9.900000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,9.900000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,10.000000002,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,10.100000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,10.300000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,10.300000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,10.500000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,10.900000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,11.100000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,11.400000002,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,11.600000002,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,11.600000002,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,11.700000002,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0],State of Active Resource Tuple,11.700000003,2.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,1.4,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,1.6,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,1.8,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,2.0,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,2.599999999,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,3.1,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,3.3,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,3.5,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,3.700000001,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,4.3,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,4.799999999,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,4.999999998,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,5.199999998,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,5.4,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,6.000000001,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,6.500000001,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,6.700000001,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,6.900000001,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,7.100000001,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,7.7,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,8.200000001,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,8.4,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,8.6,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,8.800000002,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,9.400000003,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,9.900000003,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,10.100000003,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,10.300000003,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,10.500000003,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,11.100000003,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,11.600000002,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,11.700000003,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,11.700000003,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],Resource Demand Tuple,11.700000003,0.1
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,1.4,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,1.5,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,1.6,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,1.7,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,1.8,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,1.9,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,2.0,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,2.1,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,2.599999999,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,2.699999999,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,3.1,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,3.2,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,3.3,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,3.4,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,3.5,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,3.6,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,3.700000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,3.800000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,4.3,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,4.4,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,4.799999999,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,4.899999999,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,4.999999998,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,5.099999998,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,5.199999998,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,5.299999998,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,5.4,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,5.5,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,6.000000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,6.100000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,6.500000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,6.600000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,6.700000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,6.800000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,6.900000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,7.000000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,7.100000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,7.200000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,7.7,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,7.8,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,8.200000001,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,8.300000001,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,8.4,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,8.5,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,8.6,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,8.7,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,8.800000002,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,8.900000002,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,9.400000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,9.500000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,9.900000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,10.000000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,10.100000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,10.200000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,10.300000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,10.400000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,10.500000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,10.600000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,11.100000003,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,11.200000003,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,11.600000002,1.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,11.700000002,0.0
+ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0],State of Active Resource Tuple,11.700000003,0.0
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,1.5,1.5
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,1.7,1.7
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,1.9,1.9
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,2.1,2.1
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,2.699999999,0.6999999990000001
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,3.2,1.0
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,3.4,1.0
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,3.6,1.0
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,3.800000001,0.6000000019999998
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,4.4,0.7000000000000002
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,4.899999999,0.9999999990000004
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,5.099999998,0.9999999980000007
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,5.299999998,0.9999999969999998
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,5.5,0.5999999999999996
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,6.100000001,0.7000000019999995
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,6.600000001,1.0000000029999994
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,6.800000001,1.0000000030000002
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,7.000000001,1.000000001
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,7.200000001,0.6000000000000005
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,7.8,0.6999999990000001
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,8.300000001,1.0000000000000009
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,8.5,0.9999999989999999
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,8.7,0.999999998999999
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,8.900000002,0.6000000019999998
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,9.500000003,0.7000000019999995
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,10.000000003,1.0000000030000002
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,10.200000003,1.0000000030000002
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,10.400000003,1.000000001
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,10.600000003,0.5999999999999996
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,11.200000003,0.6999999999999993
+EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1],Response Time Tuple,11.700000002,0.9999999989999999
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,1.5,1.5
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,1.7,1.7
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,1.9,1.9
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,2.1,2.1
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,2.699999999,0.6999999990000001
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,3.2,1.0
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,3.4,1.0
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,3.6,1.0
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,3.800000001,0.6000000019999998
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,4.4,0.7000000000000002
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,4.899999999,0.9999999990000004
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,5.099999998,0.9999999980000007
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,5.299999998,0.9999999969999998
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,5.5,0.5999999999999996
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,6.100000001,0.7000000019999995
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,6.600000001,1.0000000029999994
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,6.800000001,1.0000000030000002
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,7.000000001,1.000000001
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,7.200000001,0.6000000000000005
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,7.8,0.6999999990000001
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,8.300000001,1.0000000000000009
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,8.5,0.9999999989999999
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,8.7,0.999999998999999
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,8.900000002,0.6000000019999998
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,9.500000003,0.7000000019999995
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,10.000000003,1.0000000030000002
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,10.200000003,1.0000000030000002
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,10.400000003,1.000000001
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,10.600000003,0.5999999999999996
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,11.200000003,0.6999999999999993
+SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1],Response Time Tuple,11.700000002,0.9999999989999999
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,1.5,1.5
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,1.7,1.7
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,1.9,1.9
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,2.1,2.1
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,2.699999999,0.6999999990000001
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,3.2,1.0
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,3.4,1.0
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,3.6,1.0
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,3.800000001,0.6000000019999998
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,4.4,0.7000000000000002
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,4.899999999,0.9999999990000004
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,5.099999998,0.9999999980000007
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,5.299999998,0.9999999969999998
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,5.5,0.5999999999999996
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,6.100000001,0.7000000019999995
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,6.600000001,1.0000000029999994
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,6.800000001,1.0000000030000002
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,7.000000001,1.000000001
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,7.200000001,0.6000000000000005
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,7.8,0.6999999990000001
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,8.300000001,1.0000000000000009
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,8.5,0.9999999989999999
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,8.7,0.999999998999999
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,8.900000002,0.6000000019999998
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,9.500000003,0.7000000019999995
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,10.000000003,1.0000000030000002
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,10.200000003,1.0000000030000002
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,10.400000003,1.000000001
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,10.600000003,0.5999999999999996
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,11.200000003,0.6999999999999993
+UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1],Response Time Tuple,11.700000002,0.9999999989999999

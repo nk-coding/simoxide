@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_gen6_repository1" entityName="gen6">
+  <components__Repository xsi:type="repository:BasicComponent" id="_gen6_comp1" entityName="Comp0">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_gen6_prov1" entityName="Provided_IService0" providedInterface__OperationProvidedRole="_gen6_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_gen6_req1" entityName="Required_IService1" requiredInterface__OperationRequiredRole="_gen6_if2"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_gen6_req2" entityName="Required_IService3" requiredInterface__OperationRequiredRole="_gen6_if4"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_gen6_req4" entityName="Required_IMiddleware" requiredInterface__InfrastructureRequiredRole="_gen6_if5"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_gen6_seff6" describedService__SEFF="_gen6_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act79" entityName="start" successor_AbstractAction="_gen6_act77"/>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_gen6_act77" entityName="call_op1_0" predecessor_AbstractAction="_gen6_act79" successor_AbstractAction="_gen6_act78" calledService_ExternalService="_gen6_sig2" role_ExternalService="_gen6_req1">
+        <inputVariableUsages__CallAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="0"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n0"/>
+        </inputVariableUsages__CallAction>
+        <inputVariableUsages__CallAction>
+          <variableCharacterisation_VariableUsage type="NUMBER_OF_ELEMENTS">
+            <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(4;0.5)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="items1"/>
+        </inputVariableUsages__CallAction>
+        <inputVariableUsages__CallAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:NamespaceReference" referenceName="items1">
+            <innerReference_NamespaceReference xsi:type="stoex:VariableReference" referenceName="INNER"/>
+          </namedReference__VariableUsage>
+        </inputVariableUsages__CallAction>
+        <returnVariableUsage__CallReturnAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="RETURN.VALUE"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="r0"/>
+        </returnVariableUsage__CallReturnAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:SetVariableAction" id="_gen6_act78" entityName="setReturn" predecessor_AbstractAction="_gen6_act77" successor_AbstractAction="_gen6_act80">
+        <localVariableUsages_SetVariableAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="UniInt(1, 4)"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="RETURN"/>
+        </localVariableUsages_SetVariableAction>
+        <localVariableUsages_SetVariableAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="IntPMF[(0;0.2)(3;0.5)(5;0.3)]"/>
+          </variableCharacterisation_VariableUsage>
+          <variableCharacterisation_VariableUsage type="BYTESIZE">
+            <specification_VariableCharacterisation specification="UniInt(100, 2000)"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="aux"/>
+        </localVariableUsages_SetVariableAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act80" entityName="stop" predecessor_AbstractAction="_gen6_act78"/>
+    </serviceEffectSpecifications__BasicComponent>
+    <passiveResource_BasicComponent id="_gen6_pr1" entityName="pool">
+      <capacity_PassiveResource specification="2"/>
+    </passiveResource_BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_gen6_comp2" entityName="Comp1">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_gen6_prov2" entityName="Provided_IService1" providedInterface__OperationProvidedRole="_gen6_if2"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_gen6_req3" entityName="Required_IService2" requiredInterface__OperationRequiredRole="_gen6_if3"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_gen6_req5" entityName="Required_IMiddleware" requiredInterface__InfrastructureRequiredRole="_gen6_if5"/>
+    <componentParameterUsage_ImplementationComponentType>
+      <variableCharacterisation_VariableUsage type="VALUE">
+        <specification_VariableCharacterisation specification="3"/>
+      </variableCharacterisation_VariableUsage>
+      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="cp0"/>
+    </componentParameterUsage_ImplementationComponentType>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_gen6_seff4" describedService__SEFF="_gen6_sig2">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act64" entityName="start" successor_AbstractAction="_gen6_act40"/>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_gen6_act40" entityName="call_op2_0" predecessor_AbstractAction="_gen6_act64" successor_AbstractAction="_gen6_act62" calledService_ExternalService="_gen6_sig4" role_ExternalService="_gen6_req3">
+        <inputVariableUsages__CallAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="IntPMF[(1;0.3)(2;0.4)(4;0.3)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n0"/>
+        </inputVariableUsages__CallAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:ForkAction" id="_gen6_act62" entityName="fork" predecessor_AbstractAction="_gen6_act40" successor_AbstractAction="_gen6_act63">
+        <asynchronousForkedBehaviours_ForkAction id="_gen6_rdb11">
+          <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act42" entityName="start" successor_AbstractAction="_gen6_act41"/>
+          <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act41" entityName="work" predecessor_AbstractAction="_gen6_act42" successor_AbstractAction="_gen6_act43">
+            <resourceDemand_Action>
+              <specification_ParametericResourceDemand specification="Round(Exp(0.5)) * 0.004"/>
+              <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+            </resourceDemand_Action>
+          </steps_Behaviour>
+          <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act43" entityName="stop" predecessor_AbstractAction="_gen6_act41"/>
+        </asynchronousForkedBehaviours_ForkAction>
+        <asynchronousForkedBehaviours_ForkAction id="_gen6_rdb15">
+          <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act56" entityName="start" successor_AbstractAction="_gen6_act48"/>
+          <steps_Behaviour xsi:type="seff:CollectionIteratorAction" id="_gen6_act48" entityName="iterate" predecessor_AbstractAction="_gen6_act56" successor_AbstractAction="_gen6_act55" parameter_CollectionIteratorAction="//@interfaces__Repository.1/@signatures__OperationInterface.0/@parameters__OperationSignature.1">
+            <bodyBehaviour_Loop id="_gen6_rdb12">
+              <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act46" entityName="start" successor_AbstractAction="_gen6_act44"/>
+              <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act44" entityName="work" predecessor_AbstractAction="_gen6_act46" successor_AbstractAction="_gen6_act45">
+                <resourceDemand_Action>
+                  <specification_ParametericResourceDemand specification="LognormMoments(0.01, 0.005)"/>
+                  <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+                </resourceDemand_Action>
+              </steps_Behaviour>
+              <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act45" entityName="work" predecessor_AbstractAction="_gen6_act44" successor_AbstractAction="_gen6_act47">
+                <resourceDemand_Action>
+                  <specification_ParametericResourceDemand specification="(2 + 3) * 0.002 - 0.01 / 2 ^ 2"/>
+                  <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+                </resourceDemand_Action>
+              </steps_Behaviour>
+              <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act47" entityName="stop" predecessor_AbstractAction="_gen6_act45"/>
+            </bodyBehaviour_Loop>
+          </steps_Behaviour>
+          <steps_Behaviour xsi:type="seff:CollectionIteratorAction" id="_gen6_act55" entityName="iterate" predecessor_AbstractAction="_gen6_act48" successor_AbstractAction="_gen6_act57" parameter_CollectionIteratorAction="//@interfaces__Repository.1/@signatures__OperationInterface.0/@parameters__OperationSignature.1">
+            <bodyBehaviour_Loop id="_gen6_rdb14">
+              <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act53" entityName="start" successor_AbstractAction="_gen6_act52"/>
+              <steps_Behaviour xsi:type="seff:LoopAction" id="_gen6_act52" entityName="loop" predecessor_AbstractAction="_gen6_act53" successor_AbstractAction="_gen6_act54">
+                <bodyBehaviour_Loop id="_gen6_rdb13">
+                  <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act50" entityName="start" successor_AbstractAction="_gen6_act49"/>
+                  <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act49" entityName="work" predecessor_AbstractAction="_gen6_act50" successor_AbstractAction="_gen6_act51">
+                    <resourceDemand_Action>
+                      <specification_ParametericResourceDemand specification="Exp(20.0)"/>
+                      <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+                    </resourceDemand_Action>
+                    <resourceDemand_Action>
+                      <specification_ParametericResourceDemand specification="IntPMF[(1;0.25)(2;0.75)] * 0.005"/>
+                      <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+                    </resourceDemand_Action>
+                  </steps_Behaviour>
+                  <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act51" entityName="stop" predecessor_AbstractAction="_gen6_act49"/>
+                </bodyBehaviour_Loop>
+                <iterationCount_LoopAction specification="3"/>
+              </steps_Behaviour>
+              <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act54" entityName="stop" predecessor_AbstractAction="_gen6_act52"/>
+            </bodyBehaviour_Loop>
+          </steps_Behaviour>
+          <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act57" entityName="stop" predecessor_AbstractAction="_gen6_act55"/>
+        </asynchronousForkedBehaviours_ForkAction>
+        <synchronisingBehaviours_ForkAction id="_gen6_sp5">
+          <synchronousForkedBehaviours_SynchronisationPoint id="_gen6_rdb16">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act60" entityName="start" successor_AbstractAction="_gen6_act58"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act58" entityName="work" predecessor_AbstractAction="_gen6_act60" successor_AbstractAction="_gen6_act59">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="Min(0.02, Exp(80.0)) + 0.001"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+              </resourceDemand_Action>
+              <infrastructureCall__Action id="_gen6_ic4" signature__InfrastructureCall="_gen6_sig6" requiredRole__InfrastructureCall="_gen6_req5">
+                <numberOfCalls__InfrastructureCall specification="IntPMF[(0;0.2)(1;0.5)(2;0.3)]"/>
+              </infrastructureCall__Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act59" entityName="work" predecessor_AbstractAction="_gen6_act58" successor_AbstractAction="_gen6_act61">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="cp0.VALUE * 0.001 + 0.001"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+              </resourceDemand_Action>
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.02"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act61" entityName="stop" predecessor_AbstractAction="_gen6_act59"/>
+          </synchronousForkedBehaviours_SynchronisationPoint>
+        </synchronisingBehaviours_ForkAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:SetVariableAction" id="_gen6_act63" entityName="setReturn" predecessor_AbstractAction="_gen6_act62" successor_AbstractAction="_gen6_act65">
+        <localVariableUsages_SetVariableAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="2"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="RETURN"/>
+        </localVariableUsages_SetVariableAction>
+        <localVariableUsages_SetVariableAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="UniInt(1, 4)"/>
+          </variableCharacterisation_VariableUsage>
+          <variableCharacterisation_VariableUsage type="BYTESIZE">
+            <specification_VariableCharacterisation specification="IntPMF[(1000;0.5)(5000;0.5)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="aux"/>
+        </localVariableUsages_SetVariableAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act65" entityName="stop" predecessor_AbstractAction="_gen6_act63"/>
+    </serviceEffectSpecifications__BasicComponent>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_gen6_seff5" describedService__SEFF="_gen6_sig3">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act75" entityName="start" successor_AbstractAction="_gen6_act66"/>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_gen6_act66" entityName="call_op2_0" predecessor_AbstractAction="_gen6_act75" successor_AbstractAction="_gen6_act73" calledService_ExternalService="_gen6_sig4" role_ExternalService="_gen6_req3">
+        <inputVariableUsages__CallAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="IntPMF[(0;0.2)(3;0.5)(5;0.3)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n0"/>
+        </inputVariableUsages__CallAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:LoopAction" id="_gen6_act73" entityName="loop" predecessor_AbstractAction="_gen6_act66" successor_AbstractAction="_gen6_act74">
+        <bodyBehaviour_Loop id="_gen6_rdb19">
+          <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act71" entityName="start" successor_AbstractAction="_gen6_act70"/>
+          <steps_Behaviour xsi:type="seff:LoopAction" id="_gen6_act70" entityName="loop" predecessor_AbstractAction="_gen6_act71" successor_AbstractAction="_gen6_act72">
+            <bodyBehaviour_Loop id="_gen6_rdb18">
+              <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act68" entityName="start" successor_AbstractAction="_gen6_act67"/>
+              <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act67" entityName="work" predecessor_AbstractAction="_gen6_act68" successor_AbstractAction="_gen6_act69">
+                <resourceDemand_Action>
+                  <specification_ParametericResourceDemand specification="Exp(200.0)"/>
+                  <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+                </resourceDemand_Action>
+                <infrastructureCall__Action id="_gen6_ic5" signature__InfrastructureCall="_gen6_sig6" requiredRole__InfrastructureCall="_gen6_req5">
+                  <numberOfCalls__InfrastructureCall specification="UniInt(1, 3)"/>
+                </infrastructureCall__Action>
+              </steps_Behaviour>
+              <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act69" entityName="stop" predecessor_AbstractAction="_gen6_act67"/>
+            </bodyBehaviour_Loop>
+            <iterationCount_LoopAction specification="2"/>
+          </steps_Behaviour>
+          <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act72" entityName="stop" predecessor_AbstractAction="_gen6_act70"/>
+        </bodyBehaviour_Loop>
+        <iterationCount_LoopAction specification="1"/>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:SetVariableAction" id="_gen6_act74" entityName="setReturn" predecessor_AbstractAction="_gen6_act73" successor_AbstractAction="_gen6_act76">
+        <localVariableUsages_SetVariableAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="1"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="RETURN"/>
+        </localVariableUsages_SetVariableAction>
+        <localVariableUsages_SetVariableAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="1"/>
+          </variableCharacterisation_VariableUsage>
+          <variableCharacterisation_VariableUsage type="BYTESIZE">
+            <specification_VariableCharacterisation specification="IntPMF[(1000;0.5)(5000;0.5)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="aux"/>
+        </localVariableUsages_SetVariableAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act76" entityName="stop" predecessor_AbstractAction="_gen6_act74"/>
+    </serviceEffectSpecifications__BasicComponent>
+    <passiveResource_BasicComponent id="_gen6_pr2" entityName="pool">
+      <capacity_PassiveResource specification="2"/>
+    </passiveResource_BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_gen6_comp3" entityName="Comp2">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_gen6_prov3" entityName="Provided_IService2" providedInterface__OperationProvidedRole="_gen6_if3"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_gen6_seff3" describedService__SEFF="_gen6_sig4">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act38" entityName="start" successor_AbstractAction="_gen6_act28"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act28" entityName="work" predecessor_AbstractAction="_gen6_act38" successor_AbstractAction="_gen6_act37">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.0"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:BranchAction" id="_gen6_act37" entityName="guard" predecessor_AbstractAction="_gen6_act28" successor_AbstractAction="_gen6_act39">
+        <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_gen6_bt1" entityName="guard_0">
+          <branchBehaviour_BranchTransition id="_gen6_rdb8">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act31" entityName="start" successor_AbstractAction="_gen6_act29"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act29" entityName="work" predecessor_AbstractAction="_gen6_act31" successor_AbstractAction="_gen6_act30">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.0"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act30" entityName="work" predecessor_AbstractAction="_gen6_act29" successor_AbstractAction="_gen6_act32">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="LognormMoments(0.01, 0.005)"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="Norm(0.005, 0.004)"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act32" entityName="stop" predecessor_AbstractAction="_gen6_act30"/>
+          </branchBehaviour_BranchTransition>
+          <branchCondition_GuardedBranchTransition specification="n0.VALUE &lt; 3"/>
+        </branches_Branch>
+        <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_gen6_bt2" entityName="guard_1">
+          <branchBehaviour_BranchTransition id="_gen6_rdb9">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act35" entityName="start" successor_AbstractAction="_gen6_act33"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act33" entityName="work" predecessor_AbstractAction="_gen6_act35" successor_AbstractAction="_gen6_act34">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="Gamma(2.0, 0.005)"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+              </resourceDemand_Action>
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="n0.VALUE * 0.002"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act34" entityName="work" predecessor_AbstractAction="_gen6_act33" successor_AbstractAction="_gen6_act36">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.02"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act36" entityName="stop" predecessor_AbstractAction="_gen6_act34"/>
+          </branchBehaviour_BranchTransition>
+          <branchCondition_GuardedBranchTransition specification="n0.VALUE &gt;= 3"/>
+        </branches_Branch>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act39" entityName="stop" predecessor_AbstractAction="_gen6_act37"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_gen6_comp4" entityName="Comp3">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_gen6_prov4" entityName="Provided_IService3" providedInterface__OperationProvidedRole="_gen6_if4"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_gen6_req6" entityName="Required_IMiddleware" requiredInterface__InfrastructureRequiredRole="_gen6_if5"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_gen6_seff2" describedService__SEFF="_gen6_sig5">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act26" entityName="start" successor_AbstractAction="_gen6_act20"/>
+      <steps_Behaviour xsi:type="seff:ForkAction" id="_gen6_act20" entityName="fork" predecessor_AbstractAction="_gen6_act26" successor_AbstractAction="_gen6_act25">
+        <synchronisingBehaviours_ForkAction id="_gen6_sp3">
+          <synchronousForkedBehaviours_SynchronisationPoint id="_gen6_rdb4">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act14" entityName="start" successor_AbstractAction="_gen6_act12"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act12" entityName="work" predecessor_AbstractAction="_gen6_act14" successor_AbstractAction="_gen6_act13">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="GammaMoments(0.01, 0.5)"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+              <infrastructureCall__Action id="_gen6_ic1" signature__InfrastructureCall="_gen6_sig6" requiredRole__InfrastructureCall="_gen6_req6">
+                <numberOfCalls__InfrastructureCall specification="1"/>
+              </infrastructureCall__Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act13" entityName="work" predecessor_AbstractAction="_gen6_act12" successor_AbstractAction="_gen6_act15">
+              <infrastructureCall__Action id="_gen6_ic2" signature__InfrastructureCall="_gen6_sig6" requiredRole__InfrastructureCall="_gen6_req6">
+                <numberOfCalls__InfrastructureCall specification="1"/>
+              </infrastructureCall__Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act15" entityName="stop" predecessor_AbstractAction="_gen6_act13"/>
+          </synchronousForkedBehaviours_SynchronisationPoint>
+          <synchronousForkedBehaviours_SynchronisationPoint id="_gen6_rdb5">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act18" entityName="start" successor_AbstractAction="_gen6_act17"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act17" entityName="syncWait" predecessor_AbstractAction="_gen6_act18" successor_AbstractAction="_gen6_act16">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.005"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act16" entityName="work" predecessor_AbstractAction="_gen6_act17" successor_AbstractAction="_gen6_act19">
+              <infrastructureCall__Action id="_gen6_ic3" signature__InfrastructureCall="_gen6_sig6" requiredRole__InfrastructureCall="_gen6_req6">
+                <numberOfCalls__InfrastructureCall specification="IntPMF[(0;0.2)(1;0.5)(2;0.3)]"/>
+              </infrastructureCall__Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act19" entityName="stop" predecessor_AbstractAction="_gen6_act16"/>
+          </synchronousForkedBehaviours_SynchronisationPoint>
+        </synchronisingBehaviours_ForkAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:ForkAction" id="_gen6_act25" entityName="fork" predecessor_AbstractAction="_gen6_act20" successor_AbstractAction="_gen6_act27">
+        <synchronisingBehaviours_ForkAction id="_gen6_sp4">
+          <synchronousForkedBehaviours_SynchronisationPoint id="_gen6_rdb6">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act23" entityName="start" successor_AbstractAction="_gen6_act21"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act21" entityName="work" predecessor_AbstractAction="_gen6_act23" successor_AbstractAction="_gen6_act22">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="DoublePDF[(0.005;0.5)(0.02;0.5)]"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act22" entityName="work" predecessor_AbstractAction="_gen6_act21" successor_AbstractAction="_gen6_act24">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="Pois(2.0) * 0.004"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="DoublePDF[(0.005;0.5)(0.02;0.5)]"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act24" entityName="stop" predecessor_AbstractAction="_gen6_act22"/>
+          </synchronousForkedBehaviours_SynchronisationPoint>
+        </synchronisingBehaviours_ForkAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act27" entityName="stop" predecessor_AbstractAction="_gen6_act25"/>
+    </serviceEffectSpecifications__BasicComponent>
+    <passiveResource_BasicComponent id="_gen6_pr3" entityName="pool">
+      <capacity_PassiveResource specification="1"/>
+    </passiveResource_BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_gen6_comp5" entityName="Middleware">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:InfrastructureProvidedRole" id="_gen6_prov5" entityName="Provided_IMiddleware" providedInterface__InfrastructureProvidedRole="_gen6_if5"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_gen6_seff1" describedService__SEFF="_gen6_sig6">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act10" entityName="start" successor_AbstractAction="_gen6_act5"/>
+      <steps_Behaviour xsi:type="seff:ForkAction" id="_gen6_act5" entityName="fork" predecessor_AbstractAction="_gen6_act10" successor_AbstractAction="_gen6_act9">
+        <synchronisingBehaviours_ForkAction id="_gen6_sp1">
+          <synchronousForkedBehaviours_SynchronisationPoint id="_gen6_rdb1">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act3" entityName="start" successor_AbstractAction="_gen6_act1"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act1" entityName="work" predecessor_AbstractAction="_gen6_act3" successor_AbstractAction="_gen6_act2">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.0"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_BIjHoQ3KEdyouMqirZIhzQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act2" entityName="work" predecessor_AbstractAction="_gen6_act1" successor_AbstractAction="_gen6_act4">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="Lognorm(-4.5, 0.4)"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act4" entityName="stop" predecessor_AbstractAction="_gen6_act2"/>
+          </synchronousForkedBehaviours_SynchronisationPoint>
+        </synchronisingBehaviours_ForkAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:ForkAction" id="_gen6_act9" entityName="fork" predecessor_AbstractAction="_gen6_act5" successor_AbstractAction="_gen6_act11">
+        <synchronisingBehaviours_ForkAction id="_gen6_sp2">
+          <synchronousForkedBehaviours_SynchronisationPoint id="_gen6_rdb2">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_gen6_act7" entityName="start" successor_AbstractAction="_gen6_act6"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_gen6_act6" entityName="work" predecessor_AbstractAction="_gen6_act7" successor_AbstractAction="_gen6_act8">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="Pois(2.0) * 0.004"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act8" entityName="stop" predecessor_AbstractAction="_gen6_act6"/>
+          </synchronousForkedBehaviours_SynchronisationPoint>
+        </synchronisingBehaviours_ForkAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_gen6_act11" entityName="stop" predecessor_AbstractAction="_gen6_act9"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_gen6_if1" entityName="IService0">
+    <signatures__OperationInterface id="_gen6_sig1" entityName="op0_0">
+      <parameters__OperationSignature dataType__Parameter="_gen6_dt1" parameterName="items0"/>
+      <parameters__OperationSignature parameterName="n1">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+      <returnType__OperationSignature xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_gen6_if2" entityName="IService1">
+    <signatures__OperationInterface id="_gen6_sig2" entityName="op1_0">
+      <parameters__OperationSignature parameterName="n0">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+      <parameters__OperationSignature dataType__Parameter="_gen6_dt1" parameterName="items1"/>
+      <returnType__OperationSignature xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+    </signatures__OperationInterface>
+    <signatures__OperationInterface id="_gen6_sig3" entityName="op1_1">
+      <parameters__OperationSignature dataType__Parameter="_gen6_dt1" parameterName="items0"/>
+      <returnType__OperationSignature xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_gen6_if3" entityName="IService2">
+    <signatures__OperationInterface id="_gen6_sig4" entityName="op2_0">
+      <parameters__OperationSignature parameterName="n0">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_gen6_if4" entityName="IService3">
+    <signatures__OperationInterface id="_gen6_sig5" entityName="op3_0"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:InfrastructureInterface" id="_gen6_if5" entityName="IMiddleware">
+    <infrastructureSignatures__InfrastructureInterface id="_gen6_sig6" entityName="marshal"/>
+  </interfaces__Repository>
+  <dataTypes__Repository xsi:type="repository:CollectionDataType" id="_gen6_dt1" entityName="IntList">
+    <innerType_CollectionDataType xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+  </dataTypes__Repository>
+</repository:Repository>

@@ -1,0 +1,35 @@
+--- 5.2.2/Palladio-Analyzer-SimuCom/bundles/de.uka.ipd.sdq.simucomframework.core/src/de/uka/ipd/sdq/simucomframework/core/resources/SimSimpleFairPassiveResource.java
++++ patched/de/uka/ipd/sdq/simucomframework/core/resources/SimSimpleFairPassiveResource.java
+@@ -100,6 +100,10 @@
+     private void grantAccess(final ISchedulableProcess process, final long num) {
+         LoggingWrapper.log("Process " + process + " acquires " + num + " of " + this);
+         this.available -= num;
++        if (refsim.trace.Trace.ON) { // REFSIM trace
++            refsim.trace.Trace.event("grant", process, "res", passiveResourceID, "ac", assemblyContext.getId(), "n", num,
++                    "avail", available);
++        }
+         observee.fireAquire(process, num);
+         assert this.available >= 0 : "More resource than available have been acquired!";
+     }
+@@ -120,6 +124,10 @@
+         // In this case, this method should not block, but return in order to
+         // allow processes to complete
+         observee.fireRequest(schedulableProcess, num);
++        if (refsim.trace.Trace.ON) { // REFSIM trace
++            refsim.trace.Trace.event("acquire", schedulableProcess, "res", passiveResourceID, "ac", assemblyContext.getId(), "n",
++                    num, "avail", available, "queue", waitingQueue.size());
++        }
+         if (canProceed(schedulableProcess, num)) {
+             grantAccess(schedulableProcess, num);
+             return true;
+@@ -183,6 +191,10 @@
+ 
+         LoggingWrapper.log("Process " + schedulableProcess + " releases " + num + " of " + this);
+         this.available += num;
++        if (refsim.trace.Trace.ON) { // REFSIM trace
++            refsim.trace.Trace.event("release", schedulableProcess, "res", passiveResourceID, "ac", assemblyContext.getId(), "n",
++                    num, "avail", available);
++        }
+         observee.fireRelease(schedulableProcess, num);
+         notifyWaitingProcesses();
+     }

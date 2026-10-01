@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: defaultUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_replicated_composite/default.usagemodel#_-ttaACihEeCxO_9MozM6LA">
+    <usageScenario href="default.usagemodel#_-ttaACihEeCxO_9MozM6LA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_Worker->work [_Ai-5kCiiEeCxO_9MozM6LA]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_replicated_composite/default.usagemodel#_Ai-5kCiiEeCxO_9MozM6LA">
+    <entryLevelSystemCall href="default.usagemodel#_Ai-5kCiiEeCxO_9MozM6LA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_Worker.work"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_replicated_composite/default.repository#_vgukYCifEeCxO_9MozM6LA">
+    <role xsi:type="repository:OperationProvidedRole" href="default.system#_Buya0CihEeCxO_9MozM6LA"/>
+    <operationSignature href="default.repository#_vgukYCifEeCxO_9MozM6LA"/>
+    <system href="default.system#_6RVx0CigEeCxO_9MozM6LA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from LoadBalancer_2 to Required_Worker_LoadBalancer_2_1->work [_t22nECigEeCxO_9MozM6LA]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_replicated_composite/default.repository#_t22nECigEeCxO_9MozM6LA">
+    <externalCall href="default.repository#_t22nECigEeCxO_9MozM6LA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from LoadBalancer_2 to Required_Worker_LoadBalancer_2_2->work [_qideICigEeCxO_9MozM6LA]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_replicated_composite/default.repository#_qideICigEeCxO_9MozM6LA">
+    <externalCall href="default.repository#_qideICigEeCxO_9MozM6LA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Kiste1" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_replicated_composite/default.resourceenvironment#_cL4N0LuZEfGlbqFMZxAJkQ">
+    <activeResource href="default.resourceenvironment#_cL4N0LuZEfGlbqFMZxAJkQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Kiste2" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_replicated_composite/default.resourceenvironment#_cL4047uZEfGlbqFMZxAJkQ">
+    <activeResource href="default.resourceenvironment#_cL4047uZEfGlbqFMZxAJkQ"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

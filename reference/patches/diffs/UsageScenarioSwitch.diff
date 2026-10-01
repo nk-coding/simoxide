@@ -1,0 +1,69 @@
+--- 5.2.2/Palladio-Analyzer-SimuLizar/bundles/org.palladiosimulator.simulizar/src/org/palladiosimulator/simulizar/interpreter/UsageScenarioSwitch.java
++++ patched/org/palladiosimulator/simulizar/interpreter/UsageScenarioSwitch.java
+@@ -144,8 +144,14 @@
+     @Override
+     public InterpreterResult caseDelay(final Delay object) {
+         // determine delay
+-        final double delay = StackContext.evaluateStatic(object.getTimeSpecification_Delay().getSpecification(),
+-                Double.class);
++        final String prevOrigin = refsim.trace.Trace.origin("delay", object); // REFSIM tape
++        final double delay;
++        try {
++            delay = StackContext.evaluateStatic(object.getTimeSpecification_Delay().getSpecification(),
++                    Double.class);
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+         if (LOGGER.isDebugEnabled()) {
+             LOGGER.debug("Start delay " + delay + " @ simulation time "
+                     + this.context.getModel().getSimulationControl().getCurrentSimulationTime());
+@@ -178,15 +184,25 @@
+                             .getProvidingEntity_ProvidedRole()));
+ 
+         // create new stack frame for input parameter
+-        SimulatedStackHelper.createAndPushNewStackFrame(this.context.getStack(),
+-                entryLevelSystemCall.getInputParameterUsages_EntryLevelSystemCall());
++        final String prevOrigin = refsim.trace.Trace.origin("param", entryLevelSystemCall); // REFSIM tape
++        try {
++            SimulatedStackHelper.createAndPushNewStackFrame(this.context.getStack(),
++                    entryLevelSystemCall.getInputParameterUsages_EntryLevelSystemCall());
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+         
+         this.context.getResultFrameStack().push(new SimulatedStackframe<>());
+         var result = Objects.requireNonNull(providedDelegationSwitch.doSwitch(entryLevelSystemCall.getProvidedRole_EntryLevelSystemCall()));
+         this.context.getStack().removeStackFrame();
+         
+-        SimulatedStackHelper.addParameterToStackFrame(context.getResultFrameStack().pop(),
+-                entryLevelSystemCall.getOutputParameterUsages_EntryLevelSystemCall(), this.context.getStack().currentStackFrame());
++        final String prevReturn = refsim.trace.Trace.origin("return", entryLevelSystemCall); // REFSIM tape
++        try {
++            SimulatedStackHelper.addParameterToStackFrame(context.getResultFrameStack().pop(),
++                    entryLevelSystemCall.getOutputParameterUsages_EntryLevelSystemCall(), this.context.getStack().currentStackFrame());
++        } finally {
++            refsim.trace.Trace.origin(prevReturn);
++        }
+ 
+         eventHelper.firePassedEvent(
+                 new SystemOperationPassedEvent<org.palladiosimulator.pcm.system.System, ProvidedRole, Signature>(
+@@ -205,8 +221,17 @@
+     @Override
+     public InterpreterResult caseLoop(final Loop object) {
+         // determine number of loops
+-        final int numberOfLoops = StackContext.evaluateStatic(object.getLoopIteration_Loop().getSpecification(),
+-                Integer.class);
++        final String prevOrigin = refsim.trace.Trace.origin("loop", object); // REFSIM tape
++        final int numberOfLoops;
++        try {
++            numberOfLoops = StackContext.evaluateStatic(object.getLoopIteration_Loop().getSpecification(),
++                    Integer.class);
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
++        if (refsim.trace.Trace.ON) { // REFSIM trace
++            refsim.trace.Trace.event("loop", this.context.getThread(), "id", refsim.trace.Trace.id(object), "n", numberOfLoops);
++        }
+         var result = InterpreterResult.OK;
+         for (int i = 0; issueHandler.handleIssues(result) == InterpreterResumptionPolicy.CONTINUE
+                 && i < numberOfLoops; i++) {

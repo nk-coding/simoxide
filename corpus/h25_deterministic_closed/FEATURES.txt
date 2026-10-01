@@ -1,0 +1,1 @@
+fully deterministic model (no random draws): closed workload, constant demands on PS + FCFS + DELAY

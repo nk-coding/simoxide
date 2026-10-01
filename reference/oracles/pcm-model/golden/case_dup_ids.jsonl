@@ -1,0 +1,16 @@
+{"emf_errors":2}
+{"resource":"dup.repository","roots":1}
+{"path":"/","id":"_repo","type":"repository:Repository","attrs":{"entityName":"dup","repositoryDescription":null},"refs":{}}
+{"path":"//@components__Repository.0","id":"_c0","type":"repository:BasicComponent","attrs":{"entityName":"Early","componentType":"BUSINESS_COMPONENT"},"refs":{}}
+{"path":"//@components__Repository.0/@providedRoles_InterfaceProvidingEntity.0","id":"_r0","type":"repository:OperationProvidedRole","attrs":{"entityName":"aName"},"refs":{"providedInterface__OperationProvidedRole":"dup.repository#_dup"}}
+{"path":"//@components__Repository.0/@requiredRoles_InterfaceRequiringEntity.0","id":"_r1","type":"repository:OperationRequiredRole","attrs":{"entityName":"aName"},"refs":{}}
+{"path":"//@components__Repository.1","id":"_dup","type":"repository:BasicComponent","attrs":{"entityName":"Late","componentType":"BUSINESS_COMPONENT"},"refs":{}}
+{"path":"//@components__Repository.2","id":"_dup2","type":"repository:BasicComponent","attrs":{"entityName":"Late2","componentType":"BUSINESS_COMPONENT"},"refs":{}}
+{"path":"//@interfaces__Repository.0","id":"_dup","type":"repository:OperationInterface","attrs":{"entityName":"I"},"refs":{}}
+{"path":"//@interfaces__Repository.0/@signatures__OperationInterface.0","id":"_sig1","type":"repository:OperationSignature","attrs":{"entityName":"a"},"refs":{}}
+{"path":"//@interfaces__Repository.1","id":"_dup2","type":"repository:OperationInterface","attrs":{"entityName":"I2"},"refs":{}}
+{"resource":"dup.system","roots":1}
+{"path":"/","id":"_sys","type":"system:System","attrs":{"entityName":"S"},"refs":{}}
+{"path":"//@assemblyContexts__ComposedStructure.0","id":"_ac1","type":"composition:AssemblyContext","attrs":{"entityName":"AC1"},"refs":{"encapsulatedComponent__AssemblyContext":"dup.repository#_dup"}}
+{"path":"//@assemblyContexts__ComposedStructure.1","id":"_ac2","type":"composition:AssemblyContext","attrs":{"entityName":"AC2"},"refs":{"encapsulatedComponent__AssemblyContext":"dup.repository#_dup"}}
+{"path":"//@assemblyContexts__ComposedStructure.2","id":"_ac3","type":"composition:AssemblyContext","attrs":{"entityName":"AC3"},"refs":{"encapsulatedComponent__AssemblyContext":"?dup.repository#_nope"}}

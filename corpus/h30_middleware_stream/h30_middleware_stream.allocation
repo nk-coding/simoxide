@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h30_middleware_stream_allocation1" entityName="h30_middleware_stream">
+  <targetResourceEnvironment_Allocation href="h30_middleware_stream.resourceenvironment#/"/>
+  <system_Allocation href="h30_middleware_stream.system#_h30_middleware_stream_system1"/>
+  <allocationContexts_Allocation id="_h30_middleware_stream_alc1" entityName="Allocation_Assembly_Client">
+    <resourceContainer_AllocationContext href="h30_middleware_stream.resourceenvironment#_h30_middleware_stream_rc1"/>
+    <assemblyContext_AllocationContext href="h30_middleware_stream.system#_h30_middleware_stream_ac1"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_h30_middleware_stream_alc2" entityName="Allocation_Assembly_LocalHelper">
+    <resourceContainer_AllocationContext href="h30_middleware_stream.resourceenvironment#_h30_middleware_stream_rc1"/>
+    <assemblyContext_AllocationContext href="h30_middleware_stream.system#_h30_middleware_stream_ac3"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_h30_middleware_stream_alc3" entityName="Allocation_Assembly_RemoteServer">
+    <resourceContainer_AllocationContext href="h30_middleware_stream.resourceenvironment#_h30_middleware_stream_rc2"/>
+    <assemblyContext_AllocationContext href="h30_middleware_stream.system#_h30_middleware_stream_ac2"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

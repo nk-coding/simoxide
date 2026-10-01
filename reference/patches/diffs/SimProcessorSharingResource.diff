@@ -1,0 +1,23 @@
+--- 5.2.2/Palladio-Simulation-Scheduler/bundles/de.uka.ipd.sdq.scheduler/src/de/uka/ipd/sdq/scheduler/resources/active/SimProcessorSharingResource.java
++++ patched/de/uka/ipd/sdq/scheduler/resources/active/SimProcessorSharingResource.java
+@@ -25,7 +25,10 @@
+     private final static double JIFFY = 1e-9;
+ 
+     private final ProcessingFinishedEvent processingFinished;
+-    private final Hashtable<ISchedulableProcess, Double> running_processes = new Hashtable<ISchedulableProcess, Double>();
++    // REFSIM (same patch as reference/oracles/sched): Hashtable -> LinkedHashMap so that ties in
++    // scheduleNextEvent() (first process with minimal remaining demand in iteration order) are broken by
++    // insertion order instead of identity-hash order (which differs between runs).
++    private final java.util.LinkedHashMap<ISchedulableProcess, Double> running_processes = new java.util.LinkedHashMap<ISchedulableProcess, Double>();
+     /** Keeps track of the current number of processes assigned to each core. */
+     private final List<Integer> numberProcessesOnCore;
+ 
+@@ -173,7 +176,7 @@
+ 
+ 	@Override
+     public double getRemainingDemand(final ISchedulableProcess process) {
+-        if (!running_processes.contains(process)) {
++        if (!running_processes.containsValue(process)) { // REFSIM: Hashtable.contains == containsValue (original bug kept)
+             return 0.0;
+         }
+         toNow();

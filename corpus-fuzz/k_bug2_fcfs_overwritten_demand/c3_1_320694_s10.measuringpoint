@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_c3_1_320694_s10_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario0">
+    <usageScenario href="c3_1_320694_s10.usagemodel#_c3_1_320694_s10_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario1">
+    <usageScenario href="c3_1_320694_s10.usagemodel#_c3_1_320694_s10_us2"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall call_op0_0 [_c3_1_320694_s10_ua1]">
+    <entryLevelSystemCall href="c3_1_320694_s10.usagemodel#_c3_1_320694_s10_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall call_op0_0 [_c3_1_320694_s10_ua4]">
+    <entryLevelSystemCall href="c3_1_320694_s10.usagemodel#_c3_1_320694_s10_ua4"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="c3_1_320694_s10.Provided_IService0.op0_0">
+    <role xsi:type="repository:OperationProvidedRole" href="c3_1_320694_s10.system#_c3_1_320694_s10_prov10"/>
+    <operationSignature href="c3_1_320694_s10.repository#_c3_1_320694_s10_sig1"/>
+    <system href="c3_1_320694_s10.system#_c3_1_320694_s10_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall call_op2_0 [_c3_1_320694_s10_act100]">
+    <externalCall href="c3_1_320694_s10.repository#_c3_1_320694_s10_act100"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall call_op2_1 [_c3_1_320694_s10_act105]">
+    <externalCall href="c3_1_320694_s10.repository#_c3_1_320694_s10_act105"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall call_op1_0 [_c3_1_320694_s10_act110]">
+    <externalCall href="c3_1_320694_s10.repository#_c3_1_320694_s10_act110"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall call_op3_0 [_c3_1_320694_s10_act76]">
+    <externalCall href="c3_1_320694_s10.repository#_c3_1_320694_s10_act76"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall call_op3_0 [_c3_1_320694_s10_act77]">
+    <externalCall href="c3_1_320694_s10.repository#_c3_1_320694_s10_act77"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall call_op4_0 [_c3_1_320694_s10_act57]">
+    <externalCall href="c3_1_320694_s10.repository#_c3_1_320694_s10_act57"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall call_op4_0 [_c3_1_320694_s10_act60]">
+    <externalCall href="c3_1_320694_s10.repository#_c3_1_320694_s10_act60"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Node0">
+    <activeResource href="c3_1_320694_s10.resourceenvironment#_c3_1_320694_s10_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Node1">
+    <activeResource href="c3_1_320694_s10.resourceenvironment#_c3_1_320694_s10_prs2"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Node2">
+    <activeResource href="c3_1_320694_s10.resourceenvironment#_c3_1_320694_s10_prs3"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_h30_middleware_stream_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h30_middleware_stream/h30_middleware_stream.usagemodel#_h30_middleware_stream_us1">
+    <usageScenario href="h30_middleware_stream.usagemodel#_h30_middleware_stream_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall callOp to h30_middleware_stream->Provided_IService->op [_h30_middleware_stream_ua1]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h30_middleware_stream/h30_middleware_stream.usagemodel#_h30_middleware_stream_ua1">
+    <entryLevelSystemCall href="h30_middleware_stream.usagemodel#_h30_middleware_stream_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="h30_middleware_stream.Provided_IService.op"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h30_middleware_stream/h30_middleware_stream.repository#_h30_middleware_stream_sig1">
+    <role xsi:type="repository:OperationProvidedRole" href="h30_middleware_stream.system#_h30_middleware_stream_prov4"/>
+    <operationSignature href="h30_middleware_stream.repository#_h30_middleware_stream_sig1"/>
+    <system href="h30_middleware_stream.system#_h30_middleware_stream_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall callLocal from Client to Required_ILocal->local [_h30_middleware_stream_act2]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h30_middleware_stream/h30_middleware_stream.repository#_h30_middleware_stream_act2">
+    <externalCall href="h30_middleware_stream.repository#_h30_middleware_stream_act2"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall callRemote from Client to Required_IRemote->remote [_h30_middleware_stream_act3]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h30_middleware_stream/h30_middleware_stream.repository#_h30_middleware_stream_act3">
+    <externalCall href="h30_middleware_stream.repository#_h30_middleware_stream_act3"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ClientNode"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h30_middleware_stream/h30_middleware_stream.resourceenvironment#_h30_middleware_stream_prs1">
+    <activeResource href="h30_middleware_stream.resourceenvironment#_h30_middleware_stream_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ServerNode"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h30_middleware_stream/h30_middleware_stream.resourceenvironment#_h30_middleware_stream_prs2">
+    <activeResource href="h30_middleware_stream.resourceenvironment#_h30_middleware_stream_prs2"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

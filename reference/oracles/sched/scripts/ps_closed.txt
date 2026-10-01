@@ -1,0 +1,6 @@
+# closed-loop jobs: think times (events) and immediate follow-ups (now)
+resource ps 2 1.5
+job a 0 0.3 0.1 0.2 now 0.4 0 0.1
+job b 0 0.3 0.1 0.2 now 0.4 0 0.1
+job c 0.05 0.7 0.2 0.7 0.2 0.7
+job d 0.05 0.01 0.01 0.01 0.01 0.01 0.01 0.01

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension id="app" point="org.eclipse.core.runtime.applications">
+      <application cardinality="singleton-global" thread="main" visible="true">
+         <run class="headless.simucom.SimuComApp"/>
+      </application>
+   </extension>
+   <!-- SimuCom's project nature is declared in org.palladiosimulator.simucom.launch, which is NOT shipped in the
+        Palladio 5.2.2 product; re-declare it so CompilePluginCodeJob can set it on the generated project. -->
+   <extension id="de.uka.ipd.sdq.codegen.simucontroller.runconfig.simucomnature" point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run class="de.uka.ipd.sdq.codegen.simucontroller.runconfig.SimuComNature"/>
+      </runtime>
+   </extension>
+</plugin>

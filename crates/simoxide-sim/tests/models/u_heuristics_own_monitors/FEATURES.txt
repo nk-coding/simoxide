@@ -1,0 +1,1 @@
+Palladio-Example-Models SimpleHeuristicsExample with its own monitors: the usage-scenario monitor references the equal-id scenario of quickbooking.usagemodel, probes are matched by id (MEAS-3.1). Expected outputs: reference/refsim batch (2026-09-29, agent L).

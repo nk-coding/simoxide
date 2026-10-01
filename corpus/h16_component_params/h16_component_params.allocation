@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h16_component_params_allocation1" entityName="h16_component_params">
+  <targetResourceEnvironment_Allocation href="h16_component_params.resourceenvironment#/"/>
+  <system_Allocation href="h16_component_params.system#_h16_component_params_system1"/>
+  <allocationContexts_Allocation id="_h16_component_params_alc1" entityName="Allocation_Assembly_Front">
+    <resourceContainer_AllocationContext href="h16_component_params.resourceenvironment#_h16_component_params_rc1"/>
+    <assemblyContext_AllocationContext href="h16_component_params.system#_h16_component_params_ac1"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_h16_component_params_alc2" entityName="Allocation_Worker_default">
+    <resourceContainer_AllocationContext href="h16_component_params.resourceenvironment#_h16_component_params_rc1"/>
+    <assemblyContext_AllocationContext href="h16_component_params.system#_h16_component_params_ac2"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_h16_component_params_alc3" entityName="Allocation_Worker_override">
+    <resourceContainer_AllocationContext href="h16_component_params.resourceenvironment#_h16_component_params_rc1"/>
+    <assemblyContext_AllocationContext href="h16_component_params.system#_h16_component_params_ac3"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

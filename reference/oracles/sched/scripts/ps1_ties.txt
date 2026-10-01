@@ -1,0 +1,9 @@
+# equal demands, simultaneous arrivals and completions
+resource ps 1 1.0
+job a 0 1.0
+job b 0 1.0
+job c 0 1.0
+job d 1 0.5
+job e 1 0.5
+job f 5 0.25 now 0.25
+job g 5 0.25 now 0.25

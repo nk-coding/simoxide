@@ -1,0 +1,22 @@
+#!/bin/bash
+# Deterministic SimuLizar 5.2.2 reference runner. See reference/README (PATCHES.md, docs/guide/formats.md).
+#   refsim run --model <dir|files> --seed N --max-sim-time T --max-measurements M --trace F --tape F --measurements F
+#   refsim batch <corpusDir> [--in-place|--out DIR] [--only a,b] [--repeat N] [--check]
+# Env: REFSIM_UNPATCHED=1 -> run the stock 5.2.2 classes (no determinism patches, no trace hooks)
+#      JAVA, JVM_OPTS, REFSIM_LOG (log4j level, default ERROR)
+D="$(cd "$(dirname "$0")" && pwd)"
+P=${PALLADIO_PLUGINS:-/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins}
+[ -f "$D/build/classes-base/refsim/Main.class" ] || "$D/build.sh" >&2 || exit 1
+"$D/tools/classpath.sh" > /dev/null || exit 1
+CP="$D/build/classes-patches:$D/build/classes-base:$(cat "$D/build/classpath.txt")"
+UNP=false; [ "$REFSIM_UNPATCHED" = 1 ] && { CP="$D/build/classes-base:$(cat "$D/build/classpath.txt")"; UNP=true; }
+# REFSIM_EXCLUDE=Class1,Class2: drop these patched classes (simple names, incl. inner classes) - for evidence runs
+if [ -n "$REFSIM_EXCLUDE" ] && [ "$UNP" = false ]; then
+  X=$(mktemp -d); cp -r "$D/build/classes-patches/." "$X/"
+  for c in $(echo "$REFSIM_EXCLUDE" | tr ',' ' '); do find "$X" \( -name "$c.class" -o -name "$c\$*.class" \) -delete; done
+  CP="$X:$D/build/classes-base:$(cat "$D/build/classpath.txt")"
+  trap 'rm -rf "$X"' EXIT
+  ${JAVA:-java} ${JVM_OPTS:--Xmx2g -XX:+UseSerialGC} -Drefsim.log=${REFSIM_LOG:-ERROR} -Drefsim.verbose=${REFSIM_VERBOSE:-false} -Drefsim.unpatched=false -cp "$CP" refsim.Main "$P" "$@"
+  exit $?
+fi
+exec ${JAVA:-java} ${JVM_OPTS:--Xmx2g -XX:+UseSerialGC} -Drefsim.log=${REFSIM_LOG:-ERROR} -Drefsim.verbose=${REFSIM_VERBOSE:-false} -Drefsim.unpatched=$UNP -cp "$CP" refsim.Main "$P" "$@"

@@ -1,0 +1,54 @@
+--- 5.2.2/Palladio-Analyzer-SimuCom/bundles/de.uka.ipd.sdq.simucomframework.core/src/de/uka/ipd/sdq/simucomframework/core/resources/AbstractScheduledResource.java
++++ patched/de/uka/ipd/sdq/simucomframework/core/resources/AbstractScheduledResource.java
+@@ -144,22 +144,39 @@
+         // registerProcessWindows(process, aResource);
+         // LOGGER.info("Demanding " + abstractDemand);
+ 
+-        double concreteDemand = calculateDemand(abstractDemand);
++        // REFSIM tape: processing rate / throughput / latency evaluations
++        final String prevOrigin = refsim.trace.Trace.TAPE ? refsim.trace.Trace.origin("rate:" + resourceContainerID)
++                : null;
++        double concreteDemand;
++        double additiveValue = 0.0;
++        try {
++        concreteDemand = calculateDemand(abstractDemand);
+ 
+         // for every demand modifying behavior
+         // the demand is scaled and a latency value is added to the demand.
+-        double additiveValue = 0.0;
+         for (DemandModifyingBehavior b : this.demandModifyingBehaviors) {
+             DemandModification demandModification = b.modifyDemand(concreteDemand);
+             concreteDemand = demandModification.getScaledDemand();
+             additiveValue += demandModification.getAdditiveDemandValue();
+         }
++        } finally {
++            if (refsim.trace.Trace.TAPE) {
++                refsim.trace.Trace.origin(prevOrigin);
++            }
++        }
+         concreteDemand += additiveValue;
+ 
++        if (refsim.trace.Trace.ON) { // REFSIM trace: demand issued (abstract demand, service time = demand / rate)
++            refsim.trace.Trace.event("demand", thread, "res", resourceTypeID, "rc", resourceContainerID, "spec", getName(),
++                    "sched", schedulingStrategyID, "d", abstractDemand, "st", concreteDemand);
++        }
+         // abstractDemand may be zero, in that case only the latency is considered.
+         if (concreteDemand <= 0) {
+             // Do nothing.
+             // TODO throw an exception or add a warning?
++            if (refsim.trace.Trace.ON) { // REFSIM trace
++                refsim.trace.Trace.event("demand_done", thread, "res", resourceTypeID, "rc", resourceContainerID);
++            }
+             return;
+         }
+ 
+@@ -170,6 +187,9 @@
+         // LOGGER.info("Recording " + concreteDemand);
+         fireDemand(concreteDemand);
+         getUnderlyingResource().process(thread, resourceServiceID, parameterMap, concreteDemand);
++        if (refsim.trace.Trace.ON) { // REFSIM trace: demand completed (process resumed)
++            refsim.trace.Trace.event("demand_done", thread, "res", resourceTypeID, "rc", resourceContainerID);
++        }
+     }
+ 
+     @Override

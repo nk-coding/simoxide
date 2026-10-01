@@ -1,0 +1,10 @@
+reference failed, candidate ran
+failed: ERROR de.uka.ipd.sdq.workflow.WorkflowFailedException: A workflow job failed
+de.uka.ipd.sdq.workflow.WorkflowFailedException: A workflow job failed
+    at de.uka.ipd.sdq.workflow.jobs.SequentialJob.executeWithImmediateCleanUp(SequentialJob.java:165)
+    at de.uka.ipd.sdq.workflow.jobs.SequentialJob.execute(SequentialJob.java:77)
+    at org.palladiosimulator.simulizar.launcher.jobs.SimuLizarRuntimeJob.execute(SimuLizarRuntimeJob.java:82)
+Caused by: java.lang.NullPointerException: Cannot invoke "java.lang.Double.doubleValue()" because the return value of "java.util.Hashtable.get(Object)" is null
+    at de.uka.ipd.sdq.scheduler.resources.active.SimFCFSResource.scheduleNextEvent(SimFCFSResource.java:54)
+    at de.uka.ipd.sdq.scheduler.resources.active.SimFCFSResource$ProcessingFinishedEvent.eventRoutine(SimFCFSResource.java:34)
+    at de.uka.ipd.sdq.scheduler.resources.active.SimFCFSResource$ProcessingFinishedEvent.eventRoutine(SimFCFSResource.java:1)

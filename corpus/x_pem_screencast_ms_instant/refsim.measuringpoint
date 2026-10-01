@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: RealisticUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStoreInstant-DownloadCache.usagemodel#__hpRMHD6EeSA4fySuX9I2Q">
+    <usageScenario href="MediaStoreInstant-DownloadCache.usagemodel#__hpRMHD6EeSA4fySuX9I2Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall download to MediaStoreSystem->IWebGui->download [_8QUmUHk9EeSGtbTG2d9Ipg]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStoreInstant-DownloadCache.usagemodel#_8QUmUHk9EeSGtbTG2d9Ipg">
+    <entryLevelSystemCall href="MediaStoreInstant-DownloadCache.usagemodel#_8QUmUHk9EeSGtbTG2d9Ipg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall upload to MediaStoreSystem->IWebGui->upload [_U83_oHk-EeSGtbTG2d9Ipg]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStoreInstant-DownloadCache.usagemodel#_U83_oHk-EeSGtbTG2d9Ipg">
+    <entryLevelSystemCall href="MediaStoreInstant-DownloadCache.usagemodel#_U83_oHk-EeSGtbTG2d9Ipg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="MediaStoreSystem.IWebGui.upload"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.repository#_Qa8AAHDvEeSqnN80MQ2uGw">
+    <role xsi:type="repository:OperationProvidedRole" href="MediaStore-InstantDownloadCache.system#_b9NvYHD6EeSA4fySuX9I2S"/>
+    <operationSignature href="MediaStore.repository#_Qa8AAHDvEeSqnN80MQ2uGw"/>
+    <system href="MediaStore-InstantDownloadCache.system#_oPwBYHDhEeSqnN80MQ2uGw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="MediaStoreSystem.IWebGui.download"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.repository#_Q_yZgHDvEeSqnN80MQ2uGw">
+    <role xsi:type="repository:OperationProvidedRole" href="MediaStore-InstantDownloadCache.system#_b9NvYHD6EeSA4fySuX9I2S"/>
+    <operationSignature href="MediaStore.repository#_Q_yZgHDvEeSqnN80MQ2uGw"/>
+    <system href="MediaStore-InstantDownloadCache.system#_oPwBYHDhEeSqnN80MQ2uGw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="MediaStoreSystem.IWebGui.getFileList"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.repository#_Rv19cHDvEeSqnN80MQ2uGw">
+    <role xsi:type="repository:OperationProvidedRole" href="MediaStore-InstantDownloadCache.system#_b9NvYHD6EeSA4fySuX9I2S"/>
+    <operationSignature href="MediaStore.repository#_Rv19cHDvEeSqnN80MQ2uGw"/>
+    <system href="MediaStore-InstantDownloadCache.system#_oPwBYHDhEeSqnN80MQ2uGw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaAccess to IDataStorage->storeFile [_SxR3wL0LEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.repository#_SxR3wL0LEeSAHuL4ItXOLQ">
+    <externalCall href="MediaStore.repository#_SxR3wL0LEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaAccess to IDataStorage->getFiles [_LAT00L0WEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.repository#_LAT00L0WEeSAHuL4ItXOLQ">
+    <externalCall href="MediaStore.repository#_LAT00L0WEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaManagement to IMediaAccess->upload [_mqKtIHQiEeSabL89DKH5bQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.repository#_mqKtIHQiEeSabL89DKH5bQ">
+    <externalCall href="MediaStore.repository#_mqKtIHQiEeSabL89DKH5bQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaManagement to IDownload->download [_2I7hMHQiEeSabL89DKH5bQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.repository#_2I7hMHQiEeSabL89DKH5bQ">
+    <externalCall href="MediaStore.repository#_2I7hMHQiEeSabL89DKH5bQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaManagement to IPackaging->zip [_B2sgYLzTEeSAHuL4ItXOLQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.repository#_B2sgYLzTEeSAHuL4ItXOLQ">
+    <externalCall href="MediaStore.repository#_B2sgYLzTEeSAHuL4ItXOLQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from MediaManagement to IMediaAccess->getFileList [_8M4AoHQiEeSabL89DKH5bQ]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.repository#_8M4AoHQiEeSabL89DKH5bQ">
+    <externalCall href="MediaStore.repository#_8M4AoHQiEeSabL89DKH5bQ"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from InstantDownloadCache to IDownload->download [_UOoLQGrWEeajAsHLADMRRw]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.repository#_UOoLQGrWEeajAsHLADMRRw">
+    <externalCall href="MediaStore.repository#_UOoLQGrWEeajAsHLADMRRw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ApplicationServer"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.resourceenvironment#_cCxqsHmTEeSGtbTG2d9Ipg">
+    <activeResource href="MediaStore.resourceenvironment#_cCxqsHmTEeSGtbTG2d9Ipg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="HDD [0] in ApplicationServer"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.resourceenvironment#_TVMn0Hy8EeaPy6UnbN4v1Q">
+    <activeResource href="MediaStore.resourceenvironment#_TVMn0Hy8EeaPy6UnbN4v1Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in DatabaseServer"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.resourceenvironment#_kkiVoLg3EeSNPorBlo7x9g">
+    <activeResource href="MediaStore.resourceenvironment#_kkiVoLg3EeSNPorBlo7x9g"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="HDD [0] in DatabaseServer"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_screencast_ms_instant/MediaStore.resourceenvironment#_T3NBUHy_EeaHhOO9CmhLjQ">
+    <activeResource href="MediaStore.resourceenvironment#_T3NBUHy_EeaHhOO9CmhLjQ"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

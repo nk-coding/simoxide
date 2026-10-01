@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2"
+    xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_h16_component_params_repository1" entityName="h16_component_params">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h16_component_params_comp1" entityName="Front">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h16_component_params_prov1" entityName="Provided_IService"
+        providedInterface__OperationProvidedRole="_h16_component_params_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_h16_component_params_req1" entityName="Required_IWorker"
+        requiredInterface__OperationRequiredRole="_h16_component_params_if2"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_h16_component_params_req2" entityName="Required_IWorker"
+        requiredInterface__OperationRequiredRole="_h16_component_params_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h16_component_params_seff1" describedService__SEFF="_h16_component_params_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h16_component_params_act3" entityName="start" successor_AbstractAction="_h16_component_params_act1"/>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_h16_component_params_act1" entityName="callDefault" predecessor_AbstractAction="_h16_component_params_act3"
+          successor_AbstractAction="_h16_component_params_act2" calledService_ExternalService="_h16_component_params_sig2"
+          role_ExternalService="_h16_component_params_req1"/>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_h16_component_params_act2" entityName="callOverride" predecessor_AbstractAction="_h16_component_params_act1"
+          successor_AbstractAction="_h16_component_params_act4" calledService_ExternalService="_h16_component_params_sig2"
+          role_ExternalService="_h16_component_params_req2"/>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h16_component_params_act4" entityName="stop" predecessor_AbstractAction="_h16_component_params_act2"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_h16_component_params_comp2" entityName="Worker">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h16_component_params_prov2" entityName="Provided_IWorker"
+        providedInterface__OperationProvidedRole="_h16_component_params_if2"/>
+    <componentParameterUsage_ImplementationComponentType>
+      <variableCharacterisation_VariableUsage type="VALUE">
+        <specification_VariableCharacterisation specification="10"/>
+      </variableCharacterisation_VariableUsage>
+      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="size"/>
+    </componentParameterUsage_ImplementationComponentType>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h16_component_params_seff2" describedService__SEFF="_h16_component_params_sig2">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h16_component_params_act6" entityName="start" successor_AbstractAction="_h16_component_params_act5"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h16_component_params_act5" entityName="work" predecessor_AbstractAction="_h16_component_params_act6"
+          successor_AbstractAction="_h16_component_params_act7">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="size.VALUE * 0.005"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h16_component_params_act7" entityName="stop" predecessor_AbstractAction="_h16_component_params_act5"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h16_component_params_if1" entityName="IService">
+    <signatures__OperationInterface id="_h16_component_params_sig1" entityName="op"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h16_component_params_if2" entityName="IWorker">
+    <signatures__OperationInterface id="_h16_component_params_sig2" entityName="work"/>
+  </interfaces__Repository>
+</repository:Repository>

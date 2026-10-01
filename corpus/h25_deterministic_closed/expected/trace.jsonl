@@ -1,0 +1,1323 @@
+{"ev":"header","t":0.0,"format":"palladio-trace/1","run":"h25_deterministic_closed","seed":24,"max_sim_time":-1,"max_measurements":30}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,0.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,0.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,0.0]}
+{"ev":"spawn","t":0.0,"p":1,"kind":"ClosedWorkloadUser","name":"ClosedUser","parent":0}
+{"ev":"spawn","t":0.0,"p":2,"kind":"ClosedWorkloadUser","name":"ClosedUser","parent":0}
+{"ev":"spawn","t":0.0,"p":3,"kind":"ClosedWorkloadUser","name":"ClosedUser","parent":0}
+{"ev":"spawn","t":0.0,"p":4,"kind":"ClosedWorkloadUser","name":"ClosedUser","parent":0}
+{"ev":"begin","t":0.0,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":0.0,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":0.0,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":0.0,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":0.0,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":0.0,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":0.0,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":0.0,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.3]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"begin","t":0.0,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":0.0,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":0.0,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":0.0,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":0.0,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":0.0,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":0.0,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":0.0,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.3]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,2.0]}
+{"ev":"begin","t":0.0,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":0.0,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":0.0,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":0.0,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":0.0,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":0.0,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":0.0,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":0.0,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.3]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,3.0]}
+{"ev":"begin","t":0.0,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":0.0,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":0.0,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":0.0,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":0.0,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":0.0,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":0.0,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":0.0,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":0.0,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.3]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,4.0]}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.2,3.0]}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.2,2.0]}
+{"ev":"demand_done","t":1.2,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":1.2,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":1.2,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":1.2,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[1.2,0.2]}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.2,1.0]}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.2,1.0]}
+{"ev":"demand_done","t":1.2,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":1.2,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":1.2,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":1.2,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[1.2,0.2]}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.2,2.0]}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.2,0.0]}
+{"ev":"demand_done","t":1.2,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":1.2,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":1.2,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":1.2,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[1.2,0.2]}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.2,3.0]}
+{"ev":"demand_done","t":1.2,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":1.2,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":1.2,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":1.2,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[1.2,0.2]}
+{"ev":"meas","t":1.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.2,4.0]}
+{"ev":"meas","t":1.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.4,3.0]}
+{"ev":"demand_done","t":1.4,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":1.4,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":1.4,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":1.4,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":1.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[1.4,0.1]}
+{"ev":"meas","t":1.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.4,1.0]}
+{"ev":"meas","t":1.5,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.5,0.0]}
+{"ev":"demand_done","t":1.5,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":1.5,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":1.5,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":1.5,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":1.5,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":1.5,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[1.5,1.5]}
+{"ev":"end","t":1.5,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":1.5,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[1.5,1.5]}
+{"ev":"end","t":1.5,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":1.5,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[1.5,1.5]}
+{"ev":"hold","t":1.5,"p":1,"d":0.5}
+{"ev":"meas","t":1.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.6,2.0]}
+{"ev":"demand_done","t":1.6,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":1.6,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":1.6,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":1.6,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":1.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[1.6,0.1]}
+{"ev":"meas","t":1.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.6,1.0]}
+{"ev":"meas","t":1.7,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.7,0.0]}
+{"ev":"demand_done","t":1.7,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":1.7,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":1.7,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":1.7,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":1.7,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":1.7,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[1.7,1.7]}
+{"ev":"end","t":1.7,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":1.7,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[1.7,1.7]}
+{"ev":"end","t":1.7,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":1.7,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[1.7,1.7]}
+{"ev":"hold","t":1.7,"p":2,"d":0.5}
+{"ev":"meas","t":1.8,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.8,1.0]}
+{"ev":"demand_done","t":1.8,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":1.8,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":1.8,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":1.8,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":1.8,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[1.8,0.1]}
+{"ev":"meas","t":1.8,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.8,1.0]}
+{"ev":"meas","t":1.9,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.9,0.0]}
+{"ev":"demand_done","t":1.9,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":1.9,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":1.9,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":1.9,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":1.9,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":1.9,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[1.9,1.9]}
+{"ev":"end","t":1.9,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":1.9,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[1.9,1.9]}
+{"ev":"end","t":1.9,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":1.9,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[1.9,1.9]}
+{"ev":"hold","t":1.9,"p":3,"d":0.5}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,0.0]}
+{"ev":"begin","t":2.0,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":2.0,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":2.0,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":2.0,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":2.0,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.0,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.0,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.0,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":2.0,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":2.0,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":2.0,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[2.0,0.3]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"demand_done","t":2.0,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":2.0,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":2.0,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":2.0,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[2.0,0.1]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.1,0.0]}
+{"ev":"demand_done","t":2.1,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":2.1,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":2.1,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":2.1,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":2.1,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":2.1,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[2.1,2.1]}
+{"ev":"end","t":2.1,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":2.1,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[2.1,2.1]}
+{"ev":"end","t":2.1,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":2.1,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[2.1,2.1]}
+{"ev":"hold","t":2.1,"p":4,"d":0.5}
+{"ev":"begin","t":2.2,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":2.2,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":2.2,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":2.2,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":2.2,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.2,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.2,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.2,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":2.2,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":2.2,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":2.2,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":2.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[2.2,0.3]}
+{"ev":"meas","t":2.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.2,2.0]}
+{"ev":"meas","t":2.399999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.399999999,1.0]}
+{"ev":"demand_done","t":2.399999999,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":2.399999999,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":2.399999999,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":2.399999999,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":2.399999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[2.399999999,0.2]}
+{"ev":"meas","t":2.399999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.399999999,1.0]}
+{"ev":"begin","t":2.4,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":2.4,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":2.4,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":2.4,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":2.4,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.4,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.4,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.4,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":2.4,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":2.4,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":2.4,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":2.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[2.4,0.3]}
+{"ev":"meas","t":2.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.4,2.0]}
+{"ev":"meas","t":2.599999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.599999999,0.0]}
+{"ev":"demand_done","t":2.599999999,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":2.599999999,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":2.599999999,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":2.599999999,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":2.599999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[2.599999999,0.1]}
+{"ev":"meas","t":2.599999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.599999999,1.0]}
+{"ev":"begin","t":2.6,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":2.6,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":2.6,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":2.6,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":2.6,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.6,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.6,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":2.6,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":2.6,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":2.6,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":2.6,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":2.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[2.6,0.3]}
+{"ev":"meas","t":2.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.6,3.0]}
+{"ev":"meas","t":2.699999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.699999999,0.0]}
+{"ev":"demand_done","t":2.699999999,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":2.699999999,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":2.699999999,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":2.699999999,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":2.699999999,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":2.699999999,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[2.699999999,0.6999999990000001]}
+{"ev":"end","t":2.699999999,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":2.699999999,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[2.699999999,0.6999999990000001]}
+{"ev":"end","t":2.699999999,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":2.699999999,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[2.699999999,0.6999999990000001]}
+{"ev":"hold","t":2.699999999,"p":1,"d":0.5}
+{"ev":"meas","t":2.900000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.900000001,2.0]}
+{"ev":"demand_done","t":2.900000001,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":2.900000001,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":2.900000001,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":2.900000001,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":2.900000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[2.900000001,0.2]}
+{"ev":"meas","t":2.900000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.900000001,1.0]}
+{"ev":"meas","t":3.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.1,1.0]}
+{"ev":"demand_done","t":3.1,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.1,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":3.1,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":3.1,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":3.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[3.1,0.2]}
+{"ev":"meas","t":3.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.1,2.0]}
+{"ev":"meas","t":3.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.1,1.0]}
+{"ev":"demand_done","t":3.1,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.1,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":3.1,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":3.1,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":3.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[3.1,0.1]}
+{"ev":"meas","t":3.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.1,1.0]}
+{"ev":"begin","t":3.199999999,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":3.199999999,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":3.199999999,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":3.199999999,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":3.199999999,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":3.199999999,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":3.199999999,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":3.199999999,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":3.199999999,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":3.199999999,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":3.199999999,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":3.199999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[3.199999999,0.3]}
+{"ev":"meas","t":3.199999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.199999999,2.0]}
+{"ev":"meas","t":3.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.2,0.0]}
+{"ev":"demand_done","t":3.2,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.2,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":3.2,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":3.2,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":3.2,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":3.2,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[3.2,1.0]}
+{"ev":"end","t":3.2,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":3.2,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[3.2,1.0]}
+{"ev":"end","t":3.2,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":3.2,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[3.2,1.0]}
+{"ev":"hold","t":3.2,"p":2,"d":0.5}
+{"ev":"meas","t":3.200000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.200000001,1.0]}
+{"ev":"demand_done","t":3.200000001,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.200000001,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":3.200000001,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":3.200000001,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":3.200000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[3.200000001,0.2]}
+{"ev":"meas","t":3.200000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.200000001,2.0]}
+{"ev":"meas","t":3.3,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.3,1.0]}
+{"ev":"demand_done","t":3.3,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.3,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":3.3,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":3.3,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":3.3,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[3.3,0.1]}
+{"ev":"meas","t":3.3,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.3,1.0]}
+{"ev":"meas","t":3.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.4,0.0]}
+{"ev":"demand_done","t":3.4,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.4,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":3.4,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":3.4,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":3.4,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":3.4,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[3.4,1.0]}
+{"ev":"end","t":3.4,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":3.4,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[3.4,1.0]}
+{"ev":"end","t":3.4,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":3.4,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[3.4,1.0]}
+{"ev":"hold","t":3.4,"p":3,"d":0.5}
+{"ev":"meas","t":3.5,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.5,0.0]}
+{"ev":"demand_done","t":3.5,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.5,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":3.5,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":3.5,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":3.5,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[3.5,0.1]}
+{"ev":"meas","t":3.5,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.5,1.0]}
+{"ev":"meas","t":3.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.500000001,0.0]}
+{"ev":"demand_done","t":3.500000001,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.500000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":3.500000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":3.500000001,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":3.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[3.500000001,0.2]}
+{"ev":"meas","t":3.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.500000001,1.0]}
+{"ev":"meas","t":3.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.6,0.0]}
+{"ev":"demand_done","t":3.6,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.6,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":3.6,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":3.6,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":3.6,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":3.6,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[3.6,1.0]}
+{"ev":"end","t":3.6,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":3.6,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[3.6,1.0]}
+{"ev":"end","t":3.6,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":3.6,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[3.6,1.0]}
+{"ev":"hold","t":3.6,"p":4,"d":0.5}
+{"ev":"begin","t":3.7,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":3.7,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":3.7,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":3.7,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":3.7,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":3.7,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":3.7,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":3.7,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":3.7,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":3.7,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":3.7,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":3.7,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[3.7,0.3]}
+{"ev":"meas","t":3.7,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.7,1.0]}
+{"ev":"meas","t":3.700000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.700000001,0.0]}
+{"ev":"demand_done","t":3.700000001,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.700000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":3.700000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":3.700000001,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":3.700000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[3.700000001,0.1]}
+{"ev":"meas","t":3.700000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.700000001,1.0]}
+{"ev":"meas","t":3.800000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.800000001,0.0]}
+{"ev":"demand_done","t":3.800000001,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":3.800000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":3.800000001,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":3.800000001,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":3.800000001,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":3.800000001,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[3.800000001,0.6000000019999998]}
+{"ev":"end","t":3.800000001,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":3.800000001,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[3.800000001,0.6000000019999998]}
+{"ev":"end","t":3.800000001,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":3.800000001,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[3.800000001,0.6000000019999998]}
+{"ev":"hold","t":3.800000001,"p":1,"d":0.5}
+{"ev":"begin","t":3.9,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":3.9,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":3.9,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":3.9,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":3.9,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":3.9,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":3.9,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":3.9,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":3.9,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":3.9,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":3.9,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":3.9,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[3.9,0.3]}
+{"ev":"meas","t":3.9,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.9,2.0]}
+{"ev":"meas","t":4.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.1,1.0]}
+{"ev":"begin","t":4.1,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":4.1,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":4.1,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":4.1,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":4.1,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":4.1,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":4.1,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":4.1,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":4.1,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":4.1,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":4.1,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":4.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[4.1,0.3]}
+{"ev":"meas","t":4.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.1,2.0]}
+{"ev":"demand_done","t":4.1,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":4.1,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":4.1,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":4.1,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":4.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[4.1,0.2]}
+{"ev":"meas","t":4.1,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.1,1.0]}
+{"ev":"meas","t":4.3,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.3,0.0]}
+{"ev":"demand_done","t":4.3,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":4.3,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":4.3,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":4.3,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":4.3,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[4.3,0.1]}
+{"ev":"meas","t":4.3,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.3,1.0]}
+{"ev":"begin","t":4.300000001,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":4.300000001,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":4.300000001,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":4.300000001,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":4.300000001,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":4.300000001,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":4.300000001,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":4.300000001,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":4.300000001,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":4.300000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":4.300000001,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":4.300000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[4.300000001,0.3]}
+{"ev":"meas","t":4.300000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.300000001,3.0]}
+{"ev":"meas","t":4.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.4,0.0]}
+{"ev":"demand_done","t":4.4,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":4.4,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":4.4,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":4.4,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":4.4,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":4.4,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[4.4,0.7000000000000002]}
+{"ev":"end","t":4.4,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":4.4,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[4.4,0.7000000000000002]}
+{"ev":"end","t":4.4,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":4.4,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[4.4,0.7000000000000002]}
+{"ev":"hold","t":4.4,"p":2,"d":0.5}
+{"ev":"meas","t":4.599999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.599999999,2.0]}
+{"ev":"demand_done","t":4.599999999,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":4.599999999,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":4.599999999,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":4.599999999,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":4.599999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[4.599999999,0.2]}
+{"ev":"meas","t":4.599999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.599999999,1.0]}
+{"ev":"meas","t":4.799999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.799999999,1.0]}
+{"ev":"meas","t":4.799999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.799999999,0.0]}
+{"ev":"demand_done","t":4.799999999,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":4.799999999,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":4.799999999,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":4.799999999,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":4.799999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[4.799999999,0.2]}
+{"ev":"meas","t":4.799999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.799999999,1.0]}
+{"ev":"demand_done","t":4.799999999,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":4.799999999,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":4.799999999,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":4.799999999,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":4.799999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[4.799999999,0.1]}
+{"ev":"meas","t":4.799999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.799999999,1.0]}
+{"ev":"meas","t":4.899999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.899999999,0.0]}
+{"ev":"meas","t":4.899999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.899999999,0.0]}
+{"ev":"demand_done","t":4.899999999,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":4.899999999,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":4.899999999,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":4.899999999,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":4.899999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[4.899999999,0.2]}
+{"ev":"meas","t":4.899999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.899999999,2.0]}
+{"ev":"demand_done","t":4.899999999,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":4.899999999,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":4.899999999,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":4.899999999,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":4.899999999,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":4.899999999,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[4.899999999,0.9999999990000004]}
+{"ev":"end","t":4.899999999,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":4.899999999,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[4.899999999,0.9999999990000004]}
+{"ev":"end","t":4.899999999,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":4.899999999,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[4.899999999,0.9999999990000004]}
+{"ev":"hold","t":4.899999999,"p":3,"d":0.5}
+{"ev":"begin","t":4.9,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":4.9,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":4.9,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":4.9,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":4.9,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":4.9,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":4.9,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":4.9,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":4.9,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":4.9,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":4.9,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":4.9,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[4.9,0.3]}
+{"ev":"meas","t":4.9,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.9,1.0]}
+{"ev":"meas","t":4.999999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.999999998,1.0]}
+{"ev":"demand_done","t":4.999999998,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":4.999999998,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":4.999999998,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":4.999999998,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":4.999999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[4.999999998,0.1]}
+{"ev":"meas","t":4.999999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.999999998,1.0]}
+{"ev":"meas","t":5.099999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.099999998,0.0]}
+{"ev":"demand_done","t":5.099999998,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":5.099999998,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":5.099999998,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":5.099999998,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":5.099999998,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":5.099999998,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[5.099999998,0.9999999980000007]}
+{"ev":"end","t":5.099999998,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":5.099999998,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[5.099999998,0.9999999980000007]}
+{"ev":"end","t":5.099999998,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":5.099999998,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[5.099999998,0.9999999980000007]}
+{"ev":"hold","t":5.099999998,"p":4,"d":0.5}
+{"ev":"meas","t":5.199999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.199999998,0.0]}
+{"ev":"demand_done","t":5.199999998,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":5.199999998,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":5.199999998,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":5.199999998,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":5.199999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[5.199999998,0.1]}
+{"ev":"meas","t":5.199999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.199999998,1.0]}
+{"ev":"meas","t":5.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.2,0.0]}
+{"ev":"demand_done","t":5.2,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":5.2,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":5.2,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":5.2,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":5.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[5.2,0.2]}
+{"ev":"meas","t":5.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.2,1.0]}
+{"ev":"meas","t":5.299999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.299999998,0.0]}
+{"ev":"demand_done","t":5.299999998,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":5.299999998,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":5.299999998,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":5.299999998,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":5.299999998,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":5.299999998,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[5.299999998,0.9999999969999998]}
+{"ev":"end","t":5.299999998,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":5.299999998,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[5.299999998,0.9999999969999998]}
+{"ev":"end","t":5.299999998,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":5.299999998,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[5.299999998,0.9999999969999998]}
+{"ev":"hold","t":5.299999998,"p":1,"d":0.5}
+{"ev":"begin","t":5.399999999,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":5.399999999,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":5.399999999,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":5.399999999,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":5.399999999,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":5.399999999,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":5.399999999,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":5.399999999,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":5.399999999,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":5.399999999,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":5.399999999,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":5.399999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[5.399999999,0.3]}
+{"ev":"meas","t":5.399999999,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.399999999,1.0]}
+{"ev":"meas","t":5.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.4,0.0]}
+{"ev":"demand_done","t":5.4,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":5.4,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":5.4,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":5.4,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":5.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[5.4,0.1]}
+{"ev":"meas","t":5.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.4,1.0]}
+{"ev":"meas","t":5.5,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.5,0.0]}
+{"ev":"demand_done","t":5.5,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":5.5,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":5.5,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":5.5,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":5.5,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":5.5,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[5.5,0.5999999999999996]}
+{"ev":"end","t":5.5,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":5.5,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[5.5,0.5999999999999996]}
+{"ev":"end","t":5.5,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":5.5,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[5.5,0.5999999999999996]}
+{"ev":"hold","t":5.5,"p":2,"d":0.5}
+{"ev":"begin","t":5.599999998,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":5.599999998,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":5.599999998,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":5.599999998,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":5.599999998,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":5.599999998,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":5.599999998,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":5.599999998,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":5.599999998,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":5.599999998,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":5.599999998,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":5.599999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[5.599999998,0.3]}
+{"ev":"meas","t":5.599999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.599999998,2.0]}
+{"ev":"begin","t":5.799999998,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":5.799999998,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":5.799999998,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":5.799999998,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":5.799999998,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":5.799999998,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":5.799999998,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":5.799999998,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":5.799999998,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":5.799999998,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":5.799999998,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":5.799999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[5.799999998,0.3]}
+{"ev":"meas","t":5.799999998,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.799999998,3.0]}
+{"ev":"meas","t":5.800000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.800000001,2.0]}
+{"ev":"demand_done","t":5.800000001,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":5.800000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":5.800000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":5.800000001,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":5.800000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[5.800000001,0.2]}
+{"ev":"meas","t":5.800000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.800000001,1.0]}
+{"ev":"begin","t":6.0,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":6.0,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":6.0,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":6.0,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":6.0,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":6.0,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":6.0,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":6.0,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":6.0,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":6.0,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":6.0,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[6.0,0.3]}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,3.0]}
+{"ev":"meas","t":6.000000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.000000001,0.0]}
+{"ev":"demand_done","t":6.000000001,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.000000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":6.000000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":6.000000001,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":6.000000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[6.000000001,0.1]}
+{"ev":"meas","t":6.000000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.000000001,1.0]}
+{"ev":"meas","t":6.100000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.100000001,0.0]}
+{"ev":"demand_done","t":6.100000001,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.100000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":6.100000001,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":6.100000001,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":6.100000001,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":6.100000001,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[6.100000001,0.7000000019999995]}
+{"ev":"end","t":6.100000001,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":6.100000001,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[6.100000001,0.7000000019999995]}
+{"ev":"end","t":6.100000001,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":6.100000001,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[6.100000001,0.7000000019999995]}
+{"ev":"hold","t":6.100000001,"p":3,"d":0.5}
+{"ev":"meas","t":6.300000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.300000001,2.0]}
+{"ev":"demand_done","t":6.300000001,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.300000001,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":6.300000001,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":6.300000001,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":6.300000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[6.300000001,0.2]}
+{"ev":"meas","t":6.300000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.300000001,1.0]}
+{"ev":"meas","t":6.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.500000001,1.0]}
+{"ev":"meas","t":6.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.500000001,0.0]}
+{"ev":"demand_done","t":6.500000001,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.500000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":6.500000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":6.500000001,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":6.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[6.500000001,0.2]}
+{"ev":"meas","t":6.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.500000001,1.0]}
+{"ev":"demand_done","t":6.500000001,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.500000001,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":6.500000001,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":6.500000001,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":6.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[6.500000001,0.1]}
+{"ev":"meas","t":6.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.500000001,1.0]}
+{"ev":"meas","t":6.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.6,0.0]}
+{"ev":"demand_done","t":6.6,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.6,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":6.6,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":6.6,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":6.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[6.6,0.2]}
+{"ev":"meas","t":6.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.6,2.0]}
+{"ev":"meas","t":6.600000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.600000001,0.0]}
+{"ev":"begin","t":6.600000001,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":6.600000001,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":6.600000001,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":6.600000001,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":6.600000001,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":6.600000001,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":6.600000001,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":6.600000001,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":6.600000001,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":6.600000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":6.600000001,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":6.600000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[6.600000001,0.3]}
+{"ev":"meas","t":6.600000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.600000001,1.0]}
+{"ev":"demand_done","t":6.600000001,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.600000001,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":6.600000001,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":6.600000001,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":6.600000001,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":6.600000001,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[6.600000001,1.0000000029999994]}
+{"ev":"end","t":6.600000001,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":6.600000001,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[6.600000001,1.0000000029999994]}
+{"ev":"end","t":6.600000001,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":6.600000001,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[6.600000001,1.0000000029999994]}
+{"ev":"hold","t":6.600000001,"p":4,"d":0.5}
+{"ev":"meas","t":6.700000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.700000001,1.0]}
+{"ev":"demand_done","t":6.700000001,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.700000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":6.700000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":6.700000001,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":6.700000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[6.700000001,0.1]}
+{"ev":"meas","t":6.700000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.700000001,1.0]}
+{"ev":"meas","t":6.800000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.800000001,0.0]}
+{"ev":"demand_done","t":6.800000001,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.800000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":6.800000001,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":6.800000001,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":6.800000001,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":6.800000001,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[6.800000001,1.0000000030000002]}
+{"ev":"end","t":6.800000001,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":6.800000001,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[6.800000001,1.0000000030000002]}
+{"ev":"end","t":6.800000001,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":6.800000001,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[6.800000001,1.0000000030000002]}
+{"ev":"hold","t":6.800000001,"p":1,"d":0.5}
+{"ev":"meas","t":6.900000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.900000001,0.0]}
+{"ev":"meas","t":6.900000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.900000001,0.0]}
+{"ev":"demand_done","t":6.900000001,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.900000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":6.900000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":6.900000001,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":6.900000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[6.900000001,0.2]}
+{"ev":"meas","t":6.900000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.900000001,1.0]}
+{"ev":"demand_done","t":6.900000001,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":6.900000001,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":6.900000001,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":6.900000001,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":6.900000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[6.900000001,0.1]}
+{"ev":"meas","t":6.900000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.900000001,1.0]}
+{"ev":"meas","t":7.000000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.000000001,0.0]}
+{"ev":"demand_done","t":7.000000001,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":7.000000001,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":7.000000001,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":7.000000001,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":7.000000001,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":7.000000001,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[7.000000001,1.000000001]}
+{"ev":"end","t":7.000000001,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":7.000000001,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[7.000000001,1.000000001]}
+{"ev":"end","t":7.000000001,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":7.000000001,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[7.000000001,1.000000001]}
+{"ev":"hold","t":7.000000001,"p":2,"d":0.5}
+{"ev":"meas","t":7.100000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.100000001,0.0]}
+{"ev":"begin","t":7.100000001,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":7.100000001,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":7.100000001,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":7.100000001,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":7.100000001,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.100000001,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.100000001,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.100000001,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":7.100000001,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":7.100000001,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":7.100000001,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":7.100000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[7.100000001,0.3]}
+{"ev":"meas","t":7.100000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.100000001,1.0]}
+{"ev":"demand_done","t":7.100000001,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":7.100000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":7.100000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":7.100000001,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":7.100000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[7.100000001,0.1]}
+{"ev":"meas","t":7.100000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.100000001,1.0]}
+{"ev":"meas","t":7.200000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.200000001,0.0]}
+{"ev":"demand_done","t":7.200000001,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":7.200000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":7.200000001,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":7.200000001,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":7.200000001,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":7.200000001,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[7.200000001,0.6000000000000005]}
+{"ev":"end","t":7.200000001,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":7.200000001,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[7.200000001,0.6000000000000005]}
+{"ev":"end","t":7.200000001,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":7.200000001,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[7.200000001,0.6000000000000005]}
+{"ev":"hold","t":7.200000001,"p":3,"d":0.5}
+{"ev":"begin","t":7.300000001,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":7.300000001,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":7.300000001,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":7.300000001,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":7.300000001,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.300000001,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.300000001,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.300000001,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":7.300000001,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":7.300000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":7.300000001,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":7.300000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[7.300000001,0.3]}
+{"ev":"meas","t":7.300000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.300000001,2.0]}
+{"ev":"meas","t":7.5,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.5,1.0]}
+{"ev":"demand_done","t":7.5,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":7.5,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":7.5,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":7.5,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":7.5,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[7.5,0.2]}
+{"ev":"meas","t":7.5,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.5,1.0]}
+{"ev":"begin","t":7.500000001,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":7.500000001,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":7.500000001,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":7.500000001,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":7.500000001,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.500000001,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.500000001,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.500000001,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":7.500000001,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":7.500000001,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":7.500000001,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":7.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[7.500000001,0.3]}
+{"ev":"meas","t":7.500000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.500000001,2.0]}
+{"ev":"meas","t":7.7,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.7,0.0]}
+{"ev":"demand_done","t":7.7,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":7.7,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":7.7,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":7.7,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":7.7,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[7.7,0.1]}
+{"ev":"meas","t":7.7,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.7,1.0]}
+{"ev":"begin","t":7.700000001,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":7.700000001,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":7.700000001,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":7.700000001,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":7.700000001,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.700000001,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.700000001,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":7.700000001,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":7.700000001,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":7.700000001,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":7.700000001,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":7.700000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[7.700000001,0.3]}
+{"ev":"meas","t":7.700000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.700000001,3.0]}
+{"ev":"meas","t":7.8,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.8,0.0]}
+{"ev":"demand_done","t":7.8,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":7.8,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":7.8,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":7.8,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":7.8,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":7.8,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[7.8,0.6999999990000001]}
+{"ev":"end","t":7.8,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":7.8,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[7.8,0.6999999990000001]}
+{"ev":"end","t":7.8,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":7.8,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[7.8,0.6999999990000001]}
+{"ev":"hold","t":7.8,"p":4,"d":0.5}
+{"ev":"meas","t":8.000000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.000000002,2.0]}
+{"ev":"demand_done","t":8.000000002,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.000000002,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":8.000000002,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":8.000000002,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":8.000000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[8.000000002,0.2]}
+{"ev":"meas","t":8.000000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.000000002,1.0]}
+{"ev":"meas","t":8.200000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.200000001,1.0]}
+{"ev":"demand_done","t":8.200000001,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.200000001,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":8.200000001,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":8.200000001,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":8.200000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[8.200000001,0.2]}
+{"ev":"meas","t":8.200000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.200000001,2.0]}
+{"ev":"meas","t":8.200000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.200000001,1.0]}
+{"ev":"demand_done","t":8.200000001,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.200000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":8.200000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":8.200000001,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":8.200000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[8.200000001,0.1]}
+{"ev":"meas","t":8.200000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.200000001,1.0]}
+{"ev":"begin","t":8.3,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":8.3,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":8.3,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":8.3,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":8.3,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":8.3,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":8.3,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":8.3,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":8.3,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":8.3,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":8.3,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":8.3,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[8.3,0.3]}
+{"ev":"meas","t":8.3,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.3,2.0]}
+{"ev":"meas","t":8.300000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.300000001,0.0]}
+{"ev":"demand_done","t":8.300000001,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.300000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":8.300000001,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":8.300000001,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":8.300000001,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":8.300000001,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[8.300000001,1.0000000000000009]}
+{"ev":"end","t":8.300000001,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":8.300000001,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[8.300000001,1.0000000000000009]}
+{"ev":"end","t":8.300000001,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":8.300000001,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[8.300000001,1.0000000000000009]}
+{"ev":"hold","t":8.300000001,"p":1,"d":0.5}
+{"ev":"meas","t":8.300000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.300000002,1.0]}
+{"ev":"demand_done","t":8.300000002,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.300000002,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":8.300000002,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":8.300000002,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":8.300000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[8.300000002,0.2]}
+{"ev":"meas","t":8.300000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.300000002,2.0]}
+{"ev":"meas","t":8.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.4,1.0]}
+{"ev":"demand_done","t":8.4,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.4,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":8.4,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":8.4,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":8.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[8.4,0.1]}
+{"ev":"meas","t":8.4,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.4,1.0]}
+{"ev":"meas","t":8.5,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.5,0.0]}
+{"ev":"demand_done","t":8.5,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.5,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":8.5,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":8.5,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":8.5,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":8.5,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[8.5,0.9999999989999999]}
+{"ev":"end","t":8.5,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":8.5,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[8.5,0.9999999989999999]}
+{"ev":"end","t":8.5,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":8.5,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[8.5,0.9999999989999999]}
+{"ev":"hold","t":8.5,"p":2,"d":0.5}
+{"ev":"meas","t":8.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.6,0.0]}
+{"ev":"demand_done","t":8.6,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.6,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":8.6,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":8.6,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":8.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[8.6,0.1]}
+{"ev":"meas","t":8.6,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.6,1.0]}
+{"ev":"meas","t":8.600000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.600000002,0.0]}
+{"ev":"demand_done","t":8.600000002,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.600000002,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":8.600000002,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":8.600000002,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":8.600000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[8.600000002,0.2]}
+{"ev":"meas","t":8.600000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.600000002,1.0]}
+{"ev":"meas","t":8.7,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.7,0.0]}
+{"ev":"demand_done","t":8.7,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.7,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":8.7,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":8.7,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":8.7,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":8.7,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[8.7,0.999999998999999]}
+{"ev":"end","t":8.7,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":8.7,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[8.7,0.999999998999999]}
+{"ev":"end","t":8.7,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":8.7,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[8.7,0.999999998999999]}
+{"ev":"hold","t":8.7,"p":3,"d":0.5}
+{"ev":"begin","t":8.800000001,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":8.800000001,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":8.800000001,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":8.800000001,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":8.800000001,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":8.800000001,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":8.800000001,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":8.800000001,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":8.800000001,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":8.800000001,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":8.800000001,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":8.800000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[8.800000001,0.3]}
+{"ev":"meas","t":8.800000001,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.800000001,1.0]}
+{"ev":"meas","t":8.800000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.800000002,0.0]}
+{"ev":"demand_done","t":8.800000002,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.800000002,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":8.800000002,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":8.800000002,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":8.800000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[8.800000002,0.1]}
+{"ev":"meas","t":8.800000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.800000002,1.0]}
+{"ev":"meas","t":8.900000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.900000002,0.0]}
+{"ev":"demand_done","t":8.900000002,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":8.900000002,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":8.900000002,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":8.900000002,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":8.900000002,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":8.900000002,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[8.900000002,0.6000000019999998]}
+{"ev":"end","t":8.900000002,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":8.900000002,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[8.900000002,0.6000000019999998]}
+{"ev":"end","t":8.900000002,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":8.900000002,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[8.900000002,0.6000000019999998]}
+{"ev":"hold","t":8.900000002,"p":4,"d":0.5}
+{"ev":"begin","t":9.0,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":9.0,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":9.0,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":9.0,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":9.0,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":9.0,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":9.0,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":9.0,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":9.0,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":9.0,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":9.0,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":9.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[9.0,0.3]}
+{"ev":"meas","t":9.0,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.0,2.0]}
+{"ev":"begin","t":9.2,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":9.2,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":9.2,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":9.2,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":9.2,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":9.2,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":9.2,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":9.2,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":9.2,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":9.2,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":9.2,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":9.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[9.2,0.3]}
+{"ev":"meas","t":9.2,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.2,3.0]}
+{"ev":"meas","t":9.200000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.200000003,2.0]}
+{"ev":"demand_done","t":9.200000003,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":9.200000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":9.200000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":9.200000003,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":9.200000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[9.200000003,0.2]}
+{"ev":"meas","t":9.200000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.200000003,1.0]}
+{"ev":"begin","t":9.400000002,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":9.400000002,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":9.400000002,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":9.400000002,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":9.400000002,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":9.400000002,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":9.400000002,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":9.400000002,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":9.400000002,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":9.400000002,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":9.400000002,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":9.400000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[9.400000002,0.3]}
+{"ev":"meas","t":9.400000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.400000002,3.0]}
+{"ev":"meas","t":9.400000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.400000003,0.0]}
+{"ev":"demand_done","t":9.400000003,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":9.400000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":9.400000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":9.400000003,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":9.400000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[9.400000003,0.1]}
+{"ev":"meas","t":9.400000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.400000003,1.0]}
+{"ev":"meas","t":9.500000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.500000003,0.0]}
+{"ev":"demand_done","t":9.500000003,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":9.500000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":9.500000003,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":9.500000003,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":9.500000003,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":9.500000003,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[9.500000003,0.7000000019999995]}
+{"ev":"end","t":9.500000003,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":9.500000003,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[9.500000003,0.7000000019999995]}
+{"ev":"end","t":9.500000003,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":9.500000003,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[9.500000003,0.7000000019999995]}
+{"ev":"hold","t":9.500000003,"p":1,"d":0.5}
+{"ev":"meas","t":9.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.700000003,2.0]}
+{"ev":"demand_done","t":9.700000003,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":9.700000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":9.700000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":9.700000003,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":9.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[9.700000003,0.2]}
+{"ev":"meas","t":9.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.700000003,1.0]}
+{"ev":"meas","t":9.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.900000003,1.0]}
+{"ev":"meas","t":9.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.900000003,0.0]}
+{"ev":"demand_done","t":9.900000003,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":9.900000003,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":9.900000003,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":9.900000003,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":9.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[9.900000003,0.2]}
+{"ev":"meas","t":9.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.900000003,1.0]}
+{"ev":"demand_done","t":9.900000003,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":9.900000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":9.900000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":9.900000003,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":9.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[9.900000003,0.1]}
+{"ev":"meas","t":9.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.900000003,1.0]}
+{"ev":"meas","t":10.000000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.000000002,0.0]}
+{"ev":"demand_done","t":10.000000002,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":10.000000002,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":10.000000002,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":10.000000002,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":10.000000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[10.000000002,0.2]}
+{"ev":"meas","t":10.000000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.000000002,2.0]}
+{"ev":"meas","t":10.000000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.000000003,0.0]}
+{"ev":"begin","t":10.000000003,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":10.000000003,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":10.000000003,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":10.000000003,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":10.000000003,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.000000003,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.000000003,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.000000003,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":10.000000003,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":10.000000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":10.000000003,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":10.000000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[10.000000003,0.3]}
+{"ev":"meas","t":10.000000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.000000003,1.0]}
+{"ev":"demand_done","t":10.000000003,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":10.000000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":10.000000003,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":10.000000003,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":10.000000003,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":10.000000003,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[10.000000003,1.0000000030000002]}
+{"ev":"end","t":10.000000003,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":10.000000003,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[10.000000003,1.0000000030000002]}
+{"ev":"end","t":10.000000003,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":10.000000003,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[10.000000003,1.0000000030000002]}
+{"ev":"hold","t":10.000000003,"p":2,"d":0.5}
+{"ev":"meas","t":10.100000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.100000003,1.0]}
+{"ev":"demand_done","t":10.100000003,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":10.100000003,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":10.100000003,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":10.100000003,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":10.100000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[10.100000003,0.1]}
+{"ev":"meas","t":10.100000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.100000003,1.0]}
+{"ev":"meas","t":10.200000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.200000003,0.0]}
+{"ev":"demand_done","t":10.200000003,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":10.200000003,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":10.200000003,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":10.200000003,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":10.200000003,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":10.200000003,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[10.200000003,1.0000000030000002]}
+{"ev":"end","t":10.200000003,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":10.200000003,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[10.200000003,1.0000000030000002]}
+{"ev":"end","t":10.200000003,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":10.200000003,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[10.200000003,1.0000000030000002]}
+{"ev":"hold","t":10.200000003,"p":3,"d":0.5}
+{"ev":"meas","t":10.300000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.300000003,0.0]}
+{"ev":"meas","t":10.300000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.300000003,0.0]}
+{"ev":"demand_done","t":10.300000003,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":10.300000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":10.300000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":10.300000003,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":10.300000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[10.300000003,0.2]}
+{"ev":"meas","t":10.300000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.300000003,1.0]}
+{"ev":"demand_done","t":10.300000003,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":10.300000003,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":10.300000003,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":10.300000003,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":10.300000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[10.300000003,0.1]}
+{"ev":"meas","t":10.300000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.300000003,1.0]}
+{"ev":"meas","t":10.400000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.400000003,0.0]}
+{"ev":"demand_done","t":10.400000003,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":10.400000003,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":10.400000003,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":10.400000003,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":10.400000003,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":10.400000003,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[10.400000003,1.000000001]}
+{"ev":"end","t":10.400000003,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":10.400000003,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[10.400000003,1.000000001]}
+{"ev":"end","t":10.400000003,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":10.400000003,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[10.400000003,1.000000001]}
+{"ev":"hold","t":10.400000003,"p":4,"d":0.5}
+{"ev":"meas","t":10.500000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.500000003,0.0]}
+{"ev":"begin","t":10.500000003,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":10.500000003,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":10.500000003,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":10.500000003,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":10.500000003,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.500000003,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.500000003,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.500000003,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":10.500000003,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":10.500000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":10.500000003,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":10.500000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[10.500000003,0.3]}
+{"ev":"meas","t":10.500000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.500000003,1.0]}
+{"ev":"demand_done","t":10.500000003,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":10.500000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":10.500000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":10.500000003,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":10.500000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[10.500000003,0.1]}
+{"ev":"meas","t":10.500000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.500000003,1.0]}
+{"ev":"meas","t":10.600000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.600000003,0.0]}
+{"ev":"demand_done","t":10.600000003,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":10.600000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":10.600000003,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":10.600000003,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":10.600000003,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":10.600000003,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[10.600000003,0.5999999999999996]}
+{"ev":"end","t":10.600000003,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":10.600000003,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[10.600000003,0.5999999999999996]}
+{"ev":"end","t":10.600000003,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":10.600000003,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[10.600000003,0.5999999999999996]}
+{"ev":"hold","t":10.600000003,"p":1,"d":0.5}
+{"ev":"begin","t":10.700000003,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":10.700000003,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":10.700000003,"p":3,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":10.700000003,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":10.700000003,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.700000003,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.700000003,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.700000003,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":10.700000003,"p":3,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":10.700000003,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":10.700000003,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":10.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[10.700000003,0.3]}
+{"ev":"meas","t":10.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.700000003,2.0]}
+{"ev":"meas","t":10.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.900000003,1.0]}
+{"ev":"begin","t":10.900000003,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":10.900000003,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":10.900000003,"p":4,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":10.900000003,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":10.900000003,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.900000003,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.900000003,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":10.900000003,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":10.900000003,"p":4,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":10.900000003,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":10.900000003,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":10.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[10.900000003,0.3]}
+{"ev":"meas","t":10.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.900000003,2.0]}
+{"ev":"demand_done","t":10.900000003,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":10.900000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":10.900000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":10.900000003,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":10.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[10.900000003,0.2]}
+{"ev":"meas","t":10.900000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.900000003,1.0]}
+{"ev":"meas","t":11.100000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.100000003,0.0]}
+{"ev":"begin","t":11.100000003,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":11.100000003,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":11.100000003,"p":1,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":11.100000003,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":11.100000003,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":11.100000003,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":11.100000003,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":11.100000003,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":11.100000003,"p":1,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.100000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.100000003,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":11.100000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[11.100000003,0.3]}
+{"ev":"meas","t":11.100000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.100000003,3.0]}
+{"ev":"demand_done","t":11.100000003,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.100000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.100000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.100000003,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":11.100000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[11.100000003,0.1]}
+{"ev":"meas","t":11.100000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.100000003,1.0]}
+{"ev":"meas","t":11.200000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.200000003,0.0]}
+{"ev":"demand_done","t":11.200000003,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.200000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":11.200000003,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.200000003,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.200000003,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":11.200000003,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[11.200000003,0.6999999999999993]}
+{"ev":"end","t":11.200000003,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":11.200000003,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[11.200000003,0.6999999999999993]}
+{"ev":"end","t":11.200000003,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":11.200000003,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[11.200000003,0.6999999999999993]}
+{"ev":"hold","t":11.200000003,"p":2,"d":0.5}
+{"ev":"meas","t":11.400000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.400000002,2.0]}
+{"ev":"demand_done","t":11.400000002,"p":3,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.400000002,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.400000002,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.400000002,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":11.400000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[11.400000002,0.2]}
+{"ev":"meas","t":11.400000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.400000002,1.0]}
+{"ev":"meas","t":11.600000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.600000002,1.0]}
+{"ev":"meas","t":11.600000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.600000002,0.0]}
+{"ev":"demand_done","t":11.600000002,"p":4,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.600000002,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.600000002,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.600000002,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":11.600000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[11.600000002,0.2]}
+{"ev":"meas","t":11.600000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.600000002,1.0]}
+{"ev":"demand_done","t":11.600000002,"p":3,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.600000002,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.600000002,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.600000002,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":11.600000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[11.600000002,0.1]}
+{"ev":"meas","t":11.600000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.600000002,1.0]}
+{"ev":"meas","t":11.700000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.700000002,0.0]}
+{"ev":"meas","t":11.700000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.700000002,0.0]}
+{"ev":"demand_done","t":11.700000002,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.700000002,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.700000002,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.700000002,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":11.700000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[11.700000002,0.2]}
+{"ev":"meas","t":11.700000002,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.700000002,2.0]}
+{"ev":"demand_done","t":11.700000002,"p":3,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.700000002,"p":3,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":11.700000002,"p":3,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000002,"p":3,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000002,"p":3,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"meas","t":11.700000002,"mp":"SystemOperationMeasuringPoint[_h25_deterministic_closed_prov2|_h25_deterministic_closed_sig1|_h25_deterministic_closed_system1]","metric":"Response Time Tuple","v":[11.700000002,0.9999999989999999]}
+{"ev":"end","t":11.700000002,"p":3,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"meas","t":11.700000002,"mp":"EntryLevelSystemCallMeasuringPoint[_h25_deterministic_closed_ua1]","metric":"Response Time Tuple","v":[11.700000002,0.9999999989999999]}
+{"ev":"end","t":11.700000002,"p":3,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"meas","t":11.700000002,"mp":"UsageScenarioMeasuringPoint[_h25_deterministic_closed_us1]","metric":"Response Time Tuple","v":[11.700000002,0.9999999989999999]}
+{"ev":"hold","t":11.700000002,"p":3,"d":0.5}
+{"ev":"begin","t":11.700000003,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"begin","t":11.700000003,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"end","t":11.700000003,"p":2,"type":"Start","id":"_h25_deterministic_closed_ua2"}
+{"ev":"begin","t":11.700000003,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"begin","t":11.700000003,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":11.700000003,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":11.700000003,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"begin","t":11.700000003,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":11.700000003,"p":2,"type":"StartAction","id":"_h25_deterministic_closed_act4","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.700000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.700000003,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs1","sched":"PROCESSOR_SHARING","d":0.3,"st":0.3}
+{"ev":"meas","t":11.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[11.700000003,0.3]}
+{"ev":"meas","t":11.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.700000003,1.0]}
+{"ev":"stop","t":11.700000003}
+{"ev":"meas","t":11.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.700000003,2.0]}
+{"ev":"meas","t":11.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.700000003,0.0]}
+{"ev":"meas","t":11.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.700000003,1.0]}
+{"ev":"demand_done","t":11.700000003,"p":1,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.700000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.700000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.700000003,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":11.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[11.700000003,0.1]}
+{"ev":"demand_done","t":11.700000003,"p":1,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.700000003,"p":1,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":11.700000003,"p":1,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000003,"p":1,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000003,"p":1,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000003,"p":1,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"end","t":11.700000003,"p":1,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"hold","t":11.700000003,"p":1,"d":0.5}
+{"ev":"pend","t":11.700000003,"p":1}
+{"ev":"demand_done","t":11.700000003,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.700000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act1","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.700000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.700000003,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs2","sched":"FCFS","d":0.2,"st":0.2}
+{"ev":"meas","t":11.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs2|replicaID=0]","metric":"Resource Demand Tuple","v":[11.700000003,0.2]}
+{"ev":"demand_done","t":11.700000003,"p":2,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.700000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.700000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.700000003,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":11.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[11.700000003,0.1]}
+{"ev":"demand_done","t":11.700000003,"p":2,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.700000003,"p":2,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":11.700000003,"p":2,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000003,"p":2,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000003,"p":2,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000003,"p":2,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"end","t":11.700000003,"p":2,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"hold","t":11.700000003,"p":2,"d":0.5}
+{"ev":"pend","t":11.700000003,"p":2}
+{"ev":"pend","t":11.700000003,"p":3}
+{"ev":"demand_done","t":11.700000003,"p":4,"res":"_BIjHoQ3KEdyouMqirZIhzQ","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.700000003,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act2","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"begin","t":11.700000003,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"demand","t":11.700000003,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1","spec":"_h25_deterministic_closed_prs3","sched":"DELAY","d":0.1,"st":0.1}
+{"ev":"meas","t":11.700000003,"mp":"ActiveResourceMeasuringPoint[_h25_deterministic_closed_prs3|replicaID=0]","metric":"Resource Demand Tuple","v":[11.700000003,0.1]}
+{"ev":"demand_done","t":11.700000003,"p":4,"res":"_nvHX4KkREdyEA_b89s7q9w","rc":"_h25_deterministic_closed_rc1"}
+{"ev":"end","t":11.700000003,"p":4,"type":"InternalAction","id":"_h25_deterministic_closed_act3","ac":"_h25_deterministic_closed_ac1"}
+{"ev":"end","t":11.700000003,"p":4,"type":"AssemblyOperation","ac":"_h25_deterministic_closed_ac1","role":"_h25_deterministic_closed_prov1","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000003,"p":4,"type":"AssemblyOperation","ac":"_SYSTEM_ASSEMBLY_CONTEXT_","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000003,"p":4,"type":"SystemOperation","role":"_h25_deterministic_closed_prov2","sig":"_h25_deterministic_closed_sig1"}
+{"ev":"end","t":11.700000003,"p":4,"type":"EntryLevelSystemCall","id":"_h25_deterministic_closed_ua1"}
+{"ev":"end","t":11.700000003,"p":4,"type":"UsageScenario","id":"_h25_deterministic_closed_us1"}
+{"ev":"hold","t":11.700000003,"p":4,"d":0.5}
+{"ev":"pend","t":11.700000003,"p":4}
+{"ev":"finish","t":11.700000003,"uniforms":0,"measurements":394}

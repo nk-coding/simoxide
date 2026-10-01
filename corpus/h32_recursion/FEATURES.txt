@@ -1,0 +1,1 @@
+recursive calls: two assemblies of one component call each other (probabilistic branch, depth unbounded but finite); no response-time monitors on the external call (with them SimuLizar aborts: 'First measurement to the same context arrived')

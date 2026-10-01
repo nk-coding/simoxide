@@ -1,0 +1,1 @@
+corpus/h01_ps_single; triggersSelfAdaptations=true on the scenario monitor, which is deactivated (activated=false): no calculator, no PRM write, no reconfiguration process. Expected outputs: reference/refsim batch (2026-09-29, agent L).

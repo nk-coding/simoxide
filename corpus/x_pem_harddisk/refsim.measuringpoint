@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_refsim_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: defaultUsageScenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_harddisk/default.usagemodel#_1dCWYHJ1Ed2efr_U4e1c6Q">
+    <usageScenario href="default.usagemodel#_1dCWYHJ1Ed2efr_U4e1c6Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall aName to defaultSystem->Provided_IHardDiskAccess->read [_5GYboHJ1Ed2efr_U4e1c6Q]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_harddisk/default.usagemodel#_5GYboHJ1Ed2efr_U4e1c6Q">
+    <entryLevelSystemCall href="default.usagemodel#_5GYboHJ1Ed2efr_U4e1c6Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="defaultSystem.Provided_IHardDiskAccess.read"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_harddisk/default.repository#_WDpkgDlUEeuNm-AP5RieIg">
+    <role xsi:type="repository:OperationProvidedRole" href="default.system#_eVfzEHJ1Ed2efr_U4e1c6Q"/>
+    <operationSignature href="default.repository#_WDpkgDlUEeuNm-AP5RieIg"/>
+    <system href="default.system#_aGSnsHJ1Ed2efr_U4e1c6Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="HDD [0] in machine" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_harddisk/default.resourceenvironment#_JaJtUTlUEeuNm-AP5RieIg">
+    <activeResource href="default.resourceenvironment#_JaJtUTlUEeuNm-AP5RieIg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Assembly_HardDiskModel &lt;HardDiskModel>.hardDrive"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/x_pem_harddisk/default.repository#_MRheAHJ6Ed2efr_U4e1c6Q">
+    <assembly href="default.system#_bNOakHJ1Ed2efr_U4e1c6Q"/>
+    <passiveResource href="default.repository#_MRheAHJ6Ed2efr_U4e1c6Q"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

@@ -1,0 +1,1 @@
+triggersSelfAdaptations=true only on the state of an unused HDD: its only runtime-measurement write after t=0 is the final state tuple at the stop, so the reconfiguration process is created during SimuComModel.finalise (after the stop line)

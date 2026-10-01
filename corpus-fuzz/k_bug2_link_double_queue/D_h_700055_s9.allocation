@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_D_h_700055_s9_allocation1" entityName="D_h_700055_s9">
+  <targetResourceEnvironment_Allocation href="D_h_700055_s9.resourceenvironment#/"/>
+  <system_Allocation href="D_h_700055_s9.system#_D_h_700055_s9_system1"/>
+  <allocationContexts_Allocation id="_D_h_700055_s9_alc1" entityName="Allocation_Assembly_Comp0_0">
+    <resourceContainer_AllocationContext href="D_h_700055_s9.resourceenvironment#_D_h_700055_s9_rc2"/>
+    <assemblyContext_AllocationContext href="D_h_700055_s9.system#_D_h_700055_s9_ac5"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_D_h_700055_s9_alc2" entityName="Allocation_Assembly_Comp1_0">
+    <resourceContainer_AllocationContext href="D_h_700055_s9.resourceenvironment#_D_h_700055_s9_rc2"/>
+    <assemblyContext_AllocationContext href="D_h_700055_s9.system#_D_h_700055_s9_ac6"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_D_h_700055_s9_alc3" entityName="Allocation_Assembly_Comp2_0">
+    <resourceContainer_AllocationContext href="D_h_700055_s9.resourceenvironment#_D_h_700055_s9_rc3"/>
+    <assemblyContext_AllocationContext href="D_h_700055_s9.system#_D_h_700055_s9_ac7"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_D_h_700055_s9_alc4" entityName="Allocation_Assembly_Composite3_0">
+    <resourceContainer_AllocationContext href="D_h_700055_s9.resourceenvironment#_D_h_700055_s9_rc3"/>
+    <assemblyContext_AllocationContext href="D_h_700055_s9.system#_D_h_700055_s9_ac8"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_D_h_700055_s9_alc5" entityName="Allocation_Assembly_Comp4_0">
+    <resourceContainer_AllocationContext href="D_h_700055_s9.resourceenvironment#_D_h_700055_s9_rc2"/>
+    <assemblyContext_AllocationContext href="D_h_700055_s9.system#_D_h_700055_s9_ac9"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_D_h_700055_s9_alc6" entityName="Allocation_Assembly_Comp4_1">
+    <resourceContainer_AllocationContext href="D_h_700055_s9.resourceenvironment#_D_h_700055_s9_rc1"/>
+    <assemblyContext_AllocationContext href="D_h_700055_s9.system#_D_h_700055_s9_ac10"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_D_h_700055_s9_alc7" entityName="Allocation_Assembly_Composite5_0">
+    <resourceContainer_AllocationContext href="D_h_700055_s9.resourceenvironment#_D_h_700055_s9_rc1"/>
+    <assemblyContext_AllocationContext href="D_h_700055_s9.system#_D_h_700055_s9_ac11"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

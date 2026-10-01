@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2"
+    id="_h18_infrastructure_call_repository1" entityName="h18_infrastructure_call">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h18_infrastructure_call_comp1" entityName="App">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h18_infrastructure_call_prov1"
+        entityName="Provided_IService" providedInterface__OperationProvidedRole="_h18_infrastructure_call_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_h18_infrastructure_call_req1"
+        entityName="Required_IMiddleware" requiredInterface__InfrastructureRequiredRole="_h18_infrastructure_call_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h18_infrastructure_call_seff1"
+        describedService__SEFF="_h18_infrastructure_call_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h18_infrastructure_call_act3" entityName="start" successor_AbstractAction="_h18_infrastructure_call_act1"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h18_infrastructure_call_act1" entityName="withInfra" predecessor_AbstractAction="_h18_infrastructure_call_act3"
+          successor_AbstractAction="_h18_infrastructure_call_act2">
+        <infrastructureCall__Action id="_h18_infrastructure_call_ic1" signature__InfrastructureCall="_h18_infrastructure_call_sig2"
+            requiredRole__InfrastructureCall="_h18_infrastructure_call_req1">
+          <numberOfCalls__InfrastructureCall specification="2"/>
+        </infrastructureCall__Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h18_infrastructure_call_act2" entityName="work" predecessor_AbstractAction="_h18_infrastructure_call_act1"
+          successor_AbstractAction="_h18_infrastructure_call_act4">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.05"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h18_infrastructure_call_act4" entityName="stop" predecessor_AbstractAction="_h18_infrastructure_call_act2"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_h18_infrastructure_call_comp2" entityName="Middleware">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:InfrastructureProvidedRole" id="_h18_infrastructure_call_prov2"
+        entityName="Provided_IMiddleware" providedInterface__InfrastructureProvidedRole="_h18_infrastructure_call_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h18_infrastructure_call_seff2"
+        describedService__SEFF="_h18_infrastructure_call_sig2">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h18_infrastructure_call_act6" entityName="start" successor_AbstractAction="_h18_infrastructure_call_act5"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h18_infrastructure_call_act5" entityName="marshalWork" predecessor_AbstractAction="_h18_infrastructure_call_act6"
+          successor_AbstractAction="_h18_infrastructure_call_act7">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Exp(50.0)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h18_infrastructure_call_act7" entityName="stop" predecessor_AbstractAction="_h18_infrastructure_call_act5"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h18_infrastructure_call_if1" entityName="IService">
+    <signatures__OperationInterface id="_h18_infrastructure_call_sig1" entityName="op"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:InfrastructureInterface" id="_h18_infrastructure_call_if2" entityName="IMiddleware">
+    <infrastructureSignatures__InfrastructureInterface id="_h18_infrastructure_call_sig2" entityName="marshal"/>
+  </interfaces__Repository>
+</repository:Repository>

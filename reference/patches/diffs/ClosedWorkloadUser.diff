@@ -1,0 +1,17 @@
+--- 5.2.2/Palladio-Analyzer-SimuCom/bundles/de.uka.ipd.sdq.simucomframework/src/de/uka/ipd/sdq/simucomframework/usage/ClosedWorkloadUser.java
++++ patched/de/uka/ipd/sdq/simucomframework/usage/ClosedWorkloadUser.java
+@@ -121,7 +121,13 @@
+         this.scenarioRunner.scenarioRunner(thread);
+         ((TriggeredProbe) this.usageStartStopProbes.get(1)).takeMeasurement(getRequestContext());
+         // think
+-        final double thinkTimeEvaluation = Context.evaluateStatic(this.thinkTime, Double.class, null);
++        final String prevOrigin = refsim.trace.Trace.origin("think"); // REFSIM tape
++        final double thinkTimeEvaluation;
++        try {
++            thinkTimeEvaluation = Context.evaluateStatic(this.thinkTime, Double.class, null);
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+         this.hold(thinkTimeEvaluation);
+     }
+ 

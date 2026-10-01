@@ -1,0 +1,1 @@
+remote call over a LinkingResource (latency 0.005, throughput 1e6) with BYTESIZE parameter; SimuLizar default: throughput of linking resources simulated (sum of BYTESIZE on the call/return frames)

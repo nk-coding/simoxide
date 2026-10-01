@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monitorrepository:MonitorRepository xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:metricspec="http://palladiosimulator.org/MetricSpec/1.0"
+    xmlns:monitorrepository="http://palladiosimulator.org/MonitorRepository/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    id="_ysXQINV8EeSaPsLvWUqTbQ" entityName="Default Monitor Set">
+  <monitors id="_HbTkYNV9EeSaPsLvWUqTbQ" entityName="Response Times - Usage Scenario">
+    <measurementSpecifications id="_a5IPANV9EeSaPsLvWUqTbQ">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_DwndMLu3EfG1wsDQfZeizQ"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="espresso.measuringpoint#//@measuringPoints.0"/>
+  </monitors>
+</monitorrepository:MonitorRepository>

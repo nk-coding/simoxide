@@ -1,0 +1,99 @@
+{
+ "std": [
+  {
+   "id": "x.VALUE",
+   "t": "int",
+   "v": 7
+  },
+  {
+   "id": "y.VALUE",
+   "t": "double",
+   "v": 2.5
+  },
+  {
+   "id": "b.VALUE",
+   "t": "bool",
+   "v": true
+  },
+  {
+   "id": "s.VALUE",
+   "t": "string",
+   "v": "abc"
+  },
+  {
+   "id": "n.BYTESIZE",
+   "t": "int",
+   "v": 100
+  },
+  {
+   "id": "d.BYTESIZE",
+   "t": "double",
+   "v": 3.5
+  },
+  {
+   "id": "z.VALUE",
+   "t": "int",
+   "v": 0
+  },
+  {
+   "id": "neg.VALUE",
+   "t": "int",
+   "v": -3
+  },
+  {
+   "id": "big.VALUE",
+   "t": "int",
+   "v": 2147483647
+  },
+  {
+   "id": "min.VALUE",
+   "t": "int",
+   "v": -2147483648
+  },
+  {
+   "id": "nz.VALUE",
+   "t": "double",
+   "v": "0x8000000000000000"
+  },
+  {
+   "id": "nan.VALUE",
+   "t": "double",
+   "v": "0x7ff8000000000000"
+  },
+  {
+   "id": "inf.VALUE",
+   "t": "double",
+   "v": "0x7ff0000000000000"
+  },
+  {
+   "id": "t.TYPE",
+   "t": "string",
+   "v": "graphical"
+  },
+  {
+   "id": "c.NUMBER_OF_ELEMENTS",
+   "t": "int",
+   "v": 4
+  },
+  {
+   "id": "a.b.c.VALUE",
+   "t": "int",
+   "v": 11
+  },
+  {
+   "id": "f.INNER.BYTESIZE",
+   "t": "int",
+   "v": 9
+  },
+  {
+   "id": "p.INNER.VALUE",
+   "t": "proxy",
+   "v": "IntPMF[(1;0.5)(2;0.5)] * x.VALUE"
+  },
+  {
+   "id": "q.VALUE",
+   "t": "proxy",
+   "v": "y.VALUE + 1"
+  }
+ ]
+}

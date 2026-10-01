@@ -1,0 +1,11 @@
+# 4 cores, n crosses cores
+resource ps 4 1.0
+job a 0 0.1
+job b 0 0.2
+job c 0 0.3
+job d 0 0.4
+job e 0 0.5
+job f 0 0.6
+job g 0.05 0.05
+job h 0.05 0.05
+job i 0.05 0.05

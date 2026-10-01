@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2"
+    id="_h07_prob_branch_repository1" entityName="h07_prob_branch">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h07_prob_branch_comp1" entityName="Server">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h07_prob_branch_prov1" entityName="Provided_IService"
+        providedInterface__OperationProvidedRole="_h07_prob_branch_if1"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h07_prob_branch_seff1" describedService__SEFF="_h07_prob_branch_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h07_prob_branch_act11" entityName="start" successor_AbstractAction="_h07_prob_branch_act10"/>
+      <steps_Behaviour xsi:type="seff:BranchAction" id="_h07_prob_branch_act10" entityName="branch" predecessor_AbstractAction="_h07_prob_branch_act11"
+          successor_AbstractAction="_h07_prob_branch_act12">
+        <branches_Branch xsi:type="seff:ProbabilisticBranchTransition" id="_h07_prob_branch_bt1" entityName="branch_0" branchProbability="0.2">
+          <branchBehaviour_BranchTransition id="_h07_prob_branch_rdb1">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_h07_prob_branch_act2" entityName="start" successor_AbstractAction="_h07_prob_branch_act1"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_h07_prob_branch_act1" entityName="small" predecessor_AbstractAction="_h07_prob_branch_act2"
+                successor_AbstractAction="_h07_prob_branch_act3">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.01"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_h07_prob_branch_act3" entityName="stop" predecessor_AbstractAction="_h07_prob_branch_act1"/>
+          </branchBehaviour_BranchTransition>
+        </branches_Branch>
+        <branches_Branch xsi:type="seff:ProbabilisticBranchTransition" id="_h07_prob_branch_bt2" entityName="branch_1" branchProbability="0.5">
+          <branchBehaviour_BranchTransition id="_h07_prob_branch_rdb2">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_h07_prob_branch_act5" entityName="start" successor_AbstractAction="_h07_prob_branch_act4"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_h07_prob_branch_act4" entityName="medium" predecessor_AbstractAction="_h07_prob_branch_act5"
+                successor_AbstractAction="_h07_prob_branch_act6">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.05"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_h07_prob_branch_act6" entityName="stop" predecessor_AbstractAction="_h07_prob_branch_act4"/>
+          </branchBehaviour_BranchTransition>
+        </branches_Branch>
+        <branches_Branch xsi:type="seff:ProbabilisticBranchTransition" id="_h07_prob_branch_bt3" entityName="branch_2" branchProbability="0.3">
+          <branchBehaviour_BranchTransition id="_h07_prob_branch_rdb3">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_h07_prob_branch_act8" entityName="start" successor_AbstractAction="_h07_prob_branch_act7"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_h07_prob_branch_act7" entityName="large" predecessor_AbstractAction="_h07_prob_branch_act8"
+                successor_AbstractAction="_h07_prob_branch_act9">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.2"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_h07_prob_branch_act9" entityName="stop" predecessor_AbstractAction="_h07_prob_branch_act7"/>
+          </branchBehaviour_BranchTransition>
+        </branches_Branch>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h07_prob_branch_act12" entityName="stop" predecessor_AbstractAction="_h07_prob_branch_act10"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h07_prob_branch_if1" entityName="IService">
+    <signatures__OperationInterface id="_h07_prob_branch_sig1" entityName="op"/>
+  </interfaces__Repository>
+</repository:Repository>

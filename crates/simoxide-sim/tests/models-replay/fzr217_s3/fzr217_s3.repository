@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_fzr217_s3_repository1" entityName="fzr217_s3">
+  <components__Repository xsi:type="repository:BasicComponent" id="_fzr217_s3_comp1" entityName="Front0">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_fzr217_s3_prov2" entityName="Provided_IService0" providedInterface__OperationProvidedRole="_fzr217_s3_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_fzr217_s3_req2" entityName="Required_IService1" requiredInterface__OperationRequiredRole="_fzr217_s3_if3"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_fzr217_s3_req3" entityName="Required_IBack0" requiredInterface__OperationRequiredRole="_fzr217_s3_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_fzr217_s3_seff5" describedService__SEFF="_fzr217_s3_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act41" entityName="start" successor_AbstractAction="_fzr217_s3_act38"/>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_fzr217_s3_act38" entityName="call_op2_0" predecessor_AbstractAction="_fzr217_s3_act41" successor_AbstractAction="_fzr217_s3_act39" calledService_ExternalService="_fzr217_s3_sig3" role_ExternalService="_fzr217_s3_req2">
+        <inputVariableUsages__CallAction>
+          <variableCharacterisation_VariableUsage type="VALUE">
+            <specification_VariableCharacterisation specification="IntPMF[(2;0.5)(6;0.5)]"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="n0"/>
+        </inputVariableUsages__CallAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act39" entityName="work" predecessor_AbstractAction="_fzr217_s3_act38" successor_AbstractAction="_fzr217_s3_act40">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Pois(2.0) * 0.004"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act40" entityName="work" predecessor_AbstractAction="_fzr217_s3_act39" successor_AbstractAction="_fzr217_s3_act42">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Exp(200.0)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act42" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act40"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_fzr217_s3_comp2" entityName="Back0">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_fzr217_s3_prov3" entityName="Provided_IBack0" providedInterface__OperationProvidedRole="_fzr217_s3_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_fzr217_s3_seff4" describedService__SEFF="_fzr217_s3_sig2">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act36" entityName="start" successor_AbstractAction="_fzr217_s3_act33"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act33" entityName="work" predecessor_AbstractAction="_fzr217_s3_act36" successor_AbstractAction="_fzr217_s3_act34">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="DoublePDF[(0.005;0.5)(0.02;0.5)]"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act34" entityName="work" predecessor_AbstractAction="_fzr217_s3_act33" successor_AbstractAction="_fzr217_s3_act35">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Gamma(2.0, 0.005)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act35" entityName="work" predecessor_AbstractAction="_fzr217_s3_act34" successor_AbstractAction="_fzr217_s3_act37">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="LognormMoments(0.01, 0.005)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act37" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act35"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:CompositeComponent" id="_fzr217_s3_comp3" entityName="Composite0">
+    <assemblyContexts__ComposedStructure id="_fzr217_s3_ac1" entityName="Inner_Front0" encapsulatedComponent__AssemblyContext="_fzr217_s3_comp1"/>
+    <assemblyContexts__ComposedStructure id="_fzr217_s3_ac2" entityName="Inner_Back0" encapsulatedComponent__AssemblyContext="_fzr217_s3_comp2"/>
+    <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_fzr217_s3_conn1" entityName="ProvDelegation" outerProvidedRole_ProvidedDelegationConnector="_fzr217_s3_prov1" assemblyContext_ProvidedDelegationConnector="_fzr217_s3_ac1" innerProvidedRole_ProvidedDelegationConnector="_fzr217_s3_prov2"/>
+    <connectors__ComposedStructure xsi:type="composition:RequiredDelegationConnector" id="_fzr217_s3_conn2" entityName="ReqDelegation" innerRequiredRole_RequiredDelegationConnector="_fzr217_s3_req2" outerRequiredRole_RequiredDelegationConnector="_fzr217_s3_req1" assemblyContext_RequiredDelegationConnector="_fzr217_s3_ac1"/>
+    <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_fzr217_s3_conn3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_fzr217_s3_ac1" providingAssemblyContext_AssemblyConnector="_fzr217_s3_ac2" providedRole_AssemblyConnector="_fzr217_s3_prov3" requiredRole_AssemblyConnector="_fzr217_s3_req3"/>
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_fzr217_s3_prov1" entityName="Provided_IService0" providedInterface__OperationProvidedRole="_fzr217_s3_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_fzr217_s3_req1" entityName="Required_IService1" requiredInterface__OperationRequiredRole="_fzr217_s3_if3"/>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_fzr217_s3_comp4" entityName="Comp1">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_fzr217_s3_prov4" entityName="Provided_IService1" providedInterface__OperationProvidedRole="_fzr217_s3_if3"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_fzr217_s3_req4" entityName="Required_IService2" requiredInterface__OperationRequiredRole="_fzr217_s3_if4"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_fzr217_s3_req5" entityName="Required_IMiddleware" requiredInterface__InfrastructureRequiredRole="_fzr217_s3_if5"/>
+    <componentParameterUsage_ImplementationComponentType>
+      <variableCharacterisation_VariableUsage type="VALUE">
+        <specification_VariableCharacterisation specification="4"/>
+      </variableCharacterisation_VariableUsage>
+      <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="cp0"/>
+    </componentParameterUsage_ImplementationComponentType>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_fzr217_s3_seff3" describedService__SEFF="_fzr217_s3_sig3">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act31" entityName="start" successor_AbstractAction="_fzr217_s3_act30"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act30" entityName="work" predecessor_AbstractAction="_fzr217_s3_act31" successor_AbstractAction="_fzr217_s3_act32">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="DoublePMF[(0.005;0.4)(0.02;0.6)]"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+        <infrastructureCall__Action id="_fzr217_s3_ic1" signature__InfrastructureCall="_fzr217_s3_sig5" requiredRole__InfrastructureCall="_fzr217_s3_req5">
+          <numberOfCalls__InfrastructureCall specification="1"/>
+        </infrastructureCall__Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act32" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act30"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_fzr217_s3_comp5" entityName="Front2">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_fzr217_s3_prov6" entityName="Provided_IService2" providedInterface__OperationProvidedRole="_fzr217_s3_if4"/>
+    <resourceRequiredRoles__ResourceInterfaceRequiringEntity id="_fzr217_s3_rreq1" entityName="CpuRequired">
+      <requiredResourceInterface__ResourceRequiredRole href="pathmap://PCM_MODELS/Palladio.resourcetype#_tw_Q8E5CEeCUKeckjJ_n-w"/>
+    </resourceRequiredRoles__ResourceInterfaceRequiringEntity>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_fzr217_s3_seff2" describedService__SEFF="_fzr217_s3_sig4">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act28" entityName="start" successor_AbstractAction="_fzr217_s3_act9"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act9" entityName="work" predecessor_AbstractAction="_fzr217_s3_act28" successor_AbstractAction="_fzr217_s3_act27">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="LognormMoments(0.01, 0.005)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:BranchAction" id="_fzr217_s3_act27" entityName="guard" predecessor_AbstractAction="_fzr217_s3_act9" successor_AbstractAction="_fzr217_s3_act29">
+        <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_fzr217_s3_bt1" entityName="guard_0">
+          <branchBehaviour_BranchTransition id="_fzr217_s3_rdb6">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act22" entityName="start" successor_AbstractAction="_fzr217_s3_act14"/>
+            <steps_Behaviour xsi:type="seff:CollectionIteratorAction" id="_fzr217_s3_act14" entityName="iterate" predecessor_AbstractAction="_fzr217_s3_act22" successor_AbstractAction="_fzr217_s3_act21" parameter_CollectionIteratorAction="//@interfaces__Repository.3/@signatures__OperationInterface.0/@parameters__OperationSignature.0">
+              <bodyBehaviour_Loop id="_fzr217_s3_rdb3">
+                <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act12" entityName="start" successor_AbstractAction="_fzr217_s3_act10"/>
+                <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act10" entityName="work" predecessor_AbstractAction="_fzr217_s3_act12" successor_AbstractAction="_fzr217_s3_act11">
+                  <resourceDemand_Action>
+                    <specification_ParametericResourceDemand specification="Exp(50.0)"/>
+                    <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+                  </resourceDemand_Action>
+                  <resourceCall__Action id="_fzr217_s3_rcall1" resourceRequiredRole__ResourceCall="_fzr217_s3_rreq1">
+                    <signature__ResourceCall href="pathmap://PCM_MODELS/Palladio.resourcetype#_wF22kE5CEeCUKeckjJ_n-w"/>
+                    <numberOfCalls__ResourceCall specification="Trunc(3.7) * 0.002 + Round(2.5) * 0.001"/>
+                  </resourceCall__Action>
+                </steps_Behaviour>
+                <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act11" entityName="work" predecessor_AbstractAction="_fzr217_s3_act10" successor_AbstractAction="_fzr217_s3_act13">
+                  <resourceDemand_Action>
+                    <specification_ParametericResourceDemand specification="Exp(100.0)"/>
+                    <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+                  </resourceDemand_Action>
+                  <resourceCall__Action id="_fzr217_s3_rcall2" resourceRequiredRole__ResourceCall="_fzr217_s3_rreq1">
+                    <signature__ResourceCall href="pathmap://PCM_MODELS/Palladio.resourcetype#_wF22kE5CEeCUKeckjJ_n-w"/>
+                    <numberOfCalls__ResourceCall specification="Exp(20.0)"/>
+                  </resourceCall__Action>
+                </steps_Behaviour>
+                <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act13" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act11"/>
+              </bodyBehaviour_Loop>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:LoopAction" id="_fzr217_s3_act21" entityName="loop" predecessor_AbstractAction="_fzr217_s3_act14" successor_AbstractAction="_fzr217_s3_act23">
+              <bodyBehaviour_Loop id="_fzr217_s3_rdb5">
+                <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act19" entityName="start" successor_AbstractAction="_fzr217_s3_act18"/>
+                <steps_Behaviour xsi:type="seff:CollectionIteratorAction" id="_fzr217_s3_act18" entityName="iterate" predecessor_AbstractAction="_fzr217_s3_act19" successor_AbstractAction="_fzr217_s3_act20" parameter_CollectionIteratorAction="//@interfaces__Repository.3/@signatures__OperationInterface.0/@parameters__OperationSignature.0">
+                  <bodyBehaviour_Loop id="_fzr217_s3_rdb4">
+                    <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act16" entityName="start" successor_AbstractAction="_fzr217_s3_act15"/>
+                    <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act15" entityName="work" predecessor_AbstractAction="_fzr217_s3_act16" successor_AbstractAction="_fzr217_s3_act17">
+                      <resourceDemand_Action>
+                        <specification_ParametericResourceDemand specification="UniDouble(0.001, 0.021)"/>
+                        <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+                      </resourceDemand_Action>
+                    </steps_Behaviour>
+                    <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act17" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act15"/>
+                  </bodyBehaviour_Loop>
+                </steps_Behaviour>
+                <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act20" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act18"/>
+              </bodyBehaviour_Loop>
+              <iterationCount_LoopAction specification="IntPMF[(1;0.5)(2;0.3)(3;0.2)]"/>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act23" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act21"/>
+          </branchBehaviour_BranchTransition>
+          <branchCondition_GuardedBranchTransition specification="items0.NUMBER_OF_ELEMENTS &lt; 3"/>
+        </branches_Branch>
+        <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_fzr217_s3_bt2" entityName="guard_1">
+          <branchBehaviour_BranchTransition id="_fzr217_s3_rdb7">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act25" entityName="start" successor_AbstractAction="_fzr217_s3_act24"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act24" entityName="work" predecessor_AbstractAction="_fzr217_s3_act25" successor_AbstractAction="_fzr217_s3_act26">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="Exp(100.0)"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act26" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act24"/>
+          </branchBehaviour_BranchTransition>
+          <branchCondition_GuardedBranchTransition specification="items0.NUMBER_OF_ELEMENTS &gt;= 3"/>
+        </branches_Branch>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act29" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act27"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:CompositeComponent" id="_fzr217_s3_comp6" entityName="Composite2">
+    <assemblyContexts__ComposedStructure id="_fzr217_s3_ac3" entityName="Inner_Front2" encapsulatedComponent__AssemblyContext="_fzr217_s3_comp5"/>
+    <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_fzr217_s3_conn4" entityName="ProvDelegation" outerProvidedRole_ProvidedDelegationConnector="_fzr217_s3_prov5" assemblyContext_ProvidedDelegationConnector="_fzr217_s3_ac3" innerProvidedRole_ProvidedDelegationConnector="_fzr217_s3_prov6"/>
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_fzr217_s3_prov5" entityName="Provided_IService2" providedInterface__OperationProvidedRole="_fzr217_s3_if4"/>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_fzr217_s3_comp7" entityName="Middleware">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:InfrastructureProvidedRole" id="_fzr217_s3_prov7" entityName="Provided_IMiddleware" providedInterface__InfrastructureProvidedRole="_fzr217_s3_if5"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_fzr217_s3_seff1" describedService__SEFF="_fzr217_s3_sig5">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act7" entityName="start" successor_AbstractAction="_fzr217_s3_act5"/>
+      <steps_Behaviour xsi:type="seff:LoopAction" id="_fzr217_s3_act5" entityName="loop" predecessor_AbstractAction="_fzr217_s3_act7" successor_AbstractAction="_fzr217_s3_act6">
+        <bodyBehaviour_Loop id="_fzr217_s3_rdb1">
+          <steps_Behaviour xsi:type="seff:StartAction" id="_fzr217_s3_act3" entityName="start" successor_AbstractAction="_fzr217_s3_act1"/>
+          <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act1" entityName="work" predecessor_AbstractAction="_fzr217_s3_act3" successor_AbstractAction="_fzr217_s3_act2">
+            <resourceDemand_Action>
+              <specification_ParametericResourceDemand specification="UniDouble(0.001, 0.011)"/>
+              <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+            </resourceDemand_Action>
+          </steps_Behaviour>
+          <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act2" entityName="work" predecessor_AbstractAction="_fzr217_s3_act1" successor_AbstractAction="_fzr217_s3_act4">
+            <resourceDemand_Action>
+              <specification_ParametericResourceDemand specification="0.03"/>
+              <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+            </resourceDemand_Action>
+          </steps_Behaviour>
+          <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act4" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act2"/>
+        </bodyBehaviour_Loop>
+        <iterationCount_LoopAction specification="IntPMF[(0;0.2)(1;0.5)(2;0.3)]"/>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_fzr217_s3_act6" entityName="work" predecessor_AbstractAction="_fzr217_s3_act5" successor_AbstractAction="_fzr217_s3_act8">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.0"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_fzr217_s3_act8" entityName="stop" predecessor_AbstractAction="_fzr217_s3_act6"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_fzr217_s3_if1" entityName="IService0">
+    <signatures__OperationInterface id="_fzr217_s3_sig1" entityName="op0_0"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_fzr217_s3_if2" entityName="IBack0">
+    <signatures__OperationInterface id="_fzr217_s3_sig2" entityName="op1_0"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_fzr217_s3_if3" entityName="IService1">
+    <signatures__OperationInterface id="_fzr217_s3_sig3" entityName="op2_0">
+      <parameters__OperationSignature parameterName="n0">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_fzr217_s3_if4" entityName="IService2">
+    <signatures__OperationInterface id="_fzr217_s3_sig4" entityName="op3_0">
+      <parameters__OperationSignature dataType__Parameter="_fzr217_s3_dt1" parameterName="items0"/>
+      <parameters__OperationSignature parameterName="n1">
+        <dataType__Parameter xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+      </parameters__OperationSignature>
+    </signatures__OperationInterface>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:InfrastructureInterface" id="_fzr217_s3_if5" entityName="IMiddleware">
+    <infrastructureSignatures__InfrastructureInterface id="_fzr217_s3_sig5" entityName="marshal"/>
+  </interfaces__Repository>
+  <dataTypes__Repository xsi:type="repository:CollectionDataType" id="_fzr217_s3_dt1" entityName="IntList">
+    <innerType_CollectionDataType xsi:type="repository:PrimitiveDataType" href="pathmap://PCM_MODELS/PrimitiveTypes.repository#//@dataTypes__Repository.0"/>
+  </dataTypes__Repository>
+</repository:Repository>

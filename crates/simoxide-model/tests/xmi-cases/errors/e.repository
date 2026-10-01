@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" id="_repo" entityName="errors" unknownAttribute="x">
+  <components__Repository xsi:type="repository:BasicComponent" id="_c1" entityName="C1" componentType="NOPE">
+    <unknownElement foo="bar"><nested/></unknownElement>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_s1" describedService__SEFF="_missing">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_a1" successor_AbstractAction="_a2"/>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_a2" predecessor_AbstractAction="_a1" retryCount="1.5" successor_AbstractAction="_a3"/>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_a3" predecessor_AbstractAction="_a2"/>
+    </serviceEffectSpecifications__BasicComponent>
+    <passiveResource_BasicComponent id="_p1" entityName="P">
+      <capacity_PassiveResource specification="2"/>
+    </passiveResource_BasicComponent>
+  </components__Repository>
+</repository:Repository>

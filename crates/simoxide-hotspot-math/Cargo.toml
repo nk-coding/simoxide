@@ -1,0 +1,14 @@
+[package]
+name = "simoxide-hotspot-math"
+description = "Bit-exact port of HotSpot's x86-64 Math.log and Math.exp intrinsics (Intel LIBM stubs); GPL-2.0-only, optional for SimOxide"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+# The Intel LIBM stubs of OpenJDK are GPL-2.0-only (no Classpath Exception); see lib.rs and LICENSE.
+license = "GPL-2.0-only"
+
+[dependencies]
+
+[features]
+# Use the recorded AMD Zen 5 `rcpss` table in `log` instead of the instruction.
+rcp-table = []

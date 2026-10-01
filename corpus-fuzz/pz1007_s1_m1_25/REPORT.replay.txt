@@ -1,0 +1,21 @@
+minimized from pz1007_s1 (seed 1007 size 1 ["double_assembly=0", "fork_calls=0"])
+
+first divergence (Exact) at expected line 2190 / actual line 2190 after 2189 equal lines (2340 vs 2339 lines compared): Missing(1)
+  t = 1.008054214
+  element: ActiveResourceMeasuringPoint[_pz1007_s1_m1_25_prs1|replicaID=0] / State of Active Resource Tuple
+  context:
+       2182  {"ev":"demand","t":0.979796995,"p":2,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_pz1007_s1_m1_25_rc1","spec":"_pz1007_s1_m1_25_prs1","sched":"FCFS","d":0.012777662756691123,"st":0.012777662756691123}
+       2183  {"ev":"meas","t":0.979796995,"mp":"ActiveResourceMeasuringPoint[_pz1007_s1_m1_25_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.979796995,0.012777662756691123]}
+       2184  {"ev":"meas","t":0.979796995,"mp":"ActiveResourceMeasuringPoint[_pz1007_s1_m1_25_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.979796995,2.0]}
+       2185  {"ev":"meas","t":0.995276552,"mp":"ActiveResourceMeasuringPoint[_pz1007_s1_m1_25_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.995276552,1.0]}
+       2186  {"ev":"demand_done","t":0.995276552,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_pz1007_s1_m1_25_rc1"}
+       2187  {"ev":"demand","t":0.995276552,"p":1,"res":"_oro4gG3fEdy4YaaT-RYrLQ","rc":"_pz1007_s1_m1_25_rc1","spec":"_pz1007_s1_m1_25_prs1","sched":"FCFS","d":0.002,"st":0.002}
+       2188  {"ev":"meas","t":0.995276552,"mp":"ActiveResourceMeasuringPoint[_pz1007_s1_m1_25_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.995276552,0.002]}
+       2189  {"ev":"meas","t":0.995276552,"mp":"ActiveResourceMeasuringPoint[_pz1007_s1_m1_25_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.995276552,2.0]}
+  - expected: {"ev":"meas","t":1.008054214,"mp":"ActiveResourceMeasuringPoint[_pz1007_s1_m1_25_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.008054214,1.0]}
+  + actual:   {"ev":"stop","t":1.008054214}
+    field ev: expected "meas" actual "stop"
+    field mp: expected "ActiveResourceMeasuringPoint[_pz1007_s1_m1_25_prs1|replicaID=0]" actual <absent>
+    field metric: expected "State of Active Resource Tuple" actual <absent>
+    field v: expected [1.008054214,1.0] actual <absent>
+Fail ActiveResourceMeasuringPoint[_pz1007_s1_m1_25_prs1|replicaID=0] / State of Active Resource Tuple (117 vs 116 rows) row 115: expected (1.008054214, 1.0) actual (1.008054214, 2.0)

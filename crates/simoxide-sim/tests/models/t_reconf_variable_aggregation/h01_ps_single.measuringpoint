@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmlns:simulizarmeasuringpoint="http://palladiosimulator.org/simulizar/measuringpoint" xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_h01_ps_single_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h01_ps_single/h01_ps_single.usagemodel#_h01_ps_single_us1">
+    <usageScenario href="h01_ps_single.usagemodel#_h01_ps_single_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall callOp to h01_ps_single->Provided_IService->op [_h01_ps_single_ua1]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h01_ps_single/h01_ps_single.usagemodel#_h01_ps_single_ua1">
+    <entryLevelSystemCall href="h01_ps_single.usagemodel#_h01_ps_single_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="h01_ps_single.Provided_IService.op"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h01_ps_single/h01_ps_single.repository#_h01_ps_single_sig1">
+    <role xsi:type="repository:OperationProvidedRole" href="h01_ps_single.system#_h01_ps_single_prov2"/>
+    <operationSignature href="h01_ps_single.repository#_h01_ps_single_sig1"/>
+    <system href="h01_ps_single.system#_h01_ps_single_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ServerNode"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h01_ps_single/h01_ps_single.resourceenvironment#_h01_ps_single_prs1">
+    <activeResource href="h01_ps_single.resourceenvironment#_h01_ps_single_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="simulizarmeasuringpoint:ReconfigurationMeasuringPoint" stringRepresentation="Reconfigurations" measuringPoint="Reconfigurations" resourceURI="x.qvto#frag1"/>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ResourceEnvironmentMeasuringPoint" stringRepresentation="Resource Environment">
+    <resourceEnvironment href="h01_ps_single.resourceenvironment#/"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

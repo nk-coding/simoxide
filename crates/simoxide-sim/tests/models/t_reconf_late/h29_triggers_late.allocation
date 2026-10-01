@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h29_triggers_late_allocation1" entityName="h29_triggers_late">
+  <targetResourceEnvironment_Allocation href="h29_triggers_late.resourceenvironment#/"/>
+  <system_Allocation href="h29_triggers_late.system#_h29_triggers_late_system1"/>
+  <allocationContexts_Allocation id="_h29_triggers_late_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h29_triggers_late.resourceenvironment#_h29_triggers_late_rc1"/>
+    <assemblyContext_AllocationContext href="h29_triggers_late.system#_h29_triggers_late_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

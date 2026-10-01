@@ -1,0 +1,1 @@
+simoxide-testkit fuzz model (fzr171_s2); regression: a superseded PS/FCFS completion event (removeEvent) must not count as an event for the stop condition. Expected: refsim (2026-09-29, before the commons-math classpath fix) - replay only.

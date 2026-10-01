@@ -1,0 +1,30 @@
+[package]
+name = "simoxide-cli"
+description = "Command line front end of simoxide-sim (run a PCM model, emit trace, tape and measurements, benchmark)"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "simoxide"
+path = "src/main.rs"
+
+[dependencies]
+simoxide-sim = { workspace = true }
+mimalloc = { version = "0.1", optional = true, default-features = false }
+pprof = { version = "0.15", optional = true, default-features = false, features = ["flamegraph"] }
+
+[features]
+# Compile the fast mode (`--mode fast`); the default mode stays exact.
+# `--no-default-features --features hotspot-math` builds an exact-only binary;
+# `--no-default-features --features fast` a distributable one (no GPL code).
+default = ["fast", "hotspot-math"]
+fast = ["simoxide-sim/fast"]
+# `simoxide bench --profile out.svg`: in-process sampling profiler (SIGPROF), flame graph output.
+profile = ["dep:pprof"]
+# Use mimalloc as the global allocator of `simoxide` and `simoxide-bench`.
+mimalloc = ["dep:mimalloc"]
+# Bit-exact HotSpot Math.log/exp, on by default (GPL-2.0-only code; binaries built with it must
+# not be distributed, see simoxide-random's `hotspot-math` feature).
+hotspot-math = ["simoxide-sim/hotspot-math"]

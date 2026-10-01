@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h14_call_chain_3_allocation1" entityName="h14_call_chain_3">
+  <targetResourceEnvironment_Allocation href="h14_call_chain_3.resourceenvironment#/"/>
+  <system_Allocation href="h14_call_chain_3.system#_h14_call_chain_3_system1"/>
+  <allocationContexts_Allocation id="_h14_call_chain_3_alc1" entityName="Allocation_Assembly_A">
+    <resourceContainer_AllocationContext href="h14_call_chain_3.resourceenvironment#_h14_call_chain_3_rc1"/>
+    <assemblyContext_AllocationContext href="h14_call_chain_3.system#_h14_call_chain_3_ac1"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_h14_call_chain_3_alc2" entityName="Allocation_Assembly_B">
+    <resourceContainer_AllocationContext href="h14_call_chain_3.resourceenvironment#_h14_call_chain_3_rc2"/>
+    <assemblyContext_AllocationContext href="h14_call_chain_3.system#_h14_call_chain_3_ac2"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_h14_call_chain_3_alc3" entityName="Allocation_Assembly_C">
+    <resourceContainer_AllocationContext href="h14_call_chain_3.resourceenvironment#_h14_call_chain_3_rc3"/>
+    <assemblyContext_AllocationContext href="h14_call_chain_3.system#_h14_call_chain_3_ac3"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

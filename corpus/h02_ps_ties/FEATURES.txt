@@ -1,0 +1,1 @@
+closed workload, constant demands arriving simultaneously on a PS CPU (tie-breaking of equal remaining demands; rate 2.0)

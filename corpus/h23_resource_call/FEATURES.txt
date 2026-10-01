@@ -1,0 +1,1 @@
+ResourceCall (CPU 'process' resource signature, numberOfCalls = demand) inside an InternalAction

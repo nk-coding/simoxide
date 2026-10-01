@@ -1,0 +1,10 @@
+config,model,len,sim_time_s,kind,workers,runs,failed_runs,wall_s,runs_per_s,requests_per_run,requests_per_s,mem_mb,killed
+refsim-p22,x_espresso,short,100.0,processes,22,440,0,6.923,63.556,990.0,62920.7,12762,False
+simoxide-batch-t22,x_espresso,short,100.0,batch API threads,22,22000,0,0.818,26911.315,990.0,26642201.8,2096,False
+simoxide-reload-t22,x_espresso,short,100.0,threads,22,22000,0,0.806,27281.746,990.0,27008928.6,16,False
+simucom-p16,x_espresso,short,100.0,processes,16,320,0,17.864,17.913,990.0,17734.0,18854,False
+simulizar-p22,x_espresso,short,100.0,processes,22,440,0,7.299,60.282,990.0,59679.4,12641,False
+simulizar-t22,x_espresso,short,100.0,threads,22,440,0,6.307,69.762,990.0,69063.9,6011,False
+simulizar-vt-t22,x_espresso,short,100.0,threads,22,440,0,5.93,74.199,990.0,73457.0,5797,False
+slingshot-iso-k22,x_espresso,short,100.0,isolated class loaders,22,440,0,21.499,20.466,990.0,20261.4,4422,False
+slingshot-p22,x_espresso,short,100.0,processes,22,440,0,7.997,55.021,990.0,54470.4,10243,False

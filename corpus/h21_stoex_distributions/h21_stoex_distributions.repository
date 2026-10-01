@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2"
+    id="_h21_stoex_distributions_repository1" entityName="h21_stoex_distributions">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h21_stoex_distributions_comp1" entityName="Server">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h21_stoex_distributions_prov1"
+        entityName="Provided_IService" providedInterface__OperationProvidedRole="_h21_stoex_distributions_if1"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h21_stoex_distributions_seff1"
+        describedService__SEFF="_h21_stoex_distributions_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h21_stoex_distributions_act15" entityName="start" successor_AbstractAction="_h21_stoex_distributions_act1"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act1" entityName="d0" predecessor_AbstractAction="_h21_stoex_distributions_act15"
+          successor_AbstractAction="_h21_stoex_distributions_act2">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Exp(50.0)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act2" entityName="d1" predecessor_AbstractAction="_h21_stoex_distributions_act1"
+          successor_AbstractAction="_h21_stoex_distributions_act3">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Max(Norm(0.02, 0.005), 0.0)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act3" entityName="d2" predecessor_AbstractAction="_h21_stoex_distributions_act2"
+          successor_AbstractAction="_h21_stoex_distributions_act4">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Gamma(2.0, 0.01)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act4" entityName="d3" predecessor_AbstractAction="_h21_stoex_distributions_act3"
+          successor_AbstractAction="_h21_stoex_distributions_act5">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="GammaMoments(0.02, 0.5)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act5" entityName="d4" predecessor_AbstractAction="_h21_stoex_distributions_act4"
+          successor_AbstractAction="_h21_stoex_distributions_act6">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Lognorm(-4.0, 0.3)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act6" entityName="d5" predecessor_AbstractAction="_h21_stoex_distributions_act5"
+          successor_AbstractAction="_h21_stoex_distributions_act7">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="LognormMoments(0.02, 0.01)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act7" entityName="d6" predecessor_AbstractAction="_h21_stoex_distributions_act6"
+          successor_AbstractAction="_h21_stoex_distributions_act8">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="UniDouble(0.01, 0.03)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act8" entityName="d7" predecessor_AbstractAction="_h21_stoex_distributions_act7"
+          successor_AbstractAction="_h21_stoex_distributions_act9">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="UniInt(1, 3) * 0.01"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act9" entityName="d8" predecessor_AbstractAction="_h21_stoex_distributions_act8"
+          successor_AbstractAction="_h21_stoex_distributions_act10">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Pois(2.0) * 0.005"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act10" entityName="d9" predecessor_AbstractAction="_h21_stoex_distributions_act9"
+          successor_AbstractAction="_h21_stoex_distributions_act11">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="IntPMF[(1;0.25)(2;0.75)] * 0.01 + DoublePMF[(0.001;0.5)(0.002;0.5)]"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act11" entityName="d10" predecessor_AbstractAction="_h21_stoex_distributions_act10"
+          successor_AbstractAction="_h21_stoex_distributions_act12">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="DoublePDF[(0.01;0.5)(0.02;0.5)]"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act12" entityName="d11" predecessor_AbstractAction="_h21_stoex_distributions_act11"
+          successor_AbstractAction="_h21_stoex_distributions_act13">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Trunc(3.7) * 0.001 + Round(2.5) * 0.001 + Ceil(0.2) * 0.001"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act13" entityName="d12" predecessor_AbstractAction="_h21_stoex_distributions_act12"
+          successor_AbstractAction="_h21_stoex_distributions_act14">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Min(0.05, Exp(40.0)) + Sqrt(0.0001) + Log(10, 1.01)"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h21_stoex_distributions_act14" entityName="d13" predecessor_AbstractAction="_h21_stoex_distributions_act13"
+          successor_AbstractAction="_h21_stoex_distributions_act16">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="(2 + 3) * 0.004 - 0.01 / 2 ^ 2"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h21_stoex_distributions_act16" entityName="stop" predecessor_AbstractAction="_h21_stoex_distributions_act14"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h21_stoex_distributions_if1" entityName="IService">
+    <signatures__OperationInterface id="_h21_stoex_distributions_sig1" entityName="op"/>
+  </interfaces__Repository>
+</repository:Repository>

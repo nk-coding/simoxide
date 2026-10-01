@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_new0_300006_s5_m11_23_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario0">
+    <usageScenario href="new0_300006_s5_m11_23.usagemodel#_new0_300006_s5_m11_23_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall call_op0_0 [_new0_300006_s5_m11_23_ua1]">
+    <entryLevelSystemCall href="new0_300006_s5_m11_23.usagemodel#_new0_300006_s5_m11_23_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="new0_300006_s5_m11_23.Provided_IService0.op0_0">
+    <role xsi:type="repository:OperationProvidedRole" href="new0_300006_s5_m11_23.system#_new0_300006_s5_m11_23_prov6"/>
+    <operationSignature href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_sig1"/>
+    <system href="new0_300006_s5_m11_23.system#_new0_300006_s5_m11_23_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall call_op1_0 [_new0_300006_s5_m11_23_act43]">
+    <externalCall href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_act43"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall call_op3_0 [_new0_300006_s5_m11_23_act21]">
+    <externalCall href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_act21"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Node0">
+    <activeResource href="new0_300006_s5_m11_23.resourceenvironment#_new0_300006_s5_m11_23_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Assembly_Comp2_0.pool">
+    <assembly href="new0_300006_s5_m11_23.system#_new0_300006_s5_m11_23_ac6"/>
+    <passiveResource href="new0_300006_s5_m11_23.repository#_new0_300006_s5_m11_23_pr1"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

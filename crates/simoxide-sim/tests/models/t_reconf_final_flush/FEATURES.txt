@@ -1,0 +1,1 @@
+t_tda_final_flush plus the reconfiguration monitors: the final window flush after the stop runs the process synchronously. Expected outputs: reference/refsim batch (2026-09-29, agent L).

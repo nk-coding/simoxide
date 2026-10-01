@@ -1,0 +1,123 @@
+--- 5.2.2/Palladio-Analyzer-SimuLizar/bundles/org.palladiosimulator.simulizar/src/org/palladiosimulator/simulizar/interpreter/RDSeffSwitch.java
++++ patched/org/palladiosimulator/simulizar/interpreter/RDSeffSwitch.java
+@@ -247,8 +247,13 @@
+             callFrame.addVariables(this.context.getCurrentResultFrame());
+         } else {
+             // create new stack frame for input parameter
+-            SimulatedStackHelper.createAndPushNewStackFrame(this.context.getStack(),
+-                    externalCall.getInputVariableUsages__CallAction());
++            final String prevOrigin = refsim.trace.Trace.origin("param", externalCall); // REFSIM tape
++            try {
++                SimulatedStackHelper.createAndPushNewStackFrame(this.context.getStack(),
++                        externalCall.getInputVariableUsages__CallAction());
++            } finally {
++                refsim.trace.Trace.origin(prevOrigin);
++            }
+         }
+         final AssemblyContext myContext = this.context.getAssemblyContextStack()
+             .pop();
+@@ -260,10 +265,15 @@
+         this.context.getStack()
+             .removeStackFrame();
+ 
+-        SimulatedStackHelper.addParameterToStackFrame(context.getResultFrameStack()
+-            .pop(), externalCall.getReturnVariableUsage__CallReturnAction(),
+-                this.context.getStack()
+-                    .currentStackFrame());
++        final String prevOrigin = refsim.trace.Trace.origin("return", externalCall); // REFSIM tape
++        try {
++            SimulatedStackHelper.addParameterToStackFrame(context.getResultFrameStack()
++                .pop(), externalCall.getReturnVariableUsage__CallReturnAction(),
++                    this.context.getStack()
++                        .currentStackFrame());
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+ 
+         return result;
+     }
+@@ -347,7 +357,14 @@
+         final ForkExecutor forkExecutor = new ForkExecutor(this.context.getThread(),
+                 combinedProcesses.toArray(new ForkedBehaviourProcess[0]));
+ 
++        if (refsim.trace.Trace.ON) { // REFSIM trace
++            refsim.trace.Trace.event("fork", this.context.getThread(), "id", refsim.trace.Trace.id(object), "async",
++                    asyncProcesses.size(), "sync", syncProcesses.size());
++        }
+         forkExecutor.run();
++        if (refsim.trace.Trace.ON) { // REFSIM trace
++            refsim.trace.Trace.event("join", this.context.getThread(), "id", refsim.trace.Trace.id(object));
++        }
+ 
+         return InterpreterResult.OK;
+     }
+@@ -361,8 +378,17 @@
+         final String stoex = iterationCount.getSpecification();
+ 
+         // we expect an int here
+-        final int numberOfLoops = StackContext.evaluateStatic(stoex, Integer.class, this.context.getStack()
+-            .currentStackFrame());
++        final String prevOrigin = refsim.trace.Trace.origin("loop", object); // REFSIM tape
++        final int numberOfLoops;
++        try {
++            numberOfLoops = StackContext.evaluateStatic(stoex, Integer.class, this.context.getStack()
++                .currentStackFrame());
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
++        if (refsim.trace.Trace.ON) { // REFSIM trace
++            refsim.trace.Trace.event("loop", this.context.getThread(), "id", refsim.trace.Trace.id(object), "n", numberOfLoops);
++        }
+ 
+         if (LOGGER.isDebugEnabled()) {
+             LOGGER.debug("Determined number of loops: " + numberOfLoops + " " + object);
+@@ -377,8 +403,13 @@
+      */
+     @Override
+     public InterpreterResult caseSetVariableAction(final SetVariableAction object) {
+-        SimulatedStackHelper.addParameterToStackFrame(this.context.getStack()
+-            .currentStackFrame(), object.getLocalVariableUsages_SetVariableAction(), context.getCurrentResultFrame());
++        final String prevOrigin = refsim.trace.Trace.origin("setvar", object); // REFSIM tape
++        try {
++            SimulatedStackHelper.addParameterToStackFrame(this.context.getStack()
++                .currentStackFrame(), object.getLocalVariableUsages_SetVariableAction(), context.getCurrentResultFrame());
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
+         /*
+          * Special attention has to be paid if the random variable to set is an INNER
+          * characterisation. In this case, a late evaluating random variable has to be stored with
+@@ -534,8 +565,17 @@
+         final String idNumberOfLoops = parameter.getParameterName() + ".NUMBER_OF_ELEMENTS";
+ 
+         // get number of loops
+-        final int numberOfLoops = StackContext.evaluateStatic(idNumberOfLoops, Integer.class, this.context.getStack()
+-            .currentStackFrame());
++        final String prevOrigin = refsim.trace.Trace.origin("collection", object); // REFSIM tape
++        final int numberOfLoops;
++        try {
++            numberOfLoops = StackContext.evaluateStatic(idNumberOfLoops, Integer.class, this.context.getStack()
++                .currentStackFrame());
++        } finally {
++            refsim.trace.Trace.origin(prevOrigin);
++        }
++        if (refsim.trace.Trace.ON) { // REFSIM trace
++            refsim.trace.Trace.event("loop", this.context.getThread(), "id", refsim.trace.Trace.id(object), "n", numberOfLoops);
++        }
+ 
+         if (LOGGER.isDebugEnabled()) {
+             LOGGER.debug("Determined number of loops: " + numberOfLoops + " " + object);
+@@ -559,7 +599,12 @@
+              * we search for parameter name "ab" we also get variables called "abc"
+              */
+             // TODO the point is not nice
+-            this.context.evaluateInner(innerVariableStackFrame, parameter.getParameterName() + ".");
++            final String prevInner = refsim.trace.Trace.origin("inner", object); // REFSIM tape
++            try {
++                this.context.evaluateInner(innerVariableStackFrame, parameter.getParameterName() + ".");
++            } finally {
++                refsim.trace.Trace.origin(prevInner);
++            }
+ 
+             if (LOGGER.isDebugEnabled()) {
+                 LOGGER.debug(

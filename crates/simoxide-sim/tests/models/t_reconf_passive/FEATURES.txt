@@ -1,0 +1,1 @@
+corpus/h13_passive_contention with triggersSelfAdaptations=true everywhere (EMF default) plus the reconfiguration monitors: frequent runs at same-time events (FIFO position of the reconfiguration process's Resume). Expected outputs: reference/refsim batch (2026-09-29, agent L).

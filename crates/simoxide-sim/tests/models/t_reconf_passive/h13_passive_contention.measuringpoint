@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmlns:simulizarmeasuringpoint="http://palladiosimulator.org/simulizar/measuringpoint" xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_h13_passive_contention_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h13_passive_contention/h13_passive_contention.usagemodel#_h13_passive_contention_us1">
+    <usageScenario href="h13_passive_contention.usagemodel#_h13_passive_contention_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall callOp to h13_passive_contention->Provided_IService->op [_h13_passive_contention_ua1]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h13_passive_contention/h13_passive_contention.usagemodel#_h13_passive_contention_ua1">
+    <entryLevelSystemCall href="h13_passive_contention.usagemodel#_h13_passive_contention_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="h13_passive_contention.Provided_IService.op"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h13_passive_contention/h13_passive_contention.repository#_h13_passive_contention_sig1">
+    <role xsi:type="repository:OperationProvidedRole" href="h13_passive_contention.system#_h13_passive_contention_prov2"/>
+    <operationSignature href="h13_passive_contention.repository#_h13_passive_contention_sig1"/>
+    <system href="h13_passive_contention.system#_h13_passive_contention_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ServerNode"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h13_passive_contention/h13_passive_contention.resourceenvironment#_h13_passive_contention_prs1">
+    <activeResource href="h13_passive_contention.resourceenvironment#_h13_passive_contention_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [1] in ServerNode"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h13_passive_contention/h13_passive_contention.resourceenvironment#_h13_passive_contention_prs1"
+      replicaID="1">
+    <activeResource href="h13_passive_contention.resourceenvironment#_h13_passive_contention_prs1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Assembly_Server.pool"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h13_passive_contention/h13_passive_contention.repository#_h13_passive_contention_pr1">
+    <assembly href="h13_passive_contention.system#_h13_passive_contention_ac1"/>
+    <passiveResource href="h13_passive_contention.repository#_h13_passive_contention_pr1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="simulizarmeasuringpoint:ReconfigurationMeasuringPoint" stringRepresentation="Reconfigurations" measuringPoint="Reconfigurations" resourceURI="rules/scale.qvto"/>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ResourceEnvironmentMeasuringPoint" stringRepresentation="Resource Environment">
+    <resourceEnvironment href="h13_passive_contention.resourceenvironment#/"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

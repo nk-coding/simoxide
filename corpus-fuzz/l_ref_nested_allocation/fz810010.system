@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" id="_fz810010_system1" entityName="fz810010">
+  <assemblyContexts__ComposedStructure id="_fz810010_ac1" entityName="Assembly_Comp0_0">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="fz810010.repository#_fz810010_comp1"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_fz810010_ac2" entityName="Assembly_Middleware">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="fz810010.repository#_fz810010_comp2"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_fz810010_conn1" entityName="InfraConnector" providingAssemblyContext__AssemblyInfrastructureConnector="_fz810010_ac2" requiringAssemblyContext__AssemblyInfrastructureConnector="_fz810010_ac1">
+    <providedRole__AssemblyInfrastructureConnector href="fz810010.repository#_fz810010_prov2"/>
+    <requiredRole__AssemblyInfrastructureConnector href="fz810010.repository#_fz810010_req1"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_fz810010_conn2" entityName="ProvDelegation" outerProvidedRole_ProvidedDelegationConnector="_fz810010_prov3" assemblyContext_ProvidedDelegationConnector="_fz810010_ac1">
+    <innerProvidedRole_ProvidedDelegationConnector href="fz810010.repository#_fz810010_prov1"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_fz810010_prov3" entityName="Provided_IService0">
+    <providedInterface__OperationProvidedRole href="fz810010.repository#_fz810010_if1"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

@@ -1,0 +1,22 @@
+[package]
+name = "simoxide-stoex"
+description = "Stochastic Expressions (StoEx) of Palladio/SimuLizar 5.2.2: parser, type inference, evaluator and compiler"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+simoxide-random = { workspace = true }
+
+[dev-dependencies]
+# tests/fast.rs: StoEx evaluation with the fast mode's random source; the golden tests need
+# HotSpot's Math.log/exp
+simoxide-random = { path = "../simoxide-random", features = ["fast", "hotspot-math"] }
+proptest = { version = "1", default-features = false, features = ["std"] }
+serde_json = "1"
+
+[features]
+# Bit-exact HotSpot Math.log/exp (GPL-2.0-only code; binaries built with it must not be
+# distributed, see simoxide-random's `hotspot-math` feature). Off by default in the libraries.
+hotspot-math = ["simoxide-random/hotspot-math"]
