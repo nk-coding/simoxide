@@ -15,6 +15,9 @@ hero:
     - theme: alt
       text: Exactness
       link: /correctness/
+    - theme: alt
+      text: GitHub
+      link: https://github.com/nk-coding/simoxide
 
 features:
   - title: Byte-identical

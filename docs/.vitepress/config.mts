@@ -85,6 +85,11 @@ export default defineConfig({
         ],
       },
     ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/nk-coding/simoxide' }],
+    editLink: {
+      pattern: 'https://github.com/nk-coding/simoxide/edit/main/docs/:path',
+      text: 'Edit this page on GitHub',
+    },
     outline: { level: [2, 3] },
     search: { provider: 'local' },
     footer: {
