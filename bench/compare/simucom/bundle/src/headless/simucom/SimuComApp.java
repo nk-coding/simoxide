@@ -36,7 +36,10 @@ import de.uka.ipd.sdq.workflow.mdsd.blackboard.MDSDBlackboard;
  * Headless SimuCom (Palladio 5.2.2) runner: load -> validate -> codegen -> (fix sources) -> JDT/PDE compile -> jar
  * -> install in OSGi dock -> simulate, N times sequentially in one JVM.
  *
- * Args (key=value): model=dir simTime=S runs=N seed=K [maxMeasurements=-1] [dump=true] [keep=true]
+ * Args (key=value): model=dir simTime=S runs=N seed=K [maxMeasurements=-1] [dump=true] [keep=true] [sim=label]
+ * <p>
+ * The simulation engine is the preferred one (preference de.uka.ipd.sdq.simulation/simulationEngineField, see
+ * SourcePatches); PHASES lines name the engine factory that ran.
  */
 public class SimuComApp implements IApplication {
 
@@ -59,6 +62,7 @@ public class SimuComApp implements IApplication {
         long seed = Long.parseLong(a.getOrDefault("seed", "1"));
         DUMP = Boolean.parseBoolean(a.getOrDefault("dump", "false"));
         boolean keep = Boolean.parseBoolean(a.getOrDefault("keep", "false"));
+        SIM = a.getOrDefault("sim", "simucom");
 
         LocalMemoryRepository repo = RepositoryFactory.eINSTANCE.createLocalMemoryRepository();
         RepositoryManager.addRepository(RepositoryManager.getCentralRepository(), repo);
@@ -92,8 +96,8 @@ public class SimuComApp implements IApplication {
                 failures++;
                 System.out.println("[simucom] RUN FAILED: " + e);
                 System.out.println(String.format(java.util.Locale.ROOT,
-                        "RESULT sim=simucom model=%s phase=%s run=%d wall_ms=-1 sim_ms=-1 requests=-1 mean_rt=NaN sim_end=-1 events=-1 t_end_ms=%.1f error=%s",
-                        new File(model).getName(), PHASE, RUN, (System.nanoTime() - tMeasured) / 1e6,
+                        "RESULT sim=%s model=%s phase=%s run=%d wall_ms=-1 sim_ms=-1 requests=-1 mean_rt=NaN sim_end=-1 events=-1 t_end_ms=%.1f error=%s",
+                        SIM, new File(model).getName(), PHASE, RUN, (System.nanoTime() - tMeasured) / 1e6,
                         String.valueOf(e).replace(' ', '_')));
                 for (Throwable c = e; c != null; c = c.getCause())
                     if (c instanceof org.eclipse.core.runtime.CoreException)
@@ -104,14 +108,15 @@ public class SimuComApp implements IApplication {
         }
         double wall = (System.nanoTime() - tMeasured) / 1e6;
         System.out.println(String.format(java.util.Locale.ROOT,
-                "PAR sim=simucom model=%s threads=1 runs=%d wall_ms=%.1f runs_per_s=%.3f end_epoch_ms=%d",
-                new File(model).getName(), measured, wall, measured / (wall / 1000.0), System.currentTimeMillis()));
+                "PAR sim=%s model=%s threads=1 runs=%d wall_ms=%.1f runs_per_s=%.3f end_epoch_ms=%d",
+                SIM, new File(model).getName(), measured, wall, measured / (wall / 1000.0), System.currentTimeMillis()));
         System.out.println("[simucom] failures=" + failures + " JVM start -> end: "
                 + (System.currentTimeMillis() - jvmStart) + " ms");
         return IApplication.EXIT_OK;
     }
 
     private static String PHASE = "run";
+    private static String SIM = "simucom";
     private static int RUN;
 
     private static String runOnce(int id, File d, String simTime, String maxMeas, long seed, boolean keep,
@@ -119,6 +124,7 @@ public class SimuComApp implements IApplication {
         long t0 = System.nanoTime();
         PatchedSimuComJob.MARKS.clear();
         PatchedSimuComJob.simEnd = -1;
+        PatchedSimuComJob.engine = "?";
         Map<String, Object> p = new HashMap<>();
         p.put(SimuComConfig.SIMULATE_LINKING_RESOURCES, false);
         p.put(SimuComConfig.SIMULATE_THROUGHPUT_OF_LINKING_RESOURCES, true);
@@ -181,7 +187,7 @@ public class SimuComApp implements IApplication {
 
         Map<String, Long> m = PatchedSimuComJob.MARKS;
         long simMs = m.containsKey("simulate") ? (m.get("simulate") - m.get("install")) / 1_000_000 : -1;
-        StringBuilder ph = new StringBuilder("PHASES sim=simucom model=" + d.getName() + " run=" + id);
+        StringBuilder ph = new StringBuilder("PHASES sim=" + SIM + " model=" + d.getName() + " run=" + id);
         long prev = tStart;
         ph.append(" setup_ms=").append((tStart - t0) / 1_000_000);
         String[][] names = { { "prepared", "load_validate_ms" }, { "codegen", "codegen_ms" },
@@ -194,10 +200,11 @@ public class SimuComApp implements IApplication {
             prev = v;
         }
         ph.append(" cleanup_extract_ms=").append((t3 - prev) / 1_000_000);
+        ph.append(" engine=").append(PatchedSimuComJob.engine);
         System.out.println(ph);
         return String.format(java.util.Locale.ROOT,
-                "RESULT sim=simucom model=%s phase=%s run=%d wall_ms=%d sim_ms=%d requests=%d mean_rt=%s sim_end=%s events=-1",
-                d.getName(), PHASE, RUN, (t3 - t0) / 1_000_000, simMs, (long) rt[1],
+                "RESULT sim=%s model=%s phase=%s run=%d wall_ms=%d sim_ms=%d requests=%d mean_rt=%s sim_end=%s events=-1",
+                SIM, d.getName(), PHASE, RUN, (t3 - t0) / 1_000_000, simMs, (long) rt[1],
                 rt[1] == 0 ? "NaN" : Double.toString(rt[0] / rt[1]),
                 PatchedSimuComJob.simEnd < 0 ? "-1" : Double.toString(PatchedSimuComJob.simEnd));
     }

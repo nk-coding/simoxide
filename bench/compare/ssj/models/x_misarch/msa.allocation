@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_msa_allocation1" entityName="msa">
+  <targetResourceEnvironment_Allocation href="msa.resourceenvironment#/"/>
+  <system_Allocation href="msa.system#_msa_system1"/>
+  <allocationContexts_Allocation id="_alloc0" entityName="Allocation_gateway">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc0"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac0"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc1" entityName="Allocation_user">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc1"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac1"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc2" entityName="Allocation_sidecar:user">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc2"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac2"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc3" entityName="Allocation_broker">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc3"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac3"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc4" entityName="Allocation_address">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc4"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac4"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc5" entityName="Allocation_sidecar:address">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc5"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac5"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc6" entityName="Allocation_discount">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc6"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac6"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc7" entityName="Allocation_sidecar:discount">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc7"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac7"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc8" entityName="Allocation_shoppingcart">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc8"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac8"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc9" entityName="Allocation_sidecar:shoppingcart">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc9"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac9"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc10" entityName="Allocation_wishlist">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc10"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac10"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc11" entityName="Allocation_sidecar:wishlist">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc11"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac11"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc12" entityName="Allocation_order">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc12"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac12"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc13" entityName="Allocation_sidecar:order">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc13"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac13"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc14" entityName="Allocation_payment">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc14"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac14"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc15" entityName="Allocation_sidecar:payment">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc15"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac15"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc16" entityName="Allocation_invoice">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc16"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac16"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc17" entityName="Allocation_sidecar:invoice">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc17"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac17"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc18" entityName="Allocation_review">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc18"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac18"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc19" entityName="Allocation_sidecar:review">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc19"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac19"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc20" entityName="Allocation_notification">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc20"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac20"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc21" entityName="Allocation_sidecar:notification">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc21"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac21"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc22" entityName="Allocation_user (probes)">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc1"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac22"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc23" entityName="Allocation_shipment">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc22"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac23"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc24" entityName="Allocation_sidecar:shipment">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc23"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac24"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc25" entityName="Allocation_catalog">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc24"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac25"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc26" entityName="Allocation_sidecar:catalog">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc25"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac26"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc27" entityName="Allocation_inventory">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc26"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac27"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc28" entityName="Allocation_sidecar:inventory">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc27"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac28"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc29" entityName="Allocation_media">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc28"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac29"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc30" entityName="Allocation_sidecar:media">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc29"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac30"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc31" entityName="Allocation_tax">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc30"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac31"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc32" entityName="Allocation_sidecar:tax">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc31"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac32"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc33" entityName="Allocation_return">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc32"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac33"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc34" entityName="Allocation_sidecar:return">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc33"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac34"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc35" entityName="Allocation_order (probes)">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc12"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac35"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alloc36" entityName="Allocation_return (probes)">
+    <resourceContainer_AllocationContext href="msa.resourceenvironment#_rc32"/>
+    <assemblyContext_AllocationContext href="msa.system#_ac36"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

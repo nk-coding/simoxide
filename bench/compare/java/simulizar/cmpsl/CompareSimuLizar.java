@@ -51,11 +51,18 @@ import de.uka.ipd.sdq.workflow.jobs.IJob;
  *
  * Usage: java -cp classes:&lt;OSGi-ordered product classpath&gt; cmpsl.CompareSimuLizar &lt;pluginsDir&gt;
  * model=DIR simTime=T maxMeas=M seed=S warmup=W runs=R threads=T [disposeRng=true|false] [sim=name]
+ * [engine=desmoj|ssj|&lt;ISimEngineFactory class&gt;]
+ * <p>
+ * engine: the abstract simulation engine. Without it, DESMO-J as always. ssj needs the SSJ engine bundle and the SSJ
+ * library on the classpath (bench/compare/SSJ.md). In the product, SimuLizar's EclipseSimEngineModule takes the
+ * engine from the preference de.uka.ipd.sdq.simulation/simulationEngineField; here the factory is injected.
  */
 public final class CompareSimuLizar {
 
     private static final Object REPO_LOCK = new Object();
     private static boolean disposeRng;
+    /** ISimEngineFactory class from engine=..., null = DESMO-J (the default, as before). */
+    private static String engineClass;
     private static final ThreadLocal<LocalMemoryRepository> THREAD_REPO = ThreadLocal.withInitial(() -> {
         LocalMemoryRepository r = RepositoryFactory.eINSTANCE.createLocalMemoryRepository();
         synchronized (REPO_LOCK) {
@@ -78,6 +85,15 @@ public final class CompareSimuLizar {
         String simTime = a.getOrDefault("simTime", "-1");
         String maxMeas = a.getOrDefault("maxMeas", "-1");
         long seed = Long.parseLong(a.getOrDefault("seed", "1"));
+        if (a.containsKey("engine")) {
+            engineClass = switch (a.get("engine")) {
+                case "desmoj" -> DesmoJSimEngineFactory.class.getName();
+                case "ssj" -> "org.palladiosimulator.simulation.abstractsimengine.ssj.SSJSimEngineFactory";
+                default -> a.get("engine");
+            };
+            Class<?> c = newEngine().getClass();
+            Harness.OUT.println("# ENGINE " + c.getName() + " from " + c.getProtectionDomain().getCodeSource().getLocation());
+        }
         Harness.loop(a.getOrDefault("sim", "simulizar"), a, id -> runOnce(id, new File(dir), simTime, maxMeas, Harness.seed(seed, id)));
         System.exit(0);
     }
@@ -177,7 +193,7 @@ public final class CompareSimuLizar {
             @Override
             public SimEngineComponent.Factory providesSimEngineComponentFactory() {
                 return () -> {
-                    final DesmoJSimEngineFactory f = new DesmoJSimEngineFactory();
+                    final ISimEngineFactory f = newEngine();
                     return new SimEngineComponent() {
                         @Override
                         public ISimEngineFactory simEngineFactory() {
@@ -247,6 +263,17 @@ public final class CompareSimuLizar {
         }
         repo.getExperimentGroups().clear();
         return res;
+    }
+
+    static ISimEngineFactory newEngine() {
+        if (engineClass == null) {
+            return new DesmoJSimEngineFactory();
+        }
+        try {
+            return (ISimEngineFactory) Class.forName(engineClass).getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("simulation engine " + engineClass + " not on the classpath", e);
+        }
     }
 
     static String find(File dir, String ext) {

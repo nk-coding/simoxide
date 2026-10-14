@@ -51,7 +51,7 @@ phase_cold() {
   for s in $SIMS; do
     case $s in
       simoxide) sims="$sims simoxide-cli" ;;
-      simulizar) sims="$sims simulizar simulizar-osgi" ;;
+      simulizar|simulizar-ssj) sims="$sims $s $s-osgi" ;;
       slingshot) sims="$sims slingshot slingshot-osgi" ;;
       *) sims="$sims $s" ;;
     esac
@@ -77,7 +77,7 @@ phase_warm() {
     local w n
     case "$s:$len" in
       simoxide:short) w=50; n=200 ;;  simoxide:long) w=3; n=20 ;;
-      simucom:short) w=5; n=10 ;;   *:short) w=20; n=20 ;;  *:long) w=2; n=10 ;;
+      simucom*:short) w=5; n=10 ;;   *:short) w=20; n=20 ;;  *:long) w=2; n=10 ;;
     esac
     local log="$OUT/raw/warm/${s}__${m}__${len}.log"
     [ -f "$log" ] && grep -aq "^TIME .*rc=0" "$log" && continue   # resume: keep completed processes
@@ -146,7 +146,7 @@ phase_par() {
             local runs=$((k * 50)); [ "$len" = short ] && runs=$((k * 1000))
             run_logged "$log" "$(cmd simoxide "$m" "$len" 0 $runs threads=$k mode=$mode)"
           done ;;
-        simulizar|simulizar-vt)   # in one JVM: sequential warm-up first (OCL/EMF lazy-init race), shared RNG
+        simulizar|simulizar-vt|simulizar-ssj)   # in one JVM: sequential warm-up first (OCL/EMF lazy-init race), shared RNG
           log="$OUT/raw/par/$s-t${k}__${m}__${len}.log"; rm -f "$log"
           wait_quiet; echo "par $s threads $m $len" >&2
           JO="-Xmx16g" run_logged "$log" "$(JO=-Xmx16g cmd "$s" "$m" "$len" 1 $((k * n)) threads=$k)" ;;&
@@ -154,8 +154,8 @@ phase_par() {
           log="$OUT/raw/par/slingshot-iso-k${k}__${m}__${len}.log"; rm -f "$log" "$log.err"
           wait_quiet; echo "par slingshot iso $m $len" >&2
           par_barrier "$log" $k spawn_iso "$m" "$len" $w $n $k ;;&
-        refsim|simulizar|slingshot|simucom)   # k worker processes
-          local kk=$k; [ $s = simucom ] && kk=${SIMUCOM_WORKERS:-16}
+        refsim|simulizar|simulizar-ssj|slingshot|simucom|simucom-ssj)   # k worker processes
+          local kk=$k; [[ $s == simucom* ]] && kk=${SIMUCOM_WORKERS:-16}
           log="$OUT/raw/par/$s-p${kk}__${m}__${len}.log"; rm -f "$log" "$log.err"
           wait_quiet; echo "par $s x$kk processes $m $len" >&2
           par_barrier "$log" $kk spawn_procs "$s" "$m" "$len" $w $n $kk ;;
@@ -190,7 +190,7 @@ phase_sus1() {
       rm -f "$log"*
       wait_quiet; echo "sus1 $s $m T=$T ${d}s" >&2
       # stock SimuLizar exactly as shipped: the RNG is never disposed (one leaked producer thread per run)
-      local extra=""; [ $s = simulizar ] && extra="disposeRng=false"
+      local extra=""; [[ $s == simulizar || $s == simulizar-ssj ]] && extra="disposeRng=false"
       run_sampled "$log" $((d + 180)) "$(JO="$JOPTS $(gcopt "$log")" cmd "$s" "$m" "$T" 0 1 duration=$d varySeed=true $extra)"
     done
   done

@@ -33,6 +33,8 @@ public class PatchedSimuComJob extends AbstractSimulationJob<SimuComWorkflowConf
     /** phase marks of the current run (single-threaded use). */
     static final Map<String, Long> MARKS = new LinkedHashMap<>();
     static double simEnd = -1;
+    /** class of the simulation engine factory of the current run (DESMO-J or SSJ, by preference). */
+    static String engine = "?";
 
     public PatchedSimuComJob(SimuComWorkflowConfiguration configuration) throws CoreException {
         super(configuration, null, true);
@@ -102,6 +104,8 @@ public class PatchedSimuComJob extends AbstractSimulationJob<SimuComWorkflowConf
                 svc.load(cfg.getSimulationConfiguration(), jar.getResult(), dock.isRemote());
                 SimuComModel model = svc instanceof SimulationDockServiceImpl
                         ? ((SimulationDockServiceImpl) svc).getSimuComModel() : null;
+                if (model != null && model.getSimEngineFactory() != null)
+                    engine = model.getSimEngineFactory().getClass().getName();
                 MARKS.put("install", System.nanoTime());
                 svc.simulate(cfg.getSimulationConfiguration(), jar.getResult(), dock.isRemote());
                 MARKS.put("simulate", System.nanoTime());

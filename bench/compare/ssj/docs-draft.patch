@@ -1,0 +1,186 @@
+diff -ru a/docs/development/benchmarking.md b/docs/development/benchmarking.md
+--- a/docs/development/benchmarking.md	2026-10-13 15:44:21.914226537 +0200
++++ b/docs/development/benchmarking.md	2026-10-13 15:45:49.971266301 +0200
+@@ -12,6 +12,7 @@
+ | `cargo run --release -p simoxide-random --example bench` | per-sample cost of each distribution |
+ | `--profile out.svg` or `--profile out.folded` on `bench` and `load-bench` | in-process sampling profiler (pprof at 5 kHz); needs `--features profile`. `.folded` writes one line per stack, frames as `name@file:line` |
+ | `bench/compare/run-all.sh` | the comparison with the other Palladio simulators ([Comparison in detail](../performance/comparison.md#reproducing)) |
++| `bench/compare/ssj/run.sh` | the same comparison for SimuLizar and SimuCom on both simulation engines, DESMO-J and SSJ, in one session ([Palladio on the SSJ engine](../performance/comparison.md#palladio-on-the-ssj-engine), `bench/compare/SSJ.md`) |
+ 
+ The benchmark models are listed in `crates/simoxide-cli/src/bin/simoxide-bench.rs`. Three of them
+ are in `crates/simoxide-cli/bench/models/` (`ps_many`, `gen_s5`, `gen_s6`), the rest in `corpus/`.
+diff -ru a/docs/index.md b/docs/index.md
+--- a/docs/index.md	2026-10-13 15:44:21.897226722 +0200
++++ b/docs/index.md	2026-10-13 15:44:30.196136573 +0200
+@@ -22,8 +22,8 @@
+ features:
+   - title: Byte-identical
+     details: The same event trace, random draws and measurements as the reference for every supported model, reference bugs included. Checked on 66 corpus models and about 12 000 generated models.
+-  - title: 250 to 2 400 times faster
+-    details: Than stock SimuLizar 5.2.2 per warm run. A one-shot run takes milliseconds instead of seconds; 22 cores complete over 5 000 MediaStore evaluations per second.
++  - title: {{SL_HEADLINE_RANGE}} times faster
++    details: Than stock SimuLizar 5.2.2 per warm run, on either of its simulation engines (DESMO-J or SSJ). A one-shot run takes milliseconds instead of seconds; 22 cores complete over 5 000 MediaStore evaluations per second.
+   - title: Small and stable
+     details: A few MB per process, no warm-up, no leaks, no global state. 13x on 22 threads.
+   - title: Embeddable
+diff -ru a/docs/performance/comparison.md b/docs/performance/comparison.md
+--- a/docs/performance/comparison.md	2026-10-13 15:44:21.909226592 +0200
++++ b/docs/performance/comparison.md	2026-10-13 20:37:06.342291651 +0200
+@@ -21,6 +21,8 @@
+ | **SimuLizar + VT** | stock plus a one-class virtual-thread patch (`-Dpalladio.virtualThreads=true`) | | OpenJDK 21 | same driver |
+ | **Slingshot** | event-bus Palladio simulator (University of Stuttgart, actively developed) | nightly 2026-09-01, SSJ, EDP2 in memory | OpenJDK 21, `-Xmx4g` | `java/slingshot/CompareSlingshot` around `SlingshotRunner`, flat classpath; the seeded RNG is injected into the global StoEx factory. Cold runs also in Equinox |
+ | **SimuCom** | deprecated code-generating simulator | Palladio 5.2.2 with a repaired headless workflow (below) | Temurin 17 (5.2.2's JDT cannot use Java 21), `-Xmx4g` | `simucom/run-simucom.sh`, own OSGi application |
++| **SimuLizar stock on SSJ** | stock SimuLizar 5.2.2 on the SSJ engine (below) | 5.2.2 product jars plus the release's SSJ engine bundle 5.2.2 and SSJ 3.3.1 | OpenJDK 21, `-Xmx4g` | the SimuLizar driver with the SSJ engine factory (`engine=ssj`); cold runs also in the product's OSGi runtime, engine chosen by preference |
++| **SimuCom on SSJ** | SimuCom 5.2.2 on the SSJ engine | as SimuCom, plus the two SSJ bundles | Temurin 17, `-Xmx4g` | `simucom/run-simucom.sh`, engine chosen by preference |
+ | **EventSim** | archived (2022), unsupported; a historical data point | 5.1.0 on Palladio 5.1 | Temurin 11 | `eventsim.sh`, with an in-memory counting store instead of R |
+ 
+ Not included: the PCM2LQN/LQNS solver, which is analytical, and ProtoCom, which generates
+@@ -34,6 +36,20 @@
+ again. SimuCom ignores the monitor repository and records its built-in sensors. With the same
+ seed it reproduces SimuLizar's request counts and mean response times exactly.
+ 
++**SSJ engine.** SimuLizar and SimuCom do not schedule events themselves: they run on Palladio's
++abstract simulation engine (`de.uka.ipd.sdq.simulation.abstractsimengine`), which has two
++implementations. DESMO-J is the default and the only one shipped in the Palladio 5.2.2 product;
++SimOxide reproduces it. SSJ (Stochastic Simulation in Java, Université de Montréal) is an
++optional bundle of the same release (`org.palladiosimulator.simulation.abstractsimengine.ssj`
++5.2.2 with the library `ca.umontreal.iro.simul.ssj` 3.3.1, from the 5.2.2 update site), with its
++own event list (a splay tree) and floating-point clock; it is expected to be the faster engine.
++Both simulators pick the engine from the
++preference `de.uka.ipd.sdq.simulation/simulationEngineField` (Eclipse: Preferences → Palladio
++Simulation); the benchmark sets it through the OSGi configuration, and the flat-classpath
++SimuLizar driver injects the engine factory directly. Comparing SimOxide only with DESMO-J would
++overstate its speed-up if SSJ were much faster, so SimuLizar and SimuCom were measured on both
++engines ([Palladio on the SSJ engine](#palladio-on-the-ssj-engine)).
++
+ **Machine.** AMD Ryzen 9 9950X3D VM: 22 cores, 1 thread per core, 34 GB RAM, Linux 6.8. Each
+ benchmark process runs alone: the scripts wait until the machine has at most 2 runnable tasks.
+ A watchdog kills a benchmark when free memory drops below a floor (8 GB for the JVM runs). Repeated
+@@ -152,6 +168,29 @@
+   10^10 s crosses 2^63 ns (292 years), wraps around as in Java and aborts with the reference's
+   error.
+ 
++## Palladio on the SSJ engine
++
++SimuLizar and SimuCom on SSJ were measured in a separate session ({{SSJ_SESSION}}) together with
++SimOxide and with SimuLizar and SimuCom on DESMO-J, with the same models, simulated times, phases
++and drivers as above (`bench/compare/ssj/run.sh`). Within the session, every pair of engines ran
++alternately per model and length on the same machine, so the SSJ to DESMO-J ratios do not depend
++on the session. Additional model: `x_misarch`, a generated PCM model of the MiSArch microservice
++system (34 containers, 1 146 actions, 38 open workloads, asynchronous forks), run for 36 s and
++361 s of simulated time. SimuCom cannot generate compilable code for it (entity names such as
++`createUser@user` or `return`; with Java-safe names, a package clash remains), so it is left out.
++
++- **SSJ against DESMO-J**: a warm SimuLizar run takes {{SL_SSJ_VS_DESMOJ}} and a warm SimuCom run
++  {{SC_SSJ_VS_DESMOJ}} of the time on DESMO-J; cold runs {{SSJ_COLD_VS_DESMOJ}}.
++- **SimOxide speed-up** on SSJ: {{SL_SSJ_WARM_SPEEDUP_X}} (SimuLizar) and {{SC_SSJ_WARM_SPEEDUP_X}}
++  (SimuCom) per warm run, against {{SL_DESMOJ_WARM_SPEEDUP_X}} and {{SC_DESMOJ_WARM_SPEEDUP_X}} on
++  DESMO-J in the same session.
++- **Results**: {{SSJ_CONSISTENCY}}.
++- **Sustained runs**: {{SSJ_STABILITY}}.
++
++<!--@include: ../../bench/compare/ssj/results/tables.md-->
++
++<!--@include: ../../bench/compare/ssj/results/tables_sustained.md-->
++
+ ## Fairness caveats
+ 
+ - **Same work only within the SimuLizar family.** SimOxide, refsim, stock SimuLizar, SimuLizar +
+@@ -181,6 +220,17 @@
+   summaries of each batch on one thread while the other cores idle, so it reaches only about half
+   the throughput of 22 threads that each reload the model. Its row is left out of the table (it
+   is in `sus_summary.csv`). With short espresso runs, batch and reload are equal.
++- **SSJ is not DESMO-J.** The two engines get the same random streams (the generator belongs to
++  the simulation configuration, not to the engine), but SSJ keeps simulated time as a `double` in
++  seconds where DESMO-J counts nanoseconds, and orders simultaneous events by its own event list.
++  After a first difference the runs would follow different sample paths, so on SSJ the
++  SimuLizar family is only guaranteed to match DESMO-J (and SimOxide) statistically; in this
++  benchmark: {{SSJ_CONSISTENCY}}. SSJ also ends a run at the maximum simulated time with a
++  plain `Simulator.stop()`, without the engine-independent `stop()` that DESMO-J calls; the
++  simulation model is then not finalised (no stop listeners, no resource deactivation), and the
++  threads of simulated users parked at the end are never released: on `x_espresso` (30 users),
++  SimuLizar on SSJ grows by about 30 threads per run in a long-lived JVM, on DESMO-J it stays flat.
++  {{SSJ_STOP_EFFECT}}
+ 
+ ## Reproducing
+ 
+@@ -190,6 +240,7 @@
+ bench/compare/run-all.sh summary               # only re-aggregate results/raw/
+ SIMS="simoxide slingshot" MODELS=x_espresso LENS=short bench/compare/run-all.sh cold warm summary
+ SIMS=simoxide MEM_FLOOR_KB=2000000 bench/compare/run-all.sh cold warm par sus1 susN longrun summary
++bench/compare/ssj/run.sh                       # SimOxide, SimuLizar and SimuCom on DESMO-J and SSJ (bench/compare/SSJ.md)
+ ```
+ 
+ Each phase resumes: a benchmark process whose log ends with `rc=0` is not run again. The raw logs
+diff -ru a/docs/performance/index.md b/docs/performance/index.md
+--- a/docs/performance/index.md	2026-10-13 15:44:21.903226657 +0200
++++ b/docs/performance/index.md	2026-10-13 20:37:06.340291679 +0200
+@@ -14,10 +14,12 @@
+ |---|---|---|---|---|---|
+ | **SimOxide** | this project | – | 4 to 10 ms (short runs) | **426 runs/s** | **5 396 runs/s** at 64 MB |
+ | SimuLizar 5.2.2 (stock) | supported | 256× to 2 420× | 5.4 to 17 s | 0.50 runs/s | 11.3 runs/s at 26 GB, then killed; 4.1 runs/s in one JVM (collapses) |
++| SimuLizar 5.2.2 (stock) on SSJ | supported, optional engine | {{SL_SSJ_WARM_SPEEDUP_X}} | {{SL_SSJ_COLD}} | {{SL_SSJ_ONECORE}} | {{SL_SSJ_ALLCORES}} |
+ | SimuLizar 5.2.2 + virtual threads | patched | 222× to 1 270× | 5.5 to 17 s | 0.53 runs/s | 9.7 runs/s at 13 GB, 8 failed runs |
+ | refsim (deterministic SimuLizar) | this project's reference | 222× to 2 240× | 5.5 to 16 s | 0.57 runs/s | 17 runs/s at 19 GB |
+ | Slingshot (nightly 2026-09-01) | actively developed | 182× to 1 030× | 2.7 to 13 s | 0.61 runs/s | 9.4 runs/s at 15 GB |
+ | SimuCom 5.2.2 (repaired) | deprecated | 237× to 2 100× | 7.9 to 16 s | 0.45 runs/s | – |
++| SimuCom 5.2.2 (repaired) on SSJ | deprecated, optional engine | {{SC_SSJ_WARM_SPEEDUP_X}} | {{SC_SSJ_COLD}} | {{SC_SSJ_ONECORE}} | – |
+ | EventSim 5.1 | archived, unsupported | 76× to 340× | 3.8 to 7.5 s | 0.66 runs/s, degrading | – |
+ 
+ - **Warm run**: one simulation in a long-lived, warmed-up process, from the model files to the
+@@ -27,6 +29,14 @@
+   (about 190 requests each), back to back with a new seed per run.
+ - **All cores**: the same, with the best configuration each simulator supports (threads,
+   processes or isolated class loaders).
++- **On SSJ**: SimuLizar and SimuCom run on an abstract simulation engine with two
++  implementations, DESMO-J (the default, and the only one in the Palladio product) and SSJ
++  (Stochastic Simulation in Java), an optional bundle of the same release that is expected to
++  be faster. SimOxide reproduces DESMO-J, so exactness is checked against DESMO-J, but its speed
++  is compared with both engines. On SSJ, a warm SimuLizar run takes {{SL_SSJ_VS_DESMOJ}} and a
++  warm SimuCom run {{SC_SSJ_VS_DESMOJ}} of the time on DESMO-J. The SSJ rows come from a separate
++  session ({{SSJ_SESSION}}) that measured SimOxide and both engines side by side; see
++  [Palladio on the SSJ engine](./comparison.md#palladio-on-the-ssj-engine).
+ 
+ ## What this means in practice
+ 
+@@ -54,6 +64,7 @@
+ | refsim | flat; its patches reset the per-run static state |
+ | Slingshot | flat throughput, but leaks about 0.86 threads per run |
+ | SimuCom | flat; code generation costs 0.3 to 1.5 s per model change |
++| SimuLizar and SimuCom on SSJ | {{SSJ_STABILITY}} |
+ | EventSim | degrades within minutes (espresso: 4.9 to 1.0 runs/s in 2 minutes) |
+ 
+ ## Beyond speed
+@@ -65,6 +76,11 @@
+ | Runs every benchmark model | yes | yes | no: fails on synchronous forks, needs an extra demand on acquire and release | yes |
+ | Parallel runs in one process | yes, no shared state | only with workarounds, not reproducible | isolated class loaders | – |
+ 
++The SimuLizar family column is for the DESMO-J engine. On SSJ, SimuLizar and SimuCom draw the same
++random streams but keep time as a floating-point number instead of nanoseconds and can order
++simultaneous events differently, so their
++results need not be identical to DESMO-J's. In this benchmark: {{SSJ_CONSISTENCY}}.
++
+ ## SimOxide on its own
+ 
+ For SimOxide's own benchmark suite (events per second, allocations, thread scaling, the fast
+@@ -78,4 +94,6 @@
+ SimOxide was measured on 2026-09-30 at the current state of the repository. The JVM simulators
+ were measured on 2026-09-29 on the same machine with the same harness; their versions have not
+ changed since. `bench/compare/run-all.sh` reproduces everything (about 3.5 hours;
+-`SIMS=simoxide` re-measures SimOxide alone in a few minutes).
++`SIMS=simoxide` re-measures SimOxide alone in a few minutes). The SSJ rows were measured on
++{{SSJ_SESSION}} by `bench/compare/ssj/run.sh`, together with SimOxide and SimuLizar and
++SimuCom on DESMO-J.
+diff -ru a/README.md b/README.md
+--- a/README.md	2026-10-13 15:44:21.889226809 +0200
++++ b/README.md	2026-10-13 15:44:27.068170561 +0200
+@@ -7,7 +7,8 @@
+   the same event trace, the same random draws and the same `measurements.csv`, SimuLizar's bugs
+   included. Checked on 66 corpus models, about 12 000 generated models, component oracles and
+   queueing theory.
+-- **Fast.** A warm run is 250 to 2 400 times faster than stock SimuLizar 5.2.2 and 180 to 1 000
++- **Fast.** A warm run is 250 to 2 400 times faster than stock SimuLizar 5.2.2 on its default
++  DESMO-J engine, {{SL_SSJ_WARM_SPEEDUP}} times faster on its SSJ engine, and 180 to 1 000
+   times faster than Slingshot; a one-shot run takes milliseconds instead of seconds. On 22 cores
+   SimOxide completes over 5 000 MediaStore evaluations per second at 64 MB; the best JVM
+   configuration completes 17 at 19 GB.

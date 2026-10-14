@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monitorrepository:MonitorRepository xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:metricspec="http://palladiosimulator.org/MetricSpec/1.0" xmlns:monitorrepository="http://palladiosimulator.org/MonitorRepository/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" xmlns:simulizarmeasuringpoint="http://palladiosimulator.org/simulizar/measuringpoint" id="_msa_monrepo" entityName="msa-sim monitors">
+  <monitors id="_msa_mon1" entityName="Usage Scenario: createUser">
+    <measurementSpecifications id="_msa_ms1" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft1"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.0"/>
+  </monitors>
+  <monitors id="_msa_mon2" entityName="Usage Scenario: createUser (process probe)">
+    <measurementSpecifications id="_msa_ms2" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft2"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.1"/>
+  </monitors>
+  <monitors id="_msa_mon3" entityName="Usage Scenario: currentUser">
+    <measurementSpecifications id="_msa_ms3" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft3"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.2"/>
+  </monitors>
+  <monitors id="_msa_mon4" entityName="Usage Scenario: currentUserAddresses">
+    <measurementSpecifications id="_msa_ms4" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft4"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.3"/>
+  </monitors>
+  <monitors id="_msa_mon5" entityName="Usage Scenario: currentUserPaymentInfos">
+    <measurementSpecifications id="_msa_ms5" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft5"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.4"/>
+  </monitors>
+  <monitors id="_msa_mon6" entityName="Usage Scenario: currentUserNotifications">
+    <measurementSpecifications id="_msa_ms6" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft6"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.5"/>
+  </monitors>
+  <monitors id="_msa_mon7" entityName="Usage Scenario: updateUser">
+    <measurementSpecifications id="_msa_ms7" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft7"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.6"/>
+  </monitors>
+  <monitors id="_msa_mon8" entityName="Usage Scenario: createUserAddress">
+    <measurementSpecifications id="_msa_ms8" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft8"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.7"/>
+  </monitors>
+  <monitors id="_msa_mon9" entityName="Usage Scenario: createVendorAddress">
+    <measurementSpecifications id="_msa_ms9" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft9"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.8"/>
+  </monitors>
+  <monitors id="_msa_mon10" entityName="Usage Scenario: createCategory">
+    <measurementSpecifications id="_msa_ms10" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft10"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.9"/>
+  </monitors>
+  <monitors id="_msa_mon11" entityName="Usage Scenario: createProduct">
+    <measurementSpecifications id="_msa_ms11" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft11"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.10"/>
+  </monitors>
+  <monitors id="_msa_mon12" entityName="Usage Scenario: createProductVariant">
+    <measurementSpecifications id="_msa_ms12" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft12"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.11"/>
+  </monitors>
+  <monitors id="_msa_mon13" entityName="Usage Scenario: updateProduct">
+    <measurementSpecifications id="_msa_ms13" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft13"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.12"/>
+  </monitors>
+  <monitors id="_msa_mon14" entityName="Usage Scenario: createProductVariantVersion">
+    <measurementSpecifications id="_msa_ms14" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft14"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.13"/>
+  </monitors>
+  <monitors id="_msa_mon15" entityName="Usage Scenario: updateProductVariant">
+    <measurementSpecifications id="_msa_ms15" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft15"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.14"/>
+  </monitors>
+  <monitors id="_msa_mon16" entityName="Usage Scenario: products">
+    <measurementSpecifications id="_msa_ms16" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft16"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.15"/>
+  </monitors>
+  <monitors id="_msa_mon17" entityName="Usage Scenario: product">
+    <measurementSpecifications id="_msa_ms17" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft17"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.16"/>
+  </monitors>
+  <monitors id="_msa_mon18" entityName="Usage Scenario: uploadMedia">
+    <measurementSpecifications id="_msa_ms18" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft18"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.17"/>
+  </monitors>
+  <monitors id="_msa_mon19" entityName="Usage Scenario: createTaxRate">
+    <measurementSpecifications id="_msa_ms19" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft19"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.18"/>
+  </monitors>
+  <monitors id="_msa_mon20" entityName="Usage Scenario: createTaxRateVersion">
+    <measurementSpecifications id="_msa_ms20" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft20"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.19"/>
+  </monitors>
+  <monitors id="_msa_mon21" entityName="Usage Scenario: createProductItemBatch">
+    <measurementSpecifications id="_msa_ms21" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft21"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.20"/>
+  </monitors>
+  <monitors id="_msa_mon22" entityName="Usage Scenario: createShoppingcartItem">
+    <measurementSpecifications id="_msa_ms22" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft22"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.21"/>
+  </monitors>
+  <monitors id="_msa_mon23" entityName="Usage Scenario: createWishlist">
+    <measurementSpecifications id="_msa_ms23" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft23"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.22"/>
+  </monitors>
+  <monitors id="_msa_mon24" entityName="Usage Scenario: updateWishlist">
+    <measurementSpecifications id="_msa_ms24" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft24"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.23"/>
+  </monitors>
+  <monitors id="_msa_mon25" entityName="Usage Scenario: viewWishlist">
+    <measurementSpecifications id="_msa_ms25" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft25"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.24"/>
+  </monitors>
+  <monitors id="_msa_mon26" entityName="Usage Scenario: createDiscount">
+    <measurementSpecifications id="_msa_ms26" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft26"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.25"/>
+  </monitors>
+  <monitors id="_msa_mon27" entityName="Usage Scenario: createCoupon">
+    <measurementSpecifications id="_msa_ms27" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft27"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.26"/>
+  </monitors>
+  <monitors id="_msa_mon28" entityName="Usage Scenario: registerCoupon">
+    <measurementSpecifications id="_msa_ms28" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft28"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.27"/>
+  </monitors>
+  <monitors id="_msa_mon29" entityName="Usage Scenario: shipmentMethods">
+    <measurementSpecifications id="_msa_ms29" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft29"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.28"/>
+  </monitors>
+  <monitors id="_msa_mon30" entityName="Usage Scenario: createOrder">
+    <measurementSpecifications id="_msa_ms30" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft30"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.29"/>
+  </monitors>
+  <monitors id="_msa_mon31" entityName="Usage Scenario: placeOrder">
+    <measurementSpecifications id="_msa_ms31" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft31"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.30"/>
+  </monitors>
+  <monitors id="_msa_mon32" entityName="Usage Scenario: placeOrder (process probe)">
+    <measurementSpecifications id="_msa_ms32" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft32"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.31"/>
+  </monitors>
+  <monitors id="_msa_mon33" entityName="Usage Scenario: createPaymentInformation">
+    <measurementSpecifications id="_msa_ms33" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft33"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.32"/>
+  </monitors>
+  <monitors id="_msa_mon34" entityName="Usage Scenario: createShipmentMethod">
+    <measurementSpecifications id="_msa_ms34" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft34"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.33"/>
+  </monitors>
+  <monitors id="_msa_mon35" entityName="Usage Scenario: myOrders">
+    <measurementSpecifications id="_msa_ms35" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft35"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.34"/>
+  </monitors>
+  <monitors id="_msa_mon36" entityName="Usage Scenario: createReturn">
+    <measurementSpecifications id="_msa_ms36" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft36"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.35"/>
+  </monitors>
+  <monitors id="_msa_mon37" entityName="Usage Scenario: createReturn (process probe)">
+    <measurementSpecifications id="_msa_ms37" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft37"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.36"/>
+  </monitors>
+  <monitors id="_msa_mon38" entityName="Usage Scenario: createReview">
+    <measurementSpecifications id="_msa_ms38" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft38"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.37"/>
+  </monitors>
+  <monitors id="_msa_mon39" entityName="ExternalCall [_ec248]">
+    <measurementSpecifications id="_msa_ms39" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft39"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.38"/>
+  </monitors>
+  <monitors id="_msa_mon40" entityName="ExternalCall [_ec1856]">
+    <measurementSpecifications id="_msa_ms40" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft40"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.39"/>
+  </monitors>
+  <monitors id="_msa_mon41" entityName="ExternalCall [_ec2064]">
+    <measurementSpecifications id="_msa_ms41" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_msa_ft41"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" href="msa.measuringpoint#//@measuringPoints.40"/>
+  </monitors>
+</monitorrepository:MonitorRepository>

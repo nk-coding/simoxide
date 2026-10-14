@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<usagemodel:UsageModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" xmlns:usagemodel="http://palladiosimulator.org/PalladioComponentModel/UsageModel/5.2">
+  <usageScenario_UsageModel id="_us0" entityName="createUser">
+    <scenarioBehaviour_UsageScenario id="_us0_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us0_ust" entityName="start" successor="_elsc0"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc0" entityName="createUser" successor="_us0_usp" predecessor="_us0_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us0_usp" entityName="stop" predecessor="_elsc0"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.022539999999999998)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us1" entityName="createUser (process probe)">
+    <scenarioBehaviour_UsageScenario id="_us1_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us1_ust" entityName="start" successor="_elsc1"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc1" entityName="createUser (process probe)" successor="_us1_usp" predecessor="_us1_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig210"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us1_usp" entityName="stop" predecessor="_elsc1"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.00966)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us2" entityName="currentUser">
+    <scenarioBehaviour_UsageScenario id="_us2_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us2_ust" entityName="start" successor="_elsc2"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc2" entityName="currentUser" successor="_us2_usp" predecessor="_us2_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig254"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us2_usp" entityName="stop" predecessor="_elsc2"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(9.063656)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us3" entityName="currentUserAddresses">
+    <scenarioBehaviour_UsageScenario id="_us3_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us3_ust" entityName="start" successor="_elsc3"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc3" entityName="currentUserAddresses" successor="_us3_usp" predecessor="_us3_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig270"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us3_usp" entityName="stop" predecessor="_elsc3"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(9.063656)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us4" entityName="currentUserPaymentInfos">
+    <scenarioBehaviour_UsageScenario id="_us4_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us4_ust" entityName="start" successor="_elsc4"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc4" entityName="currentUserPaymentInfos" successor="_us4_usp" predecessor="_us4_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig303"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us4_usp" entityName="stop" predecessor="_elsc4"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(3.4524840000000006)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us5" entityName="currentUserNotifications">
+    <scenarioBehaviour_UsageScenario id="_us5_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us5_ust" entityName="start" successor="_elsc5"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc5" entityName="currentUserNotifications" successor="_us5_usp" predecessor="_us5_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig336"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us5_usp" entityName="stop" predecessor="_elsc5"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.32200000000000006)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us6" entityName="updateUser">
+    <scenarioBehaviour_UsageScenario id="_us6_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us6_ust" entityName="start" successor="_elsc6"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc6" entityName="updateUser" successor="_us6_usp" predecessor="_us6_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig369"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us6_usp" entityName="stop" predecessor="_elsc6"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.0322)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us7" entityName="createUserAddress">
+    <scenarioBehaviour_UsageScenario id="_us7_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us7_ust" entityName="start" successor="_elsc7"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc7" entityName="createUserAddress" successor="_us7_usp" predecessor="_us7_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig407"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us7_usp" entityName="stop" predecessor="_elsc7"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.0644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us8" entityName="createVendorAddress">
+    <scenarioBehaviour_UsageScenario id="_us8_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us8_ust" entityName="start" successor="_elsc8"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc8" entityName="createVendorAddress" successor="_us8_usp" predecessor="_us8_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig478"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us8_usp" entityName="stop" predecessor="_elsc8"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.000644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us9" entityName="createCategory">
+    <scenarioBehaviour_UsageScenario id="_us9_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us9_ust" entityName="start" successor="_elsc9"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc9" entityName="createCategory" successor="_us9_usp" predecessor="_us9_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig526"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us9_usp" entityName="stop" predecessor="_elsc9"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.000644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us10" entityName="createProduct">
+    <scenarioBehaviour_UsageScenario id="_us10_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us10_ust" entityName="start" successor="_elsc10"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc10" entityName="createProduct" successor="_us10_usp" predecessor="_us10_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig568"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us10_usp" entityName="stop" predecessor="_elsc10"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.00644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us11" entityName="createProductVariant">
+    <scenarioBehaviour_UsageScenario id="_us11_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us11_ust" entityName="start" successor="_elsc11"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc11" entityName="createProductVariant" successor="_us11_usp" predecessor="_us11_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig742"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us11_usp" entityName="stop" predecessor="_elsc11"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.00644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us12" entityName="updateProduct">
+    <scenarioBehaviour_UsageScenario id="_us12_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us12_ust" entityName="start" successor="_elsc12"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc12" entityName="updateProduct" successor="_us12_usp" predecessor="_us12_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig782"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us12_usp" entityName="stop" predecessor="_elsc12"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.01288)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us13" entityName="createProductVariantVersion">
+    <scenarioBehaviour_UsageScenario id="_us13_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us13_ust" entityName="start" successor="_elsc13"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc13" entityName="createProductVariantVersion" successor="_us13_usp" predecessor="_us13_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig798"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us13_usp" entityName="stop" predecessor="_elsc13"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.01288)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us14" entityName="updateProductVariant">
+    <scenarioBehaviour_UsageScenario id="_us14_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us14_ust" entityName="start" successor="_elsc14"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc14" entityName="updateProductVariant" successor="_us14_usp" predecessor="_us14_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig822"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us14_usp" entityName="stop" predecessor="_elsc14"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.00644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us15" entityName="products">
+    <scenarioBehaviour_UsageScenario id="_us15_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us15_ust" entityName="start" successor="_elsc15"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc15" entityName="products" successor="_us15_usp" predecessor="_us15_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig854"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us15_usp" entityName="stop" predecessor="_elsc15"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(9.063656)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us16" entityName="product">
+    <scenarioBehaviour_UsageScenario id="_us16_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us16_ust" entityName="start" successor="_elsc16"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc16" entityName="product" successor="_us16_usp" predecessor="_us16_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig870"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us16_usp" entityName="stop" predecessor="_elsc16"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(9.063656)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us17" entityName="uploadMedia">
+    <scenarioBehaviour_UsageScenario id="_us17_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us17_ust" entityName="start" successor="_elsc17"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc17" entityName="uploadMedia" successor="_us17_usp" predecessor="_us17_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig903"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us17_usp" entityName="stop" predecessor="_elsc17"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.00644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us18" entityName="createTaxRate">
+    <scenarioBehaviour_UsageScenario id="_us18_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us18_ust" entityName="start" successor="_elsc18"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc18" entityName="createTaxRate" successor="_us18_usp" predecessor="_us18_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig949"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us18_usp" entityName="stop" predecessor="_elsc18"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.000644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us19" entityName="createTaxRateVersion">
+    <scenarioBehaviour_UsageScenario id="_us19_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us19_ust" entityName="start" successor="_elsc19"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc19" entityName="createTaxRateVersion" successor="_us19_usp" predecessor="_us19_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1009"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us19_usp" entityName="stop" predecessor="_elsc19"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.000644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us20" entityName="createProductItemBatch">
+    <scenarioBehaviour_UsageScenario id="_us20_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us20_ust" entityName="start" successor="_elsc20"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc20" entityName="createProductItemBatch" successor="_us20_usp" predecessor="_us20_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1031"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us20_usp" entityName="stop" predecessor="_elsc20"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.0644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us21" entityName="createShoppingcartItem">
+    <scenarioBehaviour_UsageScenario id="_us21_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us21_ust" entityName="start" successor="_elsc21"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc21" entityName="createShoppingcartItem" successor="_us21_usp" predecessor="_us21_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1052"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us21_usp" entityName="stop" predecessor="_elsc21"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(9.063656)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us22" entityName="createWishlist">
+    <scenarioBehaviour_UsageScenario id="_us22_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us22_ust" entityName="start" successor="_elsc22"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc22" entityName="createWishlist" successor="_us22_usp" predecessor="_us22_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1074"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us22_usp" entityName="stop" predecessor="_elsc22"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.0322)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us23" entityName="updateWishlist">
+    <scenarioBehaviour_UsageScenario id="_us23_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us23_ust" entityName="start" successor="_elsc23"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc23" entityName="updateWishlist" successor="_us23_usp" predecessor="_us23_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1095"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us23_usp" entityName="stop" predecessor="_elsc23"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.1288)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us24" entityName="viewWishlist">
+    <scenarioBehaviour_UsageScenario id="_us24_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us24_ust" entityName="start" successor="_elsc24"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc24" entityName="viewWishlist" successor="_us24_usp" predecessor="_us24_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1112"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us24_usp" entityName="stop" predecessor="_elsc24"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.32200000000000006)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us25" entityName="createDiscount">
+    <scenarioBehaviour_UsageScenario id="_us25_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us25_ust" entityName="start" successor="_elsc25"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc25" entityName="createDiscount" successor="_us25_usp" predecessor="_us25_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1141"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us25_usp" entityName="stop" predecessor="_elsc25"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.00644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us26" entityName="createCoupon">
+    <scenarioBehaviour_UsageScenario id="_us26_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us26_ust" entityName="start" successor="_elsc26"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc26" entityName="createCoupon" successor="_us26_usp" predecessor="_us26_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1161"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us26_usp" entityName="stop" predecessor="_elsc26"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.00644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us27" entityName="registerCoupon">
+    <scenarioBehaviour_UsageScenario id="_us27_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us27_ust" entityName="start" successor="_elsc27"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc27" entityName="registerCoupon" successor="_us27_usp" predecessor="_us27_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1199"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us27_usp" entityName="stop" predecessor="_elsc27"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.0644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us28" entityName="shipmentMethods">
+    <scenarioBehaviour_UsageScenario id="_us28_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us28_ust" entityName="start" successor="_elsc28"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc28" entityName="shipmentMethods" successor="_us28_usp" predecessor="_us28_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1216"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us28_usp" entityName="stop" predecessor="_elsc28"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(3.4524840000000006)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us29" entityName="createOrder">
+    <scenarioBehaviour_UsageScenario id="_us29_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us29_ust" entityName="start" successor="_elsc29"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc29" entityName="createOrder" successor="_us29_usp" predecessor="_us29_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1236"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us29_usp" entityName="stop" predecessor="_elsc29"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(3.4524840000000006)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us30" entityName="placeOrder">
+    <scenarioBehaviour_UsageScenario id="_us30_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us30_ust" entityName="start" successor="_elsc30"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc30" entityName="placeOrder" successor="_us30_usp" predecessor="_us30_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1387"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us30_usp" entityName="stop" predecessor="_elsc30"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(2.4167388)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us31" entityName="placeOrder (process probe)">
+    <scenarioBehaviour_UsageScenario id="_us31_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us31_ust" entityName="start" successor="_elsc31"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc31" entityName="placeOrder (process probe)" successor="_us31_usp" predecessor="_us31_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1702"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us31_usp" entityName="stop" predecessor="_elsc31"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(1.0357452)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us32" entityName="createPaymentInformation">
+    <scenarioBehaviour_UsageScenario id="_us32_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us32_ust" entityName="start" successor="_elsc32"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc32" entityName="createPaymentInformation" successor="_us32_usp" predecessor="_us32_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1862"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us32_usp" entityName="stop" predecessor="_elsc32"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.0644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us33" entityName="createShipmentMethod">
+    <scenarioBehaviour_UsageScenario id="_us33_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us33_ust" entityName="start" successor="_elsc33"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc33" entityName="createShipmentMethod" successor="_us33_usp" predecessor="_us33_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1879"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us33_usp" entityName="stop" predecessor="_elsc33"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.000644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us34" entityName="myOrders">
+    <scenarioBehaviour_UsageScenario id="_us34_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us34_ust" entityName="start" successor="_elsc34"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc34" entityName="myOrders" successor="_us34_usp" predecessor="_us34_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1913"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us34_usp" entityName="stop" predecessor="_elsc34"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.6440000000000001)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us35" entityName="createReturn">
+    <scenarioBehaviour_UsageScenario id="_us35_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us35_ust" entityName="start" successor="_elsc35"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc35" entityName="createReturn" successor="_us35_usp" predecessor="_us35_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig1942"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us35_usp" entityName="stop" predecessor="_elsc35"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.022539999999999998)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us36" entityName="createReturn (process probe)">
+    <scenarioBehaviour_UsageScenario id="_us36_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us36_ust" entityName="start" successor="_elsc36"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc36" entityName="createReturn (process probe)" successor="_us36_usp" predecessor="_us36_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig2010"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us36_usp" entityName="stop" predecessor="_elsc36"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.00966)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_us37" entityName="createReview">
+    <scenarioBehaviour_UsageScenario id="_us37_ub" entityName="behaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_us37_ust" entityName="start" successor="_elsc37"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_elsc37" entityName="createReview" successor="_us37_usp" predecessor="_us37_ust">
+        <providedRole_EntryLevelSystemCall href="msa.system#_sysgw"/>
+        <operationSignature__EntryLevelSystemCall href="msa.repository#_sig2070"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_us37_usp" entityName="stop" predecessor="_elsc37"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp(0.0644)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+</usagemodel:UsageModel>

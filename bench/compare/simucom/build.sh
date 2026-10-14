@@ -5,7 +5,7 @@ H="$(cd "$(dirname "$0")" && pwd)"
 P=${PALLADIO:-/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2}
 JDK=${JDK:-/home/devbox/workspace/palladio-research/work-simucom/jre17}
 JAVAC=${JAVAC:-javac}
-W=$H/work; mkdir -p $W
+W=${SIMUCOM_WORK:-$H/work}; mkdir -p $W   # SIMUCOM_WORK: another work dir, e.g. for the SSJ engine (../SSJ.md)
 cd $H/bundle
 CP=$(ls $P/plugins/*.jar | tr '\n' ':')
 rm -rf bin && mkdir bin

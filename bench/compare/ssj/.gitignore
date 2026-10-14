@@ -1,0 +1,13 @@
+# downloads, overlay install, OSGi configs, driver build (ssj/setup.sh)
+/work/
+# raw logs and large intermediate files of ssj/run.sh (the summaries and tables are kept, as in ../results/)
+/results/raw/
+/results/tmp/
+/results/*.log
+/results/raw.csv
+/results/sus_runs.csv
+/results/smoke/
+# rough single-threaded comparisons (ssj/rough.sh): raw logs only, rough.md and the summaries are kept
+/results/rough-*/raw/
+/results/rough-*/*.log
+/results/rough-*/raw.csv

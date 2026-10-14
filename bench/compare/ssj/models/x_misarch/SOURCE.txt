@@ -1,0 +1,14 @@
+Generated PCM model of the MiSArch microservice system (an extra model of the SSJ comparison, bench/compare/SSJ.md).
+
+  /home/devbox/workspace/msa-sim-service/target/release/msa-sim pcm MODEL.json OUT_DIR
+  MODEL.json = /home/devbox/workspace/misarch-optimization/msa/build/misarch.model.json as of 2026-10-13 15:08
+               sha256 172dc30e7ee78a673ed87a0da360e025d9807069ec9c47948369cc093f63ba78
+  msa-sim binary sha256 f0b0c0ec8373b067b3e62e0275e84fccf548f0bf83b1f26285f059caa3dd75e2
+  msa-sim: "34 containers, 235 SEFFs, 1146 actions, 38 usage scenarios; max_sim_time 361 s"
+
+Constructs: 38 open workloads (exponential inter-arrival times), internal actions with exponential CPU demands on
+processor-sharing CPUs and delay resources, external calls, asynchronous forks, probabilistic branches, one linking
+resource (not simulated, as in run.json). Monitors: response time (FeedThrough) of the 38 usage scenarios and 3
+external calls. SimuLizar runs it unchanged on DESMO-J and SSJ. SimuCom cannot: its generated Java does not compile
+(names like `createUser@user`, `sidecar media`, the component `return`); ssj/sanitize-names.py fixes those, but the
+code then fails with "product.impl cannot be resolved to a type", so SimuCom is left out on this model (ssj/ext.sh).

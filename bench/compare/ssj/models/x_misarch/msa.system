@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" id="_msa_system1" entityName="msa">
+  <assemblyContexts__ComposedStructure id="_ac0" entityName="gateway">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp0"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac1" entityName="user">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp1"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac2" entityName="sidecar:user">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp2"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac3" entityName="broker">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp3"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac4" entityName="address">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp4"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac5" entityName="sidecar:address">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp5"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac6" entityName="discount">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp6"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac7" entityName="sidecar:discount">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp7"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac8" entityName="shoppingcart">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp8"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac9" entityName="sidecar:shoppingcart">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp9"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac10" entityName="wishlist">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp10"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac11" entityName="sidecar:wishlist">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp11"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac12" entityName="order">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp12"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac13" entityName="sidecar:order">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp13"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac14" entityName="payment">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp14"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac15" entityName="sidecar:payment">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp15"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac16" entityName="invoice">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp16"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac17" entityName="sidecar:invoice">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp17"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac18" entityName="review">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp18"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac19" entityName="sidecar:review">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp19"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac20" entityName="notification">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp20"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac21" entityName="sidecar:notification">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp21"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac22" entityName="user (probes)">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp22"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac23" entityName="shipment">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp23"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac24" entityName="sidecar:shipment">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp24"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac25" entityName="catalog">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp25"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac26" entityName="sidecar:catalog">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp26"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac27" entityName="inventory">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp27"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac28" entityName="sidecar:inventory">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp28"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac29" entityName="media">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp29"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac30" entityName="sidecar:media">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp30"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac31" entityName="tax">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp31"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac32" entityName="sidecar:tax">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp32"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac33" entityName="return">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp33"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac34" entityName="sidecar:return">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp34"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac35" entityName="order (probes)">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp35"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ac36" entityName="return (probes)">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="msa.repository#_comp36"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_1" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac1">
+    <providedRole_AssemblyConnector href="msa.repository#_prov1"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_1"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_4" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac4">
+    <providedRole_AssemblyConnector href="msa.repository#_prov4"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_4"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_14" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac14">
+    <providedRole_AssemblyConnector href="msa.repository#_prov14"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_14"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_20" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac20">
+    <providedRole_AssemblyConnector href="msa.repository#_prov20"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_20"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_25" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac25">
+    <providedRole_AssemblyConnector href="msa.repository#_prov25"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_25"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_18" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac18">
+    <providedRole_AssemblyConnector href="msa.repository#_prov18"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_18"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_29" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac29">
+    <providedRole_AssemblyConnector href="msa.repository#_prov29"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_29"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_31" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac31">
+    <providedRole_AssemblyConnector href="msa.repository#_prov31"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_31"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_27" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac27">
+    <providedRole_AssemblyConnector href="msa.repository#_prov27"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_27"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_8" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac8">
+    <providedRole_AssemblyConnector href="msa.repository#_prov8"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_8"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_10" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac10">
+    <providedRole_AssemblyConnector href="msa.repository#_prov10"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_10"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_6" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac6">
+    <providedRole_AssemblyConnector href="msa.repository#_prov6"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_6"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_23" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac23">
+    <providedRole_AssemblyConnector href="msa.repository#_prov23"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_23"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_12" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac12">
+    <providedRole_AssemblyConnector href="msa.repository#_prov12"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_12"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn0_33" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac0" providingAssemblyContext_AssemblyConnector="_ac33">
+    <providedRole_AssemblyConnector href="msa.repository#_prov33"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req0_33"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn1_2" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac1" providingAssemblyContext_AssemblyConnector="_ac2">
+    <providedRole_AssemblyConnector href="msa.repository#_prov2"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req1_2"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn1_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac1" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req1_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn1_22" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac1" providingAssemblyContext_AssemblyConnector="_ac22">
+    <providedRole_AssemblyConnector href="msa.repository#_prov22"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req1_22"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_4" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac4">
+    <providedRole_AssemblyConnector href="msa.repository#_prov4"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_4"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_6" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac6">
+    <providedRole_AssemblyConnector href="msa.repository#_prov6"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_6"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_8" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac8">
+    <providedRole_AssemblyConnector href="msa.repository#_prov8"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_8"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_10" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac10">
+    <providedRole_AssemblyConnector href="msa.repository#_prov10"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_10"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_12" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac12">
+    <providedRole_AssemblyConnector href="msa.repository#_prov12"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_12"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_14" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac14">
+    <providedRole_AssemblyConnector href="msa.repository#_prov14"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_14"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_16" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac16">
+    <providedRole_AssemblyConnector href="msa.repository#_prov16"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_16"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_18" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac18">
+    <providedRole_AssemblyConnector href="msa.repository#_prov18"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_18"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_20" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac20">
+    <providedRole_AssemblyConnector href="msa.repository#_prov20"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_20"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_23" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac23">
+    <providedRole_AssemblyConnector href="msa.repository#_prov23"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_23"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_27" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac27">
+    <providedRole_AssemblyConnector href="msa.repository#_prov27"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_27"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_25" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac25">
+    <providedRole_AssemblyConnector href="msa.repository#_prov25"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_25"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn3_33" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac3" providingAssemblyContext_AssemblyConnector="_ac33">
+    <providedRole_AssemblyConnector href="msa.repository#_prov33"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req3_33"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn4_5" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac4" providingAssemblyContext_AssemblyConnector="_ac5">
+    <providedRole_AssemblyConnector href="msa.repository#_prov5"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req4_5"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn4_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac4" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req4_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn6_7" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac6" providingAssemblyContext_AssemblyConnector="_ac7">
+    <providedRole_AssemblyConnector href="msa.repository#_prov7"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req6_7"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn6_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac6" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req6_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn8_9" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac8" providingAssemblyContext_AssemblyConnector="_ac9">
+    <providedRole_AssemblyConnector href="msa.repository#_prov9"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req8_9"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn10_11" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac10" providingAssemblyContext_AssemblyConnector="_ac11">
+    <providedRole_AssemblyConnector href="msa.repository#_prov11"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req10_11"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn12_13" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac12" providingAssemblyContext_AssemblyConnector="_ac13">
+    <providedRole_AssemblyConnector href="msa.repository#_prov13"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req12_13"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn12_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac12" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req12_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn12_8" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac12" providingAssemblyContext_AssemblyConnector="_ac8">
+    <providedRole_AssemblyConnector href="msa.repository#_prov8"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req12_8"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn12_27" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac12" providingAssemblyContext_AssemblyConnector="_ac27">
+    <providedRole_AssemblyConnector href="msa.repository#_prov27"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req12_27"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn12_6" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac12" providingAssemblyContext_AssemblyConnector="_ac6">
+    <providedRole_AssemblyConnector href="msa.repository#_prov6"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req12_6"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn12_23" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac12" providingAssemblyContext_AssemblyConnector="_ac23">
+    <providedRole_AssemblyConnector href="msa.repository#_prov23"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req12_23"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn12_35" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac12" providingAssemblyContext_AssemblyConnector="_ac35">
+    <providedRole_AssemblyConnector href="msa.repository#_prov35"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req12_35"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn14_15" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac14" providingAssemblyContext_AssemblyConnector="_ac15">
+    <providedRole_AssemblyConnector href="msa.repository#_prov15"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req14_15"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn14_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac14" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req14_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn16_17" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac16" providingAssemblyContext_AssemblyConnector="_ac17">
+    <providedRole_AssemblyConnector href="msa.repository#_prov17"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req16_17"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn18_19" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac18" providingAssemblyContext_AssemblyConnector="_ac19">
+    <providedRole_AssemblyConnector href="msa.repository#_prov19"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req18_19"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn20_21" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac20" providingAssemblyContext_AssemblyConnector="_ac21">
+    <providedRole_AssemblyConnector href="msa.repository#_prov21"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req20_21"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn22_2" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac22" providingAssemblyContext_AssemblyConnector="_ac2">
+    <providedRole_AssemblyConnector href="msa.repository#_prov2"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req22_2"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn22_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac22" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req22_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn23_24" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac23" providingAssemblyContext_AssemblyConnector="_ac24">
+    <providedRole_AssemblyConnector href="msa.repository#_prov24"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req23_24"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn23_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac23" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req23_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn25_26" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac25" providingAssemblyContext_AssemblyConnector="_ac26">
+    <providedRole_AssemblyConnector href="msa.repository#_prov26"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req25_26"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn25_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac25" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req25_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn27_28" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac27" providingAssemblyContext_AssemblyConnector="_ac28">
+    <providedRole_AssemblyConnector href="msa.repository#_prov28"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req27_28"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn27_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac27" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req27_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn29_30" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac29" providingAssemblyContext_AssemblyConnector="_ac30">
+    <providedRole_AssemblyConnector href="msa.repository#_prov30"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req29_30"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn29_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac29" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req29_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn31_32" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac31" providingAssemblyContext_AssemblyConnector="_ac32">
+    <providedRole_AssemblyConnector href="msa.repository#_prov32"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req31_32"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn31_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac31" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req31_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn33_34" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac33" providingAssemblyContext_AssemblyConnector="_ac34">
+    <providedRole_AssemblyConnector href="msa.repository#_prov34"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req33_34"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn33_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac33" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req33_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn33_36" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac33" providingAssemblyContext_AssemblyConnector="_ac36">
+    <providedRole_AssemblyConnector href="msa.repository#_prov36"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req33_36"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn35_13" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac35" providingAssemblyContext_AssemblyConnector="_ac13">
+    <providedRole_AssemblyConnector href="msa.repository#_prov13"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req35_13"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn35_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac35" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req35_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn36_34" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac36" providingAssemblyContext_AssemblyConnector="_ac34">
+    <providedRole_AssemblyConnector href="msa.repository#_prov34"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req36_34"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_conn36_3" entityName="Connector" requiringAssemblyContext_AssemblyConnector="_ac36" providingAssemblyContext_AssemblyConnector="_ac3">
+    <providedRole_AssemblyConnector href="msa.repository#_prov3"/>
+    <requiredRole_AssemblyConnector href="msa.repository#_req36_3"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_deleg" entityName="ProvDelegation" outerProvidedRole_ProvidedDelegationConnector="_sysgw" assemblyContext_ProvidedDelegationConnector="_ac0">
+    <innerProvidedRole_ProvidedDelegationConnector href="msa.repository#_prov0"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_sysgw" entityName="Gateway">
+    <providedInterface__OperationProvidedRole href="msa.repository#_if0"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

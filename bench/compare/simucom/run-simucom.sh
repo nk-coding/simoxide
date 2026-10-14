@@ -9,7 +9,7 @@ H="$(cd "$(dirname "$0")" && pwd)"
 MODEL=$(cd "$1" && pwd); SIMTIME=$2; RUNS=$3; SEED=$4; shift 4
 P=${PALLADIO:-/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2}
 JAVA=${JAVA:-/home/devbox/workspace/palladio-research/work-simucom/jre17/bin/java}  # JDT in 5.2.2 needs <= Java 17
-W=$H/work
+W=${SIMUCOM_WORK:-$H/work}   # SIMUCOM_WORK: a work dir made by build.sh with the same variable (../SSJ.md)
 [ -f $W/headless.simucom_1.0.0.jar ] || $H/build.sh >&2
 WS=$(mktemp -d $W/ws.XXXXXX)          # fresh Eclipse workspace per invocation (generated plug-in projects live here)
 CFG=$(mktemp -d $W/cfg.XXXXXX); cp -r $W/config/. $CFG/   # private copy of the OSGi config area (Equinox writes caches there)

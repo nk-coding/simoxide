@@ -6,6 +6,8 @@
   summary.csv    per simulator x model x length: cold one-shot, warm per-run medians, rates, RSS
   parallel.csv   parallel throughput per configuration
   tables.md      the tables of docs/performance/comparison.md
+The SSJ-engine variants (simulizar-ssj, simucom-ssj, simulizar-ssj-osgi; SSJ.md) and models of ssj/ext.sh (x_misarch)
+get rows and columns only when their logs exist. CMP_COLUMNS=present: also the other simulators only when measured.
 usage: summarize.py OUT_DIR"""
 import csv, glob, os, re, statistics, sys
 
@@ -14,8 +16,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 lib = open(os.path.join(HERE, 'lib.sh')).read()
 SIMTIME = {m: tuple(float(x) for x in v.split())
            for m, v in re.findall(r'\[(\w+)\]="([\d. ]+)"', lib.split('declare -A SIMTIME=(')[1].split(')')[0])}
+EXT = os.path.join(HERE, 'ssj', 'ext.sh')   # SIMTIME[model]="short long" of the extra models
+if os.path.exists(EXT):
+    SIMTIME.update({m: tuple(float(x) for x in v.split())
+                    for m, v in re.findall(r'^SIMTIME\[(\w+)\]="([\d. ]+)"', open(EXT).read(), re.M)})
 MODELS = ['x_ss_minimal', 'x_espresso', 'x_ss_mediastore', 'x_sl_mediastore', 'h13_passive_contention', 'x_pem_fork']
 SIMS = ['simoxide', 'refsim', 'simulizar', 'simulizar-osgi', 'simulizar-vt', 'slingshot', 'slingshot-osgi', 'simucom', 'eventsim']
+SSJ = {'simulizar-ssj': 'simulizar', 'simulizar-ssj-osgi': 'simulizar-osgi', 'simucom-ssj': 'simucom'}  # -> DESMO-J twin
 COLD_ALIAS = {'simoxide-cli': 'simoxide'}
 KV = re.compile(r'(\w+)=(\S+)')
 
@@ -130,6 +137,16 @@ for phase in ('cold', 'warm', 'par'):
                         'mem_mb': round(mem * 1024) if mem == mem else '', 'killed': meta.get('killed', False)})
 
 
+# the SSJ variants right after their DESMO-J twins, the extra models after the standard ones; only if measured
+seen = {k[0] for k in list(cold) + list(warm)}
+for s, twin in SSJ.items():
+    if s in seen:
+        SIMS.insert(SIMS.index(twin) + 1, s)
+MODELS += sorted({k[1] for k in list(cold) + list(warm)} - set(MODELS))
+if os.environ.get('CMP_COLUMNS') == 'present':
+    SIMS = [s for s in SIMS if s in seen]
+
+
 def write(name, rows):
     if not rows:
         return
@@ -209,7 +226,8 @@ def speed(p, o):
 NAMES = {'simoxide': 'SimOxide', 'refsim': 'refsim (patched)', 'simulizar': 'SimuLizar 5.2.2 stock',
          'simulizar-vt': 'SimuLizar + VT patch', 'simulizar-osgi': 'SimuLizar stock, OSGi (cold only)',
          'slingshot-osgi': 'Slingshot, OSGi (cold only)', 'slingshot': 'Slingshot', 'simucom': 'SimuCom 5.2.2*',
-         'eventsim': 'EventSim 5.1 (archived)'}
+         'eventsim': 'EventSim 5.1 (archived)', 'simulizar-ssj': 'SimuLizar 5.2.2 stock, SSJ',
+         'simulizar-ssj-osgi': 'SimuLizar stock, SSJ, OSGi (cold only)', 'simucom-ssj': 'SimuCom 5.2.2*, SSJ'}
 md = []
 by = {(r['sim'], r['model'], r['len']): r for r in summary}
 def ms(x):
@@ -219,11 +237,11 @@ def ms(x):
     return f'{x / 1000:.3g} s' if x >= 1000 else f'{x:.3g} ms'
 
 
-MAIN = ['simoxide', 'refsim', 'simulizar', 'simulizar-vt', 'slingshot', 'simucom', 'eventsim']
+MAIN = [s for s in SIMS if not s.endswith('-osgi')]
 for kind, key, title in (('warm', 'warm_wall_ms', 'Warm per-run wall time (median; in brackets: SimOxide speed-up)'),
                          ('cold', 'cold_wall_s', 'Cold one-shot wall time, process start to results (median of 3; SimOxide speed-up)')):
     md.append(f'### {title}\n')
-    cols = MAIN + (['simulizar-osgi', 'slingshot-osgi'] if kind == 'cold' else [])
+    cols = MAIN + ([s for s in SIMS if s.endswith('-osgi')] if kind == 'cold' else [])
     md.append('| model | simulated s | ' + ' | '.join(NAMES[c] for c in cols) + ' |')
     md.append('|---|---|' + '---|' * len(cols))
     for model in MODELS:

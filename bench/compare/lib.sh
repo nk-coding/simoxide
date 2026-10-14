@@ -103,3 +103,7 @@ run_logged() {
   done
   wait $pid 2>/dev/null
 }
+
+# Optional extension, unset by default: CMP_EXT=ssj/ext.sh adds Palladio on the SSJ engine (SSJ.md) by
+# defining more simulators and models and overriding cmd/model_dir.
+if [ -n "${CMP_EXT:-}" ]; then source "$CMP_EXT"; fi

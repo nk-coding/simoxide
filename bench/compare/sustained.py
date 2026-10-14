@@ -246,7 +246,7 @@ def f(x, d=3):
 
 
 md = []
-for phase, title in (('sus1', 'Sustained, one core'), ('susN', 'Sustained, all 22 cores')):
+for phase, title in (('sus1', 'Sustained, one core'), ('susN', f"Sustained, all {os.environ.get('PAR_WORKERS', '22')} cores")):
     rows = [r for r in summary if r['phase'] == phase]
     if not rows:
         continue
