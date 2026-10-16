@@ -581,6 +581,14 @@ where
         {
             return Ok(Value::Invalid);
         }
+        // and of a two-argument one (classic OCL's "ternary operations": an undefined source
+        // or an invalid argument)
+        if op.desc().section == Section::Ocl
+            && args.len() == 3
+            && (s.is_undefined() || a1.is_invalid() || args[2].is_invalid())
+        {
+            return Ok(Value::Invalid);
+        }
         // so do QVTo's collection handlers (`SetTypeOperations`, `OrderedSetTypeOperations`,
         // `CollectionTypeOperations`, shared by List)
         if matches!(
@@ -1135,42 +1143,55 @@ where
                 _ => Value::Invalid,
             },
             // ---- List ----
-            LAdd => {
-                if let Value::List(l) = &s
-                    && !a1.is_invalid()
-                {
-                    l.borrow_mut().items.push(a1);
+            // `ListOperations`' mutators are typed `OclVoid` but return the list itself (or
+            // invalid for a source that is no list)
+            LAdd => match &s {
+                Value::List(l) => {
+                    if !a1.is_invalid() {
+                        l.borrow_mut().items.push(a1);
+                    }
+                    s.clone()
                 }
-                Value::Null
-            }
+                _ => Value::Invalid,
+            },
             LInsertAt => {
                 // insertAt(element, index): ArrayList.add(index - 1, element)
                 let idx = args.get(2).and_then(index_arg);
                 match (&s, idx) {
-                    (Value::List(l), Some(i)) if !a1.is_invalid() => {
-                        let mut lb = l.borrow_mut();
-                        if i >= 1 && (i as usize) <= lb.items.len() + 1 {
-                            lb.items.insert(i as usize - 1, a1);
-                            Value::Null
+                    (Value::List(l), Some(i)) => {
+                        if a1.is_invalid() {
+                            s.clone()
                         } else {
-                            Value::Invalid
+                            let mut lb = l.borrow_mut();
+                            if i >= 1 && (i as usize) <= lb.items.len() + 1 {
+                                lb.items.insert(i as usize - 1, a1);
+                                drop(lb);
+                                s.clone()
+                            } else {
+                                // IndexOutOfBoundsException
+                                Value::Invalid
+                            }
                         }
                     }
-                    _ => Value::Null,
+                    _ => Value::Invalid,
                 }
             }
-            LRemove => {
-                if let Value::List(l) = &s {
-                    l.borrow_mut().items.retain(|x| !java_equals(x, &a1, env));
+            LRemove => match &s {
+                Value::List(l) => {
+                    if !a1.is_invalid() {
+                        l.borrow_mut().items.retain(|x| !java_equals(x, &a1, env));
+                    }
+                    s.clone()
                 }
-                Value::Null
-            }
-            LRemoveAll => {
-                if let (Value::List(l), Some(d)) = (&s, self.as_coll(&a1)) {
+                _ => Value::Invalid,
+            },
+            LRemoveAll => match (&s, self.as_coll(&a1)) {
+                (Value::List(l), Some(d)) => {
                     l.borrow_mut().items.retain(|x| !d.contains(x, env));
+                    s.clone()
                 }
-                Value::Null
-            }
+                _ => Value::Invalid,
+            },
             LRemoveAt => match (&s, index_arg(&a1)) {
                 (Value::List(l), Some(i)) => {
                     let mut lb = l.borrow_mut();
