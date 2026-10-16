@@ -46,6 +46,7 @@ fn materialized_objects_register_as_the_original() {
         name: "greet".into(),
         params: vec![("who".into(), string, one)],
         result: Some((string, MetaMultiplicity { many: true, ..one })),
+        body: None,
     }];
     let r = rs.materialize(&[(p, "platform:/plugin/x/model/contract.ecore")], &ops).unwrap()[0];
     // eClass() objects
