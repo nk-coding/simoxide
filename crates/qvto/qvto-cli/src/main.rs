@@ -1,5 +1,6 @@
-//! `qvto`: the command line. Implemented so far: `qvto conform` (the conformance scoreboard and
-//! the Java reference runner's fixtures). `run`, `check`, `bench`, `disasm` come with the engine.
+//! `qvto`: the command line: `qvto conform` (the conformance scoreboard and the Java reference
+//! runner's fixtures), `qvto run` (compile and run a transformation), `qvto disasm` (the
+//! compiled program), `qvto bench` (run times of cases against the warm Java runner).
 
 mod engine;
 
@@ -15,6 +16,14 @@ use std::process::exit;
 
 const USAGE: &str = "\
 usage:
+  qvto run FILE.qvto [MODEL...] [--repeat N] [--fast]
+      Compiles and runs a transformation (models bound to the in/inout parameters in order,
+      metamodels by namespace URI from the suite configuration); prints the log and outcome.
+  qvto disasm FILE.qvto
+      Prints the problems, modules, operations and the bytecode of a transformation.
+  qvto bench [--suite eclipse|corpus] --only ID,... [--repeat N] [--java]
+      Runs cases N times with the engine (and in one JVM of the reference runner) and prints
+      compile and run times.
   qvto conform [--suite eclipse|corpus|all] [--cases FILE] [--fixture FILE]
                [--engine qvto|qvto-fast|stub|replay:DIR] [--only ID,...] [--prefix P]...
                [--report FILE.md] [--tsv FILE] [--verbose]
@@ -62,7 +71,7 @@ fn main() {
             println!("{USAGE}");
         }
         Some(c) => die(&format!(
-            "unknown command {c} (run, check, bench come with the engine)\n{USAGE}"
+            "unknown command {c}\n{USAGE}"
         )),
     }
 }

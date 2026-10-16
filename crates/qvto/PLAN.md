@@ -11,7 +11,7 @@ Status values: done, next, open, parked.
 | Q1c | Runtime values and Java-compatible primitives (`qvto-runtime` core) | done | Q1a, Q1b, Q1d |
 | Q1d | Reference harness: runner batch mode, canonical dump, conformance-runner skeleton (`qvto-testkit`) | done | Q1a, Q1b, Q1c |
 | Q2 | Type system, standard library signatures, semantic analysis (`qvto-types`, `qvto-sema`) | done | Q3a |
-| Q3a | Bytecode and VM core: expressions, imperative OCL, helpers, queries, objects, log, assert | open | Q2 (on hand-written IR) |
+| Q3a | Bytecode and VM core: expressions, imperative OCL, helpers, queries, mappings, objects, log, assert; the engine under the harness | done | Q2 (on hand-written IR) |
 | Q3b | End-to-end pipeline; SimuLizar rule corpus | open | — |
 | Q4 | Full QVTo: mappings with traces, resolve, late resolve, disjuncts, inherits, merges, intermediate data, deepclone, libraries, imports, extends, access, Dict/List, try/raise, configuration properties, `transform()`, blackboxes | open | Q5a |
 | Q5a | Compat hardening: identity hashes, Java HashMap order, error and log texts, stack traces | open | Q4 (late part), Q5b |
@@ -72,6 +72,23 @@ Status values: done, next, open, parked.
   files (539 of the 541 problem-free files have no problems at all); 115 of the 117
   `TestQvtParser` count checks pass; the IR of all 969 error-free compilations passes the
   consistency checks; the whole corpus analyses in 0.40 s (Eclipse warm: 1.77 s).
+- **Q3a**: the bytecode (register instructions of at most 8 bytes, inline iterators, constant
+  pool, per-instruction instruction pointers for stack traces) and the VM (helpers, queries,
+  constructors, contextual operations with virtual dispatch, mappings with Eclipse's protocol,
+  traces and `resolve`, objects in extents, QVTo's assignment rules, `log`, `assert`, `raise`,
+  `try`, the standard library over `qvto-runtime`, compat and fast mode) pass unit tests on
+  hand-written IR; the conformance adapter (`qvto conform --engine qvto`) runs the whole
+  pipeline; some Eclipse cases pass strictly; a first comparison with the warm Java runner.
+  Done 2026-10-17 (`crates/qvto-vm/README.md`, "Verification"; branch `q3a` on Q2's work in
+  progress): 338 of the 494 runnable Eclipse cases equal the Java runner strictly (68.4 %; 339
+  pass Eclipse's checks); `TestQvtInterpreter` 192 of 309 (62 %, the Q3b target is 50 %); the remaining failures are, by
+  stage: 114 cases the analyser rejects, 29 parser cases with other diagnostics (both Q2), the
+  rest mostly in the analyser's output (source ids, `raise 'msg'`, overloads) and Q4 features
+  (blackboxes, `Model::copy`). Corpus: 5 of 24 strictly (the others do not compile yet). Run
+  times against the warm Java runner (median of repeated runs in one JVM): suite cases
+  0.03–0.05 ms vs 2.6–9 ms, SimuLizar rules 0.04–0.07 ms vs 4.7–7.7 ms; compile 0.1–0.5 ms;
+  micro benchmarks 2.2× (collections) to 7× (arithmetic loop) and 2 900× (`including` in a
+  loop) faster.
 - **Q3b**: SimuLizar's 37 `.qvto` files compile; the 22 rule files run on the corpus PCM models
   and match the Java runner; at least 50 % of the 309 transformation cases pass.
 - **Q4**: Slingshot's SPD transformations run and match the Java runner; at least 85 % of the 309
