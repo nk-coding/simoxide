@@ -78,16 +78,41 @@ where
         self.unbound_extent = self.extents.len() - 1;
 
         let r = self.run_main();
+        // `createEvaluationResult`: the contents of the non-`in` extents that are not
+        // generated for a legacy `main(in x : T)` signature (`$x`); none and an object result
+        // of the entry: that object alone (Eclipse's compatibility extent). They fill the
+        // non-`in` parameters in order.
         let n_params = main.model_params.len();
-        let mut extents = Vec::with_capacity(n_params);
+        let mut results: Vec<Vec<ObjRef>> = Vec::new();
         for i in 0..n_params {
+            let mp = &main.model_params[i];
+            // every extent's contents are taken (purge, detach from the in-memory resource)
             let x = self.param_extents[&(ir.main_module.0, i as u32)];
-            if self.extents[x].direction == Direction::In {
+            let c = self.extents[x].contents(self.store);
+            if mp.direction == Direction::In || mp.name.starts_with('$') {
+                continue;
+            }
+            results.push(c);
+        }
+        if results.is_empty()
+            && let Ok(Value::Obj(o)) = &r
+        {
+            let mut e = Extent::new(None, Direction::Out, "compatibility".into());
+            let mut next = self.next_extent_uri;
+            e.bind_initial(self.store, vec![*o], &mut next);
+            self.next_extent_uri = next;
+            results.push(e.contents(self.store));
+        }
+        let mut results = results.into_iter();
+        let mut extents = Vec::with_capacity(n_params);
+        for mp in &main.model_params {
+            if mp.direction == Direction::In {
                 extents.push(None);
             } else {
-                extents.push(Some(self.extents[x].contents(self.store)));
+                extents.push(Some(results.next().unwrap_or_default()));
             }
         }
+        let r = r.map(|_| ());
         let trace_records = self.traces.len();
         match r {
             Ok(()) => {
@@ -124,7 +149,7 @@ where
         }
     }
 
-    fn run_main(&mut self) -> VmResult<()> {
+    fn run_main(&mut self) -> VmResult<Value> {
         let prog = self.prog;
         let ir = &prog.ir;
         // module instances: imported modules first, each property in declaration order
@@ -185,9 +210,9 @@ where
         if args.len() != eop.params.len() {
             return Err(self.runtime_error("Unexpected runtime exception caught during execution"));
         }
-        self.execute_op(entry, Value::Null, args)?;
+        let v = self.execute_op(entry, Value::Null, args)?;
         self.process_deferred()?;
-        Ok(())
+        Ok(v)
     }
 
     fn init_module(&mut self, mi: usize, m: &qvto_sema::ir::Module) -> VmResult<()> {
