@@ -1,0 +1,6 @@
+-- select, collect and sum over 100 000 Integers (benchmark B6).
+transformation selectcollect();
+
+main() {
+	log(Sequence{1..100000}->select(x | x.mod(3) = 0)->collect(x | x * 2)->sum().toString());
+}

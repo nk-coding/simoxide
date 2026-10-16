@@ -177,6 +177,8 @@ pub struct Case {
     pub source: Option<String>,
     /// Remarks (`note`, `emulates`).
     pub notes: Vec<String>,
+    /// Benchmark parameters (`bench <key> <value>`; `qvto bench`'s workload files).
+    pub bench: Vec<(String, String)>,
 }
 
 impl Case {
@@ -339,6 +341,10 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
             }
             "source" => c.source = Some(rest.into()),
             "note" | "emulates" => c.notes.push(format!("{key} {rest}")),
+            "bench" => {
+                let (k, v) = rest.split_once(' ').unwrap_or((rest, ""));
+                c.bench.push((k.into(), v.into()));
+            }
             other => return Err(err(format!("unknown key {other}"))),
         }
     }
@@ -493,6 +499,9 @@ pub fn write_case(c: &Case, out: &mut String) {
     for n in &c.notes {
         let (k, v) = n.split_once(' ').unwrap_or((n, ""));
         kv(k, v);
+    }
+    for (k, v) in &c.bench {
+        kv("bench", &format!("{k} {v}"));
     }
     for ch in &c.checks {
         kv("check", &ch.spec());

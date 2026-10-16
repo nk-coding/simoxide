@@ -1,0 +1,19 @@
+-- Queries an Ecore model: navigation, eAllSuperTypes, closure, sortedBy, string building, Dict
+-- (benchmark B5/B6, `qvto bench`).
+modeltype ECORE uses 'http://www.eclipse.org/emf/2002/Ecore';
+
+transformation EcoreQuery(in src : ECORE);
+
+main() {
+	var classes := src.objectsOfType(EClass);
+	var depth := classes->collect(c | c.eAllSuperTypes->size())->sum();
+	var refs := classes->collect(c | c.eAllReferences)->select(r | r.containment)->size();
+	var reach := classes->select(c | not c._abstract)->collect(c |
+		c->closure(x | x.eReferences.eReferenceType))->asSet()->size();
+	var byName : Dict(String, EClass) := Dict{};
+	classes->forEach(c) { byName->put(c.name, c) };
+	var names := classes->sortedBy(name)->collect(c | c.name + ':' + c.eStructuralFeatures->size().toString());
+	var text := names->iterate(n; acc : String = '' | if acc.size() > 2000 then acc else acc + n endif);
+	log('depth ' + depth.toString() + ', containments ' + refs.toString() + ', reach ' + reach.toString()
+		+ ', dict ' + byName->size().toString() + ', text ' + text.size().toString());
+}

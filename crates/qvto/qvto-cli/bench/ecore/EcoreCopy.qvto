@@ -1,0 +1,82 @@
+-- Copies Ecore models with mappings, disjuncts and resolveone (benchmark B5, `qvto bench`).
+modeltype ECORE uses 'http://www.eclipse.org/emf/2002/Ecore';
+
+transformation EcoreCopy(in src : ECORE, out dst : ECORE);
+
+main() {
+	src.rootObjects()[EPackage]->map copyPackage();
+	src.objectsOfType(EClass)->forEach(c) { c.link() };
+	src.objectsOfType(EStructuralFeature)->forEach(f) { f.link() };
+}
+
+mapping EPackage::copyPackage() : EPackage {
+	name := self.name;
+	nsURI := self.nsURI;
+	nsPrefix := self.nsPrefix;
+	eClassifiers := self.eClassifiers->map copyClassifier();
+	eSubpackages := self.eSubpackages->map copyPackage();
+}
+
+mapping EClassifier::copyClassifier() : EClassifier
+	disjuncts EClass::copyClass, EEnum::copyEnum, EDataType::copyDataType;
+
+mapping EClass::copyClass() : EClass {
+	name := self.name;
+	_abstract := self._abstract;
+	_interface := self._interface;
+	eStructuralFeatures := self.eStructuralFeatures->map copyFeature();
+}
+
+mapping EEnum::copyEnum() : EEnum {
+	name := self.name;
+	eLiterals := self.eLiterals->map copyLiteral();
+}
+
+mapping EEnumLiteral::copyLiteral() : EEnumLiteral {
+	name := self.name;
+	value := self.value;
+	_literal := self._literal;
+}
+
+mapping EDataType::copyDataType() : EDataType {
+	name := self.name;
+	instanceClassName := self.instanceClassName;
+	serializable := self.serializable;
+}
+
+mapping EStructuralFeature::copyFeature() : EStructuralFeature
+	disjuncts EAttribute::copyAttribute, EReference::copyReference;
+
+mapping EAttribute::copyAttribute() : EAttribute {
+	name := self.name;
+	lowerBound := self.lowerBound;
+	upperBound := self.upperBound;
+	_ordered := self._ordered;
+	unique := self.unique;
+	changeable := self.changeable;
+	iD := self.iD;
+}
+
+mapping EReference::copyReference() : EReference {
+	name := self.name;
+	lowerBound := self.lowerBound;
+	upperBound := self.upperBound;
+	_ordered := self._ordered;
+	unique := self.unique;
+	containment := self.containment;
+}
+
+helper EClass::link() {
+	var t := self.resolveone(EClass);
+	t.eSuperTypes := self.eSuperTypes->collect(s | s.target().oclAsType(EClass));
+}
+
+helper EStructuralFeature::link() {
+	var t := self.resolveone(EStructuralFeature);
+	t.eType := self.eType.target();
+}
+
+query EClassifier::target() : EClassifier {
+	var r := self.resolveone(EClassifier);
+	return if r = null then self else r endif;
+}

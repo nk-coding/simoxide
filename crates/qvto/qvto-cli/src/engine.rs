@@ -131,18 +131,27 @@ impl Engine for QvtoEngine {
     }
 }
 
-fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -> Outcome {
+/// A case's compiled program and the metamodels its units name (loaded in this order by every
+/// run, so that the store's ids are the program's).
+pub struct CaseProgram {
+    pub compiled: qvto::Compiled,
+    pub mm_uris: Vec<String>,
+    pub compile_time: std::time::Duration,
+}
+
+/// Parses, analyses and compiles a case's transformation as the Java runner loads it.
+pub fn compile_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str) -> Result<CaseProgram, Outcome> {
     let catalog = match Catalog::parse(signatures) {
         Ok(c) => c,
-        Err(e) => return Outcome::with_status(Status::Crashed(format!("{BLACKBOX_SIGNATURES}: {e}"))),
+        Err(e) => return Err(Outcome::with_status(Status::Crashed(format!("{BLACKBOX_SIGNATURES}: {e}")))),
     };
     let case = env.case;
     let Some(qvto) = env.transformation() else {
-        return Outcome::with_status(Status::Unsupported("no transformation".into()));
+        return Err(Outcome::with_status(Status::Unsupported("no transformation".into())));
     };
     let mut rs = match env.resource_set() {
         Ok(rs) => rs,
-        Err(e) => return Outcome::with_status(Status::Crashed(format!("resource set: {e}"))),
+        Err(e) => return Err(Outcome::with_status(Status::Crashed(format!("resource set: {e}")))),
     };
     let resolver = FsResolver {
         bundles: match &case.import_root {
@@ -164,7 +173,7 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -
     };
     let main = match file_resolver.unit_source(&qvto) {
         Ok(m) => m,
-        Err(e) => return Outcome::with_status(Status::Crashed(format!("{}: {e}", qvto.display()))),
+        Err(e) => return Err(Outcome::with_status(Status::Crashed(format!("{}: {e}", qvto.display())))),
     };
     // metamodels the units refer to, then the case's global packages (each run loads them in
     // the same order, so that the store's ids are the program's)
@@ -183,6 +192,23 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -
     let operations = qvto_emf::operations::meta_operations(&rs.graph);
     let compiled = qvto::compile_with_metamodel(main, &resolver, rs.graph.meta().clone(), &operations, &qvto_emf::operations::meta_derivations(&rs.graph));
     let compile_time = t0.elapsed();
+    Ok(CaseProgram {
+        compiled,
+        mm_uris,
+        compile_time,
+    })
+}
+
+fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -> Outcome {
+    let case = env.case;
+    let CaseProgram {
+        compiled,
+        mm_uris,
+        compile_time,
+    } = match compile_case(env, bundles, signatures) {
+        Ok(p) => p,
+        Err(o) => return o,
+    };
     let mut o = Outcome::with_status(Status::Completed);
     o.compile_time = Some(compile_time);
     let mut warnings = false;
@@ -303,15 +329,35 @@ fn object_keys(rs: &ResourceSet) -> HashMap<String, u32> {
     out
 }
 
-/// One run of the compiled program on fresh models; returns the outcome and the tape hashes of
-/// the created objects found in the outputs.
-fn execute(
+/// The models of a run: a fresh resource set with the program's metamodels (in the compile
+/// order) and the case's inputs (proxies resolved).
+pub struct CaseModels {
+    pub rs: ResourceSet,
+    /// Per model parameter: the roots bound to it.
+    pub args: Vec<Vec<qvto_emf::ObjId>>,
+    /// Per model parameter: the input resource (in/inout parameters with a model).
+    pub inputs: Vec<Option<ResourceId>>,
+    /// The input trace of an incremental update.
+    pub trace: Option<ResourceId>,
+}
+
+impl CaseModels {
+    /// The parameters' roots as the input resources hold them now (a series of runs on the
+    /// same models).
+    pub fn current_args(&self) -> Vec<Vec<qvto_emf::ObjId>> {
+        self.inputs
+            .iter()
+            .map(|r| r.map(|r| self.rs.graph.roots(r).to_vec()).unwrap_or_default())
+            .collect()
+    }
+}
+
+/// Loads a case's models for one run of `program`.
+pub fn case_models(
     env: &CaseEnv,
     program: &qvto::Program,
     mm_uris: &[String],
-    mode: Mode,
-    tape: Option<&Tape>,
-) -> Result<Outcome, Outcome> {
+) -> Result<CaseModels, Outcome> {
     let case = env.case;
     let mut rs = env
         .resource_set()
@@ -324,24 +370,32 @@ fn execute(
     // model parameters: inputs bound positionally to the in/inout parameters
     let main_mod = &ir.modules[ir.main_module.index()];
     let mut args = Vec::new();
+    let mut in_res = Vec::new();
     let mut inputs = case.inputs.iter();
     for mp in &main_mod.model_params {
         if mp.direction == Direction::Out {
             args.push(Vec::new());
+            in_res.push(None);
             continue;
         }
         match inputs.next() {
             // `getResource(uri, true)`: a model already in the resource set (a registered
             // metamodel file) is that resource
             Some(p) => match get_or_load(&mut rs, &env.path(p)) {
-                Ok(r) => args.push(rs.graph.roots(r).to_vec()),
+                Ok(r) => {
+                    args.push(rs.graph.roots(r).to_vec());
+                    in_res.push(Some(r));
+                }
                 Err(e) => {
                     return Err(Outcome::with_status(Status::Crashed(format!(
                         "input {p}: {e}"
                     ))));
                 }
             },
-            None => args.push(Vec::new()),
+            None => {
+                args.push(Vec::new());
+                in_res.push(None);
+            }
         }
     }
     // the input trace of an incremental update (its references to the previous run's inputs
@@ -356,6 +410,30 @@ fn execute(
         None => None,
     };
     rs.resolve_all();
+    Ok(CaseModels {
+        rs,
+        args,
+        inputs: in_res,
+        trace: trace_res,
+    })
+}
+
+/// One run of the compiled program on fresh models; returns the outcome and the tape hashes of
+/// the created objects found in the outputs.
+fn execute(
+    env: &CaseEnv,
+    program: &qvto::Program,
+    mm_uris: &[String],
+    mode: Mode,
+    tape: Option<&Tape>,
+) -> Result<Outcome, Outcome> {
+    let case = env.case;
+    let CaseModels {
+        mut rs,
+        args,
+        trace: trace_res,
+        ..
+    } = case_models(env, program, mm_uris)?;
     let inc_trace =
         trace_res.map(|r| qvto::trace::read_incremental_trace(&rs.graph, &rs.graph.roots(r).to_vec()));
     let first_created = rs.graph.object_count() as u32;

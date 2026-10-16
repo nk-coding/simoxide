@@ -79,6 +79,8 @@ final class Job {
 	boolean dumpModels;
 	final List<String[]> urimaps = new ArrayList<>();
 	final List<String[]> checks = new ArrayList<>();
+	/** Benchmark parameters ({@code bench <key> <value>}, read by Bench). */
+	final Map<String, String> bench = new LinkedHashMap<>();
 
 	boolean compileOnly() {
 		for (String[] c : checks) if (c[0].equals("problems") || c[0].equals("load-error")) return true;
@@ -147,6 +149,11 @@ final class Job {
 			case "dump": cur.dumpModels = rest.equals("models"); break;
 			case "urimap": cur.urimaps.add(rest.split(" ", 2)); break;
 			case "check": cur.checks.add(rest.split(" ")); break;
+			case "bench": {
+				String[] p = rest.split(" ", 2);
+				cur.bench.put(p[0], p.length > 1 ? p[1] : "");
+				break;
+			}
 			default:
 				// keys for the Rust side only (kind, driver, feature, source, ...)
 				break;

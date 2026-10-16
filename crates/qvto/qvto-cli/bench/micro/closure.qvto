@@ -1,0 +1,8 @@
+-- closure over Integers (32 767 elements) and iterate (benchmark B6).
+transformation closure();
+
+main() {
+	var c := Set{1}->closure(x | if x < 16384 then Set{2 * x, 2 * x + 1} else Set{} endif);
+	var acc := c->iterate(x; a : Integer = 0 | a + x.mod(7));
+	log(c->size().toString() + ' ' + acc.toString());
+}

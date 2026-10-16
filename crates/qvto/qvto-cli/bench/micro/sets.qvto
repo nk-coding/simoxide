@@ -1,0 +1,19 @@
+-- Hash-based collections of Strings and Integers: Set, Bag, union, includes, asSet, excluding
+-- (benchmark B6; fast mode keeps no Java HashMap order).
+transformation sets();
+
+main() {
+	var words := Sequence{1..20000}->collect(i | 'w' + (i * 7919).mod(30011).toString());
+	var s1 := words->asSet();
+	var s2 := words->collect(w | w + 'x')->asSet();
+	var u := s1->union(s2);
+	var hits := words->select(w | u->includes(w + 'x'))->size();
+	var bag := words->collect(w | w.substring(1, 2))->asBag();
+	var counts := bag->asSet()->collect(k | bag->count(k))->sum();
+	var ints : Set(Integer) := Set{};
+	Sequence{1..20000}->forEach(i) { ints += (i * 31).mod(10007) };
+	var rest := ints;
+	Sequence{1..5000}->forEach(i) { rest := rest->excluding(i) };
+	log(u->size().toString() + ' ' + hits.toString() + ' ' + counts.toString() + ' '
+		+ ints->size().toString() + ' ' + rest->size().toString());
+}
