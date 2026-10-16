@@ -9,3 +9,5 @@ publish = false
 
 [dependencies]
 qvto-model.workspace = true
+quick-xml = "0.38"
+memchr = "2"
