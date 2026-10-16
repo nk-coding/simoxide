@@ -572,6 +572,15 @@ impl<'r> Sema<'r> {
             ExprKind::Return(v) => {
                 self.validate_return(e, v.as_deref(), ctx);
             }
+            ExprKind::Compute(l, Some(init), _) | ExprKind::Let(l, init, _) => {
+                // OCL ValidationVisitor.visitVariable on the declared variable
+                if let Some(loc) = ctx.locals.get(l.index()) {
+                    if !self.ts.ck().compatible(init.ty, loc.ty) {
+                        let n = loc.name.clone();
+                        self.error(loc.span, bind(om::TypeConformanceInit_ERROR_, &[&n]));
+                    }
+                }
+            }
             ExprKind::Global(_) if e.ty == TypeId::NULL => {
                 self.error(
                     span,
