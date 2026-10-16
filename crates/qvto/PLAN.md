@@ -9,7 +9,7 @@ Status values: done, next, open, parked.
 | Q1a | Model API and own Ecore/XMI layer (`qvto-model`, `qvto-emf`) | done | Q1b, Q1c, Q1d |
 | Q1b | Lexer and parser (`qvto-syntax`) | done | Q1a, Q1c, Q1d |
 | Q1c | Runtime values and Java-compatible primitives (`qvto-runtime` core) | done | Q1a, Q1b, Q1d |
-| Q1d | Reference harness: runner batch mode, canonical dump, conformance-runner skeleton (`qvto-testkit`) | next | Q1a, Q1b, Q1c |
+| Q1d | Reference harness: runner batch mode, canonical dump, conformance-runner skeleton (`qvto-testkit`) | done | Q1a, Q1b, Q1c |
 | Q2 | Type system, standard library signatures, semantic analysis (`qvto-types`, `qvto-sema`) | open | Q3a |
 | Q3a | Bytecode and VM core: expressions, imperative OCL, helpers, queries, objects, log, assert | open | Q2 (on hand-written IR) |
 | Q3b | End-to-end pipeline; SimuLizar rule corpus | open | — |
@@ -53,6 +53,16 @@ Status values: done, next, open, parked.
   149k code points of character data; 12 993 samples are committed as goldens.
 - **Q1d**: the Java runner runs a whole list of cases in one JVM, writes canonical dumps and logs;
   `qvto-testkit` reads `reference/inventory/eclipse-tests.tsv` and reports per-case status.
+  Done 2026-10-16 (`crates/qvto-testkit/README.md`): the 523 inventory rows are cases
+  (`cases/eclipse.cases`, generated from the drivers' sources): 494 runnable (all 309
+  `TransformTests` cases, 154 parser cases, 31 of the other drivers), 29 classified (16 API, 4
+  JDT, 3 Ant, 2 perf, 2 workspace, 1 OSGi, 1 PDE). The Java runner's batch mode runs them in one
+  JVM in about 8 s, emulating the test bundle's environment; all 494 pass the drivers' checks on
+  the Java side. 24 SimuLizar/SPD cases (12 SimuLizar rule files, the SPD `MainTransformation`)
+  run and pass too. Results are committed fixtures (two 0.7 MB bundles); identity-hash tapes
+  and XMI stay in a cache. `qvto conform` runs an engine (now a stub) and prints the scoreboard;
+  replaying Java's own outputs through the Rust side reproduces Java's verdicts and dumps on all
+  494 cases.
 - **Q2**: the 49 `compile_ok` parser cases and all positive transformation cases type-check; the
   93 error cases report errors at the annotated spans.
 - **Q3b**: SimuLizar's 37 `.qvto` files compile; the 22 rule files run on the corpus PCM models

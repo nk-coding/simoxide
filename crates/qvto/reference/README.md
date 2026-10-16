@@ -98,8 +98,12 @@ Notes on the semantics and quirks: `notes/eclipse-semantics.md`. Test inventory:
 
 ## Java reference runner (`runner/`)
 
-A headless Eclipse QVTo, run on a flat classpath without OSGi. Source `runner/src/qvtorun/QvtoRun.java`,
-built with `javac` only.
+A headless Eclipse QVTo, run on a flat classpath without OSGi. Sources `runner/src/qvtorun/`
+(`QvtoRun` single runs, `Batch`/`CaseRunner` case files, `Env` and `BundleUnitResolverFactory`
+the emulated Eclipse environment, `Tape` identity hashes), `runner/src-stubs/` (stubs of
+classes the test code references), built with `javac` only. `build.sh` also compiles, from the
+reference checkout, the test bundle's generated packages and Java blackboxes, the samples
+plugin's generated packages, the suite's comparer and qvto-emf's `CanonDump`.
 
 - Jars (`runner/lib/qvto-3.11.0/`, 25 jars, 9.7 MB, not committed): copied from the local
   Slingshot install `old/palladio-research/work-slingshot/sl-install/plugins` (Eclipse 2025-12
@@ -117,9 +121,20 @@ built with `javac` only.
 reference/runner/build.sh       # javac; LIB=lib/<set> selects the jar set
 reference/runner/qvto-run --qvto T.qvto [--mm a.ecore,b.ecore] \
     --param in:in.xmi --param out:out.xmi [--param inout:m.xmi] \
-    [--config key=value] [--blackbox fq.Class] [--log log.txt] [--repeat N] [--expect expected.xmi]
+    [--config key=value] [--blackbox fq.Class] [--log log.txt] [--repeat N] [--expect expected.xmi] \
+    [--dump out.jsonl]
+reference/runner/qvto-run --batch CASES --out DIR [--base DIR] [--only id,...] [--prefix p] \
+    [--no-tape] [--save-xmi] [--timeout s]          # a case file in one JVM (qvto-testkit)
 reference/runner/tools/smoke-parserTestData.sh OUTDIR   # all simple parserTestData models
 ```
+
+Batch mode runs every case of a case file (`crates/qvto-testkit/README.md`) on a fresh thread
+and writes per case `result.txt`, the canonical dump of the outputs, the log, the QVT stack
+trace, the compile problems and the identity-hash tape; all 494 runnable cases of the Eclipse
+suite and the 24 SimuLizar/SPD cases pass their drivers' checks, in about 8 s. `qvto conform
+record` turns the results into the committed fixtures. Both modes use the same environment
+(`Env`): the `plugin.xml` registrations of the test bundle and the samples plugin through EMF's
+standalone `ExtensionProcessor`, imports resolved against the bundles' source containers.
 
 The runner registers every package of the `--mm` files by nsURI, runs `TransformationExecutor`
 with one `ModelExtent` per `--param` (in signature order), prints the load and execution
@@ -127,7 +142,7 @@ diagnostics, the log and the per-run time, and saves `out` and `inout` extents a
 `--expect` checks the first output extent with `EcoreUtil.equals` (order-sensitive). It runs
 with `nice -n 19` and `-Xmx2g`.
 
-Smoke result (2026-10-16): of the 174 test folders with exactly one `.qvto`, one `in.*` and one
+Smoke result (2026-10-16, before the batch mode's environment): of the 174 test folders with exactly one `.qvto`, one `in.*` and one
 `expected.*`, 136 produce an output equal to `expected.*`. 25 fail to compile because the
 harness does not yet provide what the Eclipse test bundle registers (metamodels from
 `plugin.xml`, Java blackboxes, imports resolved from the workspace). 13 differ, mostly because
