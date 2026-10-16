@@ -197,7 +197,12 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -
             o.problems.push(Problem {
                 error: p.is_error(),
                 unit: u.source.file_name.clone(),
-                line: p.line(&u.lines) as i32,
+                // Java units have no lines (Eclipse prints -1)
+                line: if u.source.blackbox.is_some() {
+                    -1
+                } else {
+                    p.line(&u.lines) as i32
+                },
                 offset: offset as i32,
                 length: length as i32,
                 message: p.message.clone(),
@@ -493,7 +498,21 @@ pub fn load_metamodel(rs: &mut ResourceSet, uri: &str) -> Result<(), String> {
     if let Some(loc) = rs.ns_location(uri).map(String::from) {
         return rs.load_metamodel(&loc).map(|_| ());
     }
-    rs.load_metamodel(uri).map(|_| ())
+    let packages = rs.load_metamodel(uri)?;
+    // a metamodel by file location: the registry key is the location, bound to the file's
+    // first package (`EmfUtil.getFirstEPackageContent`)
+    if rs.graph.meta().package_by_ns_uri(uri).is_none()
+        && let Some(r) = rs.get_resource(uri, false)
+        && let Some(p) = rs
+            .graph
+            .roots(r)
+            .iter()
+            .find_map(|o| rs.graph.links().obj_package.get(o).copied())
+            .or_else(|| packages.first().copied())
+    {
+        rs.graph.meta_mut().register_alias(uri, p);
+    }
+    Ok(())
 }
 
 /// Registry keys that are another key's package in the Eclipse environment
