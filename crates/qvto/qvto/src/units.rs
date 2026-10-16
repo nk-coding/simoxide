@@ -126,6 +126,7 @@ impl FsResolver {
                 .unwrap_or_default(),
             path: Some(path.to_path_buf()),
             text: Rc::from(text.as_str()),
+            blackbox: None,
         })
     }
 }
