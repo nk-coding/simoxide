@@ -121,6 +121,12 @@ pub struct Graph {
     pub(crate) objs: Vec<Object>,
     pub(crate) resources: Vec<Resource>,
     pub(crate) links: MetaLinks,
+    /// Changes of objects of Ecore's classes (the derived lists of `ecore_hooks` depend on
+    /// nothing else); the version of [`Graph::derived_cache`]'s entries.
+    pub(crate) ecore_gen: u64,
+    /// Ecore's derived lists (`eAllStructuralFeatures`, ...) by object and feature, with the
+    /// `ecore_gen` they were computed at (EMF caches them in `EClassImpl` likewise).
+    pub(crate) derived_cache: std::cell::RefCell<HashMap<(ObjId, FeatureId), (u64, std::sync::Arc<[ObjId]>)>>,
 }
 
 impl Default for Graph {
@@ -147,6 +153,8 @@ impl Graph {
             objs: Vec::new(),
             resources: Vec::new(),
             links: MetaLinks::default(),
+            ecore_gen: 0,
+            derived_cache: Default::default(),
         }
     }
 
@@ -319,6 +327,14 @@ impl Graph {
         Some(&self.objs[o.index()].slots[i])
     }
 
+    /// Records a change of `o` (invalidates the derived lists if it is an Ecore object).
+    #[inline]
+    pub(crate) fn touch(&mut self, o: ObjId) {
+        if self.meta.class(self.objs[o.index()].class).package == self.ecore.package {
+            self.ecore_gen += 1;
+        }
+    }
+
     #[inline]
     pub(crate) fn hook(&self, f: FeatureId) -> Hook {
         self.hooks.get(f.index()).copied().unwrap_or(Hook::None)
@@ -412,6 +428,7 @@ impl Graph {
     }
 
     fn refs_mut(&mut self, o: ObjId, f: FeatureId) -> &mut Vec<ObjId> {
+        self.touch(o);
         let i = self.slot_index(o, f).expect("feature of class");
         let s = &mut self.objs[o.index()].slots[i];
         if !matches!(s, Slot::Refs(..)) {
@@ -424,6 +441,7 @@ impl Graph {
     }
 
     fn datas_mut(&mut self, o: ObjId, f: FeatureId) -> &mut Vec<Value> {
+        self.touch(o);
         let i = self.slot_index(o, f).expect("feature of class");
         let s = &mut self.objs[o.index()].slots[i];
         if !matches!(s, Slot::Datas(..)) {
@@ -437,6 +455,7 @@ impl Graph {
 
     /// Marks an unsettable list as set (any change sets it; only `unset` clears it).
     fn mark_set(&mut self, o: ObjId, f: FeatureId) {
+        self.touch(o);
         if let Ok(i) = self.slot_index(o, f) {
             match &mut self.objs[o.index()].slots[i] {
                 Slot::Refs(_, b) | Slot::Datas(_, b) => *b = true,
@@ -453,6 +472,7 @@ impl Graph {
     }
 
     fn set_slot(&mut self, o: ObjId, f: FeatureId, s: Slot) {
+        self.touch(o);
         let i = self.slot_index(o, f).expect("feature of class");
         self.objs[o.index()].slots[i] = s;
     }
@@ -462,6 +482,7 @@ impl Graph {
     /// `eBasicSetContainer`: sets the container, moving the object out of its resource's root
     /// list when it becomes contained through a non-resolving containment.
     pub(crate) fn basic_set_container(&mut self, child: ObjId, new: Option<(ObjId, FeatureId)>) {
+        self.touch(child);
         let old_direct = self.objs[child.index()].resource;
         let (old_res, new_res);
         if let Some(r) = old_direct {
@@ -788,6 +809,7 @@ impl Graph {
 
     pub(crate) fn op_unset(&mut self, o: ObjId, f: FeatureId) -> ModelResult<()> {
         self.slot_index(o, f)?;
+        self.touch(o);
         if !self.meta.feature(f).changeable {
             return Err(ModelError::NotChangeable(f));
         }
@@ -1339,7 +1361,7 @@ impl ModelStore for Graph {
                 _ => {}
             },
             Hook::Derived => match ecore_hooks::derived(self, o, f) {
-                Some(v) => out.extend(v.into_iter().map(Datum::Obj)),
+                Some(v) => out.extend(v.iter().map(|x| Datum::Obj(*x))),
                 None => out.extend((0..self.op_len(o, f)).map(|i| self.op_get_at(o, f, i))),
             },
             _ => out.extend((0..self.op_len(o, f)).map(|i| self.op_get_at(o, f, i))),

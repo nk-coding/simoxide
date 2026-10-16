@@ -241,6 +241,9 @@ pub struct MetaRegistry {
     by_ns_uri: HashMap<Box<str>, PackageId>,
     /// Ecore's `EObject`, the implicit supertype of every class, once Ecore is registered.
     eobject: Option<ClassId>,
+    /// Per feature: its slot when it is the same in every finished class that has it (single
+    /// inheritance), else `u32::MAX`; recomputed by `finish_classes`.
+    fixed_slots: Vec<u32>,
 }
 
 impl MetaRegistry {
@@ -388,6 +391,17 @@ impl MetaRegistry {
     pub fn slot(&self, c: ClassId, f: FeatureId) -> Option<usize> {
         let fi = &self.features[f.index()];
         let ci = &self.classes[c.index()];
+        if let Some(&s) = self.fixed_slots.get(f.index())
+            && s != u32::MAX
+        {
+            // the owner's block is in `c` exactly when the owner is `c` or a supertype of it
+            let i = fi.owner.index();
+            return ci
+                .supertype_bits
+                .get(i / 64)
+                .is_some_and(|w| w & (1u64 << (i % 64)) != 0)
+                .then_some(s as usize);
+        }
         let base = ci.blocks.iter().find(|(o, _)| *o == fi.owner)?.1;
         Some(base as usize + fi.local_index as usize)
     }
@@ -593,6 +607,7 @@ impl MetaRegistry {
     /// marked too).
     pub fn unfinish_class(&mut self, c: ClassId) {
         self.classes[c.index()].finished = false;
+        self.fixed_slots.clear();
     }
 
     /// Computes the derived tables of every class that is not finished yet. Classes of one batch
@@ -614,11 +629,42 @@ impl MetaRegistry {
         for &c in &pending {
             self.finish_one(c, &mut state, words, &mut errors);
         }
+        self.compute_fixed_slots();
         if errors.is_empty() {
             Ok(())
         } else {
             Err(MetaError(errors.join("; ")))
         }
+    }
+
+    /// The slots of features that have the same slot in every finished class (see
+    /// `fixed_slots`); the others are looked up by the owner's block.
+    fn compute_fixed_slots(&mut self) {
+        const UNSEEN: u32 = u32::MAX - 1;
+        let mut fixed = vec![UNSEEN; self.features.len()];
+        for ci in self.classes.iter().filter(|c| c.finished) {
+            for &(owner, base) in ci.blocks.iter() {
+                for &f in &self.classes[owner.index()].features {
+                    let s = base + self.features[f.index()].local_index;
+                    let e = &mut fixed[f.index()];
+                    if *e == UNSEEN {
+                        *e = s;
+                    } else if *e != s {
+                        *e = u32::MAX;
+                    }
+                }
+            }
+        }
+        for e in &mut fixed {
+            if *e == UNSEEN {
+                *e = u32::MAX;
+            }
+        }
+        // classes that are not finished have no blocks: their lookups take the slow path
+        if self.classes.iter().any(|c| !c.finished) {
+            fixed.clear();
+        }
+        self.fixed_slots = fixed;
     }
 
     fn finish_one(&mut self, c: ClassId, state: &mut [u8], words: usize, errors: &mut Vec<String>) {

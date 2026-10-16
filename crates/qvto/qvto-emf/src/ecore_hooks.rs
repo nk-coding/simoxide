@@ -127,62 +127,49 @@ fn supers(g: &Graph, c: ObjId) -> Vec<ObjId> {
         .collect()
 }
 
-fn push_unique(v: &mut Vec<ObjId>, x: ObjId) {
-    if !v.contains(&x) {
-        v.push(x);
-    }
-}
-
-pub(crate) fn all_supers(g: &Graph, c: ObjId) -> Vec<ObjId> {
-    fn rec(g: &Graph, c: ObjId, busy: &mut Vec<ObjId>) -> Vec<ObjId> {
-        let mut out = Vec::new();
-        if busy.contains(&c) {
-            return out;
-        }
-        busy.push(c);
-        for s in supers(g, c) {
-            for x in rec(g, s, busy) {
-                push_unique(&mut out, x);
+/// Appends `xs` to `out` without duplicates (a set of the elements for long lists).
+fn extend_unique(out: &mut Vec<ObjId>, seen: &mut std::collections::HashSet<ObjId>, xs: &[ObjId]) {
+    for &x in xs {
+        if out.len() < 32 {
+            if !out.contains(&x) {
+                out.push(x);
             }
-            push_unique(&mut out, s);
-        }
-        busy.pop();
-        out
-    }
-    rec(g, c, &mut Vec::new())
-}
-
-/// For each class in `eAllSuperTypes` order then `c`, the given local list, without duplicates.
-fn accumulate(g: &Graph, c: ObjId, local: &dyn Fn(ObjId) -> Vec<ObjId>) -> Vec<ObjId> {
-    fn rec(
-        g: &Graph,
-        c: ObjId,
-        local: &dyn Fn(ObjId) -> Vec<ObjId>,
-        busy: &mut Vec<ObjId>,
-    ) -> Vec<ObjId> {
-        let mut out = Vec::new();
-        if busy.contains(&c) {
-            return out;
-        }
-        busy.push(c);
-        for s in supers(g, c) {
-            for x in rec(g, s, local, busy) {
-                push_unique(&mut out, x);
+        } else {
+            if seen.len() < out.len() {
+                seen.extend(out.iter().copied());
+            }
+            if seen.insert(x) {
+                out.push(x);
             }
         }
-        busy.pop();
-        for x in local(c) {
-            push_unique(&mut out, x);
-        }
-        out
     }
-    rec(g, c, local, &mut Vec::new())
 }
 
-pub(crate) fn all_features(g: &Graph, c: ObjId) -> Vec<ObjId> {
-    accumulate(g, c, &|x| {
-        g.refs(x, g.ecore.class_structural_features).to_vec()
-    })
+/// `eAllSuperTypes`: for each supertype its `eAllSuperTypes` (cached), then itself.
+fn all_supers(g: &Graph, c: ObjId) -> Vec<ObjId> {
+    let mut out = Vec::new();
+    let mut seen = std::collections::HashSet::new();
+    for s in supers(g, c) {
+        if let Some(v) = derived(g, s, g.ecore.class_all_super_types) {
+            extend_unique(&mut out, &mut seen, &v);
+        }
+        extend_unique(&mut out, &mut seen, &[s]);
+    }
+    out
+}
+
+/// For each supertype its value of the derived list `f` (cached; the supertypes' local lists in
+/// `eAllSuperTypes` order), then `c`'s local list, without duplicates.
+fn accumulate(g: &Graph, c: ObjId, f: FeatureId, local: &dyn Fn(ObjId) -> Vec<ObjId>) -> Vec<ObjId> {
+    let mut out = Vec::new();
+    let mut seen = std::collections::HashSet::new();
+    for s in supers(g, c) {
+        if let Some(v) = derived(g, s, f) {
+            extend_unique(&mut out, &mut seen, &v);
+        }
+    }
+    extend_unique(&mut out, &mut seen, &local(c));
+    out
 }
 
 fn local_of(g: &Graph, c: ObjId, class: ClassId) -> Vec<ObjId> {
@@ -200,9 +187,42 @@ fn is_containment(g: &Graph, f: ObjId) -> bool {
     )
 }
 
-/// The value of a derived list of Ecore (`eAllStructuralFeatures`, ...), computed.
-pub(crate) fn derived(g: &Graph, o: ObjId, f: FeatureId) -> Option<Vec<ObjId>> {
-    derived_list(g, o, f)
+/// The value of a derived list of Ecore (`eAllStructuralFeatures`, ...), cached until an
+/// object of Ecore's classes changes.
+pub(crate) fn derived(g: &Graph, o: ObjId, f: FeatureId) -> Option<std::sync::Arc<[ObjId]>> {
+    if let Some((at, v)) = g.derived_cache.borrow().get(&(o, f))
+        && *at == g.ecore_gen
+    {
+        return Some(v.clone());
+    }
+    if !is_derived_list(g, f) {
+        return None;
+    }
+    // an empty placeholder while computing: a cycle of supertypes contributes nothing
+    g.derived_cache
+        .borrow_mut()
+        .insert((o, f), (g.ecore_gen, std::sync::Arc::from(Vec::new())));
+    let v: std::sync::Arc<[ObjId]> = derived_list(g, o, f)?.into();
+    g.derived_cache
+        .borrow_mut()
+        .insert((o, f), (g.ecore_gen, v.clone()));
+    Some(v)
+}
+
+fn is_derived_list(g: &Graph, f: FeatureId) -> bool {
+    let e = &g.ecore;
+    [
+        e.class_all_super_types,
+        e.class_all_structural_features,
+        e.class_attributes,
+        e.class_references,
+        e.class_all_attributes,
+        e.class_all_references,
+        e.class_all_containments,
+        e.class_all_operations,
+        e.class_all_generic_super_types,
+    ]
+    .contains(&f)
 }
 
 fn derived_list(g: &Graph, o: ObjId, f: FeatureId) -> Option<Vec<ObjId>> {
@@ -210,24 +230,25 @@ fn derived_list(g: &Graph, o: ObjId, f: FeatureId) -> Option<Vec<ObjId>> {
     Some(if f == e.class_all_super_types {
         all_supers(g, o)
     } else if f == e.class_all_structural_features {
-        all_features(g, o)
+        accumulate(g, o, f, &|x| g.refs(x, e.class_structural_features).to_vec())
     } else if f == e.class_attributes {
         local_of(g, o, e.eattribute)
     } else if f == e.class_references {
         local_of(g, o, e.ereference)
     } else if f == e.class_all_attributes {
-        accumulate(g, o, &|x| local_of(g, x, e.eattribute))
+        accumulate(g, o, f, &|x| local_of(g, x, e.eattribute))
     } else if f == e.class_all_references {
-        accumulate(g, o, &|x| local_of(g, x, e.ereference))
+        accumulate(g, o, f, &|x| local_of(g, x, e.ereference))
     } else if f == e.class_all_containments {
-        accumulate(g, o, &|x| local_of(g, x, e.ereference))
-            .into_iter()
+        derived(g, o, e.class_all_references)?
+            .iter()
+            .copied()
             .filter(|&r| is_containment(g, r))
             .collect()
     } else if f == e.class_all_operations {
-        accumulate(g, o, &|x| g.refs(x, e.class_operations).to_vec())
+        accumulate(g, o, f, &|x| g.refs(x, e.class_operations).to_vec())
     } else if f == e.class_all_generic_super_types {
-        accumulate(g, o, &|x| g.refs(x, e.class_generic_super_types).to_vec())
+        accumulate(g, o, f, &|x| g.refs(x, e.class_generic_super_types).to_vec())
     } else {
         return None;
     })
@@ -251,9 +272,8 @@ fn derived_single(g: &Graph, o: ObjId, f: FeatureId) -> Datum<'_, ObjId> {
     } else if f == e.generic_raw_type {
         obj(raw_type(g, o))
     } else if f == e.class_id_attribute {
-        obj(accumulate(g, o, &|x| local_of(g, x, e.eattribute))
-            .into_iter()
-            .find(|&a| matches!(g.op_get(a, e.attribute_id), Datum::Bool(true))))
+        obj(derived(g, o, e.class_all_attributes)
+            .and_then(|v| v.iter().copied().find(|&a| matches!(g.op_get(a, e.attribute_id), Datum::Bool(true)))))
     } else {
         Datum::Null
     }
@@ -279,7 +299,7 @@ pub(crate) fn get(g: &Graph, o: ObjId, f: FeatureId, h: Hook) -> Option<Datum<'_
 pub(crate) fn len(g: &Graph, o: ObjId, f: FeatureId, h: Hook) -> Option<usize> {
     match h {
         Hook::SuperTypes | Hook::Exceptions => Some(g.refs(o, generic_list(g, h)).len()),
-        Hook::Derived => derived_list(g, o, f).map(|v| v.len()),
+        Hook::Derived => derived(g, o, f).map(|v| v.len()),
         _ => None,
     }
 }
@@ -291,13 +311,13 @@ pub(crate) fn get_at(
     h: Hook,
     i: usize,
 ) -> Option<Datum<'_, ObjId>> {
-    let from = |v: Vec<ObjId>| v.get(i).map_or(Datum::Null, |x| Datum::Obj(*x));
+    let from = |v: std::sync::Arc<[ObjId]>| v.get(i).map_or(Datum::Null, |x| Datum::Obj(*x));
     match h {
         Hook::SuperTypes | Hook::Exceptions => {
             let gt = *g.refs(o, generic_list(g, h)).get(i)?;
             Some(raw_type(g, gt).map_or(Datum::Null, Datum::Obj))
         }
-        Hook::Derived => derived_list(g, o, f).map(from),
+        Hook::Derived => derived(g, o, f).map(from),
         _ => None,
     }
 }
@@ -329,7 +349,7 @@ pub(crate) fn is_set(g: &Graph, o: ObjId, f: FeatureId, h: Hook) -> Option<bool>
             t.is_some() && t != str_slot(g, o, e.classifier_instance_class_name)
         }
         Hook::LiteralLiteral => str_slot(g, o, f).is_some(),
-        Hook::Derived => match derived_list(g, o, f) {
+        Hook::Derived => match derived(g, o, f) {
             Some(v) => !v.is_empty(),
             None => !derived_single(g, o, f).is_null(),
         },
@@ -418,6 +438,7 @@ pub(crate) fn set(
                 |x: Option<String>| x.map_or(Slot::Unset, |s| Slot::Data(Value::Str(s.into())));
             let ci = g.slot_index(o, e.classifier_instance_class_name).unwrap();
             let ti = g.slot_index(o, e.classifier_instance_type_name).unwrap();
+            g.touch(o);
             g.objs[o.index()].slots[ci] = to_slot(cn);
             g.objs[o.index()].slots[ti] = to_slot(tn);
             Ok(())

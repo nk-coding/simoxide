@@ -362,6 +362,8 @@ impl Graph {
         let Ok(i) = self.slot_index(holder, f) else {
             return;
         };
+        self.touch(holder);
+        self.touch(t);
         match &mut self.objs[holder.index()].slots[i] {
             Slot::Ref(r) if *r == Some(p) => *r = Some(t),
             Slot::Refs(v, _) => {
