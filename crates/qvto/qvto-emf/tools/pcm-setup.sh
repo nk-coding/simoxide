@@ -14,7 +14,8 @@ BUNDLES="de.uka.ipd.sdq.identifier de.uka.ipd.sdq.units de.uka.ipd.sdq.probfunct
 org.palladiosimulator.pcm org.palladiosimulator.metricspec org.palladiosimulator.edp2
 org.palladiosimulator.monitorrepository org.palladiosimulator.monitorrepository.map
 org.palladiosimulator.pcm.edp2.measuringpoint org.palladiosimulator.simulizar.edp2.measuringpoint
-org.palladiosimulator.pcm.resources org.palladiosimulator.metricspec.resources"
+org.palladiosimulator.pcm.resources org.palladiosimulator.metricspec.resources
+de.uka.ipd.sdq.featureconfig de.uka.ipd.sdq.featuremodel org.palladiosimulator.analyzer.completions"
 CONF="$OUT/pcm.conf"
 : > "$CONF"
 for b in $BUNDLES; do

@@ -1,0 +1,110 @@
+library BottomUpTransformationResourceEnvironment;
+
+import spd.common.AdjustmentCalculator;
+import pcm.helpers.Commons;
+import pcm.helpers.Constructors;
+
+modeltype PCM uses 'http://palladiosimulator.org/PalladioComponentModel/5.2';
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+modeltype PCM_REP uses 'http://palladiosimulator.org/PalladioComponentModel/Repository/5.2';
+modeltype PCM_SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2';
+modeltype PCM_SYS uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_RES_TYPE uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceType/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+modeltype PCM_COMP uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2';
+modeltype PCM_ENTITY uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Entity/5.2';
+modeltype PCM_PARAM uses 'http://palladiosimulator.org/PalladioComponentModel/Parameter/5.2';
+
+modeltype SPD_MOD uses 'http://palladiosimulator.org/ScalingPolicyDefinition/1.0';
+modeltype SPD_ADJ uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0';
+modeltype SPD_TRI uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0';
+modeltype SPD_TAR uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0';
+
+modeltype SPD_CON uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/1.0';
+modeltype SPD_CONP uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0';
+modeltype SPD_CONT uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0';
+
+modeltype SPD_SEM uses 'http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0';
+
+
+/**
+* The ElasticInfrastructureCfg is modified by transforming the elements and adding the policy to the enactedPolicies.
+*
+*/
+mapping inout ElasticInfrastructureCfg::transformElasticInfrastructure(enactedPolicy:ScalingPolicy){
+	init{
+		var resourceContainers:OrderedSet(ResourceContainer);
+		var newElements:OrderedSet(ResourceContainer);
+		resourceContainers := AdjustElasticInfrastructure(enactedPolicy,self);
+		var intersection:Set(ResourceContainer) := self.elements->intersection(resourceContainers);
+		if(intersection->size()=0){
+			//append all rcs to elements
+			newElements := self.elements;
+			resourceContainers->forEach(rc){
+				newElements := newElements->append(rc);
+			}
+		} else {
+			newElements := resourceContainers;
+		}
+	}
+	
+	elements := newElements;
+	enactedPolicies += enactedPolicy;
+}
+
+/**
+*
+* Semantic of adjusting an ElasticInfrastructure according to an AdjustmentType. 
+* This helper method does not modify the elasticInfrastructureCfg, but it yields the change that should occur through a set of resource containers.
+* 
+* In case the returned set contains elements that exist in the ElasticInfrastructureCfg.elements then either a scale in or no scale occurs.
+* In case the returned set contains new Resource Containers then the ElasticInfrastructureCfg then the ElasticInfrastructure scales out. 
+*
+* @param adjustment 				The type of adjustmend from the enacted policy from SPD.
+* @param elasticInfrastructureCfg	The elastic infrastructure configuration that is modified.
+* @return Set(ResourceContainer)	The set of resource containers to be added or removed from the ElasticInfrastructureCfg
+*/
+helper AdjustElasticInfrastructure(policy: ScalingPolicy, elasticInfrastructureCfg: ElasticInfrastructureCfg) : OrderedSet(ResourceContainer) {
+	var resourceContainers : OrderedSet(ResourceContainer) := OrderedSet{};
+	
+	var adjustment: AdjustmentType := policy.adjustmentType;
+	
+	var currentSize : Integer = elasticInfrastructureCfg.elements->size();
+	var desiredChange : Real := Interprete_adjustmentType(adjustment, currentSize);
+	
+	if(policy.targetGroup.targetConstraints[TargetGroupSizeConstraint]->notEmpty()){
+		desiredChange := Interprete_GroupSizeConstraints(elasticInfrastructureCfg.elements->size(),desiredChange,policy.targetGroup.targetConstraints[TargetGroupSizeConstraint]->any(true));
+	};
+	
+	
+	log('Current number of containers ' + currentSize.toString());
+	
+	// in case 0 -> no change desired, in case > 0 -> add by creating new ones, in case < 0 -> select existing
+	if(desiredChange>0) {
+		var i : Integer := 0;
+		while (i < desiredChange) {
+			log('lets create');		
+			var resourceContainer := new ResourceContainer(elasticInfrastructureCfg.unit,Commons_getUniqueElementNameSuffix());
+			resourceContainers += resourceContainer;
+			i := i + 1;
+		};						
+	} else if (desiredChange<0){
+		desiredChange := desiredChange.abs();
+		var minimalNumberOfResourceContainers : Integer := 1;
+		var index : Integer := minimalNumberOfResourceContainers.max(elasticInfrastructureCfg.elements->size()-desiredChange.round());
+		
+		/*
+		* subOrderedSet contract:
+		* pre : 1 <= lower
+		* pre : lower <= upper
+		* pre : upper <= self->size()
+		* post: result->size() = upper -lower + 1
+		* post: Sequence{lower..upper}->forAll( index | result->at(index - lower + 1) = self->at(index))
+		*/
+		
+		resourceContainers += elasticInfrastructureCfg.elements->subOrderedSet(1, index);
+		assert fatal(resourceContainers->includes(elasticInfrastructureCfg.unit)) with log('The unit is not the first element in the elements configuration, hence it would be destroyed!');
+	};	
+	return resourceContainers;
+}

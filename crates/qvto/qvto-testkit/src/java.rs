@@ -198,8 +198,21 @@ fn replay(env: &CaseEnv, r: &JavaResult, dir: &Path) -> Outcome {
             Err(e) => return Outcome::with_status(Status::Crashed(format!("{}: {e}", p.display()))),
         }
     }
+    if env.case.dump_models {
+        // the model resources as the run left them (written by --save-xmi)
+        let mut files: Vec<PathBuf> = std::fs::read_dir(dir.join("inputs"))
+            .map(|d| d.flatten().map(|e| e.path()).collect())
+            .unwrap_or_default();
+        files.sort();
+        for f in files {
+            if let Err(e) = rs.load_file(&f) {
+                return Outcome::with_status(Status::Crashed(format!("{}: {e}", f.display())));
+            }
+        }
+    }
     rs.resolve_all();
-    o.outputs = Some(Outputs { rs, extents });
+    let models = if env.case.dump_models { Outputs::collect_models(&rs, &extents, &[]) } else { Vec::new() };
+    o.outputs = Some(Outputs { rs, extents, models });
     o
 }
 

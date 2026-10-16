@@ -164,7 +164,6 @@ fn conform(args: &[String]) {
 fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
     let models = qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), root)
         .unwrap_or_else(|e| die(&format!("{}: {e}", paths::SUITE_CONF)));
-    let pcm_conf = root.join("target/pcm/pcm.conf");
     let mut all = Vec::new();
     let mut engine_name = String::new();
     for (name, cases_file, fixture_file) in suites {
@@ -185,16 +184,10 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
             e => die(&format!("unknown engine {e}")),
         };
         engine_name = engine.name().to_string();
-        // corpus cases resolve PCM metamodels through the PCM configuration (crates/qvto-emf/tools/pcm-setup.sh)
-        let suite_models = if name == "corpus" && pcm_conf.is_file() {
-            qvto_emf::config::Config::read(&pcm_conf, root).unwrap_or_else(|e| die(&format!("{}: {e}", pcm_conf.display())))
-        } else {
-            models.clone()
-        };
         let select = |c: &Case| {
             (o.only.is_empty() || o.only.contains(&c.id)) && (o.prefixes.is_empty() || o.prefixes.iter().any(|p| c.id.starts_with(p)))
         };
-        all.extend(report::run_cases(engine.as_mut(), &cases, root, &suite_models, &java, &select));
+        all.extend(report::run_cases(engine.as_mut(), &cases, root, &models, &java, &select));
     }
     let md = report::markdown(&engine_name, &all, o.verbose);
     match &o.report {

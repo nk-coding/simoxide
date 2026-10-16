@@ -1,0 +1,101 @@
+import pcm.helpers.Commons;
+import pcm.helpers.Constructors;
+import pcm.helpers.Wiring;
+import spd.bottomup.BottomUpTransformation;
+import spd.topdown.TopDownTransformation;
+import spd.common.queries.TargetGroupQueries;
+
+modeltype PCM uses 'http://palladiosimulator.org/PalladioComponentModel/5.2';
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+modeltype PCM_REP uses 'http://palladiosimulator.org/PalladioComponentModel/Repository/5.2';
+modeltype PCM_SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2';
+modeltype PCM_SYS uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_RES_TYPE uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceType/5.2';
+modeltype PCM_USAGE uses 'http://palladiosimulator.org/PalladioComponentModel/UsageModel/5.2';
+modeltype PCM_FEATURE_CONF uses 'http://sdq.ipd.uka.de/FeatureConfig/2.0';
+modeltype PCM_FEATURE_MOD uses 'http://sdq.ipd.uka.de/FeatureModel/2.0';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+modeltype PCM_COMP uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2';
+modeltype PCM_ENTITY uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Entity/5.2';
+modeltype PCM_PARAM uses 'http://palladiosimulator.org/PalladioComponentModel/Parameter/5.2';
+
+modeltype SPD_MOD uses 'http://palladiosimulator.org/ScalingPolicyDefinition/1.0';
+modeltype SPD_ADJ uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0';
+modeltype SPD_TRI uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0';
+modeltype SPD_TAR uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0';
+
+modeltype SPD_CON uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/1.0';
+modeltype SPD_CONP uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0';
+modeltype SPD_CONT uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0';
+
+modeltype SPD_SEM uses 'http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0';
+
+transformation MainTransformation(	inout pcmAllocation : PCM_ALLOC,
+									inout pcmSystem : PCM_SYS,
+									inout pcmResourceEnvironment : PCM_RES_ENV,
+									inout repository : PCM_REP,
+									in spd : SPD_MOD,
+									inout spdSemantic : SPD_SEM,
+									inout usageModel : PCM_USAGE );
+									
+configuration property max_assemblies_per_host : Integer;
+
+
+main() {
+	var bottomUpTransformation : Transformation := new BottomUpTransformation(pcmAllocation, pcmSystem, pcmResourceEnvironment, repository, spd, spdSemantic);
+	var topDownTransformation : Transformation := new TopDownTransformation(pcmAllocation, pcmSystem, pcmResourceEnvironment, repository, spd, spdSemantic);
+
+	//spd model
+	var spd : SPD = spd.objects()[SPD]->any(true);
+	log('Used SPD for transformation {name: '+ spd.entityName+'}');	
+	
+	//configuration
+	var cfg:SPD_SEM::Configuration = spdSemantic.objects()[SPD_SEM::Configuration]->any(true);
+	
+	// Palladio models
+	var resourceEnvironment : ResourceEnvironment = pcmResourceEnvironment.objects()[ResourceEnvironment]->any(true);
+	var system : System = pcmSystem.objects()[System]->any(true);
+	var allocation : Allocation = pcmAllocation.objects()[Allocation]->any(true);
+	var repository : Repository = repository.objects()[Repository]->any(true);
+	
+	preconditions(cfg, resourceEnvironment, allocation, system, repository, spd);
+	
+	
+	if(cfg.enactedPolicy.targetGroup.oclIsTypeOf(ElasticInfrastructure)){
+		// *********************
+		// Bottom-up Transformation
+		// *********************
+		bottomUpTransformation.transform();
+
+	} else if (cfg.enactedPolicy.targetGroup.isServicePattern()){
+		// *********************
+		// Top-down Transformation
+		// *********************
+		topDownTransformation.transform();
+		
+	}
+}
+
+helper preconditions(cfg:SPD_SEM::Configuration, resourceEnvironment:ResourceEnvironment, allocation:Allocation, system:System, repo:Repository, spdModel:SPD) {
+    // check preconditions with respect to the Palladio models
+    assert fatal(cfg.resourceEnvironment=resourceEnvironment) 
+    	with log ('configuration points to a different resource environment');
+    assert fatal(cfg.allocation=allocation) 
+    	with log ('configuration points to a different allocation');
+    assert fatal(cfg.system=system) 
+    	with log ('configuration points to a different system');
+    assert fatal(cfg.repository=repo) 
+    	with log ('configuration points to a different repository');
+    assert fatal(cfg.spd=spdModel) 
+    	with log ('configuration points to a different spd');
+    
+    // at least one enacted policy
+    assert fatal(cfg.enactedPolicy<>null) 
+    	with log('non null enacted policy expected, terminating',cfg.enactedPolicy);
+    	
+   	// at least one elastic infrastructure configuration
+   	assert fatal(cfg.targetCfgs->any(c:TargetGroupCfg | c.oclIsTypeOf(ElasticInfrastructureCfg))<>null)
+   		with log('at least one ElasticInfrastructureCfg expected in the configuration')
+    
+}

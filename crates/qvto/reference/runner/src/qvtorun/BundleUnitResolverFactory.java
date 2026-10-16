@@ -40,6 +40,8 @@ final class BundleUnitResolverFactory extends UnitResolverFactory {
 
 	static final List<Bundle> bundles = new ArrayList<>();
 	static volatile boolean enabled = true;
+	/** A source root for the current case (imports root DIR), instead of the bundles. */
+	static volatile Bundle caseRoot;
 
 	/** Registers the bundle directories (with a plugin.xml) below the given directories. */
 	static void install(List<File> bundleParents) throws Exception {
@@ -81,6 +83,7 @@ final class BundleUnitResolverFactory extends UnitResolverFactory {
 	private static Bundle bundleOf(URI uri) {
 		if (!uri.isFile()) return null;
 		String path = canonical(uri);
+		if (caseRoot != null) return path.startsWith(caseRoot.root.getPath() + File.separator) ? caseRoot : null;
 		for (Bundle b : bundles) if (path.startsWith(b.root.getPath() + File.separator)) return b;
 		return null;
 	}

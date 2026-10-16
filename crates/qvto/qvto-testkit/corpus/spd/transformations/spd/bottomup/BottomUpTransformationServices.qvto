@@ -1,0 +1,122 @@
+library BottomUpTransformationServices;
+
+import pcm.helpers.Constructors;
+import pcm.helpers.Commons;
+import pcm.helpers.Wiring;
+import spd.common.ServiceGroupRepositoryTransformation;
+import spd.common.CompetingConsumersGroupPCMTransformation;
+
+modeltype PCM uses 'http://palladiosimulator.org/PalladioComponentModel/5.2';
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+modeltype PCM_REP uses 'http://palladiosimulator.org/PalladioComponentModel/Repository/5.2';
+modeltype PCM_SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2';
+modeltype PCM_SYS uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_RES_TYPE uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceType/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+modeltype PCM_COMP uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2';
+modeltype PCM_ENTITY uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Entity/5.2';
+modeltype PCM_PARAM uses 'http://palladiosimulator.org/PalladioComponentModel/Parameter/5.2';
+
+modeltype SPD_MOD uses 'http://palladiosimulator.org/ScalingPolicyDefinition/1.0';
+modeltype SPD_ADJ uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0';
+modeltype SPD_TRI uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0';
+modeltype SPD_TAR uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0';
+
+modeltype SPD_CON uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/1.0';
+modeltype SPD_CONP uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0';
+modeltype SPD_CONT uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0';
+
+modeltype SPD_SEM uses 'http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0';
+
+/*
+* A service group is transformed according to the number of resource containers that exist in the infrastructure. 
+* After the transformation of a ServiceGroupCfg the following hold:
+* * The number of elements in ServiceGroupCfg = Assembly Contexts Replica of the Unit = Number of Resource Containers = Number of AllocationCtxs of the Unit 
+* * The number of elements in ServiceGroupCfg = Number of ProbabilisiticBranchTransitions in LoadBalancer Seff
+* * Probability = 1 / The number of ProbabilisticBranchTransitions
+*/
+mapping inout ServiceGroupCfg::transformServiceGroup(enactedPolicy:ScalingPolicy, elasticInfraCfg:ElasticInfrastructureCfg, sys: System, alloc: Allocation){
+	init{
+		var newAssemblies:Set(AssemblyContext) := Set{};
+		var assembliesToPreserve:Set(AssemblyContext) := Set{};
+		var system:System :=  sys;
+		var allocation:Allocation := alloc;
+		
+		elasticInfraCfg.elements->forEach(resourceContainer){
+			if(allocation.allocationContexts_Allocation
+				->select(allocCtx | allocCtx.assemblyContext_AllocationContext.encapsulatedComponent__AssemblyContext=self.unit.encapsulatedComponent__AssemblyContext)
+				->select(allocCtx | allocCtx.resourceContainer_AllocationContext=resourceContainer)->size()=0){
+				log("no allocations for this assembly exist, lets create");
+				newAssemblies += Commons_createAssemblyContext(self.unit.encapsulatedComponent__AssemblyContext, self.unit,system, allocation, resourceContainer);
+			}
+		};		
+	}
+	
+	elements += newAssemblies;
+	if(newAssemblies->size()=0 and elasticInfraCfg.elements->size() < self.elements->size()){
+		// subset elements to those for which an allocation points to a resource container that will exist after the transformation
+		elements := allocation.allocationContexts_Allocation->select(allocCtx | elasticInfraCfg.elements->includes(allocCtx.resourceContainer_AllocationContext) 
+		and elements->includes(allocCtx.assemblyContext_AllocationContext)).assemblyContext_AllocationContext;
+		
+		alloc.map modifyAllocationOnScaleIn(elements, self.unit);
+		self.loadBalancingAssembly.encapsulatedComponent__AssemblyContext[BasicComponent].map modifyLoadBalancerOnScaleIn(self);
+		system.map modifySystemModelOnScaleIn(self);
+	} else {
+		self.loadBalancingAssembly.encapsulatedComponent__AssemblyContext[BasicComponent].map modifyLoadBalancer(self);
+		system.map modifySystemModel(self);
+	};
+	enactedPolicies += enactedPolicy;
+}
+
+mapping inout CompetingConsumersGroupCfg::transformCompetingConsumersGroup(enactedPolicy:ScalingPolicy, elasticInfraCfg:ElasticInfrastructureCfg, sys: System, alloc: Allocation){
+	init{
+		var newAssemblies:Set(AssemblyContext) := Set{};
+		var assembliesToPreserve:Set(AssemblyContext) := Set{};
+		var system:System :=  sys;
+		var allocation:Allocation := alloc;
+		
+		elasticInfraCfg.elements->forEach(resourceContainer){
+			if(allocation.allocationContexts_Allocation
+				->select(allocCtx | allocCtx.assemblyContext_AllocationContext.encapsulatedComponent__AssemblyContext=self.unit.encapsulatedComponent__AssemblyContext)
+				->select(allocCtx | allocCtx.resourceContainer_AllocationContext=resourceContainer)->size()=0){
+				log("no allocations for this assembly exist, lets create");
+				newAssemblies += Commons_createAssemblyContext(self.unit.encapsulatedComponent__AssemblyContext, self.unit,system, allocation, resourceContainer);
+			}
+		};		
+	}
+	
+	elements += newAssemblies;
+ 
+ 	if(newAssemblies->size()=0 and elasticInfraCfg.elements->size() < self.elements->size()){
+		// subset elements to those for which an allocation points to a resource container that will exist after the transformation
+		elements := allocation.allocationContexts_Allocation->select(allocCtx | elasticInfraCfg.elements->includes(allocCtx.resourceContainer_AllocationContext) 
+		and elements->includes(allocCtx.assemblyContext_AllocationContext)).assemblyContext_AllocationContext;
+		
+		alloc.map modifyAllocationOnScaleIn(elements, self.unit);
+		system.map modifySystemModelOnScaleIn(self);
+	} else {
+		system.map modifySystemModel(self, newAssemblies); 
+	};
+	enactedPolicies += enactedPolicy;
+
+}
+
+mapping inout Allocation::modifyAllocationOnScaleIn(existingAssemblies:Set(AssemblyContext), unit:AssemblyContext){
+	init {
+		var allocationToPreserve:Set(AllocationContext) := Set{};
+		var allAllocationsOfUnit:Set(AllocationContext) := self.allocationContexts_Allocation->select(allocCtxt | allocCtxt.assemblyContext_AllocationContext.encapsulatedComponent__AssemblyContext.id=unit.encapsulatedComponent__AssemblyContext.id);
+		existingAssemblies->forEach(assembly){
+			allocationToPreserve += self.allocationContexts_Allocation->select(allocCtx | allocCtx.assemblyContext_AllocationContext = assembly);
+		};
+		var allocationToRemove:Set(AllocationContext) := allAllocationsOfUnit - allocationToPreserve;
+		
+		assert fatal(allocationToPreserve->size()=existingAssemblies->size()) with log('The number of assemblies that should exist and allocations that should exist does not match!');
+	}
+	allocationContexts_Allocation := self.allocationContexts_Allocation - allocationToRemove;
+}
+
+
+
+
+

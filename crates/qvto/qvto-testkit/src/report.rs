@@ -100,6 +100,22 @@ pub fn run_cases(
             out.push(rep);
             continue;
         }
+        let conf_models;
+        let models = match &case.conf {
+            Some(c) => match conf_cache(c, base) {
+                Ok(m) => {
+                    conf_models = m;
+                    &conf_models
+                }
+                Err(e) => {
+                    rep.verdict = Verdict::Crashed;
+                    rep.detail = format!("conf {c}: {e}");
+                    out.push(rep);
+                    continue;
+                }
+            },
+            None => models,
+        };
         let env = CaseEnv { case, base, models };
         let outcome = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| engine.run(&env))) {
             Ok(o) => o,
@@ -146,6 +162,18 @@ pub fn run_cases(
         out.push(rep);
     }
     out
+}
+
+fn conf_cache(conf: &str, base: &Path) -> Result<Config, String> {
+    use std::sync::{Mutex, OnceLock};
+    static CACHE: OnceLock<Mutex<BTreeMap<String, Config>>> = OnceLock::new();
+    let mut m = CACHE.get_or_init(Default::default).lock().unwrap();
+    if let Some(c) = m.get(conf) {
+        return Ok(c.clone());
+    }
+    let c = Config::read(&base.join(conf), base).map_err(|e| e.to_string())?;
+    m.insert(conf.to_string(), c.clone());
+    Ok(c)
 }
 
 /// Counts of verdicts in a group.

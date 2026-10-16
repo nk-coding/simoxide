@@ -1,0 +1,366 @@
+# SimuLizar reconfiguration rules and SPD semantic transformations on PCM models (hand-written).
+# Material: crates/qvto-testkit/corpus (tools/copy-corpus.sh). Metamodels: target/pcm/pcm.conf from
+# crates/qvto-emf/tools/pcm-setup.sh target/pcm (PCM 5.2.2 .ecore files, SimuLizar and SPD metamodels), as
+# dynamic EMF on both sides. Format: crates/qvto-testkit/README.md. The Java runner is the oracle here:
+# besides the severity checks, the cases are compared with the recorded Java results.
+
+case simulizar_runconfigtest_scaleUp_high
+driver simulizar.QVToReconfigurationTest
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/runconfigtest
+qvto scaleUp.qvto
+in prm-high.xmi
+in server.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/runconfigtest/rules
+dump models
+check severity 0 0
+end
+
+case simulizar_runconfigtest_scaleUp_low
+driver simulizar.QVToReconfigurationTest
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/runconfigtest
+qvto scaleUp.qvto
+in prm-low.xmi
+in server.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/runconfigtest/rules
+dump models
+check severity 0 0
+end
+
+case simulizar_runconfigtest_outsource_high
+driver simulizar.QVToReconfigurationTest
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/runconfigtest
+qvto outsource.qvto
+in prm-high.xmi
+in server.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/runconfigtest/rules
+dump models
+check severity 0 0
+end
+
+case simulizar_runconfigtest_outsource_low
+driver simulizar.QVToReconfigurationTest
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/runconfigtest
+qvto outsource.qvto
+in prm-low.xmi
+in server.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/runconfigtest/rules
+dump models
+check severity 0 0
+end
+
+case simulizar_runconfigtest_addNewServer_high
+driver simulizar.QVToReconfigurationTest
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/runconfigtest
+qvto addNewServer.qvto
+in prm-high.xmi
+in server.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/runconfigtest/rules
+dump models
+check severity 0 0
+end
+
+case simulizar_runconfigtest_addNewServer_low
+driver simulizar.QVToReconfigurationTest
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/runconfigtest
+qvto addNewServer.qvto
+in prm-low.xmi
+in server.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/runconfigtest/rules
+dump models
+check severity 0 0
+end
+
+case simulizar_runconfigtest_addClonedServer_high
+driver simulizar.QVToReconfigurationTest
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/runconfigtest
+qvto addClonedServer.qvto
+in prm-high.xmi
+in server.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/runconfigtest/rules
+dump models
+check severity 0 0
+end
+
+case simulizar_runconfigtest_addClonedServer_low
+driver simulizar.QVToReconfigurationTest
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/runconfigtest
+qvto addClonedServer.qvto
+in prm-low.xmi
+in server.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/runconfigtest/rules
+dump models
+check severity 0 0
+end
+
+case simulizar_reconfiguration_adapt
+driver simulizar.QVToReconfigurationTest
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/reconfiguration
+qvto adapt.qvto
+in prm.xmi
+in default.repository
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/reconfiguration/reconfigs
+dump models
+check severity 0 0
+end
+
+case simulizar_loadbalancer_scaleUp_high
+driver simulizar.examples.loadbalancer
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/loadbalancer
+qvto scaleUp.qvto
+in prm-high.xmi
+in loadbalancer_on_iaas.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer/reconfigurations_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_loadbalancer_scaleUp_low
+driver simulizar.examples.loadbalancer
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/loadbalancer
+qvto scaleUp.qvto
+in prm-low.xmi
+in loadbalancer_on_iaas.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer/reconfigurations_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_loadbalancer_scaleDown_high
+driver simulizar.examples.loadbalancer
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/loadbalancer
+qvto scaleDown.qvto
+in prm-high.xmi
+in loadbalancer_on_iaas.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer/reconfigurations_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_loadbalancer_scaleDown_low
+driver simulizar.examples.loadbalancer
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/loadbalancer
+qvto scaleDown.qvto
+in prm-low.xmi
+in loadbalancer_on_iaas.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer/reconfigurations_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_loadbalancer_scaleIn_high
+driver simulizar.examples.loadbalancer
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/loadbalancer
+qvto scaleIn.qvto
+in prm-high.xmi
+in loadbalancer_on_iaas.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer/reconfigurations_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_loadbalancer_scaleIn_low
+driver simulizar.examples.loadbalancer
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/loadbalancer
+qvto scaleIn.qvto
+in prm-low.xmi
+in loadbalancer_on_iaas.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer/reconfigurations_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_loadbalancer_outsource_high
+driver simulizar.examples.loadbalancer
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/loadbalancer
+qvto outsource.qvto
+in prm-high.xmi
+in loadbalancer_on_iaas.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer/reconfigurations_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_loadbalancer_outsource_low
+driver simulizar.examples.loadbalancer
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/loadbalancer
+qvto outsource.qvto
+in prm-low.xmi
+in loadbalancer_on_iaas.allocation
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer/reconfigurations_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_powerconsumption_scaleUp_high
+driver simulizar.examples.loadbalancer.powerconsumption
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/powerconsumption
+qvto scaleUp.qvto
+in prm-high.xmi
+in loadbalancer.repository
+in loadbalancer.system
+in loadbalancer_on_iaas.allocation
+in iaas.resourceenvironment
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/TransientEffects/org.palladiosimulator.simulizar.examples.loadbalancer.powerconsumption/reconf_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_powerconsumption_scaleUp_low
+driver simulizar.examples.loadbalancer.powerconsumption
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/powerconsumption
+qvto scaleUp.qvto
+in prm-low.xmi
+in loadbalancer.repository
+in loadbalancer.system
+in loadbalancer_on_iaas.allocation
+in iaas.resourceenvironment
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/TransientEffects/org.palladiosimulator.simulizar.examples.loadbalancer.powerconsumption/reconf_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_powerconsumption_scaleDown_high
+driver simulizar.examples.loadbalancer.powerconsumption
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/powerconsumption
+qvto scaleDown.qvto
+in prm-high.xmi
+in loadbalancer.repository
+in loadbalancer.system
+in loadbalancer_on_iaas.allocation
+in iaas.resourceenvironment
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/TransientEffects/org.palladiosimulator.simulizar.examples.loadbalancer.powerconsumption/reconf_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_powerconsumption_scaleDown_low
+driver simulizar.examples.loadbalancer.powerconsumption
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/powerconsumption
+qvto scaleDown.qvto
+in prm-low.xmi
+in loadbalancer.repository
+in loadbalancer.system
+in loadbalancer_on_iaas.allocation
+in iaas.resourceenvironment
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/TransientEffects/org.palladiosimulator.simulizar.examples.loadbalancer.powerconsumption/reconf_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_powerconsumption_scaleIn_high
+driver simulizar.examples.loadbalancer.powerconsumption
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/powerconsumption
+qvto scaleIn.qvto
+in prm-high.xmi
+in loadbalancer.repository
+in loadbalancer.system
+in loadbalancer_on_iaas.allocation
+in iaas.resourceenvironment
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/TransientEffects/org.palladiosimulator.simulizar.examples.loadbalancer.powerconsumption/reconf_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case simulizar_powerconsumption_scaleIn_low
+driver simulizar.examples.loadbalancer.powerconsumption
+kind simulizar-rule
+dir crates/qvto-testkit/corpus/simulizar/powerconsumption
+qvto scaleIn.qvto
+in prm-low.xmi
+in loadbalancer.repository
+in loadbalancer.system
+in loadbalancer_on_iaas.allocation
+in iaas.resourceenvironment
+conf target/pcm/pcm.conf
+imports folder
+source Palladio-Analyzer-SimuLizar/bundles/ExampleModels/TransientEffects/org.palladiosimulator.simulizar.examples.loadbalancer.powerconsumption/reconf_qvto
+note the rules assert fatal when no reconfiguration is required; severity as recorded
+dump models
+end
+
+case spd_minimalexample_main
+driver slingshot.SpdAdjustmentBehavior
+kind spd
+dir crates/qvto-testkit/corpus/spd
+qvto transformations/spd/MainTransformation.qvto
+in minimalexample/default.allocation
+in minimalexample/default.system
+in minimalexample/My.resourceenvironment
+in minimalexample/default.repository
+in minimalexample/default.spd
+in minimalexample/default.semanticspd
+in minimalexample/default.usagemodel
+conf target/pcm/pcm.conf
+imports root crates/qvto-testkit/corpus/spd/transformations
+config keepModeling=true
+source Palladio-Addons-SPD-Metamodel/bundles/org.palladiosimulator.spd.semantic.transformations/transformations
+note Slingshot binds the models by nsURI and sets keepModeling; the ProfilesLibrary blackbox is a stub (reference/runner/src-stubs)
+dump models
+check severity 0 0
+end

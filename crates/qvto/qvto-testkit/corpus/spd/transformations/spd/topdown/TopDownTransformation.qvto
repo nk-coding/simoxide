@@ -1,0 +1,110 @@
+import TopDownTransformationInfrastructure;
+import TopDownTransformationServices;
+import spd.common.ResourceEnvironmentTransformation;
+import spd.common.queries.TargetGroupQueries;
+
+modeltype PCM uses 'http://palladiosimulator.org/PalladioComponentModel/5.2';
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+modeltype PCM_REP uses 'http://palladiosimulator.org/PalladioComponentModel/Repository/5.2';
+modeltype PCM_SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2';
+modeltype PCM_SYS uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_RES_TYPE uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceType/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+modeltype PCM_COMP uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2';
+modeltype PCM_ENTITY uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Entity/5.2';
+modeltype PCM_PARAM uses 'http://palladiosimulator.org/PalladioComponentModel/Parameter/5.2';
+
+modeltype SPD_MOD uses 'http://palladiosimulator.org/ScalingPolicyDefinition/1.0';
+modeltype SPD_ADJ uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0';
+modeltype SPD_TRI uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0';
+modeltype SPD_TAR uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0';
+
+modeltype SPD_CON uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/1.0';
+modeltype SPD_CONP uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0';
+modeltype SPD_CONT uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0';
+
+modeltype SPD_SEM uses 'http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0';
+
+
+transformation TopDownTransformation(	inout pcmAllocation : PCM_ALLOC,
+										inout pcmSystem : PCM_SYS,
+										inout pcmResourceEnvironment : PCM_RES_ENV,
+										inout repository : PCM_REP,
+										in spd : SPD_MOD,
+										inout spdSemantic : SPD_SEM);
+	
+main(){
+		//spd model
+		var spd : SPD = spd.objects()[SPD]->any(true);
+		log('Used SPD for transformation {name: '+ spd.entityName+'}');	
+		//configuration
+		var cfg:SPD_SEM::Configuration = spdSemantic.objects()[SPD_SEM::Configuration]->any(true);
+		// Palladio models
+		var resourceEnvironment : ResourceEnvironment = pcmResourceEnvironment.objects()[ResourceEnvironment]->any(true);
+		var system : System = pcmSystem.objects()[System]->any(true);
+		var allocation : Allocation = pcmAllocation.objects()[Allocation]->any(true);
+		var repository : Repository = repository.objects()[Repository]->any(true);
+		
+		// *********************
+		// Transform Service Group of the Scaling Policy
+		// *********************		
+		var serviceTargetCfg:TargetGroupCfg := cfg.targetCfgs->retrieveServiceTargetCfgOfPolicy(cfg.enactedPolicy);
+		
+		var currentNumberOfElements : Integer := serviceTargetCfg.numberOfElements();
+		
+		
+		switch {
+			case (serviceTargetCfg.oclIsKindOf(ServiceGroupCfg)) {
+				serviceTargetCfg.oclAsType(ServiceGroupCfg).map transformServiceGroup(cfg.enactedPolicy, system);
+				
+			};
+			case (serviceTargetCfg.oclIsKindOf(CompetingConsumersGroupCfg)) {
+				serviceTargetCfg.oclAsType(CompetingConsumersGroupCfg).map transformCompetingConsumersGroup(cfg.enactedPolicy, system);
+			};
+		};
+		
+		// *************
+		// Transform Elastic Infrastructure Accordingly 
+		// *************	
+		
+		
+		
+		
+		//** Pick the elastic infrastructure in which the unit of the service is allocated on the unit of the infrastructure.		
+		var unitAssembly : AssemblyContext = serviceTargetCfg.retrieveUnit();
+		var unitResourceContainer : ResourceContainer = allocation.allocationContexts_Allocation->any(alloc | alloc.assemblyContext_AllocationContext.id = unitAssembly.id).resourceContainer_AllocationContext;
+		
+		
+		var elasticInfrastructureCfg : ElasticInfrastructureCfg := cfg.targetCfgs[ElasticInfrastructureCfg]->any(target | target.unit.id = unitResourceContainer.id);
+		assert fatal(elasticInfrastructureCfg!=null) with log('No ElasticInfrastructureCfg exist which its unit hosts the unit of the service group.');
+				
+		
+		// *************
+		// Placement Heuristic
+		// *************
+		
+		// The number of allocations initially hosted on the unit container without load balancing allocations and others not part of service groups.
+		var unitAssemblies : Sequence(AssemblyContext) := cfg.targetCfgs[ServiceGroupCfg].unit->union(cfg.targetCfgs[CompetingConsumersGroupCfg].unit);
+		var serviceAssemblies : Sequence(AssemblyContext) := cfg.targetCfgs[ServiceGroupCfg].elements->union(cfg.targetCfgs[CompetingConsumersGroupCfg].elements);
+		
+		// count only unit assemblies of services allocated on the unit resource container to determine the initial size of service replicas
+		var max_assemblies_per_host : Integer = allocation.allocationContexts_Allocation
+												->select(allocs | allocs.resourceContainer_AllocationContext.id = elasticInfrastructureCfg.unit.id)
+												->select(alloc | unitAssemblies->includes(alloc.assemblyContext_AllocationContext))->size();
+		
+		
+		log("Placement Constraints: Max Assemblies Per Host "+max_assemblies_per_host.toString());
+												
+		
+		var invariantResourceContainers:Set(ResourceContainer) := Set{};		
+		resourceEnvironment.resourceContainer_ResourceEnvironment->forEach(rc){
+			if(elasticInfrastructureCfg.elements->excludes(rc)){
+				invariantResourceContainers += rc;		
+			};
+		};
+		
+		elasticInfrastructureCfg.map transformElasticInfrastructure(cfg.enactedPolicy, serviceTargetCfg, allocation, max_assemblies_per_host, serviceAssemblies);
+		allocation.map modifyAllocation(serviceTargetCfg, elasticInfrastructureCfg, serviceTargetCfg.numberOfElements()-currentNumberOfElements);
+		resourceEnvironment.map modifyResourceEnvironment(elasticInfrastructureCfg, invariantResourceContainers);
+}

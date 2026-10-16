@@ -78,3 +78,30 @@ fn java_replay_reproduces_java_verdicts() {
         reports.iter().filter(|r| r.verdict != Verdict::Pass).map(|r| format!("{} {}: {}", r.id, r.verdict.label(), r.detail)).collect();
     assert!(bad.is_empty(), "{bad:#?}");
 }
+
+/// The SimuLizar and SPD cases: all recorded and passing on the Java side; the replay reproduces
+/// them strictly except where QVTo leaves created objects in its internal `extent:/N` resources
+/// (cross-resource containment that a saved XMI cannot hold). Needs `target/pcm` and the cache.
+#[test]
+fn corpus_cases_recorded_and_replayed() {
+    let root = root();
+    let cases = read_cases(&root.join(paths::CORPUS_CASES)).unwrap();
+    let java = read_bundle(&std::fs::read_to_string(root.join(paths::CORPUS_FIXTURE)).unwrap()).unwrap();
+    assert_eq!(cases.len(), java.len());
+    for c in &cases {
+        assert_eq!(java[&c.id].verdict(), "pass", "{}", c.id);
+    }
+    let dir = root.join(paths::JAVA_CACHE).join("corpus");
+    if !dir.join("results.tsv").is_file() || !root.join("target/pcm/pcm.conf").is_file() {
+        eprintln!("skipped replay: needs target/pcm (pcm-setup.sh) and `qvto conform record --suite corpus`");
+        return;
+    }
+    let models = qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), &root).unwrap();
+    let mut engine = JavaReplay::new(&dir).unwrap();
+    let reports = run_cases(&mut engine, &cases, &root, &models, &java, &|_| true);
+    let lenient = ["simulizar_runconfigtest_addNewServer_high", "simulizar_runconfigtest_addClonedServer_high"];
+    for r in &reports {
+        let ok = r.verdict == Verdict::Pass || (lenient.contains(&r.id.as_str()) && r.verdict == Verdict::PassLenient);
+        assert!(ok, "{} {}: {}", r.id, r.verdict.label(), r.detail);
+    }
+}

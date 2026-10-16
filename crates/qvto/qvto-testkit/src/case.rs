@@ -127,6 +127,12 @@ pub struct Case {
     /// Imports resolve relative to the transformation's folder, not the bundle's source
     /// containers.
     pub imports_from_folder: bool,
+    /// Imports resolve against this source container (relative to the base).
+    pub import_root: Option<String>,
+    /// A qvto-emf resource-set configuration (relative to the base) for the case's metamodels.
+    pub conf: Option<String>,
+    /// Besides the extents, dump every other model resource after the run (sorted by file name).
+    pub dump_models: bool,
     /// URI prefix maps (`from`, `to` directory relative to the base).
     pub urimaps: Vec<(String, String)>,
     pub checks: Vec<Check>,
@@ -147,9 +153,19 @@ impl Case {
         }
     }
 
-    /// A path of the case under the base directory.
+    /// A path of the case under the base directory (lexically normalised: `a/../b` is `b`).
     pub fn path(&self, base: &Path, p: &str) -> PathBuf {
-        base.join(self.rel(p))
+        let mut out = PathBuf::new();
+        for c in base.join(self.rel(p)).components() {
+            match c {
+                std::path::Component::ParentDir if out.file_name().is_some() => {
+                    out.pop();
+                }
+                std::path::Component::CurDir => {}
+                c => out.push(c),
+            }
+        }
+        out
     }
 
     pub fn runnable(&self) -> bool {
@@ -249,7 +265,12 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
             }
             "trace-in" => c.trace_in = Some(rest.into()),
             "no-line-numbers" => c.no_line_numbers = true,
-            "imports" => c.imports_from_folder = rest == "folder",
+            "imports" => {
+                c.imports_from_folder = rest == "folder";
+                c.import_root = rest.strip_prefix("root ").map(String::from);
+            }
+            "conf" => c.conf = Some(rest.into()),
+            "dump" => c.dump_models = rest == "models",
             "urimap" => {
                 let (a, b) = rest.split_once(' ').ok_or_else(|| err("urimap needs two values".into()))?;
                 c.urimaps.push((a.into(), b.into()));
@@ -373,6 +394,15 @@ pub fn write_case(c: &Case, out: &mut String) {
     }
     if c.imports_from_folder {
         kv("imports", "folder");
+    }
+    if let Some(r) = &c.import_root {
+        kv("imports", &format!("root {r}"));
+    }
+    if let Some(r) = &c.conf {
+        kv("conf", r);
+    }
+    if c.dump_models {
+        kv("dump", "models");
     }
     for (a, b) in &c.urimaps {
         kv("urimap", &format!("{a} {b}"));

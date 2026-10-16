@@ -206,6 +206,8 @@ final class CaseRunner {
 		}
 
 		BundleUnitResolverFactory.enabled = !job.importsFromFolder;
+		BundleUnitResolverFactory.caseRoot = job.importRoot == null ? null
+				: new BundleUnitResolverFactory.Bundle(base.resolve(job.importRoot).toFile().getCanonicalFile(), java.util.Collections.singletonList(""));
 		for (URI k : caseUriMaps) org.eclipse.emf.ecore.resource.URIConverter.URI_MAP.remove(k);
 		caseUriMaps.clear();
 		for (String[] m : job.urimaps) {
@@ -213,6 +215,7 @@ final class CaseRunner {
 			String to = base.resolve(m[1]).toAbsolutePath().toString();
 			org.eclipse.emf.ecore.resource.URIConverter.URI_MAP.put(URI.createURI(m[0]), URI.createFileURI(to.endsWith("/") ? to : to + "/"));
 		}
+		if (job.conf != null) Env.applyConf(base.resolve(job.conf), base);
 		URI transfUri = fileUri(job.path(job.qvto));
 		ResourceSet resSet = metamodelResolutionRS(job);
 		EPackage.Registry registry = resSet.getPackageRegistry();
@@ -357,7 +360,17 @@ final class CaseRunner {
 		result.put("verdict", o.verdict);
 		result.put("run-ms", String.format("%.3f", o.runMs));
 
-		// Canonical dump of the out and inout extents.
+		// Canonical dump of the out and inout extents. Proxies are resolved first (in the case's
+		// resource set, whatever the run happened to resolve), as qvto-rs resolves eagerly.
+		try {
+			org.eclipse.emf.ecore.util.EcoreUtil.resolveAll(resSet);
+			for (int i = 0; i < kinds.size(); i++) {
+				if (kinds.get(i) == DirectionKind.IN) continue;
+				for (EObject e : extents.get(i).getContents()) org.eclipse.emf.ecore.util.EcoreUtil.resolveAll(e);
+			}
+		} catch (RuntimeException e) {
+			diag.append("resolve\t").append(oneLine(e.toString())).append('\n');
+		}
 		ResourceSet dumpRs = new ResourceSetImpl();
 		List<Resource> outs = new ArrayList<>();
 		for (int i = 0; i < kinds.size(); i++) {
@@ -366,7 +379,19 @@ final class CaseRunner {
 			r.getContents().addAll(new ArrayList<>(extents.get(i).getContents()));
 			outs.add(r);
 		}
-		String dump = canonDump(outs);
+		List<Resource> dumped = new ArrayList<>(outs);
+		if (job.dumpModels) {
+			List<URI> mmUris0 = new ArrayList<>();
+			for (String mm : job.mmfiles) mmUris0.add(fileUri(job.path(mm)));
+			List<Resource> others = new ArrayList<>();
+			for (Resource r : resSet.getResources()) {
+				if (r.getURI() != null && r.getURI().isFile() && !mmUris0.contains(r.getURI())
+						&& !"ecore".equals(r.getURI().fileExtension())) others.add(r);
+			}
+			others.sort((a, b) -> a.getURI().lastSegment().compareTo(b.getURI().lastSegment()));
+			dumped.addAll(others);
+		}
+		String dump = canonDump(dumped);
 		write(dir.resolve("out.jsonl"), dump);
 		o.dumpHash = Tape.fnv(dump.getBytes(StandardCharsets.UTF_8));
 		if (saveXmi) {
@@ -585,7 +610,7 @@ final class CaseRunner {
 
 	URI fileUri(String path) {
 		File f = new File(path);
-		if (!f.isAbsolute()) f = base.resolve(path).toFile();
+		if (!f.isAbsolute()) f = base.resolve(path).normalize().toFile();
 		return URI.createFileURI(f.getAbsolutePath());
 	}
 

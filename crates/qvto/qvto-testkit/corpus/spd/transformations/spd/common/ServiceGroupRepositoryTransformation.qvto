@@ -1,0 +1,146 @@
+library ServiceGroupRepositoryTransformation;
+
+import pcm.helpers.Constructors;
+import pcm.helpers.Commons;
+import pcm.helpers.Wiring;
+import spd.common.queries.SystemQueries;
+
+modeltype SPD_MOD uses 'http://palladiosimulator.org/ScalingPolicyDefinition/1.0';
+modeltype SPD_ADJ uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0';
+modeltype SPD_TRI uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0';
+modeltype SPD_TAR uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype SPD_SEM uses 'http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0';
+
+modeltype PCM uses 'http://palladiosimulator.org/PalladioComponentModel/5.2';
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+modeltype PCM_REP uses 'http://palladiosimulator.org/PalladioComponentModel/Repository/5.2';
+modeltype PCM_SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2';
+modeltype PCM_SYS uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+modeltype PCM_RES_TYPE uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceType/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+modeltype PCM_COMP uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2';
+modeltype PCM_ENTITY uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Entity/5.2';
+modeltype PCM_PARAM uses 'http://palladiosimulator.org/PalladioComponentModel/Parameter/5.2';
+modeltype PCM_USG uses 'http://palladiosimulator.org/PalladioComponentModel/UsageModel/5.2';
+
+
+modeltype SPD_CON uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/1.0';
+modeltype SPD_CONP uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0';
+modeltype SPD_CONT uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0';
+
+
+mapping inout BasicComponent::modifyLoadBalancer(serviceGroupCfg:ServiceGroupCfg){
+	init{
+		var operationProvidedRole := serviceGroupCfg.unit.encapsulatedComponent__AssemblyContext.providedRoles_InterfaceProvidingEntity.oclAsType(OperationProvidedRole);
+		var operationInterface := operationProvidedRole.providedInterface__OperationProvidedRole;
+		
+		var branchActions:Set(BranchAction) := Set{};
+		
+		self.serviceEffectSpecifications__BasicComponent.oclAsType(ResourceDemandingSEFF)->forEach(seff){
+			var branches:Set(BranchAction) := seff.steps_Behaviour->selectByType(BranchAction);
+			assert fatal(branches->size()=1) with log('Supports LoadBalancer with only BranchAction for RDSEFF');
+			branchActions += branches;
+		};
+		
+		var actualNumberOfRequiredRoles:Integer := self.requiredRoles_InterfaceRequiringEntity.oclAsType(OperationRequiredRole)->size();
+		var numberOfnewRoles:Integer :=  serviceGroupCfg.elements->size()-actualNumberOfRequiredRoles;
+		var newRoles:Set(OperationRequiredRole) := Set{};
+		var existingProvidedRole:OperationProvidedRole := serviceGroupCfg.unit.encapsulatedComponent__AssemblyContext[BasicComponent].providedRoles_InterfaceProvidingEntity[OperationProvidedRole]->any(true);
+		var counterRoles : Integer := 1;
+		while(counterRoles <= (numberOfnewRoles)){
+			log('operation required roles+needed:'+numberOfnewRoles.toString());
+				newRoles += new OperationRequiredRole(existingProvidedRole,counterRoles);
+				counterRoles := counterRoles+1;
+			};
+	}
+	
+	requiredRoles_InterfaceRequiringEntity += newRoles;
+	branchActions-> modifyBranchAction(serviceGroupCfg, operationInterface->any(true), newRoles);
+	
+	branchActions->forEach(branchAction){	
+		branchAction.branches_Branch->select(b | b.oclIsTypeOf(ProbabilisticBranchTransition))[ProbabilisticBranchTransition]->map modifyProbability(requiredRoles_InterfaceRequiringEntity->size());
+	}
+
+}
+
+mapping inout BasicComponent::modifyLoadBalancerOnScaleIn(serviceGroupCfg:ServiceGroupCfg){
+	init {
+		var branchActions:Set(BranchAction) := Set{};
+		
+		self.serviceEffectSpecifications__BasicComponent.oclAsType(ResourceDemandingSEFF)->forEach(seff){
+			var branches:Set(BranchAction) := seff.steps_Behaviour->selectByType(BranchAction);
+			assert fatal(branches->size()=1) with log('Supports LoadBalancer with only BranchAction for RDSEFF');
+			branchActions += branches;
+		};
+		var sys:System := serviceGroupCfg.loadBalancingAssembly.parentStructure__AssemblyContext[System]->any(true);
+		var assemblyConnectors:Set(AssemblyConnector) := sys.connectors__ComposedStructure[AssemblyConnector]
+			->select(asmblConnector | asmblConnector.requiringAssemblyContext_AssemblyConnector.encapsulatedComponent__AssemblyContext = self)
+			->select(asmblConnector | serviceGroupCfg.elements->includes(asmblConnector.providingAssemblyContext_AssemblyConnector));
+		var rolesToPreserve:Bag(OperationRequiredRole) := assemblyConnectors.requiredRole_AssemblyConnector;
+	}
+	requiredRoles_InterfaceRequiringEntity := rolesToPreserve;
+	branchActions->map modifyBranchActionOnScaleIn(rolesToPreserve);
+	
+	branchActions->forEach(branchAction){	
+		branchAction.branches_Branch->select(b | b.oclIsTypeOf(ProbabilisticBranchTransition))[ProbabilisticBranchTransition]->map modifyProbability(requiredRoles_InterfaceRequiringEntity->size());
+	}
+}
+
+mapping inout BranchAction::modifyBranchAction(serviceGroupCfg:ServiceGroupCfg, opInterface:OperationInterface, newRoles:Set(OperationRequiredRole)){
+	init {
+		var newProbabilisticBranches:Set(ProbabilisticBranchTransition) := Set{};
+		newRoles->forEach(role){
+			var existingExtCall : ExternalCallAction := self.branches_Branch.branchBehaviour_BranchTransition.steps_Behaviour[ExternalCallAction]->any(true);
+			var operationSignature:OperationSignature := self.branches_Branch.branchBehaviour_BranchTransition.steps_Behaviour[ExternalCallAction]->any(true).calledService_ExternalService;
+			newProbabilisticBranches += new ProbabilisticBranchTransition(operationSignature,role,existingExtCall);
+		}	
+	}
+	branches_Branch += newProbabilisticBranches;
+}
+
+mapping inout BranchAction::modifyBranchActionOnScaleIn(rolesPreserved:Bag(OperationRequiredRole)){
+	init {
+		var branchesToPreserve:Set(ProbabilisticBranchTransition) := self.branches_Branch[ProbabilisticBranchTransition]
+			->select(probBranchTransition | 
+				rolesPreserved->includes(probBranchTransition.branchBehaviour_BranchTransition.steps_Behaviour[ExternalCallAction]->any(true).role_ExternalService));
+	}
+	branches_Branch := branchesToPreserve;
+}
+
+mapping inout ProbabilisticBranchTransition::modifyProbability(replicas:Integer){
+	branchProbability := 1.0/replicas;
+}
+
+mapping inout System::modifySystemModelOnScaleIn(serviceCfg:ServiceGroupCfg){
+	init{
+		var assembliesToPreserve:Set(AssemblyContext) := self.assemblyContexts__ComposedStructure
+		->select(assembly | 
+			serviceCfg.elements->includes(assembly) 
+			or assembly.encapsulatedComponent__AssemblyContext<>serviceCfg.unit.encapsulatedComponent__AssemblyContext);
+
+		var assembliesForDeletion:Set(AssemblyContext) :=  self.assemblyContexts__ComposedStructure
+		->select(assembly | 
+			serviceCfg.elements->excludes(assembly)
+			and assembly.encapsulatedComponent__AssemblyContext=serviceCfg.unit.encapsulatedComponent__AssemblyContext);
+		
+		var connectorsToRemove:Set(Connector) := self.selectConnectorsForRemoval(assembliesForDeletion);
+		var connectorsToPreserve:Set(Connector) := self.connectors__ComposedStructure - connectorsToRemove;
+	}
+	assemblyContexts__ComposedStructure := assembliesToPreserve;
+	connectors__ComposedStructure := connectorsToPreserve;
+}
+
+mapping inout System::modifySystemModel(serviceCfg:ServiceGroupCfg){
+	init {
+		var newAssemblies:OrderedSet(AssemblyContext) := OrderedSet{};
+		serviceCfg.elements->forEach(element){
+			if(self.connectors__ComposedStructure[AssemblyConnector]->exists(connector | connector.providingAssemblyContext_AssemblyConnector=element)=false){
+				newAssemblies += element;
+			}
+		}	
+	}
+	connectExistingLoadBalancerAndNewAssemblyContexts(serviceCfg.unit, serviceCfg.loadBalancingAssembly, newAssemblies, self);
+}
+
+

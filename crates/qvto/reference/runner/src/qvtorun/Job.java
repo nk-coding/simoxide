@@ -31,6 +31,13 @@ import java.util.Map;
  * trace-in &lt;path&gt;             QVTEvaluationOptions.INCREMENTAL_UPDATE_TRACE from a .qvtotrace file
  * no-line-numbers              compile without source line numbers
  * urimap &lt;from&gt; &lt;to&gt;          URIConverter.URI_MAP entry for the case (to: a directory relative to the base)
+ * conf &lt;path&gt;                 a qvto-emf resource-set configuration (map, mmroot, alias lines; see
+ *                              crates/qvto-emf/src/config.rs): URI maps and the indexed metamodels
+ *                              registered globally as lazily loaded dynamic packages (as OSGi
+ *                              registers generated ones)
+ * dump models                  also dump every other model resource of the resource set after the run
+ *                              (sorted by file name): changes reached through in parameters
+ * imports root &lt;dir&gt;            imports resolve against the source container dir (relative to the base)
  * imports folder               imports resolve relative to the transformation's folder (TestQvtParser's
  *                              workspace resolver), not against the bundle's source containers
  * check model                  outputs equal the expected models (the suite's comparer)
@@ -67,6 +74,9 @@ final class Job {
 	String traceIn;
 	boolean noLineNumbers;
 	boolean importsFromFolder;
+	String importRoot;
+	String conf;
+	boolean dumpModels;
 	final List<String[]> urimaps = new ArrayList<>();
 	final List<String[]> checks = new ArrayList<>();
 
@@ -129,7 +139,12 @@ final class Job {
 			}
 			case "trace-in": cur.traceIn = rest; break;
 			case "no-line-numbers": cur.noLineNumbers = true; break;
-			case "imports": cur.importsFromFolder = rest.equals("folder"); break;
+			case "imports":
+				cur.importsFromFolder = rest.equals("folder");
+				if (rest.startsWith("root ")) cur.importRoot = rest.substring(5);
+				break;
+			case "conf": cur.conf = rest; break;
+			case "dump": cur.dumpModels = rest.equals("models"); break;
 			case "urimap": cur.urimaps.add(rest.split(" ", 2)); break;
 			case "check": cur.checks.add(rest.split(" ")); break;
 			default:

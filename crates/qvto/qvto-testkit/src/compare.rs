@@ -227,7 +227,7 @@ pub fn differential(case: &Case, o: &Outcome, java: &JavaResult) -> Differential
     let dump = if case.compile_only() {
         Aspect::Equal
     } else {
-        let mine = o.outputs.as_ref().map(|out| canon::dump(&out.rs.graph, &out.extents)).unwrap_or_default();
+        let mine = o.outputs.as_ref().map(|out| canon::dump(&out.rs.graph, &out.dumped())).unwrap_or_default();
         let theirs = java.dump().unwrap_or("");
         if mine == theirs {
             Aspect::Equal

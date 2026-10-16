@@ -103,9 +103,38 @@ pub enum Status {
 
 /// The out/inout extents after a run: each in a resource of `rs` with the URI
 /// `.../extent<i>.xmi` (i = parameter index), in parameter order, as the Java runner dumps them.
+/// For cases with `dump models`, `models` holds every other model resource (inputs and the
+/// models they reference, all proxies resolved, no `.ecore` files) sorted by file name.
 pub struct Outputs {
     pub rs: ResourceSet,
     pub extents: Vec<ResourceId>,
+    pub models: Vec<ResourceId>,
+}
+
+impl Outputs {
+    /// The resources the canonical dump covers, in order.
+    pub fn dumped(&self) -> Vec<ResourceId> {
+        self.extents.iter().chain(self.models.iter()).copied().collect()
+    }
+
+    /// The other model resources of `rs` for `dump models`: file resources that are not
+    /// extents, `.ecore` files or excluded, sorted by file name (call after `resolve_all`).
+    pub fn collect_models(rs: &ResourceSet, extents: &[ResourceId], exclude: &[String]) -> Vec<ResourceId> {
+        let mut v: Vec<(String, ResourceId)> = rs
+            .graph
+            .resource_ids()
+            .filter(|r| !extents.contains(r))
+            .filter_map(|r| {
+                let uri = &rs.graph.resource(r).uri;
+                if !uri.starts_with("file:") || uri.ends_with(".ecore") || exclude.contains(uri) {
+                    return None;
+                }
+                Some((qvto_emf::canon::label(uri), r))
+            })
+            .collect();
+        v.sort();
+        v.into_iter().map(|(_, r)| r).collect()
+    }
 }
 
 /// Everything observable of one run, in the Java runner's terms.

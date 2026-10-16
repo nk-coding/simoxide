@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" xmlns:srm="http://simulizar.palladiosimulator.org/RuntimeMeasurement/1.0">
+  <srm:RuntimeMeasurement id="_prm_measurement_1" measuringValue="1.0">
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="monitors/server.measuringpoint#//@measuringPoints.0"/>
+    <measurementSpecification href="monitors/server.monitorrepository#_aG74UC1SEeaoQ9JnkNiADA"/>
+  </srm:RuntimeMeasurement>
+</xmi:XMI>
