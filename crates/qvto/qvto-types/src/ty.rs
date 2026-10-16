@@ -92,8 +92,6 @@ pub enum Type {
     Real,
     String,
     UnlimitedNatural,
-    /// Classic OCL's `OclType` (the metatype of type expressions in some signatures).
-    OclType,
     /// `OclElement` of classic OCL (unused by Ecore models; kept for completeness).
     OclElement,
     /// `OclMessage` and `State` of classic OCL (signatures only; Ecore models have none).
@@ -127,6 +125,8 @@ pub enum Type {
     Enum(EnumId),
     // ---- signatures only --------------------------------------------------------------------
     Param(TParam),
+    /// Java `null` as a type: an unresolved type (e.g. the element type of `Set(Unknown)`).
+    Null,
 }
 
 /// The interning table.
@@ -154,12 +154,14 @@ fixed! {
     REAL = 5 => Type::Real;
     STRING = 6 => Type::String;
     UNLIMITED_NATURAL = 7 => Type::UnlimitedNatural;
-    OCL_TYPE = 8 => Type::OclType;
-    OCL_ELEMENT = 9 => Type::OclElement;
-    T = 10 => Type::Param(TParam::T);
-    T2 = 11 => Type::Param(TParam::T2);
-    KEY_T = 12 => Type::Param(TParam::KeyT);
-    COMMON_T = 13 => Type::Param(TParam::CommonT);
+    OCL_ELEMENT = 8 => Type::OclElement;
+    T = 9 => Type::Param(TParam::T);
+    T2 = 10 => Type::Param(TParam::T2);
+    KEY_T = 11 => Type::Param(TParam::KeyT);
+    COMMON_T = 12 => Type::Param(TParam::CommonT);
+    // classic OCL's `OclType` is the TypeType of `T`
+    OCL_TYPE = 13 => Type::TypeType(TypeId(9));
+    NULL = 14 => Type::Null;
 }
 
 impl Default for TypeTable {
