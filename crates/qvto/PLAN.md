@@ -10,7 +10,7 @@ Status values: done, next, open, parked.
 | Q1b | Lexer and parser (`qvto-syntax`) | done | Q1a, Q1c, Q1d |
 | Q1c | Runtime values and Java-compatible primitives (`qvto-runtime` core) | done | Q1a, Q1b, Q1d |
 | Q1d | Reference harness: runner batch mode, canonical dump, conformance-runner skeleton (`qvto-testkit`) | done | Q1a, Q1b, Q1c |
-| Q2 | Type system, standard library signatures, semantic analysis (`qvto-types`, `qvto-sema`) | open | Q3a |
+| Q2 | Type system, standard library signatures, semantic analysis (`qvto-types`, `qvto-sema`) | done | Q3a |
 | Q3a | Bytecode and VM core: expressions, imperative OCL, helpers, queries, objects, log, assert | open | Q2 (on hand-written IR) |
 | Q3b | End-to-end pipeline; SimuLizar rule corpus | open | — |
 | Q4 | Full QVTo: mappings with traces, resolve, late resolve, disjuncts, inherits, merges, intermediate data, deepclone, libraries, imports, extends, access, Dict/List, try/raise, configuration properties, `transform()`, blackboxes | open | Q5a |
@@ -65,6 +65,13 @@ Status values: done, next, open, parked.
   494 cases.
 - **Q2**: the 49 `compile_ok` parser cases and all positive transformation cases type-check; the
   93 error cases report errors at the annotated spans.
+  Done 2026-10-16 (`crates/qvto-sema/README.md`, "Verification"): against Eclipse's full-compile
+  diagnostics of all 1 102 corpus files, 1 096 files get exactly Eclipse's problems (severity,
+  unit, line, offset, length, message), all 37 SimuLizar and 18 SPD files included; 2 300 of
+  Eclipse's 2 304 problems are reproduced, with 9 extra; every file Eclipse compiles without
+  problems has no errors (539 of 541 no problems at all); 112 of the 117 `TestQvtParser` count
+  checks pass; the IR of all 970 error-free compilations passes the consistency checks; the
+  whole corpus analyses in 0.42 s (Eclipse warm: 1.77 s).
 - **Q3b**: SimuLizar's 37 `.qvto` files compile; the 22 rule files run on the corpus PCM models
   and match the Java runner; at least 50 % of the 309 transformation cases pass.
 - **Q4**: Slingshot's SPD transformations run and match the Java runner; at least 85 % of the 309

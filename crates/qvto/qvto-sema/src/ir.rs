@@ -250,6 +250,10 @@ pub struct IntermClass {
     /// Initialisers of the class's own features, in declaration order; features without one
     /// get the type default when an instance is created.
     pub inits: Vec<(FeatureId, CodeBody)>,
+    /// The declared type of each own feature (`[*]` features: the collection type). The
+    /// registry keeps a classifier per feature; for types it cannot represent (collections,
+    /// `List`, `Dict`, tuples, `OclAny`, ...) that is a placeholder data type.
+    pub feature_types: Vec<(FeatureId, TypeId)>,
     pub span: Span,
 }
 

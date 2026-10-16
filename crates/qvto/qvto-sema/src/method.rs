@@ -915,11 +915,14 @@ impl<'r> Sema<'r> {
                 .map(|(_, f, b)| (*f, b.clone()))
                 .collect();
             let idx = self.interm_classes.len() as u32;
+            let own: Vec<qvto_model::FeatureId> = self.ts.meta.class(*cid).features.clone();
+            let feature_types = own.into_iter().map(|f| (f, self.feature_type(f))).collect();
             self.interm_classes.push(ir::IntermClass {
                 module: m,
                 class: *cid,
                 exception: c.exception,
                 inits: class_inits,
+                feature_types,
                 span: c.span,
             });
             self.modules[m.index()].ir.classes.push(idx);
