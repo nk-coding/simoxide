@@ -10,7 +10,7 @@ use qvto_model::{ClassId, FeatureId, ModelStore};
 use qvto_runtime::coll::{Coll, CollKind};
 use qvto_runtime::dict::{Dict, List};
 use qvto_runtime::identity::IdentityHashSource;
-use qvto_runtime::{EnumLit, Mode, ObjRef, Str, TypeRef, Value};
+use qvto_runtime::{EnumLit, Mode, Str, TypeRef, Value};
 use qvto_sema::ir::{IntermPropId, ModuleId, OpId};
 use qvto_types::{StdOp, TypeId};
 use std::cell::RefCell;
@@ -166,7 +166,7 @@ where
     pub diags: Vec<Diag>,
     pub(crate) opts: RunOptions,
     pub(crate) vcache: RefCell<HashMap<(u32, u32), u32>>,
-    pub(crate) interm: HashMap<(ObjRef, IntermPropId), Value>,
+    pub(crate) interm: HashMap<(crate::objects::IntermOwner, IntermPropId), Value>,
     pub(crate) late: Vec<LateTask>,
     pub(crate) prims: Vec<Prim>,
     pub(crate) str_counters: HashMap<String, i64>,
@@ -1006,8 +1006,12 @@ where
                     };
                     let cur = r!(self, base, var).clone();
                     // an object expression of a collection type (a mapping's `List` result)
-                    // keeps the collection unchecked (`getOutOwner`)
-                    let collection = matches!(cur, Value::Coll(_) | Value::List(_) | Value::Dict(_));
+                    // keeps the collection unchecked (`getOutOwner`); one of a tuple type (a
+                    // mapping's `Tuple` result, which the IR gives no class) conforms
+                    let collection = matches!(
+                        cur,
+                        Value::Coll(_) | Value::List(_) | Value::Dict(_) | Value::Tuple(_)
+                    );
                     if collection {
                     } else if !cur.is_null() {
                         let ty_ok = self.value_conforms_to_class(&cur, class);

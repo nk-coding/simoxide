@@ -125,13 +125,15 @@ where
     /// The operation of an extending module that overrides `op`, if any (`extends`).
     pub(crate) fn overriding(&self, op: OpId) -> OpId {
         let ir = &self.prog.ir;
-        // the main module's chain: the first operation that overrides `op`
-        for (i, o) in ir.operations.iter().enumerate() {
-            if o.overrides == Some(op) {
-                return OpId(i as u32);
+        // the main module's chain: follow the operations that override `op` to the last one
+        let mut cur = op;
+        for _ in 0..ir.operations.len() {
+            match ir.operations.iter().position(|o| o.overrides == Some(cur)) {
+                Some(i) if OpId(i as u32) != cur => cur = OpId(i as u32),
+                _ => break,
             }
         }
-        op
+        cur
     }
 
     fn check_depth(&self) -> VmResult<()> {

@@ -1202,6 +1202,8 @@ fn kind_accepts(kind: DataKind, d: &Datum<'_, ObjId>) -> bool {
                 Datum::Other(_) | Datum::Str(_)
             )
             | (DataKind::Unloadable, _)
+            // an `Enumerator`/`Object` data type (EMF's nullable enumerations) holds literals
+            | (DataKind::Other, Datum::Enum(..))
     )
 }
 

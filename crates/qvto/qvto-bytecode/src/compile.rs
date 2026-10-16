@@ -1051,6 +1051,15 @@ impl<'a> Builder<'a> {
                     extent: o.extent,
                     fail: 0,
                 })?;
+                if self.types.is_collection_like(e.ty) {
+                    // `object OrderedSet(T) {}`: `createInstance` of a collection type is a
+                    // new empty collection (the IR's class is only a placeholder)
+                    let j_create = self.jump(Insn::JumpIfNull { r: var, target: 0 });
+                    let j_body = self.jump(Insn::Jump { target: 0 });
+                    self.patch(j_create);
+                    self.emit(Insn::LoadDefault { dst: var, ty: e.ty.0 });
+                    self.patch(j_body);
+                }
                 self.emit(Insn::ObjectInit { var, site });
                 for s in &o.body {
                     self.stmt(s)?;

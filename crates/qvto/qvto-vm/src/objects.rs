@@ -788,20 +788,20 @@ where
     // ---- contextual intermediate properties --------------------------------------------------
 
     pub(crate) fn get_interm(&mut self, o: &Value, p: IntermPropId) -> Value {
-        let Value::Obj(r) = o else {
+        let Some(r) = IntermOwner::of(o) else {
             return Value::Invalid;
         };
-        if let Some(v) = self.interm.get(&(*r, p)) {
+        if let Some(v) = self.interm.get(&(r, p)) {
             return v.clone();
         }
         let ty = self.prog.ir.interm_props[p.index()].ty;
         let v = self.default_value(ty);
-        self.interm.insert((*r, p), v.clone());
+        self.interm.insert((r, p), v.clone());
         v
     }
 
     pub(crate) fn set_interm(&mut self, o: &Value, p: IntermPropId, v: Value, reset: bool) {
-        let Value::Obj(r) = o else { return };
+        let Some(r) = IntermOwner::of(o) else { return };
         let ty = self.prog.ir.interm_props[p.index()].ty;
         let old = self.get_interm(o, p);
         let nv = if self.prog.ir.types.is_collection_like(ty) {
@@ -815,7 +815,7 @@ where
         } else {
             convert_number(v, self.num_class_of_type(ty))
         };
-        self.interm.insert((*r, p), nv);
+        self.interm.insert((r, p), nv);
     }
 
     // ---- copies ------------------------------------------------------------------------------
@@ -1010,4 +1010,22 @@ pub(crate) fn model_error_text(e: &ModelError) -> String {
 #[allow(dead_code)]
 fn new_dict(env: &dyn qvto_runtime::HashEnv) -> Value {
     Value::Dict(Rc::new(RefCell::new(Dict::new(env))))
+}
+
+/// The owner of a contextual intermediate property value: an object or a module instance
+/// (`intermediate property M::p` on a transformation).
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+pub(crate) enum IntermOwner {
+    Obj(ObjRef),
+    Module(u32),
+}
+
+impl IntermOwner {
+    fn of(v: &Value) -> Option<IntermOwner> {
+        match v {
+            Value::Obj(r) => Some(IntermOwner::Obj(*r)),
+            Value::Instance(m) => Some(IntermOwner::Module(*m)),
+            _ => None,
+        }
+    }
 }
