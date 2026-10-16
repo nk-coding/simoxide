@@ -787,7 +787,12 @@ impl<'r> Sema<'r> {
                     _ => return None,
                 };
             }
-            Info::Invalid => return None,
+            Info::Invalid => {
+                // Eclipse still makes the AssignExp (with an invalid left side); keep the value
+                let mut x = self.ex(ExprKind::Block(vec![rhs.e]), lty, cst);
+                x.err = true;
+                return Some(x);
+            }
             _ => {
                 self.error(a.lhs.span, vm::notAnLValueError);
                 return None;
