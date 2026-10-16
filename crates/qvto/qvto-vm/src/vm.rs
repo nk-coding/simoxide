@@ -86,6 +86,8 @@ pub struct Frame {
     pub module: ModuleId,
     pub chunk: ChunkId,
     pub pc: u32,
+    /// An instruction pointer outside chunks (module initialisation: the property).
+    pub fixed_ip: Option<u32>,
 }
 
 /// The iteration state of one loop slot.
@@ -268,11 +270,17 @@ where
                 None => module.name.clone(),
             };
             let source = &ir.sources[module.source.index()];
-            let ip = chunk.ips.get(f.pc as usize).copied().unwrap_or(u32::MAX);
+            let (src_id, ip) = match f.fixed_ip {
+                Some(ip) => (module.source, ip),
+                None => (
+                    chunk.source,
+                    chunk.ips.get(f.pc as usize).copied().unwrap_or(u32::MAX),
+                ),
+            };
             let line = if ip == u32::MAX {
                 None
             } else {
-                Some(ir.sources[chunk.source.index()].lines.line(ip))
+                Some(ir.sources[src_id.index()].lines.line(ip))
             };
             out.push(StackElem {
                 module: module.name.clone(),

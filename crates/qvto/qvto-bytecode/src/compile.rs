@@ -1597,6 +1597,27 @@ impl<'a> Builder<'a> {
                     site,
                 });
             }
+            LValue::TupleProp(tuple, part) => {
+                // `t.part += x` on a List/Dict part: the part is mutated in place
+                let o = self.expr_reg(tuple)?;
+                let cur = self.alloc()?;
+                let ns = self.site(Site::Name(part.clone()))?;
+                self.emit(Insn::GetTuple {
+                    dst: cur,
+                    src: o,
+                    site: ns,
+                });
+                let site = self.site(Site::Assign {
+                    ty: a.target_ty,
+                    add: a.add,
+                    same_elem: false,
+                })?;
+                self.emit(Insn::Assign {
+                    dst: cur,
+                    src: t,
+                    site,
+                });
+            }
         }
         self.release(m);
         Ok(())

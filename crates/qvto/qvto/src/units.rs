@@ -36,7 +36,12 @@ impl FsResolver {
     /// paths of their `qvtTransformationContainer` extensions (the root if none).
     pub fn bundles_below(parent: &Path) -> Vec<Bundle> {
         let mut dirs: Vec<PathBuf> = std::fs::read_dir(parent)
-            .map(|d| d.flatten().map(|e| e.path()).filter(|p| p.is_dir()).collect())
+            .map(|d| {
+                d.flatten()
+                    .map(|e| e.path())
+                    .filter(|p| p.is_dir())
+                    .collect()
+            })
             .unwrap_or_default();
         dirs.sort();
         let mut out = Vec::new();

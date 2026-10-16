@@ -38,7 +38,7 @@ pub fn type_simple_name(p: &Program, t: TypeId) -> String {
                 .collect::<Vec<_>>()
                 .join(", ")
         ),
-        Type::TypeType(_) | Type::OclType => "OclType".into(),
+        Type::TypeType(_) => "OclType".into(),
         other => format!("{other:?}"),
     }
 }
@@ -176,7 +176,7 @@ where
                 Value::Instance(i) => *i == *m || self.module_extends(*i, *m),
                 _ => false,
             },
-            Type::TypeType(_) | Type::OclType => matches!(v, Value::Type(_)),
+            Type::TypeType(_) => matches!(v, Value::Type(_)),
             _ => false,
         }
     }

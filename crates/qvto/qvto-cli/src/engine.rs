@@ -4,11 +4,11 @@
 use qvto::units::{Bundle, FsResolver};
 use qvto_emf::ResourceSet;
 use qvto_model::{ModelStore, ResourceId};
+use qvto_runtime::IdentityKey;
 use qvto_runtime::Mode;
+use qvto_runtime::identity::IdentityHashSource;
 use qvto_sema::ir::Direction;
 use qvto_testkit::engine::{CaseEnv, Engine, Outcome, Outputs, Severity, Status};
-use qvto_runtime::IdentityKey;
-use qvto_runtime::identity::IdentityHashSource;
 use qvto_testkit::fixture::{Problem, Tape, parse_tape};
 use std::collections::HashMap;
 use std::panic::AssertUnwindSafe;
@@ -60,6 +60,25 @@ impl Engine for QvtoEngine {
                 .expect("thread")
                 .join()
         });
+        if std::env::var_os("QVTO_SHOW").is_some()
+            && let Ok(Ok(o)) = &r
+        {
+            eprintln!(
+                "== {} status {:?} load {:?} severity {:?} code {} message {}\n-- log\n{}-- stack\n{}\n-- problems {:?}",
+                env.case.id,
+                o.status,
+                o.load,
+                o.severity,
+                o.code,
+                o.message,
+                o.log,
+                o.stack.as_deref().unwrap_or("-"),
+                o.problems
+                    .iter()
+                    .map(|p| format!("{}:{} {}", p.unit, p.line, p.message))
+                    .collect::<Vec<_>>()
+            );
+        }
         match r {
             Ok(Ok(o)) => o,
             Ok(Err(p)) | Err(p) => {

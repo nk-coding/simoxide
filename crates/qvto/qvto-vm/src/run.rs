@@ -204,7 +204,18 @@ where
                         .find(|(k, _)| *k == gl.name)
                         .map(|(_, v)| v.clone());
                     match raw {
-                        Some(Some(s)) => self.config_value(gl.ty, &gl.name, &s)?,
+                        Some(Some(s)) => {
+                            self.frames.push(crate::vm::Frame {
+                                op: None,
+                                module: gl.module,
+                                chunk: qvto_bytecode::ChunkId(0),
+                                pc: 0,
+                                fixed_ip: Some(gl.span.start),
+                            });
+                            let r = self.config_value(gl.ty, &gl.name, &s);
+                            self.frames.pop();
+                            r?
+                        }
                         _ => Value::Null,
                     }
                 }
@@ -270,6 +281,7 @@ where
             module: c.module,
             chunk,
             pc: entry,
+            fixed_ip: None,
         });
         let r = self.exec_at(chunk, base, ibase, entry);
         self.frames.pop();

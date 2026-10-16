@@ -143,6 +143,7 @@ where
             module: o.module,
             chunk,
             pc: 0,
+            fixed_ip: None,
         });
         (base, ibase)
     }
@@ -777,6 +778,7 @@ where
             module,
             chunk: code.chunk,
             pc: 0,
+            fixed_ip: None,
         });
         let r = self.exec(code.chunk, base, ibase);
         self.frames.pop();

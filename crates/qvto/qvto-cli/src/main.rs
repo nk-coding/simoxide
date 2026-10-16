@@ -1,6 +1,9 @@
 //! `qvto`: the command line. Implemented so far: `qvto conform` (the conformance scoreboard and
 //! the Java reference runner's fixtures). `run`, `check`, `bench`, `disasm` come with the engine.
 
+mod engine;
+
+use qvto_model::ModelStore;
 use qvto_testkit::case::{Case, read_cases};
 use qvto_testkit::engine::{Engine, StubEngine};
 use qvto_testkit::fixture::{self, JavaResult};
@@ -13,7 +16,7 @@ use std::process::exit;
 const USAGE: &str = "\
 usage:
   qvto conform [--suite eclipse|corpus|all] [--cases FILE] [--fixture FILE]
-               [--engine stub|replay:DIR] [--only ID,...] [--prefix P]...
+               [--engine qvto|qvto-fast|stub|replay:DIR] [--only ID,...] [--prefix P]...
                [--report FILE.md] [--tsv FILE] [--verbose]
       Runs the engine on the cases and prints the scoreboard: per case the Eclipse
       driver's checks and the strict comparison with the Java runner's fixture.
@@ -52,6 +55,7 @@ fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
         Some("conform") => conform(&args[1..]),
+        Some("disasm") => disasm(&args[1..]),
         Some("-h" | "--help") | None => {
             println!("{USAGE}");
         }
@@ -214,8 +218,10 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
                 BTreeMap::new()
             }
         };
-        let mut engine: Box<dyn Engine> = match o.engine.as_deref().unwrap_or("stub") {
+        let mut engine: Box<dyn Engine> = match o.engine.as_deref().unwrap_or("qvto") {
             "stub" => Box::new(StubEngine),
+            "qvto" => Box::new(engine::QvtoEngine::new(root, qvto_runtime::Mode::Compat)),
+            "qvto-fast" => Box::new(engine::QvtoEngine::new(root, qvto_runtime::Mode::Fast)),
             e if e.starts_with("replay:") => {
                 let d = PathBuf::from(&e["replay:".len()..]).join(name);
                 Box::new(
@@ -252,4 +258,74 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
         std::fs::write(p, report::tsv(&all))
             .unwrap_or_else(|e| die(&format!("{}: {e}", p.display())));
     }
+}
+
+/// `qvto disasm FILE.qvto [nsURI-or-.ecore ...]`: compiles a transformation (imports relative
+/// to its folder, metamodels from the suite configuration) and prints the program.
+fn disasm(args: &[String]) {
+    let Some(file) = args.first() else {
+        die("usage: qvto disasm FILE.qvto")
+    };
+    let root =
+        find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
+    let models = qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), &root)
+        .unwrap_or_else(|e| die(&format!("{}: {e}", paths::SUITE_CONF)));
+    let path = PathBuf::from(file);
+    let mut rs = models.resource_set_for(&path);
+    let resolver = qvto::units::FsResolver {
+        bundles: qvto::units::FsResolver::bundles_below(&root.join("reference/eclipse-qvto/tests")),
+        from_folder: false,
+    };
+    let main = resolver
+        .unit_source(&path)
+        .unwrap_or_else(|e| die(&format!("{file}: {e}")));
+    for uri in qvto_sema::scan_metamodel_uris(&main, &resolver)
+        .iter()
+        .chain(args[1..].iter())
+    {
+        if let Err(e) = rs.load_metamodel(uri) {
+            eprintln!("metamodel {uri}: {e}");
+        }
+    }
+    let c = qvto::compile(main, &resolver, rs.graph.meta().clone());
+    for u in &c.units {
+        for p in &u.problems {
+            println!(
+                "{} {}:{}: {}",
+                if p.is_error() { "error" } else { "warning" },
+                u.source.file_name,
+                p.line(&u.lines),
+                p.message
+            );
+        }
+    }
+    let Some(p) = c.program else {
+        die(&format!(
+            "no program {}",
+            c.bytecode_error.unwrap_or_default()
+        ))
+    };
+    for (i, src) in p.ir.sources.iter().enumerate() {
+        println!("source {i} {} ({})", src.name, src.qualified_name);
+    }
+    for (i, o) in p.ir.operations.iter().enumerate() {
+        println!(
+            "op {i} {} module {} source {}",
+            o.name, o.module.0, o.source.0
+        );
+    }
+    for (i, m) in p.ir.modules.iter().enumerate() {
+        println!(
+            "module {i} {} source {} {:?} params {:?} entry {:?}",
+            m.name,
+            m.source.0,
+            m.kind,
+            m.model_params
+                .iter()
+                .map(|mp| format!("{:?} {}", mp.direction, mp.name))
+                .collect::<Vec<_>>(),
+            m.entry
+        );
+    }
+    print!("{}", qvto_bytecode::disasm::program(&p));
 }
