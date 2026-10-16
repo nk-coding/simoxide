@@ -161,10 +161,17 @@ fn conform(args: &[String]) {
     match o.sub.as_deref() {
         Some("record") => {
             for (name, cases, fixture) in &suites {
+                let cache = root.join(paths::JAVA_CACHE).join(name);
+                let partial = !o.only.is_empty() || !o.prefixes.is_empty();
                 let run = JavaRun {
                     base: root.clone(),
                     cases: cases.clone(),
-                    out: root.join(paths::JAVA_CACHE).join(name),
+                    // a partial recording goes to a side directory merged into the cache
+                    out: if partial {
+                        cache.with_extension("partial")
+                    } else {
+                        cache.clone()
+                    },
                     only: o.only.clone(),
                     prefixes: o.prefixes.clone(),
                     tape: true,
@@ -172,7 +179,20 @@ fn conform(args: &[String]) {
                     jvm_opts: None,
                 };
                 let _ = std::fs::remove_dir_all(&run.out);
-                match record(&run, fixture, o.runs) {
+                let r = record(&run, fixture, o.runs, partial);
+                if partial && r.is_ok() {
+                    if let Ok(d) = std::fs::read_dir(&run.out) {
+                        for e in d.flatten() {
+                            if e.path().is_dir() {
+                                let target = cache.join(e.file_name());
+                                let _ = std::fs::remove_dir_all(&target);
+                                let _ = std::fs::rename(e.path(), &target);
+                            }
+                        }
+                    }
+                    let _ = std::fs::remove_dir_all(&run.out);
+                }
+                match r {
                     Ok(log) => print!(
                         "{}",
                         log.lines()

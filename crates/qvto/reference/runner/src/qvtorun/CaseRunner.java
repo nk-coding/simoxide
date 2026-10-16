@@ -105,7 +105,9 @@ final class CaseRunner {
 	Outcome runIsolated(Job job) {
 		Outcome[] res = new Outcome[1];
 		DeadlineMonitor monitor = new DeadlineMonitor(System.currentTimeMillis() + timeoutMs);
-		Thread t = new Thread(() -> {
+		// a large stack, as the engine's: QVTo's own depth limit (1000 calls) is reached before a
+		// JVM StackOverflowError (which a default 1 MB thread stack hits at about 740 QVTo calls)
+		Thread t = new Thread(null, () -> {
 			try {
 				res[0] = run(job, monitor);
 			} catch (Throwable e) {
@@ -124,7 +126,7 @@ final class CaseRunner {
 				}
 				res[0] = o;
 			}
-		}, "case-" + job.id);
+		}, "case-" + job.id, 512L << 20);
 		t.setDaemon(true);
 		t.start();
 		try {

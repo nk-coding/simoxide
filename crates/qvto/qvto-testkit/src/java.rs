@@ -101,7 +101,9 @@ pub fn unstable_outputs(
 /// and the default, so that identity-hash-dependent orders change), marks the outputs that differ in any
 /// rerun as unstable, writes the bundle. The first run's
 /// directory stays as the cache (with tapes and XMI).
-pub fn record(run: &JavaRun, bundle: &Path, runs: usize) -> Result<String, String> {
+/// With `merge`, the recorded cases replace theirs in an existing bundle (a recording of some
+/// cases, `--only`/`--prefix`).
+pub fn record(run: &JavaRun, bundle: &Path, runs: usize, merge: bool) -> Result<String, String> {
     let mut log = run.run()?;
     let mut a = fixture::read_result_dir(&run.out).map_err(|e| e.to_string())?;
     let mut flagged = BTreeMap::new();
@@ -140,10 +142,18 @@ pub fn record(run: &JavaRun, bundle: &Path, runs: usize) -> Result<String, Strin
     if let Some(d) = bundle.parent() {
         std::fs::create_dir_all(d).map_err(|e| e.to_string())?;
     }
+    let n_recorded = a.len();
+    if merge && bundle.is_file() {
+        // a partial recording replaces its cases in the existing bundle
+        let text = std::fs::read_to_string(bundle).map_err(|e| e.to_string())?;
+        let mut all = fixture::read_bundle(&text)?;
+        all.extend(std::mem::take(&mut a));
+        a = all;
+    }
     std::fs::write(bundle, fixture::write_bundle(&a)).map_err(|e| e.to_string())?;
     log.push_str(&format!(
         "{} cases recorded in {} ({runs} runs), {} with unstable outputs\n",
-        a.len(),
+        n_recorded,
         bundle.display(),
         flagged.len()
     ));
