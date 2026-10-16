@@ -259,8 +259,10 @@ impl<'a> Parser<'a> {
     fn resolve_prefix(&self, prefix: &str) -> Option<&str> {
         self.ns_decl(prefix).map(|i| &*self.ns[i].uri)
     }
+    /// EMF parses without namespace awareness: `xsi:` attributes are recognised by their
+    /// literal prefix.
     fn prefix_is_xsi(&self, prefix: &str) -> bool {
-        self.ns_decl(prefix).is_some_and(|i| self.ns[i].is_xsi)
+        prefix == "xsi"
     }
 
     fn package_for(&self, ns_uri: &str) -> Option<PackageId> {
@@ -282,18 +284,30 @@ impl<'a> Parser<'a> {
         None
     }
 
-    /// `prefix:Name` -> class (`Err` with EMF's message).
-    fn class_for_qname(&self, qname: &str) -> Result<ClassId, String> {
+    /// `prefix:Name` -> class, reporting EMF's errors.
+    fn class_for_qname(&mut self, qname: &str) -> Option<ClassId> {
         let (prefix, name) = qname.split_once(':').unwrap_or(("", qname));
-        let Some(uri) = self.resolve_prefix(prefix) else {
-            return Err(format!("The namespace prefix '{prefix}' in type '{qname}' is not declared"));
+        let uri = self.resolve_prefix(prefix).map(|u| u.to_string());
+        self.class_in(uri.as_deref(), prefix, name)
+    }
+
+    fn class_in(&mut self, uri: Option<&str>, prefix: &str, name: &str) -> Option<ClassId> {
+        let Some(uri) = uri else {
+            let _ = prefix;
+            self.emf_error(format!("Class '{name}' is not found or is abstract."));
+            return None;
         };
         let Some(p) = self.package_for(uri) else {
-            return Err(format!("Package with uri '{uri}' not found."));
+            self.emf_error(format!("Package with uri '{uri}' not found."));
+            self.emf_error(format!("Class '{name}' is not found or is abstract."));
+            return None;
         };
         match self.g.meta().classifier_by_name(p, name) {
-            Some(Classifier::Class(c)) => Ok(c),
-            _ => Err(format!("Class '{name}' is not found or is abstract.")),
+            Some(Classifier::Class(c)) if !self.is_abstract(c) => Some(c),
+            _ => {
+                self.emf_error(format!("Class '{name}' is not found or is abstract."));
+                None
+            }
         }
     }
 
@@ -327,6 +341,15 @@ impl<'a> Parser<'a> {
         self.attr_spans = spans;
         let qname = self.text_of(e.name().as_ref());
         let (prefix, local) = qname.split_once(':').unwrap_or(("", &qname));
+        if self.stack.is_empty()
+            && attrs.iter().any(|(k, _)| {
+                k.split_once(':').is_some_and(|(p, l)| {
+                    (l == "schemaLocation" || l == "noNamespaceSchemaLocation") && self.prefix_is_xsi(p)
+                })
+            })
+        {
+            self.g.resource_mut(self.res).save_schema_location = true;
+        }
         let frame = match self.stack.last() {
             None | Some(Frame::Wrapper) => {
                 let is_root = self.stack.is_empty();
@@ -339,36 +362,16 @@ impl<'a> Parser<'a> {
                 if is_root && local == "XMI" {
                     Frame::Wrapper
                 } else {
-                    let class = match self.resolve_prefix(prefix) {
-                        None if !prefix.is_empty() => Err(format!("The namespace prefix '{prefix}' is not declared")),
-                        uri => {
-                            let uri = uri.unwrap_or("").to_string();
-                            match self.package_for(&uri) {
-                                Some(p) => match self.g.meta().classifier_by_name(p, local) {
-                                    Some(Classifier::Class(c)) => Ok(c),
-                                    _ => Err(format!("Class '{local}' is not found or is abstract.")),
-                                },
-                                None => Err(format!("Package with uri '{uri}' not found.")),
-                            }
-                        }
-                    };
-                    match class {
-                        Ok(c) if !self.is_abstract(c) => {
+                    let uri = self.resolve_prefix(prefix).map(|u| u.to_string());
+                    match self.class_in(uri.as_deref(), prefix, local) {
+                        Some(c) => {
                             let o = self.create(c, attrs);
                             self.set_attached(o);
                             self.g.resource_mut(self.res).roots.push(o);
                             self.g.objs[o.index()].resource = Some(self.res);
                             Frame::Object(o)
                         }
-                        Ok(c) => {
-                            let n = self.g.meta().class(c).name.to_string();
-                            self.emf_error(format!("Class '{n}' is not found or is abstract."));
-                            Frame::Skip
-                        }
-                        Err(m) => {
-                            self.emf_error(m);
-                            Frame::Skip
-                        }
+                        None => Frame::Skip,
                     }
                 }
             }
@@ -445,11 +448,8 @@ impl<'a> Parser<'a> {
                     .map(|(_, v)| v.clone());
                 let class = match xsi_type {
                     Some(t) => match self.class_for_qname(&t) {
-                        Ok(c) => c,
-                        Err(m) => {
-                            self.emf_error(m);
-                            return Frame::Skip;
-                        }
+                        Some(c) => c,
+                        None => return Frame::Skip,
                     },
                     None => match target {
                         Some(c) => c,
@@ -488,6 +488,9 @@ impl<'a> Parser<'a> {
             }
             let (prefix, local) = k.split_once(':').unwrap_or(("", k));
             if !prefix.is_empty() && self.prefix_is_xsi(prefix) {
+                if local == "schemaLocation" || local == "noNamespaceSchemaLocation" {
+                    self.g.resource_mut(self.res).save_schema_location = true;
+                }
                 continue;
             }
             if matches!(k, "xmi:version" | "xmi:type" | "xmi:uuid") {
@@ -597,16 +600,21 @@ impl<'a> Parser<'a> {
                     id = &tok[1..];
                 } else {
                     let class = match qname.take() {
-                        Some(q) => self.class_for_qname(&q).ok(),
-                        None => fi.class_type(),
+                        Some(q) => self.class_for_qname(&q),
+                        None => match fi.class_type() {
+                            Some(c) if !self.is_abstract(c) => Some(c),
+                            Some(c) => {
+                                let n = self.g.meta().class(c).name.to_string();
+                                self.emf_error(format!("Class '{n}' is not found or is abstract."));
+                                None
+                            }
+                            None => None,
+                        },
                     };
-                    match class.filter(|c| !self.is_abstract(*c)) {
-                        Some(c) => {
-                            let p = self.g.new_object(c);
-                            self.handle_proxy(p, tok);
-                            self.set_feature_value(o, f, Some(p), -1);
-                        }
-                        None => self.emf_error(format!("cannot create proxy for {tok}")),
+                    if let Some(c) = class {
+                        let p = self.g.new_object(c);
+                        self.handle_proxy(p, tok);
+                        self.set_feature_value(o, f, Some(p), -1);
                     }
                     position += 1;
                     continue;

@@ -156,16 +156,33 @@ impl ResourceSet {
         if ns == "http://www.omg.org/XMI" || ns.starts_with("http://schema.omg.org/") || ns == crate::xmi_load::XSI_NS {
             return;
         }
-        let loc = if let Some(l) = self.ns_locations.get(ns) {
-            Some(l.clone())
-        } else {
-            locations
-                .iter()
-                .find(|(n, _)| n == ns)
-                .map(|(_, l)| Uri::parse(l).resolve(&Uri::parse(doc_uri)).to_string())
+        if let Some(l) = self.ns_locations.get(ns).cloned() {
+            let _ = self.load_metamodel(&l);
+            return;
+        }
+        // `xsi:schemaLocation`: the package at the location serves the namespace, whatever its
+        // own nsURI (XMLHandler.getPackageForURI)
+        let Some(loc) = locations
+            .iter()
+            .find(|(n, _)| n == ns)
+            .map(|(_, l)| Uri::parse(l).resolve(&Uri::parse(doc_uri)))
+        else {
+            return;
         };
-        let Some(loc) = loc else { return };
-        let _ = self.load_metamodel(&loc);
+        if self.load_metamodel(&loc.trim_fragment().to_string()).is_err() && self.graph.meta().package_by_ns_uri(ns).is_none() {
+            return;
+        }
+        let Some(r) = self.get_resource(&loc.trim_fragment().to_string(), false) else { return };
+        let target = match loc.fragment() {
+            Some(f) => resolve_fragment(&self.graph, r, f),
+            None => self.graph.roots(r).iter().copied().find(|o| self.graph.links().obj_package.contains_key(o)),
+        };
+        if let Some(o) = target
+            && let Some(&p) = self.graph.links().obj_package.get(&o)
+            && self.graph.meta().package_by_ns_uri(ns).is_none()
+        {
+            self.graph.meta_mut().register_alias(ns, p);
+        }
     }
 
     /// Loads (if needed) and registers the packages of a metamodel resource and of the

@@ -82,6 +82,9 @@ pub struct Resource {
     pub errors: Vec<String>,
     pub warnings: Vec<String>,
     pub loaded: bool,
+    /// The loaded document had `xsi:schemaLocation`: EMF then adds `OPTION_SCHEMA_LOCATION` to
+    /// the resource's default save options.
+    pub save_schema_location: bool,
 }
 
 impl Resource {
@@ -193,6 +196,7 @@ impl Graph {
             errors: Vec::new(),
             warnings: Vec::new(),
             loaded: false,
+            save_schema_location: false,
         });
         id
     }

@@ -63,7 +63,8 @@ pub fn parse_kind(kind: DataKind, s: &str, ecore_factory: bool) -> Result<Value,
 }
 
 /// `convertToString`; `None` for null.
-pub fn value_to_string(meta: &MetaRegistry, v: &Value) -> Option<String> {
+pub fn value_to_string<O>(meta: &MetaRegistry, v: &qvto_model::OwnedDatum<O>) -> Option<String> {
+    use qvto_model::OwnedDatum as Value;
     Some(match v {
         Value::Null => return None,
         Value::Bool(b) => b.to_string(),
@@ -78,6 +79,11 @@ pub fn value_to_string(meta: &MetaRegistry, v: &Value) -> Option<String> {
         Value::Enum(e, i) => meta.enumeration(*e).literals[*i as usize].literal.to_string(),
         Value::Obj(_) => return None,
     })
+}
+
+/// `convertToString` of a [`Datum`](qvto_model::Datum).
+pub fn datum_to_string<O: Copy>(meta: &MetaRegistry, d: qvto_model::Datum<'_, O>) -> Option<String> {
+    value_to_string(meta, &d.to_owned())
 }
 
 /// The intrinsic default of a type (`EClassifier.getDefaultValue()`): zero values of Java

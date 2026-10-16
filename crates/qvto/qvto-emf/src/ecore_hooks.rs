@@ -86,7 +86,13 @@ pub(crate) fn raw_type(g: &Graph, gt: ObjId) -> Option<ObjId> {
             }
         }
     }
-    None
+    // EcorePackage.Literals.EOBJECT / EJAVA_OBJECT (objects of the Ecore resource, if loaded)
+    let fallback = if need_class {
+        qvto_model::Classifier::Class(e.eobject)
+    } else {
+        g.meta.classifier_by_name(e.package, "EJavaObject")?
+    };
+    g.links.classifier_obj.get(&fallback).copied()
 }
 
 fn is_simple_generic(g: &Graph, gt: ObjId) -> bool {
