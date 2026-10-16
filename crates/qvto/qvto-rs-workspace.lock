@@ -162,8 +162,10 @@ dependencies = [
 name = "qvto-sema"
 version = "0.1.0"
 dependencies = [
+ "qvto-emf",
  "qvto-model",
  "qvto-syntax",
+ "qvto-testkit",
  "qvto-types",
 ]
 

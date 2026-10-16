@@ -11,3 +11,7 @@ publish = false
 qvto-syntax.workspace = true
 qvto-model.workspace = true
 qvto-types.workspace = true
+
+[dev-dependencies]
+qvto-emf.workspace = true
+qvto-testkit.workspace = true
