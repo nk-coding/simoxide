@@ -49,6 +49,8 @@ struct Opts {
     report: Option<PathBuf>,
     /// `--profile FILE.svg`: sample the engine's runs (feature `profile`).
     profile: Option<PathBuf>,
+    /// `--java-results FILE`: the Java runner's results of an earlier run (`java.tsv`).
+    java_results: Option<PathBuf>,
 }
 
 fn die(msg: &str) -> ! {
@@ -141,6 +143,7 @@ pub fn bench(args: &[String]) {
         budget_ms: 2000.0,
         report: None,
         profile: None,
+        java_results: None,
     };
     let mut gen_only = false;
     let mut i = 0;
@@ -173,6 +176,7 @@ pub fn bench(args: &[String]) {
             "--budget-ms" => o.budget_ms = next(&mut i).parse().unwrap_or(2000.0),
             "--report" => o.report = Some(PathBuf::from(next(&mut i))),
             "--profile" => o.profile = Some(PathBuf::from(next(&mut i))),
+            "--java-results" => o.java_results = Some(PathBuf::from(next(&mut i))),
             a => die(&format!("unknown argument {a}")),
         }
         i += 1;
@@ -224,6 +228,10 @@ pub fn bench(args: &[String]) {
     }
     let mut java: Vec<(String, Measured)> = Vec::new();
     let mut java_cold: Vec<(String, Measured)> = Vec::new();
+    if let Some(f) = &o.java_results {
+        java = parse_java(&std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("{}: {e}", f.display()))));
+        java.retain(|(id, _)| cases.iter().any(|c| &c.id == id));
+    }
     if o.java || o.java_cold {
         let dir = root.join(OUT_DIR);
         let _ = std::fs::create_dir_all(&dir);
@@ -298,6 +306,7 @@ fn clone_opts(o: &Opts) -> Opts {
         budget_ms: o.budget_ms,
         report: None,
         profile: None,
+        java_results: None,
     }
 }
 
@@ -522,6 +531,11 @@ fn run_java(root: &Path, jobs: &Path, out: &Path, only: Option<&str>, o: &Opts) 
             String::from_utf8_lossy(&res.stderr)
         )
     })?;
+    Ok(parse_java(&text))
+}
+
+/// Rows of the Java runner's `RESULTS.tsv`.
+fn parse_java(text: &str) -> Vec<(String, Measured)> {
     let nums = |s: &str| -> Vec<f64> { s.split(',').filter_map(|x| x.parse().ok()).collect() };
     let mut rows = Vec::new();
     for line in text.lines().skip(1) {
@@ -543,7 +557,7 @@ fn run_java(root: &Path, jobs: &Path, out: &Path, only: Option<&str>, o: &Opts) 
         }
         rows.push((f[0].to_string(), m));
     }
-    Ok(rows)
+    rows
 }
 
 fn fmt_ms(x: f64) -> String {
