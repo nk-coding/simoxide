@@ -1,5 +1,16 @@
 #!/bin/sh
-# Runs Eclipse QVTo headless. See src/qvtorun/QvtoRun.java for the arguments.
+# Runs Eclipse QVTo headless. See src/qvtorun/QvtoRun.java (single run) and
+# src/qvtorun/Batch.java (--batch: a case file in one JVM) for the arguments.
+#
+# The Eclipse test bundle and the samples plugin directories of the reference checkout are on
+# the classpath, so EMF's standalone ExtensionProcessor registers what their plugin.xml files
+# declare (generated and dynamic packages, platform:/plugin mappings), as OSGi would.
 D="$(cd "$(dirname "$0")" && pwd)"
 CP="$(cat "$D/build/classpath.txt" | sed "s#\(^\|:\)lib/#\1$D/lib/#g")"
-exec nice -n 19 ${JAVA:-java} -Xmx2g ${JVM_OPTS:-} -cp "$D/build/classes:$CP${EXTRA_CP:+:$EXTRA_CP}" qvtorun.QvtoRun "$@"
+Q="$D/../eclipse-qvto"
+T="$Q/tests/org.eclipse.m2m.tests.qvt.oml"
+BUNDLES="$T:$Q/plugins/org.eclipse.m2m.qvt.oml.samples"
+MAIN=qvtorun.QvtoRun
+[ "$1" = "--batch" ] && MAIN=qvtorun.Batch
+exec nice -n 19 ${JAVA:-java} ${XMX:--Xmx2g} -Dqvtorun.testbundle="$T" -Dqvtorun.oclplugin="$Q/plugins/org.eclipse.m2m.qvt.oml.ocl" \
+	${JVM_OPTS:-} -cp "$D/build/classes:$CP:$BUNDLES${EXTRA_CP:+:$EXTRA_CP}" $MAIN "$@"
