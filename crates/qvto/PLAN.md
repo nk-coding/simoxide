@@ -7,7 +7,7 @@ Status values: done, next, open, parked.
 |---|---|---|---|
 | Q0 | Research, resources, design, skeleton | done | — |
 | Q1a | Model API and own Ecore/XMI layer (`qvto-model`, `qvto-emf`) | next | Q1b, Q1c, Q1d |
-| Q1b | Lexer and parser (`qvto-syntax`) | next | Q1a, Q1c, Q1d |
+| Q1b | Lexer and parser (`qvto-syntax`) | done | Q1a, Q1c, Q1d |
 | Q1c | Runtime values and Java-compatible primitives (`qvto-runtime` core) | next | Q1a, Q1b, Q1d |
 | Q1d | Reference harness: runner batch mode, canonical dump, conformance-runner skeleton (`qvto-testkit`) | next | Q1a, Q1b, Q1c |
 | Q2 | Type system, standard library signatures, semantic analysis (`qvto-types`, `qvto-sema`) | open | Q3a |
@@ -24,8 +24,14 @@ Status values: done, next, open, parked.
 - **Q1a**: every `.ecore` and model file of the Eclipse test suite and of the SimuLizar/SPD
   corpora loads; XMI save of a loaded model equals EMF's save byte for byte on the suite's
   models; the canonical dump equals the Java runner's dump; the model-API contract tests pass.
-- **Q1b**: all 1 046 `.qvto` files of the suite and the 56 corpus files parse; files with
+- **Q1b**: all 1 046 `.qvto` files of the suite and the 55 corpus files parse; files with
   expected syntax errors report errors; spans are exact; unparse/reparse round trip.
+  Done 2026-10-16 (`crates/qvto-syntax/README.md`, "Verification"): on all 1 102 files the
+  lexer and parser report exactly what Eclipse's parser reports (11 files with syntax errors,
+  33 with parser warnings, same offsets, lengths and messages); round trip on all 1 091
+  error-free files; same accept/reject verdict as Eclipse on 3 306 token mutants and 182
+  edge cases; 121 MB/s (Eclipse warm: 11 MB/s). The 93 error cases of `TestQvtParser` contain
+  10 with syntax errors; the other 83 are semantic and move to Q2.
 - **Q1c**: values, the four OCL collection kinds, Java `HashMap`/`HashSet` iteration order (with
   copy-constructor capacities, removals, treeified bins noted), `String.hashCode`,
   `Double.toString`, `Integer` arithmetic and string operations agree with golden values dumped
@@ -34,7 +40,7 @@ Status values: done, next, open, parked.
   `qvto-testkit` reads `reference/inventory/eclipse-tests.tsv` and reports per-case status.
 - **Q2**: the 49 `compile_ok` parser cases and all positive transformation cases type-check; the
   93 error cases report errors at the annotated spans.
-- **Q3b**: SimuLizar's 38 `.qvto` files compile; the 22 rule files run on the corpus PCM models
+- **Q3b**: SimuLizar's 37 `.qvto` files compile; the 22 rule files run on the corpus PCM models
   and match the Java runner; at least 50 % of the 309 transformation cases pass.
 - **Q4**: Slingshot's SPD transformations run and match the Java runner; at least 85 % of the 309
   cases pass in compat mode.
