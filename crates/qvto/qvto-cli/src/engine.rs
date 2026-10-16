@@ -311,7 +311,8 @@ fn execute(
             .map(|(h, i)| (i.unwrap_or(usize::MAX), *h))
             .collect();
         ordered.sort();
-        let mut queue: std::collections::VecDeque<i32> = ordered.into_iter().map(|(_, h)| h).collect();
+        let mut queue: std::collections::VecDeque<i32> =
+            ordered.into_iter().map(|(_, h)| h).collect();
         let mut fallback = qvto_testkit::idhash::XorShift::recover(t.seed.0, t.seed.1);
         if let Some(x) = fallback.as_mut() {
             // the seed's two draws are taken

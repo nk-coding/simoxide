@@ -57,6 +57,7 @@ fn main() {
         Some("conform") => conform(&args[1..]),
         Some("disasm") => disasm(&args[1..]),
         Some("run") => run_cmd(&args[1..]),
+        Some("bench") => bench(&args[1..]),
         Some("-h" | "--help") | None => {
             println!("{USAGE}");
         }
@@ -258,6 +259,139 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
     if let Some(p) = &o.tsv {
         std::fs::write(p, report::tsv(&all))
             .unwrap_or_else(|e| die(&format!("{}: {e}", p.display())));
+    }
+}
+
+/// `qvto bench [--suite eclipse|corpus] --only ID,... [--repeat N] [--java]`: runs cases N
+/// times with the engine (and with `--java` in one JVM of the reference runner, the case
+/// repeated N times so that the later runs are warm) and prints the run times.
+fn bench(args: &[String]) {
+    let mut suite = "eclipse".to_string();
+    let mut only: Vec<String> = Vec::new();
+    let mut repeat = 20usize;
+    let mut java = false;
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--suite" => {
+                i += 1;
+                suite = args[i].clone();
+            }
+            "--only" => {
+                i += 1;
+                only.extend(args[i].split(',').map(String::from));
+            }
+            "--repeat" => {
+                i += 1;
+                repeat = args[i].parse().unwrap_or(20);
+            }
+            "--java" => java = true,
+            a => die(&format!("unknown argument {a}")),
+        }
+        i += 1;
+    }
+    let root =
+        find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
+    let s = SUITES
+        .iter()
+        .find(|s| s.name == suite)
+        .unwrap_or_else(|| die("unknown suite"));
+    let cases: Vec<Case> = read_cases(&root.join(s.cases)).unwrap_or_else(|e| die(&e.to_string()));
+    let models = qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), &root)
+        .unwrap_or_else(|e| die(&format!("{}: {e}", paths::SUITE_CONF)));
+    let median = |v: &mut Vec<f64>| -> f64 {
+        v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        if v.is_empty() {
+            f64::NAN
+        } else {
+            v[v.len() / 2]
+        }
+    };
+    let mut engine = engine::QvtoEngine::new(&root, qvto_runtime::Mode::Compat);
+    let mut dup = String::new();
+    for c in cases.iter().filter(|c| only.contains(&c.id)) {
+        let conf_models;
+        let models = match &c.conf {
+            Some(cf) => {
+                conf_models = qvto_emf::config::Config::read(&root.join(cf), &root)
+                    .unwrap_or_else(|e| die(&format!("{cf}: {e}")));
+                &conf_models
+            }
+            None => &models,
+        };
+        let env = qvto_testkit::engine::CaseEnv {
+            case: c,
+            base: &root,
+            models,
+        };
+        let mut runs = Vec::new();
+        let mut compiles = Vec::new();
+        for _ in 0..repeat {
+            let o = engine.run(&env);
+            if let Some(t) = o.run_time {
+                runs.push(t.as_secs_f64() * 1e3);
+            }
+            if let Some(t) = o.compile_time {
+                compiles.push(t.as_secs_f64() * 1e3);
+            }
+        }
+        let first_run = runs.first().copied().unwrap_or(f64::NAN);
+        println!(
+            "qvto  {:40} compile {:8.3} ms  run first {:8.3} ms  median {:8.3} ms",
+            c.id,
+            median(&mut compiles),
+            first_run,
+            median(&mut runs)
+        );
+        for k in 0..repeat {
+            let mut c2 = c.clone();
+            c2.id = format!("{}~{k}", c.id);
+            qvto_testkit::case::write_case(&c2, &mut dup);
+        }
+    }
+    if !java {
+        return;
+    }
+    let dir = root.join("target/qvto-bench");
+    let _ = std::fs::create_dir_all(&dir);
+    let file = dir.join("bench.cases");
+    std::fs::write(&file, &dup).unwrap_or_else(|e| die(&e.to_string()));
+    let out = dir.join("java");
+    let _ = std::fs::remove_dir_all(&out);
+    let run = JavaRun {
+        base: root.clone(),
+        cases: file,
+        out: out.clone(),
+        only: Vec::new(),
+        prefixes: Vec::new(),
+        tape: false,
+        save_xmi: false,
+        jvm_opts: None,
+    };
+    if let Err(e) = run.run() {
+        die(&e);
+    }
+    let results = fixture::read_result_dir(&out).unwrap_or_else(|e| die(&e.to_string()));
+    for id in &only {
+        let mut runs: Vec<(usize, f64)> = results
+            .iter()
+            .filter_map(|(k, r)| {
+                let (base, n) = k.split_once('~')?;
+                if base != id {
+                    return None;
+                }
+                Some((n.parse().ok()?, r.get("run-ms")?.parse().ok()?))
+            })
+            .collect();
+        runs.sort_by_key(|x| x.0);
+        let first = runs.first().map(|x| x.1).unwrap_or(f64::NAN);
+        let mut warm: Vec<f64> = runs.iter().skip(runs.len() / 2).map(|x| x.1).collect();
+        println!(
+            "java  {:40} run first {:8.3} ms  median of the second half {:8.3} ms",
+            id,
+            first,
+            median(&mut warm)
+        );
     }
 }
 
