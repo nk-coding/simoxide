@@ -1,0 +1,11 @@
+[package]
+name = "qvto-types"
+description = "OCL and QVTo type system, standard library signatures and blackbox signature descriptors"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+qvto-model.workspace = true

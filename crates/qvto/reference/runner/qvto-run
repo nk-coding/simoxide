@@ -1,0 +1,5 @@
+#!/bin/sh
+# Runs Eclipse QVTo headless. See src/qvtorun/QvtoRun.java for the arguments.
+D="$(cd "$(dirname "$0")" && pwd)"
+CP="$(cat "$D/build/classpath.txt" | sed "s#\(^\|:\)lib/#\1$D/lib/#g")"
+exec nice -n 19 ${JAVA:-java} -Xmx2g ${JVM_OPTS:-} -cp "$D/build/classes:$CP${EXTRA_CP:+:$EXTRA_CP}" qvtorun.QvtoRun "$@"

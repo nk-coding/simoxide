@@ -1,0 +1,10 @@
+[package]
+name = "qvto-syntax"
+description = "Lexer, parser and AST of QVT Operational Mappings and the embedded OCL, with spans and error recovery"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]

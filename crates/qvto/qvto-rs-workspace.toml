@@ -1,0 +1,36 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+license = "EPL-2.0"
+rust-version = "1.88"
+
+[workspace.dependencies]
+qvto-syntax = { path = "crates/qvto-syntax" }
+qvto-model = { path = "crates/qvto-model" }
+qvto-emf = { path = "crates/qvto-emf" }
+qvto-types = { path = "crates/qvto-types" }
+qvto-sema = { path = "crates/qvto-sema" }
+qvto-bytecode = { path = "crates/qvto-bytecode" }
+qvto-runtime = { path = "crates/qvto-runtime" }
+qvto-vm = { path = "crates/qvto-vm" }
+qvto = { path = "crates/qvto" }
+qvto-testkit = { path = "crates/qvto-testkit" }
+
+# Small dev builds: this machine is shared and disk is tight.
+[profile.dev]
+debug = 0
+
+[profile.test]
+debug = 0
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+debug = "line-tables-only"
+
+[profile.bench]
+inherits = "release"

@@ -1,0 +1,7 @@
+/target
+# Downloaded reference material: large or third-party. reference/README.md says how to get it.
+/reference/specs/
+/reference/eclipse-qvto/
+/reference/eclipse-ocl/
+/reference/runner/lib/
+/reference/runner/build/

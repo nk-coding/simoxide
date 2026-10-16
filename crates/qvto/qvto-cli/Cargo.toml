@@ -1,0 +1,16 @@
+[package]
+name = "qvto-cli"
+description = "Command line: run, check, conform, bench"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[[bin]]
+name = "qvto"
+path = "src/main.rs"
+
+[dependencies]
+qvto.workspace = true
+qvto-testkit.workspace = true

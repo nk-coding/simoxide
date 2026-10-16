@@ -1,0 +1,12 @@
+[package]
+name = "qvto-runtime"
+description = "Runtime values, OCL collections, Java-compatible hashing and formatting, standard library implementations, blackbox trait"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+qvto-model.workspace = true
+qvto-types.workspace = true

@@ -1,0 +1,13 @@
+[package]
+name = "qvto-testkit"
+description = "Conformance runner over the Eclipse QVTo test suite and differential testing against the Java reference"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+qvto.workspace = true
+qvto-emf.workspace = true
+qvto-model.workspace = true
