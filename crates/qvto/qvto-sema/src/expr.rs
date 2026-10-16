@@ -270,7 +270,10 @@ impl<'r> Sema<'r> {
     pub(crate) fn simple_name(&mut self, name: &str, name_span: Span, source: Option<Ex>, cst: Span) -> Ex {
         if let Some(s) = &source {
             if s.err {
-                return source.unwrap();
+                // the unparseable source itself, with the CS node's positions
+                let mut x = source.unwrap();
+                x.e.span = cst;
+                return x;
             }
         }
         let explicit = source.is_some();
@@ -389,7 +392,6 @@ impl<'r> Sema<'r> {
         let st = src.ty();
         let seq = matches!(self.ts.types.get(st), Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _) | Type::List(_));
         let ty = self.ts.types.collection(if seq { CollKind::Sequence } else { CollKind::Bag }, body.ty());
-        let err = src.err;
         let lp = ir::Loop {
             kind: LoopKind::XCollect,
             source: src.e,
@@ -401,7 +403,6 @@ impl<'r> Sema<'r> {
             filter_type: None,
         };
         let mut x = self.ex(ExprKind::Loop(Box::new(lp)), ty, cst);
-        x.err = err;
         x.info = Info::ImperativeIterate;
         x
     }

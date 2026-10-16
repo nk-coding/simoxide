@@ -564,6 +564,8 @@ pub struct Assign {
     pub value: Expr,
     /// `+=`
     pub add: bool,
+    /// The left-hand side's span.
+    pub target_span: Span,
 }
 
 #[derive(Clone, Debug)]

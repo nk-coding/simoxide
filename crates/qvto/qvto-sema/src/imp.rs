@@ -378,8 +378,8 @@ impl<'r> Sema<'r> {
             cond: cond_ir,
             filter_type,
         };
+        let _ = err;
         let mut x = self.ex(ExprKind::Loop(Box::new(lp)), ty, cst);
-        x.err = err;
         x.info = Info::ImperativeIterate;
         x
     }
@@ -800,6 +800,7 @@ impl<'r> Sema<'r> {
             target_ty: lty,
             value: rhs.e,
             add: a.add,
+            target_span: a.lhs.span,
         };
         Some(self.ex(ExprKind::Assign(Box::new(asg)), lty, cst))
     }

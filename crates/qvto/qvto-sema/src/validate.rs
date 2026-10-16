@@ -438,6 +438,16 @@ impl<'r> Sema<'r> {
             ExprKind::Return(v) => {
                 self.validate_return(e, v.as_deref(), ctx);
             }
+            ExprKind::Global(_) if e.ty == TypeId::NULL => {
+                self.error(span, bind(om::NullNavigationType_ERROR_, &["this.\"<null>\""]));
+            }
+            ExprKind::Assign(a) => {
+                if let ir::LValue::Global(g) = &a.target {
+                    if self.globals[g.index()].ir.ty == TypeId::NULL {
+                        self.error(a.target_span, bind(om::NullNavigationType_ERROR_, &["this.\"<null>\""]));
+                    }
+                }
+            }
             ExprKind::Call(c) => {
                 self.validate_call(e, c, ctx);
             }
