@@ -128,8 +128,14 @@ fn main() {
         syncer(&journal, &store);
         if !journal.is_empty() {
             // what option D would do incrementally: here the typed model is simply rebuilt
+            let t = std::time::Instant::now();
             let m = simoxide_model::build_from_graph(store.graph().clone(), Default::default());
-            println!("  SimOxide's typed model now: {} containers, {} processing resources", m.containers.len(), m.processing_resources.len());
+            println!(
+                "  SimOxide's typed model rebuilt ({:.1?}): {} containers, {} processing resources",
+                t.elapsed(),
+                m.containers.len(),
+                m.processing_resources.len()
+            );
         }
     }
 
