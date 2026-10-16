@@ -588,6 +588,13 @@ impl MetaRegistry {
         &mut self.enums[e.index()]
     }
 
+    /// Marks a class for recomputing its derived tables in the next
+    /// [`MetaRegistry::finish_classes`] (after its supertypes changed; its subclasses must be
+    /// marked too).
+    pub fn unfinish_class(&mut self, c: ClassId) {
+        self.classes[c.index()].finished = false;
+    }
+
     /// Computes the derived tables of every class that is not finished yet. Classes of one batch
     /// may refer to each other in any order; supertypes must be finished or in the batch.
     pub fn finish_classes(&mut self) -> Result<(), MetaError> {

@@ -140,8 +140,14 @@ impl Session {
         c.0 < self.st.raw_classes
     }
 
-    /// The resource set of the objects of other metamodels (URI maps, metamodel locations).
-    pub fn resource_set(&mut self) -> &mut ResourceSet {
+    /// The resource set of the objects of other metamodels and of the metamodel objects.
+    pub fn resource_set(&self) -> &ResourceSet {
+        &self.rs
+    }
+
+    /// The resource set, for URI maps, metamodel locations, loading (call
+    /// [`SimStore::link_proxies`] after loading models that refer to the graph).
+    pub fn resource_set_mut(&mut self) -> &mut ResourceSet {
         &mut self.rs
     }
 

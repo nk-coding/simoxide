@@ -29,9 +29,11 @@ impl SimTables {
     }
 }
 
-/// A feature type that names an Ecore classifier, resolved once Ecore is registered.
+/// Feature types and supertypes that name Ecore classifiers, resolved once Ecore is registered.
 pub(crate) struct Pending {
     pub ecore_types: Vec<(FeatureId, &'static str, bool)>,
+    /// Class, position among its supertypes, Ecore class name.
+    pub ecore_supers: Vec<(ClassId, usize, &'static str)>,
     pub data_types: Vec<DataTypeId>,
 }
 
@@ -40,6 +42,7 @@ pub(crate) struct Pending {
 pub(crate) fn add_sim_packages(meta: &mut MetaRegistry) -> Pending {
     assert_eq!(meta.package_count(), 0, "SimOxide's packages come first");
     let mut data_types = Vec::new();
+    let mut ecore_supers = Vec::new();
     for (i, p) in sm::PACKAGES.iter().enumerate() {
         let x = &sm::PACKAGE_EXT[i];
         let short = p.name.rsplit('.').next().unwrap_or(p.name);
@@ -60,7 +63,15 @@ pub(crate) fn add_sim_packages(meta: &mut MetaRegistry) -> Pending {
                     let cid = meta.add_class(id, d.name, e.is_abstract, e.is_interface);
                     assert_eq!(cid.0, c.0);
                     meta.class_mut(cid).instance_class_name = e.instance_class_name.map(Into::into);
-                    meta.class_mut(cid).supers = d.supers.iter().map(|s| ClassId(s.0)).collect();
+                    // the complete `eSuperTypes` (generic ones included); Ecore's after Ecore
+                    // is registered
+                    for (k, t) in e.supers.iter().enumerate() {
+                        match *t {
+                            sm::TypeRef::Class(s) => meta.class_mut(cid).supers.push(ClassId(s.0)),
+                            sm::TypeRef::Ecore(n) => ecore_supers.push((cid, k, n)),
+                            ref t => panic!("supertype {t:?} of {}", d.name),
+                        }
+                    }
                 }
                 sm::ClassifierRef::Enum(e) => {
                     let d = e.def();
@@ -151,6 +162,7 @@ pub(crate) fn add_sim_packages(meta: &mut MetaRegistry) -> Pending {
     }
     Pending {
         ecore_types,
+        ecore_supers,
         data_types,
     }
 }
@@ -161,6 +173,19 @@ pub(crate) fn finish(meta: &mut MetaRegistry, pending: &Pending) -> Vec<MetaOper
     let ecore = meta
         .package_by_ns_uri(qvto_emf::ecore::ECORE_NS_URI)
         .expect("Ecore registered");
+    if !pending.ecore_supers.is_empty() {
+        for &(c, k, name) in &pending.ecore_supers {
+            let s = meta
+                .class_by_name(ecore, name)
+                .unwrap_or_else(|| panic!("Ecore class {name}"));
+            meta.class_mut(c).supers.insert(k, s);
+        }
+        // the derived tables of every SimOxide class again (subclasses included)
+        for i in 0..sm::CLASSES.len() {
+            meta.unfinish_class(ClassId(i as u32));
+        }
+        meta.finish_classes().expect("SimOxide metamodel");
+    }
     for &(f, name, tparam) in &pending.ecore_types {
         let k = meta
             .classifier_by_name(ecore, name)

@@ -32,7 +32,7 @@ mod other_home {
     use super::*;
     qvto_model::contract_tests!(|| {
         let session = leak(Session::with_registry(MetaRegistry::new(), &[]));
-        let roles = build_metamodel(session.resource_set().graph.meta_mut());
+        let roles = build_metamodel(session.resource_set_mut().graph.meta_mut());
         assert!(!session.is_graph_class(roles.node));
         let store = SimStore::new(leak(raw::Graph::default()), session);
         (store, roles)
