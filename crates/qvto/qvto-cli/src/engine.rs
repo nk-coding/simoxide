@@ -121,7 +121,11 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
     let mut mm_uris = qvto_sema::scan_metamodel_uris(&main, &resolver);
     mm_uris.extend(case.packages.iter().cloned());
     for uri in &mm_uris {
-        let _ = rs.load_metamodel(uri);
+        if let Err(e) = load_metamodel(&mut rs, uri)
+            && std::env::var_os("QVTO_SHOW").is_some()
+        {
+            eprintln!("metamodel {uri}: {e}");
+        }
     }
     let t0 = Instant::now();
     let compiled = qvto::compile(main, &resolver, rs.graph.meta().clone());
@@ -252,7 +256,7 @@ fn execute(
         .map_err(|e| Outcome::with_status(Status::Crashed(format!("resource set: {e}"))))?;
     let ir = &program.ir;
     for uri in mm_uris {
-        let _ = rs.load_metamodel(uri);
+        let _ = load_metamodel(&mut rs, uri);
     }
     // model parameters: inputs bound positionally to the in/inout parameters
     let main_mod = &ir.modules[ir.main_module.index()];
@@ -384,4 +388,16 @@ fn outputs(mut rs: ResourceSet, out: &qvto::RunOutcome, dump_models: bool) -> Ou
         extents,
         models,
     }
+}
+
+/// Loads and registers the metamodel of a namespace URI (through the configuration's index of
+/// metamodel files) or at a location.
+pub fn load_metamodel(rs: &mut ResourceSet, uri: &str) -> Result<(), String> {
+    if rs.graph.meta().package_by_ns_uri(uri).is_some() {
+        return Ok(());
+    }
+    if let Some(loc) = rs.ns_location(uri).map(String::from) {
+        return rs.load_metamodel(&loc).map(|_| ());
+    }
+    rs.load_metamodel(uri).map(|_| ())
 }

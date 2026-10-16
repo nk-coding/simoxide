@@ -58,6 +58,11 @@ impl ResourceSet {
             .insert(ns_uri.to_string(), location.to_string());
     }
 
+    /// The registered location of the metamodel defining a namespace URI.
+    pub fn ns_location(&self, ns_uri: &str) -> Option<&str> {
+        self.ns_locations.get(ns_uri).map(String::as_str)
+    }
+
     /// Registers a package-registry alias: documents at `key` are the package with `ns_uri`
     /// (e.g. `platform:/plugin/org.eclipse.emf.ecore/model/Ecore.ecore` for Ecore).
     pub fn add_alias(&mut self, key: &str, ns_uri: &str) {

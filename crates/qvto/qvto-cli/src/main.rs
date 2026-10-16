@@ -283,7 +283,7 @@ fn disasm(args: &[String]) {
         .iter()
         .chain(args[1..].iter())
     {
-        if let Err(e) = rs.load_metamodel(uri) {
+        if let Err(e) = engine::load_metamodel(&mut rs, uri) {
             eprintln!("metamodel {uri}: {e}");
         }
     }
