@@ -16,6 +16,7 @@ pub mod error;
 pub mod extent;
 mod jregex;
 mod log;
+mod meta;
 pub mod native;
 mod objects;
 mod run;

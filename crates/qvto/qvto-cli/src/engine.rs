@@ -177,6 +177,8 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -
             eprintln!("metamodel {uri}: {e}");
         }
     }
+    // Ecore's own objects (EcorePackage is always there): `eClass()`, its EOperations
+    rs.ecore_resource();
     let t0 = Instant::now();
     let operations = qvto_emf::operations::meta_operations(&rs.graph);
     let compiled = qvto::compile_with_operations(main, &resolver, rs.graph.meta().clone(), &operations);
@@ -313,6 +315,7 @@ fn execute(
     for uri in mm_uris {
         let _ = load_metamodel(&mut rs, uri);
     }
+    rs.ecore_resource();
     // model parameters: inputs bound positionally to the in/inout parameters
     let main_mod = &ir.modules[ir.main_module.index()];
     let mut args = Vec::new();

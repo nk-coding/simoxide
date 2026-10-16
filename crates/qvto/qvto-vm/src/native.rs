@@ -159,6 +159,11 @@ pub fn java_method_key(method: &str) -> String {
     format!("{class}#{name}{}", &method[open..close])
 }
 
+/// The registry key of a metamodel operation.
+pub fn eoperation_key(ns_uri: &str, class: &str, name: &str) -> String {
+    format!("eoperation:{ns_uri}#{class}.{name}")
+}
+
 impl<S: ModelStore> Natives<S>
 where
     S::Obj: ObjHandle,
@@ -211,6 +216,27 @@ where
             name.to_string(),
             Native {
                 display: Rc::from(display),
+                f: Rc::new(f),
+            },
+        );
+        self
+    }
+
+    /// Registers the implementation of an operation of a metamodel class (an `EOperation`
+    /// without OCL body; what generated Java code implements in Eclipse). `self` is the
+    /// receiver.
+    pub fn eoperation(
+        &mut self,
+        ns_uri: &str,
+        class: &str,
+        name: &str,
+        f: impl Fn(&mut Vm<'_, S>, NativeCall) -> NativeResult + 'static,
+    ) -> &mut Self {
+        let key = eoperation_key(ns_uri, class, name);
+        self.ops.insert(
+            key.clone(),
+            Native {
+                display: Rc::from(key.as_str()),
                 f: Rc::new(f),
             },
         );
@@ -322,7 +348,7 @@ where
         self.invoke_native(&n, call)
     }
 
-    fn invoke_native(&mut self, n: &Native<S>, call: NativeCall) -> VmResult<Value> {
+    pub(crate) fn invoke_native(&mut self, n: &Native<S>, call: NativeCall) -> VmResult<Value> {
         let r = (n.f)(self, call);
         if self.native.canceled {
             self.native.canceled = false;

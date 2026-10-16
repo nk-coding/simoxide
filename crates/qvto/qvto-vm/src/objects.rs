@@ -1006,62 +1006,6 @@ where
         }
         Ok(c)
     }
-
-    // ---- metamodel operations ---------------------------------------------------------------
-
-    /// Operations of metamodels the VM knows (Ecore's `EObject` operations).
-    pub(crate) fn call_meta(&mut self, m: qvto_sema::ir::MetaOpId, at: usize) -> VmResult<Value> {
-        let mo = &self.prog.ir.meta_ops[m.index()];
-        let src = self.regs[at].clone();
-        let name = mo.name.as_str();
-        let Value::Obj(r) = src else {
-            return Ok(Value::Invalid);
-        };
-        if r.is_local() {
-            return Ok(match name {
-                "eContainer" => Value::Null,
-                _ => Value::Invalid,
-            });
-        }
-        let h = S::Obj::from_u32(r.index());
-        Ok(match name {
-            "eContainer" => match self.store.container(h) {
-                Some((p, _)) => Value::Obj(ObjRef::host(p.to_u32())),
-                None => Value::Null,
-            },
-            "eContents" => {
-                let items: Vec<Value> = self
-                    .store
-                    .contents(h)
-                    .into_iter()
-                    .map(|c| Value::Obj(ObjRef::host(c.to_u32())))
-                    .collect();
-                Value::Coll(Rc::new(Coll::from_values(
-                    qvto_runtime::CollKind::OrderedSet,
-                    items,
-                    &self.env,
-                )))
-            }
-            "eAllContents" => {
-                let items: Vec<Value> = self
-                    .store
-                    .all_contents(h)
-                    .into_iter()
-                    .map(|c| Value::Obj(ObjRef::host(c.to_u32())))
-                    .collect();
-                Value::Coll(Rc::new(Coll::Sequence(items)))
-            }
-            "eIsProxy" => Value::Bool(self.store.is_proxy(h)),
-            "eContainingFeature" | "eContainmentFeature" | "eClass" | "eResource" => {
-                return Err(self
-                    .runtime_error(format!("metamodel operation '{name}' is not supported yet")));
-            }
-            _ => {
-                return Err(self
-                    .runtime_error(format!("metamodel operation '{name}' is not supported yet")));
-            }
-        })
-    }
 }
 
 pub(crate) struct FeatureType {

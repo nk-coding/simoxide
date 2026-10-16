@@ -734,6 +734,8 @@ fn misc(n: &mut Natives<Graph>) {
     n.java("public org.eclipse.emf.ecore.EClass org.eclipse.m2m.tests.qvto.transformationProject.Bug507955_Library.mirrorBug507955(org.eclipse.emf.ecore.EClass)", |_vm, c| Ok(arg0(&c)));
     n.java(&format!("public org.eclipse.emf.ecore.EClass {BBOX}.Bug579914_Library.mirrorBug579914(org.eclipse.emf.ecore.EClass)"), |_vm, c| Ok(arg0(&c)));
     n.java(&format!("public simpleuml.Class {BBOX}.Bug573752_Library.test(simpleuml.DataType)"), |vm, _c| create(vm, SIMPLEUML, "Class"));
+    // generated code of the samples' metamodels (`@generated NOT` EOperation bodies)
+    n.eoperation(SIMPLEUML, "Model", "getCustomProperty", |_vm, c| Ok(arg0(&c)));
     n.java("public java.lang.String org.eclipse.m2m.tests.qvt.oml.Bug578955_Library.echoBug578955(java.lang.String)", |_vm, c| Ok(arg0(&c)));
     n.java("public java.lang.String org.eclipse.m2m.tests.qvt.oml.Blackbox.doEchoFromSimpleJavaLibrary(java.lang.String)", |_vm, c| Ok(arg0(&c)));
     n.java("public java.lang.String org.eclipse.m2m.tests.qvt.oml.Bug578265_Library.doEchoFromSimpleJavaLibrary(java.lang.String)", |_vm, c| Ok(arg0(&c)));
