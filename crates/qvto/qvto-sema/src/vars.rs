@@ -166,6 +166,11 @@ impl<'r> Sema<'r> {
         match self.find_most_specific_operation(owner, name, args) {
             Ok(Some(_)) | Err(_) => true,
             Ok(None) => {
+                if let Some(u) = name.strip_prefix('_') {
+                    if self.has_operation(owner, u, args) {
+                        return true;
+                    }
+                }
                 // classic OCL's fall-backs
                 if owner == TypeId::UNLIMITED_NATURAL {
                     return self.has_operation(TypeId::INTEGER, name, args);

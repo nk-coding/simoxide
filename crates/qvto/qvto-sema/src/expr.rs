@@ -237,13 +237,18 @@ impl<'r> Sema<'r> {
     }
 
     pub fn visit_ocl_expression_at(&mut self, e: &ast::Expr, pos: Pos) -> Option<Ex> {
-        let x = self.expr_at(e, pos, e.span)?;
+        self.visit_ocl_expression_cst(e, pos, e.span)
+    }
+
+    pub fn visit_ocl_expression_cst(&mut self, e: &ast::Expr, pos: Pos, cst: Span) -> Option<Ex> {
+        let x = self.expr_at(e, pos, cst)?;
         let mut inner = e;
         while let ast::ExprKind::Paren(i) = &inner.kind {
             inner = i;
         }
-        if let ast::ExprKind::MapCall(_) = &inner.kind {
-            return self.check_mapping_call(x, e.span);
+        if let ast::ExprKind::MapCall(m) = &inner.kind {
+            let sp = self.span_after_source(m.source.as_ref().map(|(s, _)| s), cst);
+            return self.check_mapping_call(x, sp);
         }
         Some(x)
     }
@@ -670,7 +675,10 @@ impl<'r> Sema<'r> {
         let c = self.expr_d(&i.cond);
         let inner = if pos == Pos::Block { Pos::Branch } else { Pos::Other };
         let t = self.expr_at(&i.then, inner, i.then.span);
-        let e = i.els.as_ref().and_then(|x| self.expr_at(x, inner, x.span));
+        let e = i.els.as_ref().and_then(|x| {
+            let sp = self.else_span(i.then.span.end, x.span);
+            self.expr_at(x, inner, sp)
+        });
         if !c.err && c.ty() != TypeId::BOOLEAN {
             let s = self.src();
             let text = i.cond.span.text(&s).to_string();
@@ -699,7 +707,25 @@ impl<'r> Sema<'r> {
         for (c, t) in &i.elifs {
             alts.push((c, t));
         }
-        self.switch_common(&alts, i.els.as_ref(), cst, pos)
+        let else_cst = match (&i.els, i.c_style) {
+            (Some(x), false) => {
+                let from = i.elifs.last().map(|(_, t)| t.span.end).unwrap_or(i.then.span.end);
+                Some(self.else_span(from, x.span))
+            }
+            (Some(x), true) => Some(x.span),
+            _ => None,
+        };
+        self.switch_common_spans(&alts, i.els.as_ref().zip(else_cst), cst, pos)
+    }
+
+    /// `ifElseOpt ::= else ifExpBodyCS`: the else part's CS node starts at `else`.
+    fn else_span(&self, from: u32, els: Span) -> Span {
+        let src = self.src();
+        let text = src.get(from as usize..els.start as usize).unwrap_or("");
+        match text.rfind("else") {
+            Some(i) => Span::new(from + i as u32, els.end),
+            None => els,
+        }
     }
 
     // ---- operation calls -----------------------------------------------------------------------

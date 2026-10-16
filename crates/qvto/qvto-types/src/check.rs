@@ -169,6 +169,8 @@ impl<'a> Checker<'a> {
         match *self.ty(t) {
             // intermediate classes live in their module's package, so they count too
             Type::Class(c) => self.meta.class(c).package != self.std.package,
+            // ocl.ecore's TupleType is an EClass of a non-library metaclass
+            Type::Tuple(_) => true,
             _ => false,
         }
     }

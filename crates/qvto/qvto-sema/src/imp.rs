@@ -640,6 +640,10 @@ impl<'r> Sema<'r> {
 
     /// `visitSwitchExpCS`
     pub(crate) fn switch_common(&mut self, alts: &[(&ast::Expr, &ast::Expr)], els: Option<&ast::Expr>, cst: Span, pos: Pos) -> Ex {
+        self.switch_common_spans(alts, els.map(|e| (e, e.span)), cst, pos)
+    }
+
+    pub(crate) fn switch_common_spans(&mut self, alts: &[(&ast::Expr, &ast::Expr)], els: Option<(&ast::Expr, Span)>, cst: Span, pos: Pos) -> Ex {
         let inner = if pos == Pos::Block { Pos::Branch } else { Pos::Other };
         let mut types: Vec<Option<TypeId>> = Vec::new();
         let mut out = Vec::new();
@@ -655,7 +659,7 @@ impl<'r> Sema<'r> {
         }
         let mut else_e = None;
         match els {
-            Some(e) => match self.visit_ocl_expression_at(e, inner) {
+            Some((e, esp)) => match self.visit_ocl_expression_cst(e, inner, esp) {
                 Some(x) => {
                     types.push(Some(x.ty()));
                     det &= x.det;
@@ -750,7 +754,7 @@ impl<'r> Sema<'r> {
                 }
                 self.validate_variable_modification(v, a.lhs.span, None, !is_mutation);
                 let vt = self.var_type(v);
-                self.validate_assignment(false, &name, vt, rhs.ty(), a.add, a.lhs.span, a.rhs.span);
+                self.validate_assignment(false, &name, vt, rhs.ty(), a.add, a.lhs.span, rhs.e.span);
                 target = match v {
                     VarRef::Local(l) => ir::LValue::Local(l),
                     _ => return None,
@@ -773,7 +777,7 @@ impl<'r> Sema<'r> {
                         self.validate_variable_modification(v, a.lhs.span, Some(p), false);
                     }
                     let pt = self.prop_type(p);
-                    self.validate_assignment(true, &pname, pt, rhs.ty(), a.add, a.lhs.span, a.rhs.span);
+                    self.validate_assignment(true, &pname, pt, rhs.ty(), a.add, a.lhs.span, rhs.e.span);
                 }
                 target = match lv.e.kind {
                     ExprKind::Prop(src, f) => ir::LValue::Prop(*src, f),
@@ -1322,9 +1326,27 @@ impl<'r> Sema<'r> {
 
     // ---- mapping calls -------------------------------------------------------------------------
 
+    /// The span of a CS node that starts after its source (`src.map f()`, `src.resolve(..)`:
+    /// the grammar attaches the source without extending the node).
+    pub(crate) fn span_after_source(&self, source: Option<&ast::Expr>, cst: Span) -> Span {
+        match source {
+            Some(s) => {
+                let src = self.src();
+                let b = src.as_bytes();
+                let mut i = s.span.end as usize;
+                while i < cst.end as usize && (b[i].is_ascii_whitespace() || b[i] == b'.' || b[i] == b'-' || b[i] == b'>') {
+                    i += 1;
+                }
+                Span::new(i as u32, cst.end)
+            }
+            None => cst,
+        }
+    }
+
     /// `[src.|src->]map|xmap [M::]name(args)`; the "mapping expected" check is the statement
     /// context's (`visitOclExpressionCS`).
     pub(crate) fn map_call(&mut self, m: &ast::MapCall, cst: Span, pos: Pos) -> Option<Ex> {
+        let cst = self.span_after_source(m.source.as_ref().map(|(s, _)| s), cst);
         let n = m.name.segments.len();
         let name = &m.name.segments[n - 1];
         let qualifier = &m.name.segments[..n - 1];
@@ -1535,18 +1557,7 @@ impl<'r> Sema<'r> {
             ty = if one { base } else { self.ts.types.collection(CollKind::Sequence, base) };
         }
         // the ResolveExp's positions are its own CS node's, without the source
-        let own = match &r.source {
-            Some((s, _)) => {
-                let src = self.src();
-                let b = src.as_bytes();
-                let mut i = s.span.end as usize;
-                while i < cst.end as usize && (b[i].is_ascii_whitespace() || b[i] == b'.' || b[i] == b'-' || b[i] == b'>') {
-                    i += 1;
-                }
-                Span::new(i as u32, cst.end)
-            }
-            None => cst,
-        };
+        let own = self.span_after_source(r.source.as_ref().map(|(s, _)| s), cst);
         if r.late {
             self.late_resolves.push(LateResolve { span: own, ok: false });
         }
