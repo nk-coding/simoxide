@@ -10,3 +10,5 @@ publish = false
 [dependencies]
 qvto-sema.workspace = true
 qvto-types.workspace = true
+qvto-model.workspace = true
+qvto-syntax.workspace = true

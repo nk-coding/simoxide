@@ -7,8 +7,15 @@ license.workspace = true
 rust-version.workspace = true
 publish = false
 
+[features]
+default = ["emf"]
+# `ObjHandle` for qvto-emf's object ids
+emf = ["dep:qvto-emf"]
+
 [dependencies]
 qvto-model.workspace = true
 qvto-types.workspace = true
+qvto-sema.workspace = true
 qvto-bytecode.workspace = true
 qvto-runtime.workspace = true
+qvto-emf = { workspace = true, optional = true }
