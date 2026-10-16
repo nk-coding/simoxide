@@ -371,6 +371,31 @@ where
         }
     }
 
+    /// A blackbox operation call: a Java library operation as an OCL operation call, a
+    /// `blackbox` operation declared in QVTo on a stack frame of its own
+    /// (`executeImperativeOperation`; its instruction pointer is the declaration).
+    pub(crate) fn call_native_op(
+        &mut self,
+        op: OpId,
+        src: Value,
+        args: Vec<Value>,
+    ) -> VmResult<Value> {
+        if self.is_library_native(op) {
+            return self.call_native(op, src, args);
+        }
+        let o = self.prog.op(op);
+        self.frames.push(crate::vm::Frame {
+            op: Some(op),
+            module: o.module,
+            chunk: qvto_bytecode::ChunkId(0),
+            pc: 0,
+            fixed_ip: Some(o.span.start),
+        });
+        let r = self.call_native(op, src, args);
+        self.frames.pop();
+        r
+    }
+
     /// The registers `at..at + n` as arguments.
     pub(crate) fn native_args(&self, op: OpId, at: usize) -> Vec<Value> {
         let n = self.prog.op(op).params.len();
@@ -387,6 +412,9 @@ where
         base: usize,
     ) -> VmResult<Value> {
         let o = self.prog.op(op);
+        if let Some(f) = self.frames.last_mut() {
+            f.fixed_ip = Some(o.span.start);
+        }
         let self_ = if o.context.is_some() {
             src.clone()
         } else {

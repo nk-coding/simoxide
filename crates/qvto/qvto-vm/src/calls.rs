@@ -240,7 +240,7 @@ where
         let o = self.prog.op(op);
         if o.is_blackbox && (o.kind != OpKind::Mapping || self.is_library_native(op)) {
             let args = self.native_args(op, args_at);
-            return self.call_native(op, src, args);
+            return self.call_native_op(op, src, args);
         }
         if o.kind == OpKind::Mapping {
             let n = o.params.len();
