@@ -34,7 +34,11 @@ public final class ScriptRunner {
 
     static void run(String ecore, Path in, Path outDir) throws IOException {
         ResourceSet mm = new ResourceSetImpl();
-        Resource r = mm.getResource(URI.createFileURI(new File(ecore).getAbsolutePath()), true);
+        // a fixed URI, so saves with schema locations do not depend on the checkout's path
+        Resource r = mm.createResource(URI.createURI("http://qvto-rs/contract.ecore"));
+        try (InputStream is = new FileInputStream(ecore)) {
+            r.load(is, null);
+        }
         EPackage pkg = (EPackage) r.getContents().get(0);
         Files.createDirectories(outDir);
         List<Path> scripts = new ArrayList<>();
@@ -56,6 +60,7 @@ public final class ScriptRunner {
                 sr.out.append('\n');
             }
             sr.state();
+            sr.saves();
             byte[] b = sr.out.toString().getBytes(StandardCharsets.UTF_8);
             String name = p.getFileName().toString().replace(".script", ".out");
             Files.write(outDir.resolve(name), b);
@@ -155,6 +160,28 @@ public final class ScriptRunner {
                 return "ok";
             }
             default: throw new IllegalArgumentException(a[0]);
+        }
+    }
+
+    /** Each resource saved with default options and with the reference runner's options. */
+    void saves() {
+        for (Map.Entry<String, Resource> e : res.entrySet()) {
+            for (int variant = 0; variant < 2; variant++) {
+                out.append("~save ").append(e.getKey()).append(variant == 0 ? " default" : " runner").append('\n');
+                Map<Object, Object> opts = new HashMap<>();
+                if (variant == 1) {
+                    opts.put(org.eclipse.emf.ecore.xmi.XMLResource.OPTION_ENCODING, "UTF-8");
+                    opts.put(org.eclipse.emf.ecore.xmi.XMLResource.OPTION_SCHEMA_LOCATION, Boolean.TRUE);
+                }
+                try {
+                    ByteArrayOutputStream b = new ByteArrayOutputStream();
+                    e.getValue().save(b, opts);
+                    out.append(b.toString(StandardCharsets.UTF_8));
+                } catch (Exception x) {
+                    Throwable c = x.getCause() != null ? x.getCause() : x;
+                    out.append("err ").append(c.getClass().getSimpleName()).append('\n');
+                }
+            }
         }
     }
 

@@ -12,8 +12,9 @@
 
 use qvto_emf::canon::{first_difference, fnv64};
 use qvto_emf::datatypes::java_double_to_string;
+use qvto_emf::xmi_save::{save, SaveOptions};
 use qvto_emf::{Graph, ObjId};
-use qvto_model::contract::{build_metamodel, Roles};
+use qvto_model::contract::Roles;
 use qvto_model::{ClassId, Datum, FeatureId, ModelError, ModelStore, ResourceId};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -194,8 +195,11 @@ fn err(e: &ModelError) -> String {
 
 impl Runner {
     fn new() -> Runner {
-        let mut g = Graph::new();
-        let roles = build_metamodel(g.meta_mut());
+        let mut rs = qvto_emf::ResourceSet::new();
+        let r = rs.load_text("http://qvto-rs/contract.ecore", qvto_model::contract::CONTRACT_ECORE).unwrap();
+        rs.register(r).unwrap();
+        let roles = Roles::resolve(rs.graph.meta()).unwrap();
+        let g = rs.graph;
         Runner { g, roles, objs: HashMap::new(), order: Vec::new(), names: HashMap::new(), res: Vec::new() }
     }
 
@@ -392,6 +396,19 @@ fn run(lines: &[String]) -> String {
         out.push_str(&format!("{l} => {res}\n"));
     }
     rn.state(&mut out);
+    for (name, r) in &rn.res {
+        for (variant, opts) in [
+            ("default", SaveOptions::for_resource(rn.g.resource(*r))),
+            ("runner", SaveOptions { encoding: Some("UTF-8".into()), schema_location: true, ..SaveOptions::for_resource(rn.g.resource(*r)) }),
+        ] {
+            out.push_str(&format!("~save {name} {variant}\n"));
+            match save(&rn.g, *r, &opts) {
+                Ok(t) => out.push_str(&t),
+                Err(e) if e.starts_with("DanglingHREFException") => out.push_str("err DanglingHREFException\n"),
+                Err(e) => out.push_str(&format!("err {e}\n")),
+            }
+        }
+    }
     out
 }
 
