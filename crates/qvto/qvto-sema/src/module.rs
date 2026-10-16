@@ -81,7 +81,88 @@ pub(crate) fn scoped_parts(s: &ast::ScopedName) -> (Option<&ast::Name>, Option<C
     (name, ctx)
 }
 
-pub(crate) fn method_decl<'u>(m: MethodCs<'u>) -> MethodDecl<'u> {
+pub(crate) fn method_decl<'u>(m: MethodCs<'u>, src: &str) -> MethodDecl<'u> {
+    let mut d = method_decl_raw(m);
+    d.decl_span = eclipse_decl_span(m, &d, src);
+    d
+}
+
+/// The span of Eclipse's `MappingDeclarationCS`: from the `helper`/`query`/`constructor`
+/// keyword (mappings: the direction keyword, else `mapping`) to the end of the signature.
+fn eclipse_decl_span(m: MethodCs<'_>, d: &MethodDecl<'_>, src: &str) -> Span {
+    let q1 = d.decl_span;
+    let name_start = d.context.as_ref().map(|c| c.span().start).or(d.name.map(|n| n.span.start));
+    let Some(ns) = name_start else {
+        return q1;
+    };
+    let kw: Option<&str> = match m {
+        MethodCs::Helper(h) => h.kind.spelling(),
+        MethodCs::Constructor(_) => Some("constructor"),
+        MethodCs::Mapping(mp) => match mp.direction {
+            Some(k) => k.spelling(),
+            None => Some("mapping"),
+        },
+        MethodCs::Entry(_) => None,
+    };
+    let Some(kw) = kw else {
+        return q1;
+    };
+    let text = src.get(q1.start as usize..ns as usize).unwrap_or("");
+    let start = match rfind_word(text, kw) {
+        Some(i) => q1.start + i as u32,
+        None => q1.start,
+    };
+    let end = match d.results.last() {
+        Some(r) => r.span.end,
+        None => {
+            let name_end = d.name.map(|n| n.span.end).unwrap_or(ns);
+            match_paren_end(src, name_end, q1.end).unwrap_or(q1.end)
+        }
+    };
+    Span::new(start, end.max(start))
+}
+
+fn rfind_word(text: &str, w: &str) -> Option<usize> {
+    let b = text.as_bytes();
+    let mut end = text.len();
+    while let Some(i) = text[..end].rfind(w) {
+        let e = i + w.len();
+        let before = i == 0 || !(b[i - 1].is_ascii_alphanumeric() || b[i - 1] == b'_');
+        let after = e >= b.len() || !(b[e].is_ascii_alphanumeric() || b[e] == b'_');
+        if before && after {
+            return Some(i);
+        }
+        end = i;
+    }
+    None
+}
+
+/// The end of the parenthesised list starting at the first `(` after `from`.
+fn match_paren_end(src: &str, from: u32, limit: u32) -> Option<u32> {
+    let b = src.as_bytes();
+    let mut i = from as usize;
+    let lim = (limit as usize).min(b.len());
+    while i < lim && b[i] != b'(' {
+        i += 1;
+    }
+    let mut depth = 0;
+    while i < lim {
+        match b[i] {
+            b'(' => depth += 1,
+            b')' => {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(i as u32 + 1);
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    None
+}
+
+fn method_decl_raw<'u>(m: MethodCs<'u>) -> MethodDecl<'u> {
     match m {
         MethodCs::Helper(h) => {
             let (name, context) = scoped_parts(&h.name);
@@ -1046,7 +1127,7 @@ impl<'r> Sema<'r> {
     fn visit_method_headers<'u>(&mut self, id: ModuleId, cs: &ModuleCs<'u>) -> Vec<(MethodCs<'u>, OpId)> {
         let mut map: Vec<(MethodCs<'u>, OpId)> = Vec::new();
         for &mcs in &cs.methods {
-            let d = method_decl(mcs);
+            let d = method_decl(mcs, &self.src());
             let kind = match mcs {
                 MethodCs::Constructor(_) => ir::OpKind::Constructor,
                 MethodCs::Mapping(_) => {
@@ -1067,7 +1148,7 @@ impl<'r> Sema<'r> {
         self.patch_signatureless(id);
         let mut entry_found = false;
         for &(mcs, op) in &map {
-            let d = method_decl(mcs);
+            let d = method_decl(mcs, &self.src());
             let qname = d.repr();
             let is_ctor = kind_of(self, op) == ir::OpKind::Constructor;
             for q in d.qualifiers {

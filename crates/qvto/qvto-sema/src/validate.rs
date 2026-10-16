@@ -85,7 +85,8 @@ impl<'r> Sema<'r> {
         if let Some(ct) = info.context {
             if matches!(self.ts.types.get(ct), Type::Module(_)) {
                 let tn = self.qualified_name(ct);
-                let span = mcs.map(|c| crate::module::method_decl(c)).and_then(|d| d.context.map(|c| c.span())).unwrap_or(info.decl_span);
+                let src = self.src();
+                let span = mcs.map(|c| crate::module::method_decl(c, &src)).and_then(|d| d.context.map(|c| c.span())).unwrap_or(info.decl_span);
                 self.error(span, bind(vm::QvtOperationalValidationVisitor_invalidContextualType, &[&tn]));
             }
         }

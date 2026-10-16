@@ -1534,15 +1534,28 @@ impl<'r> Sema<'r> {
             let base = if inverse { mapping_ctx.unwrap_or(TypeId::OCL_ANY) } else { mapping_result.unwrap_or(TypeId::OCL_ANY) };
             ty = if one { base } else { self.ts.types.collection(CollKind::Sequence, base) };
         }
+        // the ResolveExp's positions are its own CS node's, without the source
+        let own = match &r.source {
+            Some((s, _)) => {
+                let src = self.src();
+                let b = src.as_bytes();
+                let mut i = s.span.end as usize;
+                while i < cst.end as usize && (b[i].is_ascii_whitespace() || b[i] == b'.' || b[i] == b'-' || b[i] == b'>') {
+                    i += 1;
+                }
+                Span::new(i as u32, cst.end)
+            }
+            None => cst,
+        };
         if r.late {
-            self.late_resolves.push(LateResolve { span: cst, ok: false });
+            self.late_resolves.push(LateResolve { span: own, ok: false });
         }
         if single {
             let mp = mapping.unwrap();
             let info = &self.ops[mp.index()];
             let valid = if inverse { info.contextual } else { !info.ir.results.is_empty() };
             if !valid {
-                self.warning(cst, bind(vm::QvtOperationalVisitorCS_invalidResolveInMapping, &[&fq]));
+                self.warning(own, bind(vm::QvtOperationalVisitorCS_invalidResolveInMapping, &[&fq]));
             } else if let Some(tv) = target_var_ty {
                 let expected = if inverse { mapping_ctx.unwrap_or(TypeId::NULL) } else { mapping_result.unwrap_or(TypeId::NULL) };
                 if self.ts.ck().relationship(expected, tv) & rel::RELATED_TYPE == 0 {
@@ -1560,7 +1573,7 @@ impl<'r> Sema<'r> {
             cond_var,
             cond: cond_ir,
         };
-        let mut x = self.ex(ExprKind::Resolve(Box::new(rs)), ty, cst);
+        let mut x = self.ex(ExprKind::Resolve(Box::new(rs)), ty, own);
         x.info = Info::Resolve;
         x
     }

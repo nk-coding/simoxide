@@ -166,34 +166,46 @@ impl<'r> Sema<'r> {
         }
     }
 
-    /// `FormattingHelperImpl.formatOperationSignature`: `owner::name(T1, T2) : R`.
+    /// `FormattingHelperImpl.formatOperationSignature`:
+    /// `owner::name(T1, T2) : R - Module` (no owner for module operations).
     pub fn format_op_signature(&mut self, o: OpRef) -> String {
         let owner = self.op_owner(o);
         let mut s = String::new();
-        let on = self.type_name(owner);
-        s.push_str(&on);
-        s.push_str("::");
+        if !matches!(self.ts.types.get(owner), Type::Module(_)) {
+            let q = self.sig_type_name(owner, true);
+            s.push_str(&q);
+            s.push_str("::");
+        }
         s.push_str(self.op_name(o));
         s.push('(');
         let params = self.op_params(o);
-        let names = self.op_param_names(o);
         for (i, p) in params.iter().enumerate() {
             if i > 0 {
                 s.push_str(", ");
             }
-            s.push_str(&names[i]);
-            s.push_str(" : ");
-            let pn = self.type_name(*p);
-            s.push_str(&pn);
+            let n = self.sig_type_name(*p, false);
+            s.push_str(&n);
         }
-        s.push(')');
+        s.push_str(") : ");
         let r = self.op_ret(o);
-        if r != TypeId::OCL_VOID {
-            s.push_str(" : ");
-            let rn = self.type_name(r);
-            s.push_str(&rn);
+        let rn = self.sig_type_name(r, false);
+        s.push_str(&rn);
+        if let Some(m) = self.op_module(o) {
+            s.push_str(" - ");
+            s.push_str(&self.modules[m.index()].name.clone());
         }
         s
+    }
+
+    /// A type in a signature: predefined types by name, others qualified.
+    fn sig_type_name(&mut self, t: TypeId, owner: bool) -> String {
+        let predefined = self.ts.ck().is_predefined(t) || self.ts.types.is_collection_like(t) || matches!(self.ts.types.get(t), Type::Tuple(_) | Type::TypeType(_));
+        if predefined && !owner {
+            self.type_name(t)
+        } else {
+            let m = self.cur_module_name();
+            self.ts.ck().qualified_name(t, &m)
+        }
     }
 }
 

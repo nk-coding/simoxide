@@ -65,7 +65,7 @@ impl<'r> Sema<'r> {
 
     /// `visitMappingMethodCS`
     pub(crate) fn visit_method(&mut self, module: ModuleId, mcs: MethodCs<'_>, op: OpId) {
-        let d = method_decl(mcs);
+        let d = method_decl(mcs, &self.src());
         self.begin_operation(module, op);
         match mcs {
             MethodCs::Constructor(c) => self.visit_constructor(c, op, &d),
