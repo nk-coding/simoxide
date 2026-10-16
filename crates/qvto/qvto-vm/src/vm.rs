@@ -188,6 +188,8 @@ where
     pub(crate) static_vals: HashMap<qvto_model::FeatureId, Value>,
     /// The intermediate extent of each transformation (`getIntermediateExtent`).
     pub(crate) interm_extents: HashMap<u32, usize>,
+    /// The records of the input trace of an incremental update.
+    pub(crate) inc_trace: Vec<crate::inctrace::IncRecord>,
     /// Transformation instances made with `new T(...)`: the module and the extents of its
     /// model parameters (`Value::Instance(NESTED | index)`).
     pub(crate) nested: Vec<(ModuleId, Vec<usize>)>,
@@ -270,6 +272,7 @@ where
             interm_vals: HashMap::new(),
             static_vals: HashMap::new(),
             interm_extents: HashMap::new(),
+            inc_trace: Vec::new(),
             nested: Vec::new(),
             cur_transf: prog.ir.main_module,
             regexes: RefCell::new(HashMap::new()),

@@ -11,6 +11,7 @@
 //! ```
 
 mod calls;
+pub mod inctrace;
 pub mod env;
 pub mod error;
 pub mod extent;
@@ -27,6 +28,7 @@ mod types;
 pub mod vm;
 
 pub use env::{RunEnv, TapeHook};
+pub use inctrace::{IncrementalTrace, TraceParam, TraceRecordIn, TraceValue};
 pub use error::{ErrorKind, QvtError, StackElem, Unwind};
 pub use native::{NativeCall, NativeError, NativeFn, NativeResult, Natives, java_method_key};
 pub use run::RunOutcome;

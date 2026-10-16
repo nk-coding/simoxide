@@ -201,3 +201,64 @@ main() {
          Level 1 - moved, data: 0\nlist, data: [Node, Node]\n"
     );
 }
+
+#[test]
+fn incremental_update_reuses_recorded_results() {
+    // bug463572: a mapping call without a record in the run's trace starts with the result of
+    // the input trace's record for the same mapping and source
+    use qvto_model::{Datum, ModelStore};
+    use qvto_vm::{IncrementalTrace, TraceParam, TraceRecordIn, TraceValue};
+    let mut rs = ResourceSet::new();
+    let _ = rs.ecore_resource();
+    let meta = rs.graph.meta_mut().clone();
+    let epackage = meta.class_by_name(meta.package_by_ns_uri("http://www.eclipse.org/emf/2002/Ecore").unwrap(), "EPackage").unwrap();
+    let name = meta.feature_by_name(epackage, "name").unwrap();
+    let input = rs.graph.create(epackage).unwrap();
+    rs.graph.set(input, name, Datum::Str("in")).unwrap();
+    let old = rs.graph.create(epackage).unwrap();
+    rs.graph.set(old, name, Datum::Str("old")).unwrap();
+    let main = UnitSource {
+        key: "mem:t".into(),
+        qualified_name: "t".into(),
+        file_name: "t.qvto".into(),
+        path: None,
+        text: Rc::from(
+            "modeltype E uses 'http://www.eclipse.org/emf/2002/Ecore';
+             transformation t(in i : E, out o : E);
+             main() { i.rootObjects()![EPackage].map m(); }
+             mapping EPackage::m() : EPackage { if (name = null) { name := 'new' }; }",
+        ),
+        blackbox: None,
+    };
+    let c = qvto::compile(main, &NoImports, meta);
+    let program = c.program.expect("compiles");
+    let param = |v| TraceParam {
+        name: "result".into(),
+        kind: qvto_sema::ir::Direction::Out,
+        type_name: "EPackage".into(),
+        value: v,
+    };
+    let trace = IncrementalTrace {
+        records: vec![TraceRecordIn {
+            mapping: "m".into(),
+            package: "t".into(),
+            module: "t".into(),
+            context: Some(TraceParam {
+                name: "self".into(),
+                kind: qvto_sema::ir::Direction::In,
+                type_name: "EPackage".into(),
+                value: TraceValue::Obj(input.0),
+            }),
+            params: Vec::new(),
+            results: vec![param(TraceValue::Obj(old.0))],
+        }],
+    };
+    let mut vm = qvto::Vm::new(&program, &mut rs.graph, qvto::RunOptions::default());
+    vm.set_incremental_trace(trace);
+    let out = vm.run_transformation(vec![vec![input], Vec::new()]);
+    assert_eq!(out.severity, 0, "{}", out.message);
+    let roots = out.extents[1].clone().unwrap();
+    assert_eq!(roots.len(), 1);
+    assert_eq!(roots[0].index(), old.0);
+    assert!(matches!(rs.graph.get(old, name), Datum::Str("old")));
+}

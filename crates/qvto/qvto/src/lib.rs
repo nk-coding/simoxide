@@ -11,6 +11,7 @@
 //! ```
 
 pub mod blackbox;
+pub mod trace;
 pub mod units;
 
 pub use qvto_bytecode::Program;

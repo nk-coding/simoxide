@@ -534,6 +534,8 @@ where
             };
             return Ok((value, MappingStatus::FetchedFromTrace));
         }
+        // in case of incremental update: the recorded results and out parameters
+        self.incremental_fetch(op, &self_val, &params, base)?;
         let m = o.mapping.as_ref();
         if let Some(m) = m
             && !m.disjuncts.is_empty()

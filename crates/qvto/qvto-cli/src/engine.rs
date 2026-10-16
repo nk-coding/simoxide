@@ -344,7 +344,20 @@ fn execute(
             None => args.push(Vec::new()),
         }
     }
+    // the input trace of an incremental update (its references to the previous run's inputs
+    // and outputs resolve in this resource set)
+    let trace_res = match &case.trace_in {
+        Some(t) => match rs.load_file(&env.path(t)) {
+            Ok(r) => Some(r),
+            Err(e) => {
+                return Err(Outcome::with_status(Status::Crashed(format!("trace {t}: {e}"))));
+            }
+        },
+        None => None,
+    };
     rs.resolve_all();
+    let inc_trace =
+        trace_res.map(|r| qvto::trace::read_incremental_trace(&rs.graph, &rs.graph.roots(r).to_vec()));
     let first_created = rs.graph.object_count() as u32;
     let id_source: Option<Box<dyn IdentityHashSource>> = tape.map(|t| {
         // objects that exist before the run: their recorded hashes by key; objects the run
@@ -407,6 +420,9 @@ fn execute(
     let (out, log) = {
         let mut vm = qvto::Vm::new(program, &mut rs.graph, opts);
         vm.set_natives(std::rc::Rc::new(crate::bbox::natives()));
+        if let Some(t) = inc_trace {
+            vm.set_incremental_trace(t);
+        }
         let out = vm.run_transformation(args);
         (out, std::mem::take(&mut vm.log))
     };
