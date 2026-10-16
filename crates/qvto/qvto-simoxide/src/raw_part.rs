@@ -64,10 +64,10 @@ pub(crate) fn to_datum<'a>(meta: &MetaRegistry, f: FeatureId, v: &'a Value) -> D
     match v {
         Value::Null => Datum::Null,
         Value::Bool(b) => Datum::Bool(*b),
-        Value::Str(s) | Value::Other(s) => match k {
+        Value::Str(s) => Datum::Str(s),
+        Value::Other(s) => match k {
             Some(DataKind::String) => Datum::Str(s),
             Some(DataKind::Char) => Datum::Char(s.encode_utf16().next().unwrap_or(0)),
-            _ if matches!(v, Value::Str(_)) => Datum::Str(s),
             _ => Datum::Other(s),
         },
         Value::Int(i) => match k {
@@ -101,10 +101,9 @@ pub(crate) fn to_value(meta: &MetaRegistry, f: FeatureId, d: &Datum<'_, u32>) ->
         Datum::Char(c) => Value::Other(String::from_utf16_lossy(&[c]).into()),
         Datum::Double(x) => Value::Double(x),
         Datum::Float(x) => Value::Double(x as f64),
-        Datum::Str(s) => match kind(meta, f) {
-            Some(DataKind::String) | None => Value::Str(s.into()),
-            _ => Value::Other(s.into()),
-        },
+        // kept as given, like `qvto_emf::Graph` (a String stored in an `Object`-like attribute
+        // reads back as a String)
+        Datum::Str(s) => Value::Str(s.into()),
         Datum::Other(s) => Value::Other(s.into()),
         Datum::Enum(_, i) => Value::Enum(i),
     }
