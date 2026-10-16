@@ -47,7 +47,7 @@ fn materialized_objects_register_as_the_original() {
         params: vec![("who".into(), string, one)],
         result: Some((string, MetaMultiplicity { many: true, ..one })),
     }];
-    let r = rs.materialize(p, "platform:/plugin/x/model/contract.ecore", &ops).unwrap();
+    let r = rs.materialize(&[(p, "platform:/plugin/x/model/contract.ecore")], &ops).unwrap()[0];
     // eClass() objects
     let n = rs.graph.create(node).unwrap();
     let co = rs.graph.classifier_object(Classifier::Class(rs.graph.class_of(n))).unwrap();
@@ -86,7 +86,7 @@ fn materialized_objects_register_as_the_original() {
 #[test]
 fn ecore_files_can_refer_to_materialized_packages() {
     let (mut rs, p) = contract_first();
-    rs.materialize(p, "platform:/plugin/x/model/contract.ecore", &[]).unwrap();
+    rs.materialize(&[(p, "platform:/plugin/x/model/contract.ecore")], &[]).unwrap();
     let ext = r#"<?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="ext" nsURI="http://ext" nsPrefix="ext">

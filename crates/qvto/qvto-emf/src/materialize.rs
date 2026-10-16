@@ -13,29 +13,33 @@ use qvto_model::{
 };
 
 impl ResourceSet {
-    /// Creates the Ecore objects of package `top` (with its subpackages) in a new resource with
-    /// the URI `uri` (the location other metamodels use to refer to it, e.g.
+    /// Creates the Ecore objects of each package `top` (with its subpackages) in a new resource
+    /// with the URI `uri` (the location other metamodels use to refer to it, e.g.
     /// `platform:/plugin/<bundle>/model/<file>.ecore`), links them to the registry entries, and
-    /// adds the `EOperation`s of `ops` whose class is in the package tree. Types must be
+    /// adds the `EOperation`s of `ops` whose class is in the package trees. Types must be
     /// registry entries with objects: Ecore's (loaded on demand), packages materialized or
-    /// loaded before, or this package tree. Returns the resource; errors name the types without
-    /// objects (their features stay untyped).
+    /// loaded before, or one of these package trees. Returns the resources; errors name the
+    /// types without objects (their features stay untyped).
     pub fn materialize(
         &mut self,
-        top: PackageId,
-        uri: &str,
+        tops: &[(PackageId, &str)],
         ops: &[MetaOperation],
-    ) -> Result<ResourceId, String> {
+    ) -> Result<Vec<ResourceId>, String> {
         self.ecore_resource();
-        let r = self.graph.create_resource_kind(uri, ResourceKind::Ecore);
         let meta = self.graph.meta().clone();
         let mut packages = Vec::new();
-        collect_packages(&meta, top, &mut packages);
+        let mut resources = Vec::new();
+        for &(top, uri) in tops {
+            let r = self.graph.create_resource_kind(uri, ResourceKind::Ecore);
+            let start = packages.len();
+            collect_packages(&meta, top, &mut packages);
+            resources.extend(std::iter::repeat_n(r, packages.len() - start));
+        }
         let g = &mut self.graph;
         let e = g.ecore().clone();
         let mut errors = Vec::new();
         // pass 1: packages and classifiers
-        for &p in &packages {
+        for (&p, &r) in packages.iter().zip(&resources) {
             let pi = meta.package(p);
             let po = new_obj(g, e.epackage);
             set_str(g, po, e.named_element_name, Some(&pi.name));
@@ -175,8 +179,9 @@ impl ResourceSet {
                 None => errors.push(format!("no object for opposite {}", meta.feature(o).name)),
             }
         }
+        resources.dedup();
         if errors.is_empty() {
-            Ok(r)
+            Ok(resources)
         } else {
             Err(errors.join("; "))
         }

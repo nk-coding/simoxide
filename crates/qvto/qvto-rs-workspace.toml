@@ -1,6 +1,8 @@
 [workspace]
 resolver = "3"
 members = ["crates/*"]
+# own workspace: depends on SimOxide by path (a checkout outside this repository)
+exclude = ["crates/qvto-simoxide"]
 
 [workspace.package]
 edition = "2024"

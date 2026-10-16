@@ -1208,7 +1208,7 @@ fn owned_scalar(v: &Value) -> Datum<'static, ObjId> {
 /// Data types whose Java instance class is a supertype of the boxes (`EJavaObject`,
 /// `java.lang.Number`, e.g. the erasure of a type parameter bounded by a `Number` data type)
 /// accept those values (EMF checks `eType.isInstance(value)`).
-fn java_supertype_accepts(instance_class: Option<&str>, d: &Datum<'_, ObjId>) -> bool {
+fn java_supertype_accepts<O>(instance_class: Option<&str>, d: &Datum<'_, O>) -> bool {
     let number = matches!(
         d,
         Datum::Int(_)
@@ -1225,7 +1225,13 @@ fn java_supertype_accepts(instance_class: Option<&str>, d: &Datum<'_, ObjId>) ->
     }
 }
 
-fn kind_accepts(kind: DataKind, d: &Datum<'_, ObjId>) -> bool {
+/// Whether a value may be stored in an attribute of a data type with this kind and Java instance
+/// class (EMF's `isInstance` check), for stores that share `Graph`'s rules.
+pub fn data_accepts<O>(kind: DataKind, instance_class: Option<&str>, d: &Datum<'_, O>) -> bool {
+    kind_accepts(kind, d) || java_supertype_accepts(instance_class, d)
+}
+
+fn kind_accepts<O>(kind: DataKind, d: &Datum<'_, O>) -> bool {
     matches!(
         (kind, d),
         (DataKind::String, Datum::Str(_))
