@@ -13,7 +13,7 @@ Status values: done, next, open, parked.
 | Q2 | Type system, standard library signatures, semantic analysis (`qvto-types`, `qvto-sema`) | done | Q3a |
 | Q3a | Bytecode and VM core: expressions, imperative OCL, helpers, queries, mappings, objects, log, assert; the engine under the harness | done | Q2 (on hand-written IR) |
 | Q3b | End-to-end pipeline; SimuLizar rule corpus | open | — |
-| Q4 | Full QVTo: mappings with traces, resolve, late resolve, disjuncts, inherits, merges, intermediate data, deepclone, libraries, imports, extends, access, Dict/List, try/raise, configuration properties, `transform()`, blackboxes | next (Q4a done) | Q5a |
+| Q4 | Full QVTo: mappings with traces, resolve, late resolve, disjuncts, inherits, merges, intermediate data, deepclone, libraries, imports, extends, access, Dict/List, try/raise, configuration properties, `transform()`, blackboxes | done | Q5a |
 | Q5a | Compat hardening: identity hashes, Java HashMap order, error and log texts, stack traces | open | Q4 (late part), Q5b |
 | Q5b | Fast mode and performance: benchmarks, profiling, optimisations | open | Q5a |
 | Q6 | SimOxide integration preparation: adapter over `raw::Graph`, change journal | open | Q5 |
@@ -106,11 +106,20 @@ Status values: done, next, open, parked.
   the CLI. The scoreboard went from 424 to 482 of the 494 runnable Eclipse cases strictly equal
   to the Java runner (483 pass Eclipse's checks; fast mode the same), `TestQvtInterpreter` from
   262 to 300 of 309 (97.1 %), `TestQvtParser` from 137 to 152 of 154; corpus 23 of 24 strictly,
-  24 pass: **SPD's `MainTransformation` equals the Java runner**. The exit criteria are met; the
-  Q4b part (analyser fixes, intermediate classes in the store, remaining VM semantics) is in
-  progress. Open from Q4a: OCL bodies of EOperations and OCL derivations (`oclannotation`), a
-  Java blackbox Eclipse only loads with the run's registry (`bug565747`), incremental update
-  traces (`bug463572`).
+  24 pass: **SPD's `MainTransformation` equals the Java runner**. The exit criteria are met.
+  Q4b (analyser gaps, intermediate classes in the store, remaining VM semantics) done 2026-10-17
+  (DESIGN §12 Q4b-1 to Q4b-11; `crates/qvto-vm/README.md`, "Verification"): the analyser fills
+  model parameters (with a flag for generated legacy ones) and virtual tables, types
+  `raise 'msg'`, accepts `iterate` with an implicit iterator, and reports exactly Eclipse's
+  problems on all 1 102 corpus files (validator problems in object bodies, LPG's repairs, a
+  Java unit loaded with the importing module's packages); intermediate class instances are store
+  objects with EMF semantics, static features; OCL bodies and derivations of metamodels;
+  incremental update with an input trace; per-instance properties of nested transformations;
+  List mutators and two-argument OCL operations as Eclipse; `sortedBy` twice for effectful
+  bodies; harness fixes (`extent:/N` numbering, runner thread stacks). **All 494 runnable
+  Eclipse cases and all 24 corpus cases equal the Java runner strictly** (from 482 and 23; fast
+  mode the same; `TestQvtInterpreter` 309 of 309, `TestQvtParser` 154 of 154), which also meets
+  Q5a's case criterion.
 - **Q5a**: at least 95 % of the runnable cases (excluding JDT/PDE, Ant, debugger cases) pass in
   compat mode, byte-identical output and log against the Java runner on all of them.
 - **Q5b**: fast mode passes the same cases under the order-insensitive comparison; performance

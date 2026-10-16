@@ -23,7 +23,8 @@ print!("{}", qvto_bytecode::disasm::program(&program));
 - **Frames.** One frame per operation call: the operation's variables first (`LocalId` =
   register), then temporaries allocated as a stack. Mapping sections (`when`, `where`, `init`,
   population, `end`) are separate chunks on the same frame. Code outside operations
-  (initialisers, model type `where`) gets chunks with frames of their own.
+  (initialisers, model type `where`, OCL bodies of metamodel operations and OCL derivations:
+  `Program::meta_bodies`, `Program::derivations`) gets chunks with frames of their own.
 - **Instructions** have an opcode and up to three 16-bit operands, or a register and a 32-bit
   operand (jump targets, constants, globals, types). Everything else (feature ids beyond
   `u16`, names, flags, static types) is in the chunk's site table, indexed by a 16-bit operand.
@@ -50,13 +51,13 @@ print!("{}", qvto_bytecode::disasm::program(&program));
 
 | Group | Instructions |
 |---|---|
-| moves, constants | `Move`, `LoadNull`, `LoadInvalid`, `LoadBool`, `LoadInt`, `LoadConst`, `LoadDefault`, `LoadThis`, `LoadModel`, `LoadGlobal`, `StoreGlobal` |
-| control | `Jump`, `JumpIfTrue`, `JumpIfNotTrue`, `JumpIfFalse`, `JumpIfUndef`, `JumpIfInvalid`, `JumpIfNull`, `JumpIfNotBool`, `Return` |
+| moves, constants | `Move`, `LoadNull`, `LoadInvalid`, `LoadBool`, `LoadInt`, `LoadConst`, `LoadDefault`, `LoadThis`, `LoadModel`, `LoadGlobal`, `StoreGlobal`, `LoadInstGlobal`, `StoreInstGlobal` (a property of a transformation instance) |
+| control | `Jump`, `JumpIfTrue`, `JumpIfNotTrue`, `JumpIfFalse`, `JumpIfUndef`, `JumpIfInvalid`, `JumpIfNull`, `JumpIfNotBool`, `JumpIfFastMode` (code only compat mode runs: `sortedBy`'s second pass), `Return` |
 | calls | `CallStd`, `CallStdX`, `Call`, `CallVirtual`, `CallMapping`, `CallMeta`, `New` |
 | navigation | `GetProp`, `GetPropW`, `GetTuple`, `GetInterm` |
 | assignment | `Assign` (QVTo's `assign` on a variable), `Coerce` (List/Sequence coercion), `SetProp` (`callSetter`), `SetInterm` |
 | collections | `NewColl`, `NewCollLike`, `LitAdd`, `LitRange`, `LitPut`, `NewTuple`, `Push`, `PushFlat`, `PushNew` |
-| iteration | `IterInit`, `IterNext`, `ClosureInit`, `ClosureNext`, `ClosurePush`, `SortBy` |
+| iteration | `IterInit`, `IterNext`, `ClosureInit`, `ClosureNext`, `ClosurePush`, `SortBy`, `SetNext` |
 | types, objects | `KindTest`, `ObjectInit`, `Resolve`, `LateResolve` |
 | imperative | `Log`, `AssertFail`, `Raise`, `Unsupported` |
 

@@ -144,7 +144,10 @@ the reruns cycle through constant identity hashes (`-XX:hashCode=2`), sequential
 (`-XX:hashCode=3`) and HotSpot's default, and outputs that differ in any rerun are marked
 `unstable` (8 Eclipse cases: identity-hash order in 6 dumps, `Class@hash` and elapsed times in 2
 logs; 2 corpus cases). Detection is probabilistic: a set of two identity-hashed elements keeps
-its order in a rerun with probability 1/2 (`qvto conform record --runs N`).
+its order in a rerun with probability 1/2 (`qvto conform record --runs N`). With `--only` or
+`--prefix`, the recorded cases replace theirs in the existing bundle and cache. The runner runs
+each case on a thread with a 512 MB stack, so that QVTo's own call depth limit (1 000) applies
+before a JVM `StackOverflowError` (a default thread stack overflows at about 740 calls).
 
 ## Engine interface
 
@@ -181,7 +184,9 @@ ported, the runner's `ProfilesLibrary` stub), and puts the extents into `extent<
 Per runnable case: the driver's checks on the outcome (the Eclipse verdict: `pass-lenient` if
 only these pass) and the strict comparison with the Java fixture (`pass`): load, severity, code
 and exception; canonical dumps (order, values, reference targets); log; stack; problems by
-severity and line. Unstable aspects are not compared. Other verdicts: `fail`, `unsupported`,
+severity and line. Unstable aspects are not compared; QVTo's in-memory extent resources
+(`extent:/N`) are compared renumbered by first appearance, as Eclipse numbers them with a
+JVM-wide counter (the Java side's numbers depend on the cases run before). Other verdicts: `fail`, `unsupported`,
 `not-implemented`, `crashed`, `java-fails` (harness problem), `unrunnable:<category>`. The
 report tallies by driver, kind and feature tag (`-v`).
 

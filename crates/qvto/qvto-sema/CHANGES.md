@@ -5,6 +5,12 @@ first version is listed here, newest first.
 
 | Date | Change |
 |---|---|
+| 2026-10-17 | `ExprKind::ModuleProp(inst, g)` / `LValue::ModuleProp(inst, g)`: a property read or written through a transformation instance other than `this` (`t.p` with `t := new T(...)`); `Global(g)` stays the property of the running instance (Q4b). |
+| 2026-10-17 | `MetaOp::body` (`MetaBody`: a `CodeBody` with `self` and the parameters' variables): the analysed OCL body of an operation of a dynamic class (`http://www.eclipse.org/2007/OCL` annotation, `body`); `Program::derivations`: OCL derivations of features (`derive`). Hosts pass them with `compile_with_metamodel` (`MetaOperation::body`, `MetaDerivation` in `qvto-model`) (Q4b). |
+| 2026-10-17 | `IntermClass::static_features`: the own features declared `static` (one value for all instances) (Q4b). |
+| 2026-10-17 | `ExprKind::Raise(class, arg)`: `raise 'msg'` is `Raise(Some(Exception), Some('msg'))` as in Eclipse; `None` class only after an error (Q4b). |
+| 2026-10-17 | `Operation::vtable` is filled by the analyser (Eclipse's `VirtualTable` contents from `doFindCollidingOperation`, in insertion order); the VM no longer computes tables of its own (Q4b). |
+| 2026-10-17 | `ModelParam::generated`: a model parameter generated for a legacy `mapping main(in x : T) : U` of a transformation without parameters (`DeprecatedSignaturelessTransf`, named `$x`); `Module::model_params` is filled by the analyser (Q3a's temporary copy removed) (Q4b). |
 | 2026-10-17 | `Module::blackbox` is also set for the modules of Java (native) blackbox units; `Operation::blackbox_impl` is also set for a `blackbox` operation declared in QVTo whose Java implementation the analyser matched uniquely (Q4a, native blackboxes). `MetaOperation`/`MetaMultiplicity` moved to `qvto-model` (re-exported). |
 | 2026-10-16 | `IntermClass::feature_types`: the declared (OCL) type of each own feature of an intermediate class; the registry's classifier is a placeholder for collection, tuple and other non-classifier types. |
 | 2026-10-16 | `Assign::target_span`: the span of the assignment's left-hand side. |

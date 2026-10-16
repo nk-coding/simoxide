@@ -118,6 +118,16 @@ directories, failing tests print the first differing line.
 - Ecore's derived lists are recomputed on every `get_at` (fine for tests and metamodel-sized
   models; the VM should cache).
 - The dynamic-subclass anomaly above is not reproduced.
+- A reference whose `eOpposite` is set on one side only (as QVTo declares `opposites` of
+  intermediate class features) behaves as in EMF: changing it updates the other end's value;
+  a containment with such an opposite sets that value on the child instead of making it
+  contained (`tests/one_sided_opposites.rs`, checked against EMF with
+  `tests/data/OneSided.java`).
+- `ModelStore::extend_meta` adopts a registry that extends the graph's (a program's
+  intermediate classes); the new classes have no metamodel objects.
+- `operations::meta_operations` also reads the OCL `body` of operations of dynamic classes and
+  `operations::meta_derivations` the `derive` of their features (`http://www.eclipse.org/2007/OCL`
+  annotations, Eclipse QVTo's `OCLAnnotationSupport`).
 
 ## Licence
 

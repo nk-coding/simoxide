@@ -54,8 +54,20 @@ print!("{}", vm.log);                                              // WriterLog'
   is the class's root package, else the first non-`in` parameter, else the unbound extent.
   Created objects without a resource become roots of an in-memory resource `extent:/N` of the
   store; at the end the out/inout extents' roots are detached from it (`getContents`).
-- **Engine-local objects**: instances of QVTo's library classes and of intermediate classes live
-  in the VM (`ObjRef::local`), with a slot per feature of the class.
+- **Engine-local objects**: instances of QVTo's library classes (`Exception`, `Status`) and of
+  exception classes live in the VM (`ObjRef::local`), with a slot per feature of the class.
+- **Intermediate classes** (`objects.rs`, `IntermInfo`, DESIGN §12 Q4b-4): when the store takes
+  the program's registry (`ModelStore::extend_meta`), instances are store objects in an
+  intermediate extent of their transformation: references with EMF's semantics (containment,
+  opposites, container references), attributes and `static` features kept by the VM; else
+  engine-local objects.
+- **Dispatch**: every call of a contextual operation goes through its virtual table
+  (`Operation::vtable`, the operation of the actual type or its closest supertype); module
+  overriding (`extends`) applies to calls that are not module-qualified (DESIGN §12 Q4b-1).
+  Operations of dynamic classes with an OCL body run that body (on the overriding operation of
+  the instance's class, `meta.rs`); derived features with an OCL derivation evaluate it.
+- **Nested transformations**: each `new T(...)` instance keeps its own model extents and
+  property values, swapped in while it runs (`run.rs`).
 - **Blackboxes** (`native.rs`, DESIGN §12 Q4a-1): an operation with `is_blackbox` runs the host's
   function registered under its `blackbox_impl` key (`Vm::set_natives`). Operations of Java
   (native) library modules are called like OCL operations (no stack frame; `invalid` on a
@@ -91,8 +103,13 @@ EOperations and host EOperations, `BigInteger`/`BigDecimal` attributes as number
 to an extent's resources by blackboxes (`ResourceModificationAdapter`), dictionary keys cloned by
 `deepclone`.
 
-Not yet: OCL bodies of EOperations and OCL derivations of derived features, `unlink`,
-incremental update traces, per-instance properties of nested transformations.
+Q4b added: virtual tables from the analyser (no tables of the VM's own), intermediate class
+instances in the store (EMF references, static features), OCL bodies of EOperations and OCL
+derivations (`OCLAnnotationSupport`), incremental update with an input trace
+(`inctrace.rs`, `Vm::set_incremental_trace`), per-instance properties of nested transformations
+(`t.p`), List mutators returning the list, classic OCL's invalid rule for two-argument
+operations, `sortedBy` evaluating an effectful body twice in compat mode (once in fast mode).
+`unlink` is not part of Eclipse's language (DESIGN §12 Q4b-10).
 
 ## Verification
 
@@ -102,16 +119,13 @@ incremental update traces, per-instance properties of nested transformations.
   overflow with Eclipse's stack trace text, `raise`/`try`, fatal assertions, mappings with
   traces and `resolveone`, `when` and `xmap`, out parameters, disjuncts, virtual dispatch,
   collections, `Dict` and `List`, objects in out extents.
-- End to end (`qvto conform --engine qvto`), after Q4a: 482 of the 494 runnable Eclipse cases
-  equal the Java runner strictly (models, log, severity, code, stack, problems; 97.6 %), 483
-  pass Eclipse's checks, fast mode the same; `TestQvtInterpreter` 300 of 309, `TestQvtParser`
-  152 of 154. Corpus: 23 of 24 strictly, all 24 pass (SPD's `MainTransformation` strictly).
-  The 12 others: analyser and VM semantics (`raise 'msg'`, `insertAt` overloads in 3 cases, an
-  implicit-iterator `iterate`, opposites of intermediate classes, a parser recovery
-  difference), OCL bodies of EOperations (`oclannotation`), an incremental update trace
-  (`bug463572`), a Java blackbox Eclipse loads only with the run's registry (`bug565747`, 2
-  cases), a stack overflow log (lenient pass); in the corpus an `extent:/N` number (lenient
-  pass). Q3a's state: 424 strictly, 425 Eclipse checks; corpus 22.
+- End to end (`qvto conform --engine qvto`), after Q4b: **all 494 runnable Eclipse cases and
+  all 24 corpus cases equal the Java runner strictly** (models, log, severity, code, stack,
+  problems), fast mode the same. After Q4a: 482 and 23 (483 and 24 Eclipse checks); after Q3a:
+  424 and 22.
+- `cargo test -p qvto --test run`: end-to-end programs whose expected logs are Eclipse's
+  (List mutators, two-argument OCL operations, intermediate classes, OCL annotations,
+  incremental update, nested instances, `sortedBy`).
 - Performance (`qvto bench --java`, release build, median of 20 runs; Java: the reference
   runner, same cases repeated in one JVM, median of the second half):
 

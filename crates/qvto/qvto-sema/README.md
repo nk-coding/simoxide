@@ -46,6 +46,7 @@ if !comp.has_errors() { /* comp.program: the IR */ }
 | `lookup.rs` | `TypeCheckerImpl`, `QvtTypeResolverImpl`, `QVTUMLReflection` | operations and attributes of a type (OCL ops, metamodel ops, the library's and the modules' additional operations), overload resolution (`findMostSpecificOperationMatching`), properties with aliases |
 | `names.rs`, `vars.rs` | `lookupClassifier`, `typeCS`; environments | type names (model types, packages, imported modules), variables per environment level, implicit sources (`this` before `self`, extended modules and libraries) |
 | `ocltypes.rs` | `OCLStandardLibraryUtil.getResultTypeOf` | result types of classic OCL operations |
+| `annot.rs` | `OCLAnnotationSupport` | OCL bodies of metamodel operations and OCL derivations |
 | `validate.rs` | `QvtOperationalValidationVisitor` | the validation pass over the IR (operations, mapping extensions, `return`, `break`, instantiation, iterators, variable initialisers, null types) |
 | `blackbox.rs` | `BlackboxUnitResolver` | modules of Java blackbox units |
 | `messages.rs` | `NLS.bind`, `messages.properties` | the 444 messages, generated (`examples/gen_messages.rs`) |
@@ -64,22 +65,33 @@ bundles and the case's metamodel files, unit resolution through the bundles' sou
 (`tests/fixtures/sema-oracle-baseline.txt`) and on `irck` for every error-free compilation.
 
 `cargo run --release -p qvto-sema --example oracle_report` prints the full comparison and writes
-every mismatch to `target/q2-oracle-report.tsv`. On 2026-10-16:
+every mismatch to `target/q2-oracle-report.tsv`. On 2026-10-17 (after Q4b; Q2's numbers in
+brackets):
 
 | | |
 |---|---|
-| files whose problems equal Eclipse's exactly (severity, unit, line, offset, length, message) | 1 096 of 1 102 (Eclipse suite 1 041 / 1 047, SimuLizar 37 / 37, SPD 18 / 18) |
-| files Eclipse compiles without problems | 541; we report none on 539, no errors on 541 |
-| files with errors | 133; 129 match exactly; errors or not agrees on all 1 102 files |
-| problems | Eclipse 2 304, ours 2 312: all 2 304 reproduced, 8 extra |
-| `TestQvtParser` expected counts | 117 cases, ours pass 115 (Eclipse 117) |
-| `TestQvtParser` inline annotations | 91 of 104 annotated files match exactly (Eclipse's own problems: 93) |
+| files whose problems equal Eclipse's exactly (severity, unit, line, offset, length, message) | **1 102 of 1 102** (Eclipse suite 1 047, SimuLizar 37, SPD 18) [1 096] |
+| files Eclipse compiles without problems | 541; we report none on 541 [539] |
+| files with errors | 133; 133 match exactly [129]; errors or not agrees on all 1 102 files |
+| problems | Eclipse 2 304, ours 2 304, all reproduced [8 extra] |
+| `TestQvtParser` expected counts | 117 cases, ours pass 117 [115] |
+| `TestQvtParser` inline annotations | 93 of 104 annotated files match exactly, as Eclipse's own problems [91] |
 | IR checks | 969 error-free compilations, no violations |
-| speed | 0.40 s for all 1 102 files (release, mean 0.36 ms, largest file 39 ms); Eclipse: 1.77 s warm |
+| speed | 0.44 s for all 1 102 files (release, mean 0.40 ms, largest file 36 ms); Eclipse: 1.77 s warm |
 
-The remaining six files: a parser recovery difference (`exec_erroneous`, `missingObjectType`), a
-validation run that Eclipse apparently stops early in two files (`UMLFoo`, `Ecore2UML`: problems
-inside `object` bodies not reported), and a blackbox unit Eclipse fails to load (`bug565747`).
+Q4b closed the last six differences (DESIGN §12 Q4b-3): problems of OCL's validator inside
+`object` bodies, which Eclipse drops (`UMLFoo`, `Ecore2UML`); LPG's repairs of a missing object
+type and of `a-b` in qualified names (`missingObjectType`, `exec_erroneous`); a Java unit that
+loads only with the importing module's packages (`bug565747`, alternative signatures in
+`blackboxes.tsv`).
+
+`tools/probe/probe.sh` asks Eclipse about single files (problems, AST, the operation each call
+refers to) for comparisons on small programs.
+
+OCL annotations of metamodels (`annot.rs`): the `body` of operations and the `derive` of
+features of dynamic classes are analysed after the units (`compile_with_metamodel`), in the main
+module's environment; problems are not reported and a body with errors is `invalid`, as Eclipse
+evaluates an unparseable annotation.
 
 ## IR changes
 
