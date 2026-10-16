@@ -7,7 +7,10 @@ use qvto_model::{ModelStore, ResourceId};
 use qvto_runtime::Mode;
 use qvto_sema::ir::Direction;
 use qvto_testkit::engine::{CaseEnv, Engine, Outcome, Outputs, Severity, Status};
-use qvto_testkit::fixture::Problem;
+use qvto_runtime::IdentityKey;
+use qvto_runtime::identity::IdentityHashSource;
+use qvto_testkit::fixture::{Problem, Tape, parse_tape};
+use std::collections::HashMap;
 use std::panic::AssertUnwindSafe;
 use std::path::Path;
 use std::time::Instant;
@@ -94,12 +97,12 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
         Ok(m) => m,
         Err(e) => return Outcome::with_status(Status::Crashed(format!("{}: {e}", qvto.display()))),
     };
-    // metamodels the units refer to, then the case's global packages
-    for uri in qvto_sema::scan_metamodel_uris(&main, &resolver) {
-        let _ = rs.load_metamodel(&uri);
-    }
-    for p in &case.packages {
-        let _ = rs.load_metamodel(p);
+    // metamodels the units refer to, then the case's global packages (each run loads them in
+    // the same order, so that the store's ids are the program's)
+    let mut mm_uris = qvto_sema::scan_metamodel_uris(&main, &resolver);
+    mm_uris.extend(case.packages.iter().cloned());
+    for uri in &mm_uris {
+        let _ = rs.load_metamodel(uri);
     }
     let t0 = Instant::now();
     let compiled = qvto::compile(main, &resolver, rs.graph.meta().clone());
@@ -145,8 +148,95 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
         ));
         return o;
     };
+    let tape = load_tape(env);
+    let mut created: HashMap<u32, i32> = HashMap::new();
+    let mut attempt = 0;
+    loop {
+        let r = execute(env, &program, &mm_uris, mode, tape.as_ref(), &created);
+        let (o2, new_created) = match r {
+            Ok(x) => x,
+            Err(o) => return o,
+        };
+        // with a tape, the hashes of created objects come from their keys in the outputs; run
+        // again until the run creates the same objects at the same places
+        attempt += 1;
+        if tape.is_none() || new_created == created || attempt >= 3 {
+            let mut o2 = o2;
+            o2.compile_time = o.compile_time;
+            o2.load = o.load;
+            o2.problems = std::mem::take(&mut o.problems);
+            return o2;
+        }
+        created = new_created;
+    }
+}
+
+/// The Java run's identity-hash tape of the case, if cached.
+fn load_tape(env: &CaseEnv) -> Option<Tape> {
+    for suite in ["eclipse", "corpus"] {
+        let p = env
+            .base
+            .join(qvto_testkit::paths::JAVA_CACHE)
+            .join(suite)
+            .join(&env.case.id)
+            .join("idtape.tsv");
+        if let Ok(t) = std::fs::read_to_string(&p) {
+            return parse_tape(&t).ok();
+        }
+    }
+    None
+}
+
+/// Keys of the store's objects as the tape names them: `<label>#<path>` for model objects,
+/// `mm:<nsURI>#<fragment>` for objects of metamodel resources.
+fn object_keys(rs: &ResourceSet) -> HashMap<String, u32> {
+    let g = &rs.graph;
+    let mut out = HashMap::new();
+    for r in g.resource_ids() {
+        let uri = g.resource(r).uri.clone();
+        let label = qvto_emf::canon::label(&uri);
+        let ns = g.roots(r).iter().find_map(|&o| {
+            let c = g.class_of(o);
+            (g.meta().class(c).name.as_ref() == "EPackage")
+                .then(|| {
+                    let f = g.meta().feature_by_name(c, "nsURI")?;
+                    g.get(o, f).as_str().map(String::from)
+                })
+                .flatten()
+        });
+        for o in g.resource_contents(r) {
+            out.insert(format!("{label}#{}", qvto_emf::canon::path(g, o)), o.0);
+            if let Some(ns) = &ns {
+                out.insert(
+                    format!("mm:{ns}#{}", qvto_emf::fragment::uri_fragment(g, r, o)),
+                    o.0,
+                );
+            }
+        }
+    }
+    out
+}
+
+/// One run of the compiled program on fresh models; returns the outcome and the tape hashes of
+/// the created objects found in the outputs.
+fn execute(
+    env: &CaseEnv,
+    program: &qvto::Program,
+    mm_uris: &[String],
+    mode: Mode,
+    tape: Option<&Tape>,
+    created: &HashMap<u32, i32>,
+) -> Result<(Outcome, HashMap<u32, i32>), Outcome> {
+    let case = env.case;
+    let mut rs = env
+        .resource_set()
+        .map_err(|e| Outcome::with_status(Status::Crashed(format!("resource set: {e}"))))?;
+    let ir = &program.ir;
+    for uri in mm_uris {
+        let _ = rs.load_metamodel(uri);
+    }
     // model parameters: inputs bound positionally to the in/inout parameters
-    let main_mod = &program.ir.modules[program.ir.main_module.index()];
+    let main_mod = &ir.modules[ir.main_module.index()];
     let mut args = Vec::new();
     let mut inputs = case.inputs.iter();
     for mp in &main_mod.model_params {
@@ -158,15 +248,46 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
             Some(p) => match rs.load_file(&env.path(p)) {
                 Ok(r) => args.push(rs.graph.roots(r).to_vec()),
                 Err(e) => {
-                    return Outcome::with_status(Status::Crashed(format!("input {p}: {e}")));
+                    return Err(Outcome::with_status(Status::Crashed(format!(
+                        "input {p}: {e}"
+                    ))));
                 }
             },
             None => args.push(Vec::new()),
         }
     }
     rs.resolve_all();
+    let first_created = rs.graph.object_count() as u32;
+    let id_source: Option<Box<dyn IdentityHashSource>> = tape.map(|t| {
+        let keys = object_keys(&rs);
+        let mut by_obj: HashMap<u32, i32> = HashMap::new();
+        for (k, h, _) in &t.objects {
+            if let Some(&o) = keys.get(k) {
+                by_obj.insert(o, *h);
+            }
+        }
+        for (o, h) in created {
+            by_obj.insert(*o, *h);
+        }
+        let mut fallback = qvto_testkit::idhash::XorShift::recover(t.seed.0, t.seed.1);
+        if let Some(x) = fallback.as_mut() {
+            // the seed's two draws are taken
+            x.next();
+            x.next();
+        }
+        let lookup = Box::new(move |k: IdentityKey| match k {
+            IdentityKey::Obj(r) if !r.is_local() => by_obj.get(&r.index()).copied(),
+            _ => None,
+        });
+        let fb: Box<dyn IdentityHashSource> = match fallback {
+            Some(x) => Box::new(Recovered(x)),
+            None => Box::new(qvto_runtime::identity::HotSpotXorShift::default()),
+        };
+        Box::new(qvto_vm::TapeHook::new(lookup, fb)) as Box<dyn IdentityHashSource>
+    });
     let opts = qvto::RunOptions {
         mode,
+        id_source,
         max_stack_depth: case.max_stack_depth.map(|d| d as usize).unwrap_or(1000),
         readonly_guard: case.readonly_guard,
         config: case.config.clone(),
@@ -174,10 +295,11 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
     };
     let t1 = Instant::now();
     let (out, log) = {
-        let mut vm = qvto::Vm::new(&program, &mut rs.graph, opts);
+        let mut vm = qvto::Vm::new(program, &mut rs.graph, opts);
         let out = vm.run_transformation(args);
         (out, std::mem::take(&mut vm.log))
     };
+    let mut o = Outcome::with_status(Status::Completed);
     o.run_time = Some(t1.elapsed());
     o.log = log;
     o.severity = Some(severity(out.severity));
@@ -188,8 +310,31 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
         o.stack = Some(e.print_stack_trace());
     }
     o.trace_records = Some(out.trace_records);
-    o.outputs = Some(outputs(rs, &out, case.dump_models));
-    o
+    let outputs = outputs(rs, &out, case.dump_models);
+    let mut new_created = HashMap::new();
+    if let Some(t) = tape {
+        let keys = object_keys(&outputs.rs);
+        let tape_map: HashMap<&str, i32> =
+            t.objects.iter().map(|(k, h, _)| (k.as_str(), *h)).collect();
+        for (k, &obj) in &keys {
+            if obj >= first_created
+                && let Some(&h) = tape_map.get(k.as_str())
+            {
+                new_created.insert(obj, h);
+            }
+        }
+    }
+    o.outputs = Some(outputs);
+    Ok((o, new_created))
+}
+
+/// The Java thread's identity-hash sequence, continued after the tape's seed.
+struct Recovered(qvto_testkit::idhash::XorShift);
+
+impl IdentityHashSource for Recovered {
+    fn draw(&mut self, _key: IdentityKey) -> i32 {
+        self.0.next()
+    }
 }
 
 /// Each out/inout extent's roots into a resource `extent<i>.xmi`, as the Java runner dumps
