@@ -21,7 +21,8 @@ store.set_list(o, tags, &[Datum::Str("x")])?;       // ECollections.setEList
 | `src/ids.rs` | `PackageId`, `ClassId`, `FeatureId`, `DataTypeId`, `EnumId`, `ResourceId` (dense `u32`) |
 | `src/meta.rs` | `MetaRegistry`: packages, classes, features, data types, enums; derived class tables as EMF computes them (`eAllSuperTypes`, `eAllStructuralFeatures` = slot order, containments, cross references, ID attribute, supertype bit sets); `DataKind` (the Java class of values) |
 | `src/datum.rs` | `Datum` (borrowed value) and `OwnedDatum`; Java box classes kept apart (`Int`, `Long`, `Short`, `Byte`, `Char`, `Double`, `Float`) with Java `equals` |
-| `src/store.rs` | the `ModelStore` trait with its contract, `ModelError`, provided `set_list`, `contents`, `all_contents`, `resource_contents` |
+| `src/store.rs` | the `ModelStore` trait with its contract, `ModelError`, provided `set_list`, `contents`, `all_contents`, `resource_contents`; optional metamodel objects (`classifier_object`, `object_classifier`, `feature_object`, `object_feature`, `package_object`, `object_package`: the `EClass`/`EStructuralFeature`/`EPackage` objects of registry entries, for `eClass()` and Ecore's EOperations; default none) |
+| `src/operation.rs` | `MetaOperation`, `MetaMultiplicity`: the `EOperation`s a host gives the analyser (the registry keeps none) |
 | `src/contract.rs`, `src/contract.ecore` | the contract test suite (20 checks) and its metamodel; `contract_tests!` generates one `#[test]` per check for a store |
 
 ## The contract

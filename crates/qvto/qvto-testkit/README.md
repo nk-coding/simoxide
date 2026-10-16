@@ -164,9 +164,16 @@ exception class, printed QVT stack, log, trace-record count, and `Outputs` (the 
 resources `extent<i>.xmi` in a qvto-emf `ResourceSet`, plus the other model resources for
 `dump models`). `StubEngine` answers `NotImplemented` for every case; the engine itself is
 `crates/qvto-cli/src/engine.rs` (`qvto`, `qvto-fast`): it resolves imports like the Java
-runner (bundle source containers), loads the metamodels the units name, compiles, binds the
-inputs, replays the Java run's identity hashes when the tape is cached (inputs by key, created
-objects in the recorded thread's draw order), runs, and puts the extents into `extent<i>.xmi`.
+runner (bundle source containers, then the case's Java blackbox units from
+`qvto-types/data/blackboxes.tsv` — the test bundle's for `bundle-blackboxes`, the case's own
+registrations, Java classes by name — as the analyser's oracle harness does), loads the
+metamodels the units name (plus Ecore's own objects, the QVT metamodel's second registry key
+and the EMF jars' `XMLType`/`XMLNamespace`/`Change`), compiles with the metamodels'
+EOperations, binds the inputs (`getResource`: a registered metamodel file given as input is
+that resource), replays the Java run's identity hashes when the tape is cached (inputs by key,
+created objects in the recorded thread's draw order), runs with the native blackboxes of
+`crates/qvto-cli/src/bbox.rs` (QVTo's `Strings`/`emf.tools`, the test bundle's Java libraries
+ported, the runner's `ProfilesLibrary` stub), and puts the extents into `extent<i>.xmi`.
 `QVTO_SHOW=1` prints each case's outcome, log and dump.
 
 ## Verdicts

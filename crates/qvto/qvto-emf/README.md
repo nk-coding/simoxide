@@ -24,7 +24,8 @@ let canonical = dump(&rs.graph, &[r]);                 // strict comparison text
 | `src/graph.rs` | `Graph`: objects with one slot per feature (`eAllStructuralFeatures` order), resources, `xmi:id` maps; the EMF internals (`eBasicSetContainer`, inverse add/remove, `eSetResource`, `EcoreUtil.delete`); `impl ModelStore` |
 | `src/ecore.rs` | Ecore's registry entries, bootstrapped from `models/Ecore.ecore` (the runtime `EcorePackage` as EMF holds it, saved by the oracle); `EcoreIds` |
 | `src/ecore_hooks.rs` | generated-code behaviour of Ecore's classes: `eType`/`eGenericType`, `eSuperTypes`/`eGenericSuperTypes`, `eExceptions` views; `isSet` of these and of `instanceClassName`/`instanceTypeName`; `EEnumLiteral.literal`; derived features (`eAllSuperTypes`, `eAllStructuralFeatures`, `eAllAttributes`, `eReferenceType`, `many`, `eIDAttribute`, ...) computed from the model objects; erasure of type parameters |
-| `src/register.rs` | `EPackage` objects of loaded resources -> registry entries, linked both ways (`MetaLinks`: `EClass` object <-> `ClassId`, ...) |
+| `src/register.rs` | `EPackage` objects of loaded resources -> registry entries, linked both ways (`MetaLinks`: `EClass` object <-> `ClassId`, ...; also `ModelStore::classifier_object` etc.) |
+| `src/operations.rs` | `meta_operations`: the `EOperation`s of the registered classes read from their `.ecore` objects, for `qvto_sema::compile_with_operations` (load `ResourceSet::ecore_resource()` first for Ecore's own) |
 | `src/datatypes.rs` | `createFromString` / `convertToString` per data kind (`EcoreFactoryImpl` vs reflective `EFactoryImpl`), Java `Double.toString`/`Float.toString`, intrinsic defaults |
 | `src/uri.rs` | port of EMF's `URI` (parse, `resolve`, `deresolve`, file URIs) |
 | `src/fragment.rs` | URI fragments: IDs, `/0/@f.1` paths, `eKeys` predicates, Ecore's named segments (`//Class/feature`, `%source%`) |
@@ -110,7 +111,10 @@ directories, failing tests print the first differing line.
 - `xsi:` attributes are recognised by their literal prefix (EMF parses without namespace
   awareness).
 - Values of data types without a loadable Java class become `null` on load, as in EMF; the store
-  keeps `BigDecimal`, `Date` and other Java-class values in lexical form.
+  keeps `BigDecimal`, `Date` and other Java-class values in lexical form. Attributes of data
+  types whose instance class is `java.lang.Number` (numbers) or `java.lang.Object` (numbers,
+  booleans, characters) accept those boxes, as EMF's `isInstance` check does (e.g. a type
+  parameter bounded by a `Number` data type).
 - Ecore's derived lists are recomputed on every `get_at` (fine for tests and metamodel-sized
   models; the VM should cache).
 - The dynamic-subclass anomaly above is not reproduced.

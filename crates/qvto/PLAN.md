@@ -13,7 +13,7 @@ Status values: done, next, open, parked.
 | Q2 | Type system, standard library signatures, semantic analysis (`qvto-types`, `qvto-sema`) | done | Q3a |
 | Q3a | Bytecode and VM core: expressions, imperative OCL, helpers, queries, mappings, objects, log, assert; the engine under the harness | done | Q2 (on hand-written IR) |
 | Q3b | End-to-end pipeline; SimuLizar rule corpus | open | — |
-| Q4 | Full QVTo: mappings with traces, resolve, late resolve, disjuncts, inherits, merges, intermediate data, deepclone, libraries, imports, extends, access, Dict/List, try/raise, configuration properties, `transform()`, blackboxes | open | Q5a |
+| Q4 | Full QVTo: mappings with traces, resolve, late resolve, disjuncts, inherits, merges, intermediate data, deepclone, libraries, imports, extends, access, Dict/List, try/raise, configuration properties, `transform()`, blackboxes | next (Q4a done) | Q5a |
 | Q5a | Compat hardening: identity hashes, Java HashMap order, error and log texts, stack traces | open | Q4 (late part), Q5b |
 | Q5b | Fast mode and performance: benchmarks, profiling, optimisations | open | Q5a |
 | Q6 | SimOxide integration preparation: adapter over `raw::Graph`, change journal | open | Q5 |
@@ -96,6 +96,21 @@ Status values: done, next, open, parked.
   and match the Java runner; at least 50 % of the 309 transformation cases pass.
 - **Q4**: Slingshot's SPD transformations run and match the Java runner; at least 85 % of the 309
   cases pass in compat mode.
+  Q4a (blackboxes, metamodels, `Model` operations, EOperations) done 2026-10-17
+  (`crates/qvto/README.md`, "Blackboxes"; `crates/qvto-vm/README.md`, "Verification"; DESIGN §12
+  Q4a-1 to Q4a-8): native blackboxes (signatures as data, Rust implementations by key; library
+  operations, `blackbox` operations declared in QVTo, blackbox mappings, constructors and
+  transformations), QVTo's `Strings`/`emf.tools` and the test bundle's Java libraries ported,
+  Palladio's signatures and `getSimulationTime` for hosts; the QVT and XMLType metamodels;
+  `Model::copy`/`createEmptyModel`; Ecore's EOperations and host EOperations; EOperations in
+  the CLI. The scoreboard went from 424 to 481 of the 494 runnable Eclipse cases strictly equal
+  to the Java runner (482 pass Eclipse's checks; fast mode the same), `TestQvtInterpreter` from
+  262 to 299 of 309 (96.8 %), `TestQvtParser` from 137 to 152 of 154; corpus 23 of 24 strictly,
+  24 pass: **SPD's `MainTransformation` equals the Java runner**. The exit criteria are met; the
+  Q4b part (analyser fixes, intermediate classes in the store, remaining VM semantics) is in
+  progress. Open from Q4a: OCL bodies of EOperations and OCL derivations (`oclannotation`), a
+  Java blackbox Eclipse only loads with the run's registry (`bug565747`), incremental update
+  traces (`bug463572`).
 - **Q5a**: at least 95 % of the runnable cases (excluding JDT/PDE, Ant, debugger cases) pass in
   compat mode, byte-identical output and log against the Java runner on all of them.
 - **Q5b**: fast mode passes the same cases under the order-insensitive comparison; performance

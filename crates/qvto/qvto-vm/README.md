@@ -21,7 +21,10 @@ print!("{}", vm.log);                                              // WriterLog'
 |---|---|
 | `src/vm.rs` | `Vm`, `RunOptions`, frames, the instruction loop, `try` handlers, iteration slots |
 | `src/calls.rs` | helper/query/constructor calls, mapping calls (`when`, trace lookup, disjuncts, `init`, implicit results and `out` parameters, the trace record before population, inherited and merged mappings, `end`, `where`), virtual dispatch (`VirtualTable`), overriding |
-| `src/objects.rs` | navigation, `assign`/`callSetter`, creation into extents, engine-local objects, contextual intermediate properties, default values, `clone`/`deepclone` (`EcoreUtil.Copier`), Ecore's `EObject` operations |
+| `src/objects.rs` | navigation, `assign`/`callSetter`, creation into extents, engine-local objects, contextual intermediate properties, default values, `clone`/`deepclone` (`EcoreUtil.Copier`) |
+| `src/native.rs` | native blackboxes: `Natives` (implementations by key, transformations by name, EOperations), the call protocol (library operations, `blackbox` operations declared in QVTo, blackbox mappings and transformations, Java exceptions, cancellation), the `native_*` API for implementations |
+| `src/meta.rs` | metamodel operations (`Callee::Meta`): Ecore's `EObject`, `EClass`, `EPackage`, `EModelElement`, `EClassifier`, `EEnum`, `EFactory`, `EStructuralFeature`, `EOperation` operations from EMF's semantics; host implementations of other metamodels' operations |
+| `src/model_ops.rs` | `Model::copy()`, `Model::createEmptyModel()`, model types of extents; `BigInteger`/`BigDecimal` attribute values |
 | `src/extent.rs` | `ModelParameterExtent`: initial and created objects, in-memory `extent:/N` resources, the purge counter |
 | `src/trace.rs` | trace records and indexes, `resolve`, `resolveIn`, `invresolve` |
 | `src/stdlib.rs` | `Prim`: every `StdOp` of the generated table mapped to a run-time primitive; the primitives |
@@ -53,6 +56,16 @@ print!("{}", vm.log);                                              // WriterLog'
   store; at the end the out/inout extents' roots are detached from it (`getContents`).
 - **Engine-local objects**: instances of QVTo's library classes and of intermediate classes live
   in the VM (`ObjRef::local`), with a slot per feature of the class.
+- **Blackboxes** (`native.rs`, DESIGN §12 Q4a-1): an operation with `is_blackbox` runs the host's
+  function registered under its `blackbox_impl` key (`Vm::set_natives`). Operations of Java
+  (native) library modules are called like OCL operations (no stack frame; `invalid` on a
+  `null`/`invalid` receiver; `map` on them skips the mapping protocol); `blackbox` operations
+  declared in QVTo run on a stack frame of their own, a `blackbox mapping` with the protocol
+  (`when`, trace lookup, a defined result, trace record, merged mappings, the result's extent);
+  `invalid` arguments are passed as `null`; implementation exceptions become
+  `QvtRuntimeException`s with Eclipse's text, cancellation interrupts. A `blackbox
+  transformation` is run by the implementation registered under its name with its model
+  extents, its configuration properties as the context's.
 - **Mode**: `RunOptions::mode` (compat: Java `HashMap` orders and identity hashes from a source;
   fast: insertion order). The VM is not monomorphised per mode (DESIGN §12, Q3a-3).
 
@@ -71,10 +84,14 @@ model type `where`; nested transformations (`new T(...)`, `transform()`, `Status
 standard library except the parts below; `clone`, `deepclone`; Java regular expressions that
 the `regex` crate accepts.
 
-Not yet (Q4): blackboxes (Java libraries; `No blackbox implementation found`), blackbox
-transformations, `Model::copy`/`createEmptyModel`, `Collection::product`, metamodel operations
-other than `eContainer`/`eContents`/`eAllContents`/`eIsProxy` (no OCL bodies of EOperations),
-`unlink`, incremental update traces, per-instance properties of nested transformations.
+Q4a added: native blackboxes (library operations, `blackbox` operations declared in QVTo,
+blackbox mappings, constructors and transformations), `Model::copy`/`createEmptyModel`, Ecore's
+EOperations and host EOperations, `BigInteger`/`BigDecimal` attributes as numbers, roots added
+to an extent's resources by blackboxes (`ResourceModificationAdapter`), dictionary keys cloned by
+`deepclone`.
+
+Not yet: OCL bodies of EOperations and OCL derivations of derived features, `unlink`,
+incremental update traces, per-instance properties of nested transformations.
 
 ## Verification
 
@@ -84,13 +101,16 @@ other than `eContainer`/`eContents`/`eAllContents`/`eIsProxy` (no OCL bodies of 
   overflow with Eclipse's stack trace text, `raise`/`try`, fatal assertions, mappings with
   traces and `resolveone`, `when` and `xmap`, out parameters, disjuncts, virtual dispatch,
   collections, `Dict` and `List`, objects in out extents.
-- End to end (`qvto conform --engine qvto`): 424 of the 494 runnable Eclipse cases equal the
-  Java runner strictly (models, log, severity, code, stack, problems), 425 pass Eclipse's
-  checks, fast mode the same; `TestQvtInterpreter` 262 of 309. Of the failures, 39 do not
-  compile (Java blackbox libraries, metamodels missing from the registry: Q4), 17 are parser
-  cases with other diagnostics (Q2), 12 have other outcomes (blackboxes, `Model::copy`, the
-  analyser's `raise 'msg'` and overloads such as `List::insertAt`/QVTo's `Sequence::insertAt`,
-  opposites of intermediate classes). Corpus: 22 of 24 strictly.
+- End to end (`qvto conform --engine qvto`), after Q4a: 481 of the 494 runnable Eclipse cases
+  equal the Java runner strictly (models, log, severity, code, stack, problems; 97.4 %), 482
+  pass Eclipse's checks, fast mode the same; `TestQvtInterpreter` 299 of 309, `TestQvtParser`
+  152 of 154. Corpus: 23 of 24 strictly, all 24 pass (SPD's `MainTransformation` strictly).
+  The 13 others: analyser and VM semantics (`raise 'msg'`, `insertAt` overloads in 3 cases, an
+  implicit-iterator `iterate`, opposites of intermediate classes, virtual calls across `extends`
+  of a native library in `transf_inheritance`, a parser recovery difference), OCL bodies of
+  EOperations (`oclannotation`), an incremental update trace (`bug463572`), a Java blackbox
+  Eclipse loads only with the run's registry (`bug565747`, 2 cases), a stack overflow log, and an
+  `extent:/N` number (lenient passes). Q3a's state: 424 strictly, 425 Eclipse checks; corpus 22.
 - Performance (`qvto bench --java`, release build, median of 20 runs; Java: the reference
   runner, same cases repeated in one JVM, median of the second half):
 
