@@ -362,6 +362,12 @@ fn execute(
             }
         }
     }
+    if std::env::var_os("QVTO_SHOW").is_some() {
+        eprintln!(
+            "-- dump\n{}",
+            qvto_emf::canon::dump(&outputs.rs.graph, &outputs.dumped())
+        );
+    }
     o.outputs = Some(outputs);
     Ok((o, new_created))
 }

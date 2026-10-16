@@ -1014,6 +1014,11 @@ impl<'a> Builder<'a> {
             }
             ExprKind::Object(o) => {
                 let var = self.local(o.var);
+                if self.locals[o.var.index()].kind == ir::LocalKind::Object {
+                    // the analyser's temporary for the object: Eclipse removes it after the
+                    // expression, so every evaluation creates a new object
+                    self.emit(Insn::LoadNull { dst: var });
+                }
                 let site = self.site(Site::Object {
                     class: o.class,
                     extent: o.extent,
