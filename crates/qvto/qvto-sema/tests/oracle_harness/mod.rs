@@ -428,6 +428,23 @@ impl CaseResolver<'_> {
 }
 
 impl UnitResolver for CaseResolver<'_> {
+    fn blackbox_units(&self) -> Vec<UnitSource> {
+        let mut out = Vec::new();
+        let Some(env) = self.bb_envs.first().filter(|e| e.as_str() != "classpath") else {
+            return out;
+        };
+        if let Some(m) = self.data.blackboxes.get(env) {
+            let mut names: Vec<&String> = m.keys().collect();
+            names.sort();
+            for qn in names {
+                if let Some(u) = self.try_blackbox(qn) {
+                    out.push(u);
+                }
+            }
+        }
+        out
+    }
+
     fn resolve(&self, importer: &UnitSource, qualified_name: &str) -> Option<UnitSource> {
         let r = self.unit_resolver.borrow().get(&importer.key).copied().unwrap_or(0);
         if let Some(u) = self.try_bases(r, qualified_name) {

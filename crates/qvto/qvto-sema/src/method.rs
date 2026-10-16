@@ -97,10 +97,82 @@ impl<'r> Sema<'r> {
         self.end_operation(op);
     }
 
-    /// The number of blackbox implementations (Java handlers) of a blackbox operation of a
-    /// non-blackbox module: none are registered in a headless compile.
-    fn blackbox_handler_count(&self, _op: OpId) -> usize {
-        0
+    /// The number of Java implementations of a `blackbox` operation declared in QVTo
+    /// (`BlackboxRegistry.getBlackboxCallHandler`, `OperationMatcher.matchOperation`): in the
+    /// blackbox units the module imports, else in all registered units.
+    fn blackbox_handler_count(&mut self, op: OpId) -> usize {
+        let module = self.ops[op.index()].module;
+        let mut native: Vec<(std::rc::Rc<crate::blackbox::BlackboxUnit>, String)> = Vec::new();
+        let me = &self.modules[module.index()];
+        for &m in me.by_extension.iter().chain(me.by_access.iter()) {
+            let u = self.modules[m.index()].unit;
+            if u == usize::MAX {
+                continue;
+            }
+            if let Some(bb) = &self.units[u].source.blackbox {
+                let name = self.modules[m.index()].name.clone();
+                if !native.iter().any(|(b, n)| std::rc::Rc::ptr_eq(b, bb) && *n == name) {
+                    native.push((bb.clone(), name));
+                }
+            }
+        }
+        let candidates: Vec<(std::rc::Rc<crate::blackbox::BlackboxUnit>, Option<String>)> = if native.is_empty() {
+            self.resolver.blackbox_units().into_iter().filter_map(|u| u.blackbox.map(|b| (b, None))).collect()
+        } else {
+            native.into_iter().map(|(b, n)| (b, Some(n))).collect()
+        };
+        let mut count = 0;
+        for (unit, only) in candidates {
+            if unit.load_error {
+                continue;
+            }
+            for bm in &unit.modules {
+                if only.as_ref().is_some_and(|n| *n != bm.name) {
+                    continue;
+                }
+                for bop in &bm.ops {
+                    if self.blackbox_matches(op, bm, bop) {
+                        count += 1;
+                    }
+                }
+            }
+        }
+        count
+    }
+
+    fn blackbox_matches(&mut self, op: OpId, bm: &crate::blackbox::BlackboxModule, b: &crate::blackbox::BlackboxOp) -> bool {
+        let info = self.ops[op.index()].ir.clone();
+        if b.name != info.name {
+            return false;
+        }
+        let bctx = b.context.as_deref().filter(|c| *c != "-").map(|c| self.parse_bb_type(c));
+        match (info.context, bctx) {
+            (None, None) => {
+                if !bm.library {
+                    return false;
+                }
+            }
+            (Some(c), Some(bc)) => {
+                if !self.ts.ck().exact(c, bc) {
+                    return false;
+                }
+            }
+            _ => return false,
+        }
+        if info.params.len() != b.params.len() {
+            return false;
+        }
+        for (p, bp) in info.params.iter().zip(&b.params) {
+            let t = self.parse_bb_type(&bp.ty);
+            if !self.ts.ck().exact(p.ty, t) {
+                return false;
+            }
+        }
+        let bret = if b.result.is_empty() || b.result == "-" { TypeId::OCL_VOID } else { self.parse_bb_type(&b.result) };
+        match info.results.first() {
+            None => bret == TypeId::OCL_VOID,
+            Some(r) => self.ts.ck().exact(bret, r.ty),
+        }
     }
 
     /// `visitConstructorCS`

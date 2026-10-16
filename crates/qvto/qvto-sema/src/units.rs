@@ -38,6 +38,13 @@ impl UnitSource {
 pub trait UnitResolver {
     /// The unit with the given qualified name, as seen from `importer`.
     fn resolve(&self, importer: &UnitSource, qualified_name: &str) -> Option<UnitSource>;
+
+    /// The Java blackbox units registered in the compilation's context (Eclipse's
+    /// `BlackboxRegistry`), searched for implementations of `blackbox` operations declared in
+    /// QVTo modules that import no blackbox unit.
+    fn blackbox_units(&self) -> Vec<UnitSource> {
+        Vec::new()
+    }
 }
 
 /// The result of compiling one unit.
