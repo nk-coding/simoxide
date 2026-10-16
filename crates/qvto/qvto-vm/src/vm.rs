@@ -170,6 +170,8 @@ where
     /// Stderr-like messages of swallowed runtime errors (`Evaluation failed at ...`).
     pub errors: Vec<String>,
     pub(crate) class_local: Vec<bool>,
+    /// Static type of the receiver of the current `CallStdX`.
+    pub(crate) std_src_ty: TypeId,
     pub(crate) regexes: RefCell<HashMap<(String, bool), Result<regex::Regex, String>>>,
 }
 
@@ -212,6 +214,7 @@ where
             errors: Vec::new(),
             class_local: Vec::new(),
             regexes: RefCell::new(HashMap::new()),
+            std_src_ty: TypeId::OCL_VOID,
         };
         if let Some(src) = vm.opts.id_source.take() {
             vm.env = RunEnv::new(vm.opts.mode, Some(src));
@@ -528,11 +531,13 @@ where
                         op,
                         src_unlimited,
                         arg_unlimited,
+                        src_ty,
                     } = chunk.sites[site as usize]
                     else {
                         unreachable!()
                     };
                     let at = base + b as usize;
+                    self.std_src_ty = src_ty;
                     match self.call_std(op, at, src_unlimited, arg_unlimited) {
                         Ok(v) => r!(self, base, dst) = v,
                         Err(e) => fail!(e),

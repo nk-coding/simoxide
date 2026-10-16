@@ -848,9 +848,15 @@ where
                 Some(c) => match ops::sum(&c) {
                     Some(v) => v,
                     None => {
-                        // empty: by the static element type, unknown here; Integer 0 is the
-                        // common case
-                        Value::Int(0)
+                        // empty: by the static element type
+                        let el = self.prog.ir.types.element(self.std_src_ty);
+                        match el {
+                            Some(TypeId::INTEGER) | Some(TypeId::UNLIMITED_NATURAL) => {
+                                Value::Int(0)
+                            }
+                            Some(TypeId::REAL) => Value::Real(0.0),
+                            _ => Value::Null,
+                        }
                     }
                 },
                 None => Value::Invalid,

@@ -34,6 +34,9 @@ pub enum Site {
         src_unlimited: bool,
         /// The argument's static type is UnlimitedNatural.
         arg_unlimited: bool,
+        /// The receiver's static type (`sum` of an empty collection: `0`, `0.0` or null by
+        /// element type).
+        src_ty: TypeId,
     },
     Mapping {
         op: OpId,
@@ -114,6 +117,8 @@ pub enum Site {
         has_log: bool,
         has_level: bool,
         has_element: bool,
+        /// The log's condition was false: nothing is logged.
+        silent: bool,
     },
     Raise {
         class: Option<ClassId>,

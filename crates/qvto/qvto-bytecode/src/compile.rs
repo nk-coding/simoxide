@@ -890,6 +890,7 @@ impl<'a> Builder<'a> {
                     has_log,
                     has_level,
                     has_element,
+                    silent: false,
                 })?;
                 match &a.log {
                     Some(l) => self.log(l, true, Some(site))?,
@@ -1070,6 +1071,27 @@ impl<'a> Builder<'a> {
         if assert {
             let site = assert_site.expect("assert site");
             self.emit(Insn::AssertFail { base, site });
+            if let Some(j) = j_skip.take() {
+                // the log's condition is false: nothing is logged, the assertion still fails
+                let j_end = self.jump(Insn::Jump { target: 0 });
+                self.patch(j);
+                let silent = match &self.chunk.sites[site as usize] {
+                    Site::Assert {
+                        severity, location, ..
+                    } => Site::Assert {
+                        severity: *severity,
+                        location: location.clone(),
+                        has_log: false,
+                        has_level: false,
+                        has_element: false,
+                        silent: true,
+                    },
+                    _ => unreachable!(),
+                };
+                let s2 = self.site(silent)?;
+                self.emit(Insn::AssertFail { base, site: s2 });
+                self.patch(j_end);
+            }
         } else {
             let site = self.site(Site::Log {
                 has_level: l.level.is_some(),
@@ -1216,11 +1238,13 @@ impl<'a> Builder<'a> {
         let base = self.call_args(c)?;
         let src_unlimited = c.source.as_ref().is_some_and(|s| self.is_unlimited(s));
         let arg_unlimited = c.args.first().is_some_and(|a| self.is_unlimited(a));
-        if src_unlimited || arg_unlimited {
+        let needs_type = op.name() == "sum";
+        if src_unlimited || arg_unlimited || needs_type {
             let site = self.site(Site::Std {
                 op,
                 src_unlimited,
                 arg_unlimited,
+                src_ty: c.source.as_ref().map(|s| s.ty).unwrap_or(TypeId::OCL_VOID),
             })?;
             self.emit(Insn::CallStdX { dst, base, site });
         } else {

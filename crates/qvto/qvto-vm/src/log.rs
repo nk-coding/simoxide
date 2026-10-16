@@ -12,17 +12,18 @@ use std::fmt::Write;
 /// Formats objects, enum literals and types with the program's metamodels.
 struct Fmt<'a> {
     prog: &'a qvto_bytecode::Program,
-    classes: Vec<Option<qvto_model::ClassId>>,
+    class_of: &'a dyn Fn(ObjRef) -> Option<qvto_model::ClassId>,
 }
 
 impl ObjectFormat for Fmt<'_> {
     fn object(&self, o: ObjRef, env: &dyn HashEnv, out: &mut String) {
         let key = IdentityKey::Obj(o);
         let _ = write!(out, "{}@{:x}", env.class_name(key), env.identity_hash(key));
-        if let Some(Some(c)) = self.classes.first() {
+        if let Some(c) = (self.class_of)(o) {
             let meta = &self.prog.ir.meta;
-            let ci = meta.class(*c);
+            let ci = meta.class(c);
             let ck = IdentityKey::Type(TypeRef(0x4000_0000 | c.0));
+
             let _ = write!(
                 out,
                 " (eClass: org.eclipse.emf.ecore.impl.EClassImpl@{:x} (name: {}) (instanceClassName: {}) (abstract: {}, interface: {}))",
@@ -65,23 +66,12 @@ where
     }
 
     fn write_value(&self, v: &Value, out: &mut String) {
-        match v {
-            Value::Obj(o) => {
-                let c = self.class_of(v);
-                let f = Fmt {
-                    prog: self.prog,
-                    classes: vec![c],
-                };
-                f.object(*o, &self.env, out);
-            }
-            _ => {
-                let f = Fmt {
-                    prog: self.prog,
-                    classes: Vec::new(),
-                };
-                java_to_string(v, &self.env, &f, out);
-            }
-        }
+        let class_of = |o: ObjRef| self.class_of(&Value::Obj(o));
+        let f = Fmt {
+            prog: self.prog,
+            class_of: &class_of,
+        };
+        java_to_string(v, &self.env, &f, out);
     }
 
     /// One record of the transformation's log (`WriterLog`, records end with a newline).
@@ -180,6 +170,7 @@ where
             has_log,
             has_level,
             has_element,
+            silent,
         } = site
         else {
             unreachable!()
@@ -193,7 +184,9 @@ where
         let log_message = if *has_log {
             Some(self.do_log(at, *has_level, *has_element, Some(&message)))
         } else {
-            self.log_line(&message);
+            if !*silent {
+                self.log_line(&message);
+            }
             None
         };
         if *severity == AssertSeverity::Fatal {
