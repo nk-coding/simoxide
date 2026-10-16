@@ -37,6 +37,26 @@ fn suite_models() {
     let oracle_dir = std::env::var("QVTO_EMF_ORACLE")
         .map(PathBuf::from)
         .unwrap_or_else(|_| root.join("target/emf-oracle/suite"));
+    check_models("suite", &root, &config, &expected, &oracle_dir);
+}
+
+/// The PCM corpus (SimOxide's corpus models and Palladio's default models), when set up with
+/// `tools/pcm-setup.sh target/pcm` and the oracle has run on it
+/// (`oracle/run.sh models target/pcm/pcm.conf target/pcm/pcm-models.txt target/emf-oracle/pcm`).
+#[test]
+fn pcm_models() {
+    let root = repo();
+    let pcm = std::env::var("QVTO_PCM_DIR").map(PathBuf::from).unwrap_or_else(|_| root.join("target/pcm"));
+    let oracle_dir = std::env::var("QVTO_EMF_ORACLE_PCM").map(PathBuf::from).unwrap_or_else(|_| root.join("target/emf-oracle/pcm"));
+    let Ok(expected) = std::fs::read_to_string(oracle_dir.join("results.tsv")) else {
+        eprintln!("PCM oracle results missing: skipped");
+        return;
+    };
+    let config = Config::read(&pcm.join("pcm.conf"), &root).unwrap();
+    check_models("PCM", &root, &config, &expected, &oracle_dir);
+}
+
+fn check_models(what: &str, root: &Path, config: &Config, expected: &str, oracle_dir: &Path) {
     let (mut n, mut load_ok, mut save_ok, mut dump_ok) = (0, 0, 0, 0);
     let mut failures = Vec::new();
     for (i, line) in expected.lines().enumerate() {
@@ -91,7 +111,7 @@ fn suite_models() {
             failures.push(msg);
         }
     }
-    eprintln!("{n} models: load {load_ok}, save {save_ok}, dump {dump_ok} as EMF");
+    eprintln!("{what}: {n} models: load {load_ok}, save {save_ok}, dump {dump_ok} as EMF");
     for f in failures.iter().take(40) {
         eprintln!("{f}");
     }
