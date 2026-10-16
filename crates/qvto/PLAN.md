@@ -67,11 +67,11 @@ Status values: done, next, open, parked.
   93 error cases report errors at the annotated spans.
   Done 2026-10-16 (`crates/qvto-sema/README.md`, "Verification"): against Eclipse's full-compile
   diagnostics of all 1 102 corpus files, 1 096 files get exactly Eclipse's problems (severity,
-  unit, line, offset, length, message), all 37 SimuLizar and 18 SPD files included; 2 300 of
-  Eclipse's 2 304 problems are reproduced, with 9 extra; every file Eclipse compiles without
-  problems has no errors (539 of 541 no problems at all); 112 of the 117 `TestQvtParser` count
-  checks pass; the IR of all 970 error-free compilations passes the consistency checks; the
-  whole corpus analyses in 0.42 s (Eclipse warm: 1.77 s).
+  unit, line, offset, length, message), all 37 SimuLizar and 18 SPD files included; all 2 304
+  of Eclipse's problems are reproduced, with 8 extra; whether a file has errors agrees on all
+  files (539 of the 541 problem-free files have no problems at all); 115 of the 117
+  `TestQvtParser` count checks pass; the IR of all 969 error-free compilations passes the
+  consistency checks; the whole corpus analyses in 0.40 s (Eclipse warm: 1.77 s).
 - **Q3b**: SimuLizar's 37 `.qvto` files compile; the 22 rule files run on the corpus PCM models
   and match the Java runner; at least 50 % of the 309 transformation cases pass.
 - **Q4**: Slingshot's SPD transformations run and match the Java runner; at least 85 % of the 309

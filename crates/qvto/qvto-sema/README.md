@@ -70,12 +70,12 @@ every mismatch to `target/q2-oracle-report.tsv`. On 2026-10-16:
 |---|---|
 | files whose problems equal Eclipse's exactly (severity, unit, line, offset, length, message) | 1 096 of 1 102 (Eclipse suite 1 041 / 1 047, SimuLizar 37 / 37, SPD 18 / 18) |
 | files Eclipse compiles without problems | 541; we report none on 539, no errors on 541 |
-| files with errors | 133; 127 match exactly, 132 have errors on our side |
-| problems | Eclipse 2 304, ours 2 309, matched 2 300 (99.8 %) |
-| `TestQvtParser` expected counts | 117 cases, ours pass 112 (Eclipse 117) |
-| `TestQvtParser` inline annotations | 89 of 104 annotated files match exactly (Eclipse's own problems: 93) |
-| IR checks | 970 error-free compilations, no violations |
-| speed | 0.42 s for all 1 102 files (release, mean 0.38 ms, largest file 44 ms); Eclipse: 1.77 s warm |
+| files with errors | 133; 129 match exactly; errors or not agrees on all 1 102 files |
+| problems | Eclipse 2 304, ours 2 312: all 2 304 reproduced, 8 extra |
+| `TestQvtParser` expected counts | 117 cases, ours pass 115 (Eclipse 117) |
+| `TestQvtParser` inline annotations | 91 of 104 annotated files match exactly (Eclipse's own problems: 93) |
+| IR checks | 969 error-free compilations, no violations |
+| speed | 0.40 s for all 1 102 files (release, mean 0.36 ms, largest file 39 ms); Eclipse: 1.77 s warm |
 
 The remaining six files: a parser recovery difference (`exec_erroneous`, `missingObjectType`), a
 validation run that Eclipse apparently stops early in two files (`UMLFoo`, `Ecore2UML`: problems
