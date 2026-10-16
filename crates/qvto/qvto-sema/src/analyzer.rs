@@ -79,6 +79,8 @@ pub(crate) struct Sema<'r> {
     pub meta_op_names: Vec<Vec<String>>,
     /// Metamodel operations by owning class, in `eOperations` order.
     pub class_ops: HashMap<ClassId, Vec<ir::MetaOpId>>,
+    /// The source type for "Cannot find operation" messages of implicit collects.
+    pub call_msg_src: Option<TypeId>,
 }
 
 pub(crate) const STDLIB_MODULE: ModuleId = ModuleId(0);
@@ -120,6 +122,7 @@ impl<'r> Sema<'r> {
             meta_ops: Vec::new(),
             meta_op_names: Vec::new(),
             class_ops: HashMap::new(),
+            call_msg_src: None,
         };
         s.create_stdlib_module();
         s

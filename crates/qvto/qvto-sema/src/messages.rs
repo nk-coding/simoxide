@@ -50,8 +50,9 @@ pub fn bind(message: &str, args: &[&str]) -> String {
                 }
                 match chars[next..].iter().position(|&x| x == '\'') {
                     None => {
-                        out.push(c);
-                        i += 1;
+                        // NLS.bind: an unmatched quote is dropped, the rest copied
+                        out.extend(&chars[next..]);
+                        i = len;
                     }
                     Some(p) => {
                         out.extend(&chars[next..next + p]);

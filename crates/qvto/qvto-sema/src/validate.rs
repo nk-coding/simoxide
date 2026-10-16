@@ -306,7 +306,7 @@ impl<'r> Sema<'r> {
                 let span = if use_refs { refs.get(i).copied().unwrap_or(op_span) } else { op_span };
                 let a = self.mapping_qualified_name(*ext);
                 let b = self.mapping_qualified_name(op);
-                self.error(span, bind(vm::MappingExtension_nonConformantSignatureForMappingExtension, &[&a, &kind.to_uppercase(), &b]));
+                self.error(span, bind(vm::MappingExtension_nonConformantSignatureForMappingExtension, &[&a, kind, &b]));
             }
         }
     }

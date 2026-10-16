@@ -904,6 +904,8 @@ impl<'r> Sema<'r> {
         if implicit_collect {
             let (it, it_name) = self.new_temp_iterator(st);
             let iter_ex = self.var_ex(VarRef::Local(it), cs.span);
+            // Eclipse generates the call on the collection source, then substitutes the iterator
+            self.call_msg_src = Some(st);
             let (mut call, op) = self.gen_operation_call(cs, name, Some(iter_ex), owner, args);
             if is_static && !self.is_static_ok(op) {
                 self.error(cs.span, bind(om::NonStaticOperation_ERROR_, &[name]));
@@ -1111,7 +1113,12 @@ impl<'r> Sema<'r> {
             let actual_owner = if matches!(self.ts.types.get(owner), Type::Module(_)) { self.modules[e.index()].ty } else { owner };
             let saved = self.cur_module;
             self.cur_module = e;
-            let r = self.find_most_specific_operation(actual_owner, name, args);
+            let mut r = self.find_most_specific_operation(actual_owner, name, args);
+            if matches!(r, Ok(None)) {
+                if let Some(u) = name.strip_prefix('_') {
+                    r = self.find_most_specific_operation(actual_owner, u, args);
+                }
+            }
             self.cur_module = saved;
             match r {
                 Ok(Some(o)) => {
@@ -1149,7 +1156,7 @@ impl<'r> Sema<'r> {
     pub(crate) fn gen_operation_call(&mut self, cs: &CallCs, name: &str, src: Option<Ex>, owner: TypeId, args: Vec<Ex>) -> (Ex, Option<OpRef>) {
         let a: Vec<Arg> = args.iter().map(|x| self.arg_of(x)).collect();
         let mut op_owner = owner;
-        let src_ty = src.as_ref().map(|s| s.ty());
+        let src_ty = self.call_msg_src.take().or(src.as_ref().map(|s| s.ty()));
         let arrow_coll = cs.accessor == Accessor::Arrow && src_ty.is_some_and(|t| self.ts.types.is_collection_like(t));
         if arrow_coll && self.lookup_operation(cs.span, None, owner, name, &a).is_none() {
             op_owner = self.ts.types.element(owner).unwrap_or(TypeId::OCL_VOID);

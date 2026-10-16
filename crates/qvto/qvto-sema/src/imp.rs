@@ -1000,7 +1000,10 @@ impl<'r> Sema<'r> {
             _ => None,
         };
         let Some(te) = te else {
-            return self.ex(ExprKind::Raise(None, None), TypeId::OCL_VOID, cst);
+            let mut x = self.ex(ExprKind::Raise(None, None), TypeId::OCL_VOID, cst);
+            x.det = true;
+            x.info = Info::Return;
+            return x;
         };
         let t = self.visit_type_cs(&te);
         if !self.is_exception(t) {
