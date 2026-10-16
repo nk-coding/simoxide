@@ -519,6 +519,7 @@ dependencies = [
  "qvto-model",
  "qvto-runtime",
  "qvto-sema",
+ "qvto-syntax",
  "qvto-testkit",
  "qvto-vm",
 ]

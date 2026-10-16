@@ -15,6 +15,9 @@ use std::cell::RefCell;
 pub struct RunEnv {
     mode: Mode,
     ids: RefCell<IdentityHashes>,
+    /// Keys that are the same Java object as another key: type values and the `eClass` of
+    /// printed objects are the metamodel's `EClassifier` objects of the store.
+    aliases: std::collections::HashMap<IdentityKey, IdentityKey>,
 }
 
 impl RunEnv {
@@ -24,7 +27,13 @@ impl RunEnv {
             ids: RefCell::new(IdentityHashes::new(
                 source.unwrap_or_else(|| Box::new(HotSpotXorShift::default())),
             )),
+            aliases: std::collections::HashMap::new(),
         }
+    }
+
+    /// Makes `key` the same object as `target` for identity hashes.
+    pub fn alias(&mut self, key: IdentityKey, target: IdentityKey) {
+        self.aliases.insert(key, target);
     }
 
     /// The identity hash of a key if it has been drawn.
@@ -38,6 +47,7 @@ impl HashEnv for RunEnv {
         self.mode
     }
     fn identity_hash(&self, key: IdentityKey) -> i32 {
+        let key = self.aliases.get(&key).copied().unwrap_or(key);
         match self.mode {
             Mode::Compat => self.ids.borrow_mut().get(key),
             Mode::Fast => FastEnv.identity_hash(key),

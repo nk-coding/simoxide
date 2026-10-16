@@ -20,6 +20,7 @@ qvto-runtime.workspace = true
 qvto-model.workspace = true
 qvto-vm.workspace = true
 qvto-bytecode.workspace = true
+qvto-syntax.workspace = true
 # Sampling profiler for `qvto bench --profile` (SIGPROF, works without perf events).
 pprof = { version = "0.15", optional = true, default-features = false, features = ["flamegraph"] }
 

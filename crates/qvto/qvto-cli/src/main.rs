@@ -5,6 +5,8 @@
 mod bbox;
 mod bench;
 mod engine;
+mod fuzz;
+mod robust;
 
 use qvto_model::ModelStore;
 use qvto_testkit::case::{Case, read_cases};
@@ -39,7 +41,14 @@ usage:
       outputs that differ between the runs as unstable and writes the fixture
       bundle; the full results (tapes, XMI) stay in target/qvto-testkit/java/<suite>.
   qvto conform java [--suite ...] [--out DIR] [--only ID,...] [--prefix P]... [--save-xmi]
-      Runs the Java reference runner once into DIR.";
+      Runs the Java reference runner once into DIR.
+  qvto fuzz expr|prog [--seed N] [--minutes M | --batches B] [--cases C] [--stmts S] [--depth D] [--out DIR] [--keep]
+      Differential fuzzing against the Java runner: random expressions or programs over the fuzz
+      metamodel; findings (minimised) in DIR/findings.tsv and DIR/findings/.
+  qvto fuzz robust [--workers N] [--minutes M] [--seed N] [--out DIR] [--mem-mb MB]
+      Robustness fuzzing of parser, analyser, compiler and VM (no panics, hangs or aborts).
+  qvto fuzz robust-replay FILE.qvto...
+      Runs the robustness pipeline on files.";
 
 struct Suite {
     name: &'static str,
@@ -72,6 +81,7 @@ fn main() {
         Some("disasm") => disasm(&args[1..]),
         Some("run") => run_cmd(&args[1..]),
         Some("bench") => bench::bench(&args[1..]),
+        Some("fuzz") => fuzz::main(&args[1..]),
         Some("-h" | "--help") | None => {
             println!("{USAGE}");
         }
@@ -181,6 +191,7 @@ fn conform(args: &[String]) {
                     tape: true,
                     save_xmi: true,
                     jvm_opts: None,
+                    timeout: None,
                 };
                 let _ = std::fs::remove_dir_all(&run.out);
                 let r = record(&run, fixture, o.runs, partial);
@@ -224,6 +235,7 @@ fn conform(args: &[String]) {
                     tape: true,
                     save_xmi: o.save_xmi,
                     jvm_opts: None,
+                    timeout: None,
                 };
                 match run.run() {
                     Ok(log) => print!("{log}"),

@@ -10,7 +10,7 @@ use qvto_model::{ClassId, FeatureId, ModelStore};
 use qvto_runtime::coll::{Coll, CollKind};
 use qvto_runtime::dict::{Dict, List};
 use qvto_runtime::identity::IdentityHashSource;
-use qvto_runtime::{EnumLit, Mode, Str, TypeRef, Value};
+use qvto_runtime::{EnumLit, IdentityKey, Mode, ObjRef, Str, TypeRef, Value};
 use qvto_sema::ir::GlobalId;
 use qvto_sema::ir::{IntermPropId, ModuleId, OpId};
 use qvto_types::{StdOp, TypeId};
@@ -298,6 +298,10 @@ where
         if let Some(src) = vm.opts.id_source.take() {
             vm.env = RunEnv::new(vm.opts.mode, Some(src));
         }
+        if vm.opts.mode == Mode::Compat {
+            // identity hashes are observable only in compat mode
+            vm.alias_classifier_identities();
+        }
         vm.consts = vec![None; prog.consts.len()];
         vm.interm_info = crate::objects::IntermInfo::new(prog, vm.store);
         vm.class_local = crate::objects::local_classes(prog, vm.interm_info.in_store);
@@ -386,6 +390,35 @@ where
             k::SEQUENCE => Value::Coll(Rc::new(Coll::new_sequence())),
             k::LIST => Value::List(Rc::new(RefCell::new(List::new()))),
             _ => Value::Dict(Rc::new(RefCell::new(Dict::new(&self.env)))),
+        }
+    }
+
+    /// Type values and the `eClass` that `log` prints of an object are the metamodel's
+    /// `EClassifier` objects in Eclipse: their identity hashes are those of the store's
+    /// classifier objects (when the store has them), so that a Java run's tape applies.
+    fn alias_classifier_identities(&mut self) {
+        use qvto_model::Classifier;
+        use qvto_types::Type;
+        let types = &self.prog.ir.types;
+        for i in 0..types.len() {
+            let c = match types.get(TypeId(i as u32)) {
+                Type::Class(c) => Classifier::Class(*c),
+                Type::DataType(d) => Classifier::DataType(*d),
+                Type::Enum(e) => Classifier::Enum(*e),
+                _ => continue,
+            };
+            if let Some(o) = self.store.classifier_object(c) {
+                let target = IdentityKey::Obj(ObjRef::host(o.to_u32()));
+                self.env.alias(IdentityKey::Type(TypeRef(i as u32)), target);
+            }
+        }
+        // the `eClass` of a printed object (`log.rs`)
+        for c in 0..self.prog.ir.meta.class_count() {
+            let c = ClassId(c as u32);
+            if let Some(o) = self.store.classifier_object(Classifier::Class(c)) {
+                let target = IdentityKey::Obj(ObjRef::host(o.to_u32()));
+                self.env.alias(IdentityKey::Type(TypeRef(0x4000_0000 | c.0)), target);
+            }
         }
     }
 
@@ -1238,10 +1271,8 @@ where
         let names: Rc<[Str]> = parts.iter().map(|(n, _)| Str::new(n)).collect();
         let mut values = vec![Value::Null; parts.len()];
         for (i, &k) in order.iter().enumerate() {
+            // an `invalid` part stays a part (classic OCL's `visitTupleLiteralExp`)
             let v = self.regs[at + i].clone();
-            if v.is_invalid() {
-                return Value::Invalid;
-            }
             values[k as usize] = coerce_number(v);
         }
         Value::Tuple(Rc::new(qvto_runtime::tuple::Tuple::new(

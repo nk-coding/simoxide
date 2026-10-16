@@ -22,6 +22,8 @@ pub struct JavaRun {
     pub save_xmi: bool,
     /// Extra JVM options (`JVM_OPTS`), e.g. `-XX:+UnlockExperimentalVMOptions -XX:hashCode=3`.
     pub jvm_opts: Option<String>,
+    /// Per-case deadline in seconds (the runner's default: 120).
+    pub timeout: Option<u64>,
 }
 
 impl JavaRun {
@@ -57,7 +59,10 @@ impl JavaRun {
         if self.save_xmi {
             cmd.arg("--save-xmi");
         }
-        cmd.env("XMX", "-Xmx3g");
+        if let Some(t) = self.timeout {
+            cmd.arg("--timeout").arg(t.to_string());
+        }
+        cmd.env("XMX", "-Xmx2g");
         if let Some(o) = &self.jvm_opts {
             cmd.env("JVM_OPTS", o);
         }

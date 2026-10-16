@@ -22,6 +22,9 @@ pub struct QvtoEngine {
     /// The Java blackbox signatures of the corpus (`qvto-types/data/blackboxes.tsv`; parsed on
     /// the case's thread, the parsed units are not `Send`).
     signatures: std::sync::Arc<str>,
+    /// Java result directories searched for a case's identity-hash tape (`<dir>/<id>/idtape.tsv`)
+    /// besides the fixture caches of the Eclipse and corpus suites.
+    pub tape_dirs: Vec<std::path::PathBuf>,
 }
 
 /// The signatures of the Java blackboxes Eclipse loads for the suite and the corpus.
@@ -38,6 +41,7 @@ impl QvtoEngine {
             mode,
             bundles: FsResolver::bundles_below(&root.join("reference/eclipse-qvto/tests")),
             signatures: signatures.into(),
+            tape_dirs: Vec::new(),
         }
     }
 }
@@ -89,11 +93,12 @@ impl Engine for QvtoEngine {
         let bundles = self.bundles.clone();
         let mode = self.mode;
         let signatures = self.signatures.clone();
+        let tape_dirs = self.tape_dirs.clone();
         let r = std::thread::scope(|s| {
             std::thread::Builder::new()
                 .stack_size(512 << 20)
                 .spawn_scoped(s, || {
-                    std::panic::catch_unwind(AssertUnwindSafe(|| run_case(env, bundles, &signatures, mode)))
+                    std::panic::catch_unwind(AssertUnwindSafe(|| run_case(env, bundles, &signatures, mode, &tape_dirs)))
                 })
                 .expect("thread")
                 .join()
@@ -200,7 +205,13 @@ pub fn compile_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str) -> Re
     })
 }
 
-fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -> Outcome {
+fn run_case(
+    env: &CaseEnv,
+    bundles: Vec<Bundle>,
+    signatures: &str,
+    mode: Mode,
+    tape_dirs: &[std::path::PathBuf],
+) -> Outcome {
     let case = env.case;
     let CaseProgram {
         compiled,
@@ -272,7 +283,7 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -
         ));
         return o;
     };
-    let tape = load_tape(env);
+    let tape = load_tape(env, tape_dirs);
     match execute(env, &program, &mm_uris, mode, tape.as_ref()) {
         Ok(mut o2) => {
             o2.compile_time = o.compile_time;
@@ -285,14 +296,11 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -
 }
 
 /// The Java run's identity-hash tape of the case, if cached.
-fn load_tape(env: &CaseEnv) -> Option<Tape> {
-    for suite in ["eclipse", "corpus"] {
-        let p = env
-            .base
-            .join(qvto_testkit::paths::JAVA_CACHE)
-            .join(suite)
-            .join(&env.case.id)
-            .join("idtape.tsv");
+fn load_tape(env: &CaseEnv, tape_dirs: &[std::path::PathBuf]) -> Option<Tape> {
+    let cache = env.base.join(qvto_testkit::paths::JAVA_CACHE);
+    let dirs = [cache.join("eclipse"), cache.join("corpus")];
+    for dir in dirs.iter().chain(tape_dirs) {
+        let p = dir.join(&env.case.id).join("idtape.tsv");
         if let Ok(t) = std::fs::read_to_string(&p) {
             return parse_tape(&t).ok();
         }
@@ -474,6 +482,13 @@ fn execute(
             x.next();
             x.next();
         }
+        if std::env::var("QVTO_TAPE_DEBUG").is_ok() {
+            let mut ks: Vec<_> = keys.iter().filter(|(k, _)| k.starts_with("mm:")).collect();
+            ks.sort();
+            for (k, o) in ks.iter().take(400) {
+                eprintln!("key {k} -> {o} {:?}", by_obj.get(o));
+            }
+        }
         let lookup = Box::new(move |k: IdentityKey| match k {
             IdentityKey::Obj(r) if !r.is_local() && r.index() < first_created => {
                 by_obj.get(&r.index()).copied()
@@ -650,6 +665,11 @@ pub fn cli_catalog(root: &Path) -> Catalog {
 /// A file resolver with QVTo's libraries registered and the test bundle's blackboxes and the
 /// other Java classes of the corpus found by name.
 pub fn cli_resolver<'r>(files: &'r FsResolver, catalog: &Catalog) -> BlackboxResolver<'r> {
+    cli_resolver_dyn(files, catalog)
+}
+
+/// [`cli_resolver`] over any unit resolver.
+pub fn cli_resolver_dyn<'r>(files: &'r dyn qvto_sema::UnitResolver, catalog: &Catalog) -> BlackboxResolver<'r> {
     let mut classpath: Vec<CatalogUnit> = catalog.units("bundle").to_vec();
     classpath.extend(catalog.units("classpath").iter().cloned());
     BlackboxResolver {

@@ -76,11 +76,10 @@ where
             Type::OclInvalid => v.is_invalid(),
             Type::Boolean => matches!(v, Value::Bool(_)),
             Type::String => matches!(v, Value::Str(_)),
+            // `EDataType.isInstance` of `java.lang.Integer`: neither a `Long` (also not one
+            // beyond `int` range) nor an uncoerced `Short`/`Byte` box
             Type::Integer | Type::UnlimitedNatural => {
-                matches!(
-                    v,
-                    Value::Int(_) | Value::Boxed(IntBox::Long | IntBox::Short | IntBox::Byte, _)
-                )
+                matches!(v, Value::Int(i) if *i as i32 as i64 == *i)
             }
             // only a java.lang.Integer is also a Real (EcoreEvaluationEnvironment)
             Type::Real => match v {
@@ -218,7 +217,7 @@ where
                 _ => false,
             },
             Value::Int(i) => match ir.types.get(t) {
-                Type::Integer => true,
+                Type::Integer => *i as i32 as i64 == *i,
                 Type::Real => false,
                 Type::DataType(_) => self.is_kind_of(v, t),
                 _ => {
@@ -258,8 +257,8 @@ where
         }
         let ir = &self.prog.ir;
         match (ir.types.get(t), &v) {
-            // Real to Integer truncates (intValue)
-            (Type::Integer, Value::Real(x)) => return Value::Int(*x as i32 as i64),
+            // no Real to Integer conversion: classic OCL compares the argument's type (the type
+            // type) with Integer, which never holds, and falls back to `oclIsKindOf`
             (Type::Real, Value::Int(i)) if *i as i32 as i64 == *i => {
                 return Value::Real(*i as f64);
             }
