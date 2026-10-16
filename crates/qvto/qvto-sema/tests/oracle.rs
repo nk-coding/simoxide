@@ -24,6 +24,7 @@ fn eclipse_compile_oracle() {
     let h = Harness::new().expect("harness setup");
     let mut exact = 0;
     let mut failures = Vec::new();
+    let mut ir_issues: Vec<String> = Vec::new();
     let t = std::time::Instant::now();
     for case in &h.cases {
         let run = h.run_case(case);
@@ -38,6 +39,9 @@ fn eclipse_compile_oracle() {
             failures.push(format!("{}: no oracle entry", run.key));
             continue;
         };
+        for i in run.ir_issues.iter().take(3) {
+            ir_issues.push(format!("{}: {i}", run.key));
+        }
         let (_, missing, extra) = compare(&o.problems, &run.problems);
         if missing.is_empty() && extra.is_empty() {
             exact += 1;
@@ -53,6 +57,7 @@ fn eclipse_compile_oracle() {
     for f in failures.iter().take(20) {
         eprintln!("  {f}");
     }
+    assert!(ir_issues.is_empty(), "IR consistency (irck):\n{}", ir_issues.join("\n"));
     assert!(
         exact >= base,
         "{exact} keys match Eclipse's compile oracle exactly, below the baseline {base}"
