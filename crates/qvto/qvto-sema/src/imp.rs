@@ -1337,11 +1337,20 @@ impl<'r> Sema<'r> {
             Some(s) => {
                 let src = self.src();
                 let b = src.as_bytes();
+                let end = cst.end as usize;
                 let mut i = s.span.end as usize;
-                while i < cst.end as usize && (b[i].is_ascii_whitespace() || b[i] == b'.' || b[i] == b'-' || b[i] == b'>') {
-                    i += 1;
+                while i < end {
+                    if b[i].is_ascii_whitespace() || b[i] == b'.' || (b[i] == b'-' && b.get(i + 1) == Some(&b'>')) || b[i] == b'>' {
+                        i += 1;
+                    } else if b[i] == b'/' && b.get(i + 1) == Some(&b'*') {
+                        i = src[i + 2..].find("*/").map(|p| i + 2 + p + 2).unwrap_or(end);
+                    } else if (b[i] == b'/' && b.get(i + 1) == Some(&b'/')) || (b[i] == b'-' && b.get(i + 1) == Some(&b'-')) {
+                        i = src[i..].find('\n').map(|p| i + p + 1).unwrap_or(end);
+                    } else {
+                        break;
+                    }
                 }
-                Span::new(i as u32, cst.end)
+                Span::new(i.min(end) as u32, cst.end)
             }
             None => cst,
         }

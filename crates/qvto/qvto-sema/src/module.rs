@@ -690,10 +690,22 @@ impl<'r> Sema<'r> {
         }
     }
 
+    /// The header's CS span: from the `transformation`/`library` keyword (qualifiers excluded).
+    pub(crate) fn eclipse_header(&self, m: &ast::Module) -> Span {
+        let src = self.src();
+        let end = m.name.first().map(|n| n.span.start).unwrap_or(m.header_span.end);
+        let kw = m.kind.spelling().unwrap_or("transformation");
+        let text = src.get(m.header_span.start as usize..end as usize).unwrap_or("");
+        match rfind_word(text, kw) {
+            Some(i) => Span::new(m.header_span.start + i as u32, m.header_span.end),
+            None => m.header_span,
+        }
+    }
+
     /// `visitTransformationHeaderCS`
     fn visit_transformation_header(&mut self, id: ModuleId, m: &ast::Module) {
         let qname = path_string(&m.name, ".");
-        let head_to_path = Span::new(m.header_span.start, path_span(&m.name).end);
+        let head_to_path = Span::new(self.eclipse_header(m).start, path_span(&m.name).end);
         for q in &m.qualifiers {
             match q {
                 TokenKind::KwBlackbox => {
@@ -1084,7 +1096,7 @@ impl<'r> Sema<'r> {
                     if imp.0 == id {
                         let a = self.modules[id.index()].name.clone();
                         let b = self.modules[v.index()].name.clone();
-                        let span = modules[i].module.header_span;
+                        let span = self.eclipse_header(modules[i].module);
                         self.error(span, bind(cm::cyclicImportError, &[&a, &b]));
                         loops.push(top);
                     }
