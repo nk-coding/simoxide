@@ -157,6 +157,21 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
     } else {
         Severity::Ok
     });
+    // the executor's checks of a loaded unit (`CstTransformation.doLoad`): a transformation
+    // with an entry operation
+    if !compiled.has_errors()
+        && let Some(p) = &compiled.program
+    {
+        let m = &p.ir.modules[p.ir.main_module.index()];
+        let executable = m.kind == qvto_sema::ir::ModuleKind::Transformation
+            && (m.blackbox
+                || m.operations
+                    .iter()
+                    .any(|&op| p.ir.operations[op.index()].name == "main"));
+        if !executable {
+            o.load = Some(Severity::Error);
+        }
+    }
     if case.compile_only() {
         return o;
     }
