@@ -219,9 +219,8 @@ impl<'r> Sema<'r> {
             vtable: Vec::new(),
         });
         self.op_extras.push(extras);
-        if context.is_some() {
+        if let Some(owner) = context {
             let me = &mut self.modules[module.index()];
-            let owner = context.unwrap();
             if owner == TypeId::OCL_ANY {
                 me.defines_ocl_any_features = true;
             }
@@ -243,21 +242,21 @@ impl<'r> Sema<'r> {
     /// metamodel classifiers.
     pub(crate) fn parse_bb_type(&mut self, s: &str) -> TypeId {
         let s = s.trim();
-        if let Some((uri, name)) = s.rsplit_once('#') {
-            if !uri.contains('(') {
-                return match self
-                    .ts
-                    .meta
-                    .package_by_ns_uri(uri)
-                    .and_then(|p| self.ts.meta.classifier_by_name(p, name))
-                {
-                    Some(c) => {
-                        let t = self.classifier_type(c);
-                        self.ts.ck().ocl_type(t)
-                    }
-                    None => TypeId::OCL_VOID,
-                };
-            }
+        if let Some((uri, name)) = s.rsplit_once('#')
+            && !uri.contains('(')
+        {
+            return match self
+                .ts
+                .meta
+                .package_by_ns_uri(uri)
+                .and_then(|p| self.ts.meta.classifier_by_name(p, name))
+            {
+                Some(c) => {
+                    let t = self.classifier_type(c);
+                    self.ts.ck().ocl_type(t)
+                }
+                None => TypeId::OCL_VOID,
+            };
         }
         if let Some((head, rest)) = s.split_once('(') {
             let inner = rest.strip_suffix(')').unwrap_or(rest);

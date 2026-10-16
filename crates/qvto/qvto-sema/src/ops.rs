@@ -17,6 +17,7 @@ pub(crate) enum OpRef {
 }
 
 /// An imperative operation of the program with its signature as Eclipse records it.
+#[allow(dead_code)]
 pub(crate) struct OpInfo {
     pub ir: ir::Operation,
     /// The owning classifier: the context type, or the module type.
@@ -88,18 +89,6 @@ impl<'r> Sema<'r> {
         }
     }
 
-    pub fn op_param_names(&self, o: OpRef) -> Vec<String> {
-        match o {
-            OpRef::Std(op, _) => op.desc().params.iter().map(|p| p.0.to_string()).collect(),
-            OpRef::User(id) => self.ops[id.index()]
-                .params
-                .iter()
-                .map(|p| p.0.clone())
-                .collect(),
-            OpRef::Meta(m) => self.meta_op_names[m.index()].clone(),
-        }
-    }
-
     /// `getEType`
     pub fn op_ret(&self, o: OpRef) -> TypeId {
         match o {
@@ -138,16 +127,8 @@ impl<'r> Sema<'r> {
         }
     }
 
-    pub fn op_is_imperative(&self, o: OpRef) -> bool {
-        matches!(o, OpRef::User(_))
-    }
-
     pub fn op_is_mapping(&self, o: OpRef) -> bool {
         matches!(o, OpRef::User(id) if self.ops[id.index()].ir.kind == ir::OpKind::Mapping)
-    }
-
-    pub fn op_is_constructor(&self, o: OpRef) -> bool {
-        matches!(o, OpRef::User(id) if self.ops[id.index()].ir.kind == ir::OpKind::Constructor)
     }
 
     pub fn op_is_static(&self, o: OpRef) -> bool {

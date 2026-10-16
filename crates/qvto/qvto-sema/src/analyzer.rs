@@ -37,7 +37,8 @@ impl TypeState {
 #[derive(Clone, Debug)]
 pub(crate) struct ModelTypeState {
     pub decl: ir::ModelTypeDecl,
-    /// `strict` compliance kind given.
+    /// The declaration's span.
+    #[allow(dead_code)]
     pub span: Span,
 }
 
@@ -217,14 +218,6 @@ impl<'r> Sema<'r> {
             self.tuple_types.push(t);
         }
         t
-    }
-
-    pub fn op(&self, o: OpId) -> &OpInfo {
-        &self.ops[o.index()]
-    }
-
-    pub fn op_mut(&mut self, o: OpId) -> &mut OpInfo {
-        &mut self.ops[o.index()]
     }
 
     /// Assembles the result.

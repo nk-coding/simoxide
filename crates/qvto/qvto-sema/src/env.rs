@@ -35,14 +35,11 @@ pub(crate) struct ModuleEnv {
     /// contextual properties.
     pub features: Vec<ModuleFeature>,
     pub model_params: Vec<ModelParamInfo>,
-    /// `registerMappingOperation`: mappings by (owner, name).
-    pub mappings_map: Vec<((TypeId, String), Vec<OpId>)>,
     /// `rename` aliases: (new name, owner type, original feature name).
     pub aliases: Vec<(String, TypeId, String)>,
     /// The `extends` imports (`ModuleImport` of kind EXTENSION), for module-level overriding.
     pub module_imports: Vec<(ModuleId, bool)>,
     pub ty: TypeId,
-    pub header_span: Span,
     pub blackbox: bool,
     /// The `_INTERMEDIATE` package of the module's intermediate classes.
     pub interm_package: Option<qvto_model::PackageId>,
@@ -55,6 +52,7 @@ pub(crate) enum ModuleFeature {
 }
 
 #[derive(Clone, Debug)]
+#[allow(dead_code)]
 pub(crate) struct ModelParamInfo {
     pub name: String,
     pub direction: Direction,
@@ -120,7 +118,6 @@ pub(crate) struct VarEntry {
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Scope {
     pub vars: Vec<VarEntry>,
-    pub self_var: Option<VarRef>,
     /// `setParentLocal`: `lookupLocal` continues in the parent.
     pub parent_local: bool,
     /// `isWithinInitMappingSection` of this environment level.
@@ -136,8 +133,6 @@ pub(crate) struct FnState {
     pub scopes: Vec<Scope>,
     /// The operation being analysed (`getContextOperation`).
     pub op: Option<OpId>,
-    /// `isWithinInitMappingSection`
-    pub in_init: bool,
     /// `AbstractEnvironment.generateName` counter (implicit variables).
     pub name_counter: u32,
     /// The module whose code this is.

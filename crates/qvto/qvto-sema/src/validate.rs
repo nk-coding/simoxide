@@ -84,22 +84,22 @@ impl<'r> Sema<'r> {
         let info = self.ops[op.index()].ir.clone();
         let module = info.module;
         // visitImperativeOperation
-        if let Some(ct) = info.context {
-            if matches!(self.ts.types.get(ct), Type::Module(_)) {
-                let tn = self.qualified_name(ct);
-                let src = self.src();
-                let span = mcs
-                    .map(|c| crate::module::method_decl(c, &src))
-                    .and_then(|d| d.context.map(|c| c.span()))
-                    .unwrap_or(info.decl_span);
-                self.error(
-                    span,
-                    bind(
-                        vm::QvtOperationalValidationVisitor_invalidContextualType,
-                        &[&tn],
-                    ),
-                );
-            }
+        if let Some(ct) = info.context
+            && matches!(self.ts.types.get(ct), Type::Module(_))
+        {
+            let tn = self.qualified_name(ct);
+            let src = self.src();
+            let span = mcs
+                .map(|c| crate::module::method_decl(c, &src))
+                .and_then(|d| d.context.map(|c| c.span()))
+                .unwrap_or(info.decl_span);
+            self.error(
+                span,
+                bind(
+                    vm::QvtOperationalValidationVisitor_invalidContextualType,
+                    &[&tn],
+                ),
+            );
         }
         self.validate_unique_param_names(op);
         for p in &info.params {
@@ -147,21 +147,20 @@ impl<'r> Sema<'r> {
         if info.kind != OpKind::Mapping
             && info.result_ty != TypeId::OCL_VOID
             && info.results.len() == 1
+            && let Some(body) = &info.body
         {
-            if let Some(body) = &info.body {
-                let n = body.len();
-                let last_det = n > 0 && self.is_deterministic(&body[n - 1]);
-                if (n == 0 && !info.is_blackbox) || (n > 1 && !last_det) {
-                    let end = info
-                        .results
-                        .last()
-                        .map(|r| r.span.end)
-                        .unwrap_or(info.decl_span.start);
-                    self.warning(
-                        Span::new(info.decl_span.start, end),
-                        vm::useReturnExpForOperationResult,
-                    );
-                }
+            let n = body.len();
+            let last_det = n > 0 && self.is_deterministic(&body[n - 1]);
+            if (n == 0 && !info.is_blackbox) || (n > 1 && !last_det) {
+                let end = info
+                    .results
+                    .last()
+                    .map(|r| r.span.end)
+                    .unwrap_or(info.decl_span.start);
+                self.warning(
+                    Span::new(info.decl_span.start, end),
+                    vm::useReturnExpForOperationResult,
+                );
             }
         }
         // the bodies
@@ -222,10 +221,10 @@ impl<'r> Sema<'r> {
             |s: &mut Self, list: &[(String, Span)], scope: &[(String, Span)], same: bool| {
                 for (i, (n, sp)) in list.iter().enumerate() {
                     let found = scope.iter().enumerate().find(|(_, (sn, _))| sn == n);
-                    if let Some((j, _)) = found {
-                        if !(same && i == j) {
-                            s.error(*sp, bind(vm::NameAlreadyDefinedError, &[n]));
-                        }
+                    if let Some((j, _)) = found
+                        && !(same && i == j)
+                    {
+                        s.error(*sp, bind(vm::NameAlreadyDefinedError, &[n]));
                     }
                 }
             };
@@ -580,13 +579,13 @@ impl<'r> Sema<'r> {
                 );
             }
             ExprKind::Assign(a) => {
-                if let ir::LValue::Global(g) = &a.target {
-                    if self.globals[g.index()].ir.ty == TypeId::NULL {
-                        self.error(
-                            a.target_span,
-                            bind(om::NullNavigationType_ERROR_, &["this.\"<null>\""]),
-                        );
-                    }
+                if let ir::LValue::Global(g) = &a.target
+                    && self.globals[g.index()].ir.ty == TypeId::NULL
+                {
+                    self.error(
+                        a.target_span,
+                        bind(om::NullNavigationType_ERROR_, &["this.\"<null>\""]),
+                    );
                 }
             }
             ExprKind::Call(c) => {
@@ -899,21 +898,21 @@ impl<'r> Sema<'r> {
             }
             return;
         }
-        if let Some(c) = class {
-            if n.args.is_empty() {
-                let ci = self.ts.meta.class(c);
-                if ci.is_abstract || ci.is_interface {
-                    let tn = self.qualified_name(t);
-                    self.error(
-                        e.span,
-                        bind(
-                            vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType,
-                            &[&tn],
-                        ),
-                    );
-                }
-                return;
+        if let Some(c) = class
+            && n.args.is_empty()
+        {
+            let ci = self.ts.meta.class(c);
+            if ci.is_abstract || ci.is_interface {
+                let tn = self.qualified_name(t);
+                self.error(
+                    e.span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType,
+                        &[&tn],
+                    ),
+                );
             }
+            return;
         }
         if self.ts.types.is_collection_like(t) {
             // an abstract collection type (Collection(T)) cannot be instantiated

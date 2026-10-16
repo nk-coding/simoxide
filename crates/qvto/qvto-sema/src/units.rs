@@ -170,30 +170,29 @@ pub fn scan_metamodel_uris(main: &UnitSource, resolver: &dyn UnitResolver) -> Ve
             continue;
         }
         let parsed = qvto_syntax::parse(&u.text);
-        let mut visit =
-            |e: &ast::Element, out: &mut Vec<String>, stack: &mut Vec<UnitSource>| match e {
-                ast::Element::ModelType(m) => {
-                    for p in &m.packages {
-                        if let Some(uri) = &p.uri {
-                            if !out.contains(&uri.value) {
-                                out.push(uri.value.clone());
-                            }
-                        }
+        let visit = |e: &ast::Element, out: &mut Vec<String>, stack: &mut Vec<UnitSource>| match e {
+            ast::Element::ModelType(m) => {
+                for p in &m.packages {
+                    if let Some(uri) = &p.uri
+                        && !out.contains(&uri.value)
+                    {
+                        out.push(uri.value.clone());
                     }
                 }
-                ast::Element::Import(i) => {
-                    let q = i
-                        .unit
-                        .iter()
-                        .map(|n| n.text.as_str())
-                        .collect::<Vec<_>>()
-                        .join(".");
-                    if let Some(s) = resolve_import(resolver, &u, &q) {
-                        stack.push(s);
-                    }
+            }
+            ast::Element::Import(i) => {
+                let q = i
+                    .unit
+                    .iter()
+                    .map(|n| n.text.as_str())
+                    .collect::<Vec<_>>()
+                    .join(".");
+                if let Some(s) = resolve_import(resolver, &u, &q) {
+                    stack.push(s);
                 }
-                _ => {}
-            };
+            }
+            _ => {}
+        };
         for e in &parsed.unit.elements {
             visit(e, &mut out, &mut stack);
             if let ast::Element::Module(m) = e {
@@ -215,10 +214,10 @@ fn resolve_import(
     if let Some(u) = resolver.resolve(importer, q) {
         return Some(u);
     }
-    if let Some(ns) = importer.namespace() {
-        if !q.contains('.') {
-            return resolver.resolve(importer, &format!("{ns}.{q}"));
-        }
+    if let Some(ns) = importer.namespace()
+        && !q.contains('.')
+    {
+        return resolver.resolve(importer, &format!("{ns}.{q}"));
     }
     None
 }
@@ -272,14 +271,6 @@ impl<'u> MethodCs<'u> {
             MethodCs::Entry(e) => e.span,
             MethodCs::Mapping(m) => m.span,
             MethodCs::Constructor(c) => c.span,
-        }
-    }
-    pub fn decl_span(&self) -> Span {
-        match self {
-            MethodCs::Helper(h) => h.decl_span,
-            MethodCs::Entry(e) => e.decl_span,
-            MethodCs::Mapping(m) => m.decl_span,
-            MethodCs::Constructor(c) => c.decl_span,
         }
     }
 }
@@ -448,16 +439,15 @@ impl<'r> Sema<'r> {
             // cycle: the imported unit is on the walk path
             if let Some(pos) = self.dep_path.iter().position(|d| d.key == imported.key) {
                 let importer_elem = &self.dep_path[pos];
-                if importer_elem.unit != Some(uidx) {
-                    if let (Some(iu), Some(ispan)) =
+                if importer_elem.unit != Some(uidx)
+                    && let (Some(iu), Some(ispan)) =
                         (importer_elem.unit, importer_elem.current_import)
-                    {
-                        let msg = bind(
-                            cm::cyclicImportError,
-                            &[&self.unit_uri(iu), &self.unit_uri_of(&source)],
-                        );
-                        self.units[iu].problems.error(ispan, msg);
-                    }
+                {
+                    let msg = bind(
+                        cm::cyclicImportError,
+                        &[&self.unit_uri(iu), &self.unit_uri_of(&source)],
+                    );
+                    self.units[iu].problems.error(ispan, msg);
                 }
                 let msg = bind(
                     cm::cyclicImportError,
@@ -576,11 +566,12 @@ impl<'r> Sema<'r> {
                 .find(|(s, _)| *s == q)
                 .map(|(_, i)| *i)
                 .filter(|&i| !self.units[i].modules.is_empty());
-            if let Some(t) = target {
-                if checked_units.contains(&t) && !checked_starts.contains(&imp.span.start) {
-                    dups.push(*imp);
-                    continue;
-                }
+            if let Some(t) = target
+                && checked_units.contains(&t)
+                && !checked_starts.contains(&imp.span.start)
+            {
+                dups.push(*imp);
+                continue;
             }
             checked_units.push(target.unwrap_or(usize::MAX));
             checked_starts.push(imp.span.start);

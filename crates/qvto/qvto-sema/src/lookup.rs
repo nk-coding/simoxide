@@ -112,10 +112,10 @@ impl<'r> Sema<'r> {
                     r.extend(self.std_ops(Section::Class, StdOwner::Transformation));
                 }
                 for &o in &me.eoperations {
-                    if let OpRef::User(id) = o {
-                        if self.ops[id.index()].contextual {
-                            continue;
-                        }
+                    if let OpRef::User(id) = o
+                        && self.ops[id.index()].contextual
+                    {
+                        continue;
                     }
                     r.push(o);
                 }
@@ -199,10 +199,10 @@ impl<'r> Sema<'r> {
 
     fn all_contextual_operations(&self, env: ModuleId, out: &mut Vec<OpRef>) {
         for &o in &self.modules[env.index()].eoperations {
-            if let OpRef::User(id) = o {
-                if self.ops[id.index()].contextual {
-                    out.push(o);
-                }
+            if let OpRef::User(id) = o
+                && self.ops[id.index()].contextual
+            {
+                out.push(o);
             }
         }
     }
@@ -354,10 +354,10 @@ impl<'r> Sema<'r> {
     fn resolve_generic_type(&mut self, owner: TypeId, param: TypeId, arg: TypeId) -> TypeId {
         // template parameter types of QVTo (KeyT, CommonT)
         if param == TypeId::KEY_T || param == TypeId::COMMON_T {
-            if param == TypeId::KEY_T {
-                if let Type::Dict(k, _) = *self.ts.types.get(owner) {
-                    return k;
-                }
+            if param == TypeId::KEY_T
+                && let Type::Dict(k, _) = *self.ts.types.get(owner)
+            {
+                return k;
             }
             return arg;
         }
@@ -399,10 +399,11 @@ impl<'r> Sema<'r> {
                 }
             }
         }
-        if let Type::List(e) = *self.ts.types.get(owner) {
-            if result == TypeId::T && e == TypeId::OCL_VOID {
-                return TypeId::OCL_VOID;
-            }
+        if let Type::List(e) = *self.ts.types.get(owner)
+            && result == TypeId::T
+            && e == TypeId::OCL_VOID
+        {
+            return TypeId::OCL_VOID;
         }
         result
     }
@@ -452,14 +453,12 @@ impl<'r> Sema<'r> {
         dedup_keep_first(&mut ops);
         let mut matches: Vec<OpRef> = Vec::new();
         for o in ops {
-            if owner == TypeId::OCL_VOID {
-                if let OpRef::User(id) = o {
-                    let ctx = self.op_context(OpRef::User(id));
-                    if ctx != Some(owner) && ctx.is_some() || ctx.is_none() {
-                        if ctx != Some(owner) {
-                            continue;
-                        }
-                    }
+            if owner == TypeId::OCL_VOID
+                && let OpRef::User(id) = o
+            {
+                let ctx = self.op_context(OpRef::User(id));
+                if (ctx != Some(owner) && ctx.is_some() || ctx.is_none()) && ctx != Some(owner) {
+                    continue;
                 }
             }
             if self.op_name(o) != name {
@@ -475,12 +474,10 @@ impl<'r> Sema<'r> {
         } else if !matches.is_empty() {
             return self.most_specific_operation(&matches, args).map(Some);
         }
-        if owner == TypeId::OCL_VOID || owner == TypeId::OCL_INVALID {
-            if args.len() == 1 {
-                let at = args[0].ty;
-                if at != owner {
-                    return self.find_most_specific_operation(at, name, args);
-                }
+        if (owner == TypeId::OCL_VOID || owner == TypeId::OCL_INVALID) && args.len() == 1 {
+            let at = args[0].ty;
+            if at != owner {
+                return self.find_most_specific_operation(at, name, args);
             }
         }
         Ok(None)
@@ -750,12 +747,12 @@ impl<'r> Sema<'r> {
         }
         let me = &self.modules[m.index()];
         for f in &me.features {
-            if let ModuleFeature::Global(g) = f {
-                if !self.globals[g.index()].hidden {
-                    let p = PropRef::Global(*g);
-                    if !out.contains(&p) {
-                        out.push(p);
-                    }
+            if let ModuleFeature::Global(g) = f
+                && !self.globals[g.index()].hidden
+            {
+                let p = PropRef::Global(*g);
+                if !out.contains(&p) {
+                    out.push(p);
                 }
             }
         }
@@ -819,10 +816,10 @@ impl<'r> Sema<'r> {
     /// `lookupProperty(owner, name)` with escaped names.
     pub fn lookup_property(&mut self, owner: TypeId, name: &str) -> Option<PropRef> {
         let r = self.find_attribute(owner, name);
-        if r.is_none() {
-            if let Some(un) = name.strip_prefix('_') {
-                return self.find_attribute(owner, un);
-            }
+        if r.is_none()
+            && let Some(un) = name.strip_prefix('_')
+        {
+            return self.find_attribute(owner, un);
         }
         r
     }
@@ -832,10 +829,11 @@ impl<'r> Sema<'r> {
         let ops = self.get_operations(owner);
         let mut r = Vec::new();
         for o in ops {
-            if let OpRef::User(id) = o {
-                if self.ops[id.index()].ir.name == name && self.op_is_mapping(o) {
-                    r.push(id);
-                }
+            if let OpRef::User(id) = o
+                && self.ops[id.index()].ir.name == name
+                && self.op_is_mapping(o)
+            {
+                r.push(id);
             }
         }
         r

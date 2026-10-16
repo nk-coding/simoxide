@@ -276,17 +276,15 @@ impl<'a> Checker<'a> {
                         return SUPERTYPE;
                     }
                 }
-            } else if !list2 {
-                if let Type::Collection(k, ce) = *self.ty(t2) {
-                    let Type::List(le) = *self.ty(t1) else {
-                        unreachable!()
-                    };
-                    if k == CollKind::Collection && self.compatible(le, ce) {
-                        return STRICT_SUBTYPE;
-                    }
-                    if k == CollKind::Sequence && self.compatible(le, ce) {
-                        return SUBTYPE;
-                    }
+            } else if !list2 && let Type::Collection(k, ce) = *self.ty(t2) {
+                let Type::List(le) = *self.ty(t1) else {
+                    unreachable!()
+                };
+                if k == CollKind::Collection && self.compatible(le, ce) {
+                    return STRICT_SUBTYPE;
+                }
+                if k == CollKind::Sequence && self.compatible(le, ce) {
+                    return SUBTYPE;
                 }
             }
             if self.is_void_or_invalid(t1) || self.is_void_or_invalid(t2) {

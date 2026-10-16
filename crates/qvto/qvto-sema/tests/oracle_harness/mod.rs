@@ -564,10 +564,10 @@ impl ResolveData {
                 })
                 .collect();
             let mut q = rel_s.clone();
-            if let (Some(dot), slash) = (q.rfind('.'), q.rfind('/')) {
-                if slash.is_none_or(|s| dot > s) {
-                    q.truncate(dot);
-                }
+            if let (Some(dot), slash) = (q.rfind('.'), q.rfind('/'))
+                && slash.is_none_or(|s| dot > s)
+            {
+                q.truncate(dot);
             }
             for c in &b.containers {
                 if !c.is_empty() && q.starts_with(&format!("{c}/")) {
@@ -620,15 +620,10 @@ fn parse_kind(s: &str) -> BlackboxOpKind {
 
 /// Reads `crates/qvto-types/data/blackboxes.tsv`: env -> unit -> (file name, unit), and the case
 /// ids listed per env.
-fn read_blackboxes(
-    path: &Path,
-) -> Result<
-    (
-        HashMap<String, HashMap<String, (String, BlackboxUnit)>>,
-        HashMap<String, String>,
-    ),
-    String,
-> {
+/// Blackbox units by env and qualified name: (file name, unit).
+type BlackboxEnvs = HashMap<String, HashMap<String, (String, BlackboxUnit)>>;
+
+fn read_blackboxes(path: &Path) -> Result<(BlackboxEnvs, HashMap<String, String>), String> {
     let text = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let mut envs: HashMap<String, HashMap<String, (String, BlackboxUnit)>> = HashMap::new();
     let mut case_env = HashMap::new();
@@ -1177,7 +1172,7 @@ pub fn meta_operations(g: &qvto_emf::graph::Graph) -> Vec<qvto_sema::MetaOperati
             (
                 c,
                 qvto_sema::MetaMultiplicity {
-                    many: upper > 1 || upper < 0,
+                    many: !(0..=1).contains(&upper),
                     ordered,
                     unique,
                 },

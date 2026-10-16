@@ -39,10 +39,10 @@ impl<'r> Sema<'r> {
         if !it.vars.is_empty() {
             for v in it.vars.iter().take(2) {
                 let (l, _) = self.variable_declaration(v, ir::LocalKind::Iterator, true);
-                if self.fun.locals[l.index()].ty == TypeId::NULL {
-                    if let Some(e) = elem {
-                        self.fun.locals[l.index()].ty = e;
-                    }
+                if self.fun.locals[l.index()].ty == TypeId::NULL
+                    && let Some(e) = elem
+                {
+                    self.fun.locals[l.index()].ty = e;
                 }
                 iters.push(l);
                 names.push(v.name.text.clone());
@@ -224,8 +224,6 @@ impl<'r> Sema<'r> {
         let name = x.kind.spelling().unwrap_or("xcollect");
         let (body, cond) = if matches!(name, "xcollect" | "collectOne") {
             (Some(XBody::Expr(&x.body)), None)
-        } else if matches!(name, "collectselect" | "collectselectOne") {
-            (None, Some(&x.body))
         } else {
             (None, Some(&x.body))
         };
@@ -452,18 +450,18 @@ impl<'r> Sema<'r> {
             }
             if let Some(bt) = body_ty {
                 result_elem = Some(bt);
-                if let Some(l) = target_l {
-                    if self.fun.locals[l.index()].ty == TypeId::NULL {
-                        self.fun.locals[l.index()].ty = bt;
-                    }
+                if let Some(l) = target_l
+                    && self.fun.locals[l.index()].ty == TypeId::NULL
+                {
+                    self.fun.locals[l.index()].ty = bt;
                 }
             }
             if result_elem.is_none() {
                 result_elem = Some(elem);
-                if let Some(l) = target_l {
-                    if self.fun.locals[l.index()].ty == TypeId::NULL {
-                        self.fun.locals[l.index()].ty = elem;
-                    }
+                if let Some(l) = target_l
+                    && self.fun.locals[l.index()].ty == TypeId::NULL
+                {
+                    self.fun.locals[l.index()].ty = elem;
                 }
             }
         }
@@ -711,13 +709,13 @@ impl<'r> Sema<'r> {
             }
         }
         let ty = declared.or(derived).unwrap_or(TypeId::NULL);
-        if let (Some(dt), Some(it)) = (declared, derived) {
-            if !self.ts.ck().assignable(dt, it) {
-                let a = self.full_name(dt);
-                let b = self.full_name(it);
-                let span = init.as_ref().map(|x| x.e.span).unwrap_or(d.span);
-                self.error(span, bind(vm::TypeMismatchError, &[&a, &b]));
-            }
+        if let (Some(dt), Some(it)) = (declared, derived)
+            && !self.ts.ck().assignable(dt, it)
+        {
+            let a = self.full_name(dt);
+            let b = self.full_name(it);
+            let span = init.as_ref().map(|x| x.e.span).unwrap_or(d.span);
+            self.error(span, bind(vm::TypeMismatchError, &[&a, &b]));
         }
         let l = self.fun.new_local(&name, ty, ir::LocalKind::Var, d.span);
         if self.lookup_local(&name).is_some() {
@@ -797,22 +795,22 @@ impl<'r> Sema<'r> {
             .filter(|(l, _, n)| self.lookup_var(n) == Some(VarRef::Local(*l)))
             .map(|(_, _, n)| n.clone());
         let cond = self.visit_ocl_expression(&w.cond);
-        if let Some(c) = &cond {
-            if c.ty() != TypeId::BOOLEAN {
-                let ct = if c.ty() == TypeId::NULL {
-                    TypeId::OCL_VOID
-                } else {
-                    c.ty()
-                };
-                let n = self.type_name(ct);
-                self.error(
-                    w.cond.span,
-                    bind(
-                        vm::QvtOperationalVisitorCS_booleanTypeExpressionExpected,
-                        &[&n],
-                    ),
-                );
-            }
+        if let Some(c) = &cond
+            && c.ty() != TypeId::BOOLEAN
+        {
+            let ct = if c.ty() == TypeId::NULL {
+                TypeId::OCL_VOID
+            } else {
+                c.ty()
+            };
+            let n = self.type_name(ct);
+            self.error(
+                w.cond.span,
+                bind(
+                    vm::QvtOperationalVisitorCS_booleanTypeExpressionExpected,
+                    &[&n],
+                ),
+            );
         }
         let body = self.block_exp(&w.body, w.body.span);
         if let Some(n) = in_env {
@@ -961,8 +959,8 @@ impl<'r> Sema<'r> {
         let lv = self.expr_at(&a.lhs, Pos::Other, a.lhs.span)?;
         let lty = lv.ty();
         let is_mutation = self.is_mutable_collection(lty) && a.add;
-        let target;
-        match lv.info {
+
+        let target = match lv.info {
             Info::Var(Some(v)) => {
                 let name = self.var_name(v);
                 if let Some(src) = self.implicit_source_for_property(&name) {
@@ -999,10 +997,10 @@ impl<'r> Sema<'r> {
                 self.validate_variable_modification(v, a.lhs.span, None, !is_mutation);
                 let vt = self.var_type(v);
                 self.validate_assignment(false, &name, vt, rhs.ty(), a.add, a.lhs.span, rhs.e.span);
-                target = match v {
+                match v {
                     VarRef::Local(l) => ir::LValue::Local(l),
                     _ => return None,
-                };
+                }
             }
             Info::Prop(p, src_var, src_ty) => {
                 let pname = self.prop_name(p);
@@ -1031,13 +1029,13 @@ impl<'r> Sema<'r> {
                         rhs.e.span,
                     );
                 }
-                target = match lv.e.kind {
+                match lv.e.kind {
                     ExprKind::Prop(src, f) => ir::LValue::Prop(*src, f),
                     ExprKind::Global(g) => ir::LValue::Global(g),
                     ExprKind::IntermProp(src, i) => ir::LValue::IntermProp(*src, i),
                     ExprKind::TupleProp(src, n) => ir::LValue::TupleProp(*src, n),
                     _ => return None,
-                };
+                }
             }
             Info::Invalid => {
                 // Eclipse still makes the AssignExp (with an invalid left side); keep the value
@@ -1049,7 +1047,7 @@ impl<'r> Sema<'r> {
                 self.error(a.lhs.span, vm::notAnLValueError);
                 return None;
             }
-        }
+        };
         let is_prop_target = matches!(
             target,
             ir::LValue::Prop(..)
@@ -1217,10 +1215,10 @@ impl<'r> Sema<'r> {
                 ),
             }
         }
-        if let Some(c) = when {
-            if c.ty() != TypeId::BOOLEAN {
-                self.error(c.e.span, vm::LogExpBooleanTypeConditionError);
-            }
+        if let Some(c) = when
+            && c.ty() != TypeId::BOOLEAN
+        {
+            self.error(c.e.span, vm::LogExpBooleanTypeConditionError);
         }
     }
 
@@ -1237,14 +1235,14 @@ impl<'r> Sema<'r> {
             }
         }
         let mut log = None;
-        if let Some(l) = &a.log {
-            if let ast::ExprKind::Log(lg) = &l.kind {
-                let x = self.log_exp(lg, l.span);
-                if let ExprKind::Log(b) = x.e.kind {
-                    log = Some(*b);
-                }
-                // validateAssertExp validates the log again (same problems, deduplicated)
+        if let Some(l) = &a.log
+            && let ast::ExprKind::Log(lg) = &l.kind
+        {
+            let x = self.log_exp(lg, l.span);
+            if let ExprKind::Log(b) = x.e.kind {
+                log = Some(*b);
             }
+            // validateAssertExp validates the log again (same problems, deduplicated)
         }
         match &cond {
             Some(c) if c.ty() == TypeId::BOOLEAN => {}
@@ -1347,12 +1345,12 @@ impl<'r> Sema<'r> {
                     self.error(te.span, bind(vm::CannotCatchNonException, &[&tn]));
                 }
                 for h in handled.clone() {
-                    if let Some(e) = et {
-                        if self.is_assignable_from(h, e) {
-                            let en = self.classifier_name(e);
-                            let hn = self.classifier_name(h);
-                            self.error(te.span, bind(vm::UncatchableCatchBlock, &[&en, &hn]));
-                        }
+                    if let Some(e) = et
+                        && self.is_assignable_from(h, e)
+                    {
+                        let en = self.classifier_name(e);
+                        let hn = self.classifier_name(h);
+                        self.error(te.span, bind(vm::UncatchableCatchBlock, &[&en, &hn]));
                     }
                 }
                 if let Some(e) = et {
@@ -1467,15 +1465,13 @@ impl<'r> Sema<'r> {
         let ops = self.get_operations(owner);
         let mut r = Vec::new();
         for o in ops {
-            if let OpRef::User(id) = o {
-                if self.ops[id.index()].ir.name == name
-                    && self.ops[id.index()].ir.kind == ir::OpKind::Constructor
-                {
-                    let params = self.op_params(o);
-                    if self.match_args(owner, &params, args) && self.ops[id.index()].owner == owner
-                    {
-                        r.push(id);
-                    }
+            if let OpRef::User(id) = o
+                && self.ops[id.index()].ir.name == name
+                && self.ops[id.index()].ir.kind == ir::OpKind::Constructor
+            {
+                let params = self.op_params(o);
+                if self.match_args(owner, &params, args) && self.ops[id.index()].owner == owner {
+                    r.push(id);
                 }
             }
         }
@@ -1522,28 +1518,29 @@ impl<'r> Sema<'r> {
             let (t, e) = self.visit_type_spec(ts, Direction::Out);
             ty = t;
             extent = e;
-            if let Some(t) = t {
-                if let Type::Class(c) = *self.ts.types.get(t) {
-                    instantiated = Some(t);
-                    let ci = self.ts.meta.class(c);
-                    if var.is_none() && (ci.is_abstract || ci.is_interface) {
-                        let tn = self.qualified_name(t);
-                        self.error(
-                            cst,
-                            bind(
-                                vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType,
-                                &[&tn],
-                            ),
-                        );
-                    }
+            if let Some(t) = t
+                && let Type::Class(c) = *self.ts.types.get(t)
+            {
+                instantiated = Some(t);
+                let ci = self.ts.meta.class(c);
+                if var.is_none() && (ci.is_abstract || ci.is_interface) {
+                    let tn = self.qualified_name(t);
+                    self.error(
+                        cst,
+                        bind(
+                            vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType,
+                            &[&tn],
+                        ),
+                    );
                 }
             }
         } else if let Some(op) = top {
             let info = &self.ops[op.index()].ir;
-            if info.results.is_empty() && info.context_direction == Direction::InOut {
-                if let Some(c) = info.context {
-                    ty = Some(c);
-                }
+            if info.results.is_empty()
+                && info.context_direction == Direction::InOut
+                && let Some(c) = info.context
+            {
+                ty = Some(c);
             }
         }
         let mut referred: Option<VarRef> = None;
@@ -1559,24 +1556,23 @@ impl<'r> Sema<'r> {
                 ty = Some(vt);
             }
         }
-        if let Some(t) = ty {
-            if matches!(self.ts.types.get(t), Type::Class(_)) {
-                instantiated = Some(t);
-            }
+        if let Some(t) = ty
+            && matches!(self.ts.types.get(t), Type::Class(_))
+        {
+            instantiated = Some(t);
         }
         if extent.is_none() {
-            if let Some(VarRef::Local(l)) = referred {
-                if let Some(p) = self.fun.extra[l.index()].param {
-                    if p.mapping_param {
-                        extent = p.extent;
-                    }
-                }
+            if let Some(VarRef::Local(l)) = referred
+                && let Some(p) = self.fun.extra[l.index()].param
+                && p.mapping_param
+            {
+                extent = p.extent;
             }
-            if extent.is_none() {
-                if let Some(t) = ty {
-                    let m = self.fun.module.unwrap_or(self.cur_module);
-                    extent = self.resolve_model_parameter(m, t, Direction::Out);
-                }
+            if extent.is_none()
+                && let Some(t) = ty
+            {
+                let m = self.fun.module.unwrap_or(self.cur_module);
+                extent = self.resolve_model_parameter(m, t, Direction::Out);
             }
         }
         let m = self.fun.module.unwrap_or(self.cur_module);
@@ -1603,12 +1599,9 @@ impl<'r> Sema<'r> {
         self.fun.top().parent_local = true;
         let elem_local = match referred {
             Some(VarRef::Local(l)) => l,
-            _ => {
-                let l =
-                    self.fun
-                        .new_local("", ty.unwrap_or(TypeId::NULL), ir::LocalKind::Object, cst);
-                l
-            }
+            _ => self
+                .fun
+                .new_local("", ty.unwrap_or(TypeId::NULL), ir::LocalKind::Object, cst),
         };
         let var_name = match var {
             Some(n) if referred.is_some() => n.text.clone(),
@@ -1693,16 +1686,16 @@ impl<'r> Sema<'r> {
                     ),
                 );
             }
-            if let VarRef::Local(l) = referred {
-                if let Some(p) = self.fun.extra[l.index()].param {
-                    if p.mapping_param && p.direction == Direction::In {
-                        let n = self.fun.locals[l.index()].name.clone();
-                        self.error(
-                            span,
-                            bind(vm::QvtOperationalVisitorCS_canNotModifyINParameter, &[&n]),
-                        );
-                    }
-                }
+            if let VarRef::Local(l) = referred
+                && let Some(p) = self.fun.extra[l.index()].param
+                && p.mapping_param
+                && p.direction == Direction::In
+            {
+                let n = self.fun.locals[l.index()].name.clone();
+                self.error(
+                    span,
+                    bind(vm::QvtOperationalVisitorCS_canNotModifyINParameter, &[&n]),
+                );
             }
         }
     }

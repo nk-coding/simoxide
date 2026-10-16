@@ -8,12 +8,6 @@ use qvto_syntax::ast::{self, TypeKind};
 use qvto_syntax::{Span, TokenKind};
 use qvto_types::{CollKind, Type, TypeId};
 
-/// The result of a classifier lookup.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub(crate) enum Found {
-    Type(TypeId),
-}
-
 impl<'r> Sema<'r> {
     /// `QvtOperationalEnv.lookupClassifier(names)` in the current module environment.
     pub fn lookup_classifier(&mut self, names: &[&str]) -> Option<TypeId> {
@@ -47,16 +41,16 @@ impl<'r> Sema<'r> {
             }
         }
         if names.len() > 1 {
-            if names.len() == 2 {
-                if let Some(t) = self.stdlib_classifier(names) {
-                    return Some(t);
-                }
+            if names.len() == 2
+                && let Some(t) = self.stdlib_classifier(names)
+            {
+                return Some(t);
             }
             let mts = self.modules[m.index()].model_types.clone();
-            if let Some((_, mt)) = mts.iter().find(|(n, _)| n == first) {
-                if let Some(t) = self.lookup_in_model_type(*mt, &names[1..]) {
-                    return Some(t);
-                }
+            if let Some((_, mt)) = mts.iter().find(|(n, _)| n == first)
+                && let Some(t) = self.lookup_in_model_type(*mt, &names[1..])
+            {
+                return Some(t);
             }
             // EcoreEnvironment.lookupClassifier without context package: packages registered
             // in this file's registry by name
@@ -219,12 +213,9 @@ impl<'r> Sema<'r> {
             }
         }
         let prefix = names.join(".");
-        for &(_, p) in reg {
-            if self.ts.meta.package(p).ns_prefix.as_deref() == Some(prefix.as_str()) {
-                return Some(p);
-            }
-        }
-        None
+        reg.iter()
+            .map(|&(_, p)| p)
+            .find(|&p| self.ts.meta.package(p).ns_prefix.as_deref() == Some(prefix.as_str()))
     }
 
     // ---- type expressions ----------------------------------------------------------------------
@@ -288,15 +279,16 @@ impl<'r> Sema<'r> {
             }
             return None;
         }
-        if let Type::Module(m) = *self.ts.types.get(ty) {
-            if self.modules[m as usize].is_library && !allow_library {
-                let msg = bind(
-                    vm::QvtOperationalVisitorCS_cantUseLibraryAsType,
-                    &[&self.module_name(crate::ir::ModuleId(m)).to_string()],
-                );
-                self.error(t.span, msg);
-                return None;
-            }
+        if let Type::Module(m) = *self.ts.types.get(ty)
+            && self.modules[m as usize].is_library
+            && !allow_library
+        {
+            let msg = bind(
+                vm::QvtOperationalVisitorCS_cantUseLibraryAsType,
+                &[self.module_name(crate::ir::ModuleId(m))],
+            );
+            self.error(t.span, msg);
+            return None;
         }
         Some(ty)
     }

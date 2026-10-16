@@ -470,16 +470,17 @@ impl<'r> Sema<'r> {
     /// `visitModelTypeCS`
     fn visit_model_type(&mut self, module: ModuleId, mt: &ast::ModelType) -> Option<ModelTypeId> {
         let name = mt.name.text.clone();
-        if let Some(c) = &mt.compliance {
-            if !c.value.is_empty() && c.value != "strict" {
-                self.warning(
-                    c.span,
-                    bind(
-                        vm::QvtOperationalVisitorCS_unsupportedMetamodelComplianceKind,
-                        &[&c.value],
-                    ),
-                );
-            }
+        if let Some(c) = &mt.compliance
+            && !c.value.is_empty()
+            && c.value != "strict"
+        {
+            self.warning(
+                c.span,
+                bind(
+                    vm::QvtOperationalVisitorCS_unsupportedMetamodelComplianceKind,
+                    &[&c.value],
+                ),
+            );
         }
         let mut packages: Vec<PackageId> = Vec::new();
         let n = mt.packages.len();
@@ -494,15 +495,15 @@ impl<'r> Sema<'r> {
                     continue;
                 }
             }
-            if let Some(path) = &pr.path {
-                if !path.segments.is_empty() {
-                    let mname = path_string(&path.segments, "::");
-                    let segs: Vec<&str> = path.segments.iter().map(|s| s.text.as_str()).collect();
-                    resolved = match resolved {
-                        None => self.resolve_metamodel(None, &segs, path.span),
-                        Some(r) => self.check_metamodel_path(r, &segs, &mname, path.span),
-                    };
-                }
+            if let Some(path) = &pr.path
+                && !path.segments.is_empty()
+            {
+                let mname = path_string(&path.segments, "::");
+                let segs: Vec<&str> = path.segments.iter().map(|s| s.text.as_str()).collect();
+                resolved = match resolved {
+                    None => self.resolve_metamodel(None, &segs, path.span),
+                    Some(r) => self.check_metamodel_path(r, &segs, &mname, path.span),
+                };
             }
             if let Some(r) = resolved {
                 if packages.contains(&r) {
@@ -673,10 +674,10 @@ impl<'r> Sema<'r> {
                         .find(|&s| *self.ts.meta.package(s).name == **n)
                 });
             }
-            if let Some(r) = r {
-                if !out.contains(&r) {
-                    out.push(r);
-                }
+            if let Some(r) = r
+                && !out.contains(&r)
+            {
+                out.push(r);
             }
         }
         out
@@ -712,15 +713,15 @@ impl<'r> Sema<'r> {
             return Some(p);
         }
         let root = self.root_package(resolved);
-        if root != resolved {
-            if let Some(local) = lookup(self, root) {
-                let mut cur = Some(local);
-                while let Some(c) = cur {
-                    if c == resolved {
-                        return Some(local);
-                    }
-                    cur = self.ts.meta.package(c).super_package;
+        if root != resolved
+            && let Some(local) = lookup(self, root)
+        {
+            let mut cur = Some(local);
+            while let Some(c) = cur {
+                if c == resolved {
+                    return Some(local);
                 }
+                cur = self.ts.meta.package(c).super_package;
             }
         }
         self.error(
@@ -924,20 +925,26 @@ impl<'r> Sema<'r> {
                 );
             }
             let mut mt = None;
-            if let ast::TypeKind::Path(path) = &p.ty.ty.kind {
-                if path.segments.len() == 1 {
-                    let first = &path.segments[0].text;
-                    mt = self.modules[id.index()]
-                        .model_types
-                        .iter()
-                        .find(|(n, _)| n == first)
-                        .map(|(_, t)| *t);
-                    if let Some(t) = mt {
-                        if used.contains(&t) {
-                            self.error(p.span, bind(vm::QvtOperationalVisitorCS_LibrarySignatureErrorDuplicateModelType, &[first]));
-                        } else {
-                            used.push(t);
-                        }
+            if let ast::TypeKind::Path(path) = &p.ty.ty.kind
+                && path.segments.len() == 1
+            {
+                let first = &path.segments[0].text;
+                mt = self.modules[id.index()]
+                    .model_types
+                    .iter()
+                    .find(|(n, _)| n == first)
+                    .map(|(_, t)| *t);
+                if let Some(t) = mt {
+                    if used.contains(&t) {
+                        self.error(
+                            p.span,
+                            bind(
+                                vm::QvtOperationalVisitorCS_LibrarySignatureErrorDuplicateModelType,
+                                &[first],
+                            ),
+                        );
+                    } else {
+                        used.push(t);
                     }
                 }
             }
@@ -1075,11 +1082,11 @@ impl<'r> Sema<'r> {
             module_envs.extend(e.iter().copied());
             legacy.extend(e.iter().copied());
         }
-        if n > 1 {
-            if let Some((_, e)) = import_map.iter().find(|(k, _)| *k == unit_fq) {
-                module_envs.extend(e.iter().copied());
-                legacy.extend(e.iter().copied());
-            }
+        if n > 1
+            && let Some((_, e)) = import_map.iter().find(|(k, _)| *k == unit_fq)
+        {
+            module_envs.extend(e.iter().copied());
+            legacy.extend(e.iter().copied());
         }
         if fq.is_none() && n == 1 {
             for (_, e) in import_map {
@@ -1110,16 +1117,14 @@ impl<'r> Sema<'r> {
             }
             let mut refs: Vec<ModelTypeId> = Vec::new();
             for p in params {
-                if let ast::TypeKind::Path(path) = &p.ty.ty.kind {
-                    if let Some(first) = path.segments.first() {
-                        if let Some((_, t)) = self.modules[id.index()]
-                            .model_types
-                            .iter()
-                            .find(|(n, _)| *n == first.text)
-                        {
-                            refs.push(*t);
-                        }
-                    }
+                if let ast::TypeKind::Path(path) = &p.ty.ty.kind
+                    && let Some(first) = path.segments.first()
+                    && let Some((_, t)) = self.modules[id.index()]
+                        .model_types
+                        .iter()
+                        .find(|(n, _)| *n == first.text)
+                {
+                    refs.push(*t);
                 }
             }
             let imported: Vec<ModelTypeId> = if self.modules[c.index()].is_library {
@@ -1536,10 +1541,10 @@ impl<'r> Sema<'r> {
             return Some(e);
         }
         for o in &self.modules[id.index()].eoperations {
-            if let OpRef::User(op) = o {
-                if self.ops[op.index()].ir.name == "main" {
-                    return Some(*op);
-                }
+            if let OpRef::User(op) = o
+                && self.ops[op.index()].ir.name == "main"
+            {
+                return Some(*op);
             }
         }
         None
@@ -1794,10 +1799,10 @@ impl<'r> Sema<'r> {
         if t == TypeId::OCL_VOID || t == TypeId::OCL_INVALID || t == TypeId::NULL {
             return false;
         }
-        if let Type::Class(c) = *self.ts.types.get(t) {
-            if self.interm_class_module.contains_key(&c) {
-                return false;
-            }
+        if let Type::Class(c) = *self.ts.types.get(t)
+            && self.interm_class_module.contains_key(&c)
+        {
+            return false;
         }
         true
     }
@@ -2153,14 +2158,14 @@ impl<'r> Sema<'r> {
             return;
         }
         for next in self.modules[env.index()].additional_types.clone() {
-            if t != next && self.ts.ck().relationship(t, next) == STRICT_SUPERTYPE {
-                if let Some((_, l)) = self.modules[env.index()]
+            if t != next
+                && self.ts.ck().relationship(t, next) == STRICT_SUPERTYPE
+                && let Some((_, l)) = self.modules[env.index()]
                     .ctx_ops
                     .iter()
                     .find(|(k, _)| *k == next)
-                {
-                    out.extend(l.iter().map(|&o| OpRef::User(o)));
-                }
+            {
+                out.extend(l.iter().map(|&o| OpRef::User(o)));
             }
         }
         for e in self.modules[env.index()].by_extension.clone() {
@@ -2251,17 +2256,16 @@ impl<'r> Sema<'r> {
         if is_config {
             if let Some(t) = &p.ty {
                 ty = self.type_cs(t);
-                if let Some(tt) = ty {
-                    if !self.ts.ck().is_primitive(tt)
-                        && !self.ts.types.is_collection_like(tt)
-                        && !matches!(
-                            self.ts.types.get(tt),
-                            Type::DataType(_) | Type::Enum(_) | Type::Tuple(_)
-                        )
-                    {
-                        let n = self.type_name(tt);
-                        self.error(t.span, bind(vm::ConfigPropertyTypeUnsupported, &[&n]));
-                    }
+                if let Some(tt) = ty
+                    && !self.ts.ck().is_primitive(tt)
+                    && !self.ts.types.is_collection_like(tt)
+                    && !matches!(
+                        self.ts.types.get(tt),
+                        Type::DataType(_) | Type::Enum(_) | Type::Tuple(_)
+                    )
+                {
+                    let n = self.type_name(tt);
+                    self.error(t.span, bind(vm::ConfigPropertyTypeUnsupported, &[&n]));
                 }
             } else {
                 self.error(name_span, bind(vm::ConfigPropertyMustHaveType, &[&name]));
@@ -2368,12 +2372,12 @@ impl<'r> Sema<'r> {
             ty = init_ty;
         }
         let ty = ty?;
-        if let Some(r) = init_ty {
-            if !self.ts.ck().assignable(ty, r) {
-                let a = self.full_name(ty);
-                let b = self.full_name(r);
-                self.error(p.span, bind(vm::TypeMismatchError, &[&a, &b]));
-            }
+        if let Some(r) = init_ty
+            && !self.ts.ck().assignable(ty, r)
+        {
+            let a = self.full_name(ty);
+            let b = self.full_name(r);
+            self.error(p.span, bind(vm::TypeMismatchError, &[&a, &b]));
         }
         let mut context = None;
         let ctx_ty = match &ctx {
@@ -2501,13 +2505,11 @@ impl<'r> Sema<'r> {
             if let Some(Type::Class(oc)) = self.interm_props[o.index()]
                 .context
                 .map(|t| self.ts.types.get(t).clone())
+                && oc != c
+                && (self.ts.meta.class(oc).all_supers.contains(&c)
+                    || self.ts.meta.class(c).all_supers.contains(&oc))
             {
-                if oc != c
-                    && (self.ts.meta.class(oc).all_supers.contains(&c)
-                        || self.ts.meta.class(c).all_supers.contains(&oc))
-                {
-                    return true;
-                }
+                return true;
             }
         }
         false
@@ -2524,10 +2526,10 @@ impl<'r> Sema<'r> {
         for &(mcs, op) in map {
             self.visit_method(id, mcs, op);
         }
-        if let Some(m) = self.main_operation(id) {
-            if self.ops[m.index()].ir.kind == ir::OpKind::Entry {
-                self.modules[id.index()].ir.entry = Some(m);
-            }
+        if let Some(m) = self.main_operation(id)
+            && self.ops[m.index()].ir.kind == ir::OpKind::Entry
+        {
+            self.modules[id.index()].ir.entry = Some(m);
         }
         if self.modules[id.index()].ir.entry.is_none() {
             // legacy `mapping main(...)`
@@ -2583,12 +2585,10 @@ fn new_module_env(name: &str, library: bool, unit: usize, ty: TypeId, header: Sp
         eoperations: Vec::new(),
         features: Vec::new(),
         model_params: Vec::new(),
-        mappings_map: Vec::new(),
         aliases: Vec::new(),
         module_imports: Vec::new(),
         interm_package: None,
         ty,
-        header_span: header,
         blackbox: false,
     }
 }

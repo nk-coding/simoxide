@@ -465,8 +465,7 @@ fn main() {
                 cases_ok += 1;
             }
             if let Some(o) = h.oracle_for(&run.key) {
-                if o.problems.iter().all(|p| hit(p)) && ann.iter().all(|a| covered(a, &o.problems))
-                {
+                if o.problems.iter().all(hit) && ann.iter().all(|a| covered(a, &o.problems)) {
                     ora.0 += 1;
                 }
                 ora.1 += 1;
@@ -503,11 +502,11 @@ fn main() {
     }
     println!("IR checks (irck) on error-free compilations: {ir_cases} cases, {ir_bad} with issues");
     let mut kv: Vec<_> = ir_kinds.into_iter().collect();
-    kv.sort_by(|a, b| b.1.cmp(&a.1));
+    kv.sort_by_key(|x| std::cmp::Reverse(x.1));
     for (k, n) in kv.iter().take(15) {
         println!("  {n:6}  {k}");
     }
-    slow.sort_by(|a, b| b.0.cmp(&a.0));
+    slow.sort_by_key(|x| std::cmp::Reverse(x.0));
     for (d, k) in slow.iter().skip(1).take(4) {
         println!("  {:.1} ms {k}", ms(*d));
     }

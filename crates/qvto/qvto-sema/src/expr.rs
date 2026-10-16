@@ -100,6 +100,7 @@ pub(crate) enum Accessor {
 
 /// The parts of an operation call's CST node the analyser reports on.
 #[derive(Clone, Debug)]
+#[allow(dead_code)]
 pub(crate) struct CallCs {
     pub span: Span,
     pub name_span: Span,
@@ -274,13 +275,13 @@ impl<'r> Sema<'r> {
         source: Option<Ex>,
         cst: Span,
     ) -> Ex {
-        if let Some(s) = &source {
-            if s.err {
-                // the unparseable source itself, with the CS node's positions
-                let mut x = source.unwrap();
-                x.e.span = cst;
-                return x;
-            }
+        if let Some(s) = &source
+            && s.err
+        {
+            // the unparseable source itself, with the CS node's positions
+            let mut x = source.unwrap();
+            x.e.span = cst;
+            return x;
         }
         let explicit = source.is_some();
         if !explicit {
@@ -1067,30 +1068,28 @@ impl<'r> Sema<'r> {
             }
         }
         let mut rewritten = false;
-        if let Some(o) = op {
-            if cs.accessor == Accessor::Arrow {
-                let st = match &result.e.kind {
-                    ExprKind::Call(c) => c.source.as_ref().map(|s| s.ty),
-                    _ => None,
-                };
-                if let Some(st) = st {
-                    if self.ts.types.is_collection_like(st) {
-                        let src_ops = self.get_operations(st);
-                        if !src_ops.contains(&o) {
-                            result = self.rewrite_as_xcollect(result, cs);
-                            rewritten = true;
-                        }
-                    }
+        if let Some(o) = op
+            && cs.accessor == Accessor::Arrow
+        {
+            let st = match &result.e.kind {
+                ExprKind::Call(c) => c.source.as_ref().map(|s| s.ty),
+                _ => None,
+            };
+            if let Some(st) = st
+                && self.ts.types.is_collection_like(st)
+            {
+                let src_ops = self.get_operations(st);
+                if !src_ops.contains(&o) {
+                    result = self.rewrite_as_xcollect(result, cs);
+                    rewritten = true;
                 }
             }
         }
         if !had_source {
             self.validate_implicit_source(cs.name_span, src_var, op, None);
         }
-        if !rewritten {
-            if let Some(o) = op {
-                self.validate_operation_call(cs, &result, o, src_var);
-            }
+        if !rewritten && let Some(o) = op {
+            self.validate_operation_call(cs, &result, o, src_var);
         }
         result
     }
@@ -1275,10 +1274,10 @@ impl<'r> Sema<'r> {
             let saved = self.cur_module;
             self.cur_module = e;
             let mut r = self.find_most_specific_operation(actual_owner, name, args);
-            if matches!(r, Ok(None)) {
-                if let Some(u) = name.strip_prefix('_') {
-                    r = self.find_most_specific_operation(actual_owner, u, args);
-                }
+            if matches!(r, Ok(None))
+                && let Some(u) = name.strip_prefix('_')
+            {
+                r = self.find_most_specific_operation(actual_owner, u, args);
             }
             self.cur_module = saved;
             match r {
@@ -1579,24 +1578,22 @@ impl<'r> Sema<'r> {
             _ => (None, Vec::new()),
         };
         let name = self.op_name(o).to_string();
-        if name == "oclAsType" {
-            if let (Some(st), [at]) = (src_ty, arg_tys.as_slice()) {
-                if let Type::TypeType(target) = *self.ts.types.get(*at) {
-                    if self.incorrect_cast(st, target) {
-                        self.warning(cs.span, vm::incorrectCastWarning);
-                    }
-                }
-            }
+        if name == "oclAsType"
+            && let (Some(st), [at]) = (src_ty, arg_tys.as_slice())
+            && let Type::TypeType(target) = *self.ts.types.get(*at)
+            && self.incorrect_cast(st, target)
+        {
+            self.warning(cs.span, vm::incorrectCastWarning);
         }
         let cs_name = cs.name_span.text(&self.src()).to_string();
-        if cs_name == "=" || cs_name == "<>" || cs_name == "!=" {
-            if let (Some(st), [at]) = (src_ty, arg_tys.as_slice()) {
-                let at = *at;
-                if !self.ts.ck().assignable(st, at) && !self.ts.ck().assignable(at, st) {
-                    let a = self.full_name(at);
-                    let b = self.full_name(st);
-                    self.warning(cs.span, bind(vm::TypesDoNotConform, &[&a, &b]));
-                }
+        if (cs_name == "=" || cs_name == "<>" || cs_name == "!=")
+            && let (Some(st), [at]) = (src_ty, arg_tys.as_slice())
+        {
+            let at = *at;
+            if !self.ts.ck().assignable(st, at) && !self.ts.ck().assignable(at, st) {
+                let a = self.full_name(at);
+                let b = self.full_name(st);
+                self.warning(cs.span, bind(vm::TypesDoNotConform, &[&a, &b]));
             }
         }
         if self.op_is_mapping(o) && cs.mapping.is_none() {
@@ -1605,13 +1602,12 @@ impl<'r> Sema<'r> {
                 bind(vm::QvtOperationalVisitorCS_mapKeywordNotUsed, &[&name]),
             );
         }
-        if let OpRef::Std(s, _) = o {
-            if is_mutator(s) {
-                if let Some(v) = src_var {
-                    let span = cs.source_span.unwrap_or(cs.span);
-                    self.validate_variable_modification(v, span, None, false);
-                }
-            }
+        if let OpRef::Std(s, _) = o
+            && is_mutator(s)
+            && let Some(v) = src_var
+        {
+            let span = cs.source_span.unwrap_or(cs.span);
+            self.validate_variable_modification(v, span, None, false);
         }
     }
 
@@ -1661,13 +1657,13 @@ impl<'r> Sema<'r> {
                 (None, Some(p)) => Some(self.prop_owner(p)),
                 _ => None,
             };
-            if let Some(owner) = owner {
-                if !matches!(self.ts.types.get(owner), Type::Module(_)) {
-                    self.warning(
-                        cause,
-                        vm::DeprecatedImplicitSourceCall_moduleScopeImplicitCall,
-                    );
-                }
+            if let Some(owner) = owner
+                && !matches!(self.ts.types.get(owner), Type::Module(_))
+            {
+                self.warning(
+                    cause,
+                    vm::DeprecatedImplicitSourceCall_moduleScopeImplicitCall,
+                );
             }
         }
     }

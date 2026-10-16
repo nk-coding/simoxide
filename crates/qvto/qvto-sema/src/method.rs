@@ -2,12 +2,12 @@
 //! mapping extensions, intermediate classes, tags and the deprecated `rename`.
 
 use crate::analyzer::Sema;
-use crate::env::{ModuleEnv, Scope, VarEntry, VarRef};
-use crate::expr::{Ex, Pos, mk};
+use crate::env::{Scope, VarEntry, VarRef};
+use crate::expr::{Ex, Pos};
 use crate::ir::{self, Direction, ExprKind, ModuleId, OpId};
 use crate::messages::{bind, validation as vm};
 use crate::module::{CtxType, has_body, is_disjunctive, method_decl, scoped_parts};
-use crate::ops::{OpRef, PropRef};
+use crate::ops::PropRef;
 use crate::units::{MethodCs, ModuleCs, path_span};
 use qvto_model::{Classifier, FeatureKind};
 use qvto_syntax::ast;
@@ -33,7 +33,7 @@ impl<'r> Sema<'r> {
                 named: true,
             });
         }
-        let mut add = |name: &str, l: ir::LocalId, explicit: bool, scope: &mut Scope| {
+        let add = |name: &str, l: ir::LocalId, explicit: bool, scope: &mut Scope| {
             if !scope.vars.iter().any(|v| v.named && v.name == name) {
                 scope.vars.push(VarEntry {
                     name: name.to_string(),
@@ -275,27 +275,28 @@ impl<'r> Sema<'r> {
                 self.ops[op.index()].ir.results[0].ty
             };
             let last = body.as_ref().and_then(|b| b.last());
-            if ret != TypeId::OCL_VOID {
-                if let Some(last) = last {
-                    let lt = last.ty();
-                    let det = last.det;
-                    if lt != TypeId::NULL && !self.ts.ck().assignable(ret, lt) && !det {
-                        let a = self.full_name(lt);
-                        let b = self.full_name(ret);
-                        self.error(
-                            d.decl_span,
-                            bind(vm::bodyTypeNotCompatibleWithReturnTypeError, &[&a, &b]),
-                        );
-                    }
+            if ret != TypeId::OCL_VOID
+                && let Some(last) = last
+            {
+                let lt = last.ty();
+                let det = last.det;
+                if lt != TypeId::NULL && !self.ts.ck().assignable(ret, lt) && !det {
+                    let a = self.full_name(lt);
+                    let b = self.full_name(ret);
+                    self.error(
+                        d.decl_span,
+                        bind(vm::bodyTypeNotCompatibleWithReturnTypeError, &[&a, &b]),
+                    );
                 }
             }
         }
-        if !simple && nres == 1 {
-            if let Some(b) = &body {
-                if b.len() == 1 && !b[0].det {
-                    self.warning(d.decl_span, vm::useReturnExpForOperationResult);
-                }
-            }
+        if !simple
+            && nres == 1
+            && let Some(b) = &body
+            && b.len() == 1
+            && !b[0].det
+        {
+            self.warning(d.decl_span, vm::useReturnExpForOperationResult);
         }
         if let Some(b) = body {
             self.ops[op.index()].ir.body = Some(b.into_iter().map(|x| x.e).collect());
@@ -362,19 +363,19 @@ impl<'r> Sema<'r> {
             }
         }
         let mut init = Vec::new();
-        if let Some(body) = &m.body {
-            if let Some(b) = &body.init {
-                if let Some(s) = self.fun.scopes.last_mut() {
-                    s.in_init = true;
-                }
-                init = self
-                    .statements(&b.stmts, false)
-                    .into_iter()
-                    .map(|x| x.e)
-                    .collect();
-                if let Some(s) = self.fun.scopes.last_mut() {
-                    s.in_init = false;
-                }
+        if let Some(body) = &m.body
+            && let Some(b) = &body.init
+        {
+            if let Some(s) = self.fun.scopes.last_mut() {
+                s.in_init = true;
+            }
+            init = self
+                .statements(&b.stmts, false)
+                .into_iter()
+                .map(|x| x.e)
+                .collect();
+            if let Some(s) = self.fun.scopes.last_mut() {
+                s.in_init = false;
             }
         }
         if m.results.len() > 1 {
@@ -386,52 +387,52 @@ impl<'r> Sema<'r> {
             self.ops[op.index()].ir.result_local = Some(l);
         }
         let mut population = Vec::new();
-        if let Some(body) = &m.body {
-            if let Some(p) = &body.population {
-                let unique_result = m.results.len() == 1;
-                let implicit_ctx = m.results.is_empty()
-                    && d.context.is_some()
-                    && m.direction == Some(TokenKind::KwInout);
-                if !p.explicit && (unique_result || implicit_ctx) {
-                    let vname = if unique_result { "result" } else { "self" };
-                    let var = ast::Name {
-                        text: vname.to_string(),
-                        kind: ast::NameKind::Ident,
-                        span: p.body.span,
-                    };
-                    let x = self.object_core(
-                        Some(&var),
-                        None,
-                        &p.body.stmts,
-                        p.body.span,
-                        false,
-                        Some(op),
-                    );
-                    population.push(x.e);
-                } else {
-                    for s in &p.body.stmts {
-                        let x = match &s.kind {
-                            ast::ExprKind::Object(o) => {
-                                Some(self.object_exp(o, s.span, true, Some(op)))
-                            }
-                            _ => self.visit_ocl_expression_at(s, Pos::Block),
-                        };
-                        if let Some(x) = x {
-                            population.push(x.e);
+        if let Some(body) = &m.body
+            && let Some(p) = &body.population
+        {
+            let unique_result = m.results.len() == 1;
+            let implicit_ctx = m.results.is_empty()
+                && d.context.is_some()
+                && m.direction == Some(TokenKind::KwInout);
+            if !p.explicit && (unique_result || implicit_ctx) {
+                let vname = if unique_result { "result" } else { "self" };
+                let var = ast::Name {
+                    text: vname.to_string(),
+                    kind: ast::NameKind::Ident,
+                    span: p.body.span,
+                };
+                let x = self.object_core(
+                    Some(&var),
+                    None,
+                    &p.body.stmts,
+                    p.body.span,
+                    false,
+                    Some(op),
+                );
+                population.push(x.e);
+            } else {
+                for s in &p.body.stmts {
+                    let x = match &s.kind {
+                        ast::ExprKind::Object(o) => {
+                            Some(self.object_exp(o, s.span, true, Some(op)))
                         }
+                        _ => self.visit_ocl_expression_at(s, Pos::Block),
+                    };
+                    if let Some(x) = x {
+                        population.push(x.e);
                     }
                 }
             }
         }
         let mut end = Vec::new();
-        if let Some(body) = &m.body {
-            if let Some(b) = &body.end {
-                end = self
-                    .statements(&b.stmts, false)
-                    .into_iter()
-                    .map(|x| x.e)
-                    .collect();
-            }
+        if let Some(body) = &m.body
+            && let Some(b) = &body.end
+        {
+            end = self
+                .statements(&b.stmts, false)
+                .into_iter()
+                .map(|x| x.e)
+                .collect();
         }
         // abstract out parameters and results must be initialised in the init section
         let has_init = m.body.as_ref().is_some_and(|b| b.init.is_some());
@@ -632,12 +633,11 @@ impl<'r> Sema<'r> {
         self.begin_code(m, None);
         let tag_id = t.id.value.clone();
         let mut value = None;
-        if let Some(v) = &t.value {
-            if let Some(x) = self.visit_ocl_expression(v) {
-                if let ExprKind::Str(s) = &x.e.kind {
-                    value = Some(s.to_string());
-                }
-            }
+        if let Some(v) = &t.value
+            && let Some(x) = self.visit_ocl_expression(v)
+            && let ExprKind::Str(s) = &x.e.kind
+        {
+            value = Some(s.to_string());
         }
         let (name, ctx) = scoped_parts(&t.element);
         let mut element: Option<PropRef> = None;
@@ -795,15 +795,13 @@ impl<'r> Sema<'r> {
         // supertypes
         for (_, cid, c) in &created {
             for te in &c.extends {
-                if let ast::TypeKind::Path(p) = &te.kind {
-                    if p.segments.len() == 1 {
-                        if let Some((_, ext, _)) =
-                            created.iter().find(|(n, _, _)| *n == p.segments[0].text)
-                        {
-                            self.ts.meta.class_mut(*cid).supers.push(*ext);
-                            continue;
-                        }
-                    }
+                if let ast::TypeKind::Path(p) = &te.kind
+                    && p.segments.len() == 1
+                    && let Some((_, ext, _)) =
+                        created.iter().find(|(n, _, _)| *n == p.segments[0].text)
+                {
+                    self.ts.meta.class_mut(*cid).supers.push(*ext);
+                    continue;
                 }
                 let Some(t) = self.visit_type_cs(te) else {
                     continue;
@@ -892,10 +890,10 @@ impl<'r> Sema<'r> {
             let all: Vec<qvto_model::FeatureId> = self.ts.meta.class(*cid).all_features.to_vec();
             for f in all {
                 let fname = self.ts.meta.feature(f).name.clone();
-                if let Some(o) = own.iter().find(|o| self.ts.meta.feature(**o).name == fname) {
-                    if *o != f {
-                        self.error(c.name.span, bind(vm::HidingProperty, &[&fname]));
-                    }
+                if let Some(o) = own.iter().find(|o| self.ts.meta.feature(**o).name == fname)
+                    && *o != f
+                {
+                    self.error(c.name.span, bind(vm::HidingProperty, &[&fname]));
                 }
             }
             let class_inits: Vec<(qvto_model::FeatureId, ir::CodeBody)> = inits
@@ -1216,21 +1214,6 @@ impl<'r> Sema<'r> {
             }
         }
         body
-    }
-
-    /// Module features of a module (for the alias/tag lookups of `ModuleEnv`).
-    pub(crate) fn module_env(&self, m: ModuleId) -> &ModuleEnv {
-        &self.modules[m.index()]
-    }
-
-    /// An operation reference for an id.
-    pub(crate) fn user_op(&self, o: OpId) -> OpRef {
-        OpRef::User(o)
-    }
-
-    /// A placeholder expression.
-    pub(crate) fn null_expr(&self, span: Span) -> ir::Expr {
-        mk(ExprKind::Null, TypeId::OCL_VOID, span)
     }
 }
 

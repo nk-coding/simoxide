@@ -34,11 +34,11 @@ pub fn check_program(p: &Program) -> Vec<String> {
                     .push(format!("module {}: foreign operation {o:?}", m.name));
             }
         }
-        if let Some(e) = m.entry {
-            if p.operations[e.index()].module != ModuleId(i as u32) {
-                c.out
-                    .push(format!("module {}: entry of another module", m.name));
-            }
+        if let Some(e) = m.entry
+            && p.operations[e.index()].module != ModuleId(i as u32)
+        {
+            c.out
+                .push(format!("module {}: entry of another module", m.name));
         }
     }
     c.out
@@ -143,15 +143,15 @@ impl Checker<'_> {
                 self.local(s, o.var);
             }
             ExprKind::Call(c) => {
-                if let Callee::Op { op, .. } | Callee::Mapping { op, .. } = c.callee {
-                    if op.index() >= self.p.operations.len() {
-                        self.out.push(format!("{}: call of unknown op", s.what));
-                    }
+                if let Callee::Op { op, .. } | Callee::Mapping { op, .. } = c.callee
+                    && op.index() >= self.p.operations.len()
+                {
+                    self.out.push(format!("{}: call of unknown op", s.what));
                 }
-                if let Callee::Meta(m) = c.callee {
-                    if m.index() >= self.p.meta_ops.len() {
-                        self.out.push(format!("{}: unknown metamodel op", s.what));
-                    }
+                if let Callee::Meta(m) = c.callee
+                    && m.index() >= self.p.meta_ops.len()
+                {
+                    self.out.push(format!("{}: unknown metamodel op", s.what));
                 }
             }
             ExprKind::Type(t) => {
@@ -246,11 +246,7 @@ pub fn for_each_child(e: &Expr, mut f: impl FnMut(&Expr)) {
             }
         }
         ExprKind::Block(b) => b.iter().for_each(f),
-        ExprKind::VarInit { init, .. } => {
-            if let Some(i) = init {
-                f(i);
-            }
-        }
+        ExprKind::VarInit { init: Some(i), .. } => f(i),
         ExprKind::Assign(a) => {
             match &a.target {
                 LValue::Prop(s, _) | LValue::IntermProp(s, _) | LValue::TupleProp(s, _) => f(s),
@@ -277,11 +273,7 @@ pub fn for_each_child(e: &Expr, mut f: impl FnMut(&Expr)) {
                 f(x);
             }
         }
-        ExprKind::Return(v) => {
-            if let Some(v) = v {
-                f(v);
-            }
-        }
+        ExprKind::Return(Some(v)) => f(v),
         ExprKind::Log(l) => {
             for x in [&l.message, &l.element, &l.level, &l.when]
                 .into_iter()
@@ -301,11 +293,7 @@ pub fn for_each_child(e: &Expr, mut f: impl FnMut(&Expr)) {
                 }
             }
         }
-        ExprKind::Raise(_, a) => {
-            if let Some(a) = a {
-                f(a);
-            }
-        }
+        ExprKind::Raise(_, Some(a)) => f(a),
         ExprKind::Try(t) => {
             f(&t.body);
             for c in &t.catches {

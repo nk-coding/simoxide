@@ -137,10 +137,10 @@ impl<'r> Sema<'r> {
     pub fn lookup_local(&self, name: &str) -> Option<VarRef> {
         let level = self.fun.scopes.len().checked_sub(1)?;
         let r = self.lookup_local_at(level, name);
-        if r.is_none() {
-            if let Some(u) = name.strip_prefix('_') {
-                return self.lookup_local_at(level, u);
-            }
+        if r.is_none()
+            && let Some(u) = name.strip_prefix('_')
+        {
+            return self.lookup_local_at(level, u);
         }
         r
     }
@@ -163,12 +163,6 @@ impl<'r> Sema<'r> {
         None
     }
 
-    /// The variables visible in the current level and its parents (`getVariables`, explicit
-    /// ones), for block scoping.
-    pub fn scope_mark(&self) -> usize {
-        self.fun.top_len()
-    }
-
     // ---- implicit sources ----------------------------------------------------------------------
 
     /// Whether an operation applies to `owner` (`AbstractEnvironment.lookupOperation`, used to
@@ -177,23 +171,23 @@ impl<'r> Sema<'r> {
         match self.find_most_specific_operation(owner, name, args) {
             Ok(Some(_)) | Err(_) => true,
             Ok(None) => {
-                if let Some(u) = name.strip_prefix('_') {
-                    if self.has_operation(owner, u, args) {
-                        return true;
-                    }
+                if let Some(u) = name.strip_prefix('_')
+                    && self.has_operation(owner, u, args)
+                {
+                    return true;
                 }
                 // classic OCL's fall-backs
                 if owner == TypeId::UNLIMITED_NATURAL {
                     return self.has_operation(TypeId::INTEGER, name, args);
                 }
-                if let Type::Collection(k, _) = *self.ts.types.get(owner) {
-                    if k != qvto_types::CollKind::Collection {
-                        let c = self
-                            .ts
-                            .types
-                            .collection(qvto_types::CollKind::Collection, TypeId::T);
-                        return self.has_operation(c, name, args);
-                    }
+                if let Type::Collection(k, _) = *self.ts.types.get(owner)
+                    && k != qvto_types::CollKind::Collection
+                {
+                    let c = self
+                        .ts
+                        .types
+                        .collection(qvto_types::CollKind::Collection, TypeId::T);
+                    return self.has_operation(c, name, args);
                 }
                 false
             }
@@ -372,18 +366,12 @@ impl<'r> Sema<'r> {
             }
         }
         for e in self.modules[m.index()].by_access.clone() {
-            if self.modules[e.index()].is_library {
-                if let Some(r) = self.module_implicit_prop(e, name, depth + 1) {
-                    return Some(r);
-                }
+            if self.modules[e.index()].is_library
+                && let Some(r) = self.module_implicit_prop(e, name, depth + 1)
+            {
+                return Some(r);
             }
         }
         None
-    }
-}
-
-impl FnState {
-    pub fn top_len(&self) -> usize {
-        self.scopes.last().map(|s| s.vars.len()).unwrap_or(0)
     }
 }
