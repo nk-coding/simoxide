@@ -134,11 +134,12 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
     let mut o = Outcome::with_status(Status::Completed);
     o.compile_time = Some(compile_time);
     let mut warnings = false;
-    for u in &compiled.units {
+    for (ui, u) in compiled.units.iter().enumerate() {
         let src: &str = &u.source.text;
         for p in &u.problems {
             let (offset, length) = p.utf16(src);
-            if !p.is_error() {
+            // the executor's load diagnostic has the main unit's warnings only
+            if !p.is_error() && ui == 0 {
                 warnings = true;
             }
             o.problems.push(Problem {

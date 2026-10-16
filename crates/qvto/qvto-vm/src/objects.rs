@@ -891,6 +891,7 @@ where
                 }
             }
         }
+        self.clone_interm_props(&map);
         let cr = ObjRef::host(copy.to_u32());
         let class = self.store.class_of(copy);
         let x = self.default_extent(class, None);
@@ -902,6 +903,60 @@ where
         }
         self.put_to_extent(cr, x)?;
         Ok(Value::Obj(cr))
+    }
+
+    /// `IntermediatePropertyCopier.cloneIntermediateProperties` (bug 254962): the contextual
+    /// intermediate properties of every copied object, objects mapped to their copies,
+    /// collections and tuples cloned, other values shared.
+    fn clone_interm_props(&mut self, map: &[(S::Obj, S::Obj)]) {
+        let prog = self.prog;
+        for &(o, c) in map {
+            let src = Value::Obj(ObjRef::host(o.to_u32()));
+            let dst = Value::Obj(ObjRef::host(c.to_u32()));
+            for (i, ip) in prog.ir.interm_props.iter().enumerate() {
+                if !self.is_kind_of(&src, ip.context) {
+                    continue;
+                }
+                let p = IntermPropId(i as u32);
+                let v = self.get_interm(&src, p);
+                let r = self.clone_ocl(&v, map);
+                self.set_interm(&dst, p, r, true);
+            }
+        }
+    }
+
+    fn clone_ocl(&self, v: &Value, map: &[(S::Obj, S::Obj)]) -> Value {
+        match v {
+            Value::Obj(r) if !r.is_local() => {
+                let h = S::Obj::from_u32(r.index());
+                match map.iter().find(|(x, _)| *x == h) {
+                    Some((_, y)) => Value::Obj(ObjRef::host(y.to_u32())),
+                    None => v.clone(),
+                }
+            }
+            Value::Coll(_) | Value::List(_) => {
+                let mut out = self.new_coll_like(v);
+                for e in crate::vm::Iter::of(v).items.iter() {
+                    push(&mut out, self.clone_ocl(e, map), &self.env);
+                }
+                out
+            }
+            Value::Dict(d) => {
+                let out = self.new_coll_like(v);
+                if let Value::Dict(o) = &out {
+                    for (k, x) in d.borrow().iter() {
+                        o.borrow_mut().put(k.clone(), self.clone_ocl(x, map), &self.env);
+                    }
+                }
+                out
+            }
+            Value::Tuple(t) => Value::Tuple(Rc::new(qvto_runtime::tuple::Tuple::new(
+                t.type_id,
+                t.names.clone(),
+                t.values.iter().map(|x| self.clone_ocl(x, map)).collect(),
+            ))),
+            _ => v.clone(),
+        }
     }
 
     fn copy_rec(
