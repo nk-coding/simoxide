@@ -59,6 +59,8 @@ where
             Value::Int(_) => Type::Integer,
             Value::Real(_) => Type::Real,
             Value::Bool(_) => Type::Boolean,
+            // `getType(null)` is OclVoid
+            Value::Null => return Some(TypeId::OCL_VOID),
             _ => return None,
         };
         ir.types.find(&t)

@@ -72,6 +72,24 @@ where
             self.param_extents
                 .insert((ir.main_module.0, i as u32), self.extents.len() - 1);
         }
+        // modules the main transformation extends share its model parameters (by position)
+        let mut stack = vec![ir.main_module];
+        let mut seen = vec![ir.main_module];
+        while let Some(m) = stack.pop() {
+            for u in &ir.modules[m.index()].usages {
+                if u.kind != qvto_sema::ir::UsageKind::Extends || seen.contains(&u.module) {
+                    continue;
+                }
+                seen.push(u.module);
+                stack.push(u.module);
+                let n = ir.modules[u.module.index()].model_params.len();
+                for i in 0..n.min(main.model_params.len()) {
+                    if let Some(&x) = self.param_extents.get(&(ir.main_module.0, i as u32)) {
+                        self.param_extents.insert((u.module.0, i as u32), x);
+                    }
+                }
+            }
+        }
         let mut unbound = Extent::new(None, Direction::Out, "unbound".into());
         unbound.local_only = false;
         self.extents.push(unbound);
