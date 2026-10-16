@@ -187,25 +187,14 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
         return o;
     };
     let tape = load_tape(env);
-    let mut created: HashMap<u32, i32> = HashMap::new();
-    let mut attempt = 0;
-    loop {
-        let r = execute(env, &program, &mm_uris, mode, tape.as_ref(), &created);
-        let (o2, new_created) = match r {
-            Ok(x) => x,
-            Err(o) => return o,
-        };
-        // with a tape, the hashes of created objects come from their keys in the outputs; run
-        // again until the run creates the same objects at the same places
-        attempt += 1;
-        if tape.is_none() || new_created == created || attempt >= 3 {
-            let mut o2 = o2;
+    match execute(env, &program, &mm_uris, mode, tape.as_ref()) {
+        Ok(mut o2) => {
             o2.compile_time = o.compile_time;
             o2.load = o.load;
             o2.problems = std::mem::take(&mut o.problems);
-            return o2;
+            o2
         }
-        created = new_created;
+        Err(o) => o,
     }
 }
 
@@ -263,8 +252,7 @@ fn execute(
     mm_uris: &[String],
     mode: Mode,
     tape: Option<&Tape>,
-    created: &HashMap<u32, i32>,
-) -> Result<(Outcome, HashMap<u32, i32>), Outcome> {
+) -> Result<Outcome, Outcome> {
     let case = env.case;
     let mut rs = env
         .resource_set()
@@ -297,16 +285,33 @@ fn execute(
     rs.resolve_all();
     let first_created = rs.graph.object_count() as u32;
     let id_source: Option<Box<dyn IdentityHashSource>> = tape.map(|t| {
+        // objects that exist before the run: their recorded hashes by key; objects the run
+        // creates: the hashes the Java run assigned to the other objects of the tape, in the
+        // order the thread drew them (both runs ask for the hashes in program order)
         let keys = object_keys(&rs);
         let mut by_obj: HashMap<u32, i32> = HashMap::new();
-        for (k, h, _) in &t.objects {
-            if let Some(&o) = keys.get(k) {
-                by_obj.insert(o, *h);
+        let mut others: Vec<i32> = Vec::new();
+        for (k, h, assigned) in &t.objects {
+            match keys.get(k) {
+                Some(&o) => {
+                    by_obj.insert(o, *h);
+                }
+                None => {
+                    if *assigned != Some(false) {
+                        others.push(*h);
+                    }
+                }
             }
         }
-        for (o, h) in created {
-            by_obj.insert(*o, *h);
-        }
+        let idx = qvto_testkit::idhash::sequence_index(t.seed, &others, 20_000)
+            .unwrap_or_else(|| vec![None; others.len()]);
+        let mut ordered: Vec<(usize, i32)> = others
+            .iter()
+            .zip(idx)
+            .map(|(h, i)| (i.unwrap_or(usize::MAX), *h))
+            .collect();
+        ordered.sort();
+        let mut queue: std::collections::VecDeque<i32> = ordered.into_iter().map(|(_, h)| h).collect();
         let mut fallback = qvto_testkit::idhash::XorShift::recover(t.seed.0, t.seed.1);
         if let Some(x) = fallback.as_mut() {
             // the seed's two draws are taken
@@ -314,7 +319,10 @@ fn execute(
             x.next();
         }
         let lookup = Box::new(move |k: IdentityKey| match k {
-            IdentityKey::Obj(r) if !r.is_local() => by_obj.get(&r.index()).copied(),
+            IdentityKey::Obj(r) if !r.is_local() && r.index() < first_created => {
+                by_obj.get(&r.index()).copied()
+            }
+            IdentityKey::Obj(_) => queue.pop_front(),
             _ => None,
         });
         let fb: Box<dyn IdentityHashSource> = match fallback {
@@ -349,19 +357,6 @@ fn execute(
     }
     o.trace_records = Some(out.trace_records);
     let outputs = outputs(rs, &out, case.dump_models);
-    let mut new_created = HashMap::new();
-    if let Some(t) = tape {
-        let keys = object_keys(&outputs.rs);
-        let tape_map: HashMap<&str, i32> =
-            t.objects.iter().map(|(k, h, _)| (k.as_str(), *h)).collect();
-        for (k, &obj) in &keys {
-            if obj >= first_created
-                && let Some(&h) = tape_map.get(k.as_str())
-            {
-                new_created.insert(obj, h);
-            }
-        }
-    }
     if std::env::var_os("QVTO_SHOW").is_some() {
         eprintln!(
             "-- dump\n{}",
@@ -369,7 +364,7 @@ fn execute(
         );
     }
     o.outputs = Some(outputs);
-    Ok((o, new_created))
+    Ok(o)
 }
 
 /// The Java thread's identity-hash sequence, continued after the tape's seed.
