@@ -321,7 +321,7 @@ impl<'r> Sema<'r> {
                 out.push((name.into(), ty));
             }
         }
-        self.ts.types.tuple(out)
+        self.tuple_type(out)
     }
 }
 

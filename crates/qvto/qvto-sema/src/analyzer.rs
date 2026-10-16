@@ -81,6 +81,8 @@ pub(crate) struct Sema<'r> {
     pub class_ops: HashMap<ClassId, Vec<ir::MetaOpId>>,
     /// The source type for "Cannot find operation" messages of implicit collects.
     pub call_msg_src: Option<TypeId>,
+    /// Tuple types in creation order (`TypeResolver` cache).
+    pub tuple_types: Vec<TypeId>,
 }
 
 pub(crate) const STDLIB_MODULE: ModuleId = ModuleId(0);
@@ -123,6 +125,7 @@ impl<'r> Sema<'r> {
             meta_op_names: Vec::new(),
             class_ops: HashMap::new(),
             call_msg_src: None,
+            tuple_types: Vec::new(),
         };
         s.create_stdlib_module();
         s
@@ -172,6 +175,45 @@ impl<'r> Sema<'r> {
     pub fn qualified_name(&mut self, t: TypeId) -> String {
         let m = self.cur_module_name();
         self.ts.ck().qualified_name(t, &m)
+    }
+
+    /// `TypeResolver.resolveTupleType`: an existing tuple type with the same part names whose
+    /// part types are the same OCL types (`EString` and `String` alike) is reused.
+    pub fn tuple_type(&mut self, parts: Vec<(Box<str>, TypeId)>) -> TypeId {
+        let key: Vec<(Box<str>, TypeId)> = parts.iter().map(|(n, t)| (n.clone(), self.ts.ck().ocl_type(*t))).collect();
+        for i in 0..self.tuple_types.len() {
+            let t = self.tuple_types[i];
+            let qvto_types::Type::Tuple(existing) = self.ts.types.get(t).clone() else {
+                continue;
+            };
+            if existing.len() != key.len() {
+                continue;
+            }
+            let mut all = true;
+            for (n, kt) in &key {
+                match existing.iter().find(|(en, _)| en == n) {
+                    Some((_, et)) => {
+                        let eo = self.ts.ck().ocl_type(*et);
+                        if eo != *kt {
+                            all = false;
+                            break;
+                        }
+                    }
+                    None => {
+                        all = false;
+                        break;
+                    }
+                }
+            }
+            if all {
+                return t;
+            }
+        }
+        let t = self.ts.types.tuple(parts);
+        if !self.tuple_types.contains(&t) {
+            self.tuple_types.push(t);
+        }
+        t
     }
 
     pub fn op(&self, o: OpId) -> &OpInfo {

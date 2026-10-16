@@ -1390,7 +1390,7 @@ impl<'r> Sema<'r> {
             1 => results[0].ty,
             _ => {
                 let parts = results.iter().map(|r| (r.name.clone().into_boxed_str(), r.ty)).collect();
-                self.ts.types.tuple(parts)
+                self.tuple_type(parts)
             }
         };
         let result_local = if results.len() == 1 { Some(results[0].local) } else { None };

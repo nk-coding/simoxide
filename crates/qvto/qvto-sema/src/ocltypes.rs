@@ -385,7 +385,7 @@ impl<'r> Sema<'r> {
             }
             "product" => {
                 let t2 = self.elem_of(args.first()?.ty);
-                let tuple = self.ts.types.tuple(vec![("first".into(), elem), ("second".into(), t2)]);
+                let tuple = self.tuple_type(vec![("first".into(), elem), ("second".into(), t2)]);
                 self.coll(CollKind::Set, tuple)
             }
             "exists" | "forAll" | "isUnique" | "one" => TypeId::BOOLEAN,

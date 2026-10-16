@@ -615,7 +615,7 @@ impl<'r> Sema<'r> {
                 val.map(|x| x.e).unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, v.span)),
             ));
         }
-        let ty = self.ts.types.tuple(tparts);
+        let ty = self.tuple_type(tparts);
         let mut x = self.ex(ExprKind::Tuple(values), ty, cst);
         x.err = err;
         x

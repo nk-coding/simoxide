@@ -283,7 +283,7 @@ impl<'r> Sema<'r> {
                             parts.push((n.into(), tt));
                         }
                     }
-                    self.ts.types.tuple(parts)
+                    self.tuple_type(parts)
                 }
                 _ => TypeId::OCL_VOID,
             };
