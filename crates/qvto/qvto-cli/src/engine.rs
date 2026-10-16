@@ -340,6 +340,7 @@ fn execute(
         max_stack_depth: case.max_stack_depth.map(|d| d as usize).unwrap_or(1000),
         readonly_guard: case.readonly_guard,
         config: case.config.clone(),
+        line_numbers: !case.no_line_numbers,
         ..qvto::RunOptions::default()
     };
     let t1 = Instant::now();

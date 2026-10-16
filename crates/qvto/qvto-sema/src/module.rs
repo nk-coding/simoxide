@@ -332,14 +332,8 @@ impl<'r> Sema<'r> {
 
     /// `visitUnitCS`
     pub(crate) fn analyze_unit(&mut self, u: usize, modules: &[ModuleCs<'_>], _text: &str) {
-        let src = &self.units[u].source;
-        self.sources.push(ir::Source {
-            name: src.file_name.clone(),
-            qualified_name: src.qualified_name.clone(),
-            path: src.path.clone(),
-            lines: self.units[u].lines.clone(),
-        });
-        // keep SourceId = unit + 1 (0 is Stdlib)
+        // keep SourceId = unit + 1 (0 is Stdlib); units are analysed imports first, so the
+        // slot may be beyond the end or a placeholder
         while self.sources.len() < u + 2 {
             self.sources.push(ir::Source {
                 name: String::new(),
@@ -348,6 +342,13 @@ impl<'r> Sema<'r> {
                 lines: qvto_syntax::LineIndex::new(""),
             });
         }
+        let src = &self.units[u].source;
+        self.sources[u + 1] = ir::Source {
+            name: src.file_name.clone(),
+            qualified_name: src.qualified_name.clone(),
+            path: src.path.clone(),
+            lines: self.units[u].lines.clone(),
+        };
         let mut ids = Vec::new();
         let mut names: Vec<String> = Vec::new();
         // pass 1: headers

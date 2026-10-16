@@ -176,6 +176,7 @@ where
         if let Some(f) = self.frames.last_mut() {
             f.chunk = c;
             f.pc = 0;
+            f.fixed_ip = None;
         }
     }
 
@@ -550,6 +551,10 @@ where
         if let Some(c) = code.init {
             self.set_chunk(c);
             self.exec(c, base, ibase)?;
+            // "a meaningful IP after init section": the mapping operation
+            if let Some(f) = self.frames.last_mut() {
+                f.fixed_ip = Some(o.span.start);
+            }
         }
         // createOrGetResult
         for p in &o.results {

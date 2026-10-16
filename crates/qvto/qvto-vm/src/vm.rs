@@ -55,6 +55,9 @@ pub struct RunOptions {
     pub config: Vec<(String, Option<String>)>,
     /// Step budget (backward jumps and calls); `None` for unlimited.
     pub step_limit: Option<u64>,
+    /// Stack traces with units and lines; `false` gives `(Unknown Source)` (a program
+    /// compiled without line numbers).
+    pub line_numbers: bool,
 }
 
 impl Default for RunOptions {
@@ -66,6 +69,7 @@ impl Default for RunOptions {
             readonly_guard: false,
             config: Vec::new(),
             step_limit: None,
+            line_numbers: true,
         }
     }
 }
@@ -309,7 +313,7 @@ where
             out.push(StackElem {
                 module: module.name.clone(),
                 operation,
-                unit: Some(source.name.clone()),
+                unit: self.opts.line_numbers.then(|| source.name.clone()),
                 line,
             });
         }
