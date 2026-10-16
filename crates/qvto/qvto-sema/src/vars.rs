@@ -26,6 +26,7 @@ impl<'r> Sema<'r> {
             name: "this".into(),
             var: VarRef::This(module),
             explicit: false,
+            named: true,
         });
         for (i, p) in self.modules[module.index()].model_params.iter().enumerate() {
             if scope.vars.iter().any(|v| v.name == p.name) {
@@ -38,6 +39,7 @@ impl<'r> Sema<'r> {
                     index: i as u32,
                 }),
                 explicit: true,
+                named: true,
             });
         }
         fun.scopes.push(scope);
@@ -73,8 +75,20 @@ impl<'r> Sema<'r> {
             name: name.to_string(),
             var: v,
             explicit,
+            named: true,
         });
         true
+    }
+
+    /// `addImplicitVariableForProperties`: an implicit source for properties that is not a
+    /// named element of the environment.
+    pub fn add_implicit_property_source(&mut self, name: &str, v: VarRef) {
+        self.fun.top().vars.push(VarEntry {
+            name: name.to_string(),
+            var: v,
+            explicit: false,
+            named: false,
+        });
     }
 
     /// `addElement(null, ...)`: a generated name (`temp<n>`).
@@ -87,6 +101,7 @@ impl<'r> Sema<'r> {
                     name: n.clone(),
                     var: v,
                     explicit: false,
+                    named: true,
                 });
                 return n;
             }
@@ -95,12 +110,12 @@ impl<'r> Sema<'r> {
 
     /// `deleteElement`: removes every variable of that name from the current level.
     pub fn delete_var(&mut self, name: &str) {
-        self.fun.top().vars.retain(|v| v.name != name);
+        self.fun.top().vars.retain(|v| !(v.named && v.name == name));
     }
 
     fn lookup_local_at(&self, level: usize, name: &str) -> Option<VarRef> {
         let s = &self.fun.scopes[level];
-        let r = s.vars.iter().find(|v| v.name == name).map(|v| v.var);
+        let r = s.vars.iter().find(|v| v.named && v.name == name).map(|v| v.var);
         if r.is_some() {
             return r;
         }
@@ -128,8 +143,8 @@ impl<'r> Sema<'r> {
             let r = s
                 .vars
                 .iter()
-                .find(|v| v.name == name)
-                .or_else(|| name.strip_prefix('_').and_then(|u| s.vars.iter().find(|v| v.name == u)));
+                .find(|v| v.named && v.name == name)
+                .or_else(|| name.strip_prefix('_').and_then(|u| s.vars.iter().find(|v| v.named && v.name == u)));
             if let Some(v) = r {
                 return Some(v.var);
             }
@@ -169,10 +184,13 @@ impl<'r> Sema<'r> {
     fn abstract_implicit_op(&mut self, level: usize, name: &str, args: &[Arg]) -> Option<VarRef> {
         let vars: Vec<VarEntry> = self.fun.scopes[level].vars.clone();
         for v in vars.iter().rev() {
-            if v.explicit {
+            if v.explicit || !v.named {
                 continue;
             }
             let t = self.var_type(v.var);
+            if t == TypeId::NULL {
+                continue;
+            }
             if self.has_operation(t, name, args) {
                 return Some(v.var);
             }
@@ -253,6 +271,9 @@ impl<'r> Sema<'r> {
                 continue;
             }
             let t = self.var_type(v.var);
+            if t == TypeId::NULL {
+                continue;
+            }
             if self.property_fits(t, name) {
                 return Some(v.var);
             }
@@ -286,30 +307,37 @@ impl<'r> Sema<'r> {
 
     fn root_implicit_prop(&mut self, name: &str) -> Option<VarRef> {
         let m = self.fun.module?;
+        self.module_implicit_prop(m, name, 0)
+    }
+
+    /// `QvtEnvironmentBase.lookupImplicitSourceForProperty` of a module environment: its own
+    /// `this`, then the extended modules (recursively), then the accessed libraries.
+    fn module_implicit_prop(&mut self, m: ModuleId, name: &str, depth: usize) -> Option<VarRef> {
+        if depth > 32 {
+            return None;
+        }
         let saved = self.cur_module;
-        let mut result = None;
-        for e in self.modules[m.index()].by_extension.clone() {
-            self.cur_module = e;
-            let t = self.modules[e.index()].ty;
-            if self.property_fits(t, name) {
-                result = Some(VarRef::This(e));
-                break;
+        self.cur_module = m;
+        let t = self.modules[m.index()].ty;
+        let own = if m != crate::analyzer::STDLIB_MODULE && self.property_fits(t, name) { Some(VarRef::This(m)) } else { None };
+        self.cur_module = saved;
+        if own.is_some() {
+            return own;
+        }
+        let ext: Vec<ModuleId> = self.modules[m.index()].by_extension.iter().copied().filter(|x| *x != crate::analyzer::STDLIB_MODULE).collect();
+        for e in ext {
+            if let Some(r) = self.module_implicit_prop(e, name, depth + 1) {
+                return Some(r);
             }
         }
-        if result.is_none() {
-            for e in self.modules[m.index()].by_access.clone() {
-                if self.modules[e.index()].is_library {
-                    self.cur_module = e;
-                    let t = self.modules[e.index()].ty;
-                    if self.property_fits(t, name) {
-                        result = Some(VarRef::This(e));
-                        break;
-                    }
+        for e in self.modules[m.index()].by_access.clone() {
+            if self.modules[e.index()].is_library {
+                if let Some(r) = self.module_implicit_prop(e, name, depth + 1) {
+                    return Some(r);
                 }
             }
         }
-        self.cur_module = saved;
-        result
+        None
     }
 }
 

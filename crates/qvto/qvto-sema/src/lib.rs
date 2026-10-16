@@ -22,7 +22,11 @@ mod module;
 mod names;
 mod ops;
 mod units;
+mod imp;
+mod method;
+mod ocltypes;
 mod validate;
+mod vars;
 
 pub use diag::{Problem, Problems, Severity};
 pub use units::{compile, scan_metamodel_uris, Compilation, UnitResolver, UnitResult, UnitSource};

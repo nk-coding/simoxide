@@ -69,7 +69,7 @@ impl CtxType<'_> {
     }
 }
 
-fn scoped_parts(s: &ast::ScopedName) -> (Option<&ast::Name>, Option<CtxType<'_>>) {
+pub(crate) fn scoped_parts(s: &ast::ScopedName) -> (Option<&ast::Name>, Option<CtxType<'_>>) {
     let name = s.names.last();
     let ctx = if let Some(t) = &s.context_type {
         Some(CtxType::Type(t))
@@ -579,8 +579,8 @@ impl<'r> Sema<'r> {
         for c in &block.stmts {
             let e = self.visit_ocl_expression(c);
             if let Some(e) = e {
-                if e.ty != TypeId::BOOLEAN {
-                    let n = self.full_name(e.ty);
+                if e.ty() != TypeId::BOOLEAN {
+                    let n = self.full_name(e.ty());
                     self.error(c.span, bind(vm::ModelTypeWhereNotBooleanError, &[&n]));
                 } else {
                     conds.push(e.e);
@@ -1789,13 +1789,13 @@ impl<'r> Sema<'r> {
                 let locals = std::mem::take(&mut self.fun.locals);
                 self.end_code();
                 if let Some(ex) = ex {
-                    if matches!(self.ts.types.get(ex.ty), Type::TypeType(_)) {
+                    if matches!(self.ts.types.get(ex.ty()), Type::TypeType(_)) {
                         self.error(e.span, vm::PropertyTypeTypeError);
                     }
                     if ty.is_none() {
-                        ty = Some(ex.ty);
+                        ty = Some(ex.ty());
                     }
-                    let real = ex.ty;
+                    let real = ex.ty();
                     let declared = ty.unwrap_or(TypeId::NULL);
                     if !self.ts.ck().assignable(declared, real) {
                         let a = self.full_name(declared);
@@ -1849,7 +1849,7 @@ impl<'r> Sema<'r> {
             let locals = std::mem::take(&mut self.fun.locals);
             self.end_code();
             if let Some(ex) = ex {
-                init_ty = Some(ex.ty);
+                init_ty = Some(ex.ty());
                 init = Some(ir::CodeBody {
                     source: ir::SourceId(self.cur_unit as u32 + 1),
                     locals,
@@ -2017,6 +2017,7 @@ fn new_module_env(name: &str, library: bool, unit: usize, ty: TypeId, header: Sp
         mappings_map: Vec::new(),
         aliases: Vec::new(),
         module_imports: Vec::new(),
+        interm_package: None,
         ty,
         header_span: header,
         blackbox: false,

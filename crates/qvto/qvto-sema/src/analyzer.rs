@@ -63,8 +63,14 @@ pub(crate) struct Sema<'r> {
     pub cur_module: ModuleId,
     /// Classes declared as intermediate classes or exceptions, and their module.
     pub interm_class_module: HashMap<ClassId, ModuleId>,
-    /// Late resolves seen in the current module (validated after the bodies).
-    pub late_resolves: Vec<(Span, bool)>,
+    /// Late resolves seen in the current unit (validated after each module's bodies).
+    pub late_resolves: Vec<crate::imp::LateResolve>,
+    /// Per operation: what Eclipse knows about its parameter variables.
+    pub op_extras: Vec<Vec<crate::env::LocalExtra>>,
+    /// Declared OCL types of intermediate class features (the registry keeps a classifier).
+    pub interm_feature_types: HashMap<qvto_model::FeatureId, TypeId>,
+    /// Package of placeholder data types for intermediate features of non-classifier types.
+    pub placeholder_pkg: Option<qvto_model::PackageId>,
 }
 
 pub(crate) const STDLIB_MODULE: ModuleId = ModuleId(0);
@@ -99,6 +105,9 @@ impl<'r> Sema<'r> {
             cur_module: STDLIB_MODULE,
             interm_class_module: HashMap::new(),
             late_resolves: Vec::new(),
+            op_extras: Vec::new(),
+            interm_feature_types: HashMap::new(),
+            placeholder_pkg: None,
         };
         s.create_stdlib_module();
         s

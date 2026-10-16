@@ -42,6 +42,8 @@ pub(crate) struct ModuleEnv {
     pub ty: TypeId,
     pub header_span: Span,
     pub blackbox: bool,
+    /// The `_INTERMEDIATE` package of the module's intermediate classes.
+    pub interm_package: Option<qvto_model::PackageId>,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -105,6 +107,10 @@ pub(crate) struct VarEntry {
     pub name: String,
     pub var: VarRef,
     pub explicit: bool,
+    /// In the environment's named elements (`addElement`); `false` for an object expression's
+    /// variable, which is only an implicit source for properties
+    /// (`addImplicitVariableForProperties`).
+    pub named: bool,
 }
 
 /// One Eclipse environment level.
@@ -114,6 +120,8 @@ pub(crate) struct Scope {
     pub self_var: Option<VarRef>,
     /// `setParentLocal`: `lookupLocal` continues in the parent.
     pub parent_local: bool,
+    /// `isWithinInitMappingSection` of this environment level.
+    pub in_init: bool,
 }
 
 /// The code body being analysed.
@@ -129,8 +137,10 @@ pub(crate) struct FnState {
     pub in_init: bool,
     /// `AbstractEnvironment.generateName` counter (implicit variables).
     pub name_counter: u32,
-    /// Variables Eclipse would add to the module's resource etc.: none needed.
+    /// The module whose code this is.
     pub module: Option<ModuleId>,
+    /// Nesting depth of `object self : ...` expressions (implicit `self` is allowed inside).
+    pub object_self_depth: u32,
 }
 
 impl FnState {

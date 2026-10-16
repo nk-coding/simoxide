@@ -249,6 +249,15 @@ impl<'r> Sema<'r> {
     /// The OCL type of a metamodel feature (`UMLReflectionImpl.getOCLType`): many-valued
     /// features (upper bound > 1 or < 0) are collections by `ordered`/`unique`.
     pub fn feature_type(&mut self, f: FeatureId) -> TypeId {
+        if let Some(t) = self.interm_feature_types.get(&f).copied() {
+            let fi = self.ts.meta.feature(f);
+            let many = fi.upper > 1 || fi.upper < 0;
+            if many && !self.ts.types.is_collection(t) {
+                let kind = qvto_types::CollKind::of_feature(fi.ordered, fi.unique);
+                return self.ts.types.collection(kind, t);
+            }
+            return t;
+        }
         let fi = self.ts.meta.feature(f);
         let many = fi.upper > 1 || fi.upper < 0;
         let (ordered, unique) = (fi.ordered, fi.unique);

@@ -18,7 +18,8 @@
 //! - A mapping body without an explicit `population` section and with exactly one result (or an
 //!   `inout` context and no result) has its statements wrapped in an [`ExprKind::Object`]
 //!   for `result` (resp. `self`), as Eclipse's `visitMappingBodyCS` does.
-//! - `while (x := e; c)` is a block with the variable declaration followed by the loop.
+//! - `while (x := e; c)` and `while (x : T := e; c)` are a [`ExprKind::Compute`] of the
+//!   variable around the loop, as Eclipse makes them.
 //! - Calls that Eclipse resolves to the standard library are [`Callee::Std`], also operators
 //!   (`a + b` is `Std(Integer_add)` with source `a` and argument `b`), `and`/`or`/`implies`
 //!   included: the VM implements their short-circuit rules.
@@ -102,8 +103,11 @@ pub struct Program {
     /// (one package per module, named after it). Ids of the input registry are unchanged.
     pub meta: MetaRegistry,
     pub std_classes: StdClasses,
+    /// Source files; `SourceId(0)` is an empty placeholder (the library), units start at 1.
     pub sources: Vec<Source>,
-    /// All modules; imported modules come before the modules that import them.
+    /// All modules; imported modules come before the modules that import them. `ModuleId(0)`
+    /// is QVTo's library module `Stdlib` (no operations of its own in
+    /// [`Program::operations`]; calls to it are [`Callee::Std`]).
     pub modules: Vec<Module>,
     /// The module of the main unit that is executed (the first transformation of the main
     /// compilation unit, or its first library).
@@ -545,6 +549,8 @@ pub enum LValue {
     Global(GlobalId),
     Prop(Expr, FeatureId),
     IntermProp(Expr, IntermPropId),
+    /// `t.part += x` on a `List`/`Dict` tuple part (the only tuple mutation Eclipse allows).
+    TupleProp(Expr, Box<str>),
 }
 
 #[derive(Clone, Debug)]
