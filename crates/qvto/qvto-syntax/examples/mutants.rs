@@ -10,7 +10,21 @@
 mod common;
 
 fn main() {
-    let out = std::path::PathBuf::from(std::env::args().nth(1).expect("output directory"));
+    let arg = std::env::args().nth(1).expect("output directory or --parse");
+    if arg == "--parse" {
+        // Parse every mutant in process, printing each id first (to find hangs and crashes).
+        let roots = common::roots();
+        for key in common::oracle().keys() {
+            let Some(path) = common::resolve(&roots, key) else { continue };
+            let src = common::read(&path);
+            for m in common::mutate::mutants(key, &src) {
+                eprintln!("{}", m.id);
+                std::hint::black_box(qvto_syntax::parse(&m.text));
+            }
+        }
+        return;
+    }
+    let out = std::path::PathBuf::from(arg);
     std::fs::create_dir_all(&out).unwrap();
     let roots = common::roots();
     let mut n = 0;

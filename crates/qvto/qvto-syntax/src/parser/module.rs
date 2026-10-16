@@ -312,6 +312,7 @@ impl<'s> Parser<'s> {
             // classifierFeatureList ::= classifierFeatureCS (';' classifierFeatureCS)* [';']
             while !self.at(K::Rbrace) && !self.at(K::Eof) {
                 let before = self.pos;
+                let start_pos = self.pos;
                 match self.class_feature() {
                     Some(f) => features.push(f),
                     None => {
@@ -327,6 +328,10 @@ impl<'s> Parser<'s> {
                         self.skip_to(&[K::Semicolon, K::Rbrace]);
                         self.eat(K::Semicolon);
                     }
+                }
+                if self.pos == start_pos {
+                    // No progress (e.g. a stray closing bracket): drop the token.
+                    self.bump();
                 }
             }
             self.expect(K::Rbrace);

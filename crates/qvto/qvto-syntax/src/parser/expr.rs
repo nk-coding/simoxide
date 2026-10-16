@@ -1269,11 +1269,18 @@ impl<'s> Parser<'s> {
     /// `expression_list -> expression_semi_list semicolonOpt` up to `}` (or one of `stop`).
     pub(super) fn stmt_list(&mut self, stop: &[K]) -> Vec<Expr> {
         let mut stmts = Vec::new();
+        let mut last_pos = usize::MAX;
         loop {
             let k = self.peek();
             if k == K::Rbrace || k == K::Eof || stop.contains(&k) {
                 break;
             }
+            if self.pos == last_pos {
+                // No progress since the last round (a stray closing bracket): drop the token.
+                self.bump();
+                continue;
+            }
+            last_pos = self.pos;
             if !self.at_expr_start() {
                 // Not a statement start: LPG deletes the token.
                 self.unexpected();
