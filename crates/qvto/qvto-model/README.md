@@ -2,7 +2,7 @@
 
 The model API of the engine: metamodels resolved to dense ids and the `ModelStore` trait through
 which the VM reads and writes models with EMF's semantics. No dependencies. Implementations:
-`qvto-emf` (own Ecore/XMI store); later an adapter over SimOxide's `raw::Graph`.
+`qvto-emf` (own Ecore/XMI store) and `qvto-simoxide` (SimOxide's `raw::Graph`).
 
 ```rust
 use qvto_model::{Datum, ModelStore};
@@ -40,7 +40,10 @@ child in its resource), `EcoreUtil.delete`, `ECollections.setEList`, changeabili
 
 A store whose metamodel is fixed (generated tables) fills `contract::Roles` with features of its
 own metamodel that have the properties of the contract metamodel's features, and runs the same
-checks.
+checks. The checks need all roles on one class with the contract's defaults, which no PCM class
+has; `qvto-simoxide` therefore runs the suite with the contract metamodel in place of SimOxide's
+(its graph code is registry-driven) and covers PCM's features with random scripts against
+`qvto-emf`.
 
 ## Verification
 

@@ -6,6 +6,10 @@ from loaded resources, XMI load and save byte for byte like EMF 2.41, resource s
 maps and proxy resolution, the canonical dump (strict comparison) and the Eclipse suite's
 lenient comparer. Depends on `qvto-model`, `quick-xml`, `memchr`.
 
+A host with fixed metamodel ids (SimOxide's generated tables) builds its registry first and
+lets Ecore follow (`Graph::with_registry(meta)`, `ResourceSet::with_graph`); `materialize`
+gives such packages their metamodel objects.
+
 ```rust
 use qvto_emf::{ResourceSet, xmi_save::{save, SaveOptions}, canon::dump};
 let mut rs = ResourceSet::new();
@@ -25,6 +29,7 @@ let canonical = dump(&rs.graph, &[r]);                 // strict comparison text
 | `src/ecore.rs` | Ecore's registry entries, bootstrapped from `models/Ecore.ecore` (the runtime `EcorePackage` as EMF holds it, saved by the oracle); `EcoreIds` |
 | `src/ecore_hooks.rs` | generated-code behaviour of Ecore's classes: `eType`/`eGenericType`, `eSuperTypes`/`eGenericSuperTypes`, `eExceptions` views; `isSet` of these and of `instanceClassName`/`instanceTypeName`; `EEnumLiteral.literal`; derived features (`eAllSuperTypes`, `eAllStructuralFeatures`, `eAllAttributes`, `eReferenceType`, `many`, `eIDAttribute`, ...) computed from the model objects; erasure of type parameters |
 | `src/register.rs` | `EPackage` objects of loaded resources -> registry entries, linked both ways (`MetaLinks`: `EClass` object <-> `ClassId`, ...; also `ModelStore::classifier_object` etc.) |
+| `src/materialize.rs` | `ResourceSet::materialize`: Ecore objects (`EPackage`, `EClass`, features, enums, data types, operations) for registry entries built in code, linked like registered `.ecore` files, under given locations; `describe_packages` (a name-based description of registry entries, for comparing registries) |
 | `src/operations.rs` | `meta_operations`: the `EOperation`s of the registered classes read from their `.ecore` objects, for `qvto_sema::compile_with_operations` (load `ResourceSet::ecore_resource()` first for Ecore's own) |
 | `src/datatypes.rs` | `createFromString` / `convertToString` per data kind (`EcoreFactoryImpl` vs reflective `EFactoryImpl`), Java `Double.toString`/`Float.toString`, intrinsic defaults |
 | `src/uri.rs` | port of EMF's `URI` (parse, `resolve`, `deresolve`, file URIs) |
@@ -66,6 +71,7 @@ All against EMF 2.41 (standalone, the reference runner's jars) through `oracle/`
 | `tests/scripts.rs` | 300 random scripts (15 321 operations: set, unset, add, insert, remove, move, set at index, clear, `setEList`, roots, delete, with wrong types, nulls and bad indexes) on dynamic EMF objects, then each resource saved with default options and with the runner's options (UTF-8, schema location) | every result, the final state and all 1 200 saves equal |
 | `tests/compare.rs` | the suite's lenient comparer on 1 663 pairs: `in`/`expected` per test folder, each model with itself, each model with a perturbed copy (list reversed, attribute changed, object deleted, reference retargeted) | 1 662 verdicts as Java's `TreeComparator`, 1 skipped (Java's comparer throws); of 721 lenient-equal pairs, 174 differ strictly |
 | `tests/contract.rs` | `qvto-model`'s contract suite, with the metamodel built in code and loaded from `.ecore` | 40 tests |
+| `tests/materialize.rs` | the contract suite with Ecore registered after the contract package; materialized objects saved and registered again give the original registry (and that of `contract.ecore`); `.ecore` files referring to materialized packages register | pass |
 | `tests/registry.rs` | registering `contract.ecore` gives the entries `build_metamodel` builds; built-in Ecore entries linked to Ecore's objects; derived `eAllStructuralFeatures` equals the registry | pass |
 
 Excluded: `Stdlib.xmi` and `bug449912/expected.qvtoperational` are instances of the QVTo AST

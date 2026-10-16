@@ -258,13 +258,16 @@ SimOxide's `simoxide-model` already has an EMF-faithful generic graph (`raw::Gra
 class, container, proxy, slots; mutators that maintain opposites, `raw.rs` lines ~420–600) and
 generated static metamodel tables (`meta/generated.rs`). The integration:
 
-1. **Adapter** (in SimOxide, a feature-gated module or a small `simoxide-qvto` crate):
+1. **Adapter** (done in Q6: `crates/qvto-simoxide`, §12 Q6-1 to Q6-8):
    - `MetaRegistry` built from `simoxide_model::meta` tables, with ids equal to SimOxide's
-     `ClassId`/`FeatureId` (so no translation on access).
-   - `impl ModelStore for GraphStore<'_>` wrapping `&mut raw::Graph`: reads map directly to
-     `Graph::slot`; writes call the existing mutators (`set_ref`, `add_ref_unique`, `clear_refs`,
-     `set_attr`, …), which become `pub` or get a public wrapper; `create` appends an object.
-   - The journal records every change.
+     `ClassId`/`FeatureId`/`EnumId`/`PackageId` (so no translation on access); the EMF facts
+     the loader does not need come from extension tables SimOxide's generator now writes.
+   - `impl ModelStore for SimStore<'_>` over `&mut raw::Graph`: reads and writes go to
+     `Obj::slots` in place; EMF's semantics are the adapter's (ported from `qvto-emf`, not
+     SimOxide's loader mutators); `create` appends an object (`raw::Graph::add_object`).
+     Objects of other metamodels (PRM, SPD, metamodel objects) live in a `qvto-emf` graph of
+     the session and refer to graph objects through mirrors.
+   - The journal records every change, side effects included.
 2. **SimOxide-side work** (this is option D of `SIMOXIDE-self-adaptation-options.md`):
    - keep the `raw::Graph` of the run alive and mutable (today the typed model and the
      `CompiledModel` are built once and shared immutably);
@@ -277,8 +280,9 @@ generated static metamodel tables (`meta/generated.rs`). The integration:
      `getSimulationTime` and the stereotype library;
    - rule loading and order: SimuLizar loads every `*.qvto` of the rules folder in file-system
      order; SimOxide fixes the order explicitly.
-3. **Determinism.** New PCM objects need ids. Compat mode generates EMF-like UUIDs from a seeded
-   generator so runs are reproducible; byte equality with SimuLizar is only possible against a
+   The work list with estimates is `docs/simoxide-integration.md`.
+3. **Determinism.** New PCM objects need ids. The adapter generates EMF-like UUIDs from a seeded
+   generator (`IdPolicy::Uuid`) so runs are reproducible; byte equality with SimuLizar is only possible against a
    patched reference (as the options doc notes).
 
 The engine side needs no SimOxide knowledge. The cost per rule run is the VM run itself: the
@@ -666,3 +670,11 @@ Decisions taken while implementing, where they refine or deviate from the sectio
 | Q4b-9 | Harness: dumps compare `extent:/N` labels renumbered by first appearance (Eclipse's counter is JVM-wide); the reference runner runs cases on threads with a 512 MB stack, so QVTo's own depth limit (1000) is reached before a JVM `StackOverflowError` (a default stack overflows at about 740 calls), and `stacktrace_testStackOverFlow` was re-recorded; `qvto conform record --only/--prefix` merges into the fixture bundle and the cache. | Results of Eclipse that depend on the test JVM rather than on QVTo. |
 | Q4b-10 | `unlink` needs nothing: Eclipse's grammar has no rule for it and `visitUnlinkExp` is an empty stub. | QVTo 3.11 sources. |
 | Q4b-11 | `crates/qvto-sema/tools/probe/probe.sh` asks Eclipse about single files: compile problems, the AST of the operations, the referred operation of every call. | Faster than reading the analyser's sources when a behaviour is unclear. |
+| Q6-1 | The adapter is a crate in qvto-rs, `crates/qvto-simoxide`, outside the qvto-rs workspace (`exclude`, a workspace of its own) and depending on SimOxide's `simoxide-model` by path; SimOxide is unchanged except for two additive commits on its branch `qvto-adapter`. | The adapter's tests need qvto-rs's corpus, testkit and Java fixtures; qvto-rs must build without a SimOxide checkout; SimOxide stays free of the engine until it decides to integrate (then it depends on this crate behind a feature, or moves it). |
+| Q6-2 | SimOxide's generator writes extension tables (`meta/generated_ext.rs`: `upperBound`, ordered, unique, changeable, unsettable, interface, complete `eSuperTypes` incl. Ecore and generic supertypes, data types, classifier order, `EOperation` signatures, package locations) instead of changing its main tables; `generated.rs` regenerates byte for byte unchanged. | The registry needs these facts (312 PCM features are unordered, so navigation types depend on them); additive, no effect on SimOxide's loader. |
+| Q6-3 | The registry puts SimOxide's packages first (ids equal) and Ecore after them: `qvto_emf::Graph::with_registry` (`EcoreIds::class_start`/`feature_start`); Ecore supertypes are patched after Ecore is registered and the classes finished again (`MetaRegistry::unfinish_class`). | DESIGN §4.4's "ids equal to SimOxide's"; `register_ecore` asserted an empty registry before. |
+| Q6-4 | Programmatic registries get metamodel objects by `ResourceSet::materialize` (EPackage, EClass, EAttribute, EReference, EEnum, EDataType, EOperation objects from the registry, linked both ways, under the packages' `platform:/plugin` locations). | The Q1a open issue: `eClass()`, Ecore's reflective operations and `.ecore` files that refer to SimOxide's packages (SPD, the PRM metamodel) work without the `.ecore` files at run time. Checked: materialized, saved and registered again gives the original registry. |
+| Q6-5 | Two homes in one store: instances of SimOxide's classes in the `raw::Graph` (handle = `ObjId`), all others in a `qvto-emf` graph of the session (handle = `2^30 + id`), with mirrors (proxy objects) for references from there to the graph. References from the graph to the other home and containment/opposites across homes are `Unsupported`. The engine's `extent:/N` resources are the adapter's own and may hold roots of both homes. | SimOxide's tables cannot describe other metamodels (`ClassId::def()` is static), and the PRM, SPD models and intermediate data must not appear in SimOxide's graph; no corpus metamodel needs the unsupported cases. |
+| Q6-6 | The graph part implements EMF's semantics itself (a port of `qvto_emf::Graph`'s operations onto `Obj::slots`), driven by the registry only; SimOxide's loader mutators and `ClassId::def()` are not used. Slots are present exactly when EMF's `eIsSet` holds after a write; values keep SimOxide's representation; a string stays a `Value::Str` whatever the attribute's data kind (as `qvto-emf` keeps the given box). | The loader mutators lack uniqueness, roots, `isSet` and changeability; registry-driven code can run the contract suite on `raw::Graph` storage with the contract metamodel, and SimOxide's own reads stay consistent. |
+| Q6-7 | The journal records effective changes for graph objects (both ends of opposites, old containers, roots) as EMF notifications would, and the operations as called for objects of other metamodels. | Syncers need every change of a PCM object; the other home holds no PCM objects. |
+| Q6-8 | New objects get no `Identifier.id` by default (dynamic EMF, the corpus reference); `IdPolicy::Uuid { seed }` gives EMF-format UUIDs from a seeded generator (generated PCM code). `getSimulationTime`'s registration no longer requires a `'static` store (`SimStore` borrows the graph). | Equality with the Java fixtures and reproducible SimOxide runs; the store is a per-run view. |

@@ -9,9 +9,9 @@ A QVT Operational Mappings (QVTo) engine in Rust.
   semantics. *Fast mode* keeps the semantics but drops the Java emulation that costs time.
 - **Bytecode.** Transformations compile to a register bytecode that a VM interprets.
 - **Embeddable.** The engine reads and writes models through a trait, so it runs on its own
-  Ecore/XMI layer and, later, directly on SimOxide's model graph.
+  Ecore/XMI layer and directly on SimOxide's model graph (`crates/qvto-simoxide`).
 
-Status: Q1a (model API, Ecore/XMI layer), Q1b (parser), Q1c (runtime values, Java-compatible primitives) and Q1d (conformance harness, `qvto conform`) done; transformations do not run yet. See `PLAN.md`.
+Status: see `PLAN.md`.
 
 ## Documents
 
@@ -19,6 +19,7 @@ Status: Q1a (model API, Ecore/XMI layer), Q1b (parser), Q1c (runtime values, Jav
 |---|---|
 | `DESIGN.md` | scope, architecture, model API, bytecode and VM, compat vs fast, performance, testing, milestones, licensing |
 | `PLAN.md` | milestones and their status |
+| `docs/simoxide-integration.md` | running the engine inside SimOxide: what exists, SimOxide's work, plan |
 | `reference/README.md` | specifications, Eclipse sources, the Java reference runner |
 | `reference/inventory/` | inventory of the Eclipse QVTo test suite |
 | `reference/notes/` | notes on Eclipse QVTo and OCL semantics |
@@ -38,6 +39,7 @@ Status: Q1a (model API, Ecore/XMI layer), Q1b (parser), Q1c (runtime values, Jav
 | `qvto` | engine facade |
 | `qvto-testkit` | conformance runner, differential testing |
 | `qvto-cli` | the `qvto` command |
+| `qvto-simoxide` | the store over SimOxide's model graph, its metamodel registry, the change journal (a workspace of its own; needs a SimOxide checkout) |
 
 ## Building
 

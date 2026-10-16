@@ -16,7 +16,7 @@ Status values: done, next, open, parked.
 | Q4 | Full QVTo: mappings with traces, resolve, late resolve, disjuncts, inherits, merges, intermediate data, deepclone, libraries, imports, extends, access, Dict/List, try/raise, configuration properties, `transform()`, blackboxes | done | Q5a |
 | Q5a | Compat hardening: identity hashes, Java HashMap order, error and log texts, stack traces | open | Q4 (late part), Q5b |
 | Q5b | Fast mode and performance: benchmarks, profiling, optimisations | open | Q5a |
-| Q6 | SimOxide integration preparation: adapter over `raw::Graph`, change journal | open | Q5 |
+| Q6 | SimOxide integration preparation: adapter over `raw::Graph`, change journal | done | Q5 |
 | Q7 | Hardening: parser fuzzing, resource limits, documentation | open | Q6 |
 
 ## Exit criteria
@@ -126,4 +126,18 @@ Status values: done, next, open, parked.
   targets of `DESIGN.md` met.
 - **Q6**: SimuLizar rules run on an in-memory SimOxide `raw::Graph` through the adapter, with the
   change journal; the SimOxide-side work list is written down.
+  Done 2026-10-17 (`crates/qvto-simoxide/README.md`, `docs/simoxide-integration.md`, DESIGN §12
+  Q6-1 to Q6-8): `qvto-simoxide` (a crate of its own, depending on SimOxide's branch
+  `qvto-adapter` by path) has the registry of SimOxide's tables with SimOxide's ids (equal to the
+  registry of the product's `.ecore` files in every property), a `ModelStore` over
+  `raw::Graph` (in place, EMF's semantics ported from `qvto-emf`), objects of other metamodels
+  and metamodel objects (`ResourceSet::materialize`) in a session, and the change journal. The
+  contract suite passes with objects in both homes (40 tests); 300 random PCM scripts (23 914
+  operations) give `qvto-emf`'s results and states; all 24 SimuLizar/SPD corpus cases on models
+  loaded by SimOxide's loader equal the Java runner and the `qvto-emf` path; per rule execution
+  on MediaStore 3-8 µs (6 containers) to 0.86 ms (1 000 containers), 0.9-1.1x the `qvto-emf`
+  store with the journal on; the runtime flow (measurement, rule with `getSimulationTime`,
+  journal, stub syncer, rebuilt SimOxide model) is `examples/runtime_flow.rs`. SimOxide's side
+  (option D) is planned at 6-9 weeks. SimOxide changes on `qvto-adapter`: extension tables in
+  `gen_meta.py`/`meta/generated_ext.rs`, `raw::Graph::add_object`.
 - **Q7**: 24 h of parser fuzzing without a crash; step and memory limits enforced.
