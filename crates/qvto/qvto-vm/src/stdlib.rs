@@ -1418,9 +1418,17 @@ where
 
     /// `Classifier::allInstances()` in a transformation: every object of every model
     /// parameter extent and the unbound extent that is of the kind, in a `HashSet`.
+    /// `QVTExtentMap.collectInstances`: the extents of the current transformation's model
+    /// parameters and the unbound extent (not those of `Model::copy()`/`createEmptyModel()`).
     fn all_instances(&mut self, t: TypeId) -> Value {
         let mut set = Coll::new_set(&self.env);
-        for i in 0..self.extents.len() {
+        let m = self.cur_transf;
+        let n = self.prog.ir.modules[m.index()].model_params.len();
+        let mut xs: Vec<usize> = (0..n)
+            .filter_map(|i| self.param_extents.get(&(m.0, i as u32)).copied())
+            .collect();
+        xs.push(self.unbound_extent);
+        for i in xs {
             let objs = self.extents[i].all_objects(self.store);
             for o in objs {
                 let v = Value::Obj(o);
