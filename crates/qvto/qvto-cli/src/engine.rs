@@ -644,22 +644,7 @@ const REGISTRY_ALIASES: &[(&str, &str)] = &[(
     "http://www.eclipse.org/qvt/1.0.0/Operational",
 )];
 
-/// Metamodels of the EMF jars registered in the Eclipse environment (copies of their `.ecore`
-/// files in the analyser's fixtures).
-const EMF_JAR_MODELS: &[(&str, &str)] = &[
-    (
-        "http://www.eclipse.org/emf/2003/XMLType",
-        "crates/qvto-sema/tests/fixtures/emf-models/XMLType.ecore",
-    ),
-    (
-        "http://www.w3.org/XML/1998/namespace",
-        "crates/qvto-sema/tests/fixtures/emf-models/XMLNamespace.ecore",
-    ),
-    (
-        "http://www.eclipse.org/emf/2003/Change",
-        "crates/qvto-sema/tests/fixtures/emf-models/Change.ecore",
-    ),
-];
+use qvto_testkit::paths::EMF_JAR_MODELS;
 
 /// The blackbox signatures `qvto run`/`qvto disasm` know: QVTo's own libraries and the Java
 /// blackboxes of the corpus.

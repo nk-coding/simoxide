@@ -147,6 +147,8 @@ pub fn register_resources(
     }
     // pass 2: supertypes and features
     let mut errors = Vec::new();
+    let mut proxies: std::collections::HashMap<(String, bool), Classifier> = std::collections::HashMap::new();
+    let mut proxy_pkg: Option<PackageId> = None;
     let mut opposites = Vec::new();
     let mut keys = Vec::new();
     let eobject = Classifier::Class(e.eobject);
@@ -181,7 +183,31 @@ pub fn register_resources(
                         "unresolved type of {}.{fname}",
                         g.meta().class(cid).name
                     ));
-                    if is_ref { eobject } else { ejava_object }
+                    match ty_obj {
+                        // EMF keeps the proxy: a classifier without name (`null`), package,
+                        // supertypes or features, one per proxy URI
+                        Some(t) => {
+                            let uri = g.proxy_uri(t).unwrap_or("").to_string();
+                            let key = (uri, is_ref);
+                            match proxies.get(&key) {
+                                Some(&k) => k,
+                                None => {
+                                    let pp = *proxy_pkg.get_or_insert_with(|| {
+                                        g.meta_mut().add_package("", None, None, None)
+                                    });
+                                    let k = if is_ref {
+                                        Classifier::Class(g.meta_mut().add_class(pp, "null", false, false))
+                                    } else {
+                                        Classifier::DataType(g.meta_mut().add_data_type(pp, "null", None, true))
+                                    };
+                                    proxies.insert(key, k);
+                                    k
+                                }
+                            }
+                        }
+                        None if is_ref => eobject,
+                        None => ejava_object,
+                    }
                 }
             };
             let fid = g.meta_mut().add_feature(cid, &fname, kind, ty);

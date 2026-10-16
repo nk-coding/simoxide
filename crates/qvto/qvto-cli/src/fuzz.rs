@@ -96,6 +96,7 @@ pub fn main(args: &[String]) {
         Some("robust-worker") => return crate::robust::worker(&root, &args[1..]),
         Some("robust-replay") => return crate::robust::replay(&root, &args[1..]),
         Some("recheck") => return recheck(&root, &args[1..]),
+        Some("corpus") => return corpus(&root, &args[1..]),
         Some("expr" | "prog") => {}
         k => crate::die(&format!("fuzz: unknown campaign {k:?} (expr, prog, robust, robust-replay)")),
     }
@@ -154,6 +155,108 @@ fn recheck(root: &Path, dirs: &[String]) {
     }
 }
 
+/// `qvto fuzz corpus [--cases FILE] [--out DIR] [--only ID,..] [--reuse]`: both sides on a
+/// case file of existing transformations (default `cases/external.cases`); compile problems
+/// compared exactly (severity, unit, line, offset, length, message), run cases also by
+/// outcome, log and output models. Writes `DIR/report.tsv` (one row per case) and prints a
+/// summary. `--reuse` keeps the Java results of a previous run in `DIR/java`.
+fn corpus(root: &Path, args: &[String]) {
+    let mut cases = root.join("crates/qvto-testkit/cases/external.cases");
+    let mut out = root.join("target/qvto-fuzz/corpus");
+    let mut only: Vec<String> = Vec::new();
+    let mut reuse = false;
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--cases" => {
+                i += 1;
+                cases = root.join(&args[i]);
+            }
+            "--out" => {
+                i += 1;
+                out = root.join(&args[i]);
+            }
+            "--only" => {
+                i += 1;
+                only.extend(args[i].split(',').map(String::from));
+            }
+            "--reuse" => reuse = true,
+            a => crate::die(&format!("fuzz corpus: unknown argument {a}")),
+        }
+        i += 1;
+    }
+    let _ = std::fs::create_dir_all(&out);
+    let cf = if only.is_empty() {
+        cases.clone()
+    } else {
+        let all = read_cases(&cases).unwrap_or_else(|e| crate::die(&e.to_string()));
+        let mut t = String::new();
+        for c in all.iter().filter(|c| only.contains(&c.id)) {
+            qvto_testkit::case::write_case(c, &mut t);
+        }
+        let p = out.join("selected.cases");
+        let _ = std::fs::write(&p, t);
+        p
+    };
+    let ran = match run_batch_opts(root, &out, &cf, reuse, true) {
+        Ok(r) => r,
+        Err(e) => crate::die(&e),
+    };
+    let mut rep = String::from("id\tverdict\tjava_errors\tengine_errors\tdetail\n");
+    // every problem only one side reports: id, side, unit, line, offset, length, severity, message
+    let mut mis = String::new();
+    let mut tally: BTreeMap<&str, usize> = BTreeMap::new();
+    for (id, r) in &ran {
+        let je = r.java.as_ref().map(|j| j.problems().iter().filter(|p| p.error).count());
+        let ee = r.outcome.problems.iter().filter(|p| p.error).count();
+        let jv = r.java.as_ref().map(|j| j.verdict().to_string()).unwrap_or_default();
+        let (verdict, detail) = if r.java.is_none() || jv == "error" || jv == "timeout" {
+            ("java-error", r.java.as_ref().and_then(|j| j.get("detail")).unwrap_or("").to_string())
+        } else if let Status::Crashed(m) = &r.outcome.status {
+            ("crash", m.clone())
+        } else if let Some(s) = &r.sema {
+            if (je.unwrap_or(0) > 0) != (ee > 0) {
+                ("verdict-differs", s.clone())
+            } else {
+                ("problems-differ", s.clone())
+            }
+        } else if r.diff.as_ref().is_some_and(|d| !d.equal()) && !r.java.as_ref().unwrap().problems().iter().any(|p| p.error) {
+            ("run-differs", r.diff.as_ref().unwrap().first_difference().unwrap_or_default())
+        } else {
+            ("equal", String::new())
+        };
+        *tally.entry(verdict).or_default() += 1;
+        if r.sema.is_some()
+            && let Some(j) = &r.java
+        {
+            let jp = j.problems();
+            for (side, mine, other) in [("engine", &r.outcome.problems, &jp), ("java", &jp, &r.outcome.problems)] {
+                for p in mine.iter().filter(|p| !other.contains(p)) {
+                    let _ = writeln!(
+                        mis,
+                        "{id}\t{side}\t{}\t{}\t{}\t{}\t{}\t{}",
+                        p.unit,
+                        p.line,
+                        p.offset,
+                        p.length,
+                        if p.error { "E" } else { "W" },
+                        one_line(&p.message)
+                    );
+                }
+            }
+        }
+        let _ = writeln!(
+            rep,
+            "{id}\t{verdict}\t{}\t{ee}\t{}",
+            je.map(|x| x.to_string()).unwrap_or_default(),
+            one_line(&detail)
+        );
+    }
+    let _ = std::fs::write(out.join("report.tsv"), rep);
+    let _ = std::fs::write(out.join("mismatches.tsv"), mis);
+    println!("{} cases: {tally:?}; report in {}", ran.len(), out.join("report.tsv").display());
+}
+
 /// A generated case before it is written.
 pub struct GenCase {
     pub id: String,
@@ -200,33 +303,55 @@ pub fn write_batch(root: &Path, dir: &Path, cases: &[GenCase]) -> PathBuf {
 
 /// Runs the Java runner and the engine (compat mode) on a case file.
 pub fn run_batch(root: &Path, dir: &Path, case_file: &Path) -> Result<BTreeMap<String, Ran>, String> {
+    run_batch_opts(root, dir, case_file, false, false)
+}
+
+/// [`run_batch`]; `reuse`: keep the Java results already in `dir/java`; `default_hashes`:
+/// HotSpot's identity hashes with the tape (not `-XX:hashCode=2`).
+pub fn run_batch_opts(
+    root: &Path,
+    dir: &Path,
+    case_file: &Path,
+    reuse: bool,
+    default_hashes: bool,
+) -> Result<BTreeMap<String, Ran>, String> {
     let jdir = dir.join("java");
-    let _ = std::fs::remove_dir_all(&jdir);
+    let tape = tape_mode() || default_hashes;
+    if !reuse {
+        let _ = std::fs::remove_dir_all(&jdir);
     let run = JavaRun {
         base: root.to_path_buf(),
         cases: case_file.to_path_buf(),
         out: jdir.clone(),
         tape: true,
         timeout: Some(30),
-        jvm_opts: (!tape_mode()).then(|| "-XX:+UnlockExperimentalVMOptions -XX:hashCode=2".to_string()),
+        jvm_opts: (!tape).then(|| "-XX:+UnlockExperimentalVMOptions -XX:hashCode=2".to_string()),
         ..JavaRun::default()
     };
     run.run()?;
+    }
     let java = fixture::read_result_dir(&jdir).map_err(|e| e.to_string())?;
     let cases: Vec<Case> = read_cases(case_file).map_err(|e| e.to_string())?;
     let models = qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), root)
         .map_err(|e| e.to_string())?;
     let mut engine = QvtoEngine::new(root, Mode::Compat);
     engine.tape_dirs.push(jdir.clone());
-    if !tape_mode() {
+    if !tape {
         engine.constant_identity = Some(1);
     }
     let mut out = BTreeMap::new();
+    let mut confs: BTreeMap<String, qvto_emf::config::Config> = BTreeMap::new();
     for case in &cases {
+        if let Some(c) = &case.conf
+            && !confs.contains_key(c)
+        {
+            let m = qvto_emf::config::Config::read(&root.join(c), root).map_err(|e| format!("{c}: {e}"))?;
+            confs.insert(c.clone(), m);
+        }
         let env = CaseEnv {
             case,
             base: root,
-            models: &models,
+            models: case.conf.as_ref().and_then(|c| confs.get(c)).unwrap_or(&models),
         };
         let outcome = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| engine.run(&env))) {
             Ok(o) => o,
@@ -261,16 +386,11 @@ fn tape_mode() -> bool {
 
 /// Compile problems compared with their messages (the differential compares severity and line).
 fn sema_difference(o: &Outcome, j: &JavaResult) -> Option<String> {
-    let mut a: Vec<(bool, i32, String)> = o
-        .problems
-        .iter()
-        .map(|p| (p.error, p.line, p.message.clone()))
-        .collect();
-    let mut b: Vec<(bool, i32, String)> = j
-        .problems()
-        .iter()
-        .map(|p| (p.error, p.line, p.message.clone()))
-        .collect();
+    let key = |p: &qvto_testkit::fixture::Problem| {
+        (p.unit.clone(), p.line, p.offset, p.length, p.error, p.message.clone())
+    };
+    let mut a: Vec<_> = o.problems.iter().map(key).collect();
+    let mut b: Vec<_> = j.problems().iter().map(key).collect();
     a.sort();
     b.sort();
     if a == b {

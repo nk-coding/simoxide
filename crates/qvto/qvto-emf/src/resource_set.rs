@@ -147,6 +147,17 @@ impl ResourceSet {
         if !load || self.failed.contains_key(&uri) {
             return None;
         }
+        // a package of the (emulated) global registry, by its namespace location
+        if let Some(l) = self.ns_locations.get(&key).cloned()
+            && l != uri
+        {
+            let _ = self.load_metamodel(&l);
+            if let Some(p) = self.graph.meta().package_by_ns_uri(&key)
+                && let Some(&o) = self.graph.links().package_obj.get(&p)
+            {
+                return self.graph.resource_of(o);
+            }
+        }
         self.load(&uri).ok()
     }
 

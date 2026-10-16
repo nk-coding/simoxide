@@ -55,6 +55,22 @@ pub mod paths {
     pub const SUITE_CONF: &str = "crates/qvto-emf/tests/data/suite.conf";
     /// The inventory.
     pub const INVENTORY: &str = "reference/inventory/eclipse-tests.tsv";
+    /// Metamodels of the EMF jars registered in the Eclipse environment (copies of their
+    /// `.ecore` files in the analyser's fixtures): nsURI and file.
+    pub const EMF_JAR_MODELS: &[(&str, &str)] = &[
+        (
+            "http://www.eclipse.org/emf/2003/XMLType",
+            "crates/qvto-sema/tests/fixtures/emf-models/XMLType.ecore",
+        ),
+        (
+            "http://www.w3.org/XML/1998/namespace",
+            "crates/qvto-sema/tests/fixtures/emf-models/XMLNamespace.ecore",
+        ),
+        (
+            "http://www.eclipse.org/emf/2003/Change",
+            "crates/qvto-sema/tests/fixtures/emf-models/Change.ecore",
+        ),
+    ];
     /// Cache of full Java results (with tapes and XMI), regenerable, not committed.
     pub const JAVA_CACHE: &str = "target/qvto-testkit/java";
 }

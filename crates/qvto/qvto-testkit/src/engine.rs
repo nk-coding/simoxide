@@ -5,7 +5,7 @@ use crate::case::Case;
 use crate::fixture::Problem;
 use qvto_emf::ResourceSet;
 use qvto_emf::config::Config;
-use qvto_model::ResourceId;
+use qvto_model::{ModelStore, ResourceId};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -82,10 +82,46 @@ impl CaseEnv<'_> {
                 "http://www.eclipse.org/emf/2002/Ecore",
             );
         }
+        // the EMF jars' packages are in the global registry: references into them resolve
+        for (uri, file) in crate::paths::EMF_JAR_MODELS {
+            if rs.ns_location(uri).is_none() {
+                let abs = std::path::absolute(self.base.join(file)).map_err(|e| e.to_string())?;
+                rs.add_ns_location(uri, &qvto_emf::uri::Uri::file(&abs.to_string_lossy()).to_string());
+            }
+        }
+        // TestQvtStandaloneExecutor puts the first root package of each file into the
+        // resource set's registry (the first file wins); subpackages and the packages of
+        // metamodels loaded on the way are not found by namespace URI
+        let mut keys: Vec<qvto_model::PackageId> = Vec::new();
+        let mut loaded: Vec<qvto_model::PackageId> = Vec::new();
         for mm in &self.case.mmfiles {
             let p = self.path(mm);
             let r = rs.load_file(&p)?;
-            rs.register(r)?;
+            // EMF registers the packages with unresolved proxies (types of features,
+            // supertypes, opposites in metamodels that are not there); `register` defaults them
+            let before = rs.graph.meta().package_count();
+            if let Err(e) = rs.register(r)
+                && std::env::var_os("QVTO_SHOW_MM").is_some()
+            {
+                eprintln!("{mm}: {e}");
+            }
+            let after = rs.graph.meta().package_count();
+            loaded.extend((before..after).map(|i| qvto_model::PackageId(i as u32)));
+            let root = rs.graph.roots(r).first().and_then(|&o| rs.graph.object_package(o));
+            if let Some(root) = root {
+                let ns = rs.graph.meta().package(root).ns_uri.clone();
+                if !keys.iter().any(|k| rs.graph.meta().package(*k).ns_uri == ns) {
+                    keys.push(root);
+                }
+            }
+        }
+        for p in loaded {
+            if !keys.contains(&p) {
+                rs.graph.meta_mut().unregister_ns_uri(p);
+            }
+        }
+        for k in keys {
+            rs.graph.meta_mut().register_ns_uri(k);
         }
         Ok(rs)
     }

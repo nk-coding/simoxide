@@ -339,6 +339,15 @@ impl MetaRegistry {
         }
     }
 
+    /// Removes the registration of `p` under its namespace URI (if `p` is what it maps to).
+    pub fn unregister_ns_uri(&mut self, p: PackageId) {
+        if let Some(u) = self.packages[p.index()].ns_uri.clone()
+            && self.by_ns_uri.get(&u) == Some(&p)
+        {
+            self.by_ns_uri.remove(&u);
+        }
+    }
+
     /// Registers `p` under an extra key (e.g. a `platform:/plugin/...` location).
     pub fn register_alias(&mut self, key: &str, p: PackageId) {
         self.by_ns_uri.insert(key.into(), p);
