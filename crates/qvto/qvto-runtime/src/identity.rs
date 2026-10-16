@@ -166,6 +166,17 @@ impl IdentityHashSource for Sequential {
     }
 }
 
+/// The same value for every key: HotSpot's `-XX:hashCode=2` (every identity hash is 1), which
+/// makes identity-hash orders reproducible across runs (differential fuzzing).
+#[derive(Clone, Debug)]
+pub struct Constant(pub i32);
+
+impl IdentityHashSource for Constant {
+    fn draw(&mut self, _key: IdentityKey) -> i32 {
+        self.0
+    }
+}
+
 /// Memoised identity hashes: one value per key for the whole run, as in Java.
 pub struct IdentityHashes {
     /// Host objects by index, in pages of 512 allocated on first use (handles are dense but

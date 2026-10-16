@@ -47,6 +47,10 @@ pub mod paths {
     pub const ECLIPSE_FIXTURE: &str = "crates/qvto-testkit/fixtures/java-eclipse.txt";
     /// Committed Java results of the corpus cases.
     pub const CORPUS_FIXTURE: &str = "crates/qvto-testkit/fixtures/java-corpus.txt";
+    /// Regression cases of the fuzzing campaigns and the external corpora (Q7).
+    pub const FUZZ_CASES: &str = "crates/qvto-testkit/cases/fuzz.cases";
+    /// Committed Java results of the fuzz regression cases.
+    pub const FUZZ_FIXTURE: &str = "crates/qvto-testkit/fixtures/java-fuzz.txt";
     /// Metamodel configuration of the Eclipse suite (shared with qvto-emf and its oracle).
     pub const SUITE_CONF: &str = "crates/qvto-emf/tests/data/suite.conf";
     /// The inventory.

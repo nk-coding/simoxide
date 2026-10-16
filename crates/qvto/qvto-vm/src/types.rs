@@ -212,6 +212,10 @@ where
         match v {
             Value::Null => t == TypeId::OCL_VOID,
             Value::Invalid => t == TypeId::OCL_INVALID,
+            // `EcoreEvaluationEnvironment.isTypeOf`: `getClass() == getInstanceClass()`, never
+            // true for OclAny, for enumerations (literals are `EEnumLiteral` objects) or tuple
+            // types
+            _ if matches!(ir.types.get(t), Type::OclAny | Type::Enum(_) | Type::Tuple(_)) => false,
             Value::Obj(_) => match ir.types.get(t) {
                 Type::Class(c) => self.class_of(v) == Some(*c),
                 _ => false,

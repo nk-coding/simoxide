@@ -30,6 +30,11 @@ use std::io::Write as _;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
+/// Identity hashes: by default the Java side runs with `-XX:hashCode=2` (every identity hash
+/// 1) and the engine with a constant source, which makes identity-hash orders reproducible;
+/// `--tape` runs with HotSpot's default hashes and replays the Java run's tape instead.
+static TAPE_MODE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
 pub struct Opts {
     pub kind: String,
     pub seed: u64,
@@ -75,6 +80,7 @@ fn parse(args: &[String]) -> Opts {
             "--out" => o.out = val(&mut i).into(),
             "--keep" => o.keep = true,
             "--no-minimize" => o.minimize = false,
+            "--tape" => TAPE_MODE.store(true, std::sync::atomic::Ordering::Relaxed),
             a => crate::die(&format!("fuzz: unknown argument {a}")),
         }
         i += 1;
@@ -202,6 +208,7 @@ pub fn run_batch(root: &Path, dir: &Path, case_file: &Path) -> Result<BTreeMap<S
         out: jdir.clone(),
         tape: true,
         timeout: Some(30),
+        jvm_opts: (!tape_mode()).then(|| "-XX:+UnlockExperimentalVMOptions -XX:hashCode=2".to_string()),
         ..JavaRun::default()
     };
     run.run()?;
@@ -211,6 +218,9 @@ pub fn run_batch(root: &Path, dir: &Path, case_file: &Path) -> Result<BTreeMap<S
         .map_err(|e| e.to_string())?;
     let mut engine = QvtoEngine::new(root, Mode::Compat);
     engine.tape_dirs.push(jdir.clone());
+    if !tape_mode() {
+        engine.constant_identity = Some(1);
+    }
     let mut out = BTreeMap::new();
     for case in &cases {
         let env = CaseEnv {
@@ -243,6 +253,10 @@ pub fn run_batch(root: &Path, dir: &Path, case_file: &Path) -> Result<BTreeMap<S
         );
     }
     Ok(out)
+}
+
+fn tape_mode() -> bool {
+    TAPE_MODE.load(std::sync::atomic::Ordering::Relaxed)
 }
 
 /// Compile problems compared with their messages (the differential compares severity and line).

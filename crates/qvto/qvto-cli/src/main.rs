@@ -31,12 +31,12 @@ usage:
       The benchmark suite (crates/qvto-cli/bench/workloads.bench): compile and run times in
       compat and fast mode, with --java against the warm reference runner (one JVM), with
       --java-cold a fresh JVM per workload. Run it pinned: taskset -c 2,3 qvto bench --java.
-  qvto conform [--suite eclipse|corpus|all] [--cases FILE] [--fixture FILE]
+  qvto conform [--suite eclipse|corpus|fuzz|all] [--cases FILE] [--fixture FILE]
                [--engine qvto|qvto-fast|stub|replay:DIR] [--only ID,...] [--prefix P]...
                [--report FILE.md] [--tsv FILE] [--verbose]
       Runs the engine on the cases and prints the scoreboard: per case the Eclipse
       driver's checks and the strict comparison with the Java runner's fixture.
-  qvto conform record [--suite eclipse|corpus|all] [--only ID,...] [--prefix P]... [--runs N]
+  qvto conform record [--suite eclipse|corpus|fuzz|all] [--only ID,...] [--prefix P]... [--runs N]
       Runs the Java reference runner N times (default 5, one JVM per run), marks
       outputs that differ between the runs as unstable and writes the fixture
       bundle; the full results (tapes, XMI) stay in target/qvto-testkit/java/<suite>.
@@ -56,7 +56,7 @@ struct Suite {
     fixture: &'static str,
 }
 
-const SUITES: [Suite; 2] = [
+const SUITES: [Suite; 3] = [
     Suite {
         name: "eclipse",
         cases: paths::ECLIPSE_CASES,
@@ -66,6 +66,11 @@ const SUITES: [Suite; 2] = [
         name: "corpus",
         cases: paths::CORPUS_CASES,
         fixture: paths::CORPUS_FIXTURE,
+    },
+    Suite {
+        name: "fuzz",
+        cases: paths::FUZZ_CASES,
+        fixture: paths::FUZZ_FIXTURE,
     },
 ];
 

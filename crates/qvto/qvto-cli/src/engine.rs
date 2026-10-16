@@ -25,6 +25,9 @@ pub struct QvtoEngine {
     /// Java result directories searched for a case's identity-hash tape (`<dir>/<id>/idtape.tsv`)
     /// besides the fixture caches of the Eclipse and corpus suites.
     pub tape_dirs: Vec<std::path::PathBuf>,
+    /// Every identity hash this value instead of the tape (the Java side run with
+    /// `-XX:hashCode=2`, which gives 1).
+    pub constant_identity: Option<i32>,
 }
 
 /// The signatures of the Java blackboxes Eclipse loads for the suite and the corpus.
@@ -42,6 +45,7 @@ impl QvtoEngine {
             bundles: FsResolver::bundles_below(&root.join("reference/eclipse-qvto/tests")),
             signatures: signatures.into(),
             tape_dirs: Vec::new(),
+            constant_identity: None,
         }
     }
 }
@@ -94,11 +98,12 @@ impl Engine for QvtoEngine {
         let mode = self.mode;
         let signatures = self.signatures.clone();
         let tape_dirs = self.tape_dirs.clone();
+        let constant = self.constant_identity;
         let r = std::thread::scope(|s| {
             std::thread::Builder::new()
                 .stack_size(512 << 20)
                 .spawn_scoped(s, || {
-                    std::panic::catch_unwind(AssertUnwindSafe(|| run_case(env, bundles, &signatures, mode, &tape_dirs)))
+                    std::panic::catch_unwind(AssertUnwindSafe(|| run_case(env, bundles, &signatures, mode, &tape_dirs, constant)))
                 })
                 .expect("thread")
                 .join()
@@ -211,6 +216,7 @@ fn run_case(
     signatures: &str,
     mode: Mode,
     tape_dirs: &[std::path::PathBuf],
+    constant: Option<i32>,
 ) -> Outcome {
     let case = env.case;
     let CaseProgram {
@@ -283,8 +289,8 @@ fn run_case(
         ));
         return o;
     };
-    let tape = load_tape(env, tape_dirs);
-    match execute(env, &program, &mm_uris, mode, tape.as_ref()) {
+    let tape = if constant.is_some() { None } else { load_tape(env, tape_dirs) };
+    match execute(env, &program, &mm_uris, mode, tape.as_ref(), constant) {
         Ok(mut o2) => {
             o2.compile_time = o.compile_time;
             o2.load = o.load;
@@ -298,7 +304,7 @@ fn run_case(
 /// The Java run's identity-hash tape of the case, if cached.
 fn load_tape(env: &CaseEnv, tape_dirs: &[std::path::PathBuf]) -> Option<Tape> {
     let cache = env.base.join(qvto_testkit::paths::JAVA_CACHE);
-    let dirs = [cache.join("eclipse"), cache.join("corpus")];
+    let dirs = [cache.join("eclipse"), cache.join("corpus"), cache.join("fuzz")];
     for dir in dirs.iter().chain(tape_dirs) {
         let p = dir.join(&env.case.id).join("idtape.tsv");
         if let Ok(t) = std::fs::read_to_string(&p) {
@@ -436,6 +442,7 @@ fn execute(
     mm_uris: &[String],
     mode: Mode,
     tape: Option<&Tape>,
+    constant: Option<i32>,
 ) -> Result<Outcome, Outcome> {
     let case = env.case;
     let CaseModels {
@@ -502,6 +509,10 @@ fn execute(
         };
         Box::new(qvto_vm::TapeHook::new(lookup, fb)) as Box<dyn IdentityHashSource>
     });
+    let id_source = match constant {
+        Some(h) => Some(Box::new(qvto_runtime::identity::Constant(h)) as Box<dyn IdentityHashSource>),
+        None => id_source,
+    };
     let opts = qvto::RunOptions {
         mode,
         id_source,

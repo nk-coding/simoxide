@@ -1,0 +1,25 @@
+# Regression cases found by differential fuzzing and the external corpora (PLAN Q7): minimised
+# programs on the fuzz metamodel (crates/qvto-testkit/fuzz/fuzz.ecore), run like the Eclipse
+# cases (`qvto conform --suite fuzz`; fixture: `qvto conform record --suite fuzz`).
+
+case fuzz_types
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/types
+qvto types.qvto
+in model.xmi
+mmfile ../fuzz.ecore
+note oclIsKindOf/oclIsTypeOf/oclAsType of Integer, Long, Real values (EDataType.isInstance); invalid tuple parts; invalid collection elements
+end
+
+case fuzz_typematrix
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/types
+qvto typematrix.qvto
+in model.xmi
+mmfile ../fuzz.ecore
+note oclIsTypeOf/oclIsKindOf of 22 kinds of values against 20 types
+end
