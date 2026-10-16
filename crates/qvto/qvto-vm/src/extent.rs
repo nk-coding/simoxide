@@ -33,6 +33,12 @@ pub struct Extent {
     pub local_only: bool,
     /// The model type of an extent without parameter (`createEmptyModel`).
     pub model_type: Option<qvto_sema::ir::ModelTypeId>,
+    /// The resources of the initial objects, watched for added root objects (Eclipse's
+    /// `ResourceModificationAdapter`; the in-memory resource is watched too).
+    pub watched: Vec<ResourceId>,
+    /// Objects added to a watched resource (`myResourceAdditionalEObjects`, e.g. UML stereotype
+    /// applications added by a blackbox): roots of the contents if they have no container.
+    pub resource_additional: Vec<ObjRef>,
 }
 
 impl Extent {
@@ -49,6 +55,8 @@ impl Extent {
             resource: None,
             local_only: false,
             model_type: None,
+            watched: Vec::new(),
+            resource_additional: Vec::new(),
         }
     }
 
@@ -86,9 +94,16 @@ impl Extent {
                     continue;
                 }
                 let h = S::Obj::from_u32(o.index());
-                if s.resource_of(h).is_none() {
-                    let r = self.in_memory(s, next_uri);
-                    let _ = s.add_root(r, h, None);
+                match s.resource_of(h) {
+                    None => {
+                        let r = self.in_memory(s, next_uri);
+                        let _ = s.add_root(r, h, None);
+                    }
+                    Some(r) => {
+                        if !self.watched.contains(&r) {
+                            self.watched.push(r);
+                        }
+                    }
                 }
             }
         }
@@ -103,6 +118,11 @@ impl Extent {
         let r = s.create_resource(&format!("extent:/{}", *next_uri));
         self.resource = Some(r);
         r
+    }
+
+    /// Whether a root added to `r` is recorded (`ResourceModificationAdapter`).
+    pub fn watches(&self, r: ResourceId) -> bool {
+        !self.is_readonly() && (self.resource == Some(r) || self.watched.contains(&r))
     }
 
     /// `addObject`.
@@ -219,6 +239,11 @@ impl Extent {
         let mut roots = Vec::new();
         for &o in self.initial.iter().chain(self.additional.iter()) {
             if seen.insert(o) {
+                roots.push(o);
+            }
+        }
+        for &o in &self.resource_additional {
+            if container(s, o).is_none() && seen.insert(o) {
                 roots.push(o);
             }
         }

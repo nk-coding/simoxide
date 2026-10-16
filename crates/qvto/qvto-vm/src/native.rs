@@ -632,6 +632,12 @@ where
             return false;
         };
         let _ = self.store.add_root(r, S::Obj::from_u32(x.index()), None);
+        // the extents watching the resource record the new root
+        for e in self.extents.iter_mut() {
+            if e.watches(r) && !e.resource_additional.contains(x) {
+                e.resource_additional.push(*x);
+            }
+        }
         true
     }
 
