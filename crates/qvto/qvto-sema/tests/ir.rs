@@ -248,3 +248,25 @@ fn overriding_operations_of_extended_modules() {
     assert_eq!(p.operations[g_t.index()].overrides, Some(g_lib));
     assert_eq!(p.operations[g_lib.index()].overrides, None);
 }
+
+#[test]
+fn raise_string_is_raise_exception() {
+    // bug419299: `raise 'msg'` raises `Exception('msg')`, which `except (Exception)` catches
+    let p = compile_ok(
+        "transformation t();
+         main() { try { raise 'boom'; } except (e : Exception) { log(e.getArgument()); }; }",
+    );
+    let main = op_named(&p, "t", "main");
+    let raises: Vec<_> = body_exprs(&p, main)
+        .into_iter()
+        .filter_map(|e| match &e.kind {
+            ExprKind::Raise(c, a) => Some((*c, a.as_deref().map(|a| a.kind.clone()))),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(raises.len(), 1);
+    let (class, arg) = &raises[0];
+    let class = class.expect("raise without exception type");
+    assert_eq!(&*p.meta.class(class).name, "Exception");
+    assert!(matches!(arg, Some(ExprKind::Str(s)) if &**s == "boom"), "{arg:?}");
+}

@@ -468,7 +468,8 @@ pub enum ExprKind {
     Continue,
     Log(Box<Log>),
     Assert(Box<Assert>),
-    /// `raise T(arg)`; `raise 'msg'` has neither type nor argument (as in Eclipse).
+    /// `raise T(arg)`; `raise 'msg'` is `raise Exception('msg')` (as in Eclipse). The class is
+    /// `None` only when the analyser reported an error.
     Raise(Option<ClassId>, Option<Box<Expr>>),
     Try(Box<Try>),
     /// `object [x :] T [@ m] { ... }`

@@ -1298,6 +1298,19 @@ impl<'r> Sema<'r> {
                 span: p.span,
             }),
             ast::ExprKind::TypeLit(t) => Some(t.clone()),
+            // `raise 'msg'` is `raise Exception('msg')`: the parser
+            // (`AbstractQVTParser.createRaiseExpCS`) adds the type name, without positions
+            ast::ExprKind::Str(_) => Some(ast::TypeExpr {
+                kind: ast::TypeKind::Path(ast::PathName {
+                    segments: vec![ast::Name {
+                        text: "Exception".into(),
+                        kind: ast::NameKind::Ident,
+                        span: r.exception.span,
+                    }],
+                    span: r.exception.span,
+                }),
+                span: r.exception.span,
+            }),
             _ => None,
         };
         let Some(te) = te else {
@@ -1312,7 +1325,11 @@ impl<'r> Sema<'r> {
             self.error(te.span, bind(vm::CannotRaiseNonException, &[&tn]));
         }
         let mut arg = None;
-        if let Some(Some(e)) = &r.arg {
+        let literal_arg = match &r.exception.kind {
+            ast::ExprKind::Str(_) => Some(&r.exception),
+            _ => None,
+        };
+        if let Some(e) = literal_arg.or(r.arg.as_ref().and_then(|a| a.as_ref())) {
             let x = self.expr_d(e);
             if x.ty() != TypeId::STRING {
                 self.error(e.span, vm::StringTypeMessageExcArgumentError);
