@@ -172,8 +172,9 @@ where
                 } else {
                     v
                 };
-                if let Some(slot) = prog.ir.meta.slot(class, *f) {
-                    self.local[o.index() as usize].slots[slot] = v;
+                // `callSetter(instance, feature, value, isUndefined, true)`
+                if prog.ir.meta.slot(class, *f).is_some() {
+                    self.set_prop(&Value::Obj(o), *f, v, true)?;
                 }
             }
         }
@@ -184,6 +185,12 @@ where
     fn feature_default(&self, f: FeatureId) -> Value {
         let meta = &self.prog.ir.meta;
         let fi = meta.feature(f);
+        // `createInitialValue` of the declared OCL type
+        if let Some(&ty) = self.interm_feature_ty.get(&f)
+            && !fi.is_many()
+        {
+            return self.default_value(ty);
+        }
         if fi.is_many() {
             let kind = match CollKind::of_feature(fi.ordered, fi.unique) {
                 CollKind::Set => qvto_bytecode::insn::coll_kind::SET,
@@ -619,6 +626,18 @@ where
                     if reset { self.new_coll_like(&cur) } else { cur }
                 } else {
                     self.assign_coll(&ft, cur, v, reset)
+                }
+            } else if let Some(&ty) = self
+                .interm_feature_ty
+                .get(&f)
+                .filter(|t| self.prog.ir.types.is_collection_like(**t))
+            {
+                // a single-valued feature of a collection type: `assign` on its OCL type
+                let nv = self.assign_value(ty, cur.clone(), v, reset);
+                if nv.is_invalid() {
+                    if reset { Value::Null } else { cur }
+                } else {
+                    nv
                 }
             } else if v.is_invalid() {
                 if reset { Value::Null } else { cur }

@@ -176,6 +176,8 @@ where
     pub(crate) class_local: Vec<bool>,
     /// Virtual tables computed by the VM where the IR has none (see `calls::vtable`).
     pub(crate) vtables: Vec<Vec<OpId>>,
+    /// The declared OCL types of intermediate class features (`IntermClass::feature_types`).
+    pub(crate) interm_feature_ty: HashMap<qvto_model::FeatureId, TypeId>,
     /// Transformation instances made with `new T(...)`: the module and the extents of its
     /// model parameters (`Value::Instance(NESTED | index)`).
     pub(crate) nested: Vec<(ModuleId, Vec<usize>)>,
@@ -247,6 +249,12 @@ where
             errors: Vec::new(),
             class_local: Vec::new(),
             vtables: Vec::new(),
+            interm_feature_ty: prog
+                .ir
+                .interm_classes
+                .iter()
+                .flat_map(|c| c.feature_types.iter().copied())
+                .collect(),
             nested: Vec::new(),
             cur_transf: prog.ir.main_module,
             regexes: RefCell::new(HashMap::new()),
