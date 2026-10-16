@@ -648,6 +648,26 @@ where
                 Insn::StoreGlobal { src, g } => {
                     self.globals[g as usize] = r!(self, base, src).clone();
                 }
+                Insn::JumpIfFastMode { target } => {
+                    if self.opts.mode == qvto_runtime::Mode::Fast {
+                        pc = target as usize;
+                        continue;
+                    }
+                }
+                Insn::SetNext { coll, idx, val } => {
+                    let i = match r!(self, base, idx) {
+                        Value::Int(i) => i,
+                        _ => 0,
+                    };
+                    let v = r!(self, base, val).clone();
+                    if let Value::Coll(c) = &mut w!(self, base, coll)
+                        && let qvto_runtime::coll::Coll::Sequence(items) = std::rc::Rc::make_mut(c)
+                        && let Some(x) = items.get_mut(i as usize)
+                    {
+                        *x = v;
+                    }
+                    w!(self, base, idx) = Value::Int(i + 1);
+                }
                 Insn::LoadInstGlobal { dst, inst, g } => {
                     let v = self.instance_global(&r!(self, base, inst), GlobalId(g as u32));
                     w!(self, base, dst) = v;

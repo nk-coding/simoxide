@@ -2222,6 +2222,32 @@ impl<'a> Builder<'a> {
                 for j in exits {
                     self.patch(j);
                 }
+                if has_side_effects(body_e) {
+                    // classic OCL evaluates the body for every element a second time and keys
+                    // by the second values (`evaluateSortedByIterator`); observable only through
+                    // side effects, so fast mode evaluates once
+                    let skip = self.jump(Insn::JumpIfFastMode { target: 0 });
+                    let idx = self.alloc()?;
+                    self.emit(Insn::LoadInt { dst: idx, v: 0 });
+                    let mut stop = Vec::new();
+                    let exits = self.loops(src, &lp.iterators, acc, &mut |b, _next| {
+                        let mm = b.mark();
+                        let t = b.expr_reg(body_e)?;
+                        // an undefined value ends the pass, the first values stay
+                        stop.push(b.jump(Insn::JumpIfUndef { r: t, target: 0 }));
+                        b.emit(Insn::SetNext {
+                            coll: elems + 1,
+                            idx,
+                            val: t,
+                        });
+                        b.release(mm);
+                        Ok(())
+                    })?;
+                    for j in exits.into_iter().chain(stop) {
+                        self.patch(j);
+                    }
+                    self.patch(skip);
+                }
                 let site = self.site(Site::Sort {
                     ordered_set: matches!(
                         src_kind,
@@ -2479,4 +2505,45 @@ impl<'a> Builder<'a> {
         }
         panic!("break_patch outside a loop");
     }
+}
+
+/// Whether evaluating the expression can have an effect beyond its value: calls of imperative
+/// or metamodel operations, imperative expressions, mutating library operations.
+fn has_side_effects(e: &Expr) -> bool {
+    use qvto_sema::ir::Callee;
+    let own = match &e.kind {
+        ExprKind::Call(c) => match &c.callee {
+            Callee::Std(op) => {
+                let d = op.desc();
+                matches!(
+                    d.owner,
+                    qvto_types::StdOwner::List
+                        | qvto_types::StdOwner::Dict
+                        | qvto_types::StdOwner::Model
+                        | qvto_types::StdOwner::Transformation
+                        | qvto_types::StdOwner::Stdlib
+                ) && !matches!(
+                    d.name,
+                    "at" | "first" | "last" | "size" | "includes" | "excludes" | "get" | "hasKey"
+                        | "keys" | "values" | "isEmpty" | "notEmpty" | "indexOf" | "count"
+                )
+            }
+            _ => true,
+        },
+        ExprKind::Assign(_)
+        | ExprKind::Log(_)
+        | ExprKind::Assert(_)
+        | ExprKind::Object(_)
+        | ExprKind::New(_)
+        | ExprKind::NewTransformation(..)
+        | ExprKind::Raise(..)
+        | ExprKind::Resolve(_) => true,
+        _ => false,
+    };
+    if own {
+        return true;
+    }
+    let mut any = false;
+    qvto_sema::irck::for_each_child(e, |c| any = any || has_side_effects(c));
+    any
 }

@@ -329,3 +329,27 @@ query bump() : Integer { count := count + 10; return count; }
          t2 count, data: 1\n"
     );
 }
+
+#[test]
+fn sorted_by_evaluates_an_effectful_body_twice() {
+    // classic OCL's `evaluateSortedByIterator` runs the body over all elements twice and
+    // sorts by the second values (Eclipse's log); a pure body is evaluated once
+    let log = log_of(
+        r#"transformation sb();
+property n : Integer = 0;
+helper key(x : Integer) : Integer { n := n + 1; log('key', x); return 10 - x - n; }
+main() {
+  var s := Sequence{3, 1, 2}->sortedBy(x | key(x));
+  log('sorted', s);
+  log('n', n);
+  var p := Sequence{3, 1, 2}->sortedBy(x | -x);
+  log('pure', p);
+}
+"#,
+    );
+    assert_eq!(
+        log,
+        "key, data: 3\nkey, data: 1\nkey, data: 2\nkey, data: 3\nkey, data: 1\nkey, data: 2\n\
+         sorted, data: [2, 3, 1]\nn, data: 6\npure, data: [3, 2, 1]\n"
+    );
+}

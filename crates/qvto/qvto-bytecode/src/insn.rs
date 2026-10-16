@@ -82,6 +82,16 @@ pub enum Insn {
         inst: Reg,
         g: u16,
     },
+    /// Fast mode: jump (skips what only compat mode evaluates).
+    JumpIfFastMode {
+        target: u32,
+    },
+    /// `coll[idx] := val; idx += 1` on a Sequence (`sortedBy`'s second pass).
+    SetNext {
+        coll: Reg,
+        idx: Reg,
+        val: Reg,
+    },
 
     // ---- control --------------------------------------------------------------------------
     Jump {
@@ -445,6 +455,7 @@ impl Insn {
             | Insn::JumpIfInvalid { target, .. }
             | Insn::JumpIfNull { target, .. }
             | Insn::JumpIfNotBool { target, .. }
+            | Insn::JumpIfFastMode { target }
             | Insn::IterNext { target, .. }
             | Insn::ClosureNext { target, .. } => Some(target),
             _ => None,
@@ -462,6 +473,7 @@ impl Insn {
             | Insn::JumpIfInvalid { target, .. }
             | Insn::JumpIfNull { target, .. }
             | Insn::JumpIfNotBool { target, .. }
+            | Insn::JumpIfFastMode { target }
             | Insn::IterNext { target, .. }
             | Insn::ClosureNext { target, .. } => *target = t,
             _ => panic!("not a jump: {self:?}"),
