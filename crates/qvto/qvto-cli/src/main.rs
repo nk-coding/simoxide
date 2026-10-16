@@ -18,7 +18,7 @@ usage:
       Runs the engine on the cases and prints the scoreboard: per case the Eclipse
       driver's checks and the strict comparison with the Java runner's fixture.
   qvto conform record [--suite eclipse|corpus|all] [--only ID,...] [--prefix P]... [--runs N]
-      Runs the Java reference runner N times (default 3, one JVM per run), marks
+      Runs the Java reference runner N times (default 5, one JVM per run), marks
       outputs that differ between the runs as unstable and writes the fixture
       bundle; the full results (tapes, XMI) stay in target/qvto-testkit/java/<suite>.
   qvto conform java [--suite ...] [--out DIR] [--only ID,...] [--prefix P]... [--save-xmi]
@@ -80,7 +80,7 @@ struct Opts {
 
 fn parse(args: &[String]) -> Opts {
     let mut o = Opts {
-        runs: 3,
+        runs: 5,
         ..Opts::default()
     };
     let mut i = 0;

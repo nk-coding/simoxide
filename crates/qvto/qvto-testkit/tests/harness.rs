@@ -84,7 +84,8 @@ fn stub_engine_runs_end_to_end() {
     assert_eq!(ni, 494);
 }
 
-/// Needs `qvto conform record` (the cache with saved outputs); skipped without it.
+/// Needs the cache with saved outputs (`qvto conform record` or `qvto conform java --save-xmi`);
+/// skipped without it.
 #[test]
 fn java_replay_reproduces_java_verdicts() {
     let root = root();
@@ -133,7 +134,8 @@ fn corpus_cases_recorded_and_replayed() {
     }
     let models = qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), &root).unwrap();
     let mut engine = JavaReplay::new(&dir).unwrap();
-    let reports = run_cases(&mut engine, &cases, &root, &models, &java, &|_| true);
+    let cached = engine.results.clone();
+    let reports = run_cases(&mut engine, &cases, &root, &models, &cached, &|_| true);
     let lenient = [
         "simulizar_runconfigtest_addNewServer_high",
         "simulizar_runconfigtest_addClonedServer_high",

@@ -1,6 +1,6 @@
 qvto-testkit java fixture 1
 @case api_exec1
-@file result.txt 226
+@file result.txt 213
 id	api_exec1
 load	WARNING
 params	in:model1,in:model2,out:uml,out:rdb
@@ -12,7 +12,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.534
 
 @file out.jsonl 875
 {"resource":"extent2.xmi","roots":2}
@@ -29,7 +28,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case api_exec2
-@file result.txt 226
+@file result.txt 213
 id	api_exec2
 load	WARNING
 params	in:model1,in:model2,out:uml,out:rdb
@@ -41,7 +40,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.204
 
 @file out.jsonl 1052
 {"resource":"extent2.xmi","roots":2}
@@ -61,7 +59,7 @@ load	1	WARNING	0	Parameter declaration in the entry operation is deprecated.
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case api_exec3
-@file result.txt 174
+@file result.txt 161
 id	api_exec3
 load	WARNING
 params	
@@ -72,7 +70,6 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	1.286
 
 @file log.txt 5
 null
@@ -83,7 +80,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	'dump' is deprecated
 
 @case blackboxlib_context_testInvalidConfigProp
-@file result.txt 534
+@file result.txt 521
 id	blackboxlib_context_testInvalidConfigProp
 load	OK
 params	inout:module
@@ -96,7 +93,6 @@ check exception org.eclipse.m2m.internal.qvt.oml.evaluator.QvtInterruptedExecuti
 check stack executionTerminated.stack	pass
 check log-nonempty-equal executionTerminated.log.txt	pass
 verdict	pass
-run-ms	5.492
 
 @file out.jsonl 170
 {"resource":"extent0.xmi","roots":1}
@@ -119,7 +115,7 @@ exec	1	OK	0	test
 exec	1	OK	0	test2
 
 @case callapi_bug326871_standalone
-@file result.txt 188
+@file result.txt 175
 id	callapi_bug326871_standalone
 load	OK
 params	
@@ -130,10 +126,9 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	2.115
 
 @case callapi_bug326871a_standalone
-@file result.txt 189
+@file result.txt 176
 id	callapi_bug326871a_standalone
 load	OK
 params	
@@ -144,10 +139,9 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	1.320
 
 @case failed_bug289982_failed
-@file result.txt 310
+@file result.txt 296
 id	failed_bug289982_failed
 load	WARNING
 params	
@@ -158,7 +152,6 @@ exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtRuntimeException
 trace-records	-1
 check log-nonempty-equal qvtTraceLog.stack	pass
 verdict	pass
-run-ms	15.580
 
 @file log.txt 282
 Terminating execution...
@@ -230,7 +223,7 @@ load	1	WARNING	0	Implicit source for operation is ambiguous. Choosing first of '
 exec	0	ERROR	120	No blackbox implementation found for 'echoFromSimpleJavaLibrary'
 
 @case failed_bug301134
-@file result.txt 269
+@file result.txt 256
 id	failed_bug301134
 load	OK
 params	
@@ -241,7 +234,6 @@ exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
 trace-records	-1
 check log-nonempty-equal qvtTraceLog.stack	pass
 verdict	pass
-run-ms	1.489
 
 @file log.txt 165
 Terminating execution...
@@ -255,7 +247,7 @@ org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Precondition fail
 exec	0	ERROR	100	Precondition failed in mapping 'test'
 
 @case failed_bug323915
-@file result.txt 427
+@file result.txt 414
 id	failed_bug323915
 load	OK
 params	
@@ -266,7 +258,6 @@ exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtRuntimeException
 trace-records	-1
 check log-nonempty-equal qvtTraceLog.stack	pass
 verdict	pass
-run-ms	3.786
 
 @file log.txt 321
 Terminating execution...
@@ -282,7 +273,7 @@ Caused by: java.lang.RuntimeException: Exception from bbox library
 exec	0	ERROR	120	Java method invocation error 'public void org.eclipse.m2m.tests.qvt.oml.bbox.AnnotatedJavaLibrary.testThrowRuntimeException()'\nCaused by: java.lang.RuntimeException: Exception from bbox library
 
 @case failed_bug370098
-@file result.txt 278
+@file result.txt 265
 id	failed_bug370098
 load	OK
 params	
@@ -293,7 +284,6 @@ exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtStackOverFlowError
 trace-records	-1
 check log-nonempty-equal qvtTraceLog.stack	pass
 verdict	pass
-run-ms	0.715
 
 @file log.txt 537
 Terminating execution...
@@ -323,7 +313,7 @@ org.eclipse.m2m.internal.qvt.oml.evaluator.QvtStackOverFlowError: Stack depth: 1
 exec	0	ERROR	120	QVT Stack overflow occured during execution
 
 @case failed_scr878
-@file result.txt 309
+@file result.txt 296
 id	failed_scr878
 load	WARNING
 params	in:model,out:$1
@@ -334,7 +324,6 @@ exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtRuntimeException
 trace-records	-1
 check log-nonempty-equal qvtTraceLog.stack	pass
 verdict	pass
-run-ms	2.328
 
 @file out.jsonl 37
 {"resource":"extent1.xmi","roots":0}
@@ -382,7 +371,7 @@ load	0	ERROR	130	Compilation errors found in unit 'file:${root}/reference/eclips
 load	1	ERROR	0	Cannot find imported compilation unit 'models.bug433937_wrongImport.NonExistedImport'
 
 @case interpret__while
-@file result.txt 215
+@file result.txt 201
 id	interpret__while
 load	OK
 params	in:model,out:modelOut
@@ -394,7 +383,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	10.790
 
 @file out.jsonl 1231
 {"resource":"extent1.xmi","roots":1}
@@ -406,7 +394,7 @@ run-ms	10.790
 {"path":"/0/@eClassifiers.4","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"r1_r2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret__while_261024
-@file result.txt 221
+@file result.txt 208
 id	interpret__while_261024
 load	OK
 params	in:model,out:modelOut
@@ -418,7 +406,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.461
 
 @file out.jsonl 1231
 {"resource":"extent1.xmi","roots":1}
@@ -430,7 +417,7 @@ run-ms	6.461
 {"path":"/0/@eClassifiers.4","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"r1_r2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_abstractresult
-@file result.txt 227
+@file result.txt 214
 id	interpret_abstractresult
 load	WARNING
 params	in:$model,out:$result
@@ -442,7 +429,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.422
 
 @file out.jsonl 321
 {"resource":"extent1.xmi","roots":1}
@@ -457,7 +443,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'createPackage' should be called using '(x)map' keyword
 
 @case interpret_accessbooleans
-@file result.txt 227
+@file result.txt 214
 id	interpret_accessbooleans
 load	WARNING
 params	in:$model,out:$result
@@ -469,7 +455,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.179
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -481,7 +466,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_addclass
-@file result.txt 220
+@file result.txt 207
 id	interpret_addclass
 load	WARNING
 params	in:$pack,out:$result
@@ -493,7 +478,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.241
 
 @file out.jsonl 374
 {"resource":"extent1.xmi","roots":1}
@@ -506,7 +490,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_addclassviamodificationininit
-@file result.txt 241
+@file result.txt 228
 id	interpret_addclassviamodificationininit
 load	WARNING
 params	in:$pack,out:$result
@@ -518,7 +502,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.780
 
 @file out.jsonl 378
 {"resource":"extent1.xmi","roots":1}
@@ -533,7 +516,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'patch' should be called using '(x)map' keyword
 
 @case interpret_addclassviaoutinocl
-@file result.txt 231
+@file result.txt 218
 id	interpret_addclassviaoutinocl
 load	WARNING
 params	in:$pack,out:$result
@@ -545,7 +528,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.863
 
 @file out.jsonl 374
 {"resource":"extent1.xmi","roots":1}
@@ -558,7 +540,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_addclassviasequence
-@file result.txt 231
+@file result.txt 218
 id	interpret_addclassviasequence
 load	WARNING
 params	in:$pack,out:$result
@@ -570,7 +552,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.932
 
 @file out.jsonl 374
 {"resource":"extent1.xmi","roots":1}
@@ -583,7 +564,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_addrealtostring
-@file result.txt 227
+@file result.txt 214
 id	interpret_addrealtostring
 load	WARNING
 params	in:$pack,out:$result
@@ -595,7 +576,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.658
 
 @file out.jsonl 380
 {"resource":"extent1.xmi","roots":1}
@@ -608,7 +588,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_addundefined
-@file result.txt 226
+@file result.txt 213
 id	interpret_addundefined
 load	WARNING
 params	in:$model,out:$result
@@ -620,7 +600,6 @@ trace-records	27
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.000
 
 @file out.jsonl 5511
 {"resource":"extent1.xmi","roots":1}
@@ -710,7 +689,7 @@ load	1	WARNING	0	Mapping operation 'test' should be called using '(x)map' keywor
 load	1	WARNING	0	Mapping operation 'test' should be called using '(x)map' keyword
 
 @case interpret_allinstances
-@file result.txt 224
+@file result.txt 211
 id	interpret_allinstances
 load	WARNING
 params	in:$pack,out:$result
@@ -722,7 +701,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.873
 
 @file out.jsonl 173
 {"resource":"extent1.xmi","roots":1}
@@ -736,7 +714,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	'allInstances' is deprecated. Use 'Element::allSubobjectsOfKind(OclType)' instead
 
 @case interpret_assignresultininit
-@file result.txt 230
+@file result.txt 217
 id	interpret_assignresultininit
 load	WARNING
 params	in:$pack,out:$result
@@ -748,7 +726,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.058
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -760,7 +737,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_assigntonullowner
-@file result.txt 230
+@file result.txt 217
 id	interpret_assigntonullowner
 load	WARNING
 params	in:$model,out:$result
@@ -772,7 +749,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.166
 
 @file out.jsonl 582
 {"resource":"extent1.xmi","roots":1}
@@ -788,7 +764,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'makeClass' should be called using '(x)map' keyword
 
 @case interpret_assigntoprimfeature
-@file result.txt 232
+@file result.txt 219
 id	interpret_assigntoprimfeature
 load	WARNING
 params	in:$model,out:$result
@@ -800,7 +776,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.922
 
 @file out.jsonl 225
 {"resource":"extent1.xmi","roots":1}
@@ -814,7 +789,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'patch' should be called using '(x)map' keyword
 
 @case interpret_bagorderedsetintersection
-@file result.txt 237
+@file result.txt 224
 id	interpret_bagorderedsetintersection
 load	WARNING
 params	in:$pack,out:$result
@@ -826,7 +801,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.685
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -838,7 +812,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_blackboxlib_237781
-@file result.txt 231
+@file result.txt 218
 id	interpret_blackboxlib_237781
 load	WARNING
 params	in:model,out:modelOut
@@ -850,7 +824,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	7.311
 
 @file out.jsonl 226
 {"resource":"extent1.xmi","roots":1}
@@ -862,7 +835,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Library import statement is deprecated. Use plain 'import TestBlackboxLibrary;' instead
 
 @case interpret_blackboxlib_annotation_java
-@file result.txt 240
+@file result.txt 226
 id	interpret_blackboxlib_annotation_java
 load	WARNING
 params	in:source,out:target
@@ -874,7 +847,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	33.127
 
 @file out.jsonl 599
 {"resource":"extent1.xmi","roots":4}
@@ -889,7 +861,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Library import statement is deprecated. Use plain 'import org.eclipse.m2m.tests.qvt.oml.bbox.SimpleJavaLibrary;' instead
 
 @case interpret_boxing
-@file result.txt 219
+@file result.txt 206
 id	interpret_boxing
 load	WARNING
 params	in:$model,out:$result
@@ -901,7 +873,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.292
 
 @file out.jsonl 726
 {"resource":"extent1.xmi","roots":1}
@@ -915,7 +886,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug204126_1
-@file result.txt 224
+@file result.txt 211
 id	interpret_bug204126_1
 load	WARNING
 params	in:$model,out:$result
@@ -927,7 +898,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.237
 
 @file out.jsonl 601
 {"resource":"extent1.xmi","roots":1}
@@ -953,7 +923,7 @@ load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map
 load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map' keyword
 
 @case interpret_bug204126_2
-@file result.txt 224
+@file result.txt 211
 id	interpret_bug204126_2
 load	WARNING
 params	in:$model,out:$result
@@ -965,7 +935,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.003
 
 @file out.jsonl 600
 {"resource":"extent1.xmi","roots":1}
@@ -991,7 +960,7 @@ load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map
 load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map' keyword
 
 @case interpret_bug204126_3
-@file result.txt 224
+@file result.txt 211
 id	interpret_bug204126_3
 load	WARNING
 params	in:$model,out:$result
@@ -1003,7 +972,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.486
 
 @file out.jsonl 597
 {"resource":"extent1.xmi","roots":1}
@@ -1029,7 +997,7 @@ load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map
 load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map' keyword
 
 @case interpret_bug204126_4
-@file result.txt 224
+@file result.txt 211
 id	interpret_bug204126_4
 load	WARNING
 params	in:$model,out:$result
@@ -1041,7 +1009,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.833
 
 @file out.jsonl 601
 {"resource":"extent1.xmi","roots":1}
@@ -1065,7 +1032,7 @@ load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map
 load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map' keyword
 
 @case interpret_bug204126_5
-@file result.txt 224
+@file result.txt 211
 id	interpret_bug204126_5
 load	WARNING
 params	in:$model,out:$result
@@ -1077,7 +1044,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.389
 
 @file out.jsonl 601
 {"resource":"extent1.xmi","roots":1}
@@ -1099,7 +1065,7 @@ load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map
 load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map' keyword
 
 @case interpret_bug204126_6
-@file result.txt 224
+@file result.txt 211
 id	interpret_bug204126_6
 load	WARNING
 params	in:$model,out:$result
@@ -1111,7 +1077,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.802
 
 @file out.jsonl 601
 {"resource":"extent1.xmi","roots":1}
@@ -1135,7 +1100,7 @@ load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map
 load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map' keyword
 
 @case interpret_bug204126_7
-@file result.txt 224
+@file result.txt 211
 id	interpret_bug204126_7
 load	WARNING
 params	in:$model,out:$result
@@ -1147,7 +1112,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.921
 
 @file out.jsonl 593
 {"resource":"extent1.xmi","roots":1}
@@ -1171,7 +1135,7 @@ load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map
 load	1	WARNING	0	Mapping operation 'createEClass' should be called using '(x)map' keyword
 
 @case interpret_bug205303_1
-@file result.txt 224
+@file result.txt 211
 id	interpret_bug205303_1
 load	WARNING
 params	in:$model,out:$result
@@ -1183,7 +1147,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.498
 
 @file out.jsonl 1061
 {"resource":"extent1.xmi","roots":1}
@@ -1201,7 +1164,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug216317
-@file result.txt 212
+@file result.txt 198
 id	interpret_bug216317
 load	OK
 params	in:dummy,out:$1
@@ -1213,7 +1176,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	11.999
 
 @file out.jsonl 581
 {"resource":"extent1.xmi","roots":4}
@@ -1223,7 +1185,7 @@ run-ms	11.999
 {"path":"/3","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"BBBAAAtemp","nsURI":"right","nsPrefix":null},"refs":{}}
 
 @case interpret_bug219075_1
-@file result.txt 224
+@file result.txt 211
 id	interpret_bug219075_1
 load	WARNING
 params	in:$model,out:$result
@@ -1235,7 +1197,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.265
 
 @file out.jsonl 1427
 {"resource":"extent1.xmi","roots":1}
@@ -1259,7 +1220,7 @@ load	1	WARNING	0	Syntax is deprecated, use " 'else' <expression_statement> " ins
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug224094
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug224094
 load	OK
 params	
@@ -1271,10 +1232,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.711
 
 @case interpret_bug233984
-@file result.txt 223
+@file result.txt 210
 id	interpret_bug233984
 load	WARNING
 params	in:$model,out:$result
@@ -1286,7 +1246,6 @@ trace-records	11
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.412
 
 @file out.jsonl 328
 {"resource":"extent1.xmi","roots":1}
@@ -1305,7 +1264,7 @@ load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)ma
 load	1	WARNING	0	Mapping operation 'createEClass2' should be called using '(x)map' keyword
 
 @case interpret_bug2437_1
-@file result.txt 216
+@file result.txt 203
 id	interpret_bug2437_1
 load	WARNING
 params	in:dummy,out:$1
@@ -1317,7 +1276,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.508
 
 @file out.jsonl 3084
 {"resource":"extent1.xmi","roots":1}
@@ -1345,7 +1303,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug2437_2
-@file result.txt 216
+@file result.txt 203
 id	interpret_bug2437_2
 load	WARNING
 params	in:dummy,out:$1
@@ -1357,7 +1315,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.830
 
 @file out.jsonl 1487
 {"resource":"extent1.xmi","roots":1}
@@ -1378,7 +1335,7 @@ load	1	WARNING	0	Library import statement is deprecated. Use plain 'import Strin
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug2437_3
-@file result.txt 216
+@file result.txt 203
 id	interpret_bug2437_3
 load	WARNING
 params	in:dummy,out:$1
@@ -1390,7 +1347,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.363
 
 @file out.jsonl 1487
 {"resource":"extent1.xmi","roots":1}
@@ -1411,7 +1367,7 @@ load	1	WARNING	0	Library import statement is deprecated. Use plain 'import Strin
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug2437_4
-@file result.txt 217
+@file result.txt 203
 id	interpret_bug2437_4
 load	WARNING
 params	in:dummy,out:$1
@@ -1423,7 +1379,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	10.328
 
 @file out.jsonl 1641
 {"resource":"extent1.xmi","roots":1}
@@ -1445,7 +1400,7 @@ load	1	WARNING	0	Library import statement is deprecated. Use plain 'import Strin
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug2437_5
-@file result.txt 216
+@file result.txt 203
 id	interpret_bug2437_5
 load	WARNING
 params	in:dummy,out:$1
@@ -1457,7 +1412,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.844
 
 @file out.jsonl 1640
 {"resource":"extent1.xmi","roots":1}
@@ -1479,7 +1433,7 @@ load	1	WARNING	0	Library import statement is deprecated. Use plain 'import Strin
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug244701
-@file result.txt 222
+@file result.txt 209
 id	interpret_bug244701
 load	WARNING
 params	in:$model,out:$result
@@ -1491,7 +1445,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.227
 
 @file out.jsonl 173
 {"resource":"extent1.xmi","roots":1}
@@ -1503,7 +1456,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug254962
-@file result.txt 215
+@file result.txt 202
 id	interpret_bug254962
 load	OK
 params	in:input,out:output
@@ -1515,7 +1468,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.892
 
 @file out.jsonl 381
 {"resource":"extent1.xmi","roots":1}
@@ -1526,7 +1478,7 @@ run-ms	5.892
 problem	warning	Middle.qvto	7	174	56	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug267917
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug267917
 load	OK
 params	
@@ -1538,10 +1490,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	7.465
 
 @case interpret_bug2732
-@file result.txt 215
+@file result.txt 201
 id	interpret_bug2732
 load	WARNING
 params	in:dummy,out:$1
@@ -1553,7 +1504,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	12.283
 
 @file out.jsonl 1626
 {"resource":"extent1.xmi","roots":1}
@@ -1573,7 +1523,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug2741
-@file result.txt 214
+@file result.txt 201
 id	interpret_bug2741
 load	WARNING
 params	in:dummy,out:$1
@@ -1585,7 +1535,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.201
 
 @file out.jsonl 184
 {"resource":"extent1.xmi","roots":1}
@@ -1597,7 +1546,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug274105_274505
-@file result.txt 225
+@file result.txt 211
 id	interpret_bug274105_274505
 load	OK
 params	in:srcModel,out:dest
@@ -1609,7 +1558,6 @@ trace-records	38
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	11.728
 
 @file out.jsonl 7420
 {"resource":"extent1.xmi","roots":38}
@@ -1653,7 +1601,7 @@ run-ms	11.728
 {"path":"/37","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"24_EPackage","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_bug2787
-@file result.txt 214
+@file result.txt 201
 id	interpret_bug2787
 load	WARNING
 params	in:dummy,out:$1
@@ -1665,7 +1613,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	7.224
 
 @file out.jsonl 1641
 {"resource":"extent1.xmi","roots":1}
@@ -1687,7 +1634,7 @@ load	1	WARNING	0	Library import statement is deprecated. Use plain 'import Strin
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug2839
-@file result.txt 214
+@file result.txt 201
 id	interpret_bug2839
 load	WARNING
 params	in:dummy,out:$1
@@ -1699,7 +1646,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	7.758
 
 @file out.jsonl 1640
 {"resource":"extent1.xmi","roots":1}
@@ -1721,7 +1667,7 @@ load	1	WARNING	0	Library import statement is deprecated. Use plain 'import Strin
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bug289982
-@file result.txt 202
+@file result.txt 188
 id	interpret_bug289982
 load	WARNING
 params	
@@ -1733,7 +1679,6 @@ trace-records	8
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	18.689
 
 @file log.txt 289
 blackbox
@@ -1825,7 +1770,7 @@ load	1	WARNING	0	Implicit source for operation is ambiguous. Choosing first of '
 load	1	WARNING	0	Implicit source for operation is ambiguous. Choosing first of 'bug289982_lib::this', 'Bug289982_Lib::this'
 
 @case interpret_bug289982_importless
-@file result.txt 208
+@file result.txt 194
 id	interpret_bug289982_importless
 load	OK
 params	
@@ -1837,7 +1782,6 @@ trace-records	8
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	29.042
 
 @file log.txt 300
 blackbox
@@ -1870,7 +1814,7 @@ blackbox
 blackbox
 
 @case interpret_bug294127
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug294127
 load	OK
 params	
@@ -1882,10 +1826,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.083
 
 @case interpret_bug302594
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug302594
 load	OK
 params	
@@ -1897,10 +1840,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.963
 
 @case interpret_bug309762
-@file result.txt 215
+@file result.txt 202
 id	interpret_bug309762
 load	OK
 params	in:input,out:output
@@ -1912,14 +1854,13 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.572
 
 @file out.jsonl 179
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"m1_overridden","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_bug314443
-@file result.txt 218
+@file result.txt 205
 id	interpret_bug314443
 load	OK
 params	in:eModel,out:outModel
@@ -1931,7 +1872,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.826
 
 @file out.jsonl 2162
 {"resource":"extent1.xmi","roots":1}
@@ -1944,7 +1884,7 @@ run-ms	3.826
 {"path":"/0/@eClassifiers.0/@eStructuralFeatures.4","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"attribute5","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
 
 @case interpret_bug325192
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug325192
 load	OK
 params	
@@ -1956,10 +1896,9 @@ trace-records	9
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.425
 
 @case interpret_bug326871
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug326871
 load	OK
 params	
@@ -1971,10 +1910,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.508
 
 @case interpret_bug326871a
-@file result.txt 202
+@file result.txt 189
 id	interpret_bug326871a
 load	WARNING
 params	
@@ -1986,7 +1924,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.290
 
 @file diag.txt 641
 problem	warning	bug326871a.qvto	8	155	30	Implicit source for operation is ambiguous. Choosing first of 'bug326871_lib::this', 'StandaloneBBoxModuleUnregistered::this'
@@ -1996,7 +1933,7 @@ load	1	WARNING	0	Implicit source for operation is ambiguous. Choosing first of '
 load	1	WARNING	0	Implicit source for operation is ambiguous. Choosing first of 'bug326871_lib::this', 'StandaloneBBoxModuleUnregistered::this'
 
 @case interpret_bug329971
-@file result.txt 206
+@file result.txt 193
 id	interpret_bug329971
 load	OK
 params	in:inModel
@@ -2008,10 +1945,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.402
 
 @case interpret_bug358709
-@file result.txt 215
+@file result.txt 202
 id	interpret_bug358709
 load	OK
 params	in:input,out:output
@@ -2023,14 +1959,13 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.937
 
 @file out.jsonl 170
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"pack","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_bug370098
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug370098
 load	OK
 params	
@@ -2042,10 +1977,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.488
 
 @case interpret_bug377882
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug377882
 load	OK
 params	
@@ -2057,10 +1991,9 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.439
 
 @case interpret_bug386115
-@file result.txt 213
+@file result.txt 200
 id	interpret_bug386115
 load	OK
 params	in:input,in:model
@@ -2072,10 +2005,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.162
 
 @case interpret_bug388325
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug388325
 load	OK
 params	
@@ -2087,10 +2019,9 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.621
 
 @case interpret_bug388801
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug388801
 load	OK
 params	
@@ -2102,10 +2033,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.613
 
 @case interpret_bug390088
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug390088
 load	OK
 params	
@@ -2117,10 +2047,9 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.436
 
 @case interpret_bug392080
-@file result.txt 215
+@file result.txt 202
 id	interpret_bug392080
 load	OK
 params	in:input,out:output
@@ -2132,14 +2061,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.031
 
 @file out.jsonl 170
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"pack","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_bug392153
-@file result.txt 206
+@file result.txt 193
 id	interpret_bug392153
 load	OK
 params	in:i,out:o
@@ -2151,14 +2079,13 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.892
 
 @file out.jsonl 170
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"pack","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_bug392156
-@file result.txt 215
+@file result.txt 202
 id	interpret_bug392156
 load	OK
 params	in:input,out:output
@@ -2170,7 +2097,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.634
 
 @file out.jsonl 454
 {"resource":"extent1.xmi","roots":3}
@@ -2179,7 +2105,7 @@ run-ms	3.634
 {"path":"/2","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{"references":["extent1.xmi#/1","extent1.xmi#/0"]}}
 
 @case interpret_bug392429
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug392429
 load	OK
 params	
@@ -2191,10 +2117,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.412
 
 @case interpret_bug397215
-@file result.txt 215
+@file result.txt 202
 id	interpret_bug397215
 load	OK
 params	in:input,out:output
@@ -2206,14 +2131,13 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.812
 
 @file out.jsonl 170
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"pack","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_bug397398
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug397398
 load	OK
 params	
@@ -2225,10 +2149,9 @@ trace-records	7
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.906
 
 @case interpret_bug397959
-@file result.txt 215
+@file result.txt 202
 id	interpret_bug397959
 load	OK
 params	in:input,out:output
@@ -2240,14 +2163,13 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.957
 
 @file out.jsonl 188
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"overridden_contextless","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_bug400233
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug400233
 load	WARNING
 params	
@@ -2259,7 +2181,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.281
 
 @file diag.txt 817
 problem	warning	bug400233.qvto	9	181	21	Implicit source for operation is ambiguous. Choosing first of 'bug400233_lib::this', 'FooJavaLib::this'
@@ -2271,7 +2192,7 @@ load	1	WARNING	0	Implicit source for operation is ambiguous. Choosing first of '
 load	1	WARNING	0	Implicit source for operation is ambiguous. Choosing first of 'bug400233_lib::this', 'FooJavaLib::this'
 
 @case interpret_bug400720
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug400720
 load	OK
 params	
@@ -2283,10 +2204,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.406
 
 @case interpret_bug403440
-@file result.txt 215
+@file result.txt 202
 id	interpret_bug403440
 load	OK
 params	in:input,out:output
@@ -2298,14 +2218,13 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.641
 
 @file out.jsonl 174
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"packMain","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_bug404647
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug404647
 load	OK
 params	
@@ -2317,10 +2236,9 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.907
 
 @case interpret_bug410470
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug410470
 load	WARNING
 params	
@@ -2332,7 +2250,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.465
 
 @file diag.txt 202
 problem	warning	bug410470.qvto	3	79	24	Unsupported qualifier 'abstract' on transformation 'bug410470'
@@ -2340,7 +2257,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Unsupported qualifier 'abstract' on transformation 'bug410470'
 
 @case interpret_bug413131
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug413131
 load	WARNING
 params	
@@ -2352,7 +2269,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.092
 
 @file diag.txt 207
 problem	warning	bug413131.qvto	10	379	1	Possible use of equality operator instead of assignment operator
@@ -2360,7 +2276,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Possible use of equality operator instead of assignment operator
 
 @case interpret_bug414472
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug414472
 load	OK
 params	
@@ -2372,10 +2288,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.966
 
 @case interpret_bug414555
-@file result.txt 216
+@file result.txt 203
 id	interpret_bug414555
 load	OK
 params	in:source,out:target
@@ -2387,7 +2302,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.750
 
 @file out.jsonl 373
 {"resource":"extent1.xmi","roots":1}
@@ -2395,7 +2309,7 @@ run-ms	2.750
 {"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"A","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_bug414642
-@file result.txt 216
+@file result.txt 203
 id	interpret_bug414642
 load	OK
 params	in:source,out:target
@@ -2407,14 +2321,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.389
 
 @file out.jsonl 170
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"pack","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_bug415024
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug415024
 load	WARNING
 params	
@@ -2426,7 +2339,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.965
 
 @file diag.txt 960
 problem	warning	bug415024.qvto	24	467	6	The 'result' tuple variable is deprecated. Access the single result parameters directly.
@@ -2440,7 +2352,7 @@ load	1	WARNING	0	The 'result' tuple variable is deprecated. Access the single re
 load	1	WARNING	0	The 'result' tuple variable is deprecated. Access the single result parameters directly.
 
 @case interpret_bug415029
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug415029
 load	OK
 params	
@@ -2452,10 +2364,9 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.064
 
 @case interpret_bug415209
-@file result.txt 197
+@file result.txt 183
 id	interpret_bug415209
 load	OK
 params	
@@ -2467,10 +2378,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	24.509
 
 @case interpret_bug415310
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug415310
 load	OK
 params	
@@ -2482,10 +2392,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.566
 
 @case interpret_bug415315
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug415315
 load	WARNING
 params	
@@ -2497,7 +2406,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.874
 
 @file diag.txt 208
 problem	warning	bug415315.qvto	15	574	76	'else' part of if..then..else is missed in assignment expression
@@ -2505,7 +2413,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	'else' part of if..then..else is missed in assignment expression
 
 @case interpret_bug415661
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug415661
 load	OK
 params	
@@ -2517,10 +2425,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.578
 
 @case interpret_bug416584
-@file result.txt 219
+@file result.txt 206
 id	interpret_bug416584
 load	OK
 params	in:inModel,out:outModel
@@ -2532,7 +2439,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.238
 
 @file out.jsonl 170
 {"resource":"extent1.xmi","roots":1}
@@ -2554,7 +2460,7 @@ exec	1	OK	0	lib_helper 123
 exec	1	OK	0	T3_helper 123
 
 @case interpret_bug417751
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug417751
 load	WARNING
 params	
@@ -2566,7 +2472,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	9.956
 
 @file log.txt 14
 2
@@ -2592,7 +2497,7 @@ exec	1	OK	0	1
 exec	1	OK	0	1
 
 @case interpret_bug417779
-@file result.txt 205
+@file result.txt 192
 id	interpret_bug417779
 load	OK
 params	inout:ext
@@ -2604,7 +2509,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.826
 
 @file out.jsonl 1090
 {"resource":"extent0.xmi","roots":1}
@@ -2616,7 +2520,7 @@ run-ms	2.826
 {"path":"/0/@eSubpackages.1/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"t3_A","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_bug417996
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug417996
 load	OK
 params	
@@ -2628,10 +2532,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.396
 
 @case interpret_bug418512
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug418512
 load	OK
 params	in:mm
@@ -2643,10 +2546,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.705
 
 @case interpret_bug418961
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug418961
 load	OK
 params	
@@ -2658,10 +2560,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.847
 
 @case interpret_bug419299
-@file result.txt 197
+@file result.txt 183
 id	interpret_bug419299
 load	OK
 params	
@@ -2673,14 +2574,13 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	13.927
 
 @file log.txt 102
 ASSERT [fatal] failed at (bug419299.qvto:22) : NPE
 ASSERT [fatal] failed at (bug419299.qvto:32) : NPE
 
 @case interpret_bug420970
-@file result.txt 220
+@file result.txt 207
 id	interpret_bug420970
 load	OK
 params	in:m1,in:m2,in:m3,out:m4
@@ -2692,7 +2592,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.046
 
 @file out.jsonl 303
 {"resource":"extent3.xmi","roots":2}
@@ -2700,7 +2599,7 @@ run-ms	8.046
 {"path":"/1","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"pack","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_bug422315
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug422315
 load	OK
 params	
@@ -2712,10 +2611,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.555
 
 @case interpret_bug424086
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug424086
 load	OK
 params	
@@ -2727,10 +2625,9 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.846
 
 @case interpret_bug424584
-@file result.txt 208
+@file result.txt 194
 id	interpret_bug424584
 load	OK
 params	out:output
@@ -2742,7 +2639,6 @@ trace-records	15
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	10.443
 
 @file out.jsonl 7463
 {"resource":"extent0.xmi","roots":37}
@@ -2785,7 +2681,7 @@ run-ms	10.443
 {"path":"/36","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_bug424740
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug424740
 load	OK
 params	
@@ -2797,10 +2693,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.031
 
 @case interpret_bug424896
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug424896
 load	OK
 params	
@@ -2812,10 +2707,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.579
 
 @case interpret_bug424979
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug424979
 load	OK
 params	
@@ -2827,10 +2721,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.143
 
 @case interpret_bug425066
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug425066
 load	OK
 params	out:e
@@ -2842,7 +2735,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.865
 
 @file out.jsonl 977
 {"resource":"extent0.xmi","roots":5}
@@ -2853,7 +2745,7 @@ run-ms	4.865
 {"path":"/4","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_bug425069
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug425069
 load	OK
 params	
@@ -2865,10 +2757,9 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.858
 
 @case interpret_bug427237
-@file result.txt 206
+@file result.txt 193
 id	interpret_bug427237
 load	OK
 params	in:e,out:o
@@ -2880,7 +2771,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.413
 
 @file out.jsonl 377
 {"resource":"extent1.xmi","roots":1}
@@ -2888,7 +2778,7 @@ run-ms	3.413
 {"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"cls0","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_bug427237a
-@file result.txt 207
+@file result.txt 194
 id	interpret_bug427237a
 load	OK
 params	in:e,out:o
@@ -2900,7 +2790,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.099
 
 @file out.jsonl 566
 {"resource":"extent1.xmi","roots":2}
@@ -2909,7 +2798,7 @@ run-ms	3.099
 {"path":"/1/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"cls0","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_bug427348
-@file result.txt 197
+@file result.txt 184
 id	interpret_bug427348
 load	OK
 params	
@@ -2921,10 +2810,9 @@ trace-records	30
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.458
 
 @case interpret_bug428316
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug428316
 load	OK
 params	
@@ -2936,10 +2824,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.246
 
 @case interpret_bug428618
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug428618
 load	WARNING
 params	
@@ -2951,7 +2838,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.319
 
 @file diag.txt 730
 problem	warning	bug428618.qvto	99	2152	6	The 'result' tuple variable is deprecated. Access the single result parameters directly.
@@ -2963,7 +2849,7 @@ load	1	WARNING	0	The 'result' tuple variable is deprecated. Access the single re
 load	1	WARNING	0	The 'result' tuple variable is deprecated. Access the single result parameters directly.
 
 @case interpret_bug432786
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug432786
 load	OK
 params	
@@ -2975,10 +2861,9 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.178
 
 @case interpret_bug433292
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug433292
 load	OK
 params	
@@ -2990,10 +2875,9 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.610
 
 @case interpret_bug433937_cycle
-@file result.txt 202
+@file result.txt 189
 id	interpret_bug433937_cycle
 load	OK
 params	
@@ -3005,10 +2889,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.904
 
 @case interpret_bug433937_nocycle
-@file result.txt 204
+@file result.txt 191
 id	interpret_bug433937_nocycle
 load	OK
 params	
@@ -3020,10 +2903,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.698
 
 @case interpret_bug440514
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug440514
 load	OK
 params	
@@ -3035,10 +2917,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.325
 
 @case interpret_bug449445
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug449445
 load	OK
 params	
@@ -3050,10 +2931,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.522
 
 @case interpret_bug449912
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug449912
 load	OK
 params	out:p
@@ -3065,7 +2945,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.662
 
 @file out.jsonl 551
 {"resource":"extent0.xmi","roots":1}
@@ -3073,7 +2952,7 @@ run-ms	1.662
 {"path":"/0/@modelParameter.0","type":"http://www.eclipse.org/qvt/1.0.0/Operational/Expressions#ModelParameter","attrs":{"name":"Parameter","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","kind":"in"},"refs":{}}
 
 @case interpret_bug457433
-@file result.txt 200
+@file result.txt 187
 id	interpret_bug457433
 load	OK
 params	in:m
@@ -3085,10 +2964,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.200
 
 @case interpret_bug463395
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug463395
 load	OK
 params	
@@ -3100,10 +2978,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.249
 
 @case interpret_bug463396
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug463396
 load	OK
 params	
@@ -3115,10 +2992,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.938
 
 @case interpret_bug463410
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug463410
 load	OK
 params	
@@ -3130,10 +3006,9 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.856
 
 @case interpret_bug463416
-@file result.txt 208
+@file result.txt 195
 id	interpret_bug463416
 load	OK
 params	out:outModel
@@ -3145,7 +3020,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.334
 
 @file out.jsonl 380
 {"resource":"extent0.xmi","roots":1}
@@ -3153,7 +3027,7 @@ run-ms	2.334
 {"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"overridden","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_bug463572
-@file result.txt 207
+@file result.txt 194
 id	interpret_bug463572
 load	OK
 params	in:e,out:$1
@@ -3165,7 +3039,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.701
 
 @file out.jsonl 953
 {"resource":"extent1.xmi","roots":3}
@@ -3176,7 +3049,7 @@ run-ms	6.701
 {"path":"/2","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"TestIdentifiertest_-662974751-662974741","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_bug466705
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug466705
 load	OK
 params	
@@ -3188,10 +3061,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.529
 
 @case interpret_bug467325
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug467325
 load	OK
 params	
@@ -3203,10 +3075,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.366
 
 @case interpret_bug467600
-@file result.txt 218
+@file result.txt 205
 id	interpret_bug467600
 load	WARNING
 params	in:e
@@ -3218,21 +3089,20 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.841
 unstable	log
 
 @file log.txt 1475
 null
 <Invalid>
-org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-[org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
-[org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
-[org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+[org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+[org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+[org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
 Dictionary{1=a, 2=b}
 Dictionary{1=a, 2=b}
 Dictionary{1=a, 2=b}
@@ -3294,9 +3164,9 @@ load	1	WARNING	0	'dump' is deprecated
 load	1	WARNING	0	'dump' is deprecated
 load	1	WARNING	0	'dump' is deprecated
 exec	1	OK	0	<Invalid>
-exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-exec	1	OK	0	[org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@65180f1a (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+exec	1	OK	0	[org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
 exec	1	OK	0	Dictionary{1=a, 2=b}
 exec	1	OK	0	Dictionary{1=a, 2=b}
 exec	1	OK	0	[a, b]
@@ -3304,7 +3174,7 @@ exec	1	OK	0	Tuple{s = 'a'}
 exec	1	OK	0	<Invalid>
 
 @case interpret_bug467600_Bag
-@file result.txt 206
+@file result.txt 192
 id	interpret_bug467600_Bag
 load	WARNING
 params	
@@ -3316,7 +3186,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	23.568
 
 @file diag.txt 2211
 problem	warning	bug467600_Bag.qvto	305	10071	8	The type 'bug467600_Bag::Bag(Integer)' does not conform to the type 'bug467600_Bag::Collection(String)'
@@ -3338,7 +3207,7 @@ load	1	WARNING	0	The type 'bug467600_Bag::Bag(Integer)' does not conform to the 
 load	1	WARNING	0	The type 'bug467600_Bag::Bag(String)' does not conform to the type 'bug467600_Bag::Set(String)'
 
 @case interpret_bug467600_Collection
-@file result.txt 212
+@file result.txt 199
 id	interpret_bug467600_Collection
 load	WARNING
 params	
@@ -3350,7 +3219,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	7.293
 
 @file diag.txt 4148
 problem	warning	bug467600_Collection.qvto	19	443	8	The type 'bug467600_Collection::Collection(Integer)' does not conform to the type 'bug467600_Collection::Bag(String)'
@@ -3380,7 +3248,7 @@ load	1	WARNING	0	The type 'bug467600_Collection::Collection(Collection(EPackage)
 load	1	WARNING	0	The type 'bug467600_Collection::Collection(Collection(EPackage))' does not conform to the type 'bug467600_Collection::Collection(OrderedSet(EClassifier))'
 
 @case interpret_bug467600_List
-@file result.txt 207
+@file result.txt 193
 id	interpret_bug467600_List
 load	WARNING
 params	
@@ -3392,7 +3260,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	18.424
 
 @file diag.txt 2265
 problem	warning	bug467600_List.qvto	298	9771	8	The type 'bug467600_List::List(Integer)' does not conform to the type 'bug467600_List::Collection(String)'
@@ -3414,7 +3281,7 @@ load	1	WARNING	0	The type 'bug467600_List::List(Integer)' does not conform to th
 load	1	WARNING	0	The type 'bug467600_List::List(String)' does not conform to the type 'bug467600_List::Bag(String)'
 
 @case interpret_bug467600_OrderedSet
-@file result.txt 213
+@file result.txt 199
 id	interpret_bug467600_OrderedSet
 load	WARNING
 params	
@@ -3426,7 +3293,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	26.339
 
 @file diag.txt 1987
 problem	warning	bug467600_OrderedSet.qvto	538	19477	8	The type 'bug467600_OrderedSet::OrderedSet(Integer)' does not conform to the type 'bug467600_OrderedSet::Collection(String)'
@@ -3444,7 +3310,7 @@ load	1	WARNING	0	The type 'bug467600_OrderedSet::OrderedSet(EPackage)' does not 
 load	1	WARNING	0	The type 'bug467600_OrderedSet::OrderedSet(EPackage)' does not conform to the type 'bug467600_OrderedSet::Collection(EClassifier)'
 
 @case interpret_bug467600_Sequence
-@file result.txt 210
+@file result.txt 197
 id	interpret_bug467600_Sequence
 load	WARNING
 params	
@@ -3456,7 +3322,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	9.591
 
 @file diag.txt 2491
 problem	warning	bug467600_Sequence.qvto	298	10459	8	The type 'bug467600_Sequence::Sequence(Integer)' does not conform to the type 'bug467600_Sequence::Collection(String)'
@@ -3478,7 +3343,7 @@ load	1	WARNING	0	The type 'bug467600_Sequence::Sequence(Integer)' does not confo
 load	1	WARNING	0	The type 'bug467600_Sequence::Sequence(String)' does not conform to the type 'bug467600_Sequence::Bag(String)'
 
 @case interpret_bug467600_Set
-@file result.txt 205
+@file result.txt 192
 id	interpret_bug467600_Set
 load	WARNING
 params	
@@ -3490,7 +3355,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	9.125
 
 @file diag.txt 2211
 problem	warning	bug467600_Set.qvto	400	13261	8	The type 'bug467600_Set::Set(Integer)' does not conform to the type 'bug467600_Set::Collection(String)'
@@ -3512,7 +3376,7 @@ load	1	WARNING	0	The type 'bug467600_Set::Set(Integer)' does not conform to the 
 load	1	WARNING	0	The type 'bug467600_Set::Set(String)' does not conform to the type 'bug467600_Set::Bag(String)'
 
 @case interpret_bug472376
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug472376
 load	OK
 params	
@@ -3524,10 +3388,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.752
 
 @case interpret_bug475123
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug475123
 load	OK
 params	
@@ -3539,10 +3402,9 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.700
 
 @case interpret_bug475910
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug475910
 load	OK
 params	
@@ -3554,10 +3416,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.689
 
 @case interpret_bug478006
-@file result.txt 222
+@file result.txt 209
 id	interpret_bug478006
 load	OK
 params	out:packages2,out:packages
@@ -3569,7 +3430,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.575
 
 @file out.jsonl 649
 {"resource":"extent0.xmi","roots":1}
@@ -3579,7 +3439,7 @@ run-ms	1.575
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"a","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_bug484020
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug484020
 load	OK
 params	
@@ -3591,10 +3451,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.586
 
 @case interpret_bug486579
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug486579
 load	OK
 params	
@@ -3606,10 +3465,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.165
 
 @case interpret_bug490998
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug490998
 load	OK
 params	
@@ -3621,10 +3479,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.146
 
 @case interpret_bug492966
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug492966
 load	OK
 params	
@@ -3636,10 +3493,9 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.304
 
 @case interpret_bug507955
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug507955
 load	OK
 params	
@@ -3651,10 +3507,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.290
 
 @case interpret_bug561707
-@file result.txt 206
+@file result.txt 193
 id	interpret_bug561707
 load	OK
 params	out:output
@@ -3666,7 +3521,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.454
 
 @file out.jsonl 363
 {"resource":"extent0.xmi","roots":1}
@@ -3674,7 +3528,7 @@ run-ms	1.454
 {"path":"/0/@eLiterals.0","type":"http://www.eclipse.org/emf/2002/Ecore#EEnumLiteral","attrs":{"name":"child","value":"0","literal":"child"},"refs":{}}
 
 @case interpret_bug565747
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug565747
 load	OK
 params	
@@ -3686,10 +3540,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.874
 
 @case interpret_bug566216
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug566216
 load	OK
 params	
@@ -3701,10 +3554,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.818
 
 @case interpret_bug566236
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug566236
 load	OK
 params	
@@ -3716,10 +3568,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.060
 
 @case interpret_bug570407
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug570407
 load	OK
 params	
@@ -3731,10 +3582,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.706
 
 @case interpret_bug573659_cycle
-@file result.txt 203
+@file result.txt 189
 id	interpret_bug573659_cycle
 load	OK
 params	
@@ -3746,10 +3596,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	11.005
 
 @case interpret_bug573659_nocycle
-@file result.txt 204
+@file result.txt 191
 id	interpret_bug573659_nocycle
 load	OK
 params	
@@ -3761,10 +3610,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.370
 
 @case interpret_bug573718
-@file result.txt 196
+@file result.txt 183
 id	interpret_bug573718
 load	OK
 params	
@@ -3776,10 +3624,9 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.369
 
 @case interpret_bug577992
-@file result.txt 197
+@file result.txt 183
 id	interpret_bug577992
 load	OK
 params	
@@ -3791,10 +3638,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	17.182
 
 @case interpret_bug581992
-@file result.txt 201
+@file result.txt 188
 id	interpret_bug581992
 load	OK
 params	
@@ -3806,7 +3652,6 @@ trace-records	0
 check severity 2 0	pass
 check model	pass
 verdict	pass
-run-ms	2.432
 
 @file log.txt 94
 ASSERT [error] failed at (nested.qvto:4)
@@ -3817,7 +3662,7 @@ exec	0	WARNING	0	Transformation execution completed
 exec	1	WARNING	150	warn
 
 @case interpret_bug_214938
-@file result.txt 225
+@file result.txt 212
 id	interpret_bug_214938
 load	WARNING
 params	in:inEcore,out:outEcore
@@ -3829,7 +3674,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.072
 
 @file out.jsonl 321
 {"resource":"extent1.xmi","roots":1}
@@ -3842,7 +3686,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_bugzilla443
-@file result.txt 224
+@file result.txt 211
 id	interpret_bugzilla443
 load	WARNING
 params	in:$model,out:$result
@@ -3854,7 +3698,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.388
 
 @file out.jsonl 171
 {"resource":"extent1.xmi","roots":1}
@@ -3866,7 +3709,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_calloclIsUndefinedforundefined
-@file result.txt 243
+@file result.txt 230
 id	interpret_calloclIsUndefinedforundefined
 load	WARNING
 params	in:$model,out:$result
@@ -3878,7 +3721,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.980
 
 @file out.jsonl 175
 {"resource":"extent1.xmi","roots":1}
@@ -3890,7 +3732,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_callvirtforundefined
-@file result.txt 233
+@file result.txt 220
 id	interpret_callvirtforundefined
 load	WARNING
 params	in:$model,out:$result
@@ -3902,7 +3744,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.350
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -3914,7 +3755,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_castinttodouble
-@file result.txt 228
+@file result.txt 215
 id	interpret_castinttodouble
 load	WARNING
 params	in:$model,out:$result
@@ -3926,7 +3767,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.596
 
 @file out.jsonl 175
 {"resource":"extent1.xmi","roots":1}
@@ -3943,7 +3783,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	'dump' is deprecated
 
 @case interpret_chainedAssignments_261024
-@file result.txt 233
+@file result.txt 220
 id	interpret_chainedAssignments_261024
 load	OK
 params	in:model,out:modelOut
@@ -3955,14 +3795,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.281
 
 @file out.jsonl 192
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"someString","nsURI":"someString","nsPrefix":"someString"},"refs":{}}
 
 @case interpret_collectionMappingResult
-@file result.txt 220
+@file result.txt 207
 id	interpret_collectionMappingResult
 load	OK
 params	in:m,out:x
@@ -3974,7 +3813,6 @@ trace-records	5
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.823
 
 @file out.jsonl 1094
 {"resource":"extent1.xmi","roots":5}
@@ -3985,7 +3823,7 @@ run-ms	5.823
 {"path":"/4","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"fooInitEndConcordance","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_compositetransf
-@file result.txt 225
+@file result.txt 212
 id	interpret_compositetransf
 load	OK
 params	in:inModel,out:outModel
@@ -3997,7 +3835,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.975
 
 @file out.jsonl 1111
 {"resource":"extent1.xmi","roots":2}
@@ -4008,7 +3845,7 @@ run-ms	6.975
 {"path":"/1","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_computeExp_250403
-@file result.txt 224
+@file result.txt 211
 id	interpret_computeExp_250403
 load	WARNING
 params	in:model,out:$1
@@ -4020,7 +3857,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.341
 
 @file out.jsonl 172
 {"resource":"extent1.xmi","roots":1}
@@ -4032,7 +3868,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case interpret_constructors
-@file result.txt 216
+@file result.txt 202
 id	interpret_constructors
 load	WARNING
 params	out:x,out:y
@@ -4044,7 +3880,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	22.615
 
 @file out.jsonl 831
 {"resource":"extent0.xmi","roots":2}
@@ -4060,7 +3895,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	No constructor defined, using implicit constructor (equal to empty inline instantiation)
 
 @case interpret_contextlesscall
-@file result.txt 228
+@file result.txt 215
 id	interpret_contextlesscall
 load	WARNING
 params	in:$model,out:$result
@@ -4072,7 +3907,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.492
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -4088,7 +3922,7 @@ load	1	WARNING	0	Mapping operation 'copyPackage' should be called using '(x)map'
 load	1	WARNING	0	Mapping operation 'createPackage' should be called using '(x)map' keyword
 
 @case interpret_continue_break
-@file result.txt 201
+@file result.txt 188
 id	interpret_continue_break
 load	OK
 params	
@@ -4100,10 +3934,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.938
 
 @case interpret_continue_perf
-@file result.txt 234
+@file result.txt 220
 id	interpret_continue_perf
 load	WARNING
 params	inout:eModel
@@ -4115,7 +3948,6 @@ trace-records	2001
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	72.999
 unstable	log
 
 @file out.jsonl 170
@@ -4123,8 +3955,8 @@ unstable	log
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"root","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @file log.txt 24
-Elapsed: 42
-Elapsed: 28
+Elapsed: 71
+Elapsed: 21
 
 @file diag.txt 658
 problem	warning	continue_perf.qvto	5	116	17	Import statement must be the first element in compilation unit. Using this location is deprecated.
@@ -4138,7 +3970,7 @@ load	1	WARNING	0	'dump' is deprecated
 load	1	WARNING	0	'dump' is deprecated
 
 @case interpret_copynameviacontextmapping
-@file result.txt 237
+@file result.txt 224
 id	interpret_copynameviacontextmapping
 load	WARNING
 params	in:$pack,out:$result
@@ -4150,7 +3982,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.619
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -4162,7 +3993,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_customop
-@file result.txt 222
+@file result.txt 208
 id	interpret_customop
 load	WARNING
 params	in:$model,out:$result
@@ -4174,7 +4005,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	23.163
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -4186,7 +4016,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_dicttype
-@file result.txt 196
+@file result.txt 182
 id	interpret_dicttype
 load	OK
 params	
@@ -4198,10 +4028,9 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	45.491
 
 @case interpret_doubleQuoteStrings_262734
-@file result.txt 233
+@file result.txt 220
 id	interpret_doubleQuoteStrings_262734
 load	OK
 params	in:model,out:modelOut
@@ -4213,14 +4042,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.459
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"pack","nsURI":"","nsPrefix":"ab"},"refs":{}}
 
 @case interpret_emptyExtents
-@file result.txt 215
+@file result.txt 202
 id	interpret_emptyExtents
 load	OK
 params	in:in1,inout:in2
@@ -4232,14 +4060,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.681
 
 @file out.jsonl 174
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"packMain","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_emptyout
-@file result.txt 220
+@file result.txt 207
 id	interpret_emptyout
 load	WARNING
 params	in:$pack,out:$result
@@ -4251,7 +4078,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.684
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -4263,7 +4089,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_endsectresultpatch
-@file result.txt 230
+@file result.txt 217
 id	interpret_endsectresultpatch
 load	WARNING
 params	in:$pack,out:$result
@@ -4275,7 +4101,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.250
 
 @file out.jsonl 171
 {"resource":"extent1.xmi","roots":1}
@@ -4287,7 +4112,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_equndefined
-@file result.txt 226
+@file result.txt 212
 id	interpret_equndefined
 load	WARNING
 params	in:$model,out:$result
@@ -4299,7 +4124,6 @@ trace-records	29
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	10.913
 
 @file out.jsonl 6182
 {"resource":"extent1.xmi","roots":1}
@@ -4395,7 +4219,7 @@ load	1	WARNING	0	Mapping operation 'test' should be called using '(x)map' keywor
 load	1	WARNING	0	Mapping operation 'test' should be called using '(x)map' keyword
 
 @case interpret_escape_sequences_250630
-@file result.txt 231
+@file result.txt 218
 id	interpret_escape_sequences_250630
 load	OK
 params	in:model,out:modelOut
@@ -4407,14 +4231,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.598
 
 @file out.jsonl 212
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"''''''\\\"\"\"\"S","nsURI":"St\nri\\ng","nsPrefix":"str \t \n \r \" ' \\ing"},"refs":{}}
 
 @case interpret_exists
-@file result.txt 219
+@file result.txt 206
 id	interpret_exists
 load	WARNING
 params	in:$model,out:$result
@@ -4426,7 +4249,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.700
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -4438,7 +4260,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_firstlast
-@file result.txt 222
+@file result.txt 209
 id	interpret_firstlast
 load	WARNING
 params	in:$model,out:$result
@@ -4450,7 +4272,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.599
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -4462,7 +4283,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_forExp_245275
-@file result.txt 226
+@file result.txt 213
 id	interpret_forExp_245275
 load	WARNING
 params	in:$model,out:$result
@@ -4474,7 +4295,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.337
 
 @file out.jsonl 233
 {"resource":"extent1.xmi","roots":1}
@@ -4488,7 +4308,7 @@ load	1	WARNING	0	Library import statement is deprecated. Use plain 'import Strin
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_fqnMainCalls_271987
-@file result.txt 229
+@file result.txt 216
 id	interpret_fqnMainCalls_271987
 load	OK
 params	in:inModel,out:outModel
@@ -4500,7 +4320,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.134
 
 @file out.jsonl 451
 {"resource":"extent1.xmi","roots":3}
@@ -4509,7 +4328,7 @@ run-ms	5.134
 {"path":"/2","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"Main112","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_fqnMainCalls_272937
-@file result.txt 229
+@file result.txt 216
 id	interpret_fqnMainCalls_272937
 load	OK
 params	in:inModel,out:outModel
@@ -4521,7 +4340,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.946
 
 @file out.jsonl 594
 {"resource":"extent1.xmi","roots":4}
@@ -4531,7 +4349,7 @@ run-ms	8.946
 {"path":"/3","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"Main112","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_fqnOperationCalls_271789
-@file result.txt 235
+@file result.txt 221
 id	interpret_fqnOperationCalls_271789
 load	OK
 params	in:inModel,out:outModel
@@ -4543,7 +4361,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	10.563
 
 @file out.jsonl 580
 {"resource":"extent1.xmi","roots":4}
@@ -4553,7 +4370,7 @@ run-ms	10.563
 {"path":"/3","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"t2_root","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_fqn_noncontextual
-@file result.txt 227
+@file result.txt 213
 id	interpret_fqn_noncontextual
 load	OK
 params	in:eModel,out:outModel
@@ -4565,7 +4382,6 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	27.987
 
 @file out.jsonl 2126
 {"resource":"extent1.xmi","roots":1}
@@ -4582,7 +4398,7 @@ run-ms	27.987
 {"path":"/0/@eSubpackages.4","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"TransfForExtends2-t2","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_fqntraces
-@file result.txt 222
+@file result.txt 209
 id	interpret_fqntraces
 load	WARNING
 params	in:$model,out:$result
@@ -4594,7 +4410,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.957
 
 @file out.jsonl 926
 {"resource":"extent1.xmi","roots":1}
@@ -4614,7 +4429,7 @@ load	1	WARNING	0	Mapping operation 'createClass2' should be called using '(x)map
 load	1	WARNING	0	Mapping operation 'createClass' should be called using '(x)map' keyword
 
 @case interpret_full
-@file result.txt 216
+@file result.txt 203
 id	interpret_full
 load	WARNING
 params	in:$pack,out:$result
@@ -4626,7 +4441,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.419
 
 @file out.jsonl 374
 {"resource":"extent1.xmi","roots":1}
@@ -4643,7 +4457,7 @@ load	1	WARNING	0	Mapping operation 'impl' should be called using '(x)map' keywor
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case interpret_getpropfromundefined
-@file result.txt 233
+@file result.txt 220
 id	interpret_getpropfromundefined
 load	WARNING
 params	in:$model,out:$result
@@ -4655,7 +4469,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	0.899
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -4669,7 +4482,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'map1' should be called using '(x)map' keyword
 
 @case interpret_helperSimpleDef_252173
-@file result.txt 230
+@file result.txt 217
 id	interpret_helperSimpleDef_252173
 load	OK
 params	in:model,out:modelOut
@@ -4681,14 +4494,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.710
 
 @file out.jsonl 183
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"Root_Helper_Query","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_import_access_extends
-@file result.txt 231
+@file result.txt 217
 id	interpret_import_access_extends
 load	OK
 params	in:eModel,out:outModel
@@ -4700,7 +4512,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	16.999
 
 @file out.jsonl 4592
 {"resource":"extent1.xmi","roots":1}
@@ -4721,7 +4532,7 @@ run-ms	16.999
 {"path":"/0/@eSubpackages.0/@eSubpackages.0/@eClassifiers.1/@eStructuralFeatures.2","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"attribute3","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
 
 @case interpret_import_access_extends_cfgprop
-@file result.txt 239
+@file result.txt 225
 id	interpret_import_access_extends_cfgprop
 load	OK
 params	in:eModel,out:outModel
@@ -4733,7 +4544,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	19.331
 
 @file out.jsonl 12527
 {"resource":"extent1.xmi","roots":1}
@@ -4775,7 +4585,7 @@ run-ms	19.331
 {"path":"/0/@eSubpackages.0/@eSubpackages.0/@eClassifiers.1/@eStructuralFeatures.9","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"attribute10","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
 
 @case interpret_importedInstances
-@file result.txt 232
+@file result.txt 218
 id	interpret_importedInstances
 load	WARNING
 params	in:eModel,out:outModel
@@ -4787,7 +4597,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	15.682
 
 @file out.jsonl 1225
 {"resource":"extent1.xmi","roots":1}
@@ -4804,7 +4613,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Local variable declaration 'name' hides property with the same name of type 'EClass'
 
 @case interpret_importedprops
-@file result.txt 226
+@file result.txt 213
 id	interpret_importedprops
 load	WARNING
 params	in:$model,out:$result
@@ -4816,7 +4625,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.341
 
 @file out.jsonl 171
 {"resource":"extent1.xmi","roots":1}
@@ -4828,7 +4636,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_importedvirtuals
-@file result.txt 243
+@file result.txt 229
 id	interpret_importedvirtuals
 load	WARNING
 params	in:modelIn,out:model
@@ -4840,38 +4648,37 @@ trace-records	9
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	35.735
 unstable	dump
 
 @file out.jsonl 6146
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"testRoot","nsURI":null,"nsPrefix":null},"refs":{}}
 {"path":"/0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EStructuralFeature::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.1","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.2","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.3","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EParameter::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.4","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.5","type":"http://www.eclipse.org/emf/2002/Ecore#EOperation","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.6","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"testGlobalVirtualMapping","nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.7","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EReference::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.8","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EModelElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.9","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"ETypedElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.10","type":"http://www.eclipse.org/emf/2002/Ecore#EEnumLiteral","attrs":{"name":"e","value":"0","literal":"e"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.11","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.12","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.13","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.14","type":"http://www.eclipse.org/emf/2002/Ecore#EEnumLiteral","attrs":{"name":"e","value":"0","literal":"e"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.15","type":"http://www.eclipse.org/emf/2002/Ecore#EDataType","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"serializable":"true"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.16","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.17","type":"http://www.eclipse.org/emf/2002/Ecore#EParameter","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.18","type":"http://www.eclipse.org/emf/2002/Ecore#EParameter","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.19","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.20","type":"http://www.eclipse.org/emf/2002/Ecore#EReference","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","containment":"false","resolveProxies":"true"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.21","type":"http://www.eclipse.org/emf/2002/Ecore#EDataType","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"serializable":"true"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.22","type":"http://www.eclipse.org/emf/2002/Ecore#EReference","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","containment":"false","resolveProxies":"true"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.23","type":"http://www.eclipse.org/emf/2002/Ecore#EOperation","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.24","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"ENamedElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EParameter::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.1","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.2","type":"http://www.eclipse.org/emf/2002/Ecore#EEnumLiteral","attrs":{"name":"e","value":"0","literal":"e"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.3","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"ENamedElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.4","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EReference::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.5","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.6","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EModelElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.7","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.8","type":"http://www.eclipse.org/emf/2002/Ecore#EParameter","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.9","type":"http://www.eclipse.org/emf/2002/Ecore#EOperation","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.10","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"testGlobalVirtualMapping","nsURI":null,"nsPrefix":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.11","type":"http://www.eclipse.org/emf/2002/Ecore#EDataType","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"serializable":"true"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.12","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.13","type":"http://www.eclipse.org/emf/2002/Ecore#EParameter","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.14","type":"http://www.eclipse.org/emf/2002/Ecore#EReference","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","containment":"false","resolveProxies":"true"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.15","type":"http://www.eclipse.org/emf/2002/Ecore#EReference","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","containment":"false","resolveProxies":"true"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.16","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"ETypedElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.17","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EStructuralFeature::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.18","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.19","type":"http://www.eclipse.org/emf/2002/Ecore#EEnumLiteral","attrs":{"name":"e","value":"0","literal":"e"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.20","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.21","type":"http://www.eclipse.org/emf/2002/Ecore#EOperation","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.22","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.23","type":"http://www.eclipse.org/emf/2002/Ecore#EDataType","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"serializable":"true"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.24","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
 {"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"passed","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @file diag.txt 806
@@ -4886,7 +4693,7 @@ load	1	WARNING	0	Parameter declaration in the entry operation is deprecated.
 load	1	WARNING	0	Compilation unit 'models.importedvirtuals.Imported2' is already imported
 
 @case interpret_imports
-@file result.txt 218
+@file result.txt 219
 id	interpret_imports
 load	WARNING
 params	in:input,out:output
@@ -4898,15 +4705,15 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.941
+unstable	dump
 
 @file out.jsonl 884
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"foo","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"value:name = foo"},"refs":{}}
-{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"bar","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.1/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"value:name = bar"},"refs":{}}
+{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"bar","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"value:name = bar"},"refs":{}}
+{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"foo","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.1/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"value:name = foo"},"refs":{}}
 
 @file diag.txt 368
 problem	warning	imports.qvto	8	206	58	Declaring entry operation as a mapping is disallowed. 
@@ -4916,7 +4723,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'c2c' should be called using '(x)map' keyword
 
 @case interpret_imports_transformations
-@file result.txt 250
+@file result.txt 237
 id	interpret_imports_transformations
 load	WARNING
 params	in:$model,out:$result
@@ -4928,16 +4735,15 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	7.944
 unstable	dump
 
 @file out.jsonl 884
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"bar","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"value:name = bar"},"refs":{}}
-{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"foo","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.1/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"value:name = foo"},"refs":{}}
+{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"foo","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"value:name = foo"},"refs":{}}
+{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"bar","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.1/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"value:name = bar"},"refs":{}}
 
 @file log.txt 14
 value:
@@ -4955,7 +4761,7 @@ load	1	WARNING	0	Mapping operation 'c2c' should be called using '(x)map' keyword
 load	1	WARNING	0	'dump' is deprecated
 
 @case interpret_initsectresultpatch
-@file result.txt 231
+@file result.txt 218
 id	interpret_initsectresultpatch
 load	WARNING
 params	in:$pack,out:$result
@@ -4967,7 +4773,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.829
 
 @file out.jsonl 171
 {"resource":"extent1.xmi","roots":1}
@@ -4979,7 +4784,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_inoutMapping
-@file result.txt 222
+@file result.txt 209
 id	interpret_inoutMapping
 load	OK
 params	in:inModel,out:outModel
@@ -4991,7 +4796,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.722
 
 @file out.jsonl 836
 {"resource":"extent1.xmi","roots":1}
@@ -5001,7 +4805,7 @@ run-ms	4.722
 {"path":"/0/@eClassifiers.2","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"passedNullInout","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_inoutcontextparam
-@file result.txt 230
+@file result.txt 217
 id	interpret_inoutcontextparam
 load	WARNING
 params	in:$model,out:$result
@@ -5013,7 +4817,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.013
 
 @file out.jsonl 171
 {"resource":"extent1.xmi","roots":1}
@@ -5027,7 +4830,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'foo' should be called using '(x)map' keyword
 
 @case interpret_inoutcontextparamnoresult
-@file result.txt 238
+@file result.txt 225
 id	interpret_inoutcontextparamnoresult
 load	WARNING
 params	in:$model,out:$result
@@ -5039,7 +4842,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.810
 
 @file out.jsonl 171
 {"resource":"extent1.xmi","roots":1}
@@ -5053,7 +4855,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'foo' should be called using '(x)map' keyword
 
 @case interpret_intermProperties
-@file result.txt 210
+@file result.txt 196
 id	interpret_intermProperties
 load	OK
 params	out:$0
@@ -5065,13 +4867,12 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	10.713
 
 @file out.jsonl 37
 {"resource":"extent0.xmi","roots":0}
 
 @case interpret_intermSimple
-@file result.txt 223
+@file result.txt 210
 id	interpret_intermSimple
 load	OK
 params	in:srcModel,out:dstModel
@@ -5083,7 +4884,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	9.054
 
 @file out.jsonl 894
 {"resource":"extent1.xmi","roots":1}
@@ -5092,7 +4892,7 @@ run-ms	9.054
 {"path":"/0/@eStructuralFeatures.1","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"p_a2","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
 
 @case interpret_intermWithCrossRefs
-@file result.txt 213
+@file result.txt 199
 id	interpret_intermWithCrossRefs
 load	OK
 params	out:$0
@@ -5104,7 +4904,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	22.396
 
 @file out.jsonl 411
 {"resource":"extent0.xmi","roots":2}
@@ -5112,7 +4911,7 @@ run-ms	22.396
 {"path":"/1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"n","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_intermWithExtends
-@file result.txt 210
+@file result.txt 197
 id	interpret_intermWithExtends
 load	OK
 params	out:$0
@@ -5124,14 +4923,13 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.688
 
 @file out.jsonl 231
 {"resource":"extent0.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"MyClass2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_intermWithoutExtent
-@file result.txt 224
+@file result.txt 211
 id	interpret_intermWithoutExtent
 load	OK
 params	in:srcModel,out:$1
@@ -5143,7 +4941,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.118
 
 @file out.jsonl 655
 {"resource":"extent1.xmi","roots":2}
@@ -5151,7 +4948,7 @@ run-ms	4.118
 {"path":"/1","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"a2","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
 
 @case interpret_intermediateprop_import
-@file result.txt 232
+@file result.txt 219
 id	interpret_intermediateprop_import
 load	OK
 params	in:inMode,out:outModel
@@ -5163,7 +4960,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.866
 
 @file out.jsonl 881
 {"resource":"extent1.xmi","roots":4}
@@ -5173,7 +4969,7 @@ run-ms	4.866
 {"path":"/3","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"intermediate_model_property","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_intermediateprop_resolve
-@file result.txt 240
+@file result.txt 226
 id	interpret_intermediateprop_resolve
 load	WARNING
 params	in:inModel,out:outModel
@@ -5185,7 +4981,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	11.253
 
 @file out.jsonl 977
 {"resource":"extent1.xmi","roots":1}
@@ -5209,7 +5004,7 @@ load	1	WARNING	0	Mapping operation 'class2class' should be called using '(x)map'
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case interpret_intermediateprop_trace
-@file result.txt 237
+@file result.txt 224
 id	interpret_intermediateprop_trace
 load	WARNING
 params	in:inModel,out:outModel
@@ -5221,7 +5016,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.958
 
 @file out.jsonl 556
 {"resource":"extent1.xmi","roots":3}
@@ -5235,7 +5029,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case interpret_invalidcollectioncast
-@file result.txt 248
+@file result.txt 221
 id	interpret_invalidcollectioncast
 load	WARNING
 params	in:$model,out:$result
@@ -5247,14 +5041,12 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.080
-unstable	dump
 
 @file out.jsonl 592
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"created_c2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"created_c1","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"created_c1","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"created_c2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @file diag.txt 199
 problem	warning	invalidcollectioncast.qvto	4	101	56	Declaring entry operation as a mapping is disallowed. 
@@ -5262,7 +5054,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_invresolve_
-@file result.txt 223
+@file result.txt 210
 id	interpret_invresolve_
 load	WARNING
 params	in:$pack,out:$result
@@ -5274,7 +5066,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.659
 
 @file out.jsonl 172
 {"resource":"extent1.xmi","roots":1}
@@ -5294,7 +5085,7 @@ load	1	WARNING	0	Mapping operation 'makePack' should be called using '(x)map' ke
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case interpret_invresolvebyrule
-@file result.txt 228
+@file result.txt 215
 id	interpret_invresolvebyrule
 load	WARNING
 params	in:$pack,out:$result
@@ -5306,7 +5097,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.283
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -5322,7 +5112,7 @@ load	1	WARNING	0	Mapping operation 'makePack' should be called using '(x)map' ke
 load	1	WARNING	0	Mapping operation 'makeOtherPack' should be called using '(x)map' keyword
 
 @case interpret_isunique
-@file result.txt 221
+@file result.txt 208
 id	interpret_isunique
 load	WARNING
 params	in:$model,out:$result
@@ -5334,7 +5124,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.664
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -5346,7 +5135,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_iterateoverintset
-@file result.txt 230
+@file result.txt 217
 id	interpret_iterateoverintset
 load	WARNING
 params	in:$model,out:$result
@@ -5358,7 +5147,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.102
 
 @file out.jsonl 170
 {"resource":"extent1.xmi","roots":1}
@@ -5370,7 +5158,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_iteratetest
-@file result.txt 223
+@file result.txt 210
 id	interpret_iteratetest
 load	WARNING
 params	in:$root,out:$result
@@ -5382,7 +5170,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.428
 
 @file out.jsonl 2235
 {"resource":"extent1.xmi","roots":1}
@@ -5404,7 +5191,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_javakeywords
-@file result.txt 225
+@file result.txt 212
 id	interpret_javakeywords
 load	WARNING
 params	in:$model,out:$result
@@ -5416,7 +5203,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.647
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -5430,7 +5216,7 @@ load	1	WARNING	0	Deprecated 'rename' statement. Replace by: tag "alias" <scoped_
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_lateresolve
-@file result.txt 224
+@file result.txt 211
 id	interpret_lateresolve
 load	WARNING
 params	in:$model,out:$result
@@ -5442,7 +5228,6 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.657
 
 @file out.jsonl 977
 {"resource":"extent1.xmi","roots":1}
@@ -5466,7 +5251,7 @@ load	1	WARNING	0	Mapping operation 'package2package' should be called using '(x)
 load	1	WARNING	0	Mapping operation 'class2class' should be called using '(x)map' keyword
 
 @case interpret_lateresolve_many
-@file result.txt 231
+@file result.txt 217
 id	interpret_lateresolve_many
 load	WARNING
 params	in:eModel,out:umlModel
@@ -5478,7 +5263,6 @@ trace-records	8
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	10.190
 
 @file out.jsonl 5038
 {"resource":"extent1.xmi","roots":1}
@@ -5527,7 +5311,7 @@ load	1	WARNING	0	The result of ''late resolve'' must be assigned to a property o
 load	1	WARNING	0	The result of ''late resolve'' must be assigned to a property or non-local variable to execute as deferred assignment
 
 @case interpret_lateresolvebyrule
-@file result.txt 230
+@file result.txt 217
 id	interpret_lateresolvebyrule
 load	WARNING
 params	in:$model,out:$result
@@ -5539,7 +5323,6 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.526
 
 @file out.jsonl 977
 {"resource":"extent1.xmi","roots":1}
@@ -5563,7 +5346,7 @@ load	1	WARNING	0	Mapping operation 'package2package' should be called using '(x)
 load	1	WARNING	0	Mapping operation 'class2class' should be called using '(x)map' keyword
 
 @case interpret_libraryHeaderWithSignature_257575
-@file result.txt 243
+@file result.txt 230
 id	interpret_libraryHeaderWithSignature_257575
 load	OK
 params	in:inModel,out:outModel
@@ -5575,14 +5358,13 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.008
 
 @file out.jsonl 195
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"input_bar_foo","nsURI":"input_bar_foo_bar2","nsPrefix":null},"refs":{}}
 
 @case interpret_libraryWithModuleElements_257184
-@file result.txt 242
+@file result.txt 229
 id	interpret_libraryWithModuleElements_257184
 load	OK
 params	in:inModel,out:outModel
@@ -5594,14 +5376,13 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.125
 
 @file out.jsonl 195
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"input_bar_foo","nsURI":"input_bar_foo_bar2","nsPrefix":null},"refs":{}}
 
 @case interpret_listLiteral_259754
-@file result.txt 227
+@file result.txt 213
 id	interpret_listLiteral_259754
 load	OK
 params	in:model,out:modelOut
@@ -5613,14 +5394,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	10.075
 
 @file out.jsonl 174
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"root2454","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_localstrings
-@file result.txt 224
+@file result.txt 211
 id	interpret_localstrings
 load	WARNING
 params	in:$pack,out:$result
@@ -5632,7 +5412,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.972
 
 @file out.jsonl 186
 {"resource":"extent1.xmi","roots":1}
@@ -5644,7 +5423,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_mapDisjuncts
-@file result.txt 229
+@file result.txt 215
 id	interpret_mapDisjuncts
 load	WARNING
 params	in:inModel,out:outModel
@@ -5656,7 +5435,6 @@ trace-records	25
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	14.615
 
 @file out.jsonl 4278
 {"resource":"extent1.xmi","roots":1}
@@ -5685,7 +5463,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	The body of disjuncting mapping 'ecore::EModelElement::fooDisjuncting' gets never executed
 
 @case interpret_mapInherits
-@file result.txt 223
+@file result.txt 209
 id	interpret_mapInherits
 load	OK
 params	in:inModel,out:outModel
@@ -5697,7 +5475,6 @@ trace-records	28
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	13.169
 
 @file out.jsonl 7031
 {"resource":"extent1.xmi","roots":1}
@@ -5741,7 +5518,7 @@ run-ms	13.169
 {"path":"/0/@eSubpackages.0/@eClassifiers.4","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"baseMap_root","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_mapMerges
-@file result.txt 220
+@file result.txt 207
 id	interpret_mapMerges
 load	OK
 params	in:inModel,out:outModel
@@ -5753,7 +5530,6 @@ trace-records	27
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.413
 
 @file out.jsonl 6901
 {"resource":"extent1.xmi","roots":1}
@@ -5796,7 +5572,7 @@ run-ms	8.413
 {"path":"/0/@eSubpackages.0/@eClassifiers.4","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"baseMap_root","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_mapMultipleInherits
-@file result.txt 229
+@file result.txt 216
 id	interpret_mapMultipleInherits
 load	OK
 params	in:inModel,out:outModel
@@ -5808,7 +5584,6 @@ trace-records	7
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.377
 
 @file out.jsonl 641
 {"resource":"extent1.xmi","roots":1}
@@ -5817,7 +5592,7 @@ run-ms	6.377
 {"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"clsi","instanceClassName":"MyClass","instanceTypeName":"MyClass","abstract":"false","interface":"true"},"refs":{},"set":["instanceClassName"]}
 
 @case interpret_mapkeyword
-@file result.txt 223
+@file result.txt 210
 id	interpret_mapkeyword
 load	WARNING
 params	in:$model,out:$result
@@ -5829,7 +5604,6 @@ trace-records	7
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.465
 
 @file out.jsonl 1067
 {"resource":"extent1.xmi","roots":1}
@@ -5851,7 +5625,7 @@ load	1	WARNING	0	Mapping operation 'foo' should be called using '(x)map' keyword
 load	1	WARNING	0	Mapping operation 'bar' should be called using '(x)map' keyword
 
 @case interpret_mappingBodyExpressions_252358
-@file result.txt 239
+@file result.txt 226
 id	interpret_mappingBodyExpressions_252358
 load	WARNING
 params	in:dummy,out:model
@@ -5863,7 +5637,6 @@ trace-records	7
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.975
 
 @file out.jsonl 1663
 {"resource":"extent1.xmi","roots":1}
@@ -5884,7 +5657,7 @@ load	1	WARNING	0	Local variable declaration 'name' hides property with the same 
 load	1	WARNING	0	Local variable declaration 'name' hides property with the same name of type 'EClass'
 
 @case interpret_modifyvar
-@file result.txt 222
+@file result.txt 209
 id	interpret_modifyvar
 load	WARNING
 params	in:$model,out:$result
@@ -5896,7 +5669,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.261
 
 @file out.jsonl 582
 {"resource":"extent1.xmi","roots":1}
@@ -5910,7 +5682,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_moduleProperty
-@file result.txt 224
+@file result.txt 210
 id	interpret_moduleProperty
 load	OK
 params	in:inMode,out:outModel
@@ -5922,7 +5694,6 @@ trace-records	7
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	11.002
 
 @file out.jsonl 5792
 {"resource":"extent1.xmi","roots":1}
@@ -5949,7 +5720,7 @@ run-ms	11.002
 {"path":"/0/@eClassifiers.9","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"ePropStrSeq","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_multilineStrings_262733
-@file result.txt 231
+@file result.txt 218
 id	interpret_multilineStrings_262733
 load	OK
 params	in:model,out:modelOut
@@ -5961,14 +5732,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.243
 
 @file out.jsonl 188
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"pack123456789","nsURI":"http://a123","nsPrefix":"ab"},"refs":{}}
 
 @case interpret_multiresultpars
-@file result.txt 219
+@file result.txt 205
 id	interpret_multiresultpars
 load	OK
 params	in:m,out:x,out:y
@@ -5980,7 +5750,6 @@ trace-records	8
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	11.057
 
 @file out.jsonl 874
 {"resource":"extent1.xmi","roots":3}
@@ -5991,7 +5760,7 @@ run-ms	11.057
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"a_merging_ExtentDirectedFooAB-merged_fooA","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_nestedPropertiesAssignment_262757
-@file result.txt 241
+@file result.txt 228
 id	interpret_nestedPropertiesAssignment_262757
 load	OK
 params	in:model,out:modelOut
@@ -6003,7 +5772,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	7.376
 
 @file out.jsonl 491
 {"resource":"extent1.xmi","roots":1}
@@ -6012,7 +5780,7 @@ run-ms	7.376
 {"path":"/0/@eSubpackages.1","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"mappedsubPack","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_nestednativeops
-@file result.txt 228
+@file result.txt 215
 id	interpret_nestednativeops
 load	WARNING
 params	in:$model,out:$result
@@ -6024,7 +5792,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.472
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -6038,7 +5805,7 @@ load	1	WARNING	0	Library import statement is deprecated. Use plain 'import Strin
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_nullableEnum
-@file result.txt 205
+@file result.txt 192
 id	interpret_nullableEnum
 load	OK
 params	out:$0
@@ -6050,14 +5817,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.189
 
 @file out.jsonl 111
 {"resource":"extent0.xmi","roots":1}
 {"path":"/0","type":"http://p#Line","attrs":{"Style":"Dotted"},"refs":{}}
 
 @case interpret_nullsource
-@file result.txt 224
+@file result.txt 210
 id	interpret_nullsource
 load	WARNING
 params	in:$model,out:$result
@@ -6069,7 +5835,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	10.987
 
 @file out.jsonl 314
 {"resource":"extent1.xmi","roots":1}
@@ -6082,7 +5847,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_numconversion
-@file result.txt 213
+@file result.txt 199
 id	interpret_numconversion
 load	OK
 params	in:m1,out:$1
@@ -6094,7 +5859,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	24.525
 
 @file out.jsonl 938
 {"resource":"extent1.xmi","roots":3}
@@ -6103,7 +5867,7 @@ run-ms	24.525
 {"path":"/2","type":"http:///pack#cls2","attrs":{"attrLong":"0","attrInt":"0","attrShort":"0","attrByte":"0","attrDouble":"0.0","attrFloat":"0.0","attrLongs":[],"attrInts":[],"attrShorts":[],"attrBytes":[],"attrDoubles":[],"attrFloats":["1.0","1.0","2.0","1.0","1.0","2.0"]},"refs":{}}
 
 @case interpret_objectExp
-@file result.txt 219
+@file result.txt 206
 id	interpret_objectExp
 load	OK
 params	in:inModel,out:outModel
@@ -6115,7 +5879,6 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.953
 
 @file out.jsonl 2874
 {"resource":"extent1.xmi","roots":1}
@@ -6135,7 +5898,7 @@ run-ms	5.953
 {"path":"/0/@eClassifiers.6/@eOperations.0/@eParameters.0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"new_src1"},"refs":{}}
 
 @case interpret_objectExpBodyExpressions_253051
-@file result.txt 241
+@file result.txt 228
 id	interpret_objectExpBodyExpressions_253051
 load	WARNING
 params	in:dummy,out:model
@@ -6147,7 +5910,6 @@ trace-records	8
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	9.554
 
 @file out.jsonl 2097
 {"resource":"extent1.xmi","roots":1}
@@ -6170,7 +5932,7 @@ load	1	WARNING	0	Local variable declaration 'name' hides property with the same 
 load	1	WARNING	0	Local variable declaration 'name' hides property with the same name of type 'EClass'
 
 @case interpret_oclAllInstances
-@file result.txt 225
+@file result.txt 212
 id	interpret_oclAllInstances
 load	OK
 params	in:inModel,out:outModel
@@ -6182,7 +5944,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.827
 
 @file out.jsonl 594
 {"resource":"extent1.xmi","roots":1}
@@ -6191,7 +5952,7 @@ run-ms	5.827
 {"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"outEClass2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_ocl_test
-@file result.txt 215
+@file result.txt 202
 id	interpret_ocl_test
 load	WARNING
 params	in:ecore,out:$1
@@ -6203,7 +5964,6 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.916
 
 @file out.jsonl 782
 {"resource":"extent1.xmi","roots":1}
@@ -6224,7 +5984,7 @@ load	1	WARNING	0	Mapping operation 'test' should be called using '(x)map' keywor
 load	1	WARNING	0	Mapping operation 'test' should be called using '(x)map' keyword
 
 @case interpret_oclannotation
-@file result.txt 224
+@file result.txt 210
 id	interpret_oclannotation
 load	OK
 params	in:inModel,out:outModel
@@ -6236,7 +5996,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	32.545
 
 @file out.jsonl 2991
 {"resource":"extent1.xmi","roots":1}
@@ -6266,7 +6025,7 @@ run-ms	32.545
 {"path":"/0/@results.3/@values.5","type":"m2m.qvto.ocl.annotation#TestValue","attrs":{"value":"Foo::testOper(String)"},"refs":{}}
 
 @case interpret_oclany
-@file result.txt 219
+@file result.txt 206
 id	interpret_oclany
 load	WARNING
 params	in:$model,out:$result
@@ -6278,7 +6037,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.858
 
 @file out.jsonl 185
 {"resource":"extent1.xmi","roots":1}
@@ -6292,7 +6050,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'toEPackage' should be called using '(x)map' keyword
 
 @case interpret_oclastype
-@file result.txt 221
+@file result.txt 208
 id	interpret_oclastype
 load	WARNING
 params	in:$pack,out:$result
@@ -6304,7 +6062,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.610
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -6316,7 +6073,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_omittedobject
-@file result.txt 225
+@file result.txt 212
 id	interpret_omittedobject
 load	WARNING
 params	in:$pack,out:$result
@@ -6328,7 +6085,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.435
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -6340,7 +6096,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_omittedobjectwithinit
-@file result.txt 233
+@file result.txt 220
 id	interpret_omittedobjectwithinit
 load	WARNING
 params	in:$pack,out:$result
@@ -6352,7 +6108,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.783
 
 @file out.jsonl 374
 {"resource":"extent1.xmi","roots":1}
@@ -6365,7 +6120,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_operation_override
-@file result.txt 228
+@file result.txt 214
 id	interpret_operation_override
 load	OK
 params	in:eModel,out:outModel
@@ -6377,7 +6132,6 @@ trace-records	6
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	27.037
 
 @file out.jsonl 4636
 {"resource":"extent1.xmi","roots":1}
@@ -6400,7 +6154,7 @@ run-ms	27.037
 {"path":"/0/@eSubpackages.3/@eClassifiers.2","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"TransfForExtends-customCopy(in eClass : EClass)result-in-TransfForExtends","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_overload
-@file result.txt 220
+@file result.txt 207
 id	interpret_overload
 load	WARNING
 params	in:$pack,out:$result
@@ -6412,7 +6166,6 @@ trace-records	5
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.667
 
 @file out.jsonl 1002
 {"resource":"extent1.xmi","roots":1}
@@ -6436,7 +6189,7 @@ load	1	WARNING	0	Mapping operation 'decorate' should be called using '(x)map' ke
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case interpret_overload_205062
-@file result.txt 224
+@file result.txt 211
 id	interpret_overload_205062
 load	OK
 params	in:eModel,out:outModel
@@ -6448,7 +6201,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	6.662
 
 @file out.jsonl 375
 {"resource":"extent1.xmi","roots":1}
@@ -6456,7 +6208,7 @@ run-ms	6.662
 {"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_overload_multipleParams
-@file result.txt 238
+@file result.txt 224
 id	interpret_overload_multipleParams
 load	WARNING
 params	in:eModel,out:outModel
@@ -6468,7 +6220,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	14.813
 
 @file out.jsonl 8051
 {"resource":"extent1.xmi","roots":1}
@@ -6545,7 +6296,7 @@ load	1	WARNING	0	Operation reference is ambiguous. Choosing first of 'overloaded
 load	1	WARNING	0	Operation reference is ambiguous. Choosing first of 'overloaded(ecore::EClassifier, ecore::ENamedElement, ecore::EClass) : String - overload_multipleParams', 'overloaded(ecore::EClass, ecore::ENamedElement, ecore::EClassifier) : String - overload_multipleParams', 'overloaded(ecore::ENamedElement, ecore::EClass, ecore::EClassifier) : String - overload_multipleParams'
 
 @case interpret_overload_singleParam
-@file result.txt 229
+@file result.txt 216
 id	interpret_overload_singleParam
 load	OK
 params	in:eModel,out:outModel
@@ -6557,7 +6308,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	9.197
 
 @file out.jsonl 1559
 {"resource":"extent1.xmi","roots":1}
@@ -6570,7 +6320,7 @@ run-ms	9.197
 {"path":"/0/@eClassifiers.5","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"singleParam(c : ENamedElement) : String","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_populationSection
-@file result.txt 227
+@file result.txt 214
 id	interpret_populationSection
 load	OK
 params	in:inModel,out:outModel
@@ -6582,7 +6332,6 @@ trace-records	8
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.490
 
 @file out.jsonl 3008
 {"resource":"extent1.xmi","roots":1}
@@ -6601,7 +6350,7 @@ run-ms	3.490
 {"path":"/0/@eSubpackages.2","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"init_populationInOut","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_primtypesecore
-@file result.txt 227
+@file result.txt 214
 id	interpret_primtypesecore
 load	WARNING
 params	in:$model,out:$result
@@ -6613,7 +6362,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.588
 
 @file out.jsonl 1034
 {"resource":"extent1.xmi","roots":1}
@@ -6630,7 +6378,7 @@ load	1	WARNING	0	Library import statement is deprecated. Use plain 'import emf.t
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_propertycollect
-@file result.txt 228
+@file result.txt 215
 id	interpret_propertycollect
 load	WARNING
 params	in:$model,out:$result
@@ -6642,7 +6390,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.374
 
 @file out.jsonl 171
 {"resource":"extent1.xmi","roots":1}
@@ -6654,7 +6401,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_propinit
-@file result.txt 221
+@file result.txt 208
 id	interpret_propinit
 load	WARNING
 params	in:$model,out:$result
@@ -6666,7 +6413,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.433
 
 @file out.jsonl 182
 {"resource":"extent1.xmi","roots":1}
@@ -6678,7 +6424,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_propuseprop
-@file result.txt 224
+@file result.txt 211
 id	interpret_propuseprop
 load	WARNING
 params	in:$model,out:$result
@@ -6690,7 +6436,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.470
 
 @file out.jsonl 167
 {"resource":"extent1.xmi","roots":1}
@@ -6702,7 +6447,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_removeclassesinwhile
-@file result.txt 233
+@file result.txt 220
 id	interpret_removeclassesinwhile
 load	WARNING
 params	in:$model,out:$result
@@ -6714,7 +6459,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.348
 
 @file out.jsonl 171
 {"resource":"extent1.xmi","roots":1}
@@ -6726,7 +6470,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_resolve_invresolveoneIn
-@file result.txt 236
+@file result.txt 223
 id	interpret_resolve_invresolveoneIn
 load	WARNING
 params	in:$model,out:$result
@@ -6738,7 +6482,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.890
 
 @file out.jsonl 170
 {"resource":"extent1.xmi","roots":1}
@@ -6752,7 +6495,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)map' keyword
 
 @case interpret_resolve_lateresolveoneIn
-@file result.txt 237
+@file result.txt 224
 id	interpret_resolve_lateresolveoneIn
 load	WARNING
 params	in:$model,out:$result
@@ -6764,7 +6507,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.393
 
 @file out.jsonl 385
 {"resource":"extent1.xmi","roots":1}
@@ -6779,7 +6521,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)map' keyword
 
 @case interpret_resolve_lateresolveoneInaccess
-@file result.txt 243
+@file result.txt 230
 id	interpret_resolve_lateresolveoneInaccess
 load	WARNING
 params	in:$model,out:$result
@@ -6791,7 +6533,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.262
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -6807,7 +6548,7 @@ load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)ma
 load	1	WARNING	0	The result of ''late resolve'' must be assigned to a property or non-local variable to execute as deferred assignment
 
 @case interpret_resolve_notype
-@file result.txt 228
+@file result.txt 215
 id	interpret_resolve_notype
 load	WARNING
 params	in:$model,out:$result
@@ -6819,7 +6560,6 @@ trace-records	11
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.386
 
 @file out.jsonl 2286
 {"resource":"extent1.xmi","roots":1}
@@ -6849,7 +6589,7 @@ load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)ma
 load	1	WARNING	0	Mapping operation 'createEClass2' should be called using '(x)map' keyword
 
 @case interpret_resolve_resolveIn
-@file result.txt 231
+@file result.txt 218
 id	interpret_resolve_resolveIn
 load	WARNING
 params	in:$model,out:$result
@@ -6861,7 +6601,6 @@ trace-records	11
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.485
 
 @file out.jsonl 1229
 {"resource":"extent1.xmi","roots":1}
@@ -6886,7 +6625,7 @@ load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)ma
 load	1	WARNING	0	Mapping operation 'createEClass2' should be called using '(x)map' keyword
 
 @case interpret_resolve_resolveone
-@file result.txt 232
+@file result.txt 219
 id	interpret_resolve_resolveone
 load	WARNING
 params	in:$model,out:$result
@@ -6898,7 +6637,6 @@ trace-records	11
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.828
 
 @file out.jsonl 328
 {"resource":"extent1.xmi","roots":1}
@@ -6917,7 +6655,7 @@ load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)ma
 load	1	WARNING	0	Mapping operation 'createEClass2' should be called using '(x)map' keyword
 
 @case interpret_resolve_resolveoneIn
-@file result.txt 234
+@file result.txt 221
 id	interpret_resolve_resolveoneIn
 load	WARNING
 params	in:$model,out:$result
@@ -6929,7 +6667,6 @@ trace-records	11
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.102
 
 @file out.jsonl 328
 {"resource":"extent1.xmi","roots":1}
@@ -6948,7 +6685,7 @@ load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)ma
 load	1	WARNING	0	Mapping operation 'createEClass2' should be called using '(x)map' keyword
 
 @case interpret_resolve_type
-@file result.txt 226
+@file result.txt 213
 id	interpret_resolve_type
 load	WARNING
 params	in:$model,out:$result
@@ -6960,7 +6697,6 @@ trace-records	11
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.728
 
 @file out.jsonl 944
 {"resource":"extent1.xmi","roots":1}
@@ -6985,7 +6721,7 @@ load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)ma
 load	1	WARNING	0	Mapping operation 'createEClass2' should be called using '(x)map' keyword
 
 @case interpret_resolve_vardecl
-@file result.txt 229
+@file result.txt 216
 id	interpret_resolve_vardecl
 load	WARNING
 params	in:$model,out:$result
@@ -6997,7 +6733,6 @@ trace-records	11
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	7.339
 
 @file out.jsonl 944
 {"resource":"extent1.xmi","roots":1}
@@ -7022,7 +6757,7 @@ load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)ma
 load	1	WARNING	0	Mapping operation 'createEClass2' should be called using '(x)map' keyword
 
 @case interpret_resolve_vardeclcond
-@file result.txt 233
+@file result.txt 220
 id	interpret_resolve_vardeclcond
 load	WARNING
 params	in:$model,out:$result
@@ -7034,7 +6769,6 @@ trace-records	11
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.167
 
 @file out.jsonl 944
 {"resource":"extent1.xmi","roots":1}
@@ -7059,7 +6793,7 @@ load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)ma
 load	1	WARNING	0	Mapping operation 'createEClass2' should be called using '(x)map' keyword
 
 @case interpret_resolve_vardeclcondwithvar
-@file result.txt 240
+@file result.txt 227
 id	interpret_resolve_vardeclcondwithvar
 load	WARNING
 params	in:$model,out:$result
@@ -7071,7 +6805,6 @@ trace-records	11
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.148
 
 @file out.jsonl 485
 {"resource":"extent1.xmi","roots":1}
@@ -7093,7 +6826,7 @@ load	1	WARNING	0	Mapping operation 'createEClass1' should be called using '(x)ma
 load	1	WARNING	0	Mapping operation 'createEClass2' should be called using '(x)map' keyword
 
 @case interpret_resolveall
-@file result.txt 238
+@file result.txt 224
 id	interpret_resolveall
 load	WARNING
 params	in:$model,out:$result
@@ -7105,19 +6838,18 @@ trace-records	6
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	16.903
 unstable	dump
 
 @file out.jsonl 2161
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"all","nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"resolveAll(ecore::EObject)"},"refs":{"references":["extent1.xmi#/0","extent1.xmi#/0/@eClassifiers.0/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.1/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.0","extent1.xmi#/0/@eClassifiers.1","extent1.xmi#/0/@eClassifiers.2"]}}
-{"path":"/0/@eAnnotations.1","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"resolveAllByRule(toAttribute, ecore::EAttribute)"},"refs":{"references":["extent1.xmi#/0/@eClassifiers.0/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.1/@eStructuralFeatures.0"]}}
-{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p1","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.0/@eStructuralFeatures.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"p2","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.1/@eStructuralFeatures.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"p3","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.2","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p3","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"resolveAll(ecore::EObject)"},"refs":{"references":["extent1.xmi#/0","extent1.xmi#/0/@eClassifiers.2/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.0/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.2","extent1.xmi#/0/@eClassifiers.0","extent1.xmi#/0/@eClassifiers.1"]}}
+{"path":"/0/@eAnnotations.1","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"resolveAllByRule(toAttribute, ecore::EAttribute)"},"refs":{"references":["extent1.xmi#/0/@eClassifiers.2/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.0/@eStructuralFeatures.0"]}}
+{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.0/@eStructuralFeatures.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"p3","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p3","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.2","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p1","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.2/@eStructuralFeatures.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"p2","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
 
 @file diag.txt 809
 problem	warning	resolveall.qvto	5	91	56	Declaring entry operation as a mapping is disallowed. 
@@ -7131,7 +6863,7 @@ load	1	WARNING	0	Mapping operation 'toEClass' should be called using '(x)map' ke
 load	1	WARNING	0	Mapping operation 'toAttribute' should be called using '(x)map' keyword
 
 @case interpret_resolvebeforeoutcompletion
-@file result.txt 238
+@file result.txt 225
 id	interpret_resolvebeforeoutcompletion
 load	WARNING
 params	in:$pack,out:$result
@@ -7143,7 +6875,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.274
 
 @file out.jsonl 172
 {"resource":"extent1.xmi","roots":1}
@@ -7157,7 +6888,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'main1' should be called using '(x)map' keyword
 
 @case interpret_resolvebyrule
-@file result.txt 225
+@file result.txt 212
 id	interpret_resolvebyrule
 load	WARNING
 params	in:$pack,out:$result
@@ -7169,7 +6900,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.530
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -7185,7 +6915,7 @@ load	1	WARNING	0	Mapping operation 'makePack' should be called using '(x)map' ke
 load	1	WARNING	0	Mapping operation 'makeOtherPack' should be called using '(x)map' keyword
 
 @case interpret_resolvenoinput
-@file result.txt 227
+@file result.txt 214
 id	interpret_resolvenoinput
 load	WARNING
 params	in:$model,out:$result
@@ -7197,7 +6927,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.564
 
 @file out.jsonl 316
 {"resource":"extent1.xmi","roots":1}
@@ -7212,7 +6941,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'a' should be called using '(x)map' keyword
 
 @case interpret_returnundefinedfromquery
-@file result.txt 236
+@file result.txt 223
 id	interpret_returnundefinedfromquery
 load	WARNING
 params	in:$pack,out:$result
@@ -7224,7 +6953,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.843
 
 @file out.jsonl 374
 {"resource":"extent1.xmi","roots":1}
@@ -7237,7 +6965,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr17812
-@file result.txt 221
+@file result.txt 222
 id	interpret_scr17812
 load	WARNING
 params	in:$model,out:$result
@@ -7249,13 +6977,13 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.941
+unstable	dump
 
 @file out.jsonl 574
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"1","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"1","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @file diag.txt 185
 problem	warning	scr17812.qvto	4	88	56	Declaring entry operation as a mapping is disallowed. 
@@ -7263,7 +6991,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr18514
-@file result.txt 223
+@file result.txt 210
 id	interpret_scr18514
 load	WARNING
 params	in:$inmodel,out:$result
@@ -7275,7 +7003,6 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.303
 
 @file out.jsonl 698
 {"resource":"extent1.xmi","roots":1}
@@ -7294,7 +7021,7 @@ load	1	WARNING	0	Mapping operation 'Pack_To_Pack' should be called using '(x)map
 load	1	WARNING	0	Mapping operation 'Pack_To_Pack' should be called using '(x)map' keyword
 
 @case interpret_scr18572
-@file result.txt 220
+@file result.txt 207
 id	interpret_scr18572
 load	WARNING
 params	in:$pack,out:$result
@@ -7306,7 +7033,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.502
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -7318,7 +7044,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr18739
-@file result.txt 220
+@file result.txt 207
 id	interpret_scr18739
 load	WARNING
 params	in:$pack,out:$result
@@ -7330,7 +7056,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.221
 
 @file out.jsonl 374
 {"resource":"extent1.xmi","roots":1}
@@ -7343,7 +7068,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr18783
-@file result.txt 221
+@file result.txt 208
 id	interpret_scr18783
 load	WARNING
 params	in:$model,out:$result
@@ -7355,7 +7080,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.554
 
 @file out.jsonl 317
 {"resource":"extent1.xmi","roots":1}
@@ -7368,7 +7092,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr19364
-@file result.txt 220
+@file result.txt 207
 id	interpret_scr19364
 load	WARNING
 params	in:$pack,out:$result
@@ -7380,7 +7104,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.712
 
 @file out.jsonl 374
 {"resource":"extent1.xmi","roots":1}
@@ -7398,7 +7121,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	'dump' is deprecated
 
 @case interpret_scr20038
-@file result.txt 220
+@file result.txt 207
 id	interpret_scr20038
 load	WARNING
 params	in:$pack,out:$result
@@ -7410,7 +7133,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.769
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -7422,7 +7144,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr20041
-@file result.txt 220
+@file result.txt 207
 id	interpret_scr20041
 load	WARNING
 params	in:$pack,out:$result
@@ -7434,7 +7156,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.193
 
 @file out.jsonl 374
 {"resource":"extent1.xmi","roots":1}
@@ -7447,7 +7168,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr20469
-@file result.txt 221
+@file result.txt 208
 id	interpret_scr20469
 load	WARNING
 params	in:$model,out:$result
@@ -7459,7 +7180,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.617
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -7471,7 +7191,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr20471
-@file result.txt 221
+@file result.txt 208
 id	interpret_scr20471
 load	WARNING
 params	in:$model,out:$result
@@ -7483,7 +7203,6 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.943
 
 @file out.jsonl 779
 {"resource":"extent1.xmi","roots":1}
@@ -7500,7 +7219,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'toClass' should be called using '(x)map' keyword
 
 @case interpret_scr20667
-@file result.txt 220
+@file result.txt 207
 id	interpret_scr20667
 load	WARNING
 params	in:$pack,out:$result
@@ -7512,7 +7231,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.502
 
 @file out.jsonl 172
 {"resource":"extent1.xmi","roots":1}
@@ -7526,7 +7244,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'makePack' should be called using '(x)map' keyword
 
 @case interpret_scr20811
-@file result.txt 221
+@file result.txt 208
 id	interpret_scr20811
 load	WARNING
 params	in:$model,out:$result
@@ -7538,7 +7256,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.654
 
 @file out.jsonl 170
 {"resource":"extent1.xmi","roots":1}
@@ -7550,7 +7267,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr21121
-@file result.txt 220
+@file result.txt 207
 id	interpret_scr21121
 load	WARNING
 params	in:$pack,out:$result
@@ -7562,7 +7279,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.020
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -7574,7 +7290,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr21329
-@file result.txt 220
+@file result.txt 207
 id	interpret_scr21329
 load	WARNING
 params	in:$pack,out:$result
@@ -7586,7 +7302,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.936
 
 @file out.jsonl 172
 {"resource":"extent1.xmi","roots":1}
@@ -7600,7 +7315,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'makePack' should be called using '(x)map' keyword
 
 @case interpret_scr23070
-@file result.txt 221
+@file result.txt 208
 id	interpret_scr23070
 load	WARNING
 params	in:$model,out:$result
@@ -7612,7 +7327,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.774
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
@@ -7624,7 +7338,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_setundefinedtoprimitive
-@file result.txt 235
+@file result.txt 222
 id	interpret_setundefinedtoprimitive
 load	WARNING
 params	in:$pack,out:$result
@@ -7636,7 +7350,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.866
 
 @file out.jsonl 374
 {"resource":"extent1.xmi","roots":1}
@@ -7651,7 +7364,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'createClass' should be called using '(x)map' keyword
 
 @case interpret_simple
-@file result.txt 219
+@file result.txt 206
 id	interpret_simple
 load	WARNING
 params	in:$model,out:$result
@@ -7663,7 +7376,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.643
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -7675,7 +7387,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_simpleconfigproperty
-@file result.txt 233
+@file result.txt 220
 id	interpret_simpleconfigproperty
 load	WARNING
 params	in:$model,out:$result
@@ -7687,7 +7399,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.333
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -7699,7 +7410,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_simpleproperty
-@file result.txt 227
+@file result.txt 214
 id	interpret_simpleproperty
 load	WARNING
 params	in:$model,out:$result
@@ -7711,7 +7422,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.548
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -7723,7 +7433,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_simplerename
-@file result.txt 225
+@file result.txt 212
 id	interpret_simplerename
 load	WARNING
 params	in:$model,out:$result
@@ -7735,7 +7445,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.827
 
 @file out.jsonl 377
 {"resource":"extent1.xmi","roots":1}
@@ -7752,7 +7461,7 @@ load	1	WARNING	0	Deprecated 'rename' statement. Replace by: tag "alias" <scoped_
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_simpleresolve
-@file result.txt 225
+@file result.txt 212
 id	interpret_simpleresolve
 load	WARNING
 params	in:$pack,out:$result
@@ -7764,7 +7473,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.271
 
 @file out.jsonl 172
 {"resource":"extent1.xmi","roots":1}
@@ -7778,7 +7486,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'makePack' should be called using '(x)map' keyword
 
 @case interpret_simplestXCollectShorthand
-@file result.txt 228
+@file result.txt 214
 id	interpret_simplestXCollectShorthand
 load	OK
 params	in:dummy,out:$1
@@ -7790,7 +7498,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	25.885
 
 @file out.jsonl 1126
 {"resource":"extent1.xmi","roots":5}
@@ -7802,7 +7509,7 @@ run-ms	25.885
 {"path":"/4/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"b++a","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_simpletag
-@file result.txt 196
+@file result.txt 183
 id	interpret_simpletag
 load	OK
 params	
@@ -7814,10 +7521,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.870
 
 @case interpret_skippopulation
-@file result.txt 227
+@file result.txt 214
 id	interpret_skippopulation
 load	WARNING
 params	in:$model,out:$result
@@ -7829,7 +7535,6 @@ trace-records	2
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.272
 
 @file out.jsonl 321
 {"resource":"extent1.xmi","roots":1}
@@ -7844,7 +7549,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'createPackage' should be called using '(x)map' keyword
 
 @case interpret_slashSingleLineComments_266478
-@file result.txt 238
+@file result.txt 225
 id	interpret_slashSingleLineComments_266478
 load	OK
 params	in:model,out:modelOut
@@ -7856,14 +7561,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.852
 
 @file out.jsonl 168
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"pack","nsURI":"","nsPrefix":"ab"},"refs":{}}
 
 @case interpret_stdlibDict
-@file result.txt 216
+@file result.txt 202
 id	interpret_stdlibDict
 load	OK
 params	in:input,out:ouput
@@ -7875,13 +7579,12 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	23.978
 
 @file out.jsonl 37
 {"resource":"extent1.xmi","roots":0}
 
 @case interpret_stdlibList
-@file result.txt 208
+@file result.txt 194
 id	interpret_stdlibList
 load	OK
 params	in:m,out:x
@@ -7893,13 +7596,12 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	13.543
 
 @file out.jsonl 37
 {"resource":"extent1.xmi","roots":0}
 
 @case interpret_stdlibModel
-@file result.txt 221
+@file result.txt 208
 id	interpret_stdlibModel
 load	OK
 params	in:inModel,out:outModel
@@ -7911,7 +7613,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	8.327
 
 @file out.jsonl 926
 {"resource":"extent1.xmi","roots":1}
@@ -7921,7 +7622,7 @@ run-ms	8.327
 {"path":"/0/@eClassifiers.1/@eStructuralFeatures.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"attr","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
 
 @case interpret_stdlibString
-@file result.txt 214
+@file result.txt 201
 id	interpret_stdlibString
 load	WARNING
 params	in:m,out:x
@@ -7933,7 +7634,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.852
 
 @file out.jsonl 37
 {"resource":"extent1.xmi","roots":0}
@@ -7946,7 +7646,7 @@ load	1	WARNING	0	Library import statement is deprecated. Use plain 'import Strin
 load	1	WARNING	0	Operation reference is ambiguous. Choosing first of 'oclstdlib::String::replace(String, String) : String - Stdlib', 'oclstdlib::String::replace(String, String) : String - Strings'
 
 @case interpret_stdlibelement
-@file result.txt 217
+@file result.txt 203
 id	interpret_stdlibelement
 load	OK
 params	in:m,out:x,out:y
@@ -7958,7 +7658,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	10.383
 
 @file out.jsonl 635
 {"resource":"extent1.xmi","roots":2}
@@ -7969,7 +7668,7 @@ run-ms	10.383
 {"resource":"extent2.xmi","roots":0}
 
 @case interpret_stringescaping
-@file result.txt 226
+@file result.txt 213
 id	interpret_stringescaping
 load	WARNING
 params	in:$pack,out:$result
@@ -7981,7 +7680,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.599
 
 @file out.jsonl 173
 {"resource":"extent1.xmi","roots":1}
@@ -7993,7 +7691,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_subobjects
-@file result.txt 202
+@file result.txt 188
 id	interpret_subobjects
 load	OK
 params	in:m
@@ -8005,10 +7703,9 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	15.657
 
 @case interpret_transf_inheritance
-@file result.txt 213
+@file result.txt 199
 id	interpret_transf_inheritance
 load	OK
 params	inout:m
@@ -8020,7 +7717,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	36.572
 
 @file out.jsonl 4499
 {"resource":"extent0.xmi","roots":1}
@@ -8044,7 +7740,7 @@ run-ms	36.572
 problem	warning	A.qvto	16	471	9	Implicit source for operation is ambiguous. Choosing first of 'A::this', 'Lib::this'
 
 @case interpret_transformationWithModuleElements_257055
-@file result.txt 249
+@file result.txt 236
 id	interpret_transformationWithModuleElements_257055
 load	OK
 params	in:inModel,out:outModel
@@ -8056,14 +7752,13 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.529
 
 @file out.jsonl 192
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"input_bar_foo","nsURI":"intermProp_bar2","nsPrefix":null},"refs":{}}
 
 @case interpret_tuples
-@file result.txt 217
+@file result.txt 218
 id	interpret_tuples
 load	WARNING
 params	in:model,out:model1
@@ -8075,13 +7770,13 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.780
+unstable	dump
 
 @file out.jsonl 578
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"inpack","nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"A","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"B","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"B","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"A","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @file diag.txt 385
 problem	warning	tuples.qvto	6	221	46	Declaring entry operation as a mapping is disallowed. 
@@ -8091,7 +7786,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'tupleToClass' should be called using '(x)map' keyword
 
 @case interpret_uml2_stereotypeApplication
-@file result.txt 238
+@file result.txt 224
 id	interpret_uml2_stereotypeApplication
 load	OK
 params	inout:m1,inout:m2,out:m3
@@ -8103,7 +7798,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	17.078
 
 @file out.jsonl 2017
 {"resource":"extent0.xmi","roots":3}
@@ -8121,7 +7815,7 @@ run-ms	17.078
 {"path":"/1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"foo : stereotypeApplication","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_unspecified_multiplicity
-@file result.txt 217
+@file result.txt 204
 id	interpret_unspecified_multiplicity
 load	OK
 params	out:$0
@@ -8133,7 +7827,6 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.410
 
 @file out.jsonl 965
 {"resource":"extent0.xmi","roots":9}
@@ -8152,7 +7845,7 @@ run-ms	4.410
 {"path":"/8","type":"http://local.unbound#cls","attrs":{},"refs":{}}
 
 @case interpret_urilessModeltype
-@file result.txt 203
+@file result.txt 190
 id	interpret_urilessModeltype
 load	OK
 params	
@@ -8164,10 +7857,9 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.773
 
 @case interpret_usebooleanprop
-@file result.txt 227
+@file result.txt 214
 id	interpret_usebooleanprop
 load	WARNING
 params	in:$model,out:$result
@@ -8179,7 +7871,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.134
 
 @file out.jsonl 174
 {"resource":"extent1.xmi","roots":1}
@@ -8191,7 +7882,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_useresultinsameout
-@file result.txt 230
+@file result.txt 217
 id	interpret_useresultinsameout
 load	WARNING
 params	in:$pack,out:$result
@@ -8203,7 +7894,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.829
 
 @file out.jsonl 579
 {"resource":"extent1.xmi","roots":1}
@@ -8217,7 +7907,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_varInitExpWithResult_260985
-@file result.txt 237
+@file result.txt 224
 id	interpret_varInitExpWithResult_260985
 load	OK
 params	in:inModel,out:outModel
@@ -8229,14 +7919,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.144
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"abc","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_varInitGroup_261841
-@file result.txt 227
+@file result.txt 214
 id	interpret_varInitGroup_261841
 load	OK
 params	in:model,out:modelOut
@@ -8248,14 +7937,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.335
 
 @file out.jsonl 173
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"String","nsURI":"a1","nsPrefix":"c10"},"refs":{}}
 
 @case interpret_varassign
-@file result.txt 222
+@file result.txt 209
 id	interpret_varassign
 load	WARNING
 params	in:$model,out:$result
@@ -8267,7 +7955,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.293
 
 @file out.jsonl 578
 {"resource":"extent1.xmi","roots":1}
@@ -8281,7 +7968,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_virt
-@file result.txt 216
+@file result.txt 203
 id	interpret_virt
 load	WARNING
 params	in:$pack,out:$result
@@ -8293,7 +7980,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.069
 
 @file out.jsonl 583
 {"resource":"extent1.xmi","roots":1}
@@ -8312,7 +7998,7 @@ load	1	WARNING	0	Mapping operation 'impl' should be called using '(x)map' keywor
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case interpret_virtscr20707
-@file result.txt 224
+@file result.txt 211
 id	interpret_virtscr20707
 load	WARNING
 params	in:$pack,out:$result
@@ -8324,7 +8010,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.811
 
 @file out.jsonl 595
 {"resource":"extent1.xmi","roots":1}
@@ -8340,7 +8025,7 @@ load	1	WARNING	0	Declaring entry operation as a mapping is disallowed.
 load	1	WARNING	0	Mapping operation 'makeClassifier' should be called using '(x)map' keyword
 
 @case interpret_virtualPredefinedTypeOpers
-@file result.txt 224
+@file result.txt 211
 id	interpret_virtualPredefinedTypeOpers
 load	OK
 params	inout:model
@@ -8352,14 +8037,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	5.622
 
 @file out.jsonl 173
 {"resource":"extent0.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"Factory","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case interpret_virtual_contextVsOverride
-@file result.txt 231
+@file result.txt 218
 id	interpret_virtual_contextVsOverride
 load	OK
 params	in:input,out:output
@@ -8371,14 +8055,13 @@ trace-records	0
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	7.177
 
 @file out.jsonl 260
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"virtual_contextVsOverride-EClass::foo","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @case interpret_voidreturn
-@file result.txt 222
+@file result.txt 209
 id	interpret_voidreturn
 load	WARNING
 params	in:$pack,out:$result
@@ -8390,7 +8073,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.402
 
 @file out.jsonl 169
 {"resource":"extent1.xmi","roots":1}
@@ -8402,7 +8084,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case invalidConfigProp_testInvalidConfigProp
-@file result.txt 334
+@file result.txt 321
 id	invalidConfigProp_testInvalidConfigProp
 load	OK
 params	inout:module
@@ -8413,7 +8095,6 @@ exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtRuntimeException
 trace-records	-1
 check stack invalidIntConfigProp.stack	pass
 verdict	pass
-run-ms	1.341
 
 @file out.jsonl 170
 {"resource":"extent0.xmi","roots":1}
@@ -8431,7 +8112,7 @@ org.eclipse.m2m.internal.qvt.oml.evaluator.QvtRuntimeException: Failed to get 'i
 exec	0	ERROR	120	Failed to get 'intProp' configuration property value from 'xxx' string
 
 @case invalidConfigProp_testInvalidRealConfigProp
-@file result.txt 340
+@file result.txt 327
 id	invalidConfigProp_testInvalidRealConfigProp
 load	OK
 params	inout:module
@@ -8442,7 +8123,6 @@ exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtRuntimeException
 trace-records	-1
 check stack invalidRealConfigProp.stack	pass
 verdict	pass
-run-ms	1.866
 
 @file out.jsonl 170
 {"resource":"extent0.xmi","roots":1}
@@ -8460,7 +8140,7 @@ org.eclipse.m2m.internal.qvt.oml.evaluator.QvtRuntimeException: Failed to get 'r
 exec	0	ERROR	120	Failed to get 'realProp' configuration property value from 'xxx' string
 
 @case invalidConfigProp_testUndefinedConfigProp
-@file result.txt 213
+@file result.txt 200
 id	invalidConfigProp_testUndefinedConfigProp
 load	OK
 params	inout:module
@@ -8471,14 +8151,13 @@ exception	-
 trace-records	0
 check no-exception	pass
 verdict	pass
-run-ms	1.647
 
 @file out.jsonl 170
 {"resource":"extent0.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"root","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case manymodel_entryOp
-@file result.txt 244
+@file result.txt 231
 id	manymodel_entryOp
 load	WARNING
 params	in:ecore1,in:ecore2,in:ecore3,out:uml,out:rdb
@@ -8490,7 +8169,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	3.067
 
 @file out.jsonl 1083
 {"resource":"extent3.xmi","roots":1}
@@ -8516,7 +8194,7 @@ load	1	WARNING	0	Parameter declaration in the entry operation is deprecated.
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case manymodel_importedExtents
-@file result.txt 216
+@file result.txt 203
 id	manymodel_importedExtents
 load	WARNING
 params	out:model
@@ -8528,7 +8206,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.787
 
 @file out.jsonl 572
 {"resource":"extent0.xmi","roots":3}
@@ -8546,7 +8223,7 @@ load	1	WARNING	0	Import statement must be the first element in compilation unit.
 load	1	WARNING	0	Signature of the imported transformation 'transf2' is not compatible with the importing transformation 'importedExtents'
 
 @case manymodel_mm_header1
-@file result.txt 225
+@file result.txt 212
 id	manymodel_mm_header1
 load	WARNING
 params	in:ecore,out:uml,out:$2
@@ -8558,7 +8235,6 @@ trace-records	3
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	4.892
 
 @file out.jsonl 437
 {"resource":"extent1.xmi","roots":1}
@@ -8576,7 +8252,7 @@ load	1	WARNING	0	Mapping operation 'toClass' should be called using '(x)map' key
 load	1	WARNING	0	Mapping operation 'toEClass' should be called using '(x)map' keyword
 
 @case manymodel_mm_header2
-@file result.txt 229
+@file result.txt 216
 id	manymodel_mm_header2
 load	WARNING
 params	in:ecore,out:uml,out:ecore2
@@ -8588,7 +8264,6 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	7.024
 
 @file out.jsonl 561
 {"resource":"extent1.xmi","roots":2}
@@ -8609,7 +8284,7 @@ load	1	WARNING	0	Mapping operation 'toClass2' should be called using '(x)map' ke
 load	1	WARNING	0	Mapping operation 'toTable' should be called using '(x)map' keyword
 
 @case manymodel_mm_header3
-@file result.txt 229
+@file result.txt 216
 id	manymodel_mm_header3
 load	WARNING
 params	in:ecore,out:uml,out:ecore2
@@ -8621,7 +8296,6 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.743
 
 @file out.jsonl 561
 {"resource":"extent1.xmi","roots":2}
@@ -8642,7 +8316,7 @@ load	1	WARNING	0	Mapping operation 'toClass2' should be called using '(x)map' ke
 load	1	WARNING	0	Mapping operation 'toTable' should be called using '(x)map' keyword
 
 @case manymodel_mm_header4
-@file result.txt 247
+@file result.txt 234
 id	manymodel_mm_header4
 load	WARNING
 params	in:ecore1,in:ecore2,in:ecore3,out:uml,out:rdb
@@ -8654,7 +8328,6 @@ trace-records	4
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	1.829
 
 @file out.jsonl 902
 {"resource":"extent3.xmi","roots":1}
@@ -8671,7 +8344,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case manymodel_mm_modifyvar
-@file result.txt 230
+@file result.txt 217
 id	manymodel_mm_modifyvar
 load	WARNING
 params	in:ecore1,in:ecore2,out:$2
@@ -8683,7 +8356,6 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-run-ms	2.081
 
 @file out.jsonl 584
 {"resource":"extent2.xmi","roots":1}
@@ -11550,7 +11222,7 @@ load	1	ERROR	0	Unrecognized variable: (pack1)
 load	1	ERROR	0	Unrecognized variable: (name1)
 
 @case stacktrace_testAssertionFailed
-@file result.txt 457
+@file result.txt 444
 id	stacktrace_testAssertionFailed
 load	WARNING
 params	in:inModel,out:outModel
@@ -11563,7 +11235,6 @@ check exception org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed	pa
 check stack assertionFailed.stack	pass
 check log-nonempty-equal assertionFailed.log.txt	pass
 verdict	pass
-run-ms	3.432
 
 @file out.jsonl 37
 {"resource":"extent1.xmi","roots":0}
@@ -11595,7 +11266,7 @@ exec	1	WARNING	150	Non-fatal assertion failed
 exec	1	ERROR	150	Test error message
 
 @case stacktrace_testCreateInstaceFailure
-@file result.txt 318
+@file result.txt 305
 id	stacktrace_testCreateInstaceFailure
 load	WARNING
 params	in:inModel,out:outModel
@@ -11606,7 +11277,6 @@ exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtRuntimeException
 trace-records	-1
 check stack createInstaceFailure.stack	pass
 verdict	pass
-run-ms	2.683
 
 @file out.jsonl 37
 {"resource":"extent1.xmi","roots":0}
@@ -11637,7 +11307,7 @@ load	1	WARNING	0	'else' part of if..then..else is missed in assignment expressio
 exec	0	ERROR	120	Cannot instantiate type ecore::EClassifier
 
 @case stacktrace_testLogExpUsage
-@file result.txt 244
+@file result.txt 231
 id	stacktrace_testLogExpUsage
 load	WARNING
 params	in:inModel,out:outModel
@@ -11648,7 +11318,6 @@ exception	-
 trace-records	0
 check log-nonempty-equal testLogExpUsage.log.txt	pass
 verdict	pass
-run-ms	4.467
 
 @file out.jsonl 37
 {"resource":"extent1.xmi","roots":0}
@@ -11676,7 +11345,7 @@ exec	1	OK	0	confirmed message with data
 exec	1	OK	4	message with data and level
 
 @case stacktrace_testMappingCallInProperty
-@file result.txt 320
+@file result.txt 307
 id	stacktrace_testMappingCallInProperty
 load	WARNING
 params	in:inModel,out:outModel
@@ -11687,7 +11356,6 @@ exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtRuntimeException
 trace-records	-1
 check stack mappingCallInProperty.stack	pass
 verdict	pass
-run-ms	4.718
 
 @file out.jsonl 37
 {"resource":"extent1.xmi","roots":0}
@@ -11714,7 +11382,7 @@ load	1	WARNING	0	'else' part of if..then..else is missed in assignment expressio
 exec	0	ERROR	120	Cannot instantiate type ecore::EClassifier
 
 @case stacktrace_testStackOverFlow
-@file result.txt 431
+@file result.txt 418
 id	stacktrace_testStackOverFlow
 load	WARNING
 params	in:inModel,out:outModel
@@ -11726,7 +11394,6 @@ trace-records	-1
 check exception org.eclipse.m2m.internal.qvt.oml.evaluator.QvtStackOverFlowError	pass
 check stack-frames 10 causeStackOverFlow auxtransf auxtransf.qvto 5|6	pass
 verdict	pass
-run-ms	9.604
 
 @file out.jsonl 37
 {"resource":"extent1.xmi","roots":0}
@@ -13235,7 +12902,7 @@ load	1	WARNING	0	'else' part of if..then..else is missed in assignment expressio
 exec	0	ERROR	120	QVT Stack overflow occured during execution
 
 @case stacktrace_testUknownSourceStackTrace
-@file result.txt 326
+@file result.txt 313
 id	stacktrace_testUknownSourceStackTrace
 load	WARNING
 params	in:inModel,out:outModel
@@ -13246,7 +12913,6 @@ exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtRuntimeException
 trace-records	-1
 check stack testUknownSourceStackTrace.stack	pass
 verdict	pass
-run-ms	3.757
 
 @file out.jsonl 37
 {"resource":"extent1.xmi","roots":0}
@@ -13277,7 +12943,7 @@ load	1	WARNING	0	'else' part of if..then..else is missed in assignment expressio
 exec	0	ERROR	120	Cannot instantiate type ecore::EClassifier
 
 @case trace_mappingWithNoResultTrace_266854
-@file result.txt 221
+@file result.txt 208
 id	trace_mappingWithNoResultTrace_266854
 load	OK
 params	in:model,out:modelOut
@@ -13288,14 +12954,13 @@ exception	-
 trace-records	1
 check trace-records 1	pass
 verdict	pass
-run-ms	3.181
 
 @file out.jsonl 170
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"name","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @case trace_multipletracerecords
-@file result.txt 215
+@file result.txt 202
 id	trace_multipletracerecords
 load	WARNING
 params	in:$model,out:$result
@@ -13306,7 +12971,6 @@ exception	-
 trace-records	5
 check trace-records 5	pass
 verdict	pass
-run-ms	3.282
 
 @file out.jsonl 1290
 {"resource":"extent1.xmi","roots":1}

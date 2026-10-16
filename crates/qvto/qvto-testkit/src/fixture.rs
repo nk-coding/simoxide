@@ -142,7 +142,8 @@ pub fn read_result_dir(dir: &Path) -> std::io::Result<BTreeMap<String, JavaResul
 
 const HEADER: &str = "qvto-testkit java fixture 1\n";
 
-/// Writes a fixture bundle: the [`FIXTURE_FILES`] of every case, empty files left out.
+/// Writes a fixture bundle: the [`FIXTURE_FILES`] of every case, empty files and timings left
+/// out.
 pub fn write_bundle(results: &BTreeMap<String, JavaResult>) -> String {
     let mut s = String::from(HEADER);
     for (id, r) in results {
@@ -150,7 +151,15 @@ pub fn write_bundle(results: &BTreeMap<String, JavaResult>) -> String {
         s.push_str(id);
         s.push('\n');
         for f in FIXTURE_FILES {
-            if let Some(t) = r.files.get(f).filter(|t| !t.is_empty()) {
+            let text = r.files.get(f).map(|t| {
+                if f == "result.txt" {
+                    // timings vary from run to run; they stay in the cache
+                    t.lines().filter(|l| !l.starts_with("run-ms\t")).map(|l| format!("{l}\n")).collect()
+                } else {
+                    t.clone()
+                }
+            });
+            if let Some(t) = text.as_ref().filter(|t| !t.is_empty()) {
                 s.push_str(&format!("@file {f} {}\n", t.len()));
                 s.push_str(t);
                 s.push('\n');

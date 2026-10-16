@@ -96,9 +96,9 @@ pub fn unstable_outputs(
     out
 }
 
-/// Records Java results as a fixture: runs the batch `runs` times (the extra runs without tape;
-/// every other one with constant identity hashes, `-XX:hashCode=2`, which turns any
-/// identity-hash-dependent order into another order), marks the outputs that differ in any
+/// Records Java results as a fixture: runs the batch `runs` times (the extra runs without tape,
+/// cycling through constant identity hashes `-XX:hashCode=2`, sequential ones `-XX:hashCode=3`
+/// and the default, so that identity-hash-dependent orders change), marks the outputs that differ in any
 /// rerun as unstable, writes the bundle. The first run's
 /// directory stays as the cache (with tapes and XMI).
 pub fn record(run: &JavaRun, bundle: &Path, runs: usize) -> Result<String, String> {
@@ -110,9 +110,12 @@ pub fn record(run: &JavaRun, bundle: &Path, runs: usize) -> Result<String, Strin
         again.out = run.out.with_extension(format!("rerun{k}"));
         again.tape = false;
         again.save_xmi = false;
-        if k % 2 == 1 {
-            // constant identity hashes: identity-hash-dependent orders become insertion orders
-            again.jvm_opts = Some("-XX:+UnlockExperimentalVMOptions -XX:hashCode=2".into());
+        // other identity-hash generators: constant (orders become insertion orders) and a
+        // global counter, alternating with HotSpot's default
+        match k % 3 {
+            1 => again.jvm_opts = Some("-XX:+UnlockExperimentalVMOptions -XX:hashCode=2".into()),
+            2 => again.jvm_opts = Some("-XX:+UnlockExperimentalVMOptions -XX:hashCode=3".into()),
+            _ => {}
         }
         log.push_str(&again.run()?);
         let b = fixture::read_result_dir(&again.out).map_err(|e| e.to_string())?;

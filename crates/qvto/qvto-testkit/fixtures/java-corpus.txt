@@ -1,6 +1,6 @@
 qvto-testkit java fixture 1
 @case simulizar_loadbalancer_outsource_high
-@file result.txt 227
+@file result.txt 214
 id	simulizar_loadbalancer_outsource_high
 load	OK
 params	in:runtimeMeasurement,inout:pcmAllocation
@@ -10,7 +10,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	7.244
 unstable	log
 
 @file out.jsonl 37075
@@ -144,7 +143,7 @@ exec	1	OK	0	Set branchProbability to 0.1
 exec	1	OK	0	Set branchProbability to 0.9
 
 @case simulizar_loadbalancer_outsource_low
-@file result.txt 216
+@file result.txt 203
 id	simulizar_loadbalancer_outsource_low
 load	OK
 params	in:runtimeMeasurement,inout:pcmAllocation
@@ -154,7 +153,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	4.131
 
 @file out.jsonl 37074
 {"resource":"extent1.xmi","roots":1}
@@ -278,7 +276,7 @@ exec	1	OK	0	No measurements match the condition. Number of measurements is 1
 exec	1	ERROR	150	No reconfiguration required
 
 @case simulizar_loadbalancer_scaleDown_high
-@file result.txt 196
+@file result.txt 183
 id	simulizar_loadbalancer_scaleDown_high
 load	OK
 params	in:prm,in:pcmAllocation
@@ -288,7 +286,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	7.901
 
 @file out.jsonl 37038
 {"resource":"iaas.resourceenvironment","roots":1}
@@ -404,7 +401,7 @@ SimuLizar ScaleDown Rule Transformation started
 exec	1	OK	0	SimuLizar ScaleDown Rule Transformation started
 
 @case simulizar_loadbalancer_scaleDown_low
-@file result.txt 195
+@file result.txt 182
 id	simulizar_loadbalancer_scaleDown_low
 load	OK
 params	in:prm,in:pcmAllocation
@@ -414,7 +411,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	5.311
 
 @file out.jsonl 37044
 {"resource":"iaas.resourceenvironment","roots":1}
@@ -530,7 +526,7 @@ SimuLizar ScaleDown Rule Transformation started
 exec	1	OK	0	SimuLizar ScaleDown Rule Transformation started
 
 @case simulizar_loadbalancer_scaleIn_high
-@file result.txt 195
+@file result.txt 181
 id	simulizar_loadbalancer_scaleIn_high
 load	OK
 params	in:prm,in:pcmAllocation
@@ -540,7 +536,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	11.029
 
 @file out.jsonl 37038
 {"resource":"iaas.resourceenvironment","roots":1}
@@ -664,7 +659,7 @@ exec	1	OK	0	Found 3 AllocationContexts
 exec	1	OK	0	found load balancer: AC_LoadBalancer
 
 @case simulizar_loadbalancer_scaleIn_low
-@file result.txt 193
+@file result.txt 180
 id	simulizar_loadbalancer_scaleIn_low
 load	OK
 params	in:prm,in:pcmAllocation
@@ -674,7 +669,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	9.559
 
 @file out.jsonl 37037
 {"resource":"iaas.resourceenvironment","roots":1}
@@ -794,7 +788,7 @@ exec	1	OK	0	Measured value is 0.5
 exec	1	OK	0	No measurements match the condition. Number of measurements is 1
 
 @case simulizar_loadbalancer_scaleUp_high
-@file result.txt 195
+@file result.txt 181
 id	simulizar_loadbalancer_scaleUp_high
 load	OK
 params	in:prm,in:pcmAllocation
@@ -804,7 +798,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	11.422
 
 @file out.jsonl 37048
 {"resource":"iaas.resourceenvironment","roots":1}
@@ -920,7 +913,7 @@ SimuLizar ScaleUp Rule Transformation started
 exec	1	OK	0	SimuLizar ScaleUp Rule Transformation started
 
 @case simulizar_loadbalancer_scaleUp_low
-@file result.txt 194
+@file result.txt 180
 id	simulizar_loadbalancer_scaleUp_low
 load	OK
 params	in:prm,in:pcmAllocation
@@ -930,7 +923,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	10.166
 
 @file out.jsonl 37037
 {"resource":"iaas.resourceenvironment","roots":1}
@@ -1046,7 +1038,7 @@ SimuLizar ScaleUp Rule Transformation started
 exec	1	OK	0	SimuLizar ScaleUp Rule Transformation started
 
 @case simulizar_powerconsumption_scaleDown_high
-@file result.txt 249
+@file result.txt 236
 id	simulizar_powerconsumption_scaleDown_high
 load	OK
 params	in:prm,in:pcmRepository,in:pcmSystem,in:pcmAllocation,inout:pcmResources
@@ -1056,7 +1048,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	6.486
 
 @file out.jsonl 45071
 {"resource":"extent4.xmi","roots":1}
@@ -1197,7 +1188,7 @@ SimuLizar ScaleDown Rule Transformation started
 exec	1	OK	0	SimuLizar ScaleDown Rule Transformation started
 
 @case simulizar_powerconsumption_scaleDown_low
-@file result.txt 248
+@file result.txt 235
 id	simulizar_powerconsumption_scaleDown_low
 load	OK
 params	in:prm,in:pcmRepository,in:pcmSystem,in:pcmAllocation,inout:pcmResources
@@ -1207,7 +1198,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	4.700
 
 @file out.jsonl 45063
 {"resource":"extent4.xmi","roots":1}
@@ -1348,7 +1338,7 @@ SimuLizar ScaleDown Rule Transformation started
 exec	1	OK	0	SimuLizar ScaleDown Rule Transformation started
 
 @case simulizar_powerconsumption_scaleIn_high
-@file result.txt 247
+@file result.txt 234
 id	simulizar_powerconsumption_scaleIn_high
 load	OK
 params	in:prm,inout:pcmRepository,in:pcmSystem,in:pcmAllocation,in:pcmResources
@@ -1358,7 +1348,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	8.506
 
 @file out.jsonl 44800
 {"resource":"extent1.xmi","roots":1}
@@ -1507,7 +1496,7 @@ exec	1	OK	0	found load balancer: AC_LoadBalancer
 exec	1	OK	0	Set branchProbability to 0.4
 
 @case simulizar_powerconsumption_scaleIn_low
-@file result.txt 246
+@file result.txt 233
 id	simulizar_powerconsumption_scaleIn_low
 load	OK
 params	in:prm,inout:pcmRepository,in:pcmSystem,in:pcmAllocation,in:pcmResources
@@ -1517,7 +1506,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	6.000
 
 @file out.jsonl 44799
 {"resource":"extent1.xmi","roots":1}
@@ -1662,7 +1650,7 @@ exec	1	OK	0	Measured value is 0.5
 exec	1	OK	0	No measurements match the condition. Number of measurements is 1
 
 @case simulizar_powerconsumption_scaleUp_high
-@file result.txt 247
+@file result.txt 234
 id	simulizar_powerconsumption_scaleUp_high
 load	OK
 params	in:prm,in:pcmRepository,in:pcmSystem,in:pcmAllocation,inout:pcmResources
@@ -1672,7 +1660,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	4.689
 
 @file out.jsonl 45074
 {"resource":"extent4.xmi","roots":1}
@@ -1813,7 +1800,7 @@ SimuLizar ScaleUp Rule Transformation started
 exec	1	OK	0	SimuLizar ScaleUp Rule Transformation started
 
 @case simulizar_powerconsumption_scaleUp_low
-@file result.txt 246
+@file result.txt 233
 id	simulizar_powerconsumption_scaleUp_low
 load	OK
 params	in:prm,in:pcmRepository,in:pcmSystem,in:pcmAllocation,inout:pcmResources
@@ -1823,7 +1810,6 @@ message	Transformation execution completed
 exception	-
 trace-records	0
 verdict	pass
-run-ms	6.939
 
 @file out.jsonl 45063
 {"resource":"extent4.xmi","roots":1}
@@ -1964,7 +1950,7 @@ SimuLizar ScaleUp Rule Transformation started
 exec	1	OK	0	SimuLizar ScaleUp Rule Transformation started
 
 @case simulizar_reconfiguration_adapt
-@file result.txt 232
+@file result.txt 219
 id	simulizar_reconfiguration_adapt
 load	OK
 params	in:runtimeMeasurement,inout:pcmRepository
@@ -1975,7 +1961,6 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	7.784
 
 @file out.jsonl 9824
 {"resource":"extent1.xmi","roots":1}
@@ -2023,7 +2008,7 @@ SimuLizar Increment Demand
 exec	1	OK	0	SimuLizar Increment Demand
 
 @case simulizar_runconfigtest_addClonedServer_high
-@file result.txt 243
+@file result.txt 229
 id	simulizar_runconfigtest_addClonedServer_high
 load	OK
 params	in:runtimeMeasurement,in:pcmAllocation
@@ -2034,7 +2019,6 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	19.867
 
 @file out.jsonl 18972
 {"resource":"prm-high.xmi","roots":1}
@@ -2106,7 +2090,7 @@ exec	1	OK	0	SimuLizar addClonedServer Rule Transformation started
 exec	1	OK	0	Start of assemblyConnector creation
 
 @case simulizar_runconfigtest_addClonedServer_low
-@file result.txt 242
+@file result.txt 228
 id	simulizar_runconfigtest_addClonedServer_low
 load	OK
 params	in:runtimeMeasurement,in:pcmAllocation
@@ -2117,7 +2101,6 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	11.727
 
 @file out.jsonl 18115
 {"resource":"prm-low.xmi","roots":1}
@@ -2185,7 +2168,7 @@ SimuLizar addClonedServer Rule Transformation started
 exec	1	OK	0	SimuLizar addClonedServer Rule Transformation started
 
 @case simulizar_runconfigtest_addNewServer_high
-@file result.txt 240
+@file result.txt 226
 id	simulizar_runconfigtest_addNewServer_high
 load	OK
 params	in:runtimeMeasurement,in:pcmAllocation
@@ -2196,7 +2179,6 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	37.799
 
 @file out.jsonl 18972
 {"resource":"prm-high.xmi","roots":1}
@@ -2294,7 +2276,7 @@ exec	1	OK	0	addNewServer: Connecting the newly created AssemblyContext for Serve
 exec	1	OK	0	Start of assemblyConnector creation
 
 @case simulizar_runconfigtest_addNewServer_low
-@file result.txt 239
+@file result.txt 225
 id	simulizar_runconfigtest_addNewServer_low
 load	OK
 params	in:runtimeMeasurement,in:pcmAllocation
@@ -2305,7 +2287,6 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	29.116
 
 @file out.jsonl 18115
 {"resource":"prm-low.xmi","roots":1}
@@ -2373,7 +2354,7 @@ SimuLizar addServer Rule Transformation started
 exec	1	OK	0	SimuLizar addServer Rule Transformation started
 
 @case simulizar_runconfigtest_outsource_high
-@file result.txt 237
+@file result.txt 223
 id	simulizar_runconfigtest_outsource_high
 load	OK
 params	in:runtimeMeasurement,in:pcmAllocation
@@ -2384,7 +2365,6 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	20.513
 
 @file out.jsonl 18116
 {"resource":"prm-high.xmi","roots":1}
@@ -2452,7 +2432,7 @@ SimuLizar outsource Rule Transformation started
 exec	1	OK	0	SimuLizar outsource Rule Transformation started
 
 @case simulizar_runconfigtest_outsource_low
-@file result.txt 236
+@file result.txt 222
 id	simulizar_runconfigtest_outsource_low
 load	OK
 params	in:runtimeMeasurement,in:pcmAllocation
@@ -2463,7 +2443,6 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	10.709
 
 @file out.jsonl 18115
 {"resource":"prm-low.xmi","roots":1}
@@ -2531,7 +2510,7 @@ SimuLizar outsource Rule Transformation started
 exec	1	OK	0	SimuLizar outsource Rule Transformation started
 
 @case simulizar_runconfigtest_scaleUp_high
-@file result.txt 235
+@file result.txt 221
 id	simulizar_runconfigtest_scaleUp_high
 load	OK
 params	in:runtimeMeasurement,in:pcmAllocation
@@ -2542,7 +2521,6 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	46.466
 
 @file out.jsonl 18118
 {"resource":"prm-high.xmi","roots":1}
@@ -2610,7 +2588,7 @@ SimuLizar scaleUp Rule Transformation started
 exec	1	OK	0	SimuLizar scaleUp Rule Transformation started
 
 @case simulizar_runconfigtest_scaleUp_low
-@file result.txt 234
+@file result.txt 220
 id	simulizar_runconfigtest_scaleUp_low
 load	OK
 params	in:runtimeMeasurement,in:pcmAllocation
@@ -2621,7 +2599,6 @@ exception	-
 trace-records	0
 check severity 0 0	pass
 verdict	pass
-run-ms	19.947
 
 @file out.jsonl 18115
 {"resource":"prm-low.xmi","roots":1}
@@ -2689,7 +2666,7 @@ SimuLizar scaleUp Rule Transformation started
 exec	1	OK	0	SimuLizar scaleUp Rule Transformation started
 
 @case spd_minimalexample_main
-@file result.txt 308
+@file result.txt 307
 id	spd_minimalexample_main
 load	OK
 params	inout:pcmAllocation,inout:pcmSystem,inout:pcmResourceEnvironment,inout:repository,in:spd,inout:spdSemantic,inout:usageModel
@@ -2700,7 +2677,7 @@ exception	-
 trace-records	9
 check severity 0 0	pass
 verdict	pass
-run-ms	167.580
+unstable	dump
 
 @file out.jsonl.digest 725
 sha256	687370e155e7b7ab92653b6b368c3393ceb4e192eac5d28d106864d0710f6281

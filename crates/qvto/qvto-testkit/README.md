@@ -8,7 +8,7 @@ qvto-rs engine implements to run under the harness, the comparisons and the scor
 ```sh
 qvto conform                                  # scoreboard of the engine (now the stub) on all cases
 qvto conform --suite eclipse --prefix interpret_ --report report.md --tsv report.tsv -v
-qvto conform record [--suite eclipse|corpus]  # Java runner: refresh the fixtures (3 runs, ~10 s each)
+qvto conform record [--suite eclipse|corpus]  # Java runner: refresh the fixtures (5 runs, ~10 s each)
 qvto conform --engine replay:target/qvto-testkit/java   # Java's own results through the Rust side
 ```
 
@@ -138,11 +138,13 @@ become `${root}`.
 **Result: all 494 runnable Eclipse cases and all 24 corpus cases pass on the Java side** (the
 drivers' checks, evaluated in Java with Eclipse's own comparer).
 
-`qvto conform record` runs the batch three times: the first run's results go into the fixture
-bundle (small files; tapes and XMI stay in the cache `target/qvto-testkit/java`), a second run
-with the default identity hashes and a third with constant identity hashes
-(`-XX:hashCode=2`) mark outputs that are not reproducible as `unstable` (6 Eclipse cases:
-identity-hash order in dumps, `Class@hash` and elapsed times in logs).
+`qvto conform record` runs the batch five times: the first run's results go into the fixture
+bundle (small files without timings; tapes and XMI stay in the cache `target/qvto-testkit/java`),
+the reruns cycle through constant identity hashes (`-XX:hashCode=2`), sequential ones
+(`-XX:hashCode=3`) and HotSpot's default, and outputs that differ in any rerun are marked
+`unstable` (8 Eclipse cases: identity-hash order in 6 dumps, `Class@hash` and elapsed times in 2
+logs; 2 corpus cases). Detection is probabilistic: a set of two identity-hashed elements keeps
+its order in a rerun with probability 1/2 (`qvto conform record --runs N`).
 
 ## Engine interface
 
