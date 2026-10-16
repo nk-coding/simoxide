@@ -40,7 +40,12 @@ pub fn at(a: &Str, i: i64) -> Value {
 
 /// `characters()`: one string per UTF-16 code unit (surrogate pairs split).
 pub fn characters(a: &Str) -> Value {
-    Coll::Sequence(a.units().map(|u| Value::Str(Str::from_utf16(&[u]))).collect()).into()
+    Coll::Sequence(
+        a.units()
+            .map(|u| Value::Str(Str::from_utf16(&[u])))
+            .collect(),
+    )
+    .into()
 }
 
 pub fn to_upper(a: &Str) -> Value {
@@ -79,8 +84,16 @@ pub fn trim(a: &Str) -> Value {
 
 /// `tokenize()`, `tokenize(delims)`, `tokenize(delims, returnDelims)`: a Sequence.
 pub fn tokenize(a: &Str, delims: Option<&Str>, return_delims: bool) -> Value {
-    let d = delims.cloned().unwrap_or_else(|| Str::new(js::DEFAULT_DELIMS));
-    Coll::Sequence(js::tokenize(a, &d, return_delims).into_iter().map(Value::Str).collect()).into()
+    let d = delims
+        .cloned()
+        .unwrap_or_else(|| Str::new(js::DEFAULT_DELIMS));
+    Coll::Sequence(
+        js::tokenize(a, &d, return_delims)
+            .into_iter()
+            .map(Value::Str)
+            .collect(),
+    )
+    .into()
 }
 
 /// `substituteAll` (literal replace) and QVTo's `replace`.
@@ -234,5 +247,9 @@ pub fn as_float(a: &Str) -> Value {
 /// `matchIdentifier(_)`: the argument is ignored; true iff the first code unit is a letter and
 /// all are letters or digits (`""` is true).
 pub fn match_identifier(a: &Str) -> Value {
-    Value::Bool(a.units().enumerate().all(|(i, u)| (i > 0 || chars::is_letter(u)) && chars::is_letter_or_digit(u)))
+    Value::Bool(
+        a.units()
+            .enumerate()
+            .all(|(i, u)| (i > 0 || chars::is_letter(u)) && chars::is_letter_or_digit(u)),
+    )
 }

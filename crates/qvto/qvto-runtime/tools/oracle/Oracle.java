@@ -126,8 +126,8 @@ public class Oracle {
         if (o instanceof String) return "s" + hex((String) o);
         if (o instanceof Integer) return "i" + o;
         if (o instanceof Long) return "l" + o;
-        if (o instanceof Double) return "d" + String.format("%016x", Double.doubleToRawLongBits((Double) o));
-        if (o instanceof Float) return "f" + String.format("%08x", Float.floatToRawIntBits((Float) o));
+        if (o instanceof Double) return "d" + String.format("%016x", Double.doubleToLongBits((Double) o)); // NaN sign and payload are not observable
+        if (o instanceof Float) return "f" + String.format("%08x", Float.floatToIntBits((Float) o));
         if (o instanceof Boolean) return ((Boolean) o) ? "b1" : "b0";
         if (o instanceof Short) return "h" + o;
         if (o instanceof Byte) return "y" + o;

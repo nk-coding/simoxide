@@ -16,7 +16,7 @@ use super::{Coll, CollKind, Index};
 use crate::dict::List;
 use crate::eq::{java_equals, ocl_equal};
 use crate::identity::HashEnv;
-use crate::java::hashmap::{hash_map_capacity_for, table_size_for, JavaHashMap};
+use crate::java::hashmap::{JavaHashMap, hash_map_capacity_for, table_size_for};
 use crate::value::{JNum, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -58,14 +58,26 @@ pub struct Operand {
 impl Operand {
     pub fn of(v: Value) -> Option<Operand> {
         match &v {
-            Value::Coll(c) => Some(Operand { class: JClass::Coll(c.kind()), coll: c.clone(), value: v }),
+            Value::Coll(c) => Some(Operand {
+                class: JClass::Coll(c.kind()),
+                coll: c.clone(),
+                value: v,
+            }),
             Value::List(l) => {
                 let c = Rc::new(Coll::Sequence(l.borrow().items.clone()));
-                Some(Operand { class: JClass::MutableList, coll: c, value: v })
+                Some(Operand {
+                    class: JClass::MutableList,
+                    coll: c,
+                    value: v,
+                })
             }
             Value::Dict(d) => {
                 let c = Rc::new(Coll::Sequence(d.borrow().values()));
-                Some(Operand { class: JClass::Dict, coll: c, value: v })
+                Some(Operand {
+                    class: JClass::Dict,
+                    coll: c,
+                    value: v,
+                })
             }
             _ => None,
         }
@@ -98,13 +110,22 @@ fn plain<V>(m: &JavaHashMap<Value, V>) -> bool {
 fn copy_equivalent(c: &Coll) -> bool {
     match c {
         Coll::Sequence(_) | Coll::OrderedSet(_) => true,
-        Coll::Set(Index::Linked(_)) | Coll::Bag(super::Bag { index: Index::Linked(_), .. }) => true,
+        Coll::Set(Index::Linked(_))
+        | Coll::Bag(super::Bag {
+            index: Index::Linked(_),
+            ..
+        }) => true,
         Coll::Set(Index::Hash(m)) => {
             let want = table_size_for(hash_map_capacity_for(m.len().max(12)));
             (m.capacity() == want || (m.capacity() == 0 && want == 16)) && plain(m)
         }
-        Coll::Bag(super::Bag { index: Index::Hash(m), .. }) => {
-            (m.capacity() == default_growth_capacity(m.len()) || (m.capacity() == 0 && m.is_empty())) && plain(m)
+        Coll::Bag(super::Bag {
+            index: Index::Hash(m),
+            ..
+        }) => {
+            (m.capacity() == default_growth_capacity(m.len())
+                || (m.capacity() == 0 && m.is_empty()))
+                && plain(m)
         }
     }
 }
@@ -127,10 +148,10 @@ fn list_value(c: Coll) -> Value {
 
 /// `Utils.createList(result)` when the source was a `MutableList` (QVTo re-wraps results).
 fn rewrap(source: JClass, result: Value) -> Value {
-    if source == JClass::MutableList {
-        if let Value::Coll(c) = result {
-            return list_value(Rc::try_unwrap(c).unwrap_or_else(|rc| (*rc).clone()));
-        }
+    if source == JClass::MutableList
+        && let Value::Coll(c) = result
+    {
+        return list_value(Rc::try_unwrap(c).unwrap_or_else(|rc| (*rc).clone()));
     }
     result
 }
@@ -160,7 +181,9 @@ pub fn excludes_all(c: &Coll, d: &Coll, env: &dyn HashEnv) -> bool {
 /// `CollectionUtil.including`: kind-preserving copy, then `add` (a `Dict` source gives a
 /// sequence).
 pub fn including(src: Value, v: Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     let kind = match op.class {
         JClass::Coll(k) => k,
         _ => CollKind::Sequence,
@@ -173,7 +196,9 @@ pub fn including(src: Value, v: Value, env: &dyn HashEnv) -> Value {
 /// `CollectionUtil.excluding`: copy, then remove (a sequence drops every occurrence; a
 /// `Dict` source fails).
 pub fn excluding(src: Value, v: &Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     let kind = match op.class {
         JClass::Coll(k) => k,
         JClass::MutableList => CollKind::Sequence,
@@ -190,7 +215,9 @@ pub fn excluding(src: Value, v: &Value, env: &dyn HashEnv) -> Value {
 
 /// `CollectionUtil.union`.
 pub fn union(a: Value, b: Value, env: &dyn HashEnv) -> Value {
-    let (Some(a), Some(b)) = (Operand::of(a), Operand::of(b)) else { return Value::Invalid };
+    let (Some(a), Some(b)) = (Operand::of(a), Operand::of(b)) else {
+        return Value::Invalid;
+    };
     let either_bag = a.class.is_bag() || b.class.is_bag();
     if a.len() == 0 {
         return if either_bag {
@@ -233,13 +260,23 @@ fn create_new_collection(c: &Operand, env: &dyn HashEnv) -> Coll {
 /// if either operand is a set, else an empty Bag. Iterates the smaller operand (the source on
 /// a tie), so a Bag result has the multiplicities of the smaller bag.
 pub fn intersection(a: Value, b: Value, env: &dyn HashEnv) -> Value {
-    let (Some(a), Some(b)) = (Operand::of(a), Operand::of(b)) else { return Value::Invalid };
+    let (Some(a), Some(b)) = (Operand::of(a), Operand::of(b)) else {
+        return Value::Invalid;
+    };
     let set = a.class.is_set() || b.class.is_set();
-    let mut r = if set { Coll::new_set(env) } else { Coll::new_bag(env) };
+    let mut r = if set {
+        Coll::new_set(env)
+    } else {
+        Coll::new_bag(env)
+    };
     if a.len() == 0 || b.len() == 0 {
         return r.into();
     }
-    let (small, large) = if a.len() > b.len() { (&b.coll, &a.coll) } else { (&a.coll, &b.coll) };
+    let (small, large) = if a.len() > b.len() {
+        (&b.coll, &a.coll)
+    } else {
+        (&a.coll, &b.coll)
+    };
     for e in small.iter() {
         if large.contains(e, env) {
             r.add(e.clone(), env);
@@ -251,7 +288,9 @@ pub fn intersection(a: Value, b: Value, env: &dyn HashEnv) -> Value {
 /// `CollectionUtil.flatten`: looks only at the first element; flattens one level while it is
 /// a collection (Bag stays Bag, any Set becomes a `HashSet`, else Sequence).
 pub fn flatten(src: Value, env: &dyn HashEnv) -> Value {
-    let Some(mut cur) = Operand::of(src) else { return Value::Invalid };
+    let Some(mut cur) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     loop {
         let first = match cur.coll.iter().next() {
             None => break,
@@ -285,7 +324,9 @@ pub fn flatten(src: Value, env: &dyn HashEnv) -> Value {
 
 /// `CollectionUtil.minus`: `new HashSet(self).removeAll(set)`.
 pub fn minus(a: Value, b: Value, env: &dyn HashEnv) -> Value {
-    let (Some(a), Some(b)) = (Operand::of(a), Operand::of(b)) else { return Value::Invalid };
+    let (Some(a), Some(b)) = (Operand::of(a), Operand::of(b)) else {
+        return Value::Invalid;
+    };
     let mut r = copy_as(CollKind::Set, a.into_coll(), env);
     remove_all(&mut r, &b.coll, env);
     r.into()
@@ -311,7 +352,9 @@ pub fn remove_all(set: &mut Coll, c: &Coll, env: &dyn HashEnv) -> bool {
 
 /// `CollectionUtil.symmetricDifference`.
 pub fn symmetric_difference(a: Value, b: Value, env: &dyn HashEnv) -> Value {
-    let (Some(a), Some(b)) = (Operand::of(a), Operand::of(b)) else { return Value::Invalid };
+    let (Some(a), Some(b)) = (Operand::of(a), Operand::of(b)) else {
+        return Value::Invalid;
+    };
     let mut r = copy_as(CollKind::Set, a.into_coll(), env);
     for e in b.coll.iter() {
         if r.contains(e, env) {
@@ -325,7 +368,9 @@ pub fn symmetric_difference(a: Value, b: Value, env: &dyn HashEnv) -> Value {
 
 /// `CollectionUtil.asSet`: a `HashSet` is returned as is.
 pub fn as_set(src: Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     if op.class == JClass::Coll(CollKind::Set) {
         return op.value;
     }
@@ -334,7 +379,9 @@ pub fn as_set(src: Value, env: &dyn HashEnv) -> Value {
 
 /// `CollectionUtil.asBag`.
 pub fn as_bag(src: Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     if op.class.is_bag() {
         return op.value;
     }
@@ -343,7 +390,9 @@ pub fn as_bag(src: Value, env: &dyn HashEnv) -> Value {
 
 /// `CollectionUtil.asSequence`: any `java.util.List` (also a QVTo `List`) is returned as is.
 pub fn as_sequence(src: Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     if op.class.is_list() {
         return op.value;
     }
@@ -352,7 +401,9 @@ pub fn as_sequence(src: Value, env: &dyn HashEnv) -> Value {
 
 /// `CollectionUtil.asOrderedSet`.
 pub fn as_ordered_set(src: Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     if op.class.is_lhs() {
         return op.value;
     }
@@ -362,9 +413,19 @@ pub fn as_ordered_set(src: Value, env: &dyn HashEnv) -> Value {
 /// `CollectionUtil.append`: an OrderedSet moves an existing element to the end; anything else
 /// becomes a Sequence.
 pub fn append(src: Value, v: Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     let lhs = op.class.is_lhs();
-    let mut r = copy_as(if lhs { CollKind::OrderedSet } else { CollKind::Sequence }, op.into_coll(), env);
+    let mut r = copy_as(
+        if lhs {
+            CollKind::OrderedSet
+        } else {
+            CollKind::Sequence
+        },
+        op.into_coll(),
+        env,
+    );
     if lhs {
         r.remove(&v, env);
     }
@@ -374,8 +435,14 @@ pub fn append(src: Value, v: Value, env: &dyn HashEnv) -> Value {
 
 /// `CollectionUtil.prepend`.
 pub fn prepend(src: Value, v: Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
-    let mut r = if op.class.is_lhs() { Coll::new_ordered_set() } else { Coll::new_sequence() };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
+    let mut r = if op.class.is_lhs() {
+        Coll::new_ordered_set()
+    } else {
+        Coll::new_sequence()
+    };
     r.add(v, env);
     r.add_all(&op.coll, env);
     r.into()
@@ -383,14 +450,20 @@ pub fn prepend(src: Value, v: Value, env: &dyn HashEnv) -> Value {
 
 /// `CollectionUtil.insertAt` (1-based; `index` may be `size + 1`).
 pub fn insert_at(src: Value, index: i32, v: Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     let i = index as i64 - 1;
     let n = op.len();
     if i < 0 || i > n as i64 {
         return Value::Invalid;
     }
     let i = i as usize;
-    let mut r = if op.class.is_lhs() { Coll::new_ordered_set() } else { Coll::new_sequence() };
+    let mut r = if op.class.is_lhs() {
+        Coll::new_ordered_set()
+    } else {
+        Coll::new_sequence()
+    };
     for (cur, e) in op.coll.iter().enumerate() {
         if cur == i {
             r.add(v.clone(), env);
@@ -413,9 +486,17 @@ fn sub_range(n: usize, lower: i32, upper: i32) -> Option<(usize, usize)> {
 
 /// `CollectionUtil.subOrderedSet` (a non-OrderedSet source gives a Sequence).
 pub fn sub_ordered_set(src: Value, lower: i32, upper: i32, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
-    let Some((l, u)) = sub_range(op.len(), lower, upper) else { return Value::Invalid };
-    let mut r = if op.class.is_lhs() { Coll::new_ordered_set() } else { Coll::new_sequence() };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
+    let Some((l, u)) = sub_range(op.len(), lower, upper) else {
+        return Value::Invalid;
+    };
+    let mut r = if op.class.is_lhs() {
+        Coll::new_ordered_set()
+    } else {
+        Coll::new_sequence()
+    };
     for e in op.coll.iter().skip(l).take(u - l + 1) {
         r.add(e.clone(), env);
     }
@@ -424,8 +505,12 @@ pub fn sub_ordered_set(src: Value, lower: i32, upper: i32, env: &dyn HashEnv) ->
 
 /// `CollectionUtil.subSequence`.
 pub fn sub_sequence(src: Value, lower: i32, upper: i32) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
-    let Some((l, u)) = sub_range(op.len(), lower, upper) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
+    let Some((l, u)) = sub_range(op.len(), lower, upper) else {
+        return Value::Invalid;
+    };
     Coll::Sequence(op.coll.iter().skip(l).take(u - l + 1).cloned().collect()).into()
 }
 
@@ -477,7 +562,9 @@ fn common(a: JNum, b: JNum) -> (JNum, JNum) {
 pub fn sum(c: &Coll) -> Option<Value> {
     let mut acc: Option<JNum> = None;
     for e in c.iter() {
-        let Some(n) = e.as_jnum() else { return Some(Value::Invalid) };
+        let Some(n) = e.as_jnum() else {
+            return Some(Value::Invalid);
+        };
         acc = Some(match acc {
             None => n,
             Some(s) => match common(s, n) {
@@ -493,7 +580,9 @@ pub fn sum(c: &Coll) -> Option<Value> {
 fn extremum(c: &Coll, want: std::cmp::Ordering) -> Value {
     let mut acc: Option<JNum> = None;
     for e in c.iter() {
-        let Some(n) = e.as_jnum() else { return Value::Invalid };
+        let Some(n) = e.as_jnum() else {
+            return Value::Invalid;
+        };
         acc = Some(match acc {
             None => n,
             Some(m) => {
@@ -531,9 +620,15 @@ pub fn qvto_including(src: Value, v: Value, env: &dyn HashEnv) -> Value {
     if v.is_invalid() {
         return Value::Invalid;
     }
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     let class = op.class;
-    let src = if class.is_lhs() { Coll::copy_of(CollKind::Set, &op.coll, env).into() } else { op.value };
+    let src = if class.is_lhs() {
+        Coll::copy_of(CollKind::Set, &op.coll, env).into()
+    } else {
+        op.value
+    };
     rewrap(class, including(src, v, env))
 }
 
@@ -542,9 +637,15 @@ pub fn qvto_excluding(src: Value, v: &Value, env: &dyn HashEnv) -> Value {
     if v.is_invalid() {
         return Value::Invalid;
     }
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     let class = op.class;
-    let src = if class.is_lhs() { Coll::copy_of(CollKind::Set, &op.coll, env).into() } else { op.value };
+    let src = if class.is_lhs() {
+        Coll::copy_of(CollKind::Set, &op.coll, env).into()
+    } else {
+        op.value
+    };
     rewrap(class, excluding(src, v, env))
 }
 
@@ -560,7 +661,8 @@ pub fn qvto_union(a: Value, b: Value, env: &dyn HashEnv) -> Value {
 
 /// QVTo's `Set::-`: both operands must be `java.util.Set`s.
 pub fn qvto_minus(a: Value, b: Value, env: &dyn HashEnv) -> Value {
-    let sets = matches!(&a, Value::Coll(c) if c.kind().is_set()) && matches!(&b, Value::Coll(c) if c.kind().is_set());
+    let sets = matches!(&a, Value::Coll(c) if c.kind().is_set())
+        && matches!(&b, Value::Coll(c) if c.kind().is_set());
     if !sets {
         return Value::Invalid;
     }
@@ -569,7 +671,8 @@ pub fn qvto_minus(a: Value, b: Value, env: &dyn HashEnv) -> Value {
 
 /// QVTo's `Set::symmetricDifference`.
 pub fn qvto_symmetric_difference(a: Value, b: Value, env: &dyn HashEnv) -> Value {
-    let sets = matches!(&a, Value::Coll(c) if c.kind().is_set()) && matches!(&b, Value::Coll(c) if c.kind().is_set());
+    let sets = matches!(&a, Value::Coll(c) if c.kind().is_set())
+        && matches!(&b, Value::Coll(c) if c.kind().is_set());
     if !sets {
         return Value::Invalid;
     }
@@ -579,9 +682,15 @@ pub fn qvto_symmetric_difference(a: Value, b: Value, env: &dyn HashEnv) -> Value
 /// QVTo's `Collection::flatten`: an OrderedSet is first copied into a `HashSet`; a `List`
 /// source always gives a new `List`.
 pub fn qvto_flatten(src: Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     let class = op.class;
-    let s = if class.is_lhs() { Coll::copy_of(CollKind::Set, &op.coll, env).into() } else { op.value };
+    let s = if class.is_lhs() {
+        Coll::copy_of(CollKind::Set, &op.coll, env).into()
+    } else {
+        op.value
+    };
     let r = flatten(s, env);
     if class == JClass::MutableList {
         return match r {
@@ -653,12 +762,16 @@ pub fn qvto_insert_at(src: Value, index: i32, v: Value, env: &dyn HashEnv) -> Va
 
 /// QVTo's `reverse`: List stays List, OrderedSet stays OrderedSet, else Sequence.
 pub fn qvto_reverse(src: Value, env: &dyn HashEnv) -> Value {
-    let Some(op) = Operand::of(src) else { return Value::Invalid };
+    let Some(op) = Operand::of(src) else {
+        return Value::Invalid;
+    };
     let mut items = op.coll.to_vec();
     items.reverse();
     match op.class {
         JClass::MutableList => list_value(Coll::Sequence(items)),
-        JClass::Coll(CollKind::OrderedSet) => Coll::from_values(CollKind::OrderedSet, items, env).into(),
+        JClass::Coll(CollKind::OrderedSet) => {
+            Coll::from_values(CollKind::OrderedSet, items, env).into()
+        }
         _ => Coll::Sequence(items).into(),
     }
 }

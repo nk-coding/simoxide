@@ -12,10 +12,13 @@
 mod common;
 
 use common::generate::*;
-use common::{crate_dir, eval, write_golden, Oracle};
+use common::{Oracle, crate_dir, eval, write_golden};
 
 fn scale() -> usize {
-    std::env::var("QVTO_DIFF_SCALE").ok().and_then(|s| s.parse().ok()).unwrap_or(1)
+    std::env::var("QVTO_DIFF_SCALE")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(1)
 }
 
 /// Asks Java, compares, prints the agreement, optionally writes goldens; panics on mismatch.
@@ -43,14 +46,23 @@ fn check(name: &str, requests: Vec<String>, golden_sample: usize) {
             .collect();
         write_golden(
             &crate_dir().join(format!("tests/golden/{name}.tsv")),
-            &format!("{name}: request<TAB>Java answer (tools/oracle, JDK 21). Regenerate: QVTO_WRITE_GOLDEN=1, see tests/differential.rs"),
+            &format!(
+                "{name}: request<TAB>Java answer (tools/oracle, JDK 21). Regenerate: QVTO_WRITE_GOLDEN=1, see tests/differential.rs"
+            ),
             &pairs,
         );
     }
-    assert_eq!(agree, requests.len(), "{name}: {} mismatches", requests.len() - agree);
+    assert_eq!(
+        agree,
+        requests.len(),
+        "{name}: {} mismatches",
+        requests.len() - agree
+    );
 }
 
-const SIZES: &[usize] = &[0, 1, 2, 11, 12, 13, 23, 24, 25, 47, 48, 49, 95, 96, 97, 191, 192, 193, 383, 384, 385, 768, 769];
+const SIZES: &[usize] = &[
+    0, 1, 2, 11, 12, 13, 23, 24, 25, 47, 48, 49, 95, 96, 97, 191, 192, 193, 383, 384, 385, 768, 769,
+];
 
 fn values(rng: &mut Rng, objs: &mut Vec<(u32, i32)>, pool: u64, n: usize) -> Vec<String> {
     (0..n)
@@ -66,7 +78,11 @@ fn values(rng: &mut Rng, objs: &mut Vec<(u32, i32)>, pool: u64, n: usize) -> Vec
 
 fn growth_case(rng: &mut Rng) -> String {
     let mut objs = Vec::new();
-    let n = if rng.chance(0.6) { *rng.pick(SIZES) } else { rng.below(300) as usize };
+    let n = if rng.chance(0.6) {
+        *rng.pick(SIZES)
+    } else {
+        rng.below(300) as usize
+    };
     let pool = rng.below(5);
     let kind = *rng.pick(&["S", "S", "S", "B", "O"]);
     let vals = values(rng, &mut objs, pool, n);
@@ -111,11 +127,15 @@ fn collision_case(rng: &mut Rng) -> String {
         }
         1 => {
             let c = rng.below(1024) as i64;
-            (0..rng.range(9, 40)).map(|k| format!("i{}", c + 1024 * k)).collect()
+            (0..rng.range(9, 40))
+                .map(|k| format!("i{}", c + 1024 * k))
+                .collect()
         }
         2 => {
             let c = rng.below(1024) as i64;
-            (0..rng.range(9, 30)).flat_map(|k| [format!("i{}", c + 1024 * k), format!("l{}", c + 1024 * k)]).collect()
+            (0..rng.range(9, 30))
+                .flat_map(|k| [format!("i{}", c + 1024 * k), format!("l{}", c + 1024 * k)])
+                .collect()
         }
         3 => {
             // objects: distinct identity hashes in one bucket
@@ -160,14 +180,23 @@ fn collision_case(rng: &mut Rng) -> String {
         s += &format!(";+ 0 {}", rng.pick(&colliders));
     }
     s += ";p 0;cp S 1 0;p 1;new S 2";
-    for v in colliders.iter().take(rng.below(colliders.len() as u64 + 1) as usize) {
+    for v in colliders
+        .iter()
+        .take(rng.below(colliders.len() as u64 + 1) as usize)
+    {
         s += &format!(";+ 2 {v}");
     }
     s += ";rall 0 2;p 0";
     s
 }
 
-fn small_coll(rng: &mut Rng, objs: &mut Vec<(u32, i32)>, reg: usize, kind: &str, pool: &[String]) -> String {
+fn small_coll(
+    rng: &mut Rng,
+    objs: &mut Vec<(u32, i32)>,
+    reg: usize,
+    kind: &str,
+    pool: &[String],
+) -> String {
     let mut s = format!("new {kind} {reg}");
     for _ in 0..rng.below(8) {
         s += &format!(";+ {reg} {}", rng.pick(pool));
@@ -176,6 +205,7 @@ fn small_coll(rng: &mut Rng, objs: &mut Vec<(u32, i32)>, reg: usize, kind: &str,
     s
 }
 
+#[allow(clippy::explicit_counter_loop)]
 fn ops_case(rng: &mut Rng) -> String {
     let mut objs = Vec::new();
     let numeric = rng.chance(0.3);
@@ -264,7 +294,11 @@ fn ops_case(rng: &mut Rng) -> String {
 fn dict_case(rng: &mut Rng) -> String {
     let mut objs = Vec::new();
     let pool = rng.below(5);
-    let n = if rng.chance(0.5) { *rng.pick(SIZES) } else { rng.below(60) as usize };
+    let n = if rng.chance(0.5) {
+        *rng.pick(SIZES)
+    } else {
+        rng.below(60) as usize
+    };
     let keys = values(rng, &mut objs, pool, n);
     let vals = values(rng, &mut objs, 0, n);
     let mut s = String::from("dict 0");
@@ -287,22 +321,22 @@ fn collections() {
     for _ in 0..n {
         reqs.push(format!("coll {}", growth_case(&mut rng)));
     }
-    check("coll-growth", reqs, 150);
+    check("coll-growth", reqs, 40);
     let mut reqs: Vec<String> = Vec::new();
     for _ in 0..n {
         reqs.push(format!("coll {}", collision_case(&mut rng)));
     }
-    check("coll-collisions", reqs, 100);
+    check("coll-collisions", reqs, 40);
     let mut reqs: Vec<String> = Vec::new();
     for _ in 0..(4 * n) {
         reqs.push(format!("coll {}", ops_case(&mut rng)));
     }
-    check("coll-ops", reqs, 400);
+    check("coll-ops", reqs, 300);
     let mut reqs: Vec<String> = Vec::new();
     for _ in 0..n {
         reqs.push(format!("coll {}", dict_case(&mut rng)));
     }
-    check("coll-dict", reqs, 100);
+    check("coll-dict", reqs, 40);
 }
 
 #[test]
@@ -312,7 +346,11 @@ fn hashes() {
     let mut objs = Vec::new();
     let mut reqs: Vec<String> = Vec::new();
     for _ in 0..20000 * scale() {
-        let v = if rng.chance(0.5) { enc_str(&utf16(&mut rng, 24)) } else { scalar(&mut rng, &mut objs) };
+        let v = if rng.chance(0.5) {
+            enc_str(&utf16(&mut rng, 24))
+        } else {
+            scalar(&mut rng, &mut objs)
+        };
         reqs.push(format!("hash {v}"));
     }
     check("hash", reqs, 1000);
@@ -323,7 +361,9 @@ fn hashes() {
 #[test]
 #[ignore]
 fn shrink() {
-    let Ok(path) = std::env::var("QVTO_SHRINK") else { return };
+    let Ok(path) = std::env::var("QVTO_SHRINK") else {
+        return;
+    };
     let req = std::fs::read_to_string(path).unwrap().trim().to_string();
     let body = req.strip_prefix("coll ").unwrap();
     let mut stmts: Vec<String> = body.split(';').map(|s| s.to_string()).collect();
@@ -376,7 +416,17 @@ fn doubles_to_string() {
     for m in 0..2000u64 {
         reqs.push(format!("dtoa {m:016x}"));
     }
-    for x in [1e-3, 1e7, 9999999.999999998, 0.001, 0.0009999999999999998, f64::MAX, f64::MIN_POSITIVE, 2e23, 5e-324] {
+    for x in [
+        1e-3,
+        1e7,
+        9999999.999999998,
+        0.001,
+        0.0009999999999999998,
+        f64::MAX,
+        f64::MIN_POSITIVE,
+        2e23,
+        5e-324,
+    ] {
         reqs.push(format!("dtoa {:016x}", x.to_bits()));
     }
     for _ in 0..200_000 * scale() {
@@ -395,7 +445,9 @@ fn doubles_to_string() {
         let b = match rng.below(3) {
             0 => rng.next() as u32,
             1 => (rng.range(-100000, 100000) as f32 / 64.0).to_bits(),
-            _ => ((rng.range(1, 99999) as f64) * 10f64.powi(rng.range(-40, 38) as i32)) as f32 as u32,
+            _ => {
+                ((rng.range(1, 99999) as f64) * 10f64.powi(rng.range(-40, 38) as i32)) as f32 as u32
+            }
         };
         reqs.push(format!("ftoa {b:08x}"));
     }
@@ -408,13 +460,71 @@ fn number_parsing() {
     let mut rng = Rng(0x9a25e);
     let mut reqs: Vec<String> = Vec::new();
     let fixed = [
-        "1", "1.5", "-1.5", "+2", ".5", "5.", ".", "", " ", " 1 ", "\t2\n", "1e3", "1E-3", "1e", "1e+", "1e+5", "1.5f", "1.5F",
-        "1.5d", "1.5D", "1.5ff", "NaN", "-NaN", "+Infinity", "-Infinity", "Infinity ", "infinity", "nan", "0x1p3", "0X1.8P-2",
-        "0x.8p1", "0x1.p0", "0x1", "0xp1", "0x1p", "-0x1p-1074", "0x1p-1075", "0x1.8p-1075", "0x0.0000000000001p-1022",
-        "0x1.fffffffffffffp1023", "0x1.fffffffffffff8p1023", "0x123456789abcdef0123p0", "1e400", "1e-400", "2.4703282292062328e-324",
-        "2.4703282292062327e-324", "4.9e-324", "1_000", "1,5", "１", "٣", "0.000000000000000000000000000000001", "123456789012345678901234567890",
-        "9007199254740993", "1.7976931348623157e308", "1.7976931348623159e308", "00012", "-0", "-0.0", "0e0", "1e2147483648", "1e-2147483649",
-        "\u{0}1", "1\u{0}", "\u{20}\u{1F}7",
+        "1",
+        "1.5",
+        "-1.5",
+        "+2",
+        ".5",
+        "5.",
+        ".",
+        "",
+        " ",
+        " 1 ",
+        "\t2\n",
+        "1e3",
+        "1E-3",
+        "1e",
+        "1e+",
+        "1e+5",
+        "1.5f",
+        "1.5F",
+        "1.5d",
+        "1.5D",
+        "1.5ff",
+        "NaN",
+        "-NaN",
+        "+Infinity",
+        "-Infinity",
+        "Infinity ",
+        "infinity",
+        "nan",
+        "0x1p3",
+        "0X1.8P-2",
+        "0x.8p1",
+        "0x1.p0",
+        "0x1",
+        "0xp1",
+        "0x1p",
+        "-0x1p-1074",
+        "0x1p-1075",
+        "0x1.8p-1075",
+        "0x0.0000000000001p-1022",
+        "0x1.fffffffffffffp1023",
+        "0x1.fffffffffffff8p1023",
+        "0x123456789abcdef0123p0",
+        "1e400",
+        "1e-400",
+        "2.4703282292062328e-324",
+        "2.4703282292062327e-324",
+        "4.9e-324",
+        "1_000",
+        "1,5",
+        "１",
+        "٣",
+        "0.000000000000000000000000000000001",
+        "123456789012345678901234567890",
+        "9007199254740993",
+        "1.7976931348623157e308",
+        "1.7976931348623159e308",
+        "00012",
+        "-0",
+        "-0.0",
+        "0e0",
+        "1e2147483648",
+        "1e-2147483649",
+        "\u{0}1",
+        "1\u{0}",
+        "\u{20}\u{1F}7",
     ];
     for f in fixed {
         for c in ["dparse", "iparse", "lparse"] {
@@ -427,11 +537,24 @@ fn number_parsing() {
             1 => format!("{}", rng.next() as i64),
             2 => format!("{}", rng.next() as i32),
             3 => format!("{}e{}", rng.range(-99999, 99999), rng.range(-330, 330)),
-            4 => format!("{}.{}E{}{}", rng.below(1000), rng.below(1_000_000), if rng.chance(0.5) { "-" } else { "" }, rng.below(400)),
-            5 => format!("0x{:x}.{:x}p{}", rng.below(1 << 20), rng.next(), rng.range(-1100, 1100)),
+            4 => format!(
+                "{}.{}E{}{}",
+                rng.below(1000),
+                rng.below(1_000_000),
+                if rng.chance(0.5) { "-" } else { "" },
+                rng.below(400)
+            ),
+            5 => format!(
+                "0x{:x}.{:x}p{}",
+                rng.below(1 << 20),
+                rng.next(),
+                rng.range(-1100, 1100)
+            ),
             6 => {
                 let alphabet = b"0123456789.eE+-xXpPfFdDaN \t";
-                (0..rng.range(1, 8)).map(|_| *rng.pick(alphabet) as char).collect()
+                (0..rng.range(1, 8))
+                    .map(|_| *rng.pick(alphabet) as char)
+                    .collect()
             }
             _ => format!("{:+}", rng.range(-3_000_000_000, 3_000_000_000)),
         };
@@ -445,30 +568,77 @@ fn number_parsing() {
 #[ignore]
 fn ocl_numbers() {
     let mut rng = Rng(0x0c1);
-    let ops = ["+", "-", "*", "/", "div", "mod", "max", "min", "<", ">", "<=", ">=", "=", "<>", "neg", "abs", "floor", "round", "toString"];
+    let ops = [
+        "+", "-", "*", "/", "div", "mod", "max", "min", "<", ">", "<=", ">=", "=", "<>", "neg",
+        "abs", "floor", "round", "toString",
+    ];
     let operand = |rng: &mut Rng| -> String {
         match rng.below(9) {
             0 => format!("i{}", rng.range(-10, 10)),
             1 => format!("i{}", rng.next() as i32),
-            2 => format!("i{}", *rng.pick(&[i32::MIN, i32::MAX, -1, 0, 1, 46341, -46341, 65536])),
-            3 => format!("l{}", *rng.pick(&[i64::MIN, i64::MAX, 2147483648, -2147483649, 3037000500, 1 << 53, (1 << 53) + 1])),
+            2 => format!(
+                "i{}",
+                *rng.pick(&[i32::MIN, i32::MAX, -1, 0, 1, 46341, -46341, 65536])
+            ),
+            3 => format!(
+                "l{}",
+                *rng.pick(&[
+                    i64::MIN,
+                    i64::MAX,
+                    2147483648,
+                    -2147483649,
+                    3037000500,
+                    1 << 53,
+                    (1 << 53) + 1
+                ])
+            ),
             4 => {
                 let v = rng.next() as i64;
-                if v as i32 as i64 == v { format!("i{v}") } else { format!("l{v}") }
+                if v as i32 as i64 == v {
+                    format!("i{v}")
+                } else {
+                    format!("l{v}")
+                }
             }
             5 => format!("d{:016x}", (rng.range(-20, 20) as f64 / 4.0).to_bits()),
-            6 => format!("d{:016x}", rng.pick(&[0f64, -0.0, 0.5, -0.5, 1.5, -2.5, 1e10, 3e9, -3e9, 2147483647.5, f64::NAN, f64::INFINITY, f64::NEG_INFINITY, 9007199254740993.0]).to_bits()),
+            6 => format!(
+                "d{:016x}",
+                rng.pick(&[
+                    0f64,
+                    -0.0,
+                    0.5,
+                    -0.5,
+                    1.5,
+                    -2.5,
+                    1e10,
+                    3e9,
+                    -3e9,
+                    2147483647.5,
+                    f64::NAN,
+                    f64::INFINITY,
+                    f64::NEG_INFINITY,
+                    9007199254740993.0
+                ])
+                .to_bits()
+            ),
             _ => format!("d{:016x}", double_bits(rng)),
         }
     };
     let mut reqs: Vec<String> = Vec::new();
     for _ in 0..40_000 * scale() {
         let op = *rng.pick(&ops);
-        let a = operand(&mut rng);
+        let mut a = operand(&mut rng);
+        // div and mod are only defined on Integers (a Real operand is a type error)
+        while matches!(op, "div" | "mod") && a.starts_with('d') {
+            a = operand(&mut rng);
+        }
         if matches!(op, "neg" | "abs" | "floor" | "round" | "toString") {
             reqs.push(format!("num {op} {a}"));
         } else {
-            let b = operand(&mut rng);
+            let mut b = operand(&mut rng);
+            while matches!(op, "div" | "mod") && b.starts_with('d') {
+                b = operand(&mut rng);
+            }
             reqs.push(format!("num {op} {a} {b}"));
         }
     }
@@ -481,10 +651,34 @@ fn strings() {
     let mut rng = Rng(0x57);
     let mut reqs: Vec<String> = Vec::new();
     let enc = |u: &[u16]| common::hex16(u.iter().copied());
-    let interesting: Vec<Vec<u16>> = ["", "a", "ß", "Σ", "ΟΔΟΣ", "ΣΑ", "Α Σ", "ΑΣ.", "ΑΣ'Α", "İ", "ı", "ﬀ", "ŉ", "ǅ", "\u{1F600}", "Straße", "ÉCOLE", " x ", "\u{0}\u{1}a\u{20}", "\u{a0}x\u{a0}", "aAbB", "Ａｂ", "𐐨𐐀"]
-        .iter()
-        .map(|s| s.encode_utf16().collect())
-        .collect();
+    let interesting: Vec<Vec<u16>> = [
+        "",
+        "a",
+        "ß",
+        "Σ",
+        "ΟΔΟΣ",
+        "ΣΑ",
+        "Α Σ",
+        "ΑΣ.",
+        "ΑΣ'Α",
+        "İ",
+        "ı",
+        "ﬀ",
+        "ŉ",
+        "ǅ",
+        "\u{1F600}",
+        "Straße",
+        "ÉCOLE",
+        " x ",
+        "\u{0}\u{1}a\u{20}",
+        "\u{a0}x\u{a0}",
+        "aAbB",
+        "Ａｂ",
+        "𐐨𐐀",
+    ]
+    .iter()
+    .map(|s| s.encode_utf16().collect())
+    .collect();
     let mut strings: Vec<Vec<u16>> = interesting.clone();
     for _ in 0..3000 {
         strings.push(utf16(&mut rng, 12));
@@ -507,7 +701,23 @@ fn strings() {
         let c = rng.pick(&strings).clone();
         let req = match rng.below(9) {
             0 => format!("str cmp {} {}", enc(&a), enc(&b)),
-            1 => format!("str eqic {} {}", enc(&a), enc(&if rng.chance(0.5) { b.clone() } else { a.iter().map(|&u| if rng.chance(0.5) { qvto_runtime::java::chars::to_upper_unit(u) } else { u }).collect() })),
+            1 => format!(
+                "str eqic {} {}",
+                enc(&a),
+                enc(&if rng.chance(0.5) {
+                    b.clone()
+                } else {
+                    a.iter()
+                        .map(|&u| {
+                            if rng.chance(0.5) {
+                                qvto_runtime::java::chars::to_upper_unit(u)
+                            } else {
+                                u
+                            }
+                        })
+                        .collect()
+                })
+            ),
             2 => format!("str idx {} {}", enc(&a), enc(&b)),
             3 => format!("str lidx {} {}", enc(&a), enc(&b)),
             4 => format!("str repl {} {} {}", enc(&a), enc(&b), enc(&c)),
@@ -515,7 +725,12 @@ fn strings() {
             6 => format!("str ew {} {}", enc(&a), enc(&b)),
             7 => {
                 let n = a.len() as i64;
-                format!("str sub {} {} {}", enc(&a), rng.range(-1, n + 1), rng.range(-1, n + 1))
+                format!(
+                    "str sub {} {} {}",
+                    enc(&a),
+                    rng.range(-1, n + 1),
+                    rng.range(-1, n + 1)
+                )
             }
             _ => format!("str tok {} {}", enc(&a), enc(&b)),
         };
@@ -530,7 +745,10 @@ fn characters() {
     let reqs: Vec<String> = (0..=0xffffu32).map(|u| format!("char {u}")).collect();
     check("char", reqs, 600);
     let mut rng = Rng(0xc9);
-    let mut reqs: Vec<String> = (0..0x2_0000u32).filter(|c| !(0xd800..0xe000).contains(c)).map(|c| format!("cp {c}")).collect();
+    let mut reqs: Vec<String> = (0..0x2_0000u32)
+        .filter(|c| !(0xd800..0xe000).contains(c))
+        .map(|c| format!("cp {c}"))
+        .collect();
     for _ in 0..20_000 {
         reqs.push(format!("cp {}", rng.range(0x20000, 0x10ffff)));
     }
@@ -554,7 +772,7 @@ fn to_string() {
                     break v;
                 }
                 if v.starts_with('s') {
-                    let u = common::unhex16(&v[1..]);
+                    let u = common::unhex16(v.strip_prefix('s').unwrap());
                     if char::decode_utf16(u.iter().copied()).all(|r| r.is_ok()) {
                         break v;
                     }
@@ -564,7 +782,11 @@ fn to_string() {
         }
         s += ";ps 0;dict 1";
         for _ in 0..rng.below(5) {
-            s += &format!(";dput 1 i{} d{:016x}", rng.range(-50, 50), (rng.range(-8, 8) as f64 / 8.0).to_bits());
+            s += &format!(
+                ";dput 1 i{} d{:016x}",
+                rng.range(-50, 50),
+                (rng.range(-8, 8) as f64 / 8.0).to_bits()
+            );
         }
         s += ";ps 1";
         reqs.push(format!("coll {s}"));

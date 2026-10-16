@@ -1,0 +1,32 @@
+THIRD-PARTY CODE IN qvto-runtime
+================================
+
+qvto-runtime is licensed under the Eclipse Public License 2.0 (see the repository's LICENSE). It
+reproduces the behaviour of Eclipse OCL, Eclipse QVTo and the Java class library. The following
+files port or adapt third-party code or data.
+
+1. Eclipse OCL (classic) 3.22 and Eclipse QVTo 3.11
+   Source:    reference/eclipse-ocl, reference/eclipse-qvto (see reference/README.md)
+   Copyright: IBM, Borland Software, Open Canarias, Willink Transformations and others
+   Licence:   Eclipse Public License 2.0
+   Used in:
+   - src/coll/ops.rs: ports of org.eclipse.ocl.util.CollectionUtil and of QVTo's
+     SetTypeOperations, CollectionTypeOperations, OrderedSetTypeOperations handlers.
+   - src/coll/mod.rs: semantics of org.eclipse.ocl.util.BagImpl (iteration, equals, hashCode).
+   - src/eq.rs: ports of org.eclipse.ocl.util.ObjectUtil.equal/hashCode; AbstractTuple.
+   - src/num.rs: arithmetic of org.eclipse.ocl.EvaluationVisitorImpl and NumberUtil.
+   - src/strings.rs: string operations of EvaluationVisitorImpl and QVTo's StringOperations.
+   - src/display.rs: toString of AbstractTuple, CollectionUtil, DictionaryImpl.
+   - src/dict.rs: DictionaryImpl, MutableListImpl.
+
+2. SimOxide (same author, EPL-2.0)
+   Source:    simoxide/crates/simoxide-testkit/src/javafmt.rs, simoxide-sim/src/javahash.rs
+   Used in:   src/java/fmt.rs (Double.toString, adapted and extended to Float.toString),
+              src/java/hash.rs (String.hashCode).
+
+3. Java class library behaviour (OpenJDK 21)
+   No OpenJDK source is copied. src/java/hashmap.rs reimplements the documented behaviour of
+   java.util.HashMap (table sizing, resize split, tree bins as red-black trees with the
+   comparison rules of HashMap) and is checked against the JDK by tests/differential.rs.
+   src/java/chars_data.rs is data generated from the JDK's java.lang.Character by
+   tools/oracle/GenChars.java (Unicode character properties, Unicode licence for the data).

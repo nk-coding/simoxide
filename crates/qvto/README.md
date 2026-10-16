@@ -11,7 +11,7 @@ A QVT Operational Mappings (QVTo) engine in Rust.
 - **Embeddable.** The engine reads and writes models through a trait, so it runs on its own
   Ecore/XMI layer and, later, directly on SimOxide's model graph.
 
-Status: Q1a (model API, Ecore/XMI layer) and Q1b (parser) done; transformations do not run yet. See `PLAN.md`.
+Status: Q1a (model API, Ecore/XMI layer), Q1b (parser) and Q1c (runtime values, Java-compatible primitives) done; transformations do not run yet. See `PLAN.md`.
 
 ## Documents
 

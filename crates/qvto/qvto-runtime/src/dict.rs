@@ -32,7 +32,9 @@ impl Dict {
             Index::Hash(m) => {
                 let mut n = crate::java::hashmap::JavaHashMap::new();
                 n.put_all(m.iter().map(|(k, v)| (k.clone(), v.clone())), m.len(), env);
-                Dict { map: Index::Hash(n) }
+                Dict {
+                    map: Index::Hash(n),
+                }
             }
             Index::Linked(_) => {
                 let mut d = Dict::new(env);
@@ -94,7 +96,9 @@ impl Dict {
 
     /// `HashMap.hashCode`: sum of `hash(key) ^ hash(value)`.
     pub fn java_hash(&self, env: &dyn HashEnv) -> i32 {
-        self.map.iter().fold(0i32, |h, (k, v)| h.wrapping_add(java_hash(k, env) ^ java_hash(v, env)))
+        self.map.iter().fold(0i32, |h, (k, v)| {
+            h.wrapping_add(java_hash(k, env) ^ java_hash(v, env))
+        })
     }
 
     /// `AbstractMap.equals`.

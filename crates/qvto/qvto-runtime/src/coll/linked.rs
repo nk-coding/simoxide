@@ -25,7 +25,11 @@ impl<V> Default for LinkedMap<V> {
 
 impl<V> LinkedMap<V> {
     pub fn new() -> Self {
-        LinkedMap { map: JavaHashMap::new(), order: Vec::new(), holes: 0 }
+        LinkedMap {
+            map: JavaHashMap::new(),
+            order: Vec::new(),
+            holes: 0,
+        }
     }
     pub fn len(&self) -> usize {
         self.map.len()
@@ -34,7 +38,11 @@ impl<V> LinkedMap<V> {
         self.map.is_empty()
     }
     pub fn iter(&self) -> Iter<'_, V> {
-        Iter { map: &self.map, order: self.order.iter(), left: self.map.len() }
+        Iter {
+            map: &self.map,
+            order: self.order.iter(),
+            left: self.map.len(),
+        }
     }
     pub fn clear(&mut self) {
         self.map.clear();

@@ -113,7 +113,11 @@ fn parse_ryu(s: &str) -> Decimal {
             }
             b'.' => in_frac = true,
             b'e' | b'E' => {
-                let (neg, start) = if b.get(i + 1) == Some(&b'-') { (true, i + 2) } else { (false, i + 1) };
+                let (neg, start) = if b.get(i + 1) == Some(&b'-') {
+                    (true, i + 2)
+                } else {
+                    (false, i + 1)
+                };
                 let mut e: i32 = 0;
                 for &c in &b[start..] {
                     e = e * 10 + (c - b'0') as i32;
@@ -131,7 +135,11 @@ fn parse_ryu(s: &str) -> Decimal {
         e10 += 1;
     }
     let n = ndigits(digits);
-    Decimal { digits, ndigits: n, sci_exp: e10 + n as i32 - 1 }
+    Decimal {
+        digits,
+        ndigits: n,
+        sci_exp: e10 + n as i32 - 1,
+    }
 }
 
 fn ndigits(mut v: u64) -> u32 {
@@ -288,9 +296,18 @@ pub mod exact {
             let bits = x.to_bits();
             let be = ((bits >> 23) & 0xff) as i32;
             let m = (bits & ((1u32 << 23) - 1)) as u128;
-            let (f, q) = if be == 0 { (m, -149) } else { (m | (1u128 << 23), be - 150) };
+            let (f, q) = if be == 0 {
+                (m, -149)
+            } else {
+                (m | (1u128 << 23), be - 150)
+            };
             let dl = if m == 0 && be > 1 { 1 } else { 2 };
-            Val { f, q, dl, inclusive: f % 2 == 0 }
+            Val {
+                f,
+                q,
+                dl,
+                inclusive: f % 2 == 0,
+            }
         }
         fn new(x: f64) -> Val {
             let bits = x.to_bits();

@@ -1,7 +1,7 @@
 //! Requests other than hashes and collection scripts: number formatting and parsing, OCL
 //! arithmetic, Java string operations and character data.
 
-use super::{decode, encode, hex16, unhex16, TapeEnv};
+use super::{TapeEnv, decode, encode, hex16, unhex16};
 use qvto_runtime::eq::ocl_equal;
 use qvto_runtime::identity::Mode;
 use qvto_runtime::java::{chars, fmt, parse, string as js};
@@ -30,7 +30,11 @@ pub fn eval(cmd: &str, arg: &str) -> String {
                 "{}{}{} {} {} {}",
                 if chars::is_whitespace(u) { "W" } else { "-" },
                 if chars::is_letter(u) { "L" } else { "-" },
-                if chars::is_letter_or_digit(u) { "D" } else { "-" },
+                if chars::is_letter_or_digit(u) {
+                    "D"
+                } else {
+                    "-"
+                },
                 chars::digit10(u).map_or(-1, |d| d as i64),
                 chars::to_upper_unit(u),
                 chars::to_lower_unit(u)
@@ -106,19 +110,40 @@ fn str_req(arg: &str) -> String {
         "lower" => hex16(js::to_lower_case(&s).units()),
         "trim" => hex16(js::trim(&s).units()),
         "cmp" => (qvto_runtime::eq::compare_str(&s, &arg(2)) as i32).to_string(),
-        "eqic" => if js::equals_ignore_case(&s, &arg(2)) { "T" } else { "F" }.into(),
+        "eqic" => if js::equals_ignore_case(&s, &arg(2)) {
+            "T"
+        } else {
+            "F"
+        }
+        .into(),
         "idx" => js::index_of(&s, &arg(2)).to_string(),
         "lidx" => js::last_index_of(&s, &arg(2)).to_string(),
         "repl" => hex16(js::replace(&s, &arg(2), &arg(3)).units()),
-        "sw" => if js::starts_with(&s, &arg(2)) { "T" } else { "F" }.into(),
+        "sw" => if js::starts_with(&s, &arg(2)) {
+            "T"
+        } else {
+            "F"
+        }
+        .into(),
         "ew" => if js::ends_with(&s, &arg(2)) { "T" } else { "F" }.into(),
-        "sub" => match js::substring(&s, a[2].parse().unwrap(), a[3].parse().unwrap()) {
+        "sub" => match (a[2].parse::<usize>().ok(), a[3].parse::<usize>().ok())
+            .0
+            .zip(a[3].parse::<usize>().ok())
+            .and_then(|(b, e)| js::substring(&s, b, e))
+        {
             Some(x) => hex16(x.units()),
             None => "EXC StringIndexOutOfBoundsException".into(),
         },
         "tok" => {
-            let d = if a.len() > 2 { arg(2) } else { Str::new(js::DEFAULT_DELIMS) };
-            let toks: Vec<String> = js::tokenize(&s, &d, false).iter().map(|t| hex16(t.units())).collect();
+            let d = if a.len() > 2 {
+                arg(2)
+            } else {
+                Str::new(js::DEFAULT_DELIMS)
+            };
+            let toks: Vec<String> = js::tokenize(&s, &d, false)
+                .iter()
+                .map(|t| hex16(t.units()))
+                .collect();
             format!("[{}]", toks.join(","))
         }
         other => format!("UNIMPLEMENTED str {other}"),

@@ -8,7 +8,7 @@ Status values: done, next, open, parked.
 | Q0 | Research, resources, design, skeleton | done | — |
 | Q1a | Model API and own Ecore/XMI layer (`qvto-model`, `qvto-emf`) | done | Q1b, Q1c, Q1d |
 | Q1b | Lexer and parser (`qvto-syntax`) | done | Q1a, Q1c, Q1d |
-| Q1c | Runtime values and Java-compatible primitives (`qvto-runtime` core) | next | Q1a, Q1b, Q1d |
+| Q1c | Runtime values and Java-compatible primitives (`qvto-runtime` core) | done | Q1a, Q1b, Q1d |
 | Q1d | Reference harness: runner batch mode, canonical dump, conformance-runner skeleton (`qvto-testkit`) | next | Q1a, Q1b, Q1c |
 | Q2 | Type system, standard library signatures, semantic analysis (`qvto-types`, `qvto-sema`) | open | Q3a |
 | Q3a | Bytecode and VM core: expressions, imperative OCL, helpers, queries, objects, log, assert | open | Q2 (on hand-written IR) |
@@ -44,6 +44,13 @@ Status values: done, next, open, parked.
   copy-constructor capacities, removals, treeified bins noted), `String.hashCode`,
   `Double.toString`, `Integer` arithmetic and string operations agree with golden values dumped
   from Java.
+  Done 2026-10-16 (`crates/qvto-runtime/README.md`, "Verification"): differential tests against
+  JDK 21 and Eclipse OCL's own classes agree on every case: 1.5k–15k collection scripts per
+  category (growth across resize thresholds, treeified bins with both removal kinds, all
+  `CollectionUtil`/QVTo collection operations, `DictionaryImpl`), 20k hash codes, 210k
+  `Double.toString` and 103k `Float.toString`, 60k number parses, 40k OCL arithmetic
+  expressions through the classic evaluator, 48k string operations, all 65 536 code units and
+  149k code points of character data; 12 993 samples are committed as goldens.
 - **Q1d**: the Java runner runs a whole list of cases in one JVM, writes canonical dumps and logs;
   `qvto-testkit` reads `reference/inventory/eclipse-tests.tsv` and reports per-case status.
 - **Q2**: the 49 `compile_ok` parser cases and all positive transformation cases type-check; the

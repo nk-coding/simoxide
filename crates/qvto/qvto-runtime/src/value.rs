@@ -191,7 +191,11 @@ impl Value {
     }
     /// A `java.lang.Long` box: [`Value::Int`] outside `int` range, else a [`Value::Boxed`].
     pub fn long(l: i64) -> Value {
-        if l as i32 as i64 == l { Value::Boxed(IntBox::Long, l as i32) } else { Value::Int(l) }
+        if l as i32 as i64 == l {
+            Value::Boxed(IntBox::Long, l as i32)
+        } else {
+            Value::Int(l)
+        }
     }
     /// An integer result of OCL arithmetic (`coerceNumber` of a `Long`).
     pub fn integer(l: i64) -> Value {

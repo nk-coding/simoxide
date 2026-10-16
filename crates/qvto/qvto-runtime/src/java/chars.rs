@@ -8,7 +8,7 @@
 use super::chars_data as d;
 
 fn in_ranges(r: &[(u32, u32)], c: u32) -> bool {
-    match r.binary_search_by(|&(s, e)| {
+    r.binary_search_by(|&(s, e)| {
         if c < s {
             std::cmp::Ordering::Greater
         } else if c > e {
@@ -16,10 +16,8 @@ fn in_ranges(r: &[(u32, u32)], c: u32) -> bool {
         } else {
             std::cmp::Ordering::Equal
         }
-    }) {
-        Ok(_) => true,
-        Err(_) => false,
-    }
+    })
+    .is_ok()
 }
 
 fn map_pairs(r: &[(u32, u32)], c: u32) -> u32 {
@@ -61,7 +59,11 @@ pub fn digit10(u: u16) -> Option<u32> {
 /// `Character.toUpperCase(int)` (simple mapping).
 pub fn to_upper_cp(c: u32) -> u32 {
     if c < 0x80 {
-        return if (0x61..=0x7a).contains(&c) { c - 32 } else { c };
+        return if (0x61..=0x7a).contains(&c) {
+            c - 32
+        } else {
+            c
+        };
     }
     map_pairs(d::UPPER, c)
 }
@@ -69,7 +71,11 @@ pub fn to_upper_cp(c: u32) -> u32 {
 /// `Character.toLowerCase(int)` (simple mapping).
 pub fn to_lower_cp(c: u32) -> u32 {
     if c < 0x80 {
-        return if (0x41..=0x5a).contains(&c) { c + 32 } else { c };
+        return if (0x41..=0x5a).contains(&c) {
+            c + 32
+        } else {
+            c
+        };
     }
     map_pairs(d::LOWER, c)
 }
@@ -87,12 +93,18 @@ pub fn to_lower_unit(u: u16) -> u16 {
 /// The full upper-case mapping of a code point when it is not a single code point (`ß` to
 /// `SS`), as `String.toUpperCase(Locale.ROOT)` applies it.
 pub fn upper_special(c: u32) -> Option<&'static [u16]> {
-    d::UPPER_SPECIAL.binary_search_by_key(&c, |&(k, _)| k).ok().map(|i| d::UPPER_SPECIAL[i].1)
+    d::UPPER_SPECIAL
+        .binary_search_by_key(&c, |&(k, _)| k)
+        .ok()
+        .map(|i| d::UPPER_SPECIAL[i].1)
 }
 
 /// The full lower-case mapping when it differs from the simple one (only `İ`).
 pub fn lower_special(c: u32) -> Option<&'static [u16]> {
-    d::LOWER_SPECIAL.binary_search_by_key(&c, |&(k, _)| k).ok().map(|i| d::LOWER_SPECIAL[i].1)
+    d::LOWER_SPECIAL
+        .binary_search_by_key(&c, |&(k, _)| k)
+        .ok()
+        .map(|i| d::LOWER_SPECIAL[i].1)
 }
 
 /// Lower-, upper- or title-case letter (`ConditionalSpecialCasing.isCased`, approximately).

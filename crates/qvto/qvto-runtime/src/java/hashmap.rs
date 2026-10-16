@@ -96,7 +96,13 @@ pub fn hash_map_capacity_for(num_mappings: usize) -> usize {
 impl<K, V> JavaHashMap<K, V> {
     /// `new HashMap()`.
     pub fn new() -> Self {
-        JavaHashMap { table: Vec::new(), nodes: Vec::new(), free: Vec::new(), size: 0, threshold: 0 }
+        JavaHashMap {
+            table: Vec::new(),
+            nodes: Vec::new(),
+            free: Vec::new(),
+            size: 0,
+            threshold: 0,
+        }
     }
 
     /// `new HashMap(initialCapacity)`.
@@ -189,7 +195,12 @@ impl<K, V> JavaHashMap<K, V> {
 
     /// Entries in Java iteration order.
     pub fn iter(&self) -> Iter<'_, K, V> {
-        Iter { map: self, bucket: 0, node: NIL, left: self.size }
+        Iter {
+            map: self,
+            bucket: 0,
+            node: NIL,
+            left: self.size,
+        }
     }
     pub fn keys(&self) -> impl Iterator<Item = &K> {
         self.iter().map(|(k, _)| k)
@@ -199,7 +210,11 @@ impl<K, V> JavaHashMap<K, V> {
     }
     /// Arena ids of the entries in iteration order (stable while the entry lives).
     pub fn node_ids(&self) -> impl Iterator<Item = u32> + '_ {
-        NodeIds { map: self, bucket: 0, node: NIL }
+        NodeIds {
+            map: self,
+            bucket: 0,
+            node: NIL,
+        }
     }
     pub fn node_key(&self, id: u32) -> &K {
         &self.n(id).key
@@ -517,12 +532,20 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
         if d != Ordering::Equal {
             return d;
         }
-        if a.identity_hash(env) <= b.identity_hash(env) { Ordering::Less } else { Ordering::Greater }
+        if a.identity_hash(env) <= b.identity_hash(env) {
+            Ordering::Less
+        } else {
+            Ordering::Greater
+        }
     }
 
     /// `compareComparables(kc, k, x)`: 0 unless `x` has class `kc`.
     fn compare_comparables(kc: u8, k: &K, x: &K) -> Ordering {
-        if x.comparable_class() != Some(kc) { Ordering::Equal } else { k.compare_to(x) }
+        if x.comparable_class() != Some(kc) {
+            Ordering::Equal
+        } else {
+            k.compare_to(x)
+        }
     }
 
     // ------------------------------------------------------------------ resize
@@ -575,10 +598,18 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
                 while p != NIL {
                     let next = self.n(p).next;
                     if (self.n(p).hash as u32 as usize) & old_cap == 0 {
-                        if lo_t == NIL { lo_h = p } else { self.m(lo_t).next = p }
+                        if lo_t == NIL {
+                            lo_h = p
+                        } else {
+                            self.m(lo_t).next = p
+                        }
                         lo_t = p;
                     } else {
-                        if hi_t == NIL { hi_h = p } else { self.m(hi_t).next = p }
+                        if hi_t == NIL {
+                            hi_h = p
+                        } else {
+                            self.m(hi_t).next = p
+                        }
                         hi_t = p;
                     }
                     p = next;
@@ -633,7 +664,11 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
                         }
                     };
                     let xp = p;
-                    p = if dir != Ordering::Greater { self.n(p).left } else { self.n(p).right };
+                    p = if dir != Ordering::Greater {
+                        self.n(p).left
+                    } else {
+                        self.n(p).right
+                    };
                     if p == NIL {
                         self.m(x).parent = xp;
                         if dir != Ordering::Greater {
@@ -687,12 +722,20 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
             self.m(e).next = NIL;
             if (self.n(e).hash as u32 as usize) & bit == 0 {
                 self.m(e).prev = lo_t;
-                if lo_t == NIL { lo_h = e } else { self.m(lo_t).next = e }
+                if lo_t == NIL {
+                    lo_h = e
+                } else {
+                    self.m(lo_t).next = e
+                }
                 lo_t = e;
                 lc += 1;
             } else {
                 self.m(e).prev = hi_t;
-                if hi_t == NIL { hi_h = e } else { self.m(hi_t).next = e }
+                if hi_t == NIL {
+                    hi_h = e
+                } else {
+                    self.m(hi_t).next = e
+                }
                 hi_t = e;
                 hc += 1;
             }
@@ -750,7 +793,13 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
 
     /// `putVal` with a precomputed spread hash; returns the node and, for an existing key, the
     /// replaced value.
-    pub fn put_hashed(&mut self, hash: i32, key: K, val: V, env: &dyn HashEnv) -> (Inserted, Option<V>) {
+    pub fn put_hashed(
+        &mut self,
+        hash: i32,
+        key: K,
+        val: V,
+        env: &dyn HashEnv,
+    ) -> (Inserted, Option<V>) {
         match self.insert_node(hash, key, val, env) {
             Ok(id) => (Inserted::New(id), None),
             Err((id, val)) => {
@@ -762,7 +811,13 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
 
     /// `putIfAbsent`-like insertion that never touches an existing entry: `Ok(new node)` or
     /// `Err((existing node, val))`.
-    pub fn insert_node(&mut self, hash: i32, key: K, val: V, env: &dyn HashEnv) -> Result<u32, (u32, V)> {
+    pub fn insert_node(
+        &mut self,
+        hash: i32,
+        key: K,
+        val: V,
+        env: &dyn HashEnv,
+    ) -> Result<u32, (u32, V)> {
         if self.table.is_empty() {
             self.resize(env);
         }
@@ -776,9 +831,9 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
         } else if self.n(p).hash == hash && self.n(p).key.java_equals(&key, env) {
             return Err((p, val));
         } else if self.n(p).tree {
-            match self.put_tree_val(p, hash, key, val, env) {
-                Ok(id) => new_id = id,
-                Err(e) => return Err(e),
+            {
+                let id = self.put_tree_val(p, hash, key, val, env)?;
+                new_id = id
             }
         } else {
             let mut p = p;
@@ -807,10 +862,21 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
         Ok(new_id)
     }
 
-    fn put_tree_val(&mut self, bin_head: u32, h: i32, k: K, v: V, env: &dyn HashEnv) -> Result<u32, (u32, V)> {
+    fn put_tree_val(
+        &mut self,
+        bin_head: u32,
+        h: i32,
+        k: K,
+        v: V,
+        env: &dyn HashEnv,
+    ) -> Result<u32, (u32, V)> {
         let mut kc: Option<Option<u8>> = None;
         let mut searched = false;
-        let root = if self.n(bin_head).parent != NIL { self.root_of(bin_head) } else { bin_head };
+        let root = if self.n(bin_head).parent != NIL {
+            self.root_of(bin_head)
+        } else {
+            bin_head
+        };
         let mut p = root;
         loop {
             let ph = self.n(p).hash;
@@ -832,15 +898,15 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
                         searched = true;
                         let pl = self.n(p).left;
                         let pr = self.n(p).right;
-                        if pl != NIL {
-                            if let Some(q) = self.find(pl, h, &k, kcv, env) {
-                                return Err((q, v));
-                            }
+                        if pl != NIL
+                            && let Some(q) = self.find(pl, h, &k, kcv, env)
+                        {
+                            return Err((q, v));
                         }
-                        if pr != NIL {
-                            if let Some(q) = self.find(pr, h, &k, kcv, env) {
-                                return Err((q, v));
-                            }
+                        if pr != NIL
+                            && let Some(q) = self.find(pr, h, &k, kcv, env)
+                        {
+                            return Err((q, v));
                         }
                     }
                     dir = self.tie_break_order(&k, &self.n(p).key, env);
@@ -849,7 +915,11 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
                 }
             }
             let xp = p;
-            p = if dir != Ordering::Greater { self.n(xp).left } else { self.n(xp).right };
+            p = if dir != Ordering::Greater {
+                self.n(xp).left
+            } else {
+                self.n(xp).right
+            };
             if p == NIL {
                 let xpn = self.n(xp).next;
                 let x = self.alloc(h, k, v, xpn);
@@ -876,7 +946,14 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
     }
 
     /// `TreeNode.find(h, k, kc)` starting at `p`.
-    fn find(&self, start: u32, h: i32, k: &K, mut kc: Option<u8>, env: &dyn HashEnv) -> Option<u32> {
+    fn find(
+        &self,
+        start: u32,
+        h: i32,
+        k: &K,
+        mut kc: Option<u8>,
+        env: &dyn HashEnv,
+    ) -> Option<u32> {
         let mut p = start;
         let mut kc_known = kc.is_some();
         while p != NIL {
@@ -1026,8 +1103,8 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
         let p = this;
         let pl = self.n(p).left;
         let pr = self.n(p).right;
-        let replacement;
-        if pl != NIL && pr != NIL {
+
+        let replacement = if pl != NIL && pr != NIL {
             let mut s = pr;
             loop {
                 let sl = self.n(s).left;
@@ -1077,14 +1154,14 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
             } else {
                 self.m(pp).right = s;
             }
-            replacement = if sr != NIL { sr } else { p };
+            if sr != NIL { sr } else { p }
         } else if pl != NIL {
-            replacement = pl;
+            pl
         } else if pr != NIL {
-            replacement = pr;
+            pr
         } else {
-            replacement = p;
-        }
+            p
+        };
         if replacement != p {
             let pp = self.n(p).parent;
             self.m(replacement).parent = pp;
@@ -1101,7 +1178,11 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
             n.right = NIL;
             n.parent = NIL;
         }
-        let r = if self.n(p).red { root } else { self.balance_deletion(root, replacement) };
+        let r = if self.n(p).red {
+            root
+        } else {
+            self.balance_deletion(root, replacement)
+        };
         if replacement == p {
             let pp = self.n(p).parent;
             self.m(p).parent = NIL;
@@ -1136,14 +1217,18 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
     }
 
     /// `putMapEntries(m)` as used by `new HashMap(Map)` and `putAll` (JDK 19+ sizing).
-    pub fn put_all<'a, I>(&mut self, entries: I, count: usize, env: &dyn HashEnv)
+    pub fn put_all<I>(&mut self, entries: I, count: usize, env: &dyn HashEnv)
     where
         I: IntoIterator<Item = (K, V)>,
     {
         if count > 0 {
             if self.table.is_empty() {
                 let t = ((count as f64) / 0.75).ceil();
-                let t = if t < MAXIMUM_CAPACITY as f64 { t as usize } else { MAXIMUM_CAPACITY };
+                let t = if t < MAXIMUM_CAPACITY as f64 {
+                    t as usize
+                } else {
+                    MAXIMUM_CAPACITY
+                };
                 if t > self.threshold {
                     self.threshold = table_size_for(t);
                 }

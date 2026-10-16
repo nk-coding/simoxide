@@ -78,7 +78,13 @@ pub fn parse_double(units: &[u16]) -> Option<f64> {
     let sign = |x: f64| if neg { -x } else { x };
     match rest[0] {
         b'N' => return if rest == b"NaN" { Some(f64::NAN) } else { None },
-        b'I' => return if rest == b"Infinity" { Some(sign(f64::INFINITY)) } else { None },
+        b'I' => {
+            return if rest == b"Infinity" {
+                Some(sign(f64::INFINITY))
+            } else {
+                None
+            };
+        }
         b'0' if rest.len() > 1 && (rest[1] == b'x' || rest[1] == b'X') => {
             return parse_hex(&rest[2..]).map(sign);
         }
@@ -235,14 +241,22 @@ pub(crate) fn make_double(m: u64, sticky: bool, e2: i64) -> f64 {
     if big_e > 1023 {
         return f64::INFINITY;
     }
-    let keep: i64 = if big_e >= -1022 { 53 } else { 53 - (-1022 - big_e) };
+    let keep: i64 = if big_e >= -1022 {
+        53
+    } else {
+        53 - (-1022 - big_e)
+    };
     if keep < 0 {
         return 0.0;
     }
     let shift = (64 - keep) as u32; // 11..=64
     let mut kept: u64 = if shift >= 64 { 0 } else { m >> shift };
     let round = (m >> (shift - 1)) & 1 == 1;
-    let rest = if shift - 1 == 0 { 0 } else { m & ((1u64 << (shift - 1)) - 1) };
+    let rest = if shift - 1 == 0 {
+        0
+    } else {
+        m & ((1u64 << (shift - 1)) - 1)
+    };
     let st = rest != 0 || sticky;
     if round && (st || kept & 1 == 1) {
         kept += 1;

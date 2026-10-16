@@ -72,7 +72,12 @@ pub struct HotSpotXorShift {
 impl HotSpotXorShift {
     /// Thread state with the given `X` seed.
     pub fn new(seed: u32) -> Self {
-        HotSpotXorShift { x: seed, y: 842_502_087, z: 0x8767, w: 273_326_509 }
+        HotSpotXorShift {
+            x: seed,
+            y: 842_502_087,
+            z: 0x8767,
+            w: 273_326_509,
+        }
     }
 
     /// Seed of the thread that received the `n`-th (1-based) value of HotSpot's `os::random()`
@@ -121,7 +126,11 @@ pub struct Tape {
 
 impl Tape {
     pub fn new(fallback: Box<dyn IdentityHashSource>) -> Self {
-        Tape { values: HashMap::new(), fallback, misses: 0 }
+        Tape {
+            values: HashMap::new(),
+            fallback,
+            misses: 0,
+        }
     }
     pub fn insert(&mut self, key: IdentityKey, hash: i32) {
         self.values.insert(key, hash);
@@ -165,7 +174,10 @@ pub struct IdentityHashes {
 
 impl IdentityHashes {
     pub fn new(source: Box<dyn IdentityHashSource>) -> Self {
-        IdentityHashes { memo: HashMap::new(), source }
+        IdentityHashes {
+            memo: HashMap::new(),
+            source,
+        }
     }
     pub fn get(&mut self, key: IdentityKey) -> i32 {
         if let Some(&h) = self.memo.get(&key) {
@@ -212,7 +224,9 @@ pub fn default_class_name(key: IdentityKey) -> &'static str {
         IdentityKey::TupleType(_) => "org.eclipse.ocl.ecore.impl.TupleTypeImpl",
         IdentityKey::Invalid => "org.eclipse.ocl.ecore.internal.OCLStandardLibraryImpl$1",
         IdentityKey::Model(_) => "org.eclipse.m2m.internal.qvt.oml.evaluator.ModelInstanceImpl",
-        IdentityKey::Instance(_) => "org.eclipse.m2m.internal.qvt.oml.evaluator.TransformationInstanceImpl",
+        IdentityKey::Instance(_) => {
+            "org.eclipse.m2m.internal.qvt.oml.evaluator.TransformationInstanceImpl"
+        }
         IdentityKey::Cell(_) => "org.eclipse.ocl.util.BagImpl$MutableInteger",
     }
 }
@@ -224,13 +238,17 @@ pub struct CompatEnv {
 
 impl CompatEnv {
     pub fn new(source: Box<dyn IdentityHashSource>) -> Self {
-        CompatEnv { ids: RefCell::new(IdentityHashes::new(source)) }
+        CompatEnv {
+            ids: RefCell::new(IdentityHashes::new(source)),
+        }
     }
 }
 
 impl Default for CompatEnv {
     fn default() -> Self {
-        CompatEnv { ids: RefCell::new(IdentityHashes::default()) }
+        CompatEnv {
+            ids: RefCell::new(IdentityHashes::default()),
+        }
     }
 }
 

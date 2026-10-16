@@ -11,7 +11,9 @@
 
 use crate::coll::{Coll, CollKind};
 use crate::identity::{HashEnv, IdentityKey};
-use crate::java::hash::{bool_hash, double_hash, double_to_long_bits, float_hash, float_to_int_bits, long_hash};
+use crate::java::hash::{
+    bool_hash, double_hash, double_to_long_bits, float_hash, float_to_int_bits, long_hash,
+};
 use crate::java::hashmap::JavaKey;
 use crate::str::Str;
 use crate::value::{IntBox, JNum, Value};
@@ -52,9 +54,12 @@ pub fn java_hash(v: &Value, env: &dyn HashEnv) -> i32 {
         Value::Tuple(t) => t.java_hash(env),
         Value::Dict(d) => d.borrow().java_hash(env),
         Value::List(l) => crate::coll::list_hash(l.borrow().items.iter(), env),
-        Value::Invalid | Value::Obj(_) | Value::Enum(_) | Value::Type(_) | Value::Model(_) | Value::Instance(_) => {
-            env.identity_hash(identity_key(v).expect("identity-hashed"))
-        }
+        Value::Invalid
+        | Value::Obj(_)
+        | Value::Enum(_)
+        | Value::Type(_)
+        | Value::Model(_)
+        | Value::Instance(_) => env.identity_hash(identity_key(v).expect("identity-hashed")),
     }
 }
 
@@ -83,18 +88,35 @@ pub fn java_equals(a: &Value, b: &Value, env: &dyn HashEnv) -> bool {
         (Value::Type(x), Value::Type(y)) => x == y,
         (Value::Model(x), Value::Model(y)) => x == y,
         (Value::Instance(x), Value::Instance(y)) => x == y,
-        (Value::Coll(x), Value::Coll(y)) => std::rc::Rc::ptr_eq(x, y) || coll_java_equals(x, y, env),
+        (Value::Coll(x), Value::Coll(y)) => {
+            std::rc::Rc::ptr_eq(x, y) || coll_java_equals(x, y, env)
+        }
         (Value::Coll(x), Value::List(l)) | (Value::List(l), Value::Coll(x)) => {
-            x.kind() == CollKind::Sequence && list_equals(x.iter(), x.len(), l.borrow().items.iter(), l.borrow().items.len(), env)
+            x.kind() == CollKind::Sequence
+                && list_equals(
+                    x.iter(),
+                    x.len(),
+                    l.borrow().items.iter(),
+                    l.borrow().items.len(),
+                    env,
+                )
         }
         (Value::List(x), Value::List(y)) => {
             std::rc::Rc::ptr_eq(x, y) || {
                 let (x, y) = (x.borrow(), y.borrow());
-                list_equals(x.items.iter(), x.items.len(), y.items.iter(), y.items.len(), env)
+                list_equals(
+                    x.items.iter(),
+                    x.items.len(),
+                    y.items.iter(),
+                    y.items.len(),
+                    env,
+                )
             }
         }
         (Value::Tuple(x), Value::Tuple(y)) => std::rc::Rc::ptr_eq(x, y) || x.java_equals(y, env),
-        (Value::Dict(x), Value::Dict(y)) => std::rc::Rc::ptr_eq(x, y) || x.borrow().java_equals(&y.borrow(), env),
+        (Value::Dict(x), Value::Dict(y)) => {
+            std::rc::Rc::ptr_eq(x, y) || x.borrow().java_equals(&y.borrow(), env)
+        }
         _ => false,
     }
 }
@@ -112,12 +134,20 @@ fn list_equals<'a>(
 /// Java `equals` between two collections (`AbstractSet`, `AbstractList`, `BagImpl`).
 pub fn coll_java_equals(a: &Coll, b: &Coll, env: &dyn HashEnv) -> bool {
     match (a.kind(), b.kind()) {
-        (x, y) if x.is_set() && y.is_set() => a.len() == b.len() && b.iter().all(|e| a.contains(e, env)),
-        (CollKind::Sequence, CollKind::Sequence) => list_equals(a.iter(), a.len(), b.iter(), b.len(), env),
+        (x, y) if x.is_set() && y.is_set() => {
+            a.len() == b.len() && b.iter().all(|e| a.contains(e, env))
+        }
+        (CollKind::Sequence, CollKind::Sequence) => {
+            list_equals(a.iter(), a.len(), b.iter(), b.len(), env)
+        }
         (CollKind::Bag, CollKind::Bag) => {
-            let (Coll::Bag(x), Coll::Bag(y)) = (a, b) else { unreachable!() };
+            let (Coll::Bag(x), Coll::Bag(y)) = (a, b) else {
+                unreachable!()
+            };
             x.size == y.size
-                && x.index.iter().all(|(e, c)| y.index.get(e, env).is_some_and(|d| d.count == c.count))
+                && x.index
+                    .iter()
+                    .all(|(e, c)| y.index.get(e, env).is_some_and(|d| d.count == c.count))
         }
         _ => false,
     }
@@ -125,7 +155,14 @@ pub fn coll_java_equals(a: &Coll, b: &Coll, env: &dyn HashEnv) -> bool {
 
 /// `ObjectUtil.isPrimitive`: Integer, Long, String, Boolean, Double.
 fn is_ocl_primitive(v: &Value) -> bool {
-    matches!(v, Value::Int(_) | Value::Boxed(IntBox::Long, _) | Value::Str(_) | Value::Bool(_) | Value::Real(_))
+    matches!(
+        v,
+        Value::Int(_)
+            | Value::Boxed(IntBox::Long, _)
+            | Value::Str(_)
+            | Value::Bool(_)
+            | Value::Real(_)
+    )
 }
 
 /// `ObjectUtil.equal` (OCL `=`).
@@ -161,7 +198,8 @@ pub fn ocl_equal(a: &Value, b: &Value, env: &dyn HashEnv) -> bool {
         }
         if xo {
             return std::rc::Rc::ptr_eq(x, y)
-                || (x.len() == y.len() && x.iter().zip(y.iter()).all(|(p, q)| ocl_equal(p, q, env)));
+                || (x.len() == y.len()
+                    && x.iter().zip(y.iter()).all(|(p, q)| ocl_equal(p, q, env)));
         }
     } else if matches!(a, Value::Coll(c) if c.kind() == CollKind::OrderedSet)
         || matches!(b, Value::Coll(c) if c.kind() == CollKind::OrderedSet)

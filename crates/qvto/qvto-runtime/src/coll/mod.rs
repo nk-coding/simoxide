@@ -93,7 +93,11 @@ pub enum Index<V> {
 
 impl<V> Index<V> {
     fn new(env: &dyn HashEnv) -> Self {
-        if env.compat() { Index::Hash(JavaHashMap::new()) } else { Index::Linked(LinkedMap::new()) }
+        if env.compat() {
+            Index::Hash(JavaHashMap::new())
+        } else {
+            Index::Linked(LinkedMap::new())
+        }
     }
     pub fn len(&self) -> usize {
         match self {
@@ -212,7 +216,10 @@ impl Coll {
     }
     /// `new BagImpl()`.
     pub fn new_bag(env: &dyn HashEnv) -> Coll {
-        Coll::Bag(Bag { index: Index::new(env), size: 0 })
+        Coll::Bag(Bag {
+            index: Index::new(env),
+            size: 0,
+        })
     }
     /// `new ArrayList()`.
     pub fn new_sequence() -> Coll {
@@ -247,7 +254,11 @@ impl Coll {
     }
 
     /// The same as [`copy_of`](Self::copy_of) from a list of values.
-    pub fn from_values<I: IntoIterator<Item = Value>>(kind: CollKind, values: I, env: &dyn HashEnv) -> Coll {
+    pub fn from_values<I: IntoIterator<Item = Value>>(
+        kind: CollKind,
+        values: I,
+        env: &dyn HashEnv,
+    ) -> Coll {
         let mut r = Coll::new_of(kind, env);
         for v in values {
             r.add(v, env);
@@ -283,7 +294,11 @@ impl Coll {
         match self {
             Coll::Set(s) => CollIter::Set(s.iter()),
             Coll::OrderedSet(s) => CollIter::OSet(s.iter()),
-            Coll::Bag(b) => CollIter::Bag { it: b.index.iter(), cur: None, left: 0 },
+            Coll::Bag(b) => CollIter::Bag {
+                it: b.index.iter(),
+                cur: None,
+                left: 0,
+            },
             Coll::Sequence(v) => CollIter::Seq(v.iter()),
         }
     }
@@ -303,7 +318,14 @@ impl Coll {
                 if let Some(c) = b.index.get_mut(&v, env) {
                     c.count += 1;
                 } else {
-                    b.index.insert(v, BagCell { count: 1, cell: new_cell() }, env);
+                    b.index.insert(
+                        v,
+                        BagCell {
+                            count: 1,
+                            cell: new_cell(),
+                        },
+                        env,
+                    );
                 }
                 true
             }
@@ -364,7 +386,12 @@ impl Coll {
 
     /// Removal through the collection's iterator of every element for which `f` is false.
     /// `Err(())` for a bag (`BagImpl`'s iterator does not support removal).
-    pub fn retain_iter(&mut self, mut f: impl FnMut(&Value) -> bool, env: &dyn HashEnv) -> Result<bool, ()> {
+    #[allow(clippy::result_unit_err)]
+    pub fn retain_iter(
+        &mut self,
+        mut f: impl FnMut(&Value) -> bool,
+        env: &dyn HashEnv,
+    ) -> Result<bool, ()> {
         Ok(match self {
             Coll::Set(s) => s.retain(|v, _| f(v), env),
             Coll::OrderedSet(s) => s.retain(|v, _| f(v), env),
@@ -379,6 +406,7 @@ impl Coll {
 
     /// Java `removeAll(c)`: `AbstractSet.removeAll` for sets, `ArrayList.removeAll` (every
     /// element `c` contains) for sequences; `Err(())` for a bag.
+    #[allow(clippy::result_unit_err)]
     pub fn remove_all(&mut self, c: &Coll, env: &dyn HashEnv) -> Result<bool, ()> {
         match self {
             Coll::Set(_) | Coll::OrderedSet(_) => Ok(ops::remove_all(self, c, env)),
@@ -401,7 +429,10 @@ impl Coll {
     pub fn java_count(&self, v: &Value, env: &dyn HashEnv) -> usize {
         match self {
             Coll::Bag(b) => b.index.get(v, env).map_or(0, |c| c.count as usize),
-            Coll::Sequence(s) => s.iter().filter(|e| crate::eq::java_equals(e, v, env)).count(),
+            Coll::Sequence(s) => s
+                .iter()
+                .filter(|e| crate::eq::java_equals(e, v, env))
+                .count(),
             _ => self.contains(v, env) as usize,
         }
     }
@@ -409,15 +440,24 @@ impl Coll {
     /// Java `hashCode()` of the collection.
     pub fn java_hash(&self, env: &dyn HashEnv) -> i32 {
         match self {
-            Coll::Set(s) => s.iter().fold(0i32, |h, (e, _)| h.wrapping_add(java_hash(e, env))),
-            Coll::OrderedSet(s) => s.iter().fold(0i32, |h, (e, _)| h.wrapping_add(java_hash(e, env))),
+            Coll::Set(s) => s
+                .iter()
+                .fold(0i32, |h, (e, _)| h.wrapping_add(java_hash(e, env))),
+            Coll::OrderedSet(s) => s
+                .iter()
+                .fold(0i32, |h, (e, _)| h.wrapping_add(java_hash(e, env))),
             Coll::Sequence(s) => list_hash(s.iter(), env),
             Coll::Bag(b) => {
                 // 37 * (37 * 37 + HashMap<E, MutableInteger>.hashCode()) + size
                 let map = b.index.iter().fold(0i32, |h, (e, c)| {
-                    h.wrapping_add(java_hash(e, env) ^ env.identity_hash(crate::identity::IdentityKey::Cell(c.cell)))
+                    h.wrapping_add(
+                        java_hash(e, env)
+                            ^ env.identity_hash(crate::identity::IdentityKey::Cell(c.cell)),
+                    )
                 });
-                37i32.wrapping_mul(37i32.wrapping_mul(37).wrapping_add(map)).wrapping_add(b.size as i32)
+                37i32
+                    .wrapping_mul(37i32.wrapping_mul(37).wrapping_add(map))
+                    .wrapping_add(b.size as i32)
             }
         }
     }
@@ -434,14 +474,20 @@ impl Coll {
 
 /// `AbstractList.hashCode` over the elements.
 pub fn list_hash<'a>(it: impl Iterator<Item = &'a Value>, env: &dyn HashEnv) -> i32 {
-    it.fold(1i32, |h, e| h.wrapping_mul(31).wrapping_add(java_hash(e, env)))
+    it.fold(1i32, |h, e| {
+        h.wrapping_mul(31).wrapping_add(java_hash(e, env))
+    })
 }
 
 /// Iterator over a collection's elements.
 pub enum CollIter<'a> {
     Set(IndexIter<'a, ()>),
     OSet(linked::Iter<'a, ()>),
-    Bag { it: IndexIter<'a, BagCell>, cur: Option<&'a Value>, left: u32 },
+    Bag {
+        it: IndexIter<'a, BagCell>,
+        cur: Option<&'a Value>,
+        left: u32,
+    },
     Seq(std::slice::Iter<'a, Value>),
 }
 

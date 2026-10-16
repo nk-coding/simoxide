@@ -23,12 +23,19 @@ pub struct Tuple {
 impl Tuple {
     pub fn new(type_id: u32, names: Rc<[Str]>, values: Box<[Value]>) -> Tuple {
         assert_eq!(names.len(), values.len());
-        Tuple { type_id, names, values }
+        Tuple {
+            type_id,
+            names,
+            values,
+        }
     }
 
     /// The value of a part, by name.
     pub fn get(&self, name: &str) -> Option<&Value> {
-        self.names.iter().position(|n| n.as_str() == Some(name)).map(|i| &self.values[i])
+        self.names
+            .iter()
+            .position(|n| n.as_str() == Some(name))
+            .map(|i| &self.values[i])
     }
 
     pub fn java_hash(&self, env: &dyn HashEnv) -> i32 {
@@ -37,13 +44,21 @@ impl Tuple {
             .names
             .iter()
             .zip(self.values.iter())
-            .fold(0i32, |h, (n, v)| h.wrapping_add(n.java_hash() ^ java_hash(v, env)));
-        37i32.wrapping_mul(ty).wrapping_add(17i32.wrapping_mul(parts))
+            .fold(0i32, |h, (n, v)| {
+                h.wrapping_add(n.java_hash() ^ java_hash(v, env))
+            });
+        37i32
+            .wrapping_mul(ty)
+            .wrapping_add(17i32.wrapping_mul(parts))
     }
 
     pub fn java_equals(&self, other: &Tuple, env: &dyn HashEnv) -> bool {
         self.type_id == other.type_id
             && self.values.len() == other.values.len()
-            && self.values.iter().zip(other.values.iter()).all(|(a, b)| java_equals(a, b, env))
+            && self
+                .values
+                .iter()
+                .zip(other.values.iter())
+                .all(|(a, b)| java_equals(a, b, env))
     }
 }

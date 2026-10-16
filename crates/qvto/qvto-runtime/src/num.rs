@@ -69,7 +69,13 @@ fn int(v: i64) -> Value {
 
 /// `source op arg` for a numeric source. Returns `None` when the source is not a number (the
 /// caller dispatches to other operand types). An invalid or null argument gives invalid.
-pub fn binary(op: NumOp, a: &Value, b: &Value, a_unlimited: bool, b_unlimited: bool) -> Option<Value> {
+pub fn binary(
+    op: NumOp,
+    a: &Value,
+    b: &Value,
+    a_unlimited: bool,
+    b_unlimited: bool,
+) -> Option<Value> {
     let x = a.as_jnum()?.higher();
     if b.is_undefined() {
         return Some(Value::Invalid);
@@ -219,7 +225,11 @@ pub fn negate(a: &Value, unlimited: bool) -> Value {
         Value::Int(v) if v as i32 as i64 == v => int(-v),
         Value::Int(v) => {
             // a Long
-            if v == 2_147_483_648 { int(i32::MIN as i64) } else { Value::long(v.wrapping_neg()) }
+            if v == 2_147_483_648 {
+                int(i32::MIN as i64)
+            } else {
+                Value::long(v.wrapping_neg())
+            }
         }
         // `UNLIMITED.equals(sourceVal)` is false for a Long box
         Value::Boxed(IntBox::Long, v) => Value::long(-(v as i64)),
@@ -287,19 +297,37 @@ mod tests {
     fn arithmetic() {
         let i = |v: i64| Value::Int(v);
         let b = |op, x: &Value, y: &Value| binary(op, x, y, false, false).unwrap();
-        assert!(matches!(b(NumOp::Plus, &i(2147483647), &i(1)), Value::Int(2147483648)));
-        assert!(matches!(b(NumOp::Times, &i(i64::MAX), &i(2)), Value::Int(-2)));
+        assert!(matches!(
+            b(NumOp::Plus, &i(2147483647), &i(1)),
+            Value::Int(2147483648)
+        ));
+        assert!(matches!(
+            b(NumOp::Times, &i(i64::MAX), &i(2)),
+            Value::Int(-2)
+        ));
         assert!(matches!(b(NumOp::Divide, &i(4), &i(2)), Value::Real(x) if x == 2.0));
         assert!(b(NumOp::Divide, &i(4), &i(0)).is_invalid());
         assert!(b(NumOp::Mod, &i(4), &i(0)).is_invalid());
         assert!(matches!(b(NumOp::Mod, &i(-7), &i(2)), Value::Int(-1)));
         assert!(matches!(b(NumOp::Div, &i(-7), &i(2)), Value::Int(-3)));
         assert!(matches!(b(NumOp::Max, &i(1), &Value::Real(2.0)), Value::Real(x) if x == 2.0));
-        assert!(matches!(binary(NumOp::Lt, &i(-1), &i(5), true, false), Some(Value::Bool(false))));
-        assert!(matches!(negate(&i(i32::MIN as i64), false), Value::Int(2147483648)));
+        assert!(matches!(
+            binary(NumOp::Lt, &i(-1), &i(5), true, false),
+            Some(Value::Bool(false))
+        ));
+        assert!(matches!(
+            negate(&i(i32::MIN as i64), false),
+            Value::Int(2147483648)
+        ));
         assert!(matches!(round(&Value::Real(-2.5), false), Value::Int(-2)));
-        assert!(matches!(round(&Value::Real(3e9), false), Value::Int(-1294967296)));
-        assert!(matches!(floor(&Value::Real(1e10), false), Value::Int(2147483647)));
+        assert!(matches!(
+            round(&Value::Real(3e9), false),
+            Value::Int(-1294967296)
+        ));
+        assert!(matches!(
+            floor(&Value::Real(1e10), false),
+            Value::Int(2147483647)
+        ));
         assert_eq!(java_round(0.49999999999999994), 0);
     }
 }

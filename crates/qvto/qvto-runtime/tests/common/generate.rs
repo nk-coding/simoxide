@@ -64,7 +64,9 @@ pub fn enc_str(units: &[u16]) -> String {
 
 /// Strings with equal `hashCode`: concatenations of `Aa` and `BB` (both hash to 2112).
 pub fn colliding_strings(rng: &mut Rng, blocks: u32, count: usize) -> Vec<String> {
-    let prefix: Vec<u16> = (0..rng.below(3)).map(|_| rng.range(0x61, 0x7a) as u16).collect();
+    let prefix: Vec<u16> = (0..rng.below(3))
+        .map(|_| rng.range(0x61, 0x7a) as u16)
+        .collect();
     let mut idx: Vec<u64> = (0..(1u64 << blocks)).collect();
     // shuffle
     for i in (1..idx.len()).rev() {
@@ -89,7 +91,17 @@ pub fn colliding_strings(rng: &mut Rng, blocks: u32, count: usize) -> Vec<String
 
 pub fn double_bits(rng: &mut Rng) -> u64 {
     match rng.below(10) {
-        0 => *rng.pick(&[0u64, 0x8000_0000_0000_0000, 0x7ff8_0000_0000_0000, 0x7ff0_0000_0000_0000, 0xfff0_0000_0000_0000, 1, 0x000f_ffff_ffff_ffff, 0x0010_0000_0000_0000, 0x7fef_ffff_ffff_ffff]),
+        0 => *rng.pick(&[
+            0u64,
+            0x8000_0000_0000_0000,
+            0x7ff8_0000_0000_0000,
+            0x7ff0_0000_0000_0000,
+            0xfff0_0000_0000_0000,
+            1,
+            0x000f_ffff_ffff_ffff,
+            0x0010_0000_0000_0000,
+            0x7fef_ffff_ffff_ffff,
+        ]),
         1 => (rng.range(-1000, 1000) as f64).to_bits(),
         2 => (rng.range(-1000, 1000) as f64 / 8.0).to_bits(),
         3 => rng.below(0x0010_0000_0000_0000) | (rng.below(2) << 63),

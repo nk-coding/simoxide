@@ -33,7 +33,11 @@ pub fn long_hash(v: i64) -> i32 {
 /// `Double.doubleToLongBits`: the raw bits with every NaN collapsed to `0x7ff8000000000000`.
 #[inline]
 pub fn double_to_long_bits(d: f64) -> i64 {
-    if d.is_nan() { 0x7ff8_0000_0000_0000 } else { d.to_bits() as i64 }
+    if d.is_nan() {
+        0x7ff8_0000_0000_0000
+    } else {
+        d.to_bits() as i64
+    }
 }
 
 /// `Double.hashCode(d)`.
@@ -45,7 +49,11 @@ pub fn double_hash(d: f64) -> i32 {
 /// `Float.floatToIntBits`: every NaN collapsed to `0x7fc00000`.
 #[inline]
 pub fn float_to_int_bits(f: f32) -> i32 {
-    if f.is_nan() { 0x7fc0_0000 } else { f.to_bits() as i32 }
+    if f.is_nan() {
+        0x7fc0_0000
+    } else {
+        f.to_bits() as i32
+    }
 }
 
 /// `Float.hashCode(f)`.

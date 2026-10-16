@@ -43,7 +43,9 @@ pub fn java_to_string(v: &Value, env: &dyn HashEnv, objs: &dyn ObjectFormat, out
         Value::Invalid => out.push_str("invalid"),
         Value::Bool(b) => out.push_str(if *b { "true" } else { "false" }),
         Value::Int(i) => push_long(out, *i),
-        Value::Boxed(IntBox::Char, c) => out.push_str(&crate::str::Str::from_utf16(&[*c as u16]).to_str_lossy()),
+        Value::Boxed(IntBox::Char, c) => {
+            out.push_str(&crate::str::Str::from_utf16(&[*c as u16]).to_str_lossy())
+        }
         Value::Boxed(_, i) => push_long(out, *i as i64),
         Value::Real(d) => push_double(out, *d),
         Value::Float(f) => push_float(out, *f),
@@ -92,7 +94,12 @@ pub fn java_to_string(v: &Value, env: &dyn HashEnv, objs: &dyn ObjectFormat, out
             out.push('}');
         }
         Value::Model(m) => {
-            let _ = write!(out, "{}@{:x}", env.class_name(IdentityKey::Model(*m)), env.identity_hash(IdentityKey::Model(*m)));
+            let _ = write!(
+                out,
+                "{}@{:x}",
+                env.class_name(IdentityKey::Model(*m)),
+                env.identity_hash(IdentityKey::Model(*m))
+            );
         }
         Value::Instance(m) => {
             let k = IdentityKey::Instance(*m);
@@ -102,7 +109,12 @@ pub fn java_to_string(v: &Value, env: &dyn HashEnv, objs: &dyn ObjectFormat, out
 }
 
 /// `AbstractCollection.toString`: `[a, b]`.
-fn list_to_string<'a>(it: impl Iterator<Item = &'a Value>, env: &dyn HashEnv, objs: &dyn ObjectFormat, out: &mut String) {
+fn list_to_string<'a>(
+    it: impl Iterator<Item = &'a Value>,
+    env: &dyn HashEnv,
+    objs: &dyn ObjectFormat,
+    out: &mut String,
+) {
     out.push('[');
     for (i, e) in it.enumerate() {
         if i > 0 {
@@ -121,13 +133,20 @@ fn tuple_part(v: &Value, env: &dyn HashEnv, objs: &dyn ObjectFormat, out: &mut S
             out.push_str(&s.to_str_lossy());
             out.push('\'');
         }
-        Value::Coll(_) | Value::List(_) | Value::Dict(_) => ocl_collection_to_string(v, env, objs, out),
+        Value::Coll(_) | Value::List(_) | Value::Dict(_) => {
+            ocl_collection_to_string(v, env, objs, out)
+        }
         _ => java_to_string(v, env, objs, out),
     }
 }
 
 /// `CollectionUtil.toString`: `Set{1, 'a', Sequence{2}}`.
-pub fn ocl_collection_to_string(v: &Value, env: &dyn HashEnv, objs: &dyn ObjectFormat, out: &mut String) {
+pub fn ocl_collection_to_string(
+    v: &Value,
+    env: &dyn HashEnv,
+    objs: &dyn ObjectFormat,
+    out: &mut String,
+) {
     let (name, items): (&str, Vec<Value>) = match v {
         Value::Coll(c) => (
             match c.kind() {
@@ -149,7 +168,9 @@ pub fn ocl_collection_to_string(v: &Value, env: &dyn HashEnv, objs: &dyn ObjectF
             out.push_str(", ");
         }
         match e {
-            Value::Coll(_) | Value::List(_) | Value::Dict(_) => ocl_collection_to_string(e, env, objs, out),
+            Value::Coll(_) | Value::List(_) | Value::Dict(_) => {
+                ocl_collection_to_string(e, env, objs, out)
+            }
             Value::Str(s) => {
                 out.push('\'');
                 out.push_str(&s.to_str_lossy());
@@ -163,7 +184,12 @@ pub fn ocl_collection_to_string(v: &Value, env: &dyn HashEnv, objs: &dyn ObjectF
 
 /// OCL `toString()`: like Java's, but `*` for the unlimited value of static type
 /// UnlimitedNatural.
-pub fn ocl_to_string(v: &Value, unlimited: bool, env: &dyn HashEnv, objs: &dyn ObjectFormat) -> String {
+pub fn ocl_to_string(
+    v: &Value,
+    unlimited: bool,
+    env: &dyn HashEnv,
+    objs: &dyn ObjectFormat,
+) -> String {
     let mut s = String::new();
     if unlimited && matches!(v, Value::Int(-1)) {
         s.push('*');

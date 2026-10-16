@@ -31,8 +31,7 @@ pub fn substring(s: &Str, begin: usize, end: usize) -> Option<Str> {
         return Some(s.clone());
     }
     if s.is_ascii() {
-        // SAFETY of from_utf8: ASCII
-        return Some(Str::new(std::str::from_utf8(&s.as_bytes()[begin..end]).expect("ascii")));
+        return Some(Str::new(&s.as_str().expect("ascii")[begin..end]));
     }
     let u = u16s(s);
     Some(Str::from_utf16(&u[begin..end]))
@@ -55,7 +54,10 @@ pub fn index_of(s: &Str, t: &Str) -> i32 {
         if n.is_empty() {
             return 0;
         }
-        return h.windows(n.len()).position(|w| w == n).map_or(-1, |i| i as i32);
+        return h
+            .windows(n.len())
+            .position(|w| w == n)
+            .map_or(-1, |i| i as i32);
     }
     find(&u16s(s), &u16s(t), 0).map_or(-1, |i| i as i32)
 }
@@ -66,7 +68,10 @@ pub fn last_index_of(s: &Str, t: &Str) -> i32 {
     if n.len() > h.len() {
         return -1;
     }
-    (0..=h.len() - n.len()).rev().find(|&i| h[i..i + n.len()] == n[..]).map_or(-1, |i| i as i32)
+    (0..=h.len() - n.len())
+        .rev()
+        .find(|&i| h[i..i + n.len()] == n[..])
+        .map_or(-1, |i| i as i32)
 }
 
 pub fn starts_with(s: &Str, t: &Str) -> bool {
@@ -134,7 +139,14 @@ pub fn to_lower_case(s: &Str) -> Str {
     let mut out: Vec<u16> = Vec::with_capacity(s.len16());
     for (i, &cp) in cps.iter().enumerate() {
         if cp == 0x3a3 {
-            push_cp(&mut out, if is_final_sigma(&cps, i) { 0x3c2 } else { 0x3c3 });
+            push_cp(
+                &mut out,
+                if is_final_sigma(&cps, i) {
+                    0x3c2
+                } else {
+                    0x3c3
+                },
+            );
         } else if let Some(sp) = chars::lower_special(cp) {
             out.extend_from_slice(sp);
         } else {
@@ -145,8 +157,15 @@ pub fn to_lower_case(s: &Str) -> Str {
 }
 
 fn is_final_sigma(cps: &[u32], i: usize) -> bool {
-    let before = cps[..i].iter().rev().find(|&&c| !chars::is_case_ignorable(c)).is_some_and(|&c| chars::is_cased(c));
-    let after = cps[i + 1..].iter().find(|&&c| !chars::is_case_ignorable(c)).is_some_and(|&c| chars::is_cased(c));
+    let before = cps[..i]
+        .iter()
+        .rev()
+        .find(|&&c| !chars::is_case_ignorable(c))
+        .is_some_and(|&c| chars::is_cased(c));
+    let after = cps[i + 1..]
+        .iter()
+        .find(|&&c| !chars::is_case_ignorable(c))
+        .is_some_and(|&c| chars::is_cased(c));
     before && !after
 }
 
@@ -259,17 +278,29 @@ mod tests {
         assert_eq!(index_of(&s("hello"), &s("")), 0);
         assert_eq!(last_index_of(&s("hello"), &s("")), 5);
         assert_eq!(index_of(&s("a\u{1F600}b"), &s("b")), 3);
-        assert_eq!(substring(&s("a\u{1F600}b"), 0, 2).unwrap().to_utf16(), vec![0x61, 0xd83d]);
+        assert_eq!(
+            substring(&s("a\u{1F600}b"), 0, 2).unwrap().to_utf16(),
+            vec![0x61, 0xd83d]
+        );
         assert_eq!(trim(&s(" \u{0}x y\t")).as_str(), Some("x y"));
         assert_eq!(to_upper_case(&s("straße")).as_str(), Some("STRASSE"));
         assert_eq!(to_lower_case(&s("ΟΔΟΣ")).as_str(), Some("οδος"));
         assert_eq!(to_lower_case(&s("ΣΑ")).as_str(), Some("σα"));
-        assert_eq!(replace(&s("abc"), &s(""), &s("-")).as_str(), Some("-a-b-c-"));
+        assert_eq!(
+            replace(&s("abc"), &s(""), &s("-")).as_str(),
+            Some("-a-b-c-")
+        );
         assert_eq!(replace(&s("aaa"), &s("aa"), &s("b")).as_str(), Some("ba"));
         assert!(equals_ignore_case(&s("Straße"), &s("STRAßE")));
-        let t: Vec<String> = tokenize(&s(" a  b,c"), &s(" ,"), false).iter().map(|x| x.to_string()).collect();
+        let t: Vec<String> = tokenize(&s(" a  b,c"), &s(" ,"), false)
+            .iter()
+            .map(|x| x.to_string())
+            .collect();
         assert_eq!(t, vec!["a", "b", "c"]);
-        let t: Vec<String> = tokenize(&s("a,b"), &s(","), true).iter().map(|x| x.to_string()).collect();
+        let t: Vec<String> = tokenize(&s("a,b"), &s(","), true)
+            .iter()
+            .map(|x| x.to_string())
+            .collect();
         assert_eq!(t, vec!["a", ",", "b"]);
     }
 }

@@ -24,7 +24,10 @@ pub struct TapeEnv {
 
 impl TapeEnv {
     pub fn new(mode: Mode) -> Self {
-        TapeEnv { hashes: RefCell::new(HashMap::new()), mode }
+        TapeEnv {
+            hashes: RefCell::new(HashMap::new()),
+            mode,
+        }
     }
 }
 
@@ -52,7 +55,9 @@ pub fn hex16(units: impl IntoIterator<Item = u16>) -> String {
 }
 
 pub fn unhex16(h: &str) -> Vec<u16> {
-    (0..h.len() / 4).map(|i| u16::from_str_radix(&h[4 * i..4 * i + 4], 16).unwrap()).collect()
+    (0..h.len() / 4)
+        .map(|i| u16::from_str_radix(&h[4 * i..4 * i + 4], 16).unwrap())
+        .collect()
 }
 
 pub fn decode(t: &str, env: &TapeEnv, regs: &[Value]) -> Value {
@@ -71,7 +76,10 @@ pub fn decode(t: &str, env: &TapeEnv, regs: &[Value]) -> Value {
         "o" => {
             let (id, h) = r.split_once('.').unwrap();
             let o = ObjRef(id.parse().unwrap());
-            env.hashes.borrow_mut().entry(o).or_insert(h.parse().unwrap());
+            env.hashes
+                .borrow_mut()
+                .entry(o)
+                .or_insert(h.parse().unwrap());
             Value::Obj(o)
         }
         "r" => regs[r.parse::<usize>().unwrap()].clone(),
@@ -95,8 +103,11 @@ pub fn encode(v: &Value) -> String {
         Value::Boxed(IntBox::Short, i) => format!("h{i}"),
         Value::Boxed(IntBox::Byte, i) => format!("y{i}"),
         Value::Boxed(IntBox::Char, i) => format!("c{:04x}", *i as u16),
-        Value::Real(d) => format!("d{:016x}", d.to_bits()),
-        Value::Float(f) => format!("f{:08x}", f.to_bits()),
+        Value::Real(d) => format!(
+            "d{:016x}",
+            qvto_runtime::java::hash::double_to_long_bits(*d)
+        ),
+        Value::Float(f) => format!("f{:08x}", qvto_runtime::java::hash::float_to_int_bits(*f)),
         Value::Bool(b) => if *b { "b1" } else { "b0" }.into(),
         Value::Obj(o) => format!("o{}", o.0),
         Value::Coll(c) => {
@@ -114,7 +125,11 @@ pub fn encode(v: &Value) -> String {
             format!("Q[{}]", items.join(","))
         }
         Value::Dict(d) => {
-            let items: Vec<String> = d.borrow().iter().map(|(k, v)| format!("{}={}", encode(k), encode(v))).collect();
+            let items: Vec<String> = d
+                .borrow()
+                .iter()
+                .map(|(k, v)| format!("{}={}", encode(k), encode(v)))
+                .collect();
             format!("D[{}]", items.join(","))
         }
         other => format!("?{other:?}"),
@@ -168,7 +183,11 @@ pub fn run_coll(script: &str, env: &TapeEnv) -> String {
         let set = |regs: &mut Vec<Value>, dst: &str, v: Value| regs[r(dst)] = v;
         match t[0] {
             "new" => set(&mut regs, t[2], Coll::new_of(kind_of(t[1]), env).into()),
-            "dict" => set(&mut regs, t[1], Value::Dict(Rc::new(RefCell::new(Dict::new(env))))),
+            "dict" => set(
+                &mut regs,
+                t[1],
+                Value::Dict(Rc::new(RefCell::new(Dict::new(env)))),
+            ),
             "+" => {
                 let v = val!(t[2]);
                 coll_mut(&mut regs[r(t[1])]).add(v, env);
@@ -196,7 +215,10 @@ pub fn run_coll(script: &str, env: &TapeEnv) -> String {
             }
             "rall" => {
                 let other = reg!(t[2]);
-                if coll_mut(&mut regs[r(t[1])]).remove_all(coll_ref(&other).unwrap(), env).is_err() {
+                if coll_mut(&mut regs[r(t[1])])
+                    .remove_all(coll_ref(&other).unwrap(), env)
+                    .is_err()
+                {
                     out.push("X".into());
                 }
             }
@@ -285,7 +307,12 @@ pub fn run_coll(script: &str, env: &TapeEnv) -> String {
                 set(&mut regs, t[1], v)
             }
             "subo" => {
-                let v = ops::sub_ordered_set(reg!(t[2]), t[3].parse().unwrap(), t[4].parse().unwrap(), env);
+                let v = ops::sub_ordered_set(
+                    reg!(t[2]),
+                    t[3].parse().unwrap(),
+                    t[4].parse().unwrap(),
+                    env,
+                );
                 set(&mut regs, t[1], v)
             }
             "dput" => {
@@ -314,7 +341,9 @@ pub fn run_coll(script: &str, env: &TapeEnv) -> String {
                 set(&mut regs, t[1], Value::Dict(Rc::new(RefCell::new(d))))
             }
             "p" => out.push(encode(&regs[r(t[1])])),
-            "ps" => out.push(hex16(qvto_runtime::display::to_java_string(&regs[r(t[1])], env).encode_utf16())),
+            "ps" => out.push(hex16(
+                qvto_runtime::display::to_java_string(&regs[r(t[1])], env).encode_utf16(),
+            )),
             "ph" => out.push(format!("#{}", java_hash(&regs[r(t[1])], env))),
             "pin" | "pat" | "pidx" | "pcnt" | "psum" | "pmax" | "pmin" => {
                 let Some(c) = coll_ref(&regs[r(t[1])]) else {
@@ -322,7 +351,12 @@ pub fn run_coll(script: &str, env: &TapeEnv) -> String {
                     continue;
                 };
                 let res = match t[0] {
-                    "pin" => if c.contains(&val!(t[2]), env) { "T" } else { "F" }.to_string(),
+                    "pin" => if c.contains(&val!(t[2]), env) {
+                        "T"
+                    } else {
+                        "F"
+                    }
+                    .to_string(),
                     "pat" => encode(&ops::at(c, t[2].parse().unwrap())),
                     "pidx" => encode(&ops::index_of(c, &val!(t[2]), env)),
                     "pcnt" => format!("i{}", ops::count(c, &val!(t[2]), env)),
@@ -332,8 +366,22 @@ pub fn run_coll(script: &str, env: &TapeEnv) -> String {
                 };
                 out.push(res);
             }
-            "peq" => out.push(if ocl_equal(&regs[r(t[1])], &regs[r(t[2])], env) { "T" } else { "F" }.into()),
-            "pjeq" => out.push(if java_equals(&regs[r(t[1])], &regs[r(t[2])], env) { "T" } else { "F" }.into()),
+            "peq" => out.push(
+                if ocl_equal(&regs[r(t[1])], &regs[r(t[2])], env) {
+                    "T"
+                } else {
+                    "F"
+                }
+                .into(),
+            ),
+            "pjeq" => out.push(
+                if java_equals(&regs[r(t[1])], &regs[r(t[2])], env) {
+                    "T"
+                } else {
+                    "F"
+                }
+                .into(),
+            ),
             other => panic!("statement {other}"),
         }
     }
@@ -378,12 +426,20 @@ impl Oracle {
             .expect("start the Java oracle");
         let stdin = child.stdin.take().unwrap();
         let stdout = BufReader::new(child.stdout.take().unwrap());
-        Oracle { child, stdin, stdout }
+        Oracle {
+            child,
+            stdin,
+            stdout,
+        }
     }
 
     /// Answers for all requests (written by a thread while reading, so the pipes never block).
     pub fn ask_all(self, requests: &[String]) -> Vec<String> {
-        let Oracle { mut child, mut stdin, mut stdout } = self;
+        let Oracle {
+            mut child,
+            mut stdin,
+            mut stdout,
+        } = self;
         let reqs = requests.to_vec();
         let writer = std::thread::spawn(move || {
             let mut w = std::io::BufWriter::new(&mut stdin);

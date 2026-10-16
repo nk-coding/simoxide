@@ -36,19 +36,27 @@ pub struct Str {
 }
 
 fn layout(len: usize) -> Layout {
-    Layout::from_size_align(std::mem::size_of::<Header>() + len, std::mem::align_of::<Header>())
-        .expect("string too large")
+    Layout::from_size_align(
+        std::mem::size_of::<Header>() + len,
+        std::mem::align_of::<Header>(),
+    )
+    .expect("string too large")
 }
 
 impl Str {
     /// From WTF-8 bytes. The caller guarantees well-formed WTF-8 (no surrogate pair encoded as
     /// two three-byte sequences).
     fn from_wtf8_parts(bytes: &[u8], hash: i32, len16: usize, surrogates: bool) -> Str {
-        assert!(bytes.len() <= u32::MAX as usize && len16 <= u32::MAX as usize, "string too large");
+        assert!(
+            bytes.len() <= u32::MAX as usize && len16 <= u32::MAX as usize,
+            "string too large"
+        );
         unsafe {
             let lay = layout(bytes.len());
             let p = alloc::alloc(lay) as *mut Header;
-            let Some(ptr) = NonNull::new(p) else { alloc::handle_alloc_error(lay) };
+            let Some(ptr) = NonNull::new(p) else {
+                alloc::handle_alloc_error(lay)
+            };
             p.write(Header {
                 rc: Cell::new(1),
                 hash,
@@ -56,8 +64,15 @@ impl Str {
                 len: bytes.len() as u32,
                 flags: if surrogates { HAS_SURROGATES } else { 0 },
             });
-            std::ptr::copy_nonoverlapping(bytes.as_ptr(), (p as *mut u8).add(std::mem::size_of::<Header>()), bytes.len());
-            Str { ptr, _not_send: PhantomData }
+            std::ptr::copy_nonoverlapping(
+                bytes.as_ptr(),
+                (p as *mut u8).add(std::mem::size_of::<Header>()),
+                bytes.len(),
+            );
+            Str {
+                ptr,
+                _not_send: PhantomData,
+            }
         }
     }
 
@@ -87,7 +102,10 @@ impl Str {
         let mut i = 0;
         while i < units.len() {
             let u = units[i];
-            let cp = if (0xD800..0xDC00).contains(&u) && i + 1 < units.len() && (0xDC00..0xE000).contains(&units[i + 1]) {
+            let cp = if (0xD800..0xDC00).contains(&u)
+                && i + 1 < units.len()
+                && (0xDC00..0xE000).contains(&units[i + 1])
+            {
                 i += 1;
                 0x10000 + (((u as u32) - 0xD800) << 10) + ((units[i] as u32) - 0xDC00)
             } else {
@@ -99,7 +117,12 @@ impl Str {
             push_wtf8(&mut bytes, cp);
             i += 1;
         }
-        Self::from_wtf8_parts(&bytes, utf16_hash(units.iter().copied()), units.len(), surrogates)
+        Self::from_wtf8_parts(
+            &bytes,
+            utf16_hash(units.iter().copied()),
+            units.len(),
+            surrogates,
+        )
     }
 
     #[inline]
@@ -112,7 +135,10 @@ impl Str {
     pub fn as_bytes(&self) -> &[u8] {
         let h = self.header();
         unsafe {
-            std::slice::from_raw_parts((self.ptr.as_ptr() as *const u8).add(std::mem::size_of::<Header>()), h.len as usize)
+            std::slice::from_raw_parts(
+                (self.ptr.as_ptr() as *const u8).add(std::mem::size_of::<Header>()),
+                h.len as usize,
+            )
         }
     }
 
@@ -130,7 +156,11 @@ impl Str {
     pub fn to_str_lossy(&self) -> Cow<'_, str> {
         match self.as_str() {
             Some(s) => Cow::Borrowed(s),
-            None => Cow::Owned(char::decode_utf16(self.units()).map(|r| r.unwrap_or('\u{FFFD}')).collect()),
+            None => Cow::Owned(
+                char::decode_utf16(self.units())
+                    .map(|r| r.unwrap_or('\u{FFFD}'))
+                    .collect(),
+            ),
         }
     }
 
@@ -165,7 +195,11 @@ impl Str {
 
     /// The UTF-16 code units.
     pub fn units(&self) -> Units<'_> {
-        Units { bytes: self.as_bytes(), pos: 0, low: None }
+        Units {
+            bytes: self.as_bytes(),
+            pos: 0,
+            low: None,
+        }
     }
 
     pub fn to_utf16(&self) -> Vec<u16> {
@@ -176,7 +210,10 @@ impl Str {
 
     /// Code points (lone surrogates as themselves).
     pub fn code_points(&self) -> CodePoints<'_> {
-        CodePoints { bytes: self.as_bytes(), pos: 0 }
+        CodePoints {
+            bytes: self.as_bytes(),
+            pos: 0,
+        }
     }
 
     /// `this + other` (`String.concat`).
@@ -206,7 +243,10 @@ impl Str {
             base = base.wrapping_mul(base);
             e >>= 1;
         }
-        let h = self.java_hash().wrapping_mul(p).wrapping_add(other.java_hash());
+        let h = self
+            .java_hash()
+            .wrapping_mul(p)
+            .wrapping_add(other.java_hash());
         Self::from_wtf8_parts(&b, h, self.len16() + other.len16(), false)
     }
 
@@ -243,7 +283,12 @@ fn decode_at(bytes: &[u8], pos: usize) -> (u32, usize) {
     } else if b0 < 0xE0 {
         (((b0 & 0x1F) << 6) | (bytes[pos + 1] as u32 & 0x3F), 2)
     } else if b0 < 0xF0 {
-        (((b0 & 0x0F) << 12) | ((bytes[pos + 1] as u32 & 0x3F) << 6) | (bytes[pos + 2] as u32 & 0x3F), 3)
+        (
+            ((b0 & 0x0F) << 12)
+                | ((bytes[pos + 1] as u32 & 0x3F) << 6)
+                | (bytes[pos + 2] as u32 & 0x3F),
+            3,
+        )
     } else {
         (
             ((b0 & 0x07) << 18)
@@ -308,7 +353,10 @@ impl Clone for Str {
     fn clone(&self) -> Str {
         let h = self.header();
         h.rc.set(h.rc.get() + 1);
-        Str { ptr: self.ptr, _not_send: PhantomData }
+        Str {
+            ptr: self.ptr,
+            _not_send: PhantomData,
+        }
     }
 }
 
@@ -329,7 +377,8 @@ impl Drop for Str {
 impl PartialEq for Str {
     #[inline]
     fn eq(&self, other: &Str) -> bool {
-        Str::ptr_eq(self, other) || (self.java_hash() == other.java_hash() && self.as_bytes() == other.as_bytes())
+        Str::ptr_eq(self, other)
+            || (self.java_hash() == other.java_hash() && self.as_bytes() == other.as_bytes())
     }
 }
 impl Eq for Str {}
@@ -372,7 +421,10 @@ mod tests {
         assert!(!s.is_ascii());
         let t = s.clone();
         assert!(Str::ptr_eq(&s, &t));
-        assert_eq!(s.to_utf16(), "héllo \u{1F600}".encode_utf16().collect::<Vec<_>>());
+        assert_eq!(
+            s.to_utf16(),
+            "héllo \u{1F600}".encode_utf16().collect::<Vec<_>>()
+        );
     }
 
     #[test]
