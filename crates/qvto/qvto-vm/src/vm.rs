@@ -791,12 +791,22 @@ where
                     w!(self, base, dst) = self.get_interm(&o, p);
                 }
                 Insn::Assign { dst, src, site } => {
-                    let Site::Assign { ty, add, same_elem } = chunk.sites[site as usize] else {
+                    let Site::Assign {
+                        ty,
+                        add,
+                        same_elem,
+                        property,
+                    } = chunk.sites[site as usize]
+                    else {
                         unreachable!()
                     };
                     let old = std::mem::take(&mut w!(self, base, dst));
                     let rhs = std::mem::take(&mut w!(self, base, src));
-                    w!(self, base, dst) = self.assign_fast(ty, old, rhs, !add, same_elem);
+                    w!(self, base, dst) = if property && rhs.is_undefined() {
+                        self.property_undefined(ty, old, rhs, !add)
+                    } else {
+                        self.assign_fast(ty, old, rhs, !add, same_elem)
+                    };
                 }
                 Insn::Coerce { r, site } => {
                     let Site::Type(ty) = chunk.sites[site as usize] else {
@@ -990,7 +1000,11 @@ where
                         unreachable!()
                     };
                     let cur = r!(self, base, var).clone();
-                    if !cur.is_null() {
+                    // an object expression of a collection type (a mapping's `List` result)
+                    // keeps the collection unchecked (`getOutOwner`)
+                    let collection = matches!(cur, Value::Coll(_) | Value::List(_) | Value::Dict(_));
+                    if collection {
+                    } else if !cur.is_null() {
                         let ty_ok = self.value_conforms_to_class(&cur, class);
                         if !ty_ok {
                             self.swallow(format!(

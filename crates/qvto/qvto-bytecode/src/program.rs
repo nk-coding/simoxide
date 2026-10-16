@@ -64,6 +64,9 @@ pub enum Site {
         add: bool,
         /// The value's element type is the variable's (no number conversion of elements).
         same_elem: bool,
+        /// A module property: `callSetter`'s rules for undefined values (`+=` of an
+        /// undefined value changes nothing, `:=` resets).
+        property: bool,
     },
     SetProp {
         feature: FeatureId,

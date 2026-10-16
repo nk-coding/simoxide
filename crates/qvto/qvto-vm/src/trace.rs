@@ -241,7 +241,7 @@ where
             };
             let Some(c) = cand else { continue };
             if let Some(t) = target_ty
-                && !(matches!(c, Value::Obj(_)) && self.is_kind_of(&c, t))
+                && (c.is_undefined() || !self.is_kind_of(&c, t))
             {
                 continue;
             }

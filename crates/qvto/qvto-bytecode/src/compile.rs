@@ -1587,6 +1587,7 @@ impl<'a> Builder<'a> {
                     ty: a.target_ty,
                     add: a.add,
                     same_elem: self.same_elem(a.value.ty, a.target_ty),
+                    property: false,
                 })?;
                 self.emit(Insn::Assign {
                     dst: self.local(*l),
@@ -1601,6 +1602,7 @@ impl<'a> Builder<'a> {
                     ty: a.target_ty,
                     add: a.add,
                     same_elem: self.same_elem(a.value.ty, a.target_ty),
+                    property: true,
                 })?;
                 self.emit(Insn::Assign {
                     dst: old,
@@ -1647,6 +1649,7 @@ impl<'a> Builder<'a> {
                     ty: a.target_ty,
                     add: a.add,
                     same_elem: false,
+                    property: false,
                 })?;
                 self.emit(Insn::Assign {
                     dst: cur,

@@ -411,6 +411,25 @@ where
         self.assign_value(ty, old, rhs, reset)
     }
 
+    /// `callSetter` of an undefined value on a module property: a collection property is
+    /// cleared by `:=` and unchanged by `+=`; a single-valued one is unset (its type default)
+    /// by `:=` of invalid or of null for primitive types, else unchanged.
+    pub(crate) fn property_undefined(&self, ty: TypeId, old: Value, rhs: Value, reset: bool) -> Value {
+        let types = &self.prog.ir.types;
+        if types.is_collection_like(ty) {
+            return if reset { self.default_value(ty) } else { old };
+        }
+        let primitive = matches!(
+            types.get(ty),
+            Type::Boolean | Type::Integer | Type::Real | Type::UnlimitedNatural
+        );
+        if rhs.is_invalid() || primitive {
+            if reset { self.default_value(ty) } else { old }
+        } else {
+            rhs
+        }
+    }
+
     /// QVTo's `assign(lhsType, old, rhs, isReset)` (`QvtOperationalEvaluationEnv`).
     pub(crate) fn assign_value(&self, ty: TypeId, old: Value, rhs: Value, reset: bool) -> Value {
         let types = &self.prog.ir.types;
