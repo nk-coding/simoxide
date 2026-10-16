@@ -906,14 +906,14 @@ impl<'s> Parser<'s> {
                 self.error(
                     Code::NoModule,
                     f.to(last.unwrap()),
-                    "No module declared in the compilation unit",
+                    "A file must declare at least one transformation or library!",
                 );
             }
         } else if modules > 1 && counted != modules + imports_and_modeltypes {
             self.error(
                 Code::MultipleModulesExtraElements,
                 first.unwrap().to(last.unwrap()),
-                "Unit with multiple modules may contain only imports and modeltypes besides the modules",
+                "A file with multiple transformations/libraries cannot contain top level elements other than import, modeltype, transformation or library ",
             );
         }
     }

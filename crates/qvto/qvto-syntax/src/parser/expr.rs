@@ -1405,7 +1405,7 @@ impl<'s> Parser<'s> {
                         self.error(
                             Code::InvalidAdditiveAssignment,
                             e.span,
-                            "Additive assignment is not allowed in while header",
+                            "Invalid use of additive assignment",
                         );
                     }
                     let plain =
