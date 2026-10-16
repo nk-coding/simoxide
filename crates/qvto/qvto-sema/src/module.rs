@@ -1288,7 +1288,7 @@ impl<'r> Sema<'r> {
         let module_ty = self.modules[module.index()].ty;
         let ctx_dir = dir_of(d.direction);
         let context = match &d.context {
-            Some(CtxType::Type(t)) => Some(self.type_cs(t).unwrap_or(module_ty)),
+            Some(CtxType::Type(t)) => Some(self.type_cs_in(t, true).unwrap_or(module_ty)),
             Some(CtxType::Path(p)) => {
                 let te = ast::TypeExpr {
                     kind: ast::TypeKind::Path(ast::PathName {
@@ -1297,7 +1297,7 @@ impl<'r> Sema<'r> {
                     }),
                     span: path_span(p),
                 };
-                Some(self.type_cs(&te).unwrap_or(module_ty))
+                Some(self.type_cs_in(&te, true).unwrap_or(module_ty))
             }
             None => None,
         };
@@ -1956,13 +1956,13 @@ impl<'r> Sema<'r> {
         }
         let mut context = None;
         let ctx_ty = match &ctx {
-            Some(CtxType::Type(t)) => self.type_cs(t),
+            Some(CtxType::Type(t)) => self.type_cs_in(t, true),
             Some(CtxType::Path(path)) => {
                 let te = ast::TypeExpr {
                     kind: ast::TypeKind::Path(ast::PathName { segments: path.to_vec(), span: path_span(path) }),
                     span: path_span(path),
                 };
-                self.type_cs(&te)
+                self.type_cs_in(&te, true)
             }
             None => None,
         };

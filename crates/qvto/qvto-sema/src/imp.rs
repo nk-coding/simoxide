@@ -1479,7 +1479,7 @@ impl<'r> Sema<'r> {
             let (mname, ctx) = scoped_parts(sn);
             let mname = mname.map(|n| n.text.clone()).unwrap_or_default();
             let ctx_ty = ctx.as_ref().and_then(|c| match c {
-                CtxType::Type(t) => self.visit_type_cs(t),
+                CtxType::Type(t) => self.type_cs_in(t, true),
                 CtxType::Path(p) => {
                     let te = ast::TypeExpr {
                         kind: ast::TypeKind::Path(ast::PathName {
@@ -1488,7 +1488,7 @@ impl<'r> Sema<'r> {
                         }),
                         span: path_span_of(p),
                     };
-                    self.visit_type_cs(&te)
+                    self.type_cs_in(&te, true)
                 }
             });
             let m = self.fun.module.unwrap_or(self.cur_module);

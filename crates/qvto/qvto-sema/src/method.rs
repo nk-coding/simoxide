@@ -428,7 +428,7 @@ impl<'r> Sema<'r> {
         let has_type = ctx.is_some();
         if let Some(c) = ctx {
             let t = match c {
-                CtxType::Type(t) => self.visit_type_cs(t),
+                CtxType::Type(t) => self.type_cs_in(t, true),
                 CtxType::Path(p) => {
                     let te = ast::TypeExpr {
                         kind: ast::TypeKind::Path(ast::PathName {
@@ -437,7 +437,7 @@ impl<'r> Sema<'r> {
                         }),
                         span: path_span(p),
                     };
-                    self.visit_type_cs(&te)
+                    self.type_cs_in(&te, true)
                 }
             };
             owning = t;
@@ -493,7 +493,7 @@ impl<'r> Sema<'r> {
         let mut found_classifier = false;
         if let Some(c) = ctx {
             let ty = match c {
-                CtxType::Type(te) => self.visit_type_cs(te),
+                CtxType::Type(te) => self.type_cs_in(te, true),
                 CtxType::Path(p) => {
                     let te = ast::TypeExpr {
                         kind: ast::TypeKind::Path(ast::PathName {
@@ -502,7 +502,7 @@ impl<'r> Sema<'r> {
                         }),
                         span: path_span(p),
                     };
-                    self.visit_type_cs(&te)
+                    self.type_cs_in(&te, true)
                 }
             };
             if let (Some(ty), Some(n)) = (ty, name) {
