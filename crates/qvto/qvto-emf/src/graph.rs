@@ -132,7 +132,12 @@ impl Default for Graph {
 impl Graph {
     /// An empty graph whose registry holds Ecore.
     pub fn new() -> Graph {
-        let mut meta = MetaRegistry::new();
+        Graph::with_registry(MetaRegistry::new())
+    }
+
+    /// An empty graph whose registry is `meta` followed by Ecore: for hosts whose metamodel
+    /// ids are fixed (generated tables) and come first. `meta` must not hold Ecore.
+    pub fn with_registry(mut meta: MetaRegistry) -> Graph {
         let ecore = register_ecore(&mut meta);
         let hooks = ecore_hooks::hook_table(&meta, &ecore);
         Graph {

@@ -78,23 +78,28 @@ macro_rules! ecore_ids {
         #[derive(Clone, Debug)]
         pub struct EcoreIds {
             pub package: PackageId,
-            /// Classes of Ecore have ids `0..class_end`, features `0..feature_end` (Ecore is
-            /// always registered first).
+            /// Classes of Ecore have ids `class_start..class_end`, features
+            /// `feature_start..feature_end` (`0..` when Ecore is registered first, as in
+            /// [`Graph::new`](crate::Graph::new)).
+            pub class_start: u32,
             pub class_end: u32,
+            pub feature_start: u32,
             pub feature_end: u32,
             $(pub $c: ClassId,)*
             $(pub $f: FeatureId,)*
         }
 
         impl EcoreIds {
-            fn resolve(reg: &MetaRegistry, p: PackageId) -> EcoreIds {
+            fn resolve(reg: &MetaRegistry, p: PackageId, class_start: u32, feature_start: u32) -> EcoreIds {
                 let class = |n: &str| reg.class_by_name(p, n).unwrap_or_else(|| panic!("Ecore class {n}"));
                 let feature = |c: &str, n: &str| {
                     reg.feature_by_name(class(c), n).unwrap_or_else(|| panic!("Ecore feature {c}.{n}"))
                 };
                 EcoreIds {
                     package: p,
+                    class_start,
                     class_end: reg.class_count() as u32,
+                    feature_start,
                     feature_end: reg.feature_count() as u32,
                     $($c: class($cn),)*
                     $($f: feature($fc, $fname),)*
@@ -212,21 +217,19 @@ ecore_ids! {
 impl EcoreIds {
     #[inline]
     pub fn is_ecore_class(&self, c: ClassId) -> bool {
-        c.0 < self.class_end
+        (self.class_start..self.class_end).contains(&c.0)
     }
     #[inline]
     pub fn is_ecore_feature(&self, f: FeatureId) -> bool {
-        f.0 < self.feature_end
+        (self.feature_start..self.feature_end).contains(&f.0)
     }
 }
 
-/// Registers the Ecore package in an empty registry and returns its ids.
+/// Registers the Ecore package in a registry and returns its ids. Usually Ecore is the first
+/// package; a host whose metamodel ids are fixed elsewhere (generated tables) registers its
+/// packages first and Ecore after them.
 pub fn register_ecore(reg: &mut MetaRegistry) -> EcoreIds {
-    assert_eq!(
-        reg.class_count(),
-        0,
-        "Ecore must be the first package of a registry"
-    );
+    let (class_start, feature_start) = (reg.class_count() as u32, reg.feature_count() as u32);
     let root = parse_tree(ECORE_ECORE).expect("bundled Ecore.ecore");
     let p = reg.add_package(
         root.attr("name").unwrap(),
@@ -337,7 +340,7 @@ pub fn register_ecore(reg: &mut MetaRegistry) -> EcoreIds {
     }
     reg.finish_classes().expect("Ecore metamodel");
     reg.register_ns_uri(p);
-    let ids = EcoreIds::resolve(reg, p);
+    let ids = EcoreIds::resolve(reg, p, class_start, feature_start);
     reg.set_eobject_class(ids.eobject);
     ids
 }

@@ -10,6 +10,7 @@ pub mod ecore;
 mod ecore_hooks;
 pub mod fragment;
 pub mod graph;
+pub mod materialize;
 pub mod operations;
 pub mod register;
 pub mod resource_set;

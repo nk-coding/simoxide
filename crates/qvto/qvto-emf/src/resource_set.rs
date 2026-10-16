@@ -35,8 +35,13 @@ impl Default for ResourceSet {
 
 impl ResourceSet {
     pub fn new() -> ResourceSet {
+        ResourceSet::with_graph(Graph::new())
+    }
+
+    /// A resource set over an existing graph (e.g. [`Graph::with_registry`]).
+    pub fn with_graph(graph: Graph) -> ResourceSet {
         ResourceSet {
-            graph: Graph::new(),
+            graph,
             uri_map: Vec::new(),
             ns_locations: HashMap::new(),
             aliases: HashMap::new(),

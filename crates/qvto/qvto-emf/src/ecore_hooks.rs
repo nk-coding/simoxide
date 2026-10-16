@@ -32,7 +32,7 @@ pub(crate) enum Hook {
 
 pub(crate) fn hook_table(meta: &MetaRegistry, e: &EcoreIds) -> Vec<Hook> {
     let mut t = vec![Hook::None; e.feature_end as usize];
-    for (i, h) in t.iter_mut().enumerate() {
+    for (i, h) in t.iter_mut().enumerate().skip(e.feature_start as usize) {
         if meta.feature(FeatureId(i as u32)).derived {
             *h = Hook::Derived;
         }
