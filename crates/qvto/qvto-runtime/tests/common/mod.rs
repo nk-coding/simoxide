@@ -314,6 +314,7 @@ pub fn run_coll(script: &str, env: &TapeEnv) -> String {
                 set(&mut regs, t[1], Value::Dict(Rc::new(RefCell::new(d))))
             }
             "p" => out.push(encode(&regs[r(t[1])])),
+            "ps" => out.push(hex16(qvto_runtime::display::to_java_string(&regs[r(t[1])], env).encode_utf16())),
             "ph" => out.push(format!("#{}", java_hash(&regs[r(t[1])], env))),
             "pin" | "pat" | "pidx" | "pcnt" | "psum" | "pmax" | "pmin" => {
                 let Some(c) = coll_ref(&regs[r(t[1])]) else {

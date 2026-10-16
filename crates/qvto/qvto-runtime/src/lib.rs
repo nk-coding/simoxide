@@ -4,10 +4,13 @@
 
 pub mod coll;
 pub mod dict;
+pub mod display;
 pub mod eq;
 pub mod identity;
 pub mod java;
+pub mod num;
 pub mod str;
+pub mod strings;
 pub mod tuple;
 pub mod value;
 

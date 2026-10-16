@@ -367,7 +367,7 @@ mod tests {
     fn basics() {
         let s = Str::new("héllo \u{1F600}");
         assert_eq!(s.java_hash(), str_hash("héllo \u{1F600}"));
-        assert_eq!(s.len16(), 9);
+        assert_eq!(s.len16(), 8);
         assert_eq!(s.as_str(), Some("héllo \u{1F600}"));
         assert!(!s.is_ascii());
         let t = s.clone();

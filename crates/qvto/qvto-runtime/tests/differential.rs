@@ -354,3 +354,220 @@ fn shrink() {
     let a = Oracle::start().ask_all(std::slice::from_ref(&r));
     println!("{r}\njava: {}\nrust: {}", a[0], eval(&r));
 }
+
+fn hex_ascii(s: &str) -> String {
+    common::hex16(s.encode_utf16())
+}
+
+#[test]
+#[ignore]
+fn doubles_to_string() {
+    let mut rng = Rng(0xd70a);
+    let mut reqs: Vec<String> = Vec::new();
+    // powers of ten and their neighbours, both signs
+    for e in -325..=309 {
+        let p = format!("1e{e}").parse::<f64>().unwrap();
+        for b in [p.to_bits().wrapping_sub(1), p.to_bits(), p.to_bits() + 1] {
+            reqs.push(format!("dtoa {b:016x}"));
+            reqs.push(format!("dtoa {:016x}", b | (1 << 63)));
+        }
+    }
+    // all one- and two-ulp subnormals near the bottom, layout boundaries
+    for m in 0..2000u64 {
+        reqs.push(format!("dtoa {m:016x}"));
+    }
+    for x in [1e-3, 1e7, 9999999.999999998, 0.001, 0.0009999999999999998, f64::MAX, f64::MIN_POSITIVE, 2e23, 5e-324] {
+        reqs.push(format!("dtoa {:016x}", x.to_bits()));
+    }
+    for _ in 0..200_000 * scale() {
+        reqs.push(format!("dtoa {:016x}", double_bits(&mut rng)));
+    }
+    for i in -1000..1000 {
+        reqs.push(format!("dtoa {:016x}", (i as f64).to_bits()));
+        reqs.push(format!("dtoa {:016x}", (i as f64 / 100.0).to_bits()));
+    }
+    check("dtoa", reqs, 3000);
+    let mut reqs: Vec<String> = Vec::new();
+    for m in 0..3000u32 {
+        reqs.push(format!("ftoa {m:08x}"));
+    }
+    for _ in 0..100_000 * scale() {
+        let b = match rng.below(3) {
+            0 => rng.next() as u32,
+            1 => (rng.range(-100000, 100000) as f32 / 64.0).to_bits(),
+            _ => ((rng.range(1, 99999) as f64) * 10f64.powi(rng.range(-40, 38) as i32)) as f32 as u32,
+        };
+        reqs.push(format!("ftoa {b:08x}"));
+    }
+    check("ftoa", reqs, 1000);
+}
+
+#[test]
+#[ignore]
+fn number_parsing() {
+    let mut rng = Rng(0x9a25e);
+    let mut reqs: Vec<String> = Vec::new();
+    let fixed = [
+        "1", "1.5", "-1.5", "+2", ".5", "5.", ".", "", " ", " 1 ", "\t2\n", "1e3", "1E-3", "1e", "1e+", "1e+5", "1.5f", "1.5F",
+        "1.5d", "1.5D", "1.5ff", "NaN", "-NaN", "+Infinity", "-Infinity", "Infinity ", "infinity", "nan", "0x1p3", "0X1.8P-2",
+        "0x.8p1", "0x1.p0", "0x1", "0xp1", "0x1p", "-0x1p-1074", "0x1p-1075", "0x1.8p-1075", "0x0.0000000000001p-1022",
+        "0x1.fffffffffffffp1023", "0x1.fffffffffffff8p1023", "0x123456789abcdef0123p0", "1e400", "1e-400", "2.4703282292062328e-324",
+        "2.4703282292062327e-324", "4.9e-324", "1_000", "1,5", "１", "٣", "0.000000000000000000000000000000001", "123456789012345678901234567890",
+        "9007199254740993", "1.7976931348623157e308", "1.7976931348623159e308", "00012", "-0", "-0.0", "0e0", "1e2147483648", "1e-2147483649",
+        "\u{0}1", "1\u{0}", "\u{20}\u{1F}7",
+    ];
+    for f in fixed {
+        for c in ["dparse", "iparse", "lparse"] {
+            reqs.push(format!("{c} {}", hex_ascii(f)));
+        }
+    }
+    for _ in 0..60_000 * scale() {
+        let s = match rng.below(8) {
+            0 => qvto_runtime::java::fmt::double_to_string(f64::from_bits(double_bits(&mut rng))),
+            1 => format!("{}", rng.next() as i64),
+            2 => format!("{}", rng.next() as i32),
+            3 => format!("{}e{}", rng.range(-99999, 99999), rng.range(-330, 330)),
+            4 => format!("{}.{}E{}{}", rng.below(1000), rng.below(1_000_000), if rng.chance(0.5) { "-" } else { "" }, rng.below(400)),
+            5 => format!("0x{:x}.{:x}p{}", rng.below(1 << 20), rng.next(), rng.range(-1100, 1100)),
+            6 => {
+                let alphabet = b"0123456789.eE+-xXpPfFdDaN \t";
+                (0..rng.range(1, 8)).map(|_| *rng.pick(alphabet) as char).collect()
+            }
+            _ => format!("{:+}", rng.range(-3_000_000_000, 3_000_000_000)),
+        };
+        let c = *rng.pick(&["dparse", "dparse", "iparse", "lparse"]);
+        reqs.push(format!("{c} {}", hex_ascii(&s)));
+    }
+    check("parse", reqs, 2000);
+}
+
+#[test]
+#[ignore]
+fn ocl_numbers() {
+    let mut rng = Rng(0x0c1);
+    let ops = ["+", "-", "*", "/", "div", "mod", "max", "min", "<", ">", "<=", ">=", "=", "<>", "neg", "abs", "floor", "round", "toString"];
+    let operand = |rng: &mut Rng| -> String {
+        match rng.below(9) {
+            0 => format!("i{}", rng.range(-10, 10)),
+            1 => format!("i{}", rng.next() as i32),
+            2 => format!("i{}", *rng.pick(&[i32::MIN, i32::MAX, -1, 0, 1, 46341, -46341, 65536])),
+            3 => format!("l{}", *rng.pick(&[i64::MIN, i64::MAX, 2147483648, -2147483649, 3037000500, 1 << 53, (1 << 53) + 1])),
+            4 => {
+                let v = rng.next() as i64;
+                if v as i32 as i64 == v { format!("i{v}") } else { format!("l{v}") }
+            }
+            5 => format!("d{:016x}", (rng.range(-20, 20) as f64 / 4.0).to_bits()),
+            6 => format!("d{:016x}", rng.pick(&[0f64, -0.0, 0.5, -0.5, 1.5, -2.5, 1e10, 3e9, -3e9, 2147483647.5, f64::NAN, f64::INFINITY, f64::NEG_INFINITY, 9007199254740993.0]).to_bits()),
+            _ => format!("d{:016x}", double_bits(rng)),
+        }
+    };
+    let mut reqs: Vec<String> = Vec::new();
+    for _ in 0..40_000 * scale() {
+        let op = *rng.pick(&ops);
+        let a = operand(&mut rng);
+        if matches!(op, "neg" | "abs" | "floor" | "round" | "toString") {
+            reqs.push(format!("num {op} {a}"));
+        } else {
+            let b = operand(&mut rng);
+            reqs.push(format!("num {op} {a} {b}"));
+        }
+    }
+    check("ocl-num", reqs, 2000);
+}
+
+#[test]
+#[ignore]
+fn strings() {
+    let mut rng = Rng(0x57);
+    let mut reqs: Vec<String> = Vec::new();
+    let enc = |u: &[u16]| common::hex16(u.iter().copied());
+    let interesting: Vec<Vec<u16>> = ["", "a", "ß", "Σ", "ΟΔΟΣ", "ΣΑ", "Α Σ", "ΑΣ.", "ΑΣ'Α", "İ", "ı", "ﬀ", "ŉ", "ǅ", "\u{1F600}", "Straße", "ÉCOLE", " x ", "\u{0}\u{1}a\u{20}", "\u{a0}x\u{a0}", "aAbB", "Ａｂ", "𐐨𐐀"]
+        .iter()
+        .map(|s| s.encode_utf16().collect())
+        .collect();
+    let mut strings: Vec<Vec<u16>> = interesting.clone();
+    for _ in 0..3000 {
+        strings.push(utf16(&mut rng, 12));
+    }
+    for s in &strings {
+        for op in ["hash", "len", "upper", "lower", "trim", "tok"] {
+            reqs.push(format!("str {op} {}", enc(s)));
+        }
+    }
+    for _ in 0..30_000 * scale() {
+        let a = rng.pick(&strings).clone();
+        // b: often a piece of a
+        let b: Vec<u16> = if rng.chance(0.6) && !a.is_empty() {
+            let i = rng.below(a.len() as u64) as usize;
+            let j = i + rng.below((a.len() - i) as u64 + 1) as usize;
+            a[i..j].to_vec()
+        } else {
+            rng.pick(&strings).clone()
+        };
+        let c = rng.pick(&strings).clone();
+        let req = match rng.below(9) {
+            0 => format!("str cmp {} {}", enc(&a), enc(&b)),
+            1 => format!("str eqic {} {}", enc(&a), enc(&if rng.chance(0.5) { b.clone() } else { a.iter().map(|&u| if rng.chance(0.5) { qvto_runtime::java::chars::to_upper_unit(u) } else { u }).collect() })),
+            2 => format!("str idx {} {}", enc(&a), enc(&b)),
+            3 => format!("str lidx {} {}", enc(&a), enc(&b)),
+            4 => format!("str repl {} {} {}", enc(&a), enc(&b), enc(&c)),
+            5 => format!("str sw {} {}", enc(&a), enc(&b)),
+            6 => format!("str ew {} {}", enc(&a), enc(&b)),
+            7 => {
+                let n = a.len() as i64;
+                format!("str sub {} {} {}", enc(&a), rng.range(-1, n + 1), rng.range(-1, n + 1))
+            }
+            _ => format!("str tok {} {}", enc(&a), enc(&b)),
+        };
+        reqs.push(req);
+    }
+    check("string", reqs, 2000);
+}
+
+#[test]
+#[ignore]
+fn characters() {
+    let reqs: Vec<String> = (0..=0xffffu32).map(|u| format!("char {u}")).collect();
+    check("char", reqs, 600);
+    let mut rng = Rng(0xc9);
+    let mut reqs: Vec<String> = (0..0x2_0000u32).filter(|c| !(0xd800..0xe000).contains(c)).map(|c| format!("cp {c}")).collect();
+    for _ in 0..20_000 {
+        reqs.push(format!("cp {}", rng.range(0x20000, 0x10ffff)));
+    }
+    check("codepoint", reqs, 600);
+}
+
+#[test]
+#[ignore]
+fn to_string() {
+    let mut rng = Rng(0x7057);
+    let mut reqs: Vec<String> = Vec::new();
+    for _ in 0..5000 * scale() {
+        let mut objs = Vec::new();
+        let kind = *rng.pick(&["S", "O", "B", "Q"]);
+        let mut s = format!("new {kind} 0");
+        for _ in 0..rng.below(12) {
+            let v = loop {
+                let v = scalar(&mut rng, &mut objs);
+                // objects print their Java class; strings with lone surrogates cannot be UTF-8
+                if !v.starts_with('o') && !v.starts_with('s') {
+                    break v;
+                }
+                if v.starts_with('s') {
+                    let u = common::unhex16(&v[1..]);
+                    if char::decode_utf16(u.iter().copied()).all(|r| r.is_ok()) {
+                        break v;
+                    }
+                }
+            };
+            s += &format!(";+ 0 {v}");
+        }
+        s += ";ps 0;dict 1";
+        for _ in 0..rng.below(5) {
+            s += &format!(";dput 1 i{} d{:016x}", rng.range(-50, 50), (rng.range(-8, 8) as f64 / 8.0).to_bits());
+        }
+        s += ";ps 1";
+        reqs.push(format!("coll {s}"));
+    }
+    check("tostring", reqs, 300);
+}

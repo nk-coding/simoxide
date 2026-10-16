@@ -284,7 +284,7 @@ mod tests {
             assert!(h > 0);
             assert_eq!(h, b.next_hash());
         }
-        assert_eq!(HotSpotXorShift::nth_os_random_thread(1).x, 1_421_883_046);
+        assert_eq!(HotSpotXorShift::nth_os_random_thread(1).x, 1_422_014_746);
     }
 
     #[test]

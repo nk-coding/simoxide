@@ -76,6 +76,7 @@ public class Oracle {
             case "char": return charData(Integer.parseInt(arg));
             case "cp": return cpData(Integer.parseInt(arg));
             case "ocl": return OclEval.eval(unhex(arg));
+            case "num": return OclEval.eval(numExpr(arg.split(" ")));
             default: throw new IllegalArgumentException(cmd);
         }
     }
@@ -258,6 +259,7 @@ public class Oracle {
                     case "dcp": dst = reg(t[1]); res = new org.eclipse.m2m.internal.qvt.oml.stdlib.DictionaryImpl<Object, Object>((org.eclipse.m2m.internal.qvt.oml.stdlib.DictionaryImpl<Object, Object>) regs[reg(t[2])]); break;
                     case "drem": assign = false; ((org.eclipse.m2m.internal.qvt.oml.stdlib.DictionaryImpl<Object, Object>) regs[reg(t[1])]).remove(dec(t[2])); break;
                     case "p": assign = false; emit(out, String.valueOf(enc(regs[reg(t[1])]))); break;
+                    case "ps": assign = false; emit(out, hex(String.valueOf(regs[reg(t[1])]))); break;
                     case "ph": assign = false; emit(out, "#" + Objects.hashCode(regs[reg(t[1])])); break;
                     case "pin": assign = false; emit(out, String.valueOf(CollectionUtil.includes(c(t[1]), dec(t[2])) ? "T" : "F")); break;
                     case "pat": assign = false; emit(out, String.valueOf(enc(CollectionUtil.at(c(t[1]), Integer.parseInt(t[2]))))); break;
@@ -281,6 +283,34 @@ public class Oracle {
             if (assign && dst >= 0) regs[dst] = res;
         }
         return out.toString();
+    }
+
+    /** An OCL literal expression for an Integer, Long or Double operand. */
+    static String lit(Object o) {
+        if (o instanceof Double) {
+            double d = (Double) o;
+            if (Double.isNaN(d)) return "(1e400 - 1e400)";
+            if (Double.isInfinite(d)) return d > 0 ? "1e400" : "(-1e400)";
+            boolean neg = (Double.doubleToRawLongBits(d) & Long.MIN_VALUE) != 0;
+            String t = Double.toString(Math.abs(d));
+            return neg ? "(-" + t + ")" : t;
+        }
+        long v = ((Number) o).longValue();
+        if (v == Long.MIN_VALUE) return "(-9223372036854775807 - 1)";
+        return v < 0 ? "(" + v + ")" : Long.toString(v);
+    }
+
+    /** num <op> <a> [<b>]: the OCL expression applying op. */
+    static String numExpr(String[] t) {
+        String op = t[0];
+        String a = lit(dec(t[1]));
+        String b = t.length > 2 ? lit(dec(t[2])) : null;
+        switch (op) {
+            case "neg": return "-" + a;
+            case "abs": case "floor": case "round": case "toString": return a + "." + op + "()";
+            case "div": case "mod": case "max": case "min": return a + "." + op + "(" + b + ")";
+            default: return a + " " + op + " " + b;
+        }
     }
 
     // ---------------------------------------------------------------- strings and characters
