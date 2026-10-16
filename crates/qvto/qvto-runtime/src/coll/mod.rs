@@ -349,6 +349,44 @@ impl Coll {
         }
     }
 
+    /// `clear()` (a `HashSet` keeps its table capacity).
+    pub fn clear(&mut self) {
+        match self {
+            Coll::Set(s) => s.clear(),
+            Coll::OrderedSet(s) => s.clear(),
+            Coll::Bag(b) => {
+                b.index.clear();
+                b.size = 0;
+            }
+            Coll::Sequence(v) => v.clear(),
+        }
+    }
+
+    /// Removal through the collection's iterator of every element for which `f` is false.
+    /// `Err(())` for a bag (`BagImpl`'s iterator does not support removal).
+    pub fn retain_iter(&mut self, mut f: impl FnMut(&Value) -> bool, env: &dyn HashEnv) -> Result<bool, ()> {
+        Ok(match self {
+            Coll::Set(s) => s.retain(|v, _| f(v), env),
+            Coll::OrderedSet(s) => s.retain(|v, _| f(v), env),
+            Coll::Bag(_) => return Err(()),
+            Coll::Sequence(v) => {
+                let n = v.len();
+                v.retain(|e| f(e));
+                v.len() != n
+            }
+        })
+    }
+
+    /// Java `removeAll(c)`: `AbstractSet.removeAll` for sets, `ArrayList.removeAll` (every
+    /// element `c` contains) for sequences; `Err(())` for a bag.
+    pub fn remove_all(&mut self, c: &Coll, env: &dyn HashEnv) -> Result<bool, ()> {
+        match self {
+            Coll::Set(_) | Coll::OrderedSet(_) => Ok(ops::remove_all(self, c, env)),
+            Coll::Sequence(_) => self.retain_iter(|e| !c.contains(e, env), env),
+            Coll::Bag(_) => Err(()),
+        }
+    }
+
     /// Java `contains` (hash lookup with Java `equals`; `Set{1}->includes(1.0)` is false).
     pub fn contains(&self, v: &Value, env: &dyn HashEnv) -> bool {
         match self {

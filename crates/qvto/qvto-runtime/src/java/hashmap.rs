@@ -121,6 +121,20 @@ impl<K, V> JavaHashMap<K, V> {
     pub fn capacity(&self) -> usize {
         self.table.len()
     }
+    /// Length of the longest bucket list.
+    pub fn max_bin_len(&self) -> usize {
+        let mut best = 0;
+        for &h in &self.table {
+            let mut n = 0;
+            let mut p = h;
+            while p != NIL {
+                n += 1;
+                p = self.n(p).next;
+            }
+            best = best.max(n);
+        }
+        best
+    }
     /// True if some bucket is a red-black tree.
     pub fn has_tree_bins(&self) -> bool {
         self.table.iter().any(|&h| h != NIL && self.n(h).tree)

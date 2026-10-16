@@ -268,10 +268,13 @@ impl JavaKey for Value {
     fn identity_hash(&self, env: &dyn HashEnv) -> i32 {
         match identity_key(self) {
             Some(k) => env.identity_hash(k),
+            None if self.is_null() => 0,
             // Boxes, strings and collections have identities of their own in Java, which a
-            // value cannot reproduce; HashMap only consults them for >= 9 equal-hash values
-            // of one non-comparable class in a bucket (see DESIGN §12).
-            None => 0,
+            // value cannot reproduce. HashMap consults them only to order a key against `null`
+            // (Java identity hashes are positive, so any positive value orders correctly) or
+            // two equal-hash keys of one non-comparable class (collections, tuples) in a tree
+            // bin, where Java's order is not reproducible (DESIGN §12).
+            None => 1,
         }
     }
 }

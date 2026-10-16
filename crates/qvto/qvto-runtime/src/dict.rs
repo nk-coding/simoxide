@@ -62,6 +62,23 @@ impl Dict {
     pub fn clear(&mut self) {
         self.map.clear()
     }
+    /// `remove(Object)` of the `Collection` view: removes the first entry (in iteration order)
+    /// whose value equals `v`, through the iterator.
+    pub fn remove_value(&mut self, v: &Value, env: &dyn HashEnv) -> bool {
+        let mut done = false;
+        self.map.retain(
+            |_, w| {
+                if !done && java_equals(v, w, env) {
+                    done = true;
+                    false
+                } else {
+                    true
+                }
+            },
+            env,
+        );
+        done
+    }
     /// Entries in iteration order.
     pub fn iter(&self) -> impl Iterator<Item = (&Value, &Value)> {
         self.map.iter()
