@@ -124,6 +124,11 @@ where
 
     /// The operation of an extending module that overrides `op`, if any (`extends`).
     pub(crate) fn overriding(&self, op: OpId) -> OpId {
+        // an operation of a native library has a call handler: Eclipse calls it as an OCL
+        // operation, without looking for overriding operations
+        if self.is_library_native(op) {
+            return op;
+        }
         let ir = &self.prog.ir;
         // the main module's chain: follow the operations that override `op` to the last one
         let mut cur = op;

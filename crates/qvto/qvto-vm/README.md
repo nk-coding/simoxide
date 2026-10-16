@@ -62,7 +62,8 @@ print!("{}", vm.log);                                              // WriterLog'
   `null`/`invalid` receiver; `map` on them skips the mapping protocol); `blackbox` operations
   declared in QVTo run on a stack frame of their own, a `blackbox mapping` with the protocol
   (`when`, trace lookup, a defined result, trace record, merged mappings, the result's extent);
-  `invalid` arguments are passed as `null`; implementation exceptions become
+  `invalid` arguments are passed as `null`; calls of library operations are never redirected to
+  overriding operations (Eclipse calls them through their handler); implementation exceptions become
   `QvtRuntimeException`s with Eclipse's text, cancellation interrupts. A `blackbox
   transformation` is run by the implementation registered under its name with its model
   extents, its configuration properties as the context's.
@@ -101,16 +102,16 @@ incremental update traces, per-instance properties of nested transformations.
   overflow with Eclipse's stack trace text, `raise`/`try`, fatal assertions, mappings with
   traces and `resolveone`, `when` and `xmap`, out parameters, disjuncts, virtual dispatch,
   collections, `Dict` and `List`, objects in out extents.
-- End to end (`qvto conform --engine qvto`), after Q4a: 481 of the 494 runnable Eclipse cases
-  equal the Java runner strictly (models, log, severity, code, stack, problems; 97.4 %), 482
-  pass Eclipse's checks, fast mode the same; `TestQvtInterpreter` 299 of 309, `TestQvtParser`
+- End to end (`qvto conform --engine qvto`), after Q4a: 482 of the 494 runnable Eclipse cases
+  equal the Java runner strictly (models, log, severity, code, stack, problems; 97.6 %), 483
+  pass Eclipse's checks, fast mode the same; `TestQvtInterpreter` 300 of 309, `TestQvtParser`
   152 of 154. Corpus: 23 of 24 strictly, all 24 pass (SPD's `MainTransformation` strictly).
-  The 13 others: analyser and VM semantics (`raise 'msg'`, `insertAt` overloads in 3 cases, an
-  implicit-iterator `iterate`, opposites of intermediate classes, virtual calls across `extends`
-  of a native library in `transf_inheritance`, a parser recovery difference), OCL bodies of
-  EOperations (`oclannotation`), an incremental update trace (`bug463572`), a Java blackbox
-  Eclipse loads only with the run's registry (`bug565747`, 2 cases), a stack overflow log, and an
-  `extent:/N` number (lenient passes). Q3a's state: 424 strictly, 425 Eclipse checks; corpus 22.
+  The 12 others: analyser and VM semantics (`raise 'msg'`, `insertAt` overloads in 3 cases, an
+  implicit-iterator `iterate`, opposites of intermediate classes, a parser recovery
+  difference), OCL bodies of EOperations (`oclannotation`), an incremental update trace
+  (`bug463572`), a Java blackbox Eclipse loads only with the run's registry (`bug565747`, 2
+  cases), a stack overflow log (lenient pass); in the corpus an `extent:/N` number (lenient
+  pass). Q3a's state: 424 strictly, 425 Eclipse checks; corpus 22.
 - Performance (`qvto bench --java`, release build, median of 20 runs; Java: the reference
   runner, same cases repeated in one JVM, median of the second half):
 

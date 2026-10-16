@@ -103,9 +103,9 @@ Status values: done, next, open, parked.
   transformations), QVTo's `Strings`/`emf.tools` and the test bundle's Java libraries ported,
   Palladio's signatures and `getSimulationTime` for hosts; the QVT and XMLType metamodels;
   `Model::copy`/`createEmptyModel`; Ecore's EOperations and host EOperations; EOperations in
-  the CLI. The scoreboard went from 424 to 481 of the 494 runnable Eclipse cases strictly equal
-  to the Java runner (482 pass Eclipse's checks; fast mode the same), `TestQvtInterpreter` from
-  262 to 299 of 309 (96.8 %), `TestQvtParser` from 137 to 152 of 154; corpus 23 of 24 strictly,
+  the CLI. The scoreboard went from 424 to 482 of the 494 runnable Eclipse cases strictly equal
+  to the Java runner (483 pass Eclipse's checks; fast mode the same), `TestQvtInterpreter` from
+  262 to 300 of 309 (97.1 %), `TestQvtParser` from 137 to 152 of 154; corpus 23 of 24 strictly,
   24 pass: **SPD's `MainTransformation` equals the Java runner**. The exit criteria are met; the
   Q4b part (analyser fixes, intermediate classes in the store, remaining VM semantics) is in
   progress. Open from Q4a: OCL bodies of EOperations and OCL derivations (`oclannotation`), a
