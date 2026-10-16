@@ -73,7 +73,8 @@ pub(crate) struct GlobalInfo {
 
 pub(crate) struct IntermPropInfo {
     pub ir: ir::IntermProp,
-    pub context: Option<qvto_model::ClassId>,
+    /// The context type (a class, or another `EClass` of Eclipse: a module, a model type).
+    pub context: Option<TypeId>,
     pub hidden: bool,
     pub name_span: Span,
 }

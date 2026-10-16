@@ -1800,8 +1800,7 @@ impl<'r> Sema<'r> {
                         let n = self.interm_props[ip.index()].ir.name.clone();
                         self.error(p.span, bind(vm::QvtOperationalVisitorCS_intermediatePropertyDefinitionInsideBlackboxModule, &[&n]));
                     }
-                    if let Some(c) = self.interm_props[ip.index()].context {
-                        let ct = self.ts.types.class(c);
+                    if let Some(ct) = self.interm_props[ip.index()].context {
                         let n = self.interm_props[ip.index()].ir.name.clone();
                         if self.lookup_property(ct, &n).is_some() {
                             self.interm_props[ip.index()].hidden = true;
@@ -1969,8 +1968,8 @@ impl<'r> Sema<'r> {
         };
         match ctx_ty {
             Some(ct) => {
-                if let Type::Class(c) = *self.ts.types.get(ct) {
-                    context = Some(c);
+                if matches!(self.ts.types.get(ct), Type::Class(_) | Type::Module(_) | Type::ModelType(_) | Type::Tuple(_)) {
+                    context = Some(ct);
                 } else {
                     let span = ctx.as_ref().map(|c| c.span()).unwrap_or(p.span);
                     self.error(span, bind(vm::QvtOperationalVisitorCS_ContextualPropertyTypeIsNotClass, &[&name]));
@@ -1982,9 +1981,9 @@ impl<'r> Sema<'r> {
     }
 
     #[allow(clippy::too_many_arguments)]
-    fn push_interm_prop(&mut self, id: ModuleId, name: String, ty: TypeId, context: Option<qvto_model::ClassId>, init: Option<ir::CodeBody>, span: Span, name_span: Span) -> ir::IntermPropId {
+    fn push_interm_prop(&mut self, id: ModuleId, name: String, ty: TypeId, context: Option<TypeId>, init: Option<ir::CodeBody>, span: Span, name_span: Span) -> ir::IntermPropId {
         let pid = ir::IntermPropId(self.interm_props.len() as u32);
-        let cty = context.map(|c| self.ts.types.class(c)).unwrap_or(TypeId::NULL);
+        let cty = context.unwrap_or(TypeId::NULL);
         self.interm_props.push(IntermPropInfo {
             ir: ir::IntermProp { module: id, context: cty, name, ty, init, span },
             context,
@@ -2003,10 +2002,9 @@ impl<'r> Sema<'r> {
             .filter_map(|f| if let ModuleFeature::Interm(i) = f { Some(*i) } else { None })
             .collect();
         for &ip in &props {
-            let Some(c) = self.interm_props[ip.index()].context else {
+            let Some(ct) = self.interm_props[ip.index()].context else {
                 continue;
             };
-            let ct = self.ts.types.class(c);
             let name = self.interm_props[ip.index()].ir.name.clone();
             let found = self.lookup_property(ct, &name);
             let already = (found.is_some() && found != Some(crate::ops::PropRef::Interm(ip))) | self.interm_props[ip.index()].hidden;
@@ -2022,7 +2020,7 @@ impl<'r> Sema<'r> {
     /// `IntermediatePropertyHierarchy.hasHierarchyClashes`: another property of the same name on
     /// a sub- or supertype of the context.
     fn hierarchy_clash(&mut self, _id: ModuleId, ip: ir::IntermPropId, props: &[ir::IntermPropId]) -> bool {
-        let Some(c) = self.interm_props[ip.index()].context else {
+        let Some(Type::Class(c)) = self.interm_props[ip.index()].context.map(|t| self.ts.types.get(t).clone()) else {
             return false;
         };
         let name = self.interm_props[ip.index()].ir.name.clone();
@@ -2030,7 +2028,7 @@ impl<'r> Sema<'r> {
             if o == ip || self.interm_props[o.index()].ir.name != name {
                 continue;
             }
-            if let Some(oc) = self.interm_props[o.index()].context {
+            if let Some(Type::Class(oc)) = self.interm_props[o.index()].context.map(|t| self.ts.types.get(t).clone()) {
                 if oc != c && (self.ts.meta.class(oc).all_supers.contains(&c) || self.ts.meta.class(c).all_supers.contains(&oc)) {
                     return true;
                 }

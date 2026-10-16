@@ -459,7 +459,7 @@ impl<'r> Sema<'r> {
                 return;
             }
             ExprKind::New(n) => {
-                self.validate_instantiation(e, n);
+                self.validate_instantiation(e, n, ctx);
             }
             ExprKind::NewTransformation(m, args) => {
                 self.validate_new_transformation(e, *m, args);
@@ -612,7 +612,7 @@ impl<'r> Sema<'r> {
     }
 
     /// `visitInstantiationExp` (classes and data types)
-    fn validate_instantiation(&mut self, e: &ir::Expr, n: &ir::New) {
+    fn validate_instantiation(&mut self, e: &ir::Expr, n: &ir::New, ctx: &Ctx<'_>) {
         let t = n.ty;
         if t == TypeId::NULL {
             return;
@@ -650,7 +650,7 @@ impl<'r> Sema<'r> {
         } else if class.is_none() && self.is_data_type(t) {
             let string_arg = n.args.len() == 1 && self.is_string_type(n.args[0].ty);
             if !string_arg {
-                let args: Vec<String> = n.args.iter().map(|a| self.expr_to_string(a)).collect();
+                let args: Vec<String> = n.args.iter().map(|a| self.expr_to_string(a, ctx)).collect();
                 let tn = self.qualified_name(t);
                 self.error(e.span, bind(vm::QvtOperationalValidationVisitor_invalidParamsForDatatypeInstantiation, &[&format!("[{}]", args.join(", ")), &tn]));
             }
@@ -673,8 +673,10 @@ impl<'r> Sema<'r> {
     }
 
     /// A rough `toString` of an argument expression for messages.
-    fn expr_to_string(&self, e: &ir::Expr) -> String {
+    fn expr_to_string(&self, e: &ir::Expr, ctx: &Ctx<'_>) -> String {
         match &e.kind {
+            ExprKind::Local(l) => ctx.locals.get(l.index()).map(|x| x.name.clone()).unwrap_or_default(),
+            ExprKind::Real(r) => format!("{r:?}"),
             ExprKind::Str(s) => format!("'{s}'"),
             ExprKind::Int(i) => i.to_string(),
             ExprKind::Bool(b) => b.to_string(),

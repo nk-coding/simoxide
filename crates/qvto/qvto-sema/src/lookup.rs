@@ -770,13 +770,10 @@ impl<'r> Sema<'r> {
     }
 
     fn local_additional_attributes(&mut self, env: ModuleId, owner: TypeId, out: &mut Vec<PropRef>) {
-        let Type::Class(c) = *self.ts.types.get(owner) else {
-            return;
-        };
         for f in &self.modules[env.index()].features {
             if let ModuleFeature::Interm(i) = f {
                 let p = &self.interm_props[i.index()];
-                if !p.hidden && p.context == Some(c) {
+                if !p.hidden && p.context == Some(owner) {
                     out.push(PropRef::Interm(*i));
                 }
             }

@@ -226,10 +226,7 @@ impl<'r> Sema<'r> {
             }
             PropRef::Interm(i) => {
                 let p = &self.interm_props[i.index()];
-                match p.context {
-                    Some(c) => self.ts.types.class(c),
-                    None => TypeId::OCL_VOID,
-                }
+                p.context.unwrap_or(TypeId::OCL_VOID)
             }
             PropRef::TuplePart(t, _) => t,
         }
