@@ -771,7 +771,8 @@ impl Graph {
         }
         if fi.kind == FeatureKind::Reference {
             if self.meta.is_container(f) {
-                if matches!(self.objs[o.index()].container, Some((_, cf)) if Some(cf) == fi.opposite) {
+                // InternalSettingDelegateSingleContainer.dynamicUnset: detaches from any container
+                if self.objs[o.index()].container.is_some() {
                     self.remove_from_container(o);
                     self.basic_set_container(o, None);
                 }
@@ -795,12 +796,9 @@ impl Graph {
     pub(crate) fn op_add(&mut self, o: ObjId, f: FeatureId, v: Datum<'_, ObjId>, at: Option<usize>) -> ModelResult<bool> {
         self.slot_index(o, f)?;
         self.require_many(f)?;
+        // EMF's order: bounds, uniqueness, then validation (null, type)
         let fi = self.meta.feature(f);
-        if fi.kind == FeatureKind::Reference && v.is_null() {
-            return Err(ModelError::NullNotAllowed(f));
-        }
-        self.check_value(f, &v)?;
-        let unique = fi.unique;
+        let (unique, is_ref) = (fi.unique, fi.kind == FeatureKind::Reference);
         let len = self.op_len(o, f);
         if let Some(i) = at
             && i > len
@@ -813,6 +811,10 @@ impl Graph {
                 Some(_) => Err(ModelError::Duplicate(f)),
             };
         }
+        if is_ref && v.is_null() {
+            return Err(ModelError::NullNotAllowed(f));
+        }
+        self.check_value(f, &v)?;
         self.add_unique(o, f, v, at);
         Ok(true)
     }
@@ -885,20 +887,21 @@ impl Graph {
         self.slot_index(o, f)?;
         self.require_many(f)?;
         let fi = self.meta.feature(f);
-        if fi.kind == FeatureKind::Reference && v.is_null() {
-            return Err(ModelError::NullNotAllowed(f));
-        }
-        self.check_value(f, &v)?;
+        let (unique, is_ref) = (fi.unique, fi.kind == FeatureKind::Reference);
         let len = self.op_len(o, f);
         if i >= len {
             return Err(ModelError::IndexOutOfBounds { index: i, size: len });
         }
-        if fi.unique
+        if unique
             && let Some(j) = self.index_of(o, f, &v)
             && j != i
         {
             return Err(ModelError::Duplicate(f));
         }
+        if is_ref && v.is_null() {
+            return Err(ModelError::NullNotAllowed(f));
+        }
+        self.check_value(f, &v)?;
         let h = self.hook(f);
         if h != Hook::None
             && let Some(r) = ecore_hooks::set_at(self, o, f, h, i, v)
