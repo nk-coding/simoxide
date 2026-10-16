@@ -1868,7 +1868,7 @@ impl<'r> Sema<'r> {
             if let Some(t) = &p.ty {
                 ty = self.type_cs(t);
                 if let Some(tt) = ty {
-                    if !self.ts.ck().is_primitive(tt) && !self.ts.types.is_collection_like(tt) && !matches!(self.ts.types.get(tt), Type::DataType(_) | Type::Enum(_)) {
+                    if !self.ts.ck().is_primitive(tt) && !self.ts.types.is_collection_like(tt) && !matches!(self.ts.types.get(tt), Type::DataType(_) | Type::Enum(_) | Type::Tuple(_)) {
                         let n = self.type_name(tt);
                         self.error(t.span, bind(vm::ConfigPropertyTypeUnsupported, &[&n]));
                     }

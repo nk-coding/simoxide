@@ -524,6 +524,15 @@ impl<'a> Checker<'a> {
             if ia.is_some() && ia == self.instance_class(init) {
                 return true;
             }
+            // `initialiserType == ExtendedMetaData.getBaseType(variableType)`: the registry keeps
+            // no annotations; EMF's XSD convention names the nullable wrapper of enum `E` `EObject`
+            if let (Type::DataType(d), Type::Enum(e)) = (self.ty(var).clone(), self.ty(init).clone()) {
+                let di = self.meta.data_type(d);
+                let ei = self.meta.enumeration(e);
+                if di.package == ei.package && *di.name == *format!("{}Object", ei.name) {
+                    return true;
+                }
+            }
         }
         self.relationship(var, init) & SUPERTYPE != 0
     }
