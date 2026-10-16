@@ -155,7 +155,8 @@ where
     pub(crate) prog: &'a Program,
     pub store: &'a mut S,
     pub env: RunEnv,
-    pub(crate) consts: Vec<Value>,
+    /// The program's constants as values, converted on first use.
+    pub(crate) consts: Vec<Option<Value>>,
     pub(crate) regs: Vec<Value>,
     pub(crate) iters: Vec<IterSlot>,
     pub(crate) frames: Vec<Frame>,
@@ -174,6 +175,8 @@ where
     pub(crate) interm: HashMap<(crate::objects::IntermOwner, IntermPropId), Value>,
     pub(crate) late: Vec<LateTask>,
     pub(crate) prims: &'static [Prim],
+    /// Argument buffer of standard library calls (reused).
+    pub(crate) argbuf: Vec<Value>,
     pub(crate) str_counters: HashMap<String, i64>,
     pub(crate) steps: u64,
     /// Stderr-like messages of swallowed runtime errors (`Evaluation failed at ...`).
@@ -264,6 +267,7 @@ where
             interm: HashMap::default(),
             late: Vec::new(),
             prims: crate::stdlib::prims(),
+            argbuf: Vec::with_capacity(8),
             str_counters: HashMap::default(),
             steps: 0,
             errors: Vec::new(),
@@ -291,7 +295,7 @@ where
         if let Some(src) = vm.opts.id_source.take() {
             vm.env = RunEnv::new(vm.opts.mode, Some(src));
         }
-        vm.consts = prog.consts.iter().map(const_value).collect();
+        vm.consts = vec![None; prog.consts.len()];
         vm.interm_info = crate::objects::IntermInfo::new(prog, vm.store);
         vm.class_local = crate::objects::local_classes(prog, vm.interm_info.in_store);
         vm
@@ -627,7 +631,15 @@ where
                 Insn::LoadBool { dst, v } => w!(self, base, dst) = Value::Bool(v),
                 Insn::LoadInt { dst, v } => w!(self, base, dst) = Value::Int(v as i64),
                 Insn::LoadConst { dst, k } => {
-                    w!(self, base, dst) = self.consts[k as usize].clone();
+                    let v = match &self.consts[k as usize] {
+                        Some(v) => v.clone(),
+                        None => {
+                            let v = const_value(&prog.consts[k as usize]);
+                            self.consts[k as usize] = Some(v.clone());
+                            v
+                        }
+                    };
+                    w!(self, base, dst) = v;
                 }
                 Insn::LoadDefault { dst, ty } => {
                     w!(self, base, dst) = self.default_value(TypeId(ty));

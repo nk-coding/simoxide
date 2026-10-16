@@ -541,23 +541,28 @@ where
         arg_unl: bool,
     ) -> VmResult<Value> {
         let n = op.desc().params.len();
-        let mut args: Vec<Value> = Vec::with_capacity(n + 1);
+        // the arguments in a buffer the VM keeps (a nested call takes a fresh one)
+        let mut args = std::mem::take(&mut self.argbuf);
+        args.clear();
         for i in 0..=n {
             args.push(std::mem::take(&mut self.regs[at + i]));
         }
         let prim = self.prims[op as usize];
-        self.prim(prim, op, args, src_unl, arg_unl)
+        let r = self.prim(prim, op, &mut args, src_unl, arg_unl);
+        args.clear();
+        self.argbuf = args;
+        r
     }
 
-    pub(crate) fn prim_call(&mut self, prim: Prim, op: StdOp, args: Vec<Value>) -> VmResult<Value> {
-        self.prim(prim, op, args, false, false)
+    pub(crate) fn prim_call(&mut self, prim: Prim, op: StdOp, mut args: Vec<Value>) -> VmResult<Value> {
+        self.prim(prim, op, &mut args, false, false)
     }
 
     fn prim(
         &mut self,
         prim: Prim,
         op: StdOp,
-        mut args: Vec<Value>,
+        args: &mut [Value],
         su: bool,
         au: bool,
     ) -> VmResult<Value> {
