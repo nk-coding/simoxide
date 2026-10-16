@@ -229,6 +229,8 @@ pub(crate) fn finish(meta: &mut MetaRegistry, pending: &Pending) -> Vec<MetaOper
             name: op.name.to_string(),
             params,
             result: op.result.as_ref().and_then(|r| typed(meta, r)),
+            // generated code implements them (no OCL bodies in SimOxide's metamodels)
+            body: None,
         });
     }
     ops

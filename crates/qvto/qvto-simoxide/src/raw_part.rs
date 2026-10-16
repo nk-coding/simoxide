@@ -90,7 +90,7 @@ pub(crate) fn to_datum<'a>(meta: &MetaRegistry, f: FeatureId, v: &'a Value) -> D
 }
 
 /// A value as SimOxide stores it (`simoxide_model::raw::parse_value`'s representation).
-pub(crate) fn to_value(meta: &MetaRegistry, f: FeatureId, d: &Datum<'_, u32>) -> Value {
+pub(crate) fn to_value(_meta: &MetaRegistry, _f: FeatureId, d: &Datum<'_, u32>) -> Value {
     match *d {
         Datum::Null | Datum::Obj(_) => Value::Null,
         Datum::Bool(b) => Value::Bool(b),

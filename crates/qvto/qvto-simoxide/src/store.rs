@@ -135,6 +135,12 @@ impl Session {
         qvto_emf::operations::meta_operations(&self.rs.graph)
     }
 
+    /// The OCL derivations of the registered metamodels' features, for the analyser
+    /// (`qvto::compile_with_metamodel`).
+    pub fn derivations(&self) -> Vec<qvto_model::MetaDerivation> {
+        qvto_emf::operations::meta_derivations(&self.rs.graph)
+    }
+
     /// Whether objects of class `c` live in SimOxide's graph.
     pub fn is_graph_class(&self, c: ClassId) -> bool {
         c.0 < self.st.raw_classes
@@ -636,6 +642,16 @@ impl<'a> SimStore<'a> {
 
 impl ModelStore for SimStore<'_> {
     type Obj = u32;
+
+    /// The program's classes (intermediate classes) are added after every metamodel class, so
+    /// their instances live in the `qvto_emf` graph, with EMF's semantics.
+    fn extend_meta(&mut self, meta: &MetaRegistry) -> bool {
+        let ok = self.s.rs.graph.extend_meta(meta);
+        if ok {
+            self.s.sync_ext();
+        }
+        ok
+    }
 
     fn meta(&self) -> &MetaRegistry {
         self.s.rs.graph.meta()

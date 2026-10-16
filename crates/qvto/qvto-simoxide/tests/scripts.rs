@@ -17,6 +17,7 @@ use simoxide_model::raw;
 use std::collections::HashMap;
 
 const SCRIPTS: u64 = 300;
+const TRACE: bool = false;
 const OPS: usize = 80;
 
 struct Rng(u64);
@@ -362,6 +363,28 @@ fn script(seed: u64, meta: &MetaRegistry, classes: &[ClassId], focus: &[ClassId]
     ops
 }
 
+/// Containment cycles exist in EMF too (list containment does not check for them).
+fn in_cycle<S: ModelStore>(s: &S, o: S::Obj) -> bool {
+    let mut seen = std::collections::HashSet::new();
+    let mut cur = o;
+    while let Some((p, _)) = s.container(cur) {
+        if !seen.insert(p) {
+            return true;
+        }
+        cur = p;
+    }
+    // objects contained below `o` in a cycle
+    let mut stack = vec![o];
+    let mut seen = std::collections::HashSet::new();
+    while let Some(x) = stack.pop() {
+        if !seen.insert(x) {
+            return true;
+        }
+        stack.extend(s.contents(x));
+    }
+    false
+}
+
 #[test]
 fn pcm_scripts_equal_qvto_emf() {
     let Some(conf) = registry::pcm_conf() else { return };
@@ -408,6 +431,15 @@ fn pcm_scripts_equal_qvto_emf() {
         };
         b.res = vec![b.s.create_resource("mem:/r1"), b.s.create_resource("mem:/r2")];
         for (k, op) in ops.iter().enumerate() {
+            if TRACE || std::env::var_os("SCRIPT_TRACE").is_some() {
+                eprintln!("script {seed} op {k} {op:?}");
+            }
+            if let Op::Delete(o) = op
+                && in_cycle(&a.s, a.objs[*o])
+            {
+                // EMF's getRootContainer throws on containment cycles (both stores would loop)
+                continue;
+            }
             let ra = a.apply(op);
             let rb = b.apply(op);
             assert_eq!(ra, rb, "script {seed} op {k} {op:?}");
