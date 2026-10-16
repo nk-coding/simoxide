@@ -915,6 +915,8 @@ where
     /// collections and tuples cloned, other values shared.
     pub(crate) fn clone_interm_props(&mut self, map: &[(S::Obj, S::Obj)]) {
         let prog = self.prog;
+        // `qvtoObjectMap`: each mutable List/Dict is cloned once per copy (identity kept)
+        let mut memo: Vec<(*const (), Value)> = Vec::new();
         for &(o, c) in map {
             let src = Value::Obj(ObjRef::host(o.to_u32()));
             let dst = Value::Obj(ObjRef::host(c.to_u32()));
@@ -924,14 +926,31 @@ where
                 }
                 let p = IntermPropId(i as u32);
                 let v = self.get_interm(&src, p);
-                let r = self.clone_ocl(&v, map);
+                let r = self.clone_ocl(&v, map, &mut memo);
                 self.set_interm(&dst, p, r, true);
             }
         }
     }
 
-    fn clone_ocl(&self, v: &Value, map: &[(S::Obj, S::Obj)]) -> Value {
-        match v {
+    /// `cloneOclObjects`: objects mapped to their copies, collections, dictionaries (keys and
+    /// values) and tuples cloned.
+    fn clone_ocl(
+        &self,
+        v: &Value,
+        map: &[(S::Obj, S::Obj)],
+        memo: &mut Vec<(*const (), Value)>,
+    ) -> Value {
+        let key: Option<*const ()> = match v {
+            Value::List(l) => Some(Rc::as_ptr(l) as *const ()),
+            Value::Dict(d) => Some(Rc::as_ptr(d) as *const ()),
+            _ => None,
+        };
+        if let Some(k) = key
+            && let Some((_, r)) = memo.iter().find(|(p, _)| *p == k)
+        {
+            return r.clone();
+        }
+        let r = match v {
             Value::Obj(r) if !r.is_local() => {
                 let h = S::Obj::from_u32(r.index());
                 match map.iter().find(|(x, _)| *x == h) {
@@ -942,15 +961,20 @@ where
             Value::Coll(_) | Value::List(_) => {
                 let mut out = self.new_coll_like(v);
                 for e in crate::vm::Iter::of(v).items.iter() {
-                    push(&mut out, self.clone_ocl(e, map), &self.env);
+                    let c = self.clone_ocl(e, map, memo);
+                    push(&mut out, c, &self.env);
                 }
                 out
             }
             Value::Dict(d) => {
                 let out = self.new_coll_like(v);
+                let entries: Vec<(Value, Value)> =
+                    d.borrow().iter().map(|(k, x)| (k.clone(), x.clone())).collect();
                 if let Value::Dict(o) = &out {
-                    for (k, x) in d.borrow().iter() {
-                        o.borrow_mut().put(k.clone(), self.clone_ocl(x, map), &self.env);
+                    for (k, x) in entries {
+                        let ck = self.clone_ocl(&k, map, memo);
+                        let cx = self.clone_ocl(&x, map, memo);
+                        o.borrow_mut().put(ck, cx, &self.env);
                     }
                 }
                 out
@@ -958,10 +982,14 @@ where
             Value::Tuple(t) => Value::Tuple(Rc::new(qvto_runtime::tuple::Tuple::new(
                 t.type_id,
                 t.names.clone(),
-                t.values.iter().map(|x| self.clone_ocl(x, map)).collect(),
+                t.values.iter().map(|x| self.clone_ocl(x, map, memo)).collect(),
             ))),
             _ => v.clone(),
+        };
+        if let Some(k) = key {
+            memo.push((k, r.clone()));
         }
+        r
     }
 
     pub(crate) fn copy_rec(
