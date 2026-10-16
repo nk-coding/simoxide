@@ -211,10 +211,14 @@ where
     /// model type's first metamodel is the class's root package, else the first non-`in`
     /// parameter, else the unbound extent).
     pub(crate) fn default_extent(&self, class: ClassId, extent: Option<ModelParamRef>) -> usize {
-        if let Some(x) = extent
-            && let Some(&e) = self.param_extents.get(&(x.module.0, x.index))
-        {
-            return e;
+        if let Some(x) = extent {
+            // a parameter of a module that is not bound in this run (an imported
+            // transformation's own extent): not an output
+            return self
+                .param_extents
+                .get(&(x.module.0, x.index))
+                .copied()
+                .unwrap_or(self.unbound_extent);
         }
         if self.is_local_class(class) {
             return self.unbound_extent;

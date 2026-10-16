@@ -74,22 +74,53 @@ where
             self.param_extents
                 .insert((ir.main_module.0, i as u32), self.extents.len() - 1);
         }
-        // modules the main transformation extends share its model parameters (by position)
-        let mut stack = vec![ir.main_module];
-        let mut seen = vec![ir.main_module];
-        while let Some(m) = stack.pop() {
-            for u in &ir.modules[m.index()].usages {
-                if u.kind != qvto_sema::ir::UsageKind::Extends || seen.contains(&u.module) {
-                    continue;
-                }
-                seen.push(u.module);
-                stack.push(u.module);
-                let n = ir.modules[u.module.index()].model_params.len();
-                for i in 0..n.min(main.model_params.len()) {
-                    if let Some(&x) = self.param_extents.get(&(ir.main_module.0, i as u32)) {
-                        self.param_extents.insert((u.module.0, i as u32), x);
+        // the other transformations' model parameters (`ModelParameterHelper`): a main
+        // parameter of compatible direction and metamodels, else of compatible direction, else
+        // an extent of their own
+        for (mi, m) in ir.modules.iter().enumerate() {
+            if mi == ir.main_module.index() || m.kind != qvto_sema::ir::ModuleKind::Transformation {
+                continue;
+            }
+            let mut bound: Vec<usize> = Vec::new();
+            let mut unset = Vec::new();
+            for (pi, mp) in m.model_params.iter().enumerate() {
+                let found = main.model_params.iter().enumerate().position(|(j, q)| {
+                    !bound.contains(&j)
+                        && direction_compatible(q.direction, mp.direction)
+                        && ir.model_types[mp.model_type.index()]
+                            .packages
+                            .iter()
+                            .all(|p| ir.model_types[q.model_type.index()].packages.contains(p))
+                });
+                match found {
+                    Some(j) => {
+                        bound.push(j);
+                        let x = self.param_extents[&(ir.main_module.0, j as u32)];
+                        self.param_extents.insert((mi as u32, pi as u32), x);
                     }
+                    None => unset.push(pi),
                 }
+            }
+            for pi in unset {
+                let mp = &m.model_params[pi];
+                let found = main.model_params.iter().enumerate().position(|(j, q)| {
+                    !bound.contains(&j) && direction_compatible(q.direction, mp.direction)
+                });
+                let x = match found {
+                    Some(j) => {
+                        bound.push(j);
+                        self.param_extents[&(ir.main_module.0, j as u32)]
+                    }
+                    None => {
+                        self.extents.push(Extent::new(
+                            Some((qvto_sema::ir::ModuleId(mi as u32), pi as u32)),
+                            mp.direction,
+                            mp.name.clone(),
+                        ));
+                        self.extents.len() - 1
+                    }
+                };
+                self.param_extents.insert((mi as u32, pi as u32), x);
             }
         }
         let mut unbound = Extent::new(None, Direction::Out, "unbound".into());
@@ -412,4 +443,9 @@ where
 fn generated_param(name: &str) -> bool {
     name.strip_prefix('$')
         .is_some_and(|r| !r.is_empty() && !r.bytes().all(|b| b.is_ascii_digit()))
+}
+
+/// `isModelParamEqual`'s direction rule: an `in` parameter only binds `in` parameters.
+fn direction_compatible(main: Direction, other: Direction) -> bool {
+    main != Direction::In || other == Direction::In
 }
