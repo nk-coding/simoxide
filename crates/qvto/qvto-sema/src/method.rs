@@ -337,6 +337,12 @@ impl<'r> Sema<'r> {
                 } else {
                     list.push(target);
                 }
+                let slot = match kind {
+                    "inherits" => 0,
+                    "disjuncts" => 1,
+                    _ => 2,
+                };
+                self.ext_refs.entry(op).or_default()[slot].push(sn.span);
             }
         }
         (inherits, merges, disjuncts)

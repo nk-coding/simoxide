@@ -311,10 +311,10 @@ impl<'r> Sema<'r> {
             self.visit_method_bodies(ids[i], &modules[i], &method_maps[i]);
         }
         // AST validation
-        for &id in &ids {
+        for (i, &id) in ids.iter().enumerate() {
             self.cur_module = id;
             self.problems().check_duplicate_errors = true;
-            self.validate_module(id);
+            self.validate_module(id, &method_maps[i]);
             self.problems().check_duplicate_errors = false;
         }
     }

@@ -663,7 +663,7 @@ impl<'r> Sema<'r> {
 
     /// `if c then a else b endif` (OCL) or the switch Eclipse makes of the other forms.
     fn if_exp(&mut self, i: &ast::IfExp, cst: Span, pos: Pos) -> Ex {
-        let ocl = !i.c_style && i.elifs.is_empty() && i.els.is_some();
+        let ocl = !i.c_style && i.endif && i.elifs.is_empty();
         if !ocl {
             return self.if_as_switch(i, cst, pos);
         }
@@ -671,7 +671,7 @@ impl<'r> Sema<'r> {
         let inner = if pos == Pos::Block { Pos::Branch } else { Pos::Other };
         let t = self.expr_at(&i.then, inner, i.then.span);
         let e = i.els.as_ref().and_then(|x| self.expr_at(x, inner, x.span));
-        if c.ty() != TypeId::BOOLEAN {
+        if !c.err && c.ty() != TypeId::BOOLEAN {
             let s = self.src();
             let text = i.cond.span.text(&s).to_string();
             self.error(i.cond.span, bind(om::BooleanForIf_ERROR_, &[&text]));
@@ -681,9 +681,13 @@ impl<'r> Sema<'r> {
             _ => TypeId::OCL_VOID,
         };
         let det = t.as_ref().is_some_and(|x| x.det) && e.as_ref().is_some_and(|x| x.det);
+        let err = match (&t, &e) {
+            (Some(a), Some(b)) => a.err || b.err,
+            _ => false,
+        };
         let then_e = t.map(|x| x.e).unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, i.then.span));
         let mut x = self.ex(ExprKind::If(Box::new(c.e), Box::new(then_e), e.map(|x| Box::new(x.e))), ty, cst);
-        x.err = c.err;
+        x.err = err;
         x.det = det;
         x.info = Info::If;
         x

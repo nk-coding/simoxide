@@ -71,6 +71,9 @@ pub(crate) struct Sema<'r> {
     pub interm_feature_types: HashMap<qvto_model::FeatureId, TypeId>,
     /// Package of placeholder data types for intermediate features of non-classifier types.
     pub placeholder_pkg: Option<qvto_model::PackageId>,
+    /// Source references of mapping extensions per mapping: inherits, disjuncts, merges
+    /// (`MappingExtensionHelper.bind2SourceElement`).
+    pub ext_refs: HashMap<OpId, [Vec<Span>; 3]>,
 }
 
 pub(crate) const STDLIB_MODULE: ModuleId = ModuleId(0);
@@ -108,6 +111,7 @@ impl<'r> Sema<'r> {
             op_extras: Vec::new(),
             interm_feature_types: HashMap::new(),
             placeholder_pkg: None,
+            ext_refs: HashMap::new(),
         };
         s.create_stdlib_module();
         s
