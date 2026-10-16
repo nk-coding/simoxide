@@ -140,6 +140,7 @@ impl Irb {
             interm_props: Vec::new(),
             interm_classes: Vec::new(),
             meta_ops: Vec::new(),
+            derivations: Vec::new(),
         };
         let mut irb = Irb {
             p,
