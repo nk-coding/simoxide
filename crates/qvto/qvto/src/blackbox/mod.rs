@@ -17,9 +17,11 @@
 //! "on the classpath"), the implementations to a run with `Vm::set_natives`.
 //!
 //! [`stdlib`] holds QVTo's own deprecated libraries (`Strings`, `emf.tools`) with their
-//! signatures and implementations.
+//! signatures and implementations, [`palladio`] the signatures of Palladio's libraries
+//! (stereotypes, simulation time) for hosts.
 
 pub mod java;
+pub mod palladio;
 pub mod stdlib;
 
 pub use qvto_sema::{BlackboxModule, BlackboxOp, BlackboxOpKind, BlackboxParam, BlackboxUnit};
