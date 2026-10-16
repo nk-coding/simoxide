@@ -16,9 +16,11 @@ use crate::generated::{groups, TokenKind as K};
 use crate::lexer::{lpg_text, Lexed, Token};
 use crate::span::Span;
 
-/// Maximum nesting of expressions and blocks before the parser gives up on a construct (keeps
-/// the parser's stack bounded on adversarial input).
-const MAX_DEPTH: u32 = 400;
+/// Maximum nesting of expressions and statements before the parser gives up on a construct.
+/// It bounds the parser's stack on adversarial input: a level takes up to about 6 KB in debug
+/// builds and 3 KB in release builds, so 256 levels fit a 2 MB thread stack. The deepest nesting
+/// in the corpus is 14.
+const MAX_DEPTH: u32 = 256;
 
 pub(crate) struct Parser<'s> {
     src: &'s str,

@@ -5,6 +5,7 @@ use super::Parser;
 use crate::ast::*;
 use crate::diag::Code;
 use crate::generated::{binary_level, groups, TokenKind as K, PREFIX_OPS};
+use crate::lexer::Token;
 use crate::span::Span;
 
 /// Tokens after which a statement ends (recovery points inside blocks).
@@ -629,144 +630,190 @@ impl<'s> Parser<'s> {
                 self.bump();
                 return self.mk(start, ExprKind::SelfExp);
             }
-            K::Lparen => {
-                self.bump();
-                let inner = self.expr();
-                if self.expect(K::Rparen).is_none() {
-                    self.skip_to(&[K::Rparen, K::Semicolon]);
-                    self.eat(K::Rparen);
-                }
-                return self.mk(start, ExprKind::Paren(Box::new(inner)));
-            }
-            K::KwIf => return self.if_exp(stmt),
-            K::KwWhile => return self.while_exp(),
-            K::KwSwitch => {
-                self.bump();
-                let body = self.switch_body();
-                return self.mk(start, ExprKind::Switch(Box::new(body)));
-            }
-            K::KwDo => {
-                self.bump();
-                let b = self.block();
-                return self.mk(start, ExprKind::Do(b));
-            }
-            K::KwCompute => return self.compute(),
-            K::KwTry => return self.try_exp(),
-            K::KwRaise => return self.raise(),
-            K::KwNew => {
-                // newExpCS ::= new typespec '(' argumentsCSopt ')'
-                self.bump();
-                let ty = self.expect_type_spec();
-                let args = self.args();
-                return self.mk(start, ExprKind::New(Box::new(New { ty, args })));
-            }
+            K::Lparen => return self.paren(start),
+            _ => {}
+        }
+        if groups::SIMPLE_NAME.contains(&k) {
+            return self.primary_name(start);
+        }
+        self.primary_other(t, stmt)
+    }
+
+    // The rarer primaries are kept out of `primary`'s frame: it is on the recursive path of
+    // every nesting level, and debug builds give every temporary its own stack slot.
+    #[inline(never)]
+    fn paren(&mut self, start: Span) -> Expr {
+        self.bump();
+        let inner = self.expr();
+        if self.expect(K::Rparen).is_none() {
+            self.skip_to(&[K::Rparen, K::Semicolon]);
+            self.eat(K::Rparen);
+        }
+        self.mk(start, ExprKind::Paren(Box::new(inner)))
+    }
+
+    /// Dispatch for the keyword-introduced primaries; each has its own function so that only
+    /// the construct actually parsed puts its frame on the stack.
+    #[inline(never)]
+    fn primary_other(&mut self, t: Token, stmt: bool) -> Expr {
+        let start = t.span;
+        let k = t.kind;
+        match k {
+            K::KwIf => self.if_exp(stmt),
+            K::KwWhile => self.while_exp(),
+            K::KwSwitch => self.switch_exp(start),
+            K::KwDo => self.do_exp(start),
+            K::KwCompute => self.compute(),
+            K::KwTry => self.try_exp(),
+            K::KwRaise => self.raise(),
+            K::KwNew => self.new_exp(start),
             K::KwBreak => {
                 self.bump();
-                return self.mk(start, ExprKind::Break);
+                self.mk(start, ExprKind::Break)
             }
             K::KwContinue => {
                 self.bump();
-                return self.mk(start, ExprKind::Continue);
+                self.mk(start, ExprKind::Continue)
             }
-            K::KwObject => {
-                // outExpCS ::= object objectDeclCS expression_block
+            K::KwObject => self.object_exp(t),
+            K::KwMap | K::KwXmap => self.map_call(start, None),
+            K::KwTuple => self.tuple_exp(t),
+            K::KwList | K::KwDict => self.list_or_dict(t),
+            _ if groups::PRIMITIVE_TYPE.contains(&k) => {
                 self.bump();
-                if !self.at_simple_name() && !self.at_type_start() && !self.at(K::KwSelf) {
-                    let msg = format!("\"objectDeclCS\" expected after \"{}\"", self.quoted(t));
-                    self.error(Code::Expected, t.span, msg);
-                    if self.at(K::Lbrace) {
-                        let b = self.block();
-                        let decl = ObjectDecl { var: None, ty: None, span: Span::at(start.end) };
-                        return self.mk(start, ExprKind::Object(Box::new(ObjectExp { decl, body: b })));
-                    }
-                    return self.mk(start, ExprKind::Error);
-                }
-                let decl = self.object_decl();
-                let body = self.block();
-                return self.mk(start, ExprKind::Object(Box::new(ObjectExp { decl, body })));
+                self.mk(start, ExprKind::TypeLit(TypeExpr { kind: TypeKind::Primitive(k), span: t.span }))
             }
-            K::KwMap | K::KwXmap => return self.map_call(start, None),
-            K::KwTuple => {
-                self.bump();
-                if self.at(K::Lbrace) {
-                    // TupleLiteralExpCS ::= Tuple '{' TupleLiteralPartsCS '}'
-                    self.bump();
-                    let mut parts = Vec::new();
-                    loop {
-                        let ps = self.span();
-                        let Some(name) = self.simple_name() else {
-                            self.expected("IDENTIFIER", false);
-                            break;
-                        };
-                        let ty = if self.eat(K::Colon).is_some() { Some(self.expect_type()) } else { None };
-                        let init = if self.expect(K::Equal).is_some() { Some((K::Equal, Box::new(self.expr()))) } else { None };
-                        parts.push(VarDecl { name, ty, init, span: ps.to(Span::at(self.prev_end())) });
-                        if self.eat(K::Comma).is_none() {
-                            break;
-                        }
-                    }
-                    self.close_brace();
-                    return self.mk(start, ExprKind::TupleLit(parts));
-                }
-                let ty = self.tuple_type(t);
-                return self.mk(start, ExprKind::TypeLit(ty));
+            _ if groups::COLLECTION_TYPE.contains(&k) => self.collection_exp(t),
+            _ if k == K::KwLate || groups::RESOLVE_OP.contains(&k) || groups::RESOLVE_IN_OP.contains(&k) => {
+                self.resolve(start, None)
             }
-            K::KwList => {
-                if self.nth(1) == K::Lbrace {
-                    // listLiteralCS ::= List '{' CollectionLiteralPartsCSopt '}'
-                    self.bump();
-                    let parts = self.collection_parts();
-                    return self.mk(start, ExprKind::ListLit(parts));
-                }
-                self.bump();
-                self.expected("{", false);
-                return self.mk(start, ExprKind::Error);
+            _ => {
+                self.expected("OclExpressionCS", false);
+                self.mk(Span::at(start.start), ExprKind::Error)
             }
-            K::KwDict => {
-                if self.nth(1) == K::Lbrace {
-                    // dictLiteralCS ::= Dict '{' dictLiteralPartListCSopt '}'
-                    self.bump();
-                    self.bump();
-                    let mut parts = Vec::new();
-                    if !self.at(K::Rbrace) {
-                        loop {
-                            let key = self.dict_key();
-                            self.expect(K::Equal);
-                            let value = self.expr();
-                            parts.push(DictPart { key, value });
-                            if self.eat(K::Comma).is_none() {
-                                break;
-                            }
-                        }
-                    }
-                    self.close_brace();
-                    return self.mk(start, ExprKind::DictLit(parts));
-                }
-                self.bump();
-                self.expected("{", false);
-                return self.mk(start, ExprKind::Error);
-            }
-            _ => {}
         }
-        if groups::PRIMITIVE_TYPE.contains(&k) {
-            self.bump();
-            return self.mk(start, ExprKind::TypeLit(TypeExpr { kind: TypeKind::Primitive(k), span: t.span }));
-        }
-        if groups::COLLECTION_TYPE.contains(&k) {
-            if self.nth(1) == K::Lbrace {
-                // CollectionLiteralExpCS ::= CollectionTypeIdentifierCS '{' CollectionLiteralPartsCSopt '}'
-                self.bump();
-                let parts = self.collection_parts();
-                return self.mk(start, ExprKind::CollectionLit(k, parts));
+    }
+
+    #[inline(never)]
+    fn switch_exp(&mut self, start: Span) -> Expr {
+        self.bump();
+        let body = self.switch_body();
+        self.mk(start, ExprKind::Switch(Box::new(body)))
+    }
+
+    #[inline(never)]
+    fn do_exp(&mut self, start: Span) -> Expr {
+        self.bump();
+        let b = self.block();
+        self.mk(start, ExprKind::Do(b))
+    }
+
+    /// `newExpCS ::= new typespec '(' argumentsCSopt ')'`
+    #[inline(never)]
+    fn new_exp(&mut self, start: Span) -> Expr {
+        self.bump();
+        let ty = self.expect_type_spec();
+        let args = self.args();
+        self.mk(start, ExprKind::New(Box::new(New { ty, args })))
+    }
+
+    /// `outExpCS ::= object objectDeclCS expression_block`
+    #[inline(never)]
+    fn object_exp(&mut self, t: Token) -> Expr {
+        let start = t.span;
+        self.bump();
+        if !self.at_simple_name() && !self.at_type_start() && !self.at(K::KwSelf) {
+            let msg = format!("\"objectDeclCS\" expected after \"{}\"", self.quoted(t));
+            self.error(Code::Expected, t.span, msg);
+            if self.at(K::Lbrace) {
+                let b = self.block();
+                let decl = ObjectDecl { var: None, ty: None, span: Span::at(start.end) };
+                return self.mk(start, ExprKind::Object(Box::new(ObjectExp { decl, body: b })));
             }
-            // TypeLiteralExpCS: collectionTypeCS. `Set(T){…}` is not allowed by QVTo.
-            let ty = self.expect_type();
+            return self.mk(start, ExprKind::Error);
+        }
+        let decl = self.object_decl();
+        let body = self.block();
+        self.mk(start, ExprKind::Object(Box::new(ObjectExp { decl, body })))
+    }
+
+    /// `TupleLiteralExpCS ::= Tuple '{' TupleLiteralPartsCS '}'` or a tuple type literal.
+    #[inline(never)]
+    fn tuple_exp(&mut self, t: Token) -> Expr {
+        let start = t.span;
+        self.bump();
+        if !self.at(K::Lbrace) {
+            let ty = self.tuple_type(t);
             return self.mk(start, ExprKind::TypeLit(ty));
         }
-        if k == K::KwLate || groups::RESOLVE_OP.contains(&k) || groups::RESOLVE_IN_OP.contains(&k) {
-            return self.resolve(start, None);
+        self.bump();
+        let mut parts = Vec::new();
+        loop {
+            let ps = self.span();
+            let Some(name) = self.simple_name() else {
+                self.expected("IDENTIFIER", false);
+                break;
+            };
+            let ty = if self.eat(K::Colon).is_some() { Some(self.expect_type()) } else { None };
+            let init = if self.expect(K::Equal).is_some() { Some((K::Equal, Box::new(self.expr()))) } else { None };
+            parts.push(VarDecl { name, ty, init, span: ps.to(Span::at(self.prev_end())) });
+            if self.eat(K::Comma).is_none() {
+                break;
+            }
         }
-        if groups::SIMPLE_NAME.contains(&k) {
+        self.close_brace();
+        self.mk(start, ExprKind::TupleLit(parts))
+    }
+
+    /// `listLiteralCS ::= List '{' CollectionLiteralPartsCSopt '}'`,
+    /// `dictLiteralCS ::= Dict '{' dictLiteralPartListCSopt '}'`
+    #[inline(never)]
+    fn list_or_dict(&mut self, t: Token) -> Expr {
+        let start = t.span;
+        if self.nth(1) != K::Lbrace {
+            self.bump();
+            self.expected("{", false);
+            return self.mk(start, ExprKind::Error);
+        }
+        self.bump();
+        if t.kind == K::KwList {
+            let parts = self.collection_parts();
+            return self.mk(start, ExprKind::ListLit(parts));
+        }
+        self.bump();
+        let mut parts = Vec::new();
+        if !self.at(K::Rbrace) {
+            loop {
+                let key = self.dict_key();
+                self.expect(K::Equal);
+                let value = self.expr();
+                parts.push(DictPart { key, value });
+                if self.eat(K::Comma).is_none() {
+                    break;
+                }
+            }
+        }
+        self.close_brace();
+        self.mk(start, ExprKind::DictLit(parts))
+    }
+
+    /// `CollectionLiteralExpCS ::= CollectionTypeIdentifierCS '{' CollectionLiteralPartsCSopt '}'`
+    /// or a collection type literal (`Set(T){…}` is not allowed by QVTo).
+    #[inline(never)]
+    fn collection_exp(&mut self, t: Token) -> Expr {
+        let start = t.span;
+        if self.nth(1) == K::Lbrace {
+            self.bump();
+            let parts = self.collection_parts();
+            return self.mk(start, ExprKind::CollectionLit(t.kind, parts));
+        }
+        let ty = self.expect_type();
+        self.mk(start, ExprKind::TypeLit(ty))
+    }
+
+    #[inline(never)]
+    fn primary_name(&mut self, start: Span) -> Expr {
+        {
             let name = self.simple_name().unwrap();
             if self.at(K::Coloncolon) && self.nth_is_unreserved_name(1) {
                 // pathNameCS '::' unreservedSimpleNameCS ['(' args ')']
@@ -787,10 +834,8 @@ impl<'s> Parser<'s> {
                 let args = self.args();
                 return self.mk(start, ExprKind::Call(Box::new(Call { source: None, qualifier: Vec::new(), name, args })));
             }
-            return self.mk(start, ExprKind::Name(name));
+            self.mk(start, ExprKind::Name(name))
         }
-        self.expected("OclExpressionCS", false);
-        self.mk(Span::at(start.start), ExprKind::Error)
     }
 
     fn close_brace(&mut self) {
