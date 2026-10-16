@@ -158,7 +158,7 @@ impl<'r> Sema<'r> {
             "=" | "<>" | "<" | ">" | "<=" | ">=" | "oclIsKindOf" | "oclIsTypeOf" | "oclIsNew" | "oclIsInState" | "oclIsUndefined" | "oclIsInvalid" => Some(TypeId::BOOLEAN),
             "oclAsType" => {
                 let a = args.first()?;
-                if self.ts.types.is_collection(source) {
+                if self.ts.types.is_collection_like(source) {
                     let sn = self.type_name(source);
                     self.error(problem, bind(om::Noncomforming_ERROR_, &[&sn, "oclAsType"]));
                     return None;
@@ -196,7 +196,7 @@ impl<'r> Sema<'r> {
     }
 
     fn elem_of(&self, t: TypeId) -> TypeId {
-        if self.ts.types.is_collection(t) {
+        if self.ts.types.is_collection_like(t) {
             self.ts.types.element(t).unwrap_or(TypeId::NULL)
         } else {
             TypeId::NULL
@@ -232,7 +232,7 @@ impl<'r> Sema<'r> {
             "excluding" | "asBag" | "select" | "reject" => source,
             "count" => TypeId::INTEGER,
             "flatten" => {
-                if !self.ts.types.is_collection(elem) {
+                if !self.ts.types.is_collection_like(elem) {
                     source
                 } else {
                     let f = self.flattened_element(source);
@@ -281,7 +281,7 @@ impl<'r> Sema<'r> {
             "excluding" | "asSet" | "select" | "reject" => source,
             "count" => TypeId::INTEGER,
             "flatten" => {
-                if !self.ts.types.is_collection(elem) {
+                if !self.ts.types.is_collection_like(elem) {
                     source
                 } else {
                     let f = self.flattened_element(source);
@@ -347,7 +347,7 @@ impl<'r> Sema<'r> {
             }
             "excluding" | "asSequence" | "subSequence" | "sortedBy" => source,
             "flatten" => {
-                if !self.ts.types.is_collection(elem) {
+                if !self.ts.types.is_collection_like(elem) {
                     source
                 } else {
                     let f = self.flattened_element(source);

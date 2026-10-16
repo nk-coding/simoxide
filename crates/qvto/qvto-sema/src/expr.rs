@@ -281,7 +281,7 @@ impl<'r> Sema<'r> {
         let (src, owner) = match source {
             Some(s) => {
                 let t = s.ty();
-                let o = if self.ts.types.is_collection(t) { self.ts.types.element(t).unwrap() } else { t };
+                let o = if self.ts.types.is_collection_like(t) { self.ts.types.element(t).unwrap() } else { t };
                 (Some(s), o)
             }
             None => match self.implicit_source_for_property(name) {
@@ -298,7 +298,7 @@ impl<'r> Sema<'r> {
             let pty = self.prop_type(p);
             let src_var = if let Info::Var(v) = src.info { v } else { None };
             let st = src.ty();
-            if explicit && self.ts.types.is_collection(st) {
+            if explicit && self.ts.types.is_collection_like(st) {
                 // implicit collect over the source collection
                 let (it, it_name) = self.new_temp_iterator(st);
                 let iter_ex = self.var_ex(VarRef::Local(it), name_span);
@@ -356,7 +356,7 @@ impl<'r> Sema<'r> {
     /// `createImplicitCollect` (with QVTo's List rule).
     pub fn implicit_collect(&mut self, src: Ex, it: ir::LocalId, body: Ex, cst: Span) -> Ex {
         let mut bt = body.ty();
-        if self.ts.types.is_collection(bt) {
+        if self.ts.types.is_collection_like(bt) {
             bt = self.flattened_element(bt);
         }
         let st = src.ty();
@@ -753,6 +753,19 @@ impl<'r> Sema<'r> {
             None => Accessor::None,
         };
         let name = c.name.text.as_str();
+        if let (Some((src, NavOp::Arrow)), [arg]) = (&c.source, c.args.as_slice()) {
+            // the parser's isIterator: `src->select(cond)` is an iterator with an implicit variable
+            if c.qualifier.is_empty() && OCL_ITERATORS.contains(&name) {
+                let it = ast::Iterate {
+                    source: src.clone(),
+                    name: c.name.clone(),
+                    vars: Vec::new(),
+                    acc: None,
+                    body: arg.clone(),
+                };
+                return self.iterate_exp(&it, cst);
+            }
+        }
         if c.qualifier.len() > 1 && c.source.is_none() {
             return self.static_operation_call(c, cst, pos);
         }
@@ -790,7 +803,7 @@ impl<'r> Sema<'r> {
     }
 
     pub fn as_collection_source(&mut self, x: Ex, span: Span) -> Ex {
-        if self.ts.types.is_collection(x.ty()) {
+        if self.ts.types.is_collection_like(x.ty()) {
             return x;
         }
         let ty = self.ts.types.collection(CollKind::Set, x.ty());
@@ -859,7 +872,7 @@ impl<'r> Sema<'r> {
         let src_err = src.err;
         let st = src.ty();
         let src_var = if let Info::Var(v) = src.info { v } else { None };
-        let implicit_collect = cs.accessor == Accessor::Dot && self.ts.types.is_collection(st);
+        let implicit_collect = cs.accessor == Accessor::Dot && self.ts.types.is_collection_like(st);
         let owner = if implicit_collect { self.ts.types.element(st).unwrap_or(TypeId::OCL_VOID) } else { st };
         let is_static = matches!(self.ts.types.get(owner), Type::TypeType(_));
         if implicit_collect {
@@ -914,7 +927,7 @@ impl<'r> Sema<'r> {
                     _ => None,
                 };
                 if let Some(st) = st {
-                    if self.ts.types.is_collection(st) {
+                    if self.ts.types.is_collection_like(st) {
                         let src_ops = self.get_operations(st);
                         if !src_ops.contains(&o) {
                             result = self.rewrite_as_xcollect(result, cs);
@@ -1111,7 +1124,7 @@ impl<'r> Sema<'r> {
         let a: Vec<Arg> = args.iter().map(|x| self.arg_of(x)).collect();
         let mut op_owner = owner;
         let src_ty = src.as_ref().map(|s| s.ty());
-        let arrow_coll = cs.accessor == Accessor::Arrow && src_ty.is_some_and(|t| self.ts.types.is_collection(t));
+        let arrow_coll = cs.accessor == Accessor::Arrow && src_ty.is_some_and(|t| self.ts.types.is_collection_like(t));
         if arrow_coll && self.lookup_operation(cs.span, None, owner, name, &a).is_none() {
             op_owner = self.ts.types.element(owner).unwrap_or(TypeId::OCL_VOID);
         }
@@ -1229,8 +1242,8 @@ impl<'r> Sema<'r> {
         }
         let fty = self.ts.types.get(formal).clone();
         let aty = self.ts.types.get(actual).clone();
-        let fcoll = self.ts.types.is_collection(formal);
-        let acoll = self.ts.types.is_collection(actual);
+        let fcoll = self.ts.types.is_collection_like(formal);
+        let acoll = self.ts.types.is_collection_like(actual);
         if fcoll && acoll {
             let fe = self.ts.types.element(formal).unwrap();
             let ae = self.ts.types.element(actual).unwrap();
@@ -1383,6 +1396,9 @@ impl<'r> Sema<'r> {
         }
     }
 }
+
+/// `AbstractOCLParser.createIteratorNames`
+const OCL_ITERATORS: [&str; 11] = ["any", "collect", "collectNested", "exists", "forAll", "isUnique", "one", "reject", "select", "sortedBy", "closure"];
 
 fn is_generic_param(t: TypeId) -> bool {
     t == TypeId::T || t == TypeId::T2 || t == TypeId::KEY_T

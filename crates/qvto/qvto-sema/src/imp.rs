@@ -65,7 +65,7 @@ impl<'r> Sema<'r> {
             "select" => (LoopKind::Select, st),
             "reject" => (LoopKind::Reject, st),
             "collect" => {
-                let e = if self.ts.types.is_collection(bt) { self.flattened_element(bt) } else { bt };
+                let e = if self.ts.types.is_collection_like(bt) { self.flattened_element(bt) } else { bt };
                 let k = if seq_like { CollKind::Sequence } else { CollKind::Bag };
                 (LoopKind::Collect, self.ts.types.collection(k, e))
             }
@@ -80,7 +80,7 @@ impl<'r> Sema<'r> {
             }
             "closure" => {
                 let ordered = matches!(self.ts.types.get(bt), Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _));
-                let be = if self.ts.types.is_collection(bt) { self.ts.types.element(bt).unwrap() } else { bt };
+                let be = if self.ts.types.is_collection_like(bt) { self.ts.types.element(bt).unwrap() } else { bt };
                 let k = if ordered { CollKind::OrderedSet } else { CollKind::Set };
                 (LoopKind::Closure, self.ts.types.collection(k, be))
             }
@@ -90,7 +90,7 @@ impl<'r> Sema<'r> {
         if name == "closure" && seq_like {
             ty = self.ts.types.collection(CollKind::OrderedSet, elem_t);
         }
-        if matches!(self.ts.types.get(st), Type::List(_)) && self.ts.types.is_collection(ty) {
+        if matches!(self.ts.types.get(st), Type::List(_)) && self.ts.types.is_collection_like(ty) {
             let e = self.ts.types.element(ty).unwrap();
             match name {
                 "select" | "reject" | "collect" | "collectNested" | "sortedBy" => ty = self.ts.types.collection(CollKind::Sequence, e),
@@ -245,7 +245,7 @@ impl<'r> Sema<'r> {
     #[allow(clippy::too_many_arguments)]
     fn imperative_iterate(&mut self, name: &str, source: Ex, vars: &[IterVar<'_>], target: Option<XTarget<'_>>, body: Option<XBody<'_>>, cond: Option<&ast::Expr>, cst: Span) -> Ex {
         let st = source.ty();
-        if !self.ts.types.is_collection(st) {
+        if !self.ts.types.is_collection_like(st) {
             return self.dummy(cst);
         }
         let elem = self.ts.types.element(st).unwrap();
@@ -420,7 +420,7 @@ impl<'r> Sema<'r> {
     pub(crate) fn for_exp(&mut self, f: &ast::ForEach, cst: Span) -> Ex {
         let source = self.collection_source(&f.source);
         let st = source.ty();
-        if !self.ts.types.is_collection(st) {
+        if !self.ts.types.is_collection_like(st) {
             return self.dummy(cst);
         }
         let elem = self.ts.types.element(st).unwrap();
@@ -821,14 +821,14 @@ impl<'r> Sema<'r> {
     /// `QvtOperationalParserUtil.validateAssignment`
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn validate_assignment(&mut self, is_property: bool, left: &str, lt: TypeId, rt: TypeId, add: bool, lspan: Span, rspan: Span) -> bool {
-        let lcoll = self.ts.types.is_collection(lt);
+        let lcoll = self.ts.types.is_collection_like(lt);
         if add || (is_property && lcoll) {
             if add && !lcoll {
                 self.error(lspan, bind(vm::SemanticUtil_3, &[left]));
                 return false;
             }
             let base = self.ts.types.element(lt).unwrap();
-            let actual = if self.ts.types.is_collection(rt) { self.ts.types.element(rt).unwrap() } else { rt };
+            let actual = if self.ts.types.is_collection_like(rt) { self.ts.types.element(rt).unwrap() } else { rt };
             if !self.ts.ck().assignable(base, actual) {
                 let a = self.full_name(base);
                 let b = self.full_name(actual);
@@ -1297,7 +1297,7 @@ impl<'r> Sema<'r> {
         }
         if derived.is_none_or(|d| !self.ts.ck().is_user_model_element(d)) {
             let span = ts.map(|t| t.span).or(var.map(|n| n.span)).unwrap_or(cst);
-            if rt != TypeId::NULL && !self.ts.types.is_collection(rt) {
+            if rt != TypeId::NULL && !self.ts.types.is_collection_like(rt) {
                 let tn = self.qualified_name(rt);
                 self.error(span, bind(vm::nonModelTypeError, &[&tn]));
             }
@@ -1571,7 +1571,7 @@ impl<'r> Sema<'r> {
             ExprKind::Resolve(r) if r.late && prop_target => Some(rhs.span),
             ExprKind::Call(c) => match (&c.callee, &c.source) {
                 (ir::Callee::Std(op), Some(src)) if matches!(op.name(), "asBag" | "asSequence" | "asSet" | "asOrderedSet") && op.desc().section == qvto_types::Section::Ocl => match &src.kind {
-                    ExprKind::Resolve(r) if r.late && self.ts.types.is_collection(src.ty) => Some(src.span),
+                    ExprKind::Resolve(r) if r.late && self.ts.types.is_collection_like(src.ty) => Some(src.span),
                     _ => None,
                 },
                 _ => None,

@@ -691,7 +691,7 @@ impl<'a> Checker<'a> {
             Type::Class(c) => self.meta.class(*c).name.to_string(),
             Type::DataType(d) => self.meta.data_type(*d).name.to_string(),
             Type::Enum(e) => self.meta.enumeration(*e).name.to_string(),
-            Type::Null => String::new(),
+            Type::Null => "<null>".into(),
             Type::Param(p) => match p {
                 TParam::T => "T".into(),
                 TParam::T2 => "T2".into(),

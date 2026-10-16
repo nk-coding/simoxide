@@ -252,7 +252,7 @@ impl<'r> Sema<'r> {
         if let Some(t) = self.interm_feature_types.get(&f).copied() {
             let fi = self.ts.meta.feature(f);
             let many = fi.upper > 1 || fi.upper < 0;
-            if many && !self.ts.types.is_collection(t) {
+            if many && !self.ts.types.is_collection_like(t) {
                 let kind = qvto_types::CollKind::of_feature(fi.ordered, fi.unique);
                 return self.ts.types.collection(kind, t);
             }

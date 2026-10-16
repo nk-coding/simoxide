@@ -200,7 +200,7 @@ impl<'r> Sema<'r> {
         }
         let elem_class = self.ts.types.class(self.ts.std.element);
         let bad = matches!(self.ts.types.get(t), Type::ModelType(_) | Type::Module(_))
-            || (!self.ts.ck().is_user_model_element(t) && !self.ts.types.is_collection(t) && t != elem_class);
+            || (!self.ts.ck().is_user_model_element(t) && !self.ts.types.is_collection_like(t) && t != elem_class);
         if bad {
             let tn = self.qualified_name(t);
             self.error(span, bind(vm::nonModelTypeError, &[&tn]));
@@ -556,7 +556,7 @@ impl<'r> Sema<'r> {
             self.error(e.span, bind(vm::QvtOperationalVisitorCS_iterateExpIncomplete, &[]));
             return;
         }
-        let predefined = self.ts.types.is_collection(st) || self.ts.ck().is_predefined(st);
+        let predefined = self.ts.types.is_collection_like(st) || self.ts.ck().is_predefined(st);
         if !predefined {
             return;
         }
@@ -588,7 +588,7 @@ impl<'r> Sema<'r> {
             self.error(e.span, bind(vm::QvtOperationalVisitorCS_TypeConformanceIteratorBodyBoolean_ERROR_, &[]));
             return;
         }
-        if !self.ts.types.is_collection(st) {
+        if !self.ts.types.is_collection_like(st) {
             self.error(e.span, bind(vm::QvtOperationalVisitorCS_IteratorSource_ERROR_, &[]));
             return;
         }
@@ -640,7 +640,7 @@ impl<'r> Sema<'r> {
                 return;
             }
         }
-        if self.ts.types.is_collection(t) {
+        if self.ts.types.is_collection_like(t) {
             // an abstract collection type (Collection(T)) cannot be instantiated
             if matches!(self.ts.types.get(t), Type::Collection(CollKind::Collection, _)) {
                 let tn = self.qualified_name(t);
