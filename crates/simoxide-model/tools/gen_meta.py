@@ -332,7 +332,12 @@ w('];')
 w('pub static CLASS_EXT: &[ClassExt] = &[')
 for c in classes:
     icn = f'Some({rs_str(c["icn"])})' if c['icn'] else 'None'
-    w(f'    ClassExt {{ is_abstract: {str(c["abstract_attr"]).lower()}, is_interface: {str(c["interface"]).lower()}, instance_class_name: {icn} }},')
+    # eSuperTypes as EMF reports them: explicit Ecore supertypes and generic supertypes included
+    # (the main tables skip both)
+    sups = [type_ref(x, c['file']) for x in (c['el'].get('eSuperTypes') or '').split()]
+    sups += [type_ref(g.get('eClassifier'), c['file']) for g in c['el'].findall('eGenericSuperTypes')]
+    w(f'    ClassExt {{ is_abstract: {str(c["abstract_attr"]).lower()}, is_interface: {str(c["interface"]).lower()}, '
+      f'instance_class_name: {icn}, supers: &[{", ".join(sups)}] }},')
 w('];')
 w('pub static FEATURE_EXT: &[FeatureExt] = &[')
 for f in features:

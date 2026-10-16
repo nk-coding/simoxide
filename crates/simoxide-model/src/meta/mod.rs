@@ -120,6 +120,9 @@ pub struct ClassExt {
     pub is_abstract: bool,
     pub is_interface: bool,
     pub instance_class_name: Option<&'static str>,
+    /// `eSuperTypes` in order, including Ecore classes (`EObject`) and the classes of generic
+    /// supertypes (`Sample<Integer>`), which `ClassDef::supers` leaves out.
+    pub supers: &'static [TypeRef],
 }
 
 /// The type of a feature, parameter or operation.

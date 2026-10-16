@@ -13,6 +13,16 @@ fn extension_tables_agree_with_main_tables() {
     assert_eq!(FEATURE_EXT.len(), FEATURES.len());
     for (c, x) in CLASSES.iter().zip(CLASS_EXT) {
         assert_eq!(c.is_abstract, x.is_abstract || x.is_interface, "{}", c.name);
+        // the main tables' supertypes, in order, among the complete ones
+        let classes: Vec<_> = x
+            .supers
+            .iter()
+            .filter_map(|t| match t {
+                TypeRef::Class(s) => Some(*s),
+                _ => None,
+            })
+            .collect();
+        assert!(c.supers.iter().all(|s| classes.contains(s)), "{}", c.name);
     }
     for (f, x) in FEATURES.iter().zip(FEATURE_EXT) {
         assert_eq!(f.many, x.upper != 1, "{}", f.name);
