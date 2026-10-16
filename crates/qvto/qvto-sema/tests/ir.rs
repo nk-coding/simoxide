@@ -270,3 +270,33 @@ fn raise_string_is_raise_exception() {
     assert_eq!(&*p.meta.class(class).name, "Exception");
     assert!(matches!(arg, Some(ExprKind::Str(s)) if &**s == "boom"), "{arg:?}");
 }
+
+#[test]
+fn iterate_with_an_implicit_iterator() {
+    // iteratetest: `iterate(acc : T = init | body)`, the single declaration is the result and
+    // the iterator is implicit (an implicit source of `name`)
+    let p = compile_ok(
+        "modeltype ECORE uses 'http://www.eclipse.org/emf/2002/Ecore';
+         transformation t(in a : ECORE);
+         main() {
+           var tmp := a.rootObjects()![ecore::EPackage].eClassifiers->iterate(s : OrderedSet(String) = OrderedSet {} |
+             s->including(name)->asOrderedSet());
+         }",
+    );
+    let main = op_named(&p, "t", "main");
+    let o = &p.operations[main.index()];
+    let loops: Vec<&ir::Loop> = body_exprs(&p, main)
+        .into_iter()
+        .filter_map(|e| match &e.kind {
+            ExprKind::Loop(l) if l.kind == ir::LoopKind::Iterate => Some(&**l),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(loops.len(), 1, "{:#?}", o.body);
+    let l = loops[0];
+    let (acc, _) = l.acc.as_ref().expect("accumulator");
+    assert_eq!(o.locals[acc.index()].name, "s");
+    assert_eq!(o.locals[acc.index()].kind, ir::LocalKind::Accumulator);
+    assert_eq!(l.iterators.len(), 1);
+    assert_eq!(o.locals[l.iterators[0].index()].kind, ir::LocalKind::Temp);
+}

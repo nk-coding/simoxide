@@ -154,57 +154,74 @@ impl<'r> Sema<'r> {
         x
     }
 
-    /// `iterateExpCS`
+    /// `iterateExpCS`: `iterate(it; acc : T = init | body)`, or `iterate(acc : T = init | body)`
+    /// with an implicit iterator (the single declaration is the result).
     fn iterate_cs(&mut self, it: &ast::Iterate, cst: Span) -> Ex {
         let source = self.collection_source(&it.source);
         let st = source.ty();
-        let Some(v1) = it.vars.first() else {
-            return self.dummy(cst);
+        // Eclipse's `variable1` and `variable2` (the parser keeps a single initialised
+        // declaration in `acc`)
+        let (v1, v2) = match (it.vars.first(), it.acc.as_ref()) {
+            (Some(v), a) => (v, a),
+            (None, Some(a)) => (a, None),
+            (None, None) => return self.dummy(cst),
         };
         let (l1, init1) = self.variable_declaration(v1, ir::LocalKind::Iterator, true);
-        let acc = it.acc.as_ref().map(|a| {
+        let decl2 = v2.map(|a| {
             (
                 a,
                 self.variable_declaration(a, ir::LocalKind::Accumulator, true),
             )
         });
-        if self.fun.locals[l1.index()].ty == TypeId::NULL {
-            self.fun.locals[l1.index()].ty = self.ts.types.element(st).unwrap_or(TypeId::OCL_VOID);
+        // the iterator (`vdcl`) and the result (`vdcl1`): with one declaration, it is the
+        // result, and the iterator is synthesised
+        let (iter, iter_init, result, result_cs) = match decl2 {
+            Some((a, (l2, init2))) => ((l1, Some(v1.name.text.clone())), init1, (l2, init2), a),
+            None => {
+                self.fun.locals[l1.index()].kind = ir::LocalKind::Accumulator;
+                let (t, n) = self.new_temp_iterator(st);
+                ((t, Some(n)), None, (l1, init1), v1)
+            }
+        };
+        let (li, iter_name) = iter;
+        if self.fun.locals[li.index()].ty == TypeId::NULL {
+            self.fun.locals[li.index()].ty = self.ts.types.element(st).unwrap_or(TypeId::OCL_VOID);
         }
         let body = if source.err {
             self.dummy(cst)
         } else {
             self.expr_d(&it.body)
         };
-        let mut ty = TypeId::OCL_INVALID;
-        let mut acc_ir = None;
-        if let Some((a, (l2, init2))) = acc {
-            let name = a.name.text.clone();
-            if self.fun.locals[l2.index()].ty == TypeId::NULL {
-                self.error(v1.span, bind(om::DeclarationType_ERROR_, &[&name]));
-                self.fun.locals[l2.index()].ty = TypeId::OCL_INVALID;
-            }
-            ty = self.fun.locals[l2.index()].ty;
-            if init2.is_none() {
-                self.error(a.span, bind(om::DeclarationNoInitExp_ERROR_, &[&name]));
-            }
-            if init1.is_some() {
-                self.error(v1.span, bind(om::DeclarationInitExp_ERROR_, &[&name]));
-            }
-            self.delete_var(&name);
-            acc_ir = Some((
-                l2,
-                init2
-                    .map(|x| x.e)
-                    .unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, a.span)),
-            ));
+        let (l2, init2) = result;
+        let name = result_cs.name.text.clone();
+        if self.fun.locals[l2.index()].ty == TypeId::NULL {
+            let at = if v2.is_some() { v1.span } else { cst };
+            self.error(at, bind(om::DeclarationType_ERROR_, &[&name]));
+            self.fun.locals[l2.index()].ty = TypeId::OCL_INVALID;
         }
-        self.delete_var(&v1.name.text);
+        let ty = self.fun.locals[l2.index()].ty;
+        if init2.is_none() {
+            // Eclipse reports at `getVariable2()`, which is the missing node for one declaration
+            self.error(result_cs.span, bind(om::DeclarationNoInitExp_ERROR_, &[&name]));
+        }
+        if iter_init.is_some() {
+            self.error(v1.span, bind(om::DeclarationInitExp_ERROR_, &[&name]));
+        }
+        if let Some(n) = &iter_name {
+            self.delete_var(n);
+        }
+        self.delete_var(&name);
+        let acc_ir = Some((
+            l2,
+            init2
+                .map(|x| x.e)
+                .unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, result_cs.span)),
+        ));
         let err = source.err;
         let lp = ir::Loop {
             kind: LoopKind::Iterate,
             source: source.e,
-            iterators: vec![l1],
+            iterators: vec![li],
             acc: acc_ir,
             target: None,
             body: Some(body.e),
