@@ -104,8 +104,9 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
     };
     let resolver = FsResolver {
         bundles: match &case.import_root {
+            // `imports root` is relative to the repository root, not to the case's directory
             Some(r) => vec![Bundle {
-                root: env.path(r).canonicalize().unwrap_or_else(|_| env.path(r)),
+                root: env.base.join(r).canonicalize().unwrap_or_else(|_| env.base.join(r)),
                 containers: vec![String::new()],
             }],
             None => bundles,
