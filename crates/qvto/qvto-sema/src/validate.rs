@@ -39,6 +39,8 @@ struct Ctx<'a> {
     mapping_body: bool,
     locals: &'a [ir::Local],
     extras: Option<&'a [crate::env::LocalExtra]>,
+    /// Nesting depth of `object` bodies around the node (see [`Sema::validator_error`]).
+    in_object: std::cell::Cell<u32>,
 }
 
 impl<'r> Sema<'r> {
@@ -58,6 +60,7 @@ impl<'r> Sema<'r> {
                     mapping_body: false,
                     locals: &b.locals,
                     extras: None,
+                    in_object: std::cell::Cell::new(0),
                 };
                 let mut anc = vec![Anc::Ocl];
                 self.v_expr(&b.expr, &ctx, &mut anc);
@@ -73,6 +76,7 @@ impl<'r> Sema<'r> {
                     mapping_body: false,
                     locals: &b.locals,
                     extras: None,
+                    in_object: std::cell::Cell::new(0),
                 };
                 let mut anc = vec![Anc::Ocl];
                 self.v_expr(&b.expr, &ctx, &mut anc);
@@ -170,6 +174,7 @@ impl<'r> Sema<'r> {
             mapping_body: info.kind == OpKind::Mapping,
             locals: &info.locals,
             extras: Some(&extras),
+            in_object: std::cell::Cell::new(0),
         };
         if let Some(body) = &info.body {
             for e in body {
@@ -189,6 +194,7 @@ impl<'r> Sema<'r> {
                     mapping_body: false,
                     locals: ctx.locals,
                     extras: ctx.extras,
+                    in_object: std::cell::Cell::new(0),
                 };
                 self.v_expr(e, &c2, &mut anc);
             }
@@ -479,7 +485,7 @@ impl<'r> Sema<'r> {
                     .map(|x| x.name.clone())
                     .unwrap_or_default();
                 if lt == TypeId::NULL || e.ty == TypeId::NULL {
-                    self.error(span, bind(om::IncompleteVariableExp_ERROR_, &[&name]));
+                    self.validator_error(ctx, span, bind(om::IncompleteVariableExp_ERROR_, &[&name]));
                 } else if name == "result" && matches!(self.ts.types.get(lt), Type::Tuple(_)) {
                     let is_param = ctx
                         .extras
@@ -497,7 +503,7 @@ impl<'r> Sema<'r> {
                 let mp = &self.modules[p.module.index()].model_params[p.index as usize];
                 if mp.ty == TypeId::NULL {
                     let n = mp.name.clone();
-                    self.error(span, bind(om::IncompleteVariableExp_ERROR_, &[&n]));
+                    self.validator_error(ctx, span, bind(om::IncompleteVariableExp_ERROR_, &[&n]));
                 }
             }
             ExprKind::If(c, t, el) => {
@@ -577,12 +583,13 @@ impl<'r> Sema<'r> {
                 if let Some(loc) = ctx.locals.get(l.index()) {
                     if !self.ts.ck().compatible(init.ty, loc.ty) {
                         let n = loc.name.clone();
-                        self.error(loc.span, bind(om::TypeConformanceInit_ERROR_, &[&n]));
+                        self.validator_error(ctx, loc.span, bind(om::TypeConformanceInit_ERROR_, &[&n]));
                     }
                 }
             }
             ExprKind::Global(_) if e.ty == TypeId::NULL => {
-                self.error(
+                self.validator_error(
+                    ctx,
                     span,
                     bind(om::NullNavigationType_ERROR_, &["this.\"<null>\""]),
                 );
@@ -591,7 +598,8 @@ impl<'r> Sema<'r> {
                 if let ir::LValue::Global(g) = &a.target
                     && self.globals[g.index()].ir.ty == TypeId::NULL
                 {
-                    self.error(
+                    self.validator_error(
+                        ctx,
                         a.target_span,
                         bind(om::NullNavigationType_ERROR_, &["this.\"<null>\""]),
                     );
@@ -631,9 +639,29 @@ impl<'r> Sema<'r> {
         }
         // children
         let a = anc_of(&e.kind);
+        let object = matches!(e.kind, ExprKind::Object(_));
+        if object {
+            ctx.in_object.set(ctx.in_object.get() + 1);
+        }
         anc.push(a);
         for_each_child(e, |c| self.v_expr(c, ctx, anc));
         anc.pop();
+        if object {
+            ctx.in_object.set(ctx.in_object.get() - 1);
+        }
+    }
+
+    /// A problem of OCL's `ValidationVisitor` (`validatorError`): reported at the CST node that
+    /// the AST node maps to. The body of an `object` expression is analysed in a child
+    /// environment (`createEnvironment`, not `createOperationContext`) with its own AST-to-CST
+    /// map, which the module environment that validates does not see: the problem has no
+    /// position, and QVTo's problem handler drops validator problems without a position
+    /// (`isMDTOCLCompatibilityFalseProblem`). Problems that QVTo's validation reports with AST
+    /// positions (`QvtOperationalUtil.reportError`) are not affected.
+    fn validator_error(&mut self, ctx: &Ctx<'_>, span: Span, msg: impl Into<String>) {
+        if ctx.in_object.get() == 0 {
+            self.error(span, msg);
+        }
     }
 
     fn validate_return(&mut self, e: &ir::Expr, value: Option<&ir::Expr>, ctx: &Ctx<'_>) {

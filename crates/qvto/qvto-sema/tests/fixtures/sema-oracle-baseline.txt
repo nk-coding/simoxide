@@ -1,2 +1,2 @@
 # keys of tests/data/compile.cases whose problems match Eclipse's compile oracle exactly (tests/oracle.rs; raise it as the analyser improves)
-1096
+1100

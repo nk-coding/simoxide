@@ -405,9 +405,9 @@ impl<'s> Parser<'s> {
                 let t = self.bump();
                 let msg = format!("\".\" expected instead of \"{}\"", self.quoted(t));
                 self.error(Code::ExpectedInstead, t.span, msg);
-                if let Some(n) = self.simple_name() {
-                    names.push(n);
-                }
+                // the name after the repaired token is not part of the result (Eclipse:
+                // `import foo-bar.baz` imports `foo.baz`, `transformation a-b()` is `a`)
+                let _ = self.simple_name();
             } else {
                 break;
             }

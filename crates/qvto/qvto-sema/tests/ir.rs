@@ -300,3 +300,62 @@ fn iterate_with_an_implicit_iterator() {
     assert_eq!(l.iterators.len(), 1);
     assert_eq!(o.locals[l.iterators[0].index()].kind, ir::LocalKind::Temp);
 }
+
+/// The problems of a compilation as `line: message`, in report order.
+fn problems(main: &str) -> Vec<String> {
+    let mut rs = qvto_emf::resource_set::ResourceSet::new();
+    let _ = rs.ecore_resource();
+    let meta = rs.graph.meta_mut().clone();
+    let c = compile(unit("main", main), &Mem(Vec::new()), meta);
+    let u = &c.units[0];
+    u.problems
+        .iter()
+        .map(|p| format!("{}: {}", p.line(&u.lines), p.message))
+        .collect()
+}
+
+#[test]
+fn validator_problems_inside_object_bodies_are_dropped() {
+    // UMLFoo, Ecore2UML: OCL's validator reports at the CST node of the AST node, but object
+    // bodies are analysed in an environment whose AST-to-CST map the validation does not see,
+    // and QVTo drops validator problems without a position (checked with Eclipse)
+    let p = problems(
+        "modeltype ECORE uses 'http://www.eclipse.org/emf/2002/Ecore';
+         transformation w(inout m : ECORE);
+         main() {
+           var i := object Foo {};
+           var k := i;
+           object EClass { var q := i; };
+           do { var q2 := i; };
+         }",
+    );
+    assert_eq!(
+        p,
+        vec![
+            "4: Unknown type (Foo)",
+            "5: Incomplete reference to variable declaration in variable expression: (i)",
+            "7: Incomplete reference to variable declaration in variable expression: (i)",
+        ]
+    );
+}
+
+#[test]
+fn parser_recovery_shapes_as_eclipse() {
+    // `a-b` is repaired to `a` (exec_erroneous): the name after the substituted `.` is dropped
+    let p = problems("import foo-bar.baz;\ntransformation a-b();\nmain() {}");
+    assert_eq!(
+        p,
+        vec![
+            "1: \".\" expected instead of \"-\"",
+            "2: \".\" expected instead of \"-\"",
+            "1: Cannot find imported compilation unit 'foo.baz'",
+        ]
+    );
+    // `object { ... }` without a type leaves nothing to analyse (missingObjectType)
+    let p = problems(
+        "transformation t;
+         modeltype ECORE uses 'http://www.eclipse.org/emf/2002/Ecore';
+         mapping m(): ECORE::EPackage { name := object { fff := 'a'; } }",
+    );
+    assert_eq!(p, vec!["3: \"objectDeclCS\" expected after \"object\""]);
+}

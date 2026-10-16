@@ -923,16 +923,9 @@ impl<'s> Parser<'s> {
             let msg = format!("\"objectDeclCS\" expected after \"{}\"", self.quoted(t));
             self.error(Code::Expected, t.span, msg);
             if self.at(K::Lbrace) {
-                let b = self.block();
-                let decl = ObjectDecl {
-                    var: None,
-                    ty: None,
-                    span: Span::at(start.end),
-                };
-                return self.mk(
-                    start,
-                    ExprKind::Object(Box::new(ObjectExp { decl, body: b })),
-                );
+                // LPG's repair keeps no object expression: Eclipse's AST has nothing for the
+                // statement (case `missingObjectType`), so the block is consumed and dropped
+                let _ = self.block();
             }
             return self.mk(start, ExprKind::Error);
         }
