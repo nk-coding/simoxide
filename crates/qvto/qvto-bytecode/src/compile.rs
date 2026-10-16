@@ -1340,6 +1340,17 @@ impl<'a> Builder<'a> {
                         ExprKind::Global(g) => {
                             self.emit(Insn::StoreGlobal { src: r, g: g.0 });
                         }
+                        ExprKind::ModuleProp(inst, g) => {
+                            let mm = self.mark();
+                            let i = self.expr_reg(inst)?;
+                            let g16 = self.global16(*g)?;
+                            self.emit(Insn::StoreInstGlobal {
+                                src: r,
+                                inst: i,
+                                g: g16,
+                            });
+                            self.release(mm);
+                        }
                         _ => {}
                     }
                 }

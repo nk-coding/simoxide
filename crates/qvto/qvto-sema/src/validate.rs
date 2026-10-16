@@ -738,6 +738,7 @@ impl<'r> Sema<'r> {
                         ExprKind::Local(_)
                             | ExprKind::Prop(..)
                             | ExprKind::Global(_)
+                            | ExprKind::ModuleProp(..)
                             | ExprKind::IntermProp(..)
                             | ExprKind::TupleProp(..)
                             | ExprKind::ModelParam(_)
