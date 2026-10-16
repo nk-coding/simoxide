@@ -326,7 +326,9 @@ fn execute(
             continue;
         }
         match inputs.next() {
-            Some(p) => match rs.load_file(&env.path(p)) {
+            // `getResource(uri, true)`: a model already in the resource set (a registered
+            // metamodel file) is that resource
+            Some(p) => match get_or_load(&mut rs, &env.path(p)) {
                 Ok(r) => args.push(rs.graph.roots(r).to_vec()),
                 Err(e) => {
                     return Err(Outcome::with_status(Status::Crashed(format!(
@@ -517,3 +519,37 @@ const EMF_JAR_MODELS: &[(&str, &str)] = &[
         "crates/qvto-sema/tests/fixtures/emf-models/Change.ecore",
     ),
 ];
+
+/// The blackbox signatures `qvto run`/`qvto disasm` know: QVTo's own libraries and the Java
+/// blackboxes of the corpus.
+pub fn cli_catalog(root: &Path) -> Catalog {
+    let mut c = qvto::blackbox::stdlib::catalog();
+    if let Ok(t) = std::fs::read_to_string(root.join(BLACKBOX_SIGNATURES))
+        && let Ok(x) = Catalog::parse(&t)
+    {
+        c.extend(&x);
+    }
+    c
+}
+
+/// A file resolver with QVTo's libraries registered and the test bundle's blackboxes and the
+/// other Java classes of the corpus found by name.
+pub fn cli_resolver<'r>(files: &'r FsResolver, catalog: &Catalog) -> BlackboxResolver<'r> {
+    let mut classpath: Vec<CatalogUnit> = catalog.units("bundle").to_vec();
+    classpath.extend(catalog.units("classpath").iter().cloned());
+    BlackboxResolver {
+        inner: files,
+        registered: catalog.units("stdlib").to_vec(),
+        classpath,
+    }
+}
+
+/// `ResourceSet.getResource(fileURI, true)`.
+pub fn get_or_load(rs: &mut ResourceSet, path: &Path) -> Result<ResourceId, String> {
+    let abs = std::path::absolute(path).map_err(|e| e.to_string())?;
+    let uri = qvto_emf::uri::Uri::file(&abs.to_string_lossy()).to_string();
+    match rs.get_resource(&uri, false) {
+        Some(r) => Ok(r),
+        None => rs.load(&uri),
+    }
+}

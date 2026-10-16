@@ -352,7 +352,11 @@ impl Graph {
                 Classifier::Enum(e) => {
                     matches!(d, Datum::Enum(e2, i) if *e2 == e && (*i as usize) < self.meta.enumeration(e).literals.len())
                 }
-                Classifier::DataType(dt) => kind_accepts(self.meta.data_type(dt).kind, d),
+                Classifier::DataType(dt) => {
+                    let info = self.meta.data_type(dt);
+                    kind_accepts(info.kind, d)
+                        || java_supertype_accepts(info.instance_class_name.as_deref(), d)
+                }
                 Classifier::Class(_) => false,
             },
         };
@@ -1182,6 +1186,26 @@ fn owned_scalar(v: &Value) -> Datum<'static, ObjId> {
         Value::Enum(e, i) => Datum::Enum(e, i),
         Value::Obj(x) => Datum::Obj(x),
         Value::Str(_) | Value::Other(_) => Datum::Null,
+    }
+}
+
+/// Data types whose Java instance class is a supertype of the boxes (`EJavaObject`,
+/// `java.lang.Number`, e.g. the erasure of a type parameter bounded by a `Number` data type)
+/// accept those values (EMF checks `eType.isInstance(value)`).
+fn java_supertype_accepts(instance_class: Option<&str>, d: &Datum<'_, ObjId>) -> bool {
+    let number = matches!(
+        d,
+        Datum::Int(_)
+            | Datum::Long(_)
+            | Datum::Short(_)
+            | Datum::Byte(_)
+            | Datum::Double(_)
+            | Datum::Float(_)
+    );
+    match instance_class {
+        Some("java.lang.Number") => number,
+        Some("java.lang.Object") => number || matches!(d, Datum::Bool(_) | Datum::Char(_)),
+        _ => false,
     }
 }
 

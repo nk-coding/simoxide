@@ -439,17 +439,21 @@ fn run_cmd(args: &[String]) {
     let main = resolver
         .unit_source(&path)
         .unwrap_or_else(|e| die(&format!("{file}: {e}")));
+    let catalog = engine::cli_catalog(&root);
+    let resolver = engine::cli_resolver(&resolver, &catalog);
     let uris = qvto_sema::scan_metamodel_uris(&main, &resolver);
     let fresh = || {
         let mut rs = models.resource_set_for(&path);
         for uri in &uris {
             let _ = engine::load_metamodel(&mut rs, uri);
         }
+        rs.ecore_resource();
         rs
     };
     let rs = fresh();
     let t0 = std::time::Instant::now();
-    let c = qvto::compile(main, &resolver, rs.graph.meta().clone());
+    let ops = qvto_emf::operations::meta_operations(&rs.graph);
+    let c = qvto::compile_with_operations(main, &resolver, rs.graph.meta().clone(), &ops);
     let tc = t0.elapsed();
     for u in &c.units {
         for p in &u.problems {
@@ -481,8 +485,7 @@ fn run_cmd(args: &[String]) {
             }
             match inputs.next() {
                 Some(f) => {
-                    let r = rs
-                        .load_file(Path::new(f))
+                    let r = engine::get_or_load(&mut rs, Path::new(f))
                         .unwrap_or_else(|e| die(&format!("{f}: {e}")));
                     a.push(rs.graph.roots(r).to_vec());
                 }
@@ -496,6 +499,7 @@ fn run_cmd(args: &[String]) {
         };
         let t1 = std::time::Instant::now();
         let mut vm = qvto::Vm::new(&p, &mut rs.graph, opts);
+        vm.set_natives(std::rc::Rc::new(bbox::natives()));
         let out = vm.run_transformation(a);
         let dt = t1.elapsed();
         if run + 1 == repeat {
@@ -531,6 +535,8 @@ fn disasm(args: &[String]) {
     let main = resolver
         .unit_source(&path)
         .unwrap_or_else(|e| die(&format!("{file}: {e}")));
+    let catalog = engine::cli_catalog(&root);
+    let resolver = engine::cli_resolver(&resolver, &catalog);
     for uri in qvto_sema::scan_metamodel_uris(&main, &resolver)
         .iter()
         .chain(args[1..].iter())
@@ -539,7 +545,9 @@ fn disasm(args: &[String]) {
             eprintln!("metamodel {uri}: {e}");
         }
     }
-    let c = qvto::compile(main, &resolver, rs.graph.meta().clone());
+    rs.ecore_resource();
+    let ops = qvto_emf::operations::meta_operations(&rs.graph);
+    let c = qvto::compile_with_operations(main, &resolver, rs.graph.meta().clone(), &ops);
     for u in &c.units {
         for p in &u.problems {
             println!(
