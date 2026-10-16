@@ -522,7 +522,14 @@ impl<'s> Parser<'s> {
         if matches!(lower, MultBound::Int(_))
             && (self.at(K::Dotdot) || self.at(K::MultiplicityRange))
         {
-            self.bump();
+            let t = self.bump();
+            let next = self.tok();
+            if t.kind == K::Dotdot && next.kind == K::Dot && next.span.start == t.span.end {
+                // `1...*` lexes as INTEGER DOTDOT DOT; LPG repairs it by merging.
+                self.bump();
+                let span = t.span.to(next.span);
+                self.error(Code::Expected, span, "merge tokens \"...\" to form \"...\"");
+            }
             upper = bound(self, true);
         }
         self.expect(K::Rbracket);

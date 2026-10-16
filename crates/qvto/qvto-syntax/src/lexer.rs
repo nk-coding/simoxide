@@ -5,7 +5,8 @@
 //! - every character above ASCII is a letter, except U+00B4 (acute accent) and U+FFFF, which the
 //!   LPG lexer classifies as end of input: lexing stops at the first of them;
 //! - `<<`, `>>`, `...`, `!=`, `::=` and `+=` are single tokens (longest match);
-//! - `1.` is INTEGER DOT, `1..2` is INTEGER DOTDOT INTEGER, `1e` and `1e+` are invalid tokens;
+//! - `1.` is INTEGER DOT, `1..2` is INTEGER DOTDOT INTEGER, `1...` is INTEGER DOTDOT DOT, `1e` and
+//!   `1e+` are invalid tokens;
 //! - strings may contain raw tab, LF and CR; a backslash must be followed by a printable
 //!   character; a form feed or other control character ends the token as invalid;
 //! - `--` and `//` line comments, non-nesting `/* */` comments;
@@ -259,6 +260,11 @@ fn lex_number(src: &str, b: &[u8], start: usize, out: &mut Lexed) -> usize {
         start,
         i,
     ));
+    if !real && b[i..].starts_with(b"..") {
+        // `Token ::= IntegerLiteral DotDotToken`: after an integer, `...` is `..` then `.`.
+        out.tokens.push(tok(TokenKind::Dotdot, i, i + 2));
+        return i + 2;
+    }
     i
 }
 
@@ -326,6 +332,8 @@ mod tests {
             kinds("1..2"),
             [K::IntegerLiteral, K::Dotdot, K::IntegerLiteral, K::Eof]
         );
+        assert_eq!(kinds("1...*"), [K::IntegerLiteral, K::Dotdot, K::Dot, K::Multiply, K::Eof]);
+        assert_eq!(kinds("1 ...*"), [K::IntegerLiteral, K::MultiplicityRange, K::Multiply, K::Eof]);
         assert_eq!(
             kinds("1.5e-3 2E7"),
             [K::RealLiteral, K::RealLiteral, K::Eof]
