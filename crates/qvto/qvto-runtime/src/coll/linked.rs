@@ -1,20 +1,32 @@
 //! Insertion-ordered hash map over values: Java's `LinkedHashMap`/`LinkedHashSet` (insertion
 //! order; re-inserting a present key does not move it) and the storage of every hash-based
 //! collection in fast mode.
+//!
+//! Keys compare with Java `equals` and are hashed with Java `hashCode` ([`java_hash`]), which
+//! also draws identity hashes exactly when Java's `LinkedHashMap` would (every `put`, `get`,
+//! `remove` hashes its key). Java's bucket structure is not observable through a linked map, so
+//! the table is a SwissTable (`hashbrown::HashTable`) of indices into the entries, which are
+//! kept in insertion order with holes for removed entries (compacted when half are holes).
 
+use crate::eq::{java_equals, java_hash};
 use crate::identity::HashEnv;
-use crate::java::hashmap::JavaHashMap;
 use crate::value::Value;
+use hashbrown::HashTable;
 
-const NIL: u32 = u32::MAX;
+/// An entry: key, value and the (mixed) hash.
+#[derive(Clone)]
+struct Entry<V> {
+    key: Value,
+    val: V,
+    hash: u64,
+}
 
-/// See the module docs. Entries live in a [`JavaHashMap`]; `order` lists their node ids in
-/// insertion order, with holes for removed entries (compacted when half are holes).
+/// See the module docs.
 #[derive(Clone)]
 pub struct LinkedMap<V> {
-    map: JavaHashMap<Value, (u32, V)>,
-    order: Vec<u32>,
-    holes: usize,
+    table: HashTable<u32>,
+    entries: Vec<Option<Entry<V>>>,
+    len: usize,
 }
 
 impl<V> Default for LinkedMap<V> {
@@ -23,112 +35,164 @@ impl<V> Default for LinkedMap<V> {
     }
 }
 
+/// The table hash of a key: its Java hash, mixed so that SwissTable's tag bits vary.
+#[inline]
+fn hash_of(k: &Value, env: &dyn HashEnv) -> u64 {
+    let x = (java_hash(k, env) as u32 as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15);
+    x ^ (x >> 29)
+}
+
 impl<V> LinkedMap<V> {
     pub fn new() -> Self {
         LinkedMap {
-            map: JavaHashMap::new(),
-            order: Vec::new(),
-            holes: 0,
+            table: HashTable::new(),
+            entries: Vec::new(),
+            len: 0,
         }
     }
     pub fn len(&self) -> usize {
-        self.map.len()
+        self.len
     }
     pub fn is_empty(&self) -> bool {
-        self.map.is_empty()
+        self.len == 0
     }
     pub fn iter(&self) -> Iter<'_, V> {
         Iter {
-            map: &self.map,
-            order: self.order.iter(),
-            left: self.map.len(),
+            entries: self.entries.iter(),
+            left: self.len,
         }
     }
     pub fn clear(&mut self) {
-        self.map.clear();
-        self.order.clear();
-        self.holes = 0;
+        self.table.clear();
+        self.entries.clear();
+        self.len = 0;
     }
 
-    fn compact(&mut self) {
-        let mut j = 0usize;
-        for i in 0..self.order.len() {
-            let id = self.order[i];
-            if id != NIL {
-                self.order[j] = id;
-                self.map.node_value_mut(id).0 = j as u32;
-                j += 1;
-            }
-        }
-        self.order.truncate(j);
-        self.holes = 0;
+    #[inline]
+    fn find(&self, k: &Value, hash: u64, env: &dyn HashEnv) -> Option<usize> {
+        let entries = &self.entries;
+        self.table
+            .find(hash, |&i| {
+                entries[i as usize]
+                    .as_ref()
+                    .is_some_and(|e| e.hash == hash && java_equals(&e.key, k, env))
+            })
+            .map(|&i| i as usize)
     }
 
     pub fn get(&self, k: &Value, env: &dyn HashEnv) -> Option<&V> {
-        self.map.get(k, env).map(|(_, v)| v)
+        let h = hash_of(k, env);
+        let i = self.find(k, h, env)?;
+        self.entries[i].as_ref().map(|e| &e.val)
     }
     pub fn get_mut(&mut self, k: &Value, env: &dyn HashEnv) -> Option<&mut V> {
-        self.map.get_mut(k, env).map(|(_, v)| v)
+        let h = hash_of(k, env);
+        let i = self.find(k, h, env)?;
+        self.entries[i].as_mut().map(|e| &mut e.val)
     }
 
     /// Inserts a new key at the end: `Ok(())`, or `Err(v)` if the key is present.
     pub fn insert(&mut self, k: Value, v: V, env: &dyn HashEnv) -> Result<(), V> {
-        let h = JavaHashMap::<Value, (u32, V)>::hash_of(&k, env);
-        let pos = self.order.len() as u32;
-        match self.map.insert_node(h, k, (pos, v), env) {
-            Ok(id) => {
-                self.order.push(id);
-                Ok(())
-            }
-            Err((_, (_, v))) => Err(v),
+        let h = hash_of(&k, env);
+        if self.find(&k, h, env).is_some() {
+            return Err(v);
         }
+        self.push_new(k, v, h);
+        Ok(())
     }
 
-    /// `put`: a present key keeps its position and gets the new value.
+    fn push_new(&mut self, k: Value, v: V, h: u64) {
+        let i = self.entries.len() as u32;
+        self.entries.push(Some(Entry {
+            key: k,
+            val: v,
+            hash: h,
+        }));
+        let entries = &self.entries;
+        self.table.insert_unique(h, i, |&j| {
+            entries[j as usize].as_ref().map_or(0, |e| e.hash)
+        });
+        self.len += 1;
+    }
+
+    /// `put`: a present key keeps its position (and key) and gets the new value.
     pub fn put(&mut self, k: Value, v: V, env: &dyn HashEnv) -> Option<V> {
-        match self.map.get_mut(&k, env) {
-            Some(slot) => Some(std::mem::replace(&mut slot.1, v)),
+        let h = hash_of(&k, env);
+        match self.find(&k, h, env) {
+            Some(i) => self.entries[i]
+                .as_mut()
+                .map(|e| std::mem::replace(&mut e.val, v)),
             None => {
-                let _ = self.insert(k, v, env);
+                self.push_new(k, v, h);
                 None
             }
         }
     }
 
     pub fn remove(&mut self, k: &Value, env: &dyn HashEnv) -> Option<(Value, V)> {
-        let id = self.map.find_node(k, env)?;
-        Some(self.remove_id(id, env))
+        let h = hash_of(k, env);
+        let i = self.find(k, h, env)?;
+        Some(self.remove_index(i))
     }
 
-    fn remove_id(&mut self, id: u32, env: &dyn HashEnv) -> (Value, V) {
-        let pos = self.map.node_value(id).0 as usize;
-        self.order[pos] = NIL;
-        self.holes += 1;
-        let (k, (_, v)) = self.map.remove_node(id, true, env);
-        if self.holes > 16 && self.holes * 2 > self.order.len() {
+    /// Removes the entry at `i` (its hash is stored: no new identity hashes are drawn).
+    fn remove_index(&mut self, i: usize) -> (Value, V) {
+        let h = self.entries[i].as_ref().map_or(0, |e| e.hash);
+        if let Ok(occ) = self.table.find_entry(h, |&j| j as usize == i) {
+            occ.remove();
+        }
+        let e = self.entries[i].take().expect("entry");
+        self.len -= 1;
+        let holes = self.entries.len() - self.len;
+        if holes > 16 && holes * 2 > self.entries.len() {
             self.compact();
         }
-        (k, v)
+        (e.key, e.val)
+    }
+
+    fn compact(&mut self) {
+        self.entries.retain(|e| e.is_some());
+        self.table.clear();
+        let entries = &self.entries;
+        for (i, e) in entries.iter().enumerate() {
+            let h = e.as_ref().map_or(0, |e| e.hash);
+            self.table
+                .insert_unique(h, i as u32, |&j| entries[j as usize].as_ref().map_or(0, |e| e.hash));
+        }
     }
 
     /// Removes every entry for which `f` is false.
-    pub fn retain(&mut self, mut f: impl FnMut(&Value, &V) -> bool, env: &dyn HashEnv) -> bool {
-        let ids: Vec<u32> = self.order.iter().copied().filter(|&i| i != NIL).collect();
-        let mut changed = false;
-        for id in ids {
-            if !f(self.map.node_key(id), &self.map.node_value(id).1) {
-                self.remove_id(id, env);
-                changed = true;
+    pub fn retain(&mut self, mut f: impl FnMut(&Value, &V) -> bool, _env: &dyn HashEnv) -> bool {
+        let mut gone = Vec::new();
+        for (i, e) in self.entries.iter().enumerate() {
+            if let Some(e) = e
+                && !f(&e.key, &e.val)
+            {
+                gone.push(i);
             }
         }
-        changed
+        if gone.is_empty() {
+            return false;
+        }
+        for &i in &gone {
+            let h = self.entries[i].as_ref().map_or(0, |e| e.hash);
+            if let Ok(occ) = self.table.find_entry(h, |&j| j as usize == i) {
+                occ.remove();
+            }
+            self.entries[i] = None;
+            self.len -= 1;
+        }
+        let holes = self.entries.len() - self.len;
+        if holes > 16 && holes * 2 > self.entries.len() {
+            self.compact();
+        }
+        true
     }
 }
 
 /// Entries in insertion order.
 pub struct Iter<'a, V> {
-    map: &'a JavaHashMap<Value, (u32, V)>,
-    order: std::slice::Iter<'a, u32>,
+    entries: std::slice::Iter<'a, Option<Entry<V>>>,
     left: usize,
 }
 
@@ -137,10 +201,12 @@ impl<'a, V> Iterator for Iter<'a, V> {
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            let &id = self.order.next()?;
-            if id != NIL {
-                self.left -= 1;
-                return Some((self.map.node_key(id), &self.map.node_value(id).1));
+            match self.entries.next()? {
+                Some(e) => {
+                    self.left -= 1;
+                    return Some((&e.key, &e.val));
+                }
+                None => continue,
             }
         }
     }

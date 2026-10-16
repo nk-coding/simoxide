@@ -540,6 +540,7 @@ version = "0.1.0"
 name = "qvto-runtime"
 version = "0.1.0"
 dependencies = [
+ "hashbrown",
  "proptest",
  "qvto-model",
  "qvto-types",
