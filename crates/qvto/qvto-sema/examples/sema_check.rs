@@ -2,7 +2,7 @@
 //! the problems: `cargo run --example sema_check -p qvto-sema -- file.qvto [--mm x.ecore]...`.
 //! Imports resolve relative to the file's folder (`a.b.C` → `a/b/C.qvto`).
 
-use qvto_sema::{compile, UnitResolver, UnitSource};
+use qvto_sema::{UnitResolver, UnitSource, compile};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
@@ -34,7 +34,9 @@ fn main() {
     let mut i = 1;
     while i < args.len() {
         if args[i] == "--mm" {
-            let r = rs.load_file(Path::new(&args[i + 1])).expect("load metamodel");
+            let r = rs
+                .load_file(Path::new(&args[i + 1]))
+                .expect("load metamodel");
             rs.register(r).expect("register");
             i += 2;
         } else {
@@ -52,7 +54,15 @@ fn main() {
     for u in &c.units {
         for p in &u.problems {
             let (off, len) = p.utf16(&u.source.text);
-            println!("{}\t{}\t{}\t{}\t{}\t{}", u.source.file_name, if p.is_error() { "E" } else { "W" }, p.line(&u.lines), off, len, p.message);
+            println!(
+                "{}\t{}\t{}\t{}\t{}\t{}",
+                u.source.file_name,
+                if p.is_error() { "E" } else { "W" },
+                p.line(&u.lines),
+                off,
+                len,
+                p.message
+            );
         }
     }
     eprintln!("compiled in {el:?}");

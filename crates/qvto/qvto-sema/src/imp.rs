@@ -5,14 +5,14 @@
 
 use crate::analyzer::Sema;
 use crate::env::VarRef;
-use crate::expr::{mk, path_span_of, Accessor, CallCs, Ex, Info, Pos};
+use crate::expr::{Accessor, CallCs, Ex, Info, Pos, mk, path_span_of};
 use crate::ir::{self, Direction, ExprKind, LoopKind};
 use crate::messages::{bind, ocl as om, validation as vm};
-use crate::module::{scoped_parts, CtxType};
+use crate::module::{CtxType, scoped_parts};
 use crate::ops::{OpRef, PropRef};
 use qvto_syntax::ast::{self, NavOp};
 use qvto_syntax::{Span, TokenKind};
-use qvto_types::{rel, CollKind, Type, TypeId};
+use qvto_types::{CollKind, Type, TypeId, rel};
 
 /// A late resolve expression, validated after the module's bodies
 /// (`lateResolveNotUsedInDeferredAssignment`).
@@ -52,10 +52,17 @@ impl<'r> Sema<'r> {
             iters.push(l);
             names.push(n);
         }
-        let body = if source.err { self.dummy(cst) } else { self.expr_d(&it.body) };
+        let body = if source.err {
+            self.dummy(cst)
+        } else {
+            self.expr_d(&it.body)
+        };
         let bt = body.ty();
         let src_kind = self.ts.types.coll_kind(st);
-        let seq_like = matches!(self.ts.types.get(st), Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _));
+        let seq_like = matches!(
+            self.ts.types.get(st),
+            Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _)
+        );
         let elem_t = elem.unwrap_or(TypeId::OCL_VOID);
         let (kind, mut ty) = match name {
             "forAll" => (LoopKind::ForAll, TypeId::BOOLEAN),
@@ -65,23 +72,50 @@ impl<'r> Sema<'r> {
             "select" => (LoopKind::Select, st),
             "reject" => (LoopKind::Reject, st),
             "collect" => {
-                let e = if self.ts.types.is_collection_like(bt) { self.flattened_element(bt) } else { bt };
-                let k = if seq_like { CollKind::Sequence } else { CollKind::Bag };
+                let e = if self.ts.types.is_collection_like(bt) {
+                    self.flattened_element(bt)
+                } else {
+                    bt
+                };
+                let k = if seq_like {
+                    CollKind::Sequence
+                } else {
+                    CollKind::Bag
+                };
                 (LoopKind::Collect, self.ts.types.collection(k, e))
             }
             "collectNested" => {
-                let k = if seq_like { CollKind::Sequence } else { CollKind::Bag };
+                let k = if seq_like {
+                    CollKind::Sequence
+                } else {
+                    CollKind::Bag
+                };
                 (LoopKind::CollectNested, self.ts.types.collection(k, bt))
             }
             "any" => (LoopKind::Any, elem_t),
             "sortedBy" => {
-                let k = if matches!(src_kind, Some(CollKind::Sequence | CollKind::Bag)) { CollKind::Sequence } else { CollKind::OrderedSet };
+                let k = if matches!(src_kind, Some(CollKind::Sequence | CollKind::Bag)) {
+                    CollKind::Sequence
+                } else {
+                    CollKind::OrderedSet
+                };
                 (LoopKind::SortedBy, self.ts.types.collection(k, elem_t))
             }
             "closure" => {
-                let ordered = matches!(self.ts.types.get(bt), Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _));
-                let be = if self.ts.types.is_collection_like(bt) { self.ts.types.element(bt).unwrap() } else { bt };
-                let k = if ordered { CollKind::OrderedSet } else { CollKind::Set };
+                let ordered = matches!(
+                    self.ts.types.get(bt),
+                    Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _)
+                );
+                let be = if self.ts.types.is_collection_like(bt) {
+                    self.ts.types.element(bt).unwrap()
+                } else {
+                    bt
+                };
+                let k = if ordered {
+                    CollKind::OrderedSet
+                } else {
+                    CollKind::Set
+                };
                 (LoopKind::Closure, self.ts.types.collection(k, be))
             }
             _ => (LoopKind::Select, TypeId::NULL),
@@ -93,7 +127,9 @@ impl<'r> Sema<'r> {
         if matches!(self.ts.types.get(st), Type::List(_)) && self.ts.types.is_collection_like(ty) {
             let e = self.ts.types.element(ty).unwrap();
             match name {
-                "select" | "reject" | "collect" | "collectNested" | "sortedBy" => ty = self.ts.types.collection(CollKind::Sequence, e),
+                "select" | "reject" | "collect" | "collectNested" | "sortedBy" => {
+                    ty = self.ts.types.collection(CollKind::Sequence, e)
+                }
                 "closure" => ty = self.ts.types.collection(CollKind::OrderedSet, e),
                 _ => {}
             }
@@ -126,11 +162,20 @@ impl<'r> Sema<'r> {
             return self.dummy(cst);
         };
         let (l1, init1) = self.variable_declaration(v1, ir::LocalKind::Iterator, true);
-        let acc = it.acc.as_ref().map(|a| (a, self.variable_declaration(a, ir::LocalKind::Accumulator, true)));
+        let acc = it.acc.as_ref().map(|a| {
+            (
+                a,
+                self.variable_declaration(a, ir::LocalKind::Accumulator, true),
+            )
+        });
         if self.fun.locals[l1.index()].ty == TypeId::NULL {
             self.fun.locals[l1.index()].ty = self.ts.types.element(st).unwrap_or(TypeId::OCL_VOID);
         }
-        let body = if source.err { self.dummy(cst) } else { self.expr_d(&it.body) };
+        let body = if source.err {
+            self.dummy(cst)
+        } else {
+            self.expr_d(&it.body)
+        };
         let mut ty = TypeId::OCL_INVALID;
         let mut acc_ir = None;
         if let Some((a, (l2, init2))) = acc {
@@ -147,7 +192,12 @@ impl<'r> Sema<'r> {
                 self.error(v1.span, bind(om::DeclarationInitExp_ERROR_, &[&name]));
             }
             self.delete_var(&name);
-            acc_ir = Some((l2, init2.map(|x| x.e).unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, a.span))));
+            acc_ir = Some((
+                l2,
+                init2
+                    .map(|x| x.e)
+                    .unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, a.span)),
+            ));
         }
         self.delete_var(&v1.name.text);
         let err = source.err;
@@ -181,27 +231,59 @@ impl<'r> Sema<'r> {
         };
         let source = self.collection_source(&x.source);
         let vars: Vec<IterVar> = x.vars.iter().map(IterVar::Decl).collect();
-        self.imperative_iterate(name, source, &vars, x.target.as_ref().map(XTarget::Decl), body, cond, cst)
+        self.imperative_iterate(
+            name,
+            source,
+            &vars,
+            x.target.as_ref().map(XTarget::Decl),
+            body,
+            cond,
+            cst,
+        )
     }
 
     /// `src->name`: `xcollect` with an implicit iterator and the name as body.
     pub(crate) fn xcollect_shorthand(&mut self, n: &ast::Nav, cst: Span) -> Ex {
         let source = self.collection_source(&n.source);
-        self.imperative_iterate("xcollect", source, &[], None, Some(XBody::Name(&n.name)), None, cst)
+        self.imperative_iterate(
+            "xcollect",
+            source,
+            &[],
+            None,
+            Some(XBody::Name(&n.name)),
+            None,
+            cst,
+        )
     }
 
     /// `src->object(v) T {...}`: `xcollect` with an object body.
     pub(crate) fn object_iter(&mut self, o: &ast::ObjectIter, cst: Span) -> Ex {
         let source = self.collection_source(&o.source);
         let vars = [IterVar::Decl(&o.var)];
-        self.imperative_iterate("xcollect", source, &vars, None, Some(XBody::Object(&o.decl, &o.body)), None, cst)
+        self.imperative_iterate(
+            "xcollect",
+            source,
+            &vars,
+            None,
+            Some(XBody::Object(&o.decl, &o.body)),
+            None,
+            cst,
+        )
     }
 
     /// `src->switch(v) {...}`: `xcollect` with a switch body.
     pub(crate) fn switch_iter(&mut self, s: &ast::SwitchIter, cst: Span) -> Ex {
         let source = self.collection_source(&s.source);
         let vars = [IterVar::Decl(&s.var)];
-        self.imperative_iterate("xcollect", source, &vars, None, Some(XBody::Switch(&s.body)), None, cst)
+        self.imperative_iterate(
+            "xcollect",
+            source,
+            &vars,
+            None,
+            Some(XBody::Switch(&s.body)),
+            None,
+            cst,
+        )
     }
 
     /// `src[cond]`, `src![cond]`, `src[x | cond]`; on an `xcollect` source the collect becomes
@@ -212,26 +294,62 @@ impl<'r> Sema<'r> {
             src = inner;
         }
         let target = x.var.as_ref().map(XTarget::Name);
-        let name = if x.one { "collectselectOne" } else { "collectselect" };
+        let name = if x.one {
+            "collectselectOne"
+        } else {
+            "collectselect"
+        };
         match &src.kind {
             ast::ExprKind::XIterate(xi) if xi.kind.spelling() == Some("xcollect") => {
                 let source = self.collection_source(&xi.source);
                 let vars: Vec<IterVar> = xi.vars.iter().map(IterVar::Decl).collect();
-                return self.imperative_iterate(name, source, &vars, target, Some(XBody::Expr(&xi.body)), Some(&x.cond), cst);
+                return self.imperative_iterate(
+                    name,
+                    source,
+                    &vars,
+                    target,
+                    Some(XBody::Expr(&xi.body)),
+                    Some(&x.cond),
+                    cst,
+                );
             }
             ast::ExprKind::Nav(n) if n.op == NavOp::Arrow => {
                 let source = self.collection_source(&n.source);
-                return self.imperative_iterate(name, source, &[], target, Some(XBody::Name(&n.name)), Some(&x.cond), cst);
+                return self.imperative_iterate(
+                    name,
+                    source,
+                    &[],
+                    target,
+                    Some(XBody::Name(&n.name)),
+                    Some(&x.cond),
+                    cst,
+                );
             }
             ast::ExprKind::ObjectIter(o) => {
                 let source = self.collection_source(&o.source);
                 let vars = [IterVar::Decl(&o.var)];
-                return self.imperative_iterate(name, source, &vars, target, Some(XBody::Object(&o.decl, &o.body)), Some(&x.cond), cst);
+                return self.imperative_iterate(
+                    name,
+                    source,
+                    &vars,
+                    target,
+                    Some(XBody::Object(&o.decl, &o.body)),
+                    Some(&x.cond),
+                    cst,
+                );
             }
             ast::ExprKind::SwitchIter(s) => {
                 let source = self.collection_source(&s.source);
                 let vars = [IterVar::Decl(&s.var)];
-                return self.imperative_iterate(name, source, &vars, target, Some(XBody::Switch(&s.body)), Some(&x.cond), cst);
+                return self.imperative_iterate(
+                    name,
+                    source,
+                    &vars,
+                    target,
+                    Some(XBody::Switch(&s.body)),
+                    Some(&x.cond),
+                    cst,
+                );
             }
             _ => {}
         }
@@ -243,7 +361,16 @@ impl<'r> Sema<'r> {
 
     /// `visitImperativeIterateExp`
     #[allow(clippy::too_many_arguments)]
-    fn imperative_iterate(&mut self, name: &str, source: Ex, vars: &[IterVar<'_>], target: Option<XTarget<'_>>, body: Option<XBody<'_>>, cond: Option<&ast::Expr>, cst: Span) -> Ex {
+    fn imperative_iterate(
+        &mut self,
+        name: &str,
+        source: Ex,
+        vars: &[IterVar<'_>],
+        target: Option<XTarget<'_>>,
+        body: Option<XBody<'_>>,
+        cond: Option<&ast::Expr>,
+        cst: Span,
+    ) -> Ex {
         let st = source.ty();
         if !self.ts.types.is_collection_like(st) {
             return self.dummy(cst);
@@ -288,7 +415,10 @@ impl<'r> Sema<'r> {
                 if !target_has_init && matches!(name, "collectselect" | "collectselectOne") {
                     if !innermost_iterator_related(vdcl, &bx.e) {
                         let tn = self.full_name(self.fun.locals[vdcl.index()].ty);
-                        self.error(b.span(), bind(vm::QvtOperationalVisitorCS_FeatureNotFoundForType, &[&tn]));
+                        self.error(
+                            b.span(),
+                            bind(vm::QvtOperationalVisitorCS_FeatureNotFoundForType, &[&tn]),
+                        );
                     }
                     if target.is_none() {
                         let (l, n) = self.new_temp_var(bx.ty(), ir::LocalKind::Target);
@@ -303,7 +433,12 @@ impl<'r> Sema<'r> {
                 let (l, init) = match t {
                     XTarget::Decl(d) => self.variable_declaration(d, ir::LocalKind::Target, true),
                     XTarget::Name(n) => {
-                        let l = self.fun.new_local(&n.text, TypeId::NULL, ir::LocalKind::Target, n.span);
+                        let l = self.fun.new_local(
+                            &n.text,
+                            TypeId::NULL,
+                            ir::LocalKind::Target,
+                            n.span,
+                        );
                         self.add_var_or_error(&n.text, l, n.span);
                         (l, None)
                     }
@@ -340,7 +475,10 @@ impl<'r> Sema<'r> {
                 result_elem = Some(t);
                 filter_type = Some(t);
             } else if cx.ty() != TypeId::BOOLEAN {
-                self.error(c.span, vm::QvtOperationalVisitorCS_WrongImperativeIteratorConditionType);
+                self.error(
+                    c.span,
+                    vm::QvtOperationalVisitorCS_WrongImperativeIteratorConditionType,
+                );
             }
             if filter_type.is_none() {
                 cond_ir = Some(cx.e);
@@ -360,8 +498,18 @@ impl<'r> Sema<'r> {
                 self.ts.types.collection(k, re)
             }
             _ => {
-                let seq = matches!(self.ts.types.get(st), Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _) | Type::List(_));
-                self.ts.types.collection(if seq { CollKind::Sequence } else { CollKind::Bag }, re)
+                let seq = matches!(
+                    self.ts.types.get(st),
+                    Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _) | Type::List(_)
+                );
+                self.ts.types.collection(
+                    if seq {
+                        CollKind::Sequence
+                    } else {
+                        CollKind::Bag
+                    },
+                    re,
+                )
             }
         };
         for n in &names {
@@ -386,9 +534,14 @@ impl<'r> Sema<'r> {
 
     fn iter_var(&mut self, v: &IterVar<'_>) -> ir::LocalId {
         match v {
-            IterVar::Decl(d) => self.variable_declaration(d, ir::LocalKind::Iterator, true).0,
+            IterVar::Decl(d) => {
+                self.variable_declaration(d, ir::LocalKind::Iterator, true)
+                    .0
+            }
             IterVar::Name(n) => {
-                let l = self.fun.new_local(&n.text, TypeId::NULL, ir::LocalKind::Iterator, n.span);
+                let l = self
+                    .fun
+                    .new_local(&n.text, TypeId::NULL, ir::LocalKind::Iterator, n.span);
                 self.add_var_or_error(&n.text, l, n.span);
                 l
             }
@@ -407,10 +560,18 @@ impl<'r> Sema<'r> {
             }
             XBody::Object(decl, body) => {
                 let span = decl.span.to(body.span);
-                self.object_core(decl.var.as_ref(), decl.ty.as_ref(), &body.stmts, span, true, None)
+                self.object_core(
+                    decl.var.as_ref(),
+                    decl.ty.as_ref(),
+                    &body.stmts,
+                    span,
+                    true,
+                    None,
+                )
             }
             XBody::Switch(s) => {
-                let alts: Vec<(&ast::Expr, &ast::Expr)> = s.alts.iter().map(|a| (&a.cond, &a.body)).collect();
+                let alts: Vec<(&ast::Expr, &ast::Expr)> =
+                    s.alts.iter().map(|a| (&a.cond, &a.body)).collect();
                 self.switch_common(&alts, s.els.as_ref().map(|e| &e.body), s.span, Pos::Other)
             }
         }
@@ -426,7 +587,9 @@ impl<'r> Sema<'r> {
         let elem = self.ts.types.element(st).unwrap();
         let mut iters = Vec::new();
         for n in f.vars.iter().take(2) {
-            let l = self.fun.new_local(&n.text, elem, ir::LocalKind::Iterator, n.span);
+            let l = self
+                .fun
+                .new_local(&n.text, elem, ir::LocalKind::Iterator, n.span);
             self.add_var_or_error(&n.text, l, n.span);
             iters.push(l);
         }
@@ -435,7 +598,11 @@ impl<'r> Sema<'r> {
         for n in f.vars.iter().take(2) {
             self.delete_var(&n.text);
         }
-        let kind = if f.kind.spelling() == Some("forOne") { LoopKind::ForOne } else { LoopKind::ForEach };
+        let kind = if f.kind.spelling() == Some("forOne") {
+            LoopKind::ForOne
+        } else {
+            LoopKind::ForEach
+        };
         let lp = ir::Loop {
             kind,
             source: source.e,
@@ -453,7 +620,17 @@ impl<'r> Sema<'r> {
 
     /// The names declared in the current environment level.
     fn level_names(&self) -> Vec<String> {
-        self.fun.scopes.last().map(|s| s.vars.iter().filter(|v| v.named).map(|v| v.name.clone()).collect()).unwrap_or_default()
+        self.fun
+            .scopes
+            .last()
+            .map(|s| {
+                s.vars
+                    .iter()
+                    .filter(|v| v.named)
+                    .map(|v| v.name.clone())
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 
     /// `visitBlockExpCS`: variables declared inside are removed at the end.
@@ -467,7 +644,11 @@ impl<'r> Sema<'r> {
             }
         }
         let det = stmts.len() == 1 && stmts[0].det;
-        let mut x = self.ex(ExprKind::Block(stmts.into_iter().map(|s| s.e).collect()), TypeId::OCL_VOID, cst);
+        let mut x = self.ex(
+            ExprKind::Block(stmts.into_iter().map(|s| s.e).collect()),
+            TypeId::OCL_VOID,
+            cst,
+        );
         x.det = det;
         x.info = Info::Block;
         x
@@ -479,7 +660,11 @@ impl<'r> Sema<'r> {
         let mut out = Vec::new();
         let n = stmts.len();
         for (i, s) in stmts.iter().enumerate() {
-            let pos = if query && i + 1 == n { Pos::QueryLast } else { Pos::Block };
+            let pos = if query && i + 1 == n {
+                Pos::QueryLast
+            } else {
+                Pos::Block
+            };
             if let ast::ExprKind::Var(v) = &s.kind {
                 // `var a := 1, b := 2` are separate statements
                 if v.decls.len() > 1 {
@@ -564,8 +749,14 @@ impl<'r> Sema<'r> {
         let body = self.visit_ocl_expression(&body_expr);
         self.delete_var(&c.decl.name.text);
         let det = body.as_ref().is_some_and(|b| b.det);
-        let body_e = body.map(|b| b.e).unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, c.body.span));
-        let mut x = self.ex(ExprKind::Compute(l, init.map(|i| Box::new(i.e)), Box::new(body_e)), ty, cst);
+        let body_e = body
+            .map(|b| b.e)
+            .unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, c.body.span));
+        let mut x = self.ex(
+            ExprKind::Compute(l, init.map(|i| Box::new(i.e)), Box::new(body_e)),
+            ty,
+            cst,
+        );
         x.det = det;
         x.info = Info::Compute;
         x
@@ -601,25 +792,48 @@ impl<'r> Sema<'r> {
             }
             None => {}
         }
-        let in_env = result_var.as_ref().filter(|(l, _, n)| self.lookup_var(n) == Some(VarRef::Local(*l))).map(|(_, _, n)| n.clone());
+        let in_env = result_var
+            .as_ref()
+            .filter(|(l, _, n)| self.lookup_var(n) == Some(VarRef::Local(*l)))
+            .map(|(_, _, n)| n.clone());
         let cond = self.visit_ocl_expression(&w.cond);
         if let Some(c) = &cond {
             if c.ty() != TypeId::BOOLEAN {
-                let ct = if c.ty() == TypeId::NULL { TypeId::OCL_VOID } else { c.ty() };
+                let ct = if c.ty() == TypeId::NULL {
+                    TypeId::OCL_VOID
+                } else {
+                    c.ty()
+                };
                 let n = self.type_name(ct);
-                self.error(w.cond.span, bind(vm::QvtOperationalVisitorCS_booleanTypeExpressionExpected, &[&n]));
+                self.error(
+                    w.cond.span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_booleanTypeExpressionExpected,
+                        &[&n],
+                    ),
+                );
             }
         }
         let body = self.block_exp(&w.body, w.body.span);
         if let Some(n) = in_env {
             self.delete_var(&n);
         }
-        let cond_e = cond.map(|c| c.e).unwrap_or_else(|| mk(ExprKind::Bool(false), TypeId::BOOLEAN, w.cond.span));
-        let wh = mk(ExprKind::While(Box::new(cond_e), Box::new(body.e)), TypeId::OCL_VOID, cst);
+        let cond_e = cond
+            .map(|c| c.e)
+            .unwrap_or_else(|| mk(ExprKind::Bool(false), TypeId::BOOLEAN, w.cond.span));
+        let wh = mk(
+            ExprKind::While(Box::new(cond_e), Box::new(body.e)),
+            TypeId::OCL_VOID,
+            cst,
+        );
         match result_var {
             Some((l, init, _)) => {
                 let ty = self.fun.locals[l.index()].ty;
-                let mut x = self.ex(ExprKind::Compute(l, init.map(|i| Box::new(i.e)), Box::new(wh)), ty, cst);
+                let mut x = self.ex(
+                    ExprKind::Compute(l, init.map(|i| Box::new(i.e)), Box::new(wh)),
+                    ty,
+                    cst,
+                );
                 x.info = Info::Compute;
                 x
             }
@@ -634,17 +848,34 @@ impl<'r> Sema<'r> {
 
     /// `switch { ... }` (statement form).
     pub(crate) fn switch_exp(&mut self, s: &ast::SwitchBody, cst: Span, pos: Pos) -> Ex {
-        let alts: Vec<(&ast::Expr, &ast::Expr)> = s.alts.iter().map(|a| (&a.cond, &a.body)).collect();
+        let alts: Vec<(&ast::Expr, &ast::Expr)> =
+            s.alts.iter().map(|a| (&a.cond, &a.body)).collect();
         self.switch_common(&alts, s.els.as_ref().map(|e| &e.body), cst, pos)
     }
 
     /// `visitSwitchExpCS`
-    pub(crate) fn switch_common(&mut self, alts: &[(&ast::Expr, &ast::Expr)], els: Option<&ast::Expr>, cst: Span, pos: Pos) -> Ex {
+    pub(crate) fn switch_common(
+        &mut self,
+        alts: &[(&ast::Expr, &ast::Expr)],
+        els: Option<&ast::Expr>,
+        cst: Span,
+        pos: Pos,
+    ) -> Ex {
         self.switch_common_spans(alts, els.map(|e| (e, e.span)), cst, pos)
     }
 
-    pub(crate) fn switch_common_spans(&mut self, alts: &[(&ast::Expr, &ast::Expr)], els: Option<(&ast::Expr, Span)>, cst: Span, pos: Pos) -> Ex {
-        let inner = if pos == Pos::Block { Pos::Branch } else { Pos::Other };
+    pub(crate) fn switch_common_spans(
+        &mut self,
+        alts: &[(&ast::Expr, &ast::Expr)],
+        els: Option<(&ast::Expr, Span)>,
+        cst: Span,
+        pos: Pos,
+    ) -> Ex {
+        let inner = if pos == Pos::Block {
+            Pos::Branch
+        } else {
+            Pos::Other
+        };
         let mut types: Vec<Option<TypeId>> = Vec::new();
         let mut out = Vec::new();
         let mut det = true;
@@ -653,8 +884,12 @@ impl<'r> Sema<'r> {
             let bx = self.visit_ocl_expression_at(b, inner);
             types.push(bx.as_ref().map(|x| x.ty()));
             det &= bx.as_ref().is_some_and(|x| x.det);
-            let ce = cx.map(|x| x.e).unwrap_or_else(|| mk(ExprKind::Bool(false), TypeId::BOOLEAN, c.span));
-            let be = bx.map(|x| x.e).unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, b.span));
+            let ce = cx
+                .map(|x| x.e)
+                .unwrap_or_else(|| mk(ExprKind::Bool(false), TypeId::BOOLEAN, c.span));
+            let be = bx
+                .map(|x| x.e)
+                .unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, b.span));
             out.push((ce, be));
         }
         let mut else_e = None;
@@ -713,7 +948,10 @@ impl<'r> Sema<'r> {
         }
         let lvalue_cs = matches!(
             &lhs.kind,
-            ast::ExprKind::Name(_) | ast::ExprKind::SelfExp | ast::ExprKind::Path(_) | ast::ExprKind::Nav(_)
+            ast::ExprKind::Name(_)
+                | ast::ExprKind::SelfExp
+                | ast::ExprKind::Path(_)
+                | ast::ExprKind::Nav(_)
         ) && !matches!(&lhs.kind, ast::ExprKind::Nav(n) if n.op == NavOp::Arrow);
         if !lvalue_cs {
             self.error(a.lhs.span, vm::notAnLValueError);
@@ -736,11 +974,17 @@ impl<'r> Sema<'r> {
                     if a.add {
                         let vt = self.var_type(v);
                         if !self.is_mutable_collection(vt) {
-                            self.error(a.lhs.span, vm::QvtOperationalVisitorCS_incrementalAssignmentResultNotAllowed);
+                            self.error(
+                                a.lhs.span,
+                                vm::QvtOperationalVisitorCS_incrementalAssignmentResultNotAllowed,
+                            );
                             return None;
                         }
                     } else {
-                        self.error(a.lhs.span, vm::QvtOperationalVisitorCS_assignmentResultNotAllowed);
+                        self.error(
+                            a.lhs.span,
+                            vm::QvtOperationalVisitorCS_assignmentResultNotAllowed,
+                        );
                         return None;
                     }
                 }
@@ -777,7 +1021,15 @@ impl<'r> Sema<'r> {
                         self.validate_variable_modification(v, a.lhs.span, Some(p), false);
                     }
                     let pt = self.prop_type(p);
-                    self.validate_assignment(true, &pname, pt, rhs.ty(), a.add, a.lhs.span, rhs.e.span);
+                    self.validate_assignment(
+                        true,
+                        &pname,
+                        pt,
+                        rhs.ty(),
+                        a.add,
+                        a.lhs.span,
+                        rhs.e.span,
+                    );
                 }
                 target = match lv.e.kind {
                     ExprKind::Prop(src, f) => ir::LValue::Prop(*src, f),
@@ -798,7 +1050,13 @@ impl<'r> Sema<'r> {
                 return None;
             }
         }
-        let is_prop_target = matches!(target, ir::LValue::Prop(..) | ir::LValue::Global(_) | ir::LValue::IntermProp(..) | ir::LValue::TupleProp(..));
+        let is_prop_target = matches!(
+            target,
+            ir::LValue::Prop(..)
+                | ir::LValue::Global(_)
+                | ir::LValue::IntermProp(..)
+                | ir::LValue::TupleProp(..)
+        );
         self.mark_late_resolve_assigned(&rhs.e, is_prop_target);
         let asg = ir::Assign {
             target,
@@ -830,7 +1088,16 @@ impl<'r> Sema<'r> {
 
     /// `QvtOperationalParserUtil.validateAssignment`
     #[allow(clippy::too_many_arguments)]
-    pub(crate) fn validate_assignment(&mut self, is_property: bool, left: &str, lt: TypeId, rt: TypeId, add: bool, lspan: Span, rspan: Span) -> bool {
+    pub(crate) fn validate_assignment(
+        &mut self,
+        is_property: bool,
+        left: &str,
+        lt: TypeId,
+        rt: TypeId,
+        add: bool,
+        lspan: Span,
+        rspan: Span,
+    ) -> bool {
         let lcoll = self.ts.types.is_collection_like(lt);
         if add || (is_property && lcoll) {
             if add && !lcoll {
@@ -838,7 +1105,11 @@ impl<'r> Sema<'r> {
                 return false;
             }
             let base = self.ts.types.element(lt).unwrap();
-            let actual = if self.ts.types.is_collection_like(rt) { self.ts.types.element(rt).unwrap() } else { rt };
+            let actual = if self.ts.types.is_collection_like(rt) {
+                self.ts.types.element(rt).unwrap()
+            } else {
+                rt
+            };
             if !self.ts.ck().assignable(base, actual) {
                 let a = self.full_name(base);
                 let b = self.full_name(actual);
@@ -855,7 +1126,13 @@ impl<'r> Sema<'r> {
     }
 
     /// `QvtOperationalParserUtil.validateVariableModification`
-    pub(crate) fn validate_variable_modification(&mut self, v: VarRef, span: Span, prop: Option<PropRef>, direct: bool) -> bool {
+    pub(crate) fn validate_variable_modification(
+        &mut self,
+        v: VarRef,
+        span: Span,
+        prop: Option<PropRef>,
+        direct: bool,
+    ) -> bool {
         let (dir, name) = match v {
             VarRef::Local(l) => match self.fun.extra[l.index()].param {
                 Some(p) => (p.direction, self.fun.locals[l.index()].name.clone()),
@@ -867,13 +1144,28 @@ impl<'r> Sema<'r> {
             }
             VarRef::This(_) => return true,
         };
-        let in_mapping = self.fun.op.is_some_and(|o| self.ops[o.index()].ir.kind == ir::OpKind::Mapping);
+        let in_mapping = self
+            .fun
+            .op
+            .is_some_and(|o| self.ops[o.index()].ir.kind == ir::OpKind::Mapping);
         if dir == Direction::InOut && direct && in_mapping {
-            self.error(span, bind(vm::QvtOperationalParserUtil_inoutParamAssignmentError, &[&name]));
+            self.error(
+                span,
+                bind(
+                    vm::QvtOperationalParserUtil_inoutParamAssignmentError,
+                    &[&name],
+                ),
+            );
             return false;
         }
         if dir == Direction::Out && direct && in_mapping && !self.in_init_section() {
-            self.error(span, bind(vm::QvtOperationalParserUtil_outParamAssignmentError, &[&name]));
+            self.error(
+                span,
+                bind(
+                    vm::QvtOperationalParserUtil_outParamAssignmentError,
+                    &[&name],
+                ),
+            );
             return false;
         }
         let contextual = matches!(prop, Some(PropRef::Interm(_)));
@@ -919,7 +1211,10 @@ impl<'r> Sema<'r> {
                         self.error(a.e.span, vm::LogLevelNumberArgumentError);
                     }
                 }
-                p => self.error(a.e.span, bind(vm::UnsupportedLogExpArgumentError, &[&p.to_string()])),
+                p => self.error(
+                    a.e.span,
+                    bind(vm::UnsupportedLogExpArgumentError, &[&p.to_string()]),
+                ),
             }
         }
         if let Some(c) = when {
@@ -956,7 +1251,9 @@ impl<'r> Sema<'r> {
             Some(c) => self.error(c.e.span, vm::BooleanTypeAssertConditionError),
             None => self.error(cst, vm::BooleanTypeAssertConditionError),
         }
-        let cond_e = cond.map(|c| c.e).unwrap_or_else(|| mk(ExprKind::Bool(true), TypeId::BOOLEAN, a.cond.span));
+        let cond_e = cond
+            .map(|c| c.e)
+            .unwrap_or_else(|| mk(ExprKind::Bool(true), TypeId::BOOLEAN, a.cond.span));
         let asr = ir::Assert {
             severity,
             cond: cond_e,
@@ -1064,14 +1361,23 @@ impl<'r> Sema<'r> {
                         classes.push(*cl);
                     }
                 }
-                var_ty = Some(if var_ty.is_none() { et.unwrap_or(TypeId::NULL) } else { root });
+                var_ty = Some(if var_ty.is_none() {
+                    et.unwrap_or(TypeId::NULL)
+                } else {
+                    root
+                });
             }
             if c.types.is_empty() {
                 handled.push(root);
             }
             let mut var = None;
             if let Some(n) = &c.var {
-                let l = self.fun.new_local(&n.text, var_ty.unwrap_or(TypeId::NULL), ir::LocalKind::Catch, n.span);
+                let l = self.fun.new_local(
+                    &n.text,
+                    var_ty.unwrap_or(TypeId::NULL),
+                    ir::LocalKind::Catch,
+                    n.span,
+                );
                 self.add_var_or_error(&n.text, l, n.span);
                 var = Some(l);
             }
@@ -1086,7 +1392,10 @@ impl<'r> Sema<'r> {
                 span: c.span,
             });
         }
-        let tr = ir::Try { body: body.e, catches };
+        let tr = ir::Try {
+            body: body.e,
+            catches,
+        };
         self.ex(ExprKind::Try(Box::new(tr)), TypeId::OCL_VOID, cst)
     }
 
@@ -1108,7 +1417,11 @@ impl<'r> Sema<'r> {
         if let Type::Module(m) = *self.ts.types.get(t) {
             let mid = ir::ModuleId(m);
             if !self.modules[mid.index()].is_library {
-                return self.ex(ExprKind::NewTransformation(mid, args.into_iter().map(|x| x.e).collect()), t, cst);
+                return self.ex(
+                    ExprKind::NewTransformation(mid, args.into_iter().map(|x| x.e).collect()),
+                    t,
+                    cst,
+                );
             }
         }
         let a: Vec<crate::ops::Arg> = args.iter().map(|x| self.arg_of(x)).collect();
@@ -1145,14 +1458,22 @@ impl<'r> Sema<'r> {
     }
 
     /// `QvtOperationalEnv.lookupConstructorOperations`
-    fn lookup_constructor_operations(&mut self, owner: TypeId, name: &str, args: &[crate::ops::Arg]) -> Vec<ir::OpId> {
+    fn lookup_constructor_operations(
+        &mut self,
+        owner: TypeId,
+        name: &str,
+        args: &[crate::ops::Arg],
+    ) -> Vec<ir::OpId> {
         let ops = self.get_operations(owner);
         let mut r = Vec::new();
         for o in ops {
             if let OpRef::User(id) = o {
-                if self.ops[id.index()].ir.name == name && self.ops[id.index()].ir.kind == ir::OpKind::Constructor {
+                if self.ops[id.index()].ir.name == name
+                    && self.ops[id.index()].ir.kind == ir::OpKind::Constructor
+                {
                     let params = self.op_params(o);
-                    if self.match_args(owner, &params, args) && self.ops[id.index()].owner == owner {
+                    if self.match_args(owner, &params, args) && self.ops[id.index()].owner == owner
+                    {
                         r.push(id);
                     }
                 }
@@ -1167,12 +1488,33 @@ impl<'r> Sema<'r> {
     }
 
     /// `object [x :] [T] { ... }`
-    pub(crate) fn object_exp(&mut self, o: &ast::ObjectExp, cst: Span, validate: bool, top: Option<ir::OpId>) -> Ex {
-        self.object_core(o.decl.var.as_ref(), o.decl.ty.as_ref(), &o.body.stmts, cst, validate, top)
+    pub(crate) fn object_exp(
+        &mut self,
+        o: &ast::ObjectExp,
+        cst: Span,
+        validate: bool,
+        top: Option<ir::OpId>,
+    ) -> Ex {
+        self.object_core(
+            o.decl.var.as_ref(),
+            o.decl.ty.as_ref(),
+            &o.body.stmts,
+            cst,
+            validate,
+            top,
+        )
     }
 
     /// `visitObjectExpCS`; `top`: the mapping whose population this object is directly in.
-    pub(crate) fn object_core(&mut self, var: Option<&ast::Name>, ts: Option<&ast::TypeSpec>, stmts: &[ast::Expr], cst: Span, validate: bool, top: Option<ir::OpId>) -> Ex {
+    pub(crate) fn object_core(
+        &mut self,
+        var: Option<&ast::Name>,
+        ts: Option<&ast::TypeSpec>,
+        stmts: &[ast::Expr],
+        cst: Span,
+        validate: bool,
+        top: Option<ir::OpId>,
+    ) -> Ex {
         let mut ty: Option<TypeId> = None;
         let mut extent: Option<ir::ModelParamRef> = None;
         let mut instantiated: Option<TypeId> = None;
@@ -1186,7 +1528,13 @@ impl<'r> Sema<'r> {
                     let ci = self.ts.meta.class(c);
                     if var.is_none() && (ci.is_abstract || ci.is_interface) {
                         let tn = self.qualified_name(t);
-                        self.error(cst, bind(vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType, &[&tn]));
+                        self.error(
+                            cst,
+                            bind(
+                                vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType,
+                                &[&tn],
+                            ),
+                        );
                     }
                 }
             }
@@ -1244,7 +1592,10 @@ impl<'r> Sema<'r> {
             if !invalid {
                 let tn = ty.map(|t| self.full_name(t)).unwrap_or_default();
                 let span = ts.map(|t| t.span).unwrap_or(cst);
-                self.error(span, bind(vm::QvtOperationalVisitorCS_extentFailToInfer, &[&tn]));
+                self.error(
+                    span,
+                    bind(vm::QvtOperationalVisitorCS_extentFailToInfer, &[&tn]),
+                );
             }
         }
         // the body, in a child environment with the object as implicit source for properties
@@ -1253,7 +1604,9 @@ impl<'r> Sema<'r> {
         let elem_local = match referred {
             Some(VarRef::Local(l)) => l,
             _ => {
-                let l = self.fun.new_local("", ty.unwrap_or(TypeId::NULL), ir::LocalKind::Object, cst);
+                let l =
+                    self.fun
+                        .new_local("", ty.unwrap_or(TypeId::NULL), ir::LocalKind::Object, cst);
                 l
             }
         };
@@ -1296,13 +1649,25 @@ impl<'r> Sema<'r> {
             extent,
             body: body.into_iter().map(|x| x.e).collect(),
         };
-        let mut x = self.ex(ExprKind::Object(Box::new(ob)), ty.unwrap_or(TypeId::NULL), cst);
+        let mut x = self.ex(
+            ExprKind::Object(Box::new(ob)),
+            ty.unwrap_or(TypeId::NULL),
+            cst,
+        );
         x.info = Info::Object;
         x
     }
 
     /// `validateObjectExp`
-    fn validate_object_exp(&mut self, instantiated: Option<TypeId>, referred: VarRef, ty: Option<TypeId>, var: Option<&ast::Name>, ts: Option<&ast::TypeSpec>, cst: Span) {
+    fn validate_object_exp(
+        &mut self,
+        instantiated: Option<TypeId>,
+        referred: VarRef,
+        ty: Option<TypeId>,
+        var: Option<&ast::Name>,
+        ts: Option<&ast::TypeSpec>,
+        cst: Span,
+    ) {
         let rt = self.var_type(referred);
         let mut derived = instantiated;
         if derived.is_none() && self.ts.ck().is_user_model_element(rt) {
@@ -1320,13 +1685,22 @@ impl<'r> Sema<'r> {
             if rt != TypeId::NULL && self.ts.ck().relationship(actual, rt) & rel::SAME_TYPE == 0 {
                 let an = self.qualified_name(actual);
                 let rn = self.qualified_name(rt);
-                self.error(span, bind(vm::QvtOperationalVisitorCS_instantiatedTypeDoesNotConformToReferredType, &[&an, &rn]));
+                self.error(
+                    span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_instantiatedTypeDoesNotConformToReferredType,
+                        &[&an, &rn],
+                    ),
+                );
             }
             if let VarRef::Local(l) = referred {
                 if let Some(p) = self.fun.extra[l.index()].param {
                     if p.mapping_param && p.direction == Direction::In {
                         let n = self.fun.locals[l.index()].name.clone();
-                        self.error(span, bind(vm::QvtOperationalVisitorCS_canNotModifyINParameter, &[&n]));
+                        self.error(
+                            span,
+                            bind(vm::QvtOperationalVisitorCS_canNotModifyINParameter, &[&n]),
+                        );
                     }
                 }
             }
@@ -1345,11 +1719,20 @@ impl<'r> Sema<'r> {
                 let end = cst.end as usize;
                 let mut i = s.span.end as usize;
                 while i < end {
-                    if b[i].is_ascii_whitespace() || b[i] == b'.' || (b[i] == b'-' && b.get(i + 1) == Some(&b'>')) || b[i] == b'>' {
+                    if b[i].is_ascii_whitespace()
+                        || b[i] == b'.'
+                        || (b[i] == b'-' && b.get(i + 1) == Some(&b'>'))
+                        || b[i] == b'>'
+                    {
                         i += 1;
                     } else if b[i] == b'/' && b.get(i + 1) == Some(&b'*') {
-                        i = src[i + 2..].find("*/").map(|p| i + 2 + p + 2).unwrap_or(end);
-                    } else if (b[i] == b'/' && b.get(i + 1) == Some(&b'/')) || (b[i] == b'-' && b.get(i + 1) == Some(&b'-')) {
+                        i = src[i + 2..]
+                            .find("*/")
+                            .map(|p| i + 2 + p + 2)
+                            .unwrap_or(end);
+                    } else if (b[i] == b'/' && b.get(i + 1) == Some(&b'/'))
+                        || (b[i] == b'-' && b.get(i + 1) == Some(&b'-'))
+                    {
                         i = src[i..].find('\n').map(|p| i + p + 1).unwrap_or(end);
                     } else {
                         break;
@@ -1371,7 +1754,11 @@ impl<'r> Sema<'r> {
         let r = match &m.source {
             Some((s, op)) => {
                 let module = qualifier.first().cloned();
-                let accessor = if *op == NavOp::Arrow { Accessor::Arrow } else { Accessor::Dot };
+                let accessor = if *op == NavOp::Arrow {
+                    Accessor::Arrow
+                } else {
+                    Accessor::Dot
+                };
                 let cs = CallCs {
                     span: cst,
                     name_span: name.span,
@@ -1381,7 +1768,11 @@ impl<'r> Sema<'r> {
                     mapping: Some(m.xmap),
                     pos,
                 };
-                let src = if *op == NavOp::Arrow { self.collection_source(s) } else { self.expr_d(s) };
+                let src = if *op == NavOp::Arrow {
+                    self.collection_source(s)
+                } else {
+                    self.expr_d(s)
+                };
                 let args = self.arguments(&m.args);
                 self.operation_call(&cs, &name.text, Some(src), args)
             }
@@ -1396,7 +1787,9 @@ impl<'r> Sema<'r> {
                     pos,
                 };
                 if !qualifier.is_empty() {
-                    if let Some(x) = self.non_contextual_qualified_call(&cs, qualifier, name, &m.args) {
+                    if let Some(x) =
+                        self.non_contextual_qualified_call(&cs, qualifier, name, &m.args)
+                    {
                         return Some(x);
                     }
                     // the path is analysed as the source expression (a type)
@@ -1412,7 +1805,13 @@ impl<'r> Sema<'r> {
                                 }),
                                 span: pspan,
                             };
-                            self.error(pspan, bind(vm::UnknownClassifierType, &[&crate::names::type_string(&te)]));
+                            self.error(
+                                pspan,
+                                bind(
+                                    vm::UnknownClassifierType,
+                                    &[&crate::names::type_string(&te)],
+                                ),
+                            );
                             self.dummy(pspan)
                         }
                     };
@@ -1428,7 +1827,13 @@ impl<'r> Sema<'r> {
     }
 
     /// `genNonContextualQualifiedOperationCall`: `map M::name(args)` on module `M`.
-    fn non_contextual_qualified_call(&mut self, cs: &CallCs, qualifier: &[ast::Name], name: &ast::Name, args: &[ast::Expr]) -> Option<Ex> {
+    fn non_contextual_qualified_call(
+        &mut self,
+        cs: &CallCs,
+        qualifier: &[ast::Name],
+        name: &ast::Name,
+        args: &[ast::Expr],
+    ) -> Option<Ex> {
         let names: Vec<&str> = qualifier.iter().map(|q| q.text.as_str()).collect();
         let t = self.lookup_classifier(&names)?;
         let Type::Module(m) = *self.ts.types.get(t) else {
@@ -1440,13 +1845,20 @@ impl<'r> Sema<'r> {
         let (mut r, op) = self.gen_operation_call(cs, &name.text, Some(src), t, args);
         if let Some(o) = op {
             let cur = self.fun.module.unwrap_or(self.cur_module);
-            let valid = self.modules[mid.index()].is_library || cur == mid || self.all_extended(cur).contains(&mid);
+            let valid = self.modules[mid.index()].is_library
+                || cur == mid
+                || self.all_extended(cur).contains(&mid);
             if !valid {
-                self.error(name.span, bind(vm::NoImplicitSourceForQualifiedCall, &[&name.text]));
+                self.error(
+                    name.span,
+                    bind(vm::NoImplicitSourceForQualifiedCall, &[&name.text]),
+                );
             }
             if let ExprKind::Call(c) = &mut r.e.kind {
                 match &mut c.callee {
-                    ir::Callee::Op { virtual_, .. } | ir::Callee::Mapping { virtual_, .. } => *virtual_ = false,
+                    ir::Callee::Op { virtual_, .. } | ir::Callee::Mapping { virtual_, .. } => {
+                        *virtual_ = false
+                    }
                     _ => {}
                 }
             }
@@ -1460,8 +1872,12 @@ impl<'r> Sema<'r> {
     /// mapping ("Mapping operation expected").
     pub(crate) fn check_mapping_call(&mut self, x: Ex, cst: Span) -> Option<Ex> {
         let ok = match &x.e.kind {
-            ExprKind::Call(c) => matches!(c.callee, ir::Callee::Mapping { .. }) && x.info != Info::Invalid,
-            ExprKind::Loop(l) => matches!(&l.body, Some(b) if matches!(&b.kind, ExprKind::Call(c) if matches!(c.callee, ir::Callee::Mapping { .. }))),
+            ExprKind::Call(c) => {
+                matches!(c.callee, ir::Callee::Mapping { .. }) && x.info != Info::Invalid
+            }
+            ExprKind::Loop(l) => {
+                matches!(&l.body, Some(b) if matches!(&b.kind, ExprKind::Call(c) if matches!(c.callee, ir::Callee::Mapping { .. })))
+            }
             _ => false,
         };
         if ok {
@@ -1508,8 +1924,19 @@ impl<'r> Sema<'r> {
             let m = self.fun.module.unwrap_or(self.cur_module);
             let cls = ctx_ty.unwrap_or(self.modules[m.index()].ty);
             let raw = self.lookup_mapping_operations(cls, &mname);
-            let unfiltered: Vec<ir::OpId> = raw.into_iter().filter(|o| self.ops[o.index()].owner == cls).collect();
-            let ops: Vec<ir::OpId> = unfiltered.iter().copied().filter(|o| !self.ops[o.index()].overridden.is_some_and(|ov| unfiltered.contains(&ov))).collect();
+            let unfiltered: Vec<ir::OpId> = raw
+                .into_iter()
+                .filter(|o| self.ops[o.index()].owner == cls)
+                .collect();
+            let ops: Vec<ir::OpId> = unfiltered
+                .iter()
+                .copied()
+                .filter(|o| {
+                    !self.ops[o.index()]
+                        .overridden
+                        .is_some_and(|ov| unfiltered.contains(&ov))
+                })
+                .collect();
             fq = format!("{}::{}", self.classifier_name(cls), mname);
             let name_span = Span::new(sn.span.end.saturating_sub(mname.len() as u32), sn.span.end);
             match ops.len() {
@@ -1517,17 +1944,31 @@ impl<'r> Sema<'r> {
                     single = true;
                     mapping = Some(ops[0]);
                     mapping_result = Some(self.ops[ops[0].index()].ret);
-                    mapping_ctx = self.ops[ops[0].index()].contextual.then_some(self.ops[ops[0].index()].owner);
+                    mapping_ctx = self.ops[ops[0].index()]
+                        .contextual
+                        .then_some(self.ops[ops[0].index()].owner);
                 }
-                0 => self.error(name_span, bind(vm::QvtOperationalVisitorCS_ResolveInMappingNotFound, &[&fq])),
+                0 => self.error(
+                    name_span,
+                    bind(vm::QvtOperationalVisitorCS_ResolveInMappingNotFound, &[&fq]),
+                ),
                 _ => {
-                    self.error(name_span, bind(vm::QvtOperationalVisitorCS_ambiguousMappingOperationReference, &[&fq]));
+                    self.error(
+                        name_span,
+                        bind(
+                            vm::QvtOperationalVisitorCS_ambiguousMappingOperationReference,
+                            &[&fq],
+                        ),
+                    );
                     mapping = Some(ops[0]);
                 }
             }
         }
         // populateResolveExp
-        let source = r.source.as_ref().and_then(|(s, _)| self.visit_ocl_expression(s));
+        let source = r
+            .source
+            .as_ref()
+            .and_then(|(s, _)| self.visit_ocl_expression(s));
         let mut target_ty = None;
         let mut cond_var = None;
         let mut cond_ir = None;
@@ -1549,10 +1990,19 @@ impl<'r> Sema<'r> {
                     clash = true;
                     self.error(target_span, bind(vm::NameAlreadyDefinedError, &[&v.text]));
                 }
-                local = Some(self.fun.new_local(&v.text, tt.unwrap_or(TypeId::NULL), ir::LocalKind::ResolveVar, target_span));
+                local = Some(self.fun.new_local(
+                    &v.text,
+                    tt.unwrap_or(TypeId::NULL),
+                    ir::LocalKind::ResolveVar,
+                    target_span,
+                ));
             }
             let base = tt.unwrap_or(TypeId::NULL);
-            ty = if one { base } else { self.ts.types.collection(CollKind::Sequence, base) };
+            ty = if one {
+                base
+            } else {
+                self.ts.types.collection(CollKind::Sequence, base)
+            };
             if let Some(c) = &t.cond {
                 if let (false, Some(l), Some(v)) = (clash, local, &t.var) {
                     self.add_var(&v.text, VarRef::Local(l), true);
@@ -1564,32 +2014,66 @@ impl<'r> Sema<'r> {
                 if let Some(cx) = cx {
                     if cx.ty() != TypeId::BOOLEAN {
                         let n = self.type_name(cx.ty());
-                        self.error(cx.e.span, bind(vm::QvtOperationalVisitorCS_booleanTypeExpressionExpected, &[&n]));
+                        self.error(
+                            cx.e.span,
+                            bind(
+                                vm::QvtOperationalVisitorCS_booleanTypeExpressionExpected,
+                                &[&n],
+                            ),
+                        );
                     }
                     cond_ir = Some(cx.e);
                 }
             }
             cond_var = local;
         } else {
-            let base = if inverse { mapping_ctx.unwrap_or(TypeId::OCL_ANY) } else { mapping_result.unwrap_or(TypeId::OCL_ANY) };
-            ty = if one { base } else { self.ts.types.collection(CollKind::Sequence, base) };
+            let base = if inverse {
+                mapping_ctx.unwrap_or(TypeId::OCL_ANY)
+            } else {
+                mapping_result.unwrap_or(TypeId::OCL_ANY)
+            };
+            ty = if one {
+                base
+            } else {
+                self.ts.types.collection(CollKind::Sequence, base)
+            };
         }
         // the ResolveExp's positions are its own CS node's, without the source
         let own = self.span_after_source(r.source.as_ref().map(|(s, _)| s), cst);
         if r.late {
-            self.late_resolves.push(LateResolve { span: own, ok: false });
+            self.late_resolves.push(LateResolve {
+                span: own,
+                ok: false,
+            });
         }
         if single {
             let mp = mapping.unwrap();
             let info = &self.ops[mp.index()];
-            let valid = if inverse { info.contextual } else { !info.ir.results.is_empty() };
+            let valid = if inverse {
+                info.contextual
+            } else {
+                !info.ir.results.is_empty()
+            };
             if !valid {
-                self.warning(own, bind(vm::QvtOperationalVisitorCS_invalidResolveInMapping, &[&fq]));
+                self.warning(
+                    own,
+                    bind(vm::QvtOperationalVisitorCS_invalidResolveInMapping, &[&fq]),
+                );
             } else if let Some(tv) = target_var_ty {
-                let expected = if inverse { mapping_ctx.unwrap_or(TypeId::NULL) } else { mapping_result.unwrap_or(TypeId::NULL) };
+                let expected = if inverse {
+                    mapping_ctx.unwrap_or(TypeId::NULL)
+                } else {
+                    mapping_result.unwrap_or(TypeId::NULL)
+                };
                 if self.ts.ck().relationship(expected, tv) & rel::RELATED_TYPE == 0 {
                     let tn = self.full_name(tv);
-                    self.warning(target_span, bind(vm::QvtOperationalVisitorCS_incompatibleTargetVariableType, &[&tn, &fq]));
+                    self.warning(
+                        target_span,
+                        bind(
+                            vm::QvtOperationalVisitorCS_incompatibleTargetVariableType,
+                            &[&tn, &fq],
+                        ),
+                    );
                 }
             }
         }
@@ -1612,10 +2096,19 @@ impl<'r> Sema<'r> {
         let span = match &rhs.kind {
             ExprKind::Resolve(r) if r.late && prop_target => Some(rhs.span),
             ExprKind::Call(c) => match (&c.callee, &c.source) {
-                (ir::Callee::Std(op), Some(src)) if matches!(op.name(), "asBag" | "asSequence" | "asSet" | "asOrderedSet") && op.desc().section == qvto_types::Section::Ocl => match &src.kind {
-                    ExprKind::Resolve(r) if r.late && self.ts.types.is_collection_like(src.ty) => Some(src.span),
-                    _ => None,
-                },
+                (ir::Callee::Std(op), Some(src))
+                    if matches!(op.name(), "asBag" | "asSequence" | "asSet" | "asOrderedSet")
+                        && op.desc().section == qvto_types::Section::Ocl =>
+                {
+                    match &src.kind {
+                        ExprKind::Resolve(r)
+                            if r.late && self.ts.types.is_collection_like(src.ty) =>
+                        {
+                            Some(src.span)
+                        }
+                        _ => None,
+                    }
+                }
                 _ => None,
             },
             _ => None,
@@ -1639,7 +2132,11 @@ impl<'r> Sema<'r> {
         }
     }
 
-    pub(crate) fn handle_ambiguous_ops_pub(&mut self, problem: Span, matches: Vec<OpRef>) -> Option<OpRef> {
+    pub(crate) fn handle_ambiguous_ops_pub(
+        &mut self,
+        problem: Span,
+        matches: Vec<OpRef>,
+    ) -> Option<OpRef> {
         if matches.is_empty() {
             return None;
         }
@@ -1648,7 +2145,10 @@ impl<'r> Sema<'r> {
             let s = self.format_op_signature(*o);
             parts.push(format!("'{s}'"));
         }
-        self.warning(problem, bind(vm::AmbiguousOperationReference, &[&parts.join(", ")]));
+        self.warning(
+            problem,
+            bind(vm::AmbiguousOperationReference, &[&parts.join(", ")]),
+        );
         Some(matches[0])
     }
 }

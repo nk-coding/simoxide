@@ -241,9 +241,7 @@ impl TypeTable {
             return Some(id);
         }
         self.types.iter().enumerate().find_map(|(i, t)| match t {
-            Type::Tuple(ps)
-                if ps.len() == parts.len() && parts.iter().all(|p| ps.contains(p)) =>
-            {
+            Type::Tuple(ps) if ps.len() == parts.len() && parts.iter().all(|p| ps.contains(p)) => {
                 Some(TypeId(i as u32))
             }
             _ => None,

@@ -199,7 +199,9 @@ impl<'a> Checker<'a> {
                 b == a || self.meta.class(b).all_supers.contains(&a)
             }
             (ClassLike::Class(a), ClassLike::Module(m)) => {
-                self.modules.get(m as usize).is_some_and(|mi| mi.transformation)
+                self.modules
+                    .get(m as usize)
+                    .is_some_and(|mi| mi.transformation)
                     && a == self.std.transformation
             }
             (ClassLike::Class(a), ClassLike::ModelType(_)) => a == self.std.model,
@@ -241,7 +243,11 @@ impl<'a> Checker<'a> {
         if t2 == TypeId::NULL {
             // AbstractTypeChecker: OclVoid and OclInvalid conform to anything, even to no type
             let o1 = self.ocl_type(t1);
-            return if o1 == TypeId::OCL_VOID || o1 == TypeId::OCL_INVALID { STRICT_SUBTYPE } else { UNRELATED_TYPE };
+            return if o1 == TypeId::OCL_VOID || o1 == TypeId::OCL_INVALID {
+                STRICT_SUBTYPE
+            } else {
+                UNRELATED_TYPE
+            };
         }
         if self.is_any(t1) {
             return if self.is_any(t2) {
@@ -531,7 +537,9 @@ impl<'a> Checker<'a> {
             }
             // `initialiserType == ExtendedMetaData.getBaseType(variableType)`: the registry keeps
             // no annotations; EMF's XSD convention names the nullable wrapper of enum `E` `EObject`
-            if let (Type::DataType(d), Type::Enum(e)) = (self.ty(var).clone(), self.ty(init).clone()) {
+            if let (Type::DataType(d), Type::Enum(e)) =
+                (self.ty(var).clone(), self.ty(init).clone())
+            {
                 let di = self.meta.data_type(d);
                 let ei = self.meta.enumeration(e);
                 if di.package == ei.package && *di.name == *format!("{}Object", ei.name) {
@@ -618,7 +626,9 @@ impl<'a> Checker<'a> {
         if self.is_collection_like(t1) || self.is_collection_like(t2) {
             return Err(SuperTypeError::TypeMismatch(self.name(t1), self.name(t2)));
         }
-        Ok(self.uml_common_super_type(t1, t2).unwrap_or(TypeId::OCL_ANY))
+        Ok(self
+            .uml_common_super_type(t1, t2)
+            .unwrap_or(TypeId::OCL_ANY))
     }
 
     /// `QVTUMLReflection.getCommonSuperType` over `UMLReflectionImpl`'s.
@@ -750,10 +760,14 @@ impl<'a> Checker<'a> {
                 .map(|x| x.name.clone()),
             Type::Module(_) | Type::Null => None,
             Type::Class(c) => Some(self.meta.package_path(self.meta.class(*c).package, "::")),
-            Type::DataType(d) => {
-                Some(self.meta.package_path(self.meta.data_type(*d).package, "::"))
-            }
-            Type::Enum(e) => Some(self.meta.package_path(self.meta.enumeration(*e).package, "::")),
+            Type::DataType(d) => Some(
+                self.meta
+                    .package_path(self.meta.data_type(*d).package, "::"),
+            ),
+            Type::Enum(e) => Some(
+                self.meta
+                    .package_path(self.meta.enumeration(*e).package, "::"),
+            ),
         }
     }
 

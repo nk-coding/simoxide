@@ -83,7 +83,11 @@ impl<'r> Sema<'r> {
 
     fn blackbox_op(&mut self, module: ModuleId, b: &BlackboxOp) {
         let module_ty = self.modules[module.index()].ty;
-        let context = b.context.as_deref().filter(|c| *c != "-").map(|c| self.parse_bb_type(c));
+        let context = b
+            .context
+            .as_deref()
+            .filter(|c| *c != "-")
+            .map(|c| self.parse_bb_type(c));
         let mut locals = Vec::new();
         let mut extras = Vec::new();
         let mut params = Vec::new();
@@ -135,7 +139,11 @@ impl<'r> Sema<'r> {
             });
             self_local = Some(l);
         }
-        let ret = if b.result.is_empty() || b.result == "-" { TypeId::OCL_VOID } else { self.parse_bb_type(&b.result) };
+        let ret = if b.result.is_empty() || b.result == "-" {
+            TypeId::OCL_VOID
+        } else {
+            self.parse_bb_type(&b.result)
+        };
         let mut results = Vec::new();
         let mut result_local = None;
         if ret != TypeId::OCL_VOID && b.kind != BlackboxOpKind::Constructor {
@@ -237,7 +245,12 @@ impl<'r> Sema<'r> {
         let s = s.trim();
         if let Some((uri, name)) = s.rsplit_once('#') {
             if !uri.contains('(') {
-                return match self.ts.meta.package_by_ns_uri(uri).and_then(|p| self.ts.meta.classifier_by_name(p, name)) {
+                return match self
+                    .ts
+                    .meta
+                    .package_by_ns_uri(uri)
+                    .and_then(|p| self.ts.meta.classifier_by_name(p, name))
+                {
                     Some(c) => {
                         let t = self.classifier_type(c);
                         self.ts.ck().ocl_type(t)

@@ -108,7 +108,12 @@ pub struct MetaMultiplicity {
 }
 
 /// [`compile`] with the metamodels' operations, in `eOperations` order per class.
-pub fn compile_with_operations(main: UnitSource, resolver: &dyn UnitResolver, meta: MetaRegistry, ops: &[MetaOperation]) -> Compilation {
+pub fn compile_with_operations(
+    main: UnitSource,
+    resolver: &dyn UnitResolver,
+    meta: MetaRegistry,
+    ops: &[MetaOperation],
+) -> Compilation {
     let mut sema = Sema::new(resolver, meta);
     sema.add_meta_operations(ops);
     let main_idx = sema.compile_unit(main);
@@ -165,24 +170,30 @@ pub fn scan_metamodel_uris(main: &UnitSource, resolver: &dyn UnitResolver) -> Ve
             continue;
         }
         let parsed = qvto_syntax::parse(&u.text);
-        let mut visit = |e: &ast::Element, out: &mut Vec<String>, stack: &mut Vec<UnitSource>| match e {
-            ast::Element::ModelType(m) => {
-                for p in &m.packages {
-                    if let Some(uri) = &p.uri {
-                        if !out.contains(&uri.value) {
-                            out.push(uri.value.clone());
+        let mut visit =
+            |e: &ast::Element, out: &mut Vec<String>, stack: &mut Vec<UnitSource>| match e {
+                ast::Element::ModelType(m) => {
+                    for p in &m.packages {
+                        if let Some(uri) = &p.uri {
+                            if !out.contains(&uri.value) {
+                                out.push(uri.value.clone());
+                            }
                         }
                     }
                 }
-            }
-            ast::Element::Import(i) => {
-                let q = i.unit.iter().map(|n| n.text.as_str()).collect::<Vec<_>>().join(".");
-                if let Some(s) = resolve_import(resolver, &u, &q) {
-                    stack.push(s);
+                ast::Element::Import(i) => {
+                    let q = i
+                        .unit
+                        .iter()
+                        .map(|n| n.text.as_str())
+                        .collect::<Vec<_>>()
+                        .join(".");
+                    if let Some(s) = resolve_import(resolver, &u, &q) {
+                        stack.push(s);
+                    }
                 }
-            }
-            _ => {}
-        };
+                _ => {}
+            };
         for e in &parsed.unit.elements {
             visit(e, &mut out, &mut stack);
             if let ast::Element::Module(m) = e {
@@ -196,7 +207,11 @@ pub fn scan_metamodel_uris(main: &UnitSource, resolver: &dyn UnitResolver) -> Ve
 }
 
 /// `QVTOCompiler.resolveImportedUnit`: the name as is, then within the importer's namespace.
-fn resolve_import(resolver: &dyn UnitResolver, importer: &UnitSource, q: &str) -> Option<UnitSource> {
+fn resolve_import(
+    resolver: &dyn UnitResolver,
+    importer: &UnitSource,
+    q: &str,
+) -> Option<UnitSource> {
     if let Some(u) = resolver.resolve(importer, q) {
         return Some(u);
     }
@@ -355,7 +370,11 @@ pub(crate) fn unit_imports<'u>(modules: &[ModuleCs<'u>]) -> Vec<&'u ast::Import>
 }
 
 pub(crate) fn path_string(names: &[ast::Name], sep: &str) -> String {
-    names.iter().map(|n| n.text.as_str()).collect::<Vec<_>>().join(sep)
+    names
+        .iter()
+        .map(|n| n.text.as_str())
+        .collect::<Vec<_>>()
+        .join(sep)
 }
 
 pub(crate) fn path_span(names: &[ast::Name]) -> Span {
@@ -430,18 +449,29 @@ impl<'r> Sema<'r> {
             if let Some(pos) = self.dep_path.iter().position(|d| d.key == imported.key) {
                 let importer_elem = &self.dep_path[pos];
                 if importer_elem.unit != Some(uidx) {
-                    if let (Some(iu), Some(ispan)) = (importer_elem.unit, importer_elem.current_import) {
-                        let msg = bind(cm::cyclicImportError, &[&self.unit_uri(iu), &self.unit_uri_of(&source)]);
+                    if let (Some(iu), Some(ispan)) =
+                        (importer_elem.unit, importer_elem.current_import)
+                    {
+                        let msg = bind(
+                            cm::cyclicImportError,
+                            &[&self.unit_uri(iu), &self.unit_uri_of(&source)],
+                        );
                         self.units[iu].problems.error(ispan, msg);
                     }
                 }
-                let msg = bind(cm::cyclicImportError, &[&self.unit_uri_of(&source), &self.uri_of_source(&imported)]);
+                let msg = bind(
+                    cm::cyclicImportError,
+                    &[&self.unit_uri_of(&source), &self.uri_of_source(&imported)],
+                );
                 self.units[uidx].problems.error(pspan, msg);
                 continue;
             }
             let ci = self.compile_unit(imported);
             if self.units[ci].problems.has_errors() {
-                let msg = bind(cm::importHasCompilationError, &[&path_string(&imp.unit, "::")]);
+                let msg = bind(
+                    cm::importHasCompilationError,
+                    &[&path_string(&imp.unit, "::")],
+                );
                 self.units[uidx].problems.error(pspan, msg);
             }
             if !self.units[uidx].imports.contains(&ci) {
@@ -463,11 +493,21 @@ impl<'r> Sema<'r> {
         uidx
     }
 
-    fn compile_blackbox_unit(&mut self, source: UnitSource, bb: &crate::blackbox::BlackboxUnit) -> usize {
+    fn compile_blackbox_unit(
+        &mut self,
+        source: UnitSource,
+        bb: &crate::blackbox::BlackboxUnit,
+    ) -> usize {
         let mut problems = Problems::default();
         if bb.load_error {
-            let msg = bind(crate::messages::validation::FailedToLoadUnit, &[&source.qualified_name]);
-            let msg = bind(crate::messages::validation::QvtOperationalVisitorCS_SeeErrorLogForDetails, &[&msg]);
+            let msg = bind(
+                crate::messages::validation::FailedToLoadUnit,
+                &[&source.qualified_name],
+            );
+            let msg = bind(
+                crate::messages::validation::QvtOperationalVisitorCS_SeeErrorLogForDetails,
+                &[&msg],
+            );
             problems.error(Span::new(0, 0), msg);
         }
         let uidx = self.units.len();
@@ -546,7 +586,10 @@ impl<'r> Sema<'r> {
             checked_starts.push(imp.span.start);
         }
         for d in dups {
-            let msg = bind(cm::compilationUnitAlreadyImported, &[&path_string(&d.unit, ".")]);
+            let msg = bind(
+                cm::compilationUnitAlreadyImported,
+                &[&path_string(&d.unit, ".")],
+            );
             self.units[u].problems.warning(path_span(&d.unit), msg);
         }
     }

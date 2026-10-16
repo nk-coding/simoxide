@@ -19,17 +19,20 @@ mod analyzer;
 mod blackbox;
 mod env;
 mod expr;
+mod imp;
 mod lookup;
+mod method;
 mod module;
 mod names;
+mod ocltypes;
 mod ops;
 mod units;
-mod imp;
-mod method;
-mod ocltypes;
 mod validate;
 mod vars;
 
 pub use blackbox::{BlackboxModule, BlackboxOp, BlackboxOpKind, BlackboxParam, BlackboxUnit};
 pub use diag::{Problem, Problems, Severity};
-pub use units::{compile, compile_with_operations, scan_metamodel_uris, MetaMultiplicity, MetaOperation, Compilation, UnitResolver, UnitResult, UnitSource};
+pub use units::{
+    Compilation, MetaMultiplicity, MetaOperation, UnitResolver, UnitResult, UnitSource, compile,
+    compile_with_operations, scan_metamodel_uris,
+};

@@ -124,11 +124,19 @@ fn arg_type(a: &Arg) -> TypeId {
 
 impl<'r> Sema<'r> {
     /// `OCLStandardLibraryUtil.getResultTypeOf`
-    pub(crate) fn ocl_result_type(&mut self, problem: Span, source: TypeId, o: OpRef, args: &[Arg]) -> Option<TypeId> {
+    pub(crate) fn ocl_result_type(
+        &mut self,
+        problem: Span,
+        source: TypeId,
+        o: OpRef,
+        args: &[Arg],
+    ) -> Option<TypeId> {
         let name = self.op_name(o).to_string();
         let name = name.as_str();
         match self.ts.types.get(source).clone() {
-            Type::Boolean | Type::Integer | Type::Real | Type::String | Type::UnlimitedNatural => self.primitive_result(problem, source, name, args),
+            Type::Boolean | Type::Integer | Type::Real | Type::String | Type::UnlimitedNatural => {
+                self.primitive_result(problem, source, name, args)
+            }
             Type::Collection(k, e) => match k {
                 CollKind::Bag => self.bag_result(problem, source, e, name, args),
                 CollKind::Set => self.set_result(problem, source, e, name, args),
@@ -150,12 +158,20 @@ impl<'r> Sema<'r> {
 
     fn cst(&mut self, problem: Span, a: TypeId, b: TypeId) -> TypeId {
         // TypeUtil.commonSuperType(problemObject, ...): null on failure (reported)
-        self.common_super_type_at(problem, a, b).unwrap_or(TypeId::NULL)
+        self.common_super_type_at(problem, a, b)
+            .unwrap_or(TypeId::NULL)
     }
 
-    fn any_result(&mut self, problem: Span, source: TypeId, name: &str, args: &[Arg]) -> Option<TypeId> {
+    fn any_result(
+        &mut self,
+        problem: Span,
+        source: TypeId,
+        name: &str,
+        args: &[Arg],
+    ) -> Option<TypeId> {
         match name {
-            "=" | "<>" | "<" | ">" | "<=" | ">=" | "oclIsKindOf" | "oclIsTypeOf" | "oclIsNew" | "oclIsInState" | "oclIsUndefined" | "oclIsInvalid" => Some(TypeId::BOOLEAN),
+            "=" | "<>" | "<" | ">" | "<=" | ">=" | "oclIsKindOf" | "oclIsTypeOf" | "oclIsNew"
+            | "oclIsInState" | "oclIsUndefined" | "oclIsInvalid" => Some(TypeId::BOOLEAN),
             "oclAsType" => {
                 let a = args.first()?;
                 if self.ts.types.is_collection_like(source) {
@@ -170,7 +186,13 @@ impl<'r> Sema<'r> {
         }
     }
 
-    fn primitive_result(&mut self, problem: Span, source: TypeId, name: &str, args: &[Arg]) -> Option<TypeId> {
+    fn primitive_result(
+        &mut self,
+        problem: Span,
+        source: TypeId,
+        name: &str,
+        args: &[Arg],
+    ) -> Option<TypeId> {
         match name {
             "+" | "*" => {
                 let a = args.first()?.ty;
@@ -185,12 +207,20 @@ impl<'r> Sema<'r> {
                 None => Some(source),
                 Some(a) => Some(self.cst(problem, a.ty, source)),
             },
-            ">" | "<" | ">=" | "<=" | "implies" | "xor" | "not" | "and" | "or" | "endsWith" | "equalsIgnoreCase" | "matches" | "startsWith" | "toBoolean" => Some(TypeId::BOOLEAN),
+            ">" | "<" | ">=" | "<=" | "implies" | "xor" | "not" | "and" | "or" | "endsWith"
+            | "equalsIgnoreCase" | "matches" | "startsWith" | "toBoolean" => Some(TypeId::BOOLEAN),
             "min" | "max" | "abs" | "div" | "mod" | "substring" | "concat" => Some(source),
-            "floor" | "toInteger" | "size" | "round" | "indexOf" | "lastIndexOf" => Some(TypeId::INTEGER),
+            "floor" | "toInteger" | "size" | "round" | "indexOf" | "lastIndexOf" => {
+                Some(TypeId::INTEGER)
+            }
             "toReal" => Some(TypeId::REAL),
-            "at" | "replaceAll" | "replaceFirst" | "substituteAll" | "substituteFirst" | "toLower" | "toLowerCase" | "toString" | "toUpper" | "toUpperCase" | "trim" => Some(TypeId::STRING),
-            "characters" | "tokenize" => Some(self.ts.types.collection(CollKind::Sequence, TypeId::STRING)),
+            "at" | "replaceAll" | "replaceFirst" | "substituteAll" | "substituteFirst"
+            | "toLower" | "toLowerCase" | "toString" | "toUpper" | "toUpperCase" | "trim" => {
+                Some(TypeId::STRING)
+            }
+            "characters" | "tokenize" => {
+                Some(self.ts.types.collection(CollKind::Sequence, TypeId::STRING))
+            }
             _ => self.any_result(problem, source, name, args),
         }
     }
@@ -207,7 +237,14 @@ impl<'r> Sema<'r> {
         self.ts.types.collection(k, e)
     }
 
-    fn bag_result(&mut self, problem: Span, source: TypeId, elem: TypeId, name: &str, args: &[Arg]) -> Option<TypeId> {
+    fn bag_result(
+        &mut self,
+        problem: Span,
+        source: TypeId,
+        elem: TypeId,
+        name: &str,
+        args: &[Arg],
+    ) -> Option<TypeId> {
         Some(match name {
             "=" | "<>" => TypeId::BOOLEAN,
             "union" => {
@@ -251,7 +288,14 @@ impl<'r> Sema<'r> {
         })
     }
 
-    fn set_result(&mut self, problem: Span, source: TypeId, elem: TypeId, name: &str, args: &[Arg]) -> Option<TypeId> {
+    fn set_result(
+        &mut self,
+        problem: Span,
+        source: TypeId,
+        elem: TypeId,
+        name: &str,
+        args: &[Arg],
+    ) -> Option<TypeId> {
         Some(match name {
             "=" | "<>" => TypeId::BOOLEAN,
             "union" => {
@@ -300,7 +344,14 @@ impl<'r> Sema<'r> {
         })
     }
 
-    fn ordered_set_result(&mut self, problem: Span, source: TypeId, elem: TypeId, name: &str, args: &[Arg]) -> Option<TypeId> {
+    fn ordered_set_result(
+        &mut self,
+        problem: Span,
+        source: TypeId,
+        elem: TypeId,
+        name: &str,
+        args: &[Arg],
+    ) -> Option<TypeId> {
         Some(match name {
             "=" | "<>" => TypeId::BOOLEAN,
             "indexOf" => TypeId::INTEGER,
@@ -328,7 +379,14 @@ impl<'r> Sema<'r> {
         })
     }
 
-    fn sequence_result(&mut self, problem: Span, source: TypeId, elem: TypeId, name: &str, args: &[Arg]) -> Option<TypeId> {
+    fn sequence_result(
+        &mut self,
+        problem: Span,
+        source: TypeId,
+        elem: TypeId,
+        name: &str,
+        args: &[Arg],
+    ) -> Option<TypeId> {
         Some(match name {
             "count" | "indexOf" => TypeId::INTEGER,
             "=" | "<>" => TypeId::BOOLEAN,
@@ -367,10 +425,17 @@ impl<'r> Sema<'r> {
         })
     }
 
-    fn collection_result(&mut self, source: TypeId, elem: TypeId, name: &str, args: &[Arg]) -> Option<TypeId> {
+    fn collection_result(
+        &mut self,
+        source: TypeId,
+        elem: TypeId,
+        name: &str,
+        args: &[Arg],
+    ) -> Option<TypeId> {
         Some(match name {
             "size" | "count" => TypeId::INTEGER,
-            "includes" | "excludes" | "includesAll" | "excludesAll" | "isEmpty" | "notEmpty" | "=" | "<>" | "oclIsUndefined" | "oclIsInvalid" => TypeId::BOOLEAN,
+            "includes" | "excludes" | "includesAll" | "excludesAll" | "isEmpty" | "notEmpty"
+            | "=" | "<>" | "oclIsUndefined" | "oclIsInvalid" => TypeId::BOOLEAN,
             "max" | "min" => {
                 if elem != TypeId::REAL && elem != TypeId::INTEGER {
                     return None;
@@ -378,7 +443,10 @@ impl<'r> Sema<'r> {
                 elem
             }
             "sum" => {
-                if elem != TypeId::REAL && elem != TypeId::INTEGER && elem != TypeId::UNLIMITED_NATURAL {
+                if elem != TypeId::REAL
+                    && elem != TypeId::INTEGER
+                    && elem != TypeId::UNLIMITED_NATURAL
+                {
                     return None;
                 }
                 elem

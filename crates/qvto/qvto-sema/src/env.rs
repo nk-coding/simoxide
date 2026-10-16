@@ -2,7 +2,9 @@
 //! additional operations), and the variable scopes of the code being analysed (the operation
 //! environment and its children; Eclipse's `AbstractEnvironment` variable lists).
 
-use crate::ir::{self, Direction, GlobalId, IntermPropId, LocalId, ModelParamRef, ModelTypeId, ModuleId, OpId};
+use crate::ir::{
+    self, Direction, GlobalId, IntermPropId, LocalId, ModelParamRef, ModelTypeId, ModuleId, OpId,
+};
 use crate::ops::OpRef;
 use qvto_syntax::Span;
 use qvto_types::{StdOp, TypeId};
@@ -145,7 +147,13 @@ pub(crate) struct FnState {
 }
 
 impl FnState {
-    pub fn new_local(&mut self, name: &str, ty: TypeId, kind: ir::LocalKind, span: Span) -> LocalId {
+    pub fn new_local(
+        &mut self,
+        name: &str,
+        ty: TypeId,
+        kind: ir::LocalKind,
+        span: Span,
+    ) -> LocalId {
         let id = LocalId(self.locals.len() as u32);
         self.locals.push(ir::Local {
             name: name.to_string(),

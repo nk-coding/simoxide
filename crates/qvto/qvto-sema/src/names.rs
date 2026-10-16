@@ -1,7 +1,7 @@
 //! Classifier lookup (`QvtOperationalEnv.lookupClassifier`, Ecore's package lookup, the QVTo
 //! library's classifiers) and type expressions (`typeCS`).
 
-use crate::analyzer::{Sema, STDLIB_MODULE};
+use crate::analyzer::{STDLIB_MODULE, Sema};
 use crate::messages::{bind, ocl as om, validation as vm};
 use qvto_model::{Classifier, PackageId};
 use qvto_syntax::ast::{self, TypeKind};
@@ -116,7 +116,11 @@ impl<'r> Sema<'r> {
 
     /// A classifier of a model type by (relative) path, contained in one of its metamodels
     /// (`doLookupModeltypeClassifier`).
-    fn lookup_in_model_type(&mut self, mt: crate::ir::ModelTypeId, path: &[&str]) -> Option<TypeId> {
+    fn lookup_in_model_type(
+        &mut self,
+        mt: crate::ir::ModelTypeId,
+        path: &[&str],
+    ) -> Option<TypeId> {
         let pkgs = self.model_types[mt.index()].decl.packages.clone();
         for pkg in pkgs {
             let r = self.lookup_classifier_in_context(pkg, path);
@@ -135,7 +139,11 @@ impl<'r> Sema<'r> {
     }
 
     /// `EcoreEnvironment.lookupClassifier` with a context package.
-    fn lookup_classifier_in_context(&mut self, ctx: PackageId, names: &[&str]) -> Option<(Classifier, PackageId)> {
+    fn lookup_classifier_in_context(
+        &mut self,
+        ctx: PackageId,
+        names: &[&str],
+    ) -> Option<(Classifier, PackageId)> {
         if names.len() > 1 {
             let mut lookup: Vec<&str> = names.to_vec();
             let mut cur = Some(ctx);
@@ -282,7 +290,10 @@ impl<'r> Sema<'r> {
         }
         if let Type::Module(m) = *self.ts.types.get(ty) {
             if self.modules[m as usize].is_library && !allow_library {
-                let msg = bind(vm::QvtOperationalVisitorCS_cantUseLibraryAsType, &[&self.module_name(crate::ir::ModuleId(m)).to_string()]);
+                let msg = bind(
+                    vm::QvtOperationalVisitorCS_cantUseLibraryAsType,
+                    &[&self.module_name(crate::ir::ModuleId(m)).to_string()],
+                );
                 self.error(t.span, msg);
                 return None;
             }
@@ -352,12 +363,23 @@ pub(crate) fn coll_kind(k: TokenKind) -> CollKind {
 pub(crate) fn type_string(t: &ast::TypeExpr) -> String {
     match &t.kind {
         TypeKind::Primitive(k) => k.spelling().unwrap_or("").to_string(),
-        TypeKind::Path(p) => p.segments.iter().map(|n| n.text.as_str()).collect::<Vec<_>>().join("::"),
+        TypeKind::Path(p) => p
+            .segments
+            .iter()
+            .map(|n| n.text.as_str())
+            .collect::<Vec<_>>()
+            .join("::"),
         TypeKind::Collection(k, e) => format!("{}({})", k.spelling().unwrap_or(""), type_string(e)),
         TypeKind::Tuple(parts) => {
             let s: Vec<String> = parts
                 .iter()
-                .map(|v| format!("{}:{}", v.name.text, v.ty.as_ref().map(type_string).unwrap_or_default()))
+                .map(|v| {
+                    format!(
+                        "{}:{}",
+                        v.name.text,
+                        v.ty.as_ref().map(type_string).unwrap_or_default()
+                    )
+                })
                 .collect();
             format!("Tuple({})", s.join(","))
         }

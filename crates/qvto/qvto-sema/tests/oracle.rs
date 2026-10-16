@@ -9,7 +9,8 @@ mod oracle_harness;
 use oracle_harness::{Harness, RunStatus, compare};
 
 fn baseline() -> usize {
-    let p = oracle_harness::repo_root().join("crates/qvto-sema/tests/fixtures/sema-oracle-baseline.txt");
+    let p = oracle_harness::repo_root()
+        .join("crates/qvto-sema/tests/fixtures/sema-oracle-baseline.txt");
     let text = std::fs::read_to_string(&p).expect("baseline file");
     text.lines()
         .map(str::trim)
@@ -57,6 +58,8 @@ fn eclipse_compile_oracle() {
         "{exact} keys match Eclipse's compile oracle exactly, below the baseline {base}"
     );
     if exact > base {
-        eprintln!("  above the baseline: update tests/fixtures/sema-oracle-baseline.txt to {exact}");
+        eprintln!(
+            "  above the baseline: update tests/fixtures/sema-oracle-baseline.txt to {exact}"
+        );
     }
 }

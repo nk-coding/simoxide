@@ -2,13 +2,13 @@
 //! model types, imports and module usages, intermediate classes, operation headers with
 //! collision checks and virtual tables, module properties, operation bodies).
 
-use crate::analyzer::{ModelTypeState, Sema, STDLIB_MODULE};
+use crate::analyzer::{ModelTypeState, STDLIB_MODULE, Sema};
 use crate::env::{GlobalInfo, IntermPropInfo, ModelParamInfo, ModuleEnv, ModuleFeature, ParamInfo};
 use crate::ir::{self, Direction, ModelParamRef, ModelTypeId, ModuleId, OpId};
 use crate::messages::{bind, compiler as cm, validation as vm};
 use crate::names::type_string;
 use crate::ops::{OpInfo, OpRef};
-use crate::units::{path_span, path_string, MethodCs, ModuleCs};
+use crate::units::{MethodCs, ModuleCs, path_span, path_string};
 use qvto_model::PackageId;
 use qvto_syntax::ast;
 use qvto_syntax::{Span, TokenKind};
@@ -91,7 +91,11 @@ pub(crate) fn method_decl<'u>(m: MethodCs<'u>, src: &str) -> MethodDecl<'u> {
 /// keyword (mappings: the direction keyword, else `mapping`) to the end of the signature.
 fn eclipse_decl_span(m: MethodCs<'_>, d: &MethodDecl<'_>, src: &str) -> Span {
     let q1 = d.decl_span;
-    let name_start = d.context.as_ref().map(|c| c.span().start).or(d.name.map(|n| n.span.start));
+    let name_start = d
+        .context
+        .as_ref()
+        .map(|c| c.span().start)
+        .or(d.name.map(|n| n.span.start));
     let Some(ns) = name_start else {
         return q1;
     };
@@ -297,7 +301,13 @@ impl<'r> Sema<'r> {
         });
     }
 
-    pub(crate) fn new_module_pub(&mut self, name: &str, library: bool, unit: usize, header: Span) -> ModuleId {
+    pub(crate) fn new_module_pub(
+        &mut self,
+        name: &str,
+        library: bool,
+        unit: usize,
+        header: Span,
+    ) -> ModuleId {
         self.new_module(name, library, unit, header)
     }
 
@@ -352,8 +362,18 @@ impl<'r> Sema<'r> {
             self.visit_module_headers(id, cs);
             let name = self.modules[id.index()].name.clone();
             if names.contains(&name) {
-                let span = if m.name.is_empty() { m.span } else { path_span(&m.name) };
-                self.error(span, bind(vm::QvtOperationalVisitorCS_transformationNameDuplicates, &[&name]));
+                let span = if m.name.is_empty() {
+                    m.span
+                } else {
+                    path_span(&m.name)
+                };
+                self.error(
+                    span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_transformationNameDuplicates,
+                        &[&name],
+                    ),
+                );
             }
             names.push(name);
         }
@@ -410,14 +430,27 @@ impl<'r> Sema<'r> {
             let name = self.model_types[mtid.index()].decl.name.clone();
             self.modules[id.index()].ir.model_types.push(mtid);
             if !name.is_empty() {
-                if self.modules[id.index()].model_types.iter().any(|(n, _)| *n == name) {
-                    self.error(mt.name.span, bind(vm::QvtOperationalVisitorCS_modeltypeAlreadyDefined, &[&name]));
+                if self.modules[id.index()]
+                    .model_types
+                    .iter()
+                    .any(|(n, _)| *n == name)
+                {
+                    self.error(
+                        mt.name.span,
+                        bind(
+                            vm::QvtOperationalVisitorCS_modeltypeAlreadyDefined,
+                            &[&name],
+                        ),
+                    );
                 } else {
                     self.modules[id.index()].model_types.push((name, mtid));
                 }
             } else {
                 self.register_model_type(id, mtid);
-                self.warning(mt.span, bind(vm::QvtOperationalVisitorCS_modeltypeDeprecatedSyntax, &[]));
+                self.warning(
+                    mt.span,
+                    bind(vm::QvtOperationalVisitorCS_modeltypeDeprecatedSyntax, &[]),
+                );
             }
             self.check_model_type_constraints(id, mtid, mt);
         }
@@ -439,7 +472,13 @@ impl<'r> Sema<'r> {
         let name = mt.name.text.clone();
         if let Some(c) = &mt.compliance {
             if !c.value.is_empty() && c.value != "strict" {
-                self.warning(c.span, bind(vm::QvtOperationalVisitorCS_unsupportedMetamodelComplianceKind, &[&c.value]));
+                self.warning(
+                    c.span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_unsupportedMetamodelComplianceKind,
+                        &[&c.value],
+                    ),
+                );
             }
         }
         let mut packages: Vec<PackageId> = Vec::new();
@@ -473,7 +512,13 @@ impl<'r> Sema<'r> {
                 }
                 packages.push(r);
                 for rest in &mt.packages[i + 1..] {
-                    self.warning(rest.span, bind(vm::QvtOperationalVisitorCS_metamodelSinglePackageRefSupported, &[]));
+                    self.warning(
+                        rest.span,
+                        bind(
+                            vm::QvtOperationalVisitorCS_metamodelSinglePackageRefSupported,
+                            &[],
+                        ),
+                    );
                 }
                 break;
             }
@@ -503,7 +548,12 @@ impl<'r> Sema<'r> {
     }
 
     /// `resolveMetamodel` (`MetamodelResolutionHelper.registerMetamodel`)
-    fn resolve_metamodel(&mut self, uri: Option<&str>, path: &[&str], span: Span) -> Option<PackageId> {
+    fn resolve_metamodel(
+        &mut self,
+        uri: Option<&str>,
+        path: &[&str],
+        span: Span,
+    ) -> Option<PackageId> {
         let name = if path.is_empty() {
             uri.unwrap_or("").to_string()
         } else {
@@ -541,9 +591,23 @@ impl<'r> Sema<'r> {
         if out.len() > 1 {
             let uris: Vec<String> = out
                 .iter()
-                .map(|p| self.ts.meta.package(*p).ns_uri.as_deref().unwrap_or("null").to_string())
+                .map(|p| {
+                    self.ts
+                        .meta
+                        .package(*p)
+                        .ns_uri
+                        .as_deref()
+                        .unwrap_or("null")
+                        .to_string()
+                })
                 .collect();
-            self.warning(span, bind(vm::QvtOperationalVisitorCS_metamodelNameAmbiguous, &[&name, &format!("[{}]", uris.join(", "))]));
+            self.warning(
+                span,
+                bind(
+                    vm::QvtOperationalVisitorCS_metamodelNameAmbiguous,
+                    &[&name, &format!("[{}]", uris.join(", "))],
+                ),
+            );
         }
         Some(out[0])
     }
@@ -619,7 +683,13 @@ impl<'r> Sema<'r> {
     }
 
     /// `checkMetamodelPath`
-    fn check_metamodel_path(&mut self, resolved: PackageId, path: &[&str], name: &str, span: Span) -> Option<PackageId> {
+    fn check_metamodel_path(
+        &mut self,
+        resolved: PackageId,
+        path: &[&str],
+        name: &str,
+        span: Span,
+    ) -> Option<PackageId> {
         let lookup = |s: &Sema, root: PackageId| -> Option<PackageId> {
             let pi = s.ts.meta.package(root);
             if pi.super_package.is_some() || *pi.name != *path[0] {
@@ -627,7 +697,14 @@ impl<'r> Sema<'r> {
             }
             let mut r = Some(root);
             for n in &path[1..] {
-                r = r.and_then(|x| s.ts.meta.package(x).subpackages.iter().copied().find(|&c| *s.ts.meta.package(c).name == **n));
+                r = r.and_then(|x| {
+                    s.ts.meta
+                        .package(x)
+                        .subpackages
+                        .iter()
+                        .copied()
+                        .find(|&c| *s.ts.meta.package(c).name == **n)
+                });
             }
             r
         };
@@ -646,19 +723,32 @@ impl<'r> Sema<'r> {
                 }
             }
         }
-        self.error(span, bind(vm::QvtOperationalVisitorCS_metamodelPackageRefInconsistent, &[name]));
+        self.error(
+            span,
+            bind(
+                vm::QvtOperationalVisitorCS_metamodelPackageRefInconsistent,
+                &[name],
+            ),
+        );
         None
     }
 
     /// `checkModelTypeConstraints`
-    fn check_model_type_constraints(&mut self, module: ModuleId, mt: ModelTypeId, cs: &ast::ModelType) {
+    fn check_model_type_constraints(
+        &mut self,
+        module: ModuleId,
+        mt: ModelTypeId,
+        cs: &ast::ModelType,
+    ) {
         let Some(block) = &cs.where_ else {
             return;
         };
         let ty = self.model_types[mt.index()].decl.ty;
         let mut conds = Vec::new();
         self.begin_code(module, None);
-        let selfl = self.fun.new_local("self", ty, ir::LocalKind::SelfVar, cs.span);
+        let selfl = self
+            .fun
+            .new_local("self", ty, ir::LocalKind::SelfVar, cs.span);
         self.fun.push_scope();
         self.add_var("self", crate::env::VarRef::Local(selfl), false);
         for c in &block.stmts {
@@ -693,9 +783,15 @@ impl<'r> Sema<'r> {
     /// The header's CS span: from the `transformation`/`library` keyword (qualifiers excluded).
     pub(crate) fn eclipse_header(&self, m: &ast::Module) -> Span {
         let src = self.src();
-        let end = m.name.first().map(|n| n.span.start).unwrap_or(m.header_span.end);
+        let end = m
+            .name
+            .first()
+            .map(|n| n.span.start)
+            .unwrap_or(m.header_span.end);
         let kw = m.kind.spelling().unwrap_or("transformation");
-        let text = src.get(m.header_span.start as usize..end as usize).unwrap_or("");
+        let text = src
+            .get(m.header_span.start as usize..end as usize)
+            .unwrap_or("");
         match rfind_word(text, kw) {
             Some(i) => Span::new(m.header_span.start + i as u32, m.header_span.end),
             None => m.header_span,
@@ -714,17 +810,32 @@ impl<'r> Sema<'r> {
                 }
                 TokenKind::KwAbstract | TokenKind::KwStatic => {
                     let qn = q.spelling().unwrap_or("");
-                    self.warning(head_to_path, bind(vm::QvtOperationalVisitorCS_unsupportedQualifierOnTransformation, &[qn, &qname]));
+                    self.warning(
+                        head_to_path,
+                        bind(
+                            vm::QvtOperationalVisitorCS_unsupportedQualifierOnTransformation,
+                            &[qn, &qname],
+                        ),
+                    );
                 }
                 _ => {}
             }
         }
         for d in duplicates(&m.qualifiers) {
             let qn = d.spelling().unwrap_or("");
-            self.warning(head_to_path, bind(vm::QvtOperationalVisitorCS_duplicateQualifierOnTransformation, &[qn, &qname]));
+            self.warning(
+                head_to_path,
+                bind(
+                    vm::QvtOperationalVisitorCS_duplicateQualifierOnTransformation,
+                    &[qn, &qname],
+                ),
+            );
         }
         if m.name.len() > 1 {
-            self.error(path_span(&m.name), bind(vm::moduleNameMustBeSimpleIdentifierError, &[&qname]));
+            self.error(
+                path_span(&m.name),
+                bind(vm::moduleNameMustBeSimpleIdentifierError, &[&qname]),
+            );
         }
         let simple = m.name.last().map(|n| n.text.clone()).unwrap_or_default();
         self.rename_module(id, &simple);
@@ -734,7 +845,10 @@ impl<'r> Sema<'r> {
             self.visit_library_signature(id, m);
         }
         if let Some(r) = &m.refines {
-            self.warning(r.span, bind(vm::QvtOperationalVisitorCS_transfRefineNotSupported, &[]));
+            self.warning(
+                r.span,
+                bind(vm::QvtOperationalVisitorCS_transfRefineNotSupported, &[]),
+            );
         }
         // setContextModule: model parameters as variables (done when scopes are built)
     }
@@ -748,11 +862,18 @@ impl<'r> Sema<'r> {
             if let ast::TypeKind::Path(path) = &tcs.kind {
                 simple = path.segments.len() == 1;
                 if let Some(first) = path.segments.first() {
-                    mt = self.modules[id.index()].model_types.iter().find(|(n, _)| *n == first.text).map(|(_, t)| *t);
+                    mt = self.modules[id.index()]
+                        .model_types
+                        .iter()
+                        .find(|(n, _)| *n == first.text)
+                        .map(|(_, t)| *t);
                 }
             }
             if mt.is_none() || !simple {
-                self.error(tcs.span, bind(vm::QvtOperationalVisitorCS_transfParamWrongType, &[]));
+                self.error(
+                    tcs.span,
+                    bind(vm::QvtOperationalVisitorCS_transfParamWrongType, &[]),
+                );
             }
             let name = match &p.name {
                 Some(n) => n.text.clone(),
@@ -785,19 +906,32 @@ impl<'r> Sema<'r> {
         let mut used: Vec<ModelTypeId> = Vec::new();
         for p in m.params.iter().flatten() {
             if let Some(e) = &p.ty.extent {
-                self.error(e.span, vm::QvtOperationalVisitorCS_LibrarySignatureErrorModelExtentSpecified);
+                self.error(
+                    e.span,
+                    vm::QvtOperationalVisitorCS_LibrarySignatureErrorModelExtentSpecified,
+                );
             }
             if p.direction.is_some() {
-                self.error(p.span, vm::QvtOperationalVisitorCS_LibrarySignatureErrorDirectionKindSpecified);
+                self.error(
+                    p.span,
+                    vm::QvtOperationalVisitorCS_LibrarySignatureErrorDirectionKindSpecified,
+                );
             }
             if p.name.is_some() {
-                self.error(p.span, vm::QvtOperationalVisitorCS_LibrarySignatureErrorParameterNameSpecified);
+                self.error(
+                    p.span,
+                    vm::QvtOperationalVisitorCS_LibrarySignatureErrorParameterNameSpecified,
+                );
             }
             let mut mt = None;
             if let ast::TypeKind::Path(path) = &p.ty.ty.kind {
                 if path.segments.len() == 1 {
                     let first = &path.segments[0].text;
-                    mt = self.modules[id.index()].model_types.iter().find(|(n, _)| n == first).map(|(_, t)| *t);
+                    mt = self.modules[id.index()]
+                        .model_types
+                        .iter()
+                        .find(|(n, _)| n == first)
+                        .map(|(_, t)| *t);
                     if let Some(t) = mt {
                         if used.contains(&t) {
                             self.error(p.span, bind(vm::QvtOperationalVisitorCS_LibrarySignatureErrorDuplicateModelType, &[first]));
@@ -808,7 +942,10 @@ impl<'r> Sema<'r> {
                 }
             }
             if mt.is_none() {
-                self.error(p.span, bind(vm::QvtOperationalVisitorCS_transfParamWrongType, &[]));
+                self.error(
+                    p.span,
+                    bind(vm::QvtOperationalVisitorCS_transfParamWrongType, &[]),
+                );
             }
         }
     }
@@ -832,7 +969,10 @@ impl<'r> Sema<'r> {
                 import_map.push((q.clone(), envs));
             }
             if imp.library {
-                self.warning(path_span(&imp.unit), bind(vm::DeprecatedLibraryImportStatement, &[&q]));
+                self.warning(
+                    path_span(&imp.unit),
+                    bind(vm::DeprecatedLibraryImportStatement, &[&q]),
+                );
             }
         }
         // usages: the header's, then implicit extensions for the other imports
@@ -877,7 +1017,11 @@ impl<'r> Sema<'r> {
                 continue;
             }
             used.push(q.clone());
-            let envs = import_map.iter().find(|(k, _)| *k == q).map(|(_, e)| e.clone()).unwrap_or_default();
+            let envs = import_map
+                .iter()
+                .find(|(k, _)| *k == q)
+                .map(|(_, e)| e.clone())
+                .unwrap_or_default();
             for e in envs {
                 let mut path = segs.clone();
                 path.push(self.modules[e.index()].name.clone());
@@ -907,7 +1051,13 @@ impl<'r> Sema<'r> {
     }
 
     /// `moduleUsageCS` for one module reference.
-    fn module_usage(&mut self, u: usize, id: ModuleId, usage: &Usage, import_map: &[(String, Vec<ModuleId>)]) {
+    fn module_usage(
+        &mut self,
+        u: usize,
+        id: ModuleId,
+        usage: &Usage,
+        import_map: &[(String, Vec<ModuleId>)],
+    ) {
         let mut module_envs: Vec<ModuleId> = Vec::new();
         let mut legacy: Vec<ModuleId> = Vec::new();
         let n = usage.path.len();
@@ -917,7 +1067,10 @@ impl<'r> Sema<'r> {
         if unit_fq == self.units[u].source.qualified_name || unit_fq.is_empty() {
             module_envs.extend(self.units[u].modules.iter().copied());
         }
-        let fq = import_map.iter().find(|(k, _)| *k == module_fq).map(|(_, e)| e.clone());
+        let fq = import_map
+            .iter()
+            .find(|(k, _)| *k == module_fq)
+            .map(|(_, e)| e.clone());
         if let Some(e) = &fq {
             module_envs.extend(e.iter().copied());
             legacy.extend(e.iter().copied());
@@ -933,7 +1086,11 @@ impl<'r> Sema<'r> {
                 module_envs.extend(e.iter().copied());
             }
         }
-        let mut candidates: Vec<ModuleId> = module_envs.iter().copied().filter(|&e| self.modules[e.index()].name == short).collect();
+        let mut candidates: Vec<ModuleId> = module_envs
+            .iter()
+            .copied()
+            .filter(|&e| self.modules[e.index()].name == short)
+            .collect();
         if candidates.is_empty() {
             candidates = legacy.clone();
         }
@@ -955,7 +1112,11 @@ impl<'r> Sema<'r> {
             for p in params {
                 if let ast::TypeKind::Path(path) = &p.ty.ty.kind {
                     if let Some(first) = path.segments.first() {
-                        if let Some((_, t)) = self.modules[id.index()].model_types.iter().find(|(n, _)| *n == first.text) {
+                        if let Some((_, t)) = self.modules[id.index()]
+                            .model_types
+                            .iter()
+                            .find(|(n, _)| *n == first.text)
+                        {
                             refs.push(*t);
                         }
                     }
@@ -964,10 +1125,17 @@ impl<'r> Sema<'r> {
             let imported: Vec<ModelTypeId> = if self.modules[c.index()].is_library {
                 self.modules[c.index()].ir.model_types.clone()
             } else {
-                self.modules[c.index()].model_params.iter().filter_map(|p| p.model_type).collect()
+                self.modules[c.index()]
+                    .model_params
+                    .iter()
+                    .filter_map(|p| p.model_type)
+                    .collect()
             };
             if refs.len() == imported.len() {
-                let ok = refs.iter().zip(&imported).all(|(a, b)| self.compatible_model_type(*a, *b));
+                let ok = refs
+                    .iter()
+                    .zip(&imported)
+                    .all(|(a, b)| self.compatible_model_type(*a, *b));
                 if ok && !resolved.contains(&c) {
                     resolved.push(c);
                 }
@@ -979,32 +1147,65 @@ impl<'r> Sema<'r> {
                 let imported = resolved[0];
                 if imported != id {
                     let me = &mut self.modules[id.index()];
-                    let list = if usage.access { &mut me.by_access } else { &mut me.by_extension };
+                    let list = if usage.access {
+                        &mut me.by_access
+                    } else {
+                        &mut me.by_extension
+                    };
                     if !list.contains(&imported) {
                         list.push(imported);
                     }
                 }
                 if !usage.access {
                     if self.modules[imported.index()].blackbox {
-                        self.error(usage.ref_span, bind(vm::QvtOperationalVisitorCS_extendsOfBlackboxModule, &[&path_str]));
+                        self.error(
+                            usage.ref_span,
+                            bind(
+                                vm::QvtOperationalVisitorCS_extendsOfBlackboxModule,
+                                &[&path_str],
+                            ),
+                        );
                     }
-                    if !self.modules[id.index()].is_library && !self.modules[imported.index()].is_library {
+                    if !self.modules[id.index()].is_library
+                        && !self.modules[imported.index()].is_library
+                    {
                         self.validate_imported_signature(id, imported, usage.usage_span);
                     }
-                    if self.modules[id.index()].is_library && !self.modules[imported.index()].is_library && usage.in_header {
-                        self.error(usage.ref_span, bind(vm::QvtOperationalVisitorCS_libraryCantExtendNonLibrary, &[&path_str]));
+                    if self.modules[id.index()].is_library
+                        && !self.modules[imported.index()].is_library
+                        && usage.in_header
+                    {
+                        self.error(
+                            usage.ref_span,
+                            bind(
+                                vm::QvtOperationalVisitorCS_libraryCantExtendNonLibrary,
+                                &[&path_str],
+                            ),
+                        );
                     }
                 }
-                self.modules[id.index()].module_imports.push((imported, !usage.access));
-                let kind = if usage.access { ir::UsageKind::Access } else { ir::UsageKind::Extends };
+                self.modules[id.index()]
+                    .module_imports
+                    .push((imported, !usage.access));
+                let kind = if usage.access {
+                    ir::UsageKind::Access
+                } else {
+                    ir::UsageKind::Extends
+                };
                 self.modules[id.index()].ir.usages.push(ir::ModuleUsage {
                     kind,
                     module: imported,
                     span: usage.usage_span,
                 });
             }
-            0 => self.error(usage.ref_span, bind(vm::UnresolvedModuleReference, &[&path_str])),
-            _ => self.error(usage.ref_span, bind(vm::AmbiguousModuleReference, &[&path_str])),
+            0 => self.error(
+                usage.ref_span,
+                bind(vm::UnresolvedModuleReference, &[&path_str]),
+            ),
+            _ => self.error(
+                usage.ref_span,
+                bind(vm::AmbiguousModuleReference, &[&path_str]),
+            ),
         }
         let _ = usage.path_span;
     }
@@ -1054,7 +1255,13 @@ impl<'r> Sema<'r> {
             if !found {
                 let a = self.modules[imported.index()].name.clone();
                 let b = self.modules[id.index()].name.clone();
-                self.warning(span, bind(vm::QvtOperationalVisitorCS_incompatibleTransfSignature, &[&a, &b]));
+                self.warning(
+                    span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_incompatibleTransfSignature,
+                        &[&a, &b],
+                    ),
+                );
                 return;
             }
         }
@@ -1089,7 +1296,11 @@ impl<'r> Sema<'r> {
                 visited.push(v);
                 for &imp in &self.modules[v.index()].module_imports.clone() {
                     let top = if v != id {
-                        top_import.iter().find(|(k, _)| *k == v).map(|(_, t)| *t).unwrap_or(imp)
+                        top_import
+                            .iter()
+                            .find(|(k, _)| *k == v)
+                            .map(|(_, t)| *t)
+                            .unwrap_or(imp)
                     } else {
                         imp
                     };
@@ -1136,7 +1347,11 @@ impl<'r> Sema<'r> {
     // ---- pass 4 --------------------------------------------------------------------------------
 
     /// `visitMethodHeaders`: declares the operations; returns them with their syntax.
-    fn visit_method_headers<'u>(&mut self, id: ModuleId, cs: &ModuleCs<'u>) -> Vec<(MethodCs<'u>, OpId)> {
+    fn visit_method_headers<'u>(
+        &mut self,
+        id: ModuleId,
+        cs: &ModuleCs<'u>,
+    ) -> Vec<(MethodCs<'u>, OpId)> {
         let mut map: Vec<(MethodCs<'u>, OpId)> = Vec::new();
         for &mcs in &cs.methods {
             let d = method_decl(mcs, &self.src());
@@ -1145,7 +1360,10 @@ impl<'r> Sema<'r> {
                 MethodCs::Mapping(_) => {
                     if d.name_text == "main" {
                         let end = d.decl_span.end;
-                        self.warning(Span::new(mcs.span().start, end), bind(vm::EntryOp_DisallowedDeclAsMapping, &[]));
+                        self.warning(
+                            Span::new(mcs.span().start, end),
+                            bind(vm::EntryOp_DisallowedDeclAsMapping, &[]),
+                        );
                     }
                     ir::OpKind::Mapping
                 }
@@ -1171,7 +1389,13 @@ impl<'r> Sema<'r> {
                             self.ops[op.index()].ir.is_abstract = true;
                         }
                         if is_ctor {
-                            self.warning(d.name_node(), bind(vm::QvtOperationalVisitorCS_unsupportedQualifierOnConstructor, &[qn, &qname]));
+                            self.warning(
+                                d.name_node(),
+                                bind(
+                                    vm::QvtOperationalVisitorCS_unsupportedQualifierOnConstructor,
+                                    &[qn, &qname],
+                                ),
+                            );
                         }
                     }
                     TokenKind::KwBlackbox => {
@@ -1179,7 +1403,10 @@ impl<'r> Sema<'r> {
                             let msg = if is_ctor {
                                 bind(vm::QvtOperationalVisitorCS_blackboxConstructorWithBodyNotAllowed, &[&qname])
                             } else {
-                                bind(vm::QvtOperationalVisitorCS_blackboxOperationWithBodyNotAllowed, &[&qname])
+                                bind(
+                                    vm::QvtOperationalVisitorCS_blackboxOperationWithBodyNotAllowed,
+                                    &[&qname],
+                                )
                             };
                             self.error(d.header_node(), msg);
                         }
@@ -1201,7 +1428,13 @@ impl<'r> Sema<'r> {
             }
             for dup in duplicates(d.qualifiers) {
                 let qn = dup.spelling().unwrap_or("");
-                self.warning(d.name_node(), bind(vm::QvtOperationalVisitorCS_duplicateQualifierOnOperation, &[qn, &qname]));
+                self.warning(
+                    d.name_node(),
+                    bind(
+                        vm::QvtOperationalVisitorCS_duplicateQualifierOnOperation,
+                        &[qn, &qname],
+                    ),
+                );
             }
             let name = self.ops[op.index()].ir.name.clone();
             if name == "main" && !self.modules[id.index()].model_params.is_empty() {
@@ -1209,7 +1442,13 @@ impl<'r> Sema<'r> {
             }
             if !self.modules[id.index()].is_library && name == "main" {
                 if entry_found {
-                    self.error(mcs.span(), bind(vm::QvtOperationalVisitorCS_entryPointShouldBeDeclOnce, &["main"]));
+                    self.error(
+                        mcs.span(),
+                        bind(
+                            vm::QvtOperationalVisitorCS_entryPointShouldBeDeclOnce,
+                            &["main"],
+                        ),
+                    );
                 }
                 entry_found = true;
             }
@@ -1219,7 +1458,8 @@ impl<'r> Sema<'r> {
 
     /// `DeprecatedSignaturelessTransf.patchModule`
     fn patch_signatureless(&mut self, id: ModuleId) {
-        if self.modules[id.index()].is_library || !self.modules[id.index()].model_params.is_empty() {
+        if self.modules[id.index()].is_library || !self.modules[id.index()].model_params.is_empty()
+        {
             return;
         }
         let Some(main) = self.main_operation(id) else {
@@ -1270,13 +1510,23 @@ impl<'r> Sema<'r> {
                 ty: mty,
                 span: Span::default(),
             });
-            self.modules[id.index()].ir.model_types.push(ModelTypeId(idx));
+            self.modules[id.index()]
+                .ir
+                .model_types
+                .push(ModelTypeId(idx));
             // the parameter's extent
             let op = &mut self.ops[main.index()];
             let nparams = op.ir.params.len();
-            let p = if i < nparams { &mut op.ir.params[i] } else { &mut op.ir.results[i - nparams] };
+            let p = if i < nparams {
+                &mut op.ir.params[i]
+            } else {
+                &mut op.ir.results[i - nparams]
+            };
             if p.extent.is_none() {
-                p.extent = Some(ModelParamRef { module: id, index: mp_index });
+                p.extent = Some(ModelParamRef {
+                    module: id,
+                    index: mp_index,
+                });
             }
         }
     }
@@ -1296,7 +1546,13 @@ impl<'r> Sema<'r> {
     }
 
     /// `visitMappingDeclarationCS`: creates the operation with its parameters and results.
-    fn visit_mapping_declaration(&mut self, module: ModuleId, d: &MethodDecl<'_>, kind: ir::OpKind, mcs: MethodCs<'_>) -> OpId {
+    fn visit_mapping_declaration(
+        &mut self,
+        module: ModuleId,
+        d: &MethodDecl<'_>,
+        kind: ir::OpKind,
+        mcs: MethodCs<'_>,
+    ) -> OpId {
         let module_ty = self.modules[module.index()].ty;
         let ctx_dir = dir_of(d.direction);
         let context = match &d.context {
@@ -1333,7 +1589,14 @@ impl<'r> Sema<'r> {
                 };
             }
             let local = fun.new_local(&name, ty, ir::LocalKind::Param, p.span);
-            extras.push((local, ParamInfo { direction: dir, mapping_param: mapping_params, extent: if mapping_params { ext } else { None } }));
+            extras.push((
+                local,
+                ParamInfo {
+                    direction: dir,
+                    mapping_param: mapping_params,
+                    extent: if mapping_params { ext } else { None },
+                },
+            ));
             sig.push((name.clone(), ty, dir));
             params.push(ir::Param {
                 name,
@@ -1347,8 +1610,19 @@ impl<'r> Sema<'r> {
         let mut self_local = None;
         if let (Some(ct), Some(cspan)) = (context, d.context.as_ref().map(|c| c.span())) {
             let l = fun.new_local("self", ct, ir::LocalKind::SelfVar, cspan);
-            let ext = if mapping_params { self.resolve_model_parameter(module, ct, ctx_dir) } else { None };
-            extras.push((l, ParamInfo { direction: ctx_dir, mapping_param: mapping_params, extent: ext }));
+            let ext = if mapping_params {
+                self.resolve_model_parameter(module, ct, ctx_dir)
+            } else {
+                None
+            };
+            extras.push((
+                l,
+                ParamInfo {
+                    direction: ctx_dir,
+                    mapping_param: mapping_params,
+                    extent: ext,
+                },
+            ));
             fun.extra[l.index()].is_context = true;
             self_local = Some(l);
         }
@@ -1361,10 +1635,19 @@ impl<'r> Sema<'r> {
             if nres == 1 {
                 name = "result".into();
                 if let Some(n) = &r.name {
-                    self.error(n.span, bind(vm::QvtOperationalVisitorCS_resultParamNameNotAllowed, &[&n.text]));
+                    self.error(
+                        n.span,
+                        bind(
+                            vm::QvtOperationalVisitorCS_resultParamNameNotAllowed,
+                            &[&n.text],
+                        ),
+                    );
                 }
                 if r.direction.is_some() {
-                    self.error(r.span, vm::QvtOperationalVisitorCS_resultParamNameDirectionNotAllowed);
+                    self.error(
+                        r.span,
+                        vm::QvtOperationalVisitorCS_resultParamNameDirectionNotAllowed,
+                    );
                 }
             }
             let mut ext = extent;
@@ -1372,7 +1655,14 @@ impl<'r> Sema<'r> {
                 ext = self.resolve_model_parameter(module, ty, Direction::Out);
             }
             let local = fun.new_local(&name, ty, ir::LocalKind::Result, r.span);
-            extras.push((local, ParamInfo { direction: Direction::Out, mapping_param: mapping_params, extent: if mapping_params { ext } else { None } }));
+            extras.push((
+                local,
+                ParamInfo {
+                    direction: Direction::Out,
+                    mapping_param: mapping_params,
+                    extent: if mapping_params { ext } else { None },
+                },
+            ));
             results.push(ir::Param {
                 name,
                 direction: Direction::Out,
@@ -1389,11 +1679,18 @@ impl<'r> Sema<'r> {
             0 => TypeId::OCL_VOID,
             1 => results[0].ty,
             _ => {
-                let parts = results.iter().map(|r| (r.name.clone().into_boxed_str(), r.ty)).collect();
+                let parts = results
+                    .iter()
+                    .map(|r| (r.name.clone().into_boxed_str(), r.ty))
+                    .collect();
                 self.tuple_type(parts)
             }
         };
-        let result_local = if results.len() == 1 { Some(results[0].local) } else { None };
+        let result_local = if results.len() == 1 {
+            Some(results[0].local)
+        } else {
+            None
+        };
         let id = OpId(self.ops.len() as u32);
         let source = ir::SourceId(self.cur_unit as u32 + 1);
         let mut info = OpInfo {
@@ -1442,14 +1739,24 @@ impl<'r> Sema<'r> {
     }
 
     /// `visitTypeSpecCS`: the type and the extent (`T @ m`).
-    pub(crate) fn visit_type_spec(&mut self, ts: &ast::TypeSpec, dir: Direction) -> (Option<TypeId>, Option<ModelParamRef>) {
+    pub(crate) fn visit_type_spec(
+        &mut self,
+        ts: &ast::TypeSpec,
+        dir: Direction,
+    ) -> (Option<TypeId>, Option<ModelParamRef>) {
         let mut extent = None;
         if let Some(e) = &ts.extent {
             extent = self.lookup_model_parameter(&e.text, dir);
             if extent.is_none() {
                 let m = self.cur_module;
                 let names = self.extent_names(m, dir);
-                self.error(e.span, bind(vm::QvtOperationalVisitorCS_extentWrongName, &[&e.text, &format!("[{}]", names.join(", "))]));
+                self.error(
+                    e.span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_extentWrongName,
+                        &[&e.text, &format!("[{}]", names.join(", "))],
+                    ),
+                );
             }
         }
         let ty = self.type_cs(&ts.ty);
@@ -1463,7 +1770,10 @@ impl<'r> Sema<'r> {
                 continue;
             }
             if p.name == name {
-                return Some(ModelParamRef { module: m, index: i as u32 });
+                return Some(ModelParamRef {
+                    module: m,
+                    index: i as u32,
+                });
             }
         }
         None
@@ -1503,21 +1813,36 @@ impl<'r> Sema<'r> {
     }
 
     /// `resolveModelParameter` (`findModelParameter`)
-    pub(crate) fn resolve_model_parameter(&self, m: ModuleId, t: TypeId, dir: Direction) -> Option<ModelParamRef> {
+    pub(crate) fn resolve_model_parameter(
+        &self,
+        m: ModuleId,
+        t: TypeId,
+        dir: Direction,
+    ) -> Option<ModelParamRef> {
         if !self.may_belong_to_extent(t) {
             return None;
         }
         self.find_model_parameter(m, t, |pd| dir != Direction::In && pd == Direction::In)
     }
 
-    fn resolve_model_parameter_deprecated(&self, m: ModuleId, t: TypeId, dir: Direction) -> Option<ModelParamRef> {
+    fn resolve_model_parameter_deprecated(
+        &self,
+        m: ModuleId,
+        t: TypeId,
+        dir: Direction,
+    ) -> Option<ModelParamRef> {
         if !self.may_belong_to_extent(t) {
             return None;
         }
         self.find_model_parameter(m, t, |pd| dir == Direction::Out && pd == Direction::In)
     }
 
-    fn find_model_parameter(&self, m: ModuleId, t: TypeId, skip: impl Fn(Direction) -> bool) -> Option<ModelParamRef> {
+    fn find_model_parameter(
+        &self,
+        m: ModuleId,
+        t: TypeId,
+        skip: impl Fn(Direction) -> bool,
+    ) -> Option<ModelParamRef> {
         let root = self.type_root_package(t);
         let params = &self.modules[m.index()].model_params;
         for (i, p) in params.iter().enumerate() {
@@ -1527,7 +1852,10 @@ impl<'r> Sema<'r> {
             if let Some(mt) = p.model_type {
                 let pk = &self.model_types[mt.index()].decl.packages;
                 if !pk.is_empty() && root == Some(pk[0]) {
-                    return Some(ModelParamRef { module: m, index: i as u32 });
+                    return Some(ModelParamRef {
+                        module: m,
+                        index: i as u32,
+                    });
                 }
             }
         }
@@ -1535,7 +1863,10 @@ impl<'r> Sema<'r> {
             if skip(p.direction) {
                 continue;
             }
-            return Some(ModelParamRef { module: m, index: i as u32 });
+            return Some(ModelParamRef {
+                module: m,
+                index: i as u32,
+            });
         }
         None
     }
@@ -1546,7 +1877,10 @@ impl<'r> Sema<'r> {
         let mut used: Vec<Option<ModelParamRef>> = Vec::new();
         for p in params {
             if used.contains(&p.extent) {
-                self.error(p.span, bind(vm::QvtOperationalVisitorCS_extentDuplicateUse, &[]));
+                self.error(
+                    p.span,
+                    bind(vm::QvtOperationalVisitorCS_extentDuplicateUse, &[]),
+                );
             }
             if p.direction != Direction::Out {
                 used.push(p.extent);
@@ -1555,13 +1889,22 @@ impl<'r> Sema<'r> {
                 None => {
                     if p.direction != Direction::In {
                         let n = self.full_name(p.ty);
-                        self.error(p.span, bind(vm::QvtOperationalVisitorCS_extentFailToInfer, &[&n]));
+                        self.error(
+                            p.span,
+                            bind(vm::QvtOperationalVisitorCS_extentFailToInfer, &[&n]),
+                        );
                     }
                 }
                 Some(e) => {
-                    let ed = self.modules[e.module.index()].model_params[e.index as usize].direction;
-                    if (ed == Direction::In && p.direction != Direction::In) || (ed == Direction::Out && p.direction != Direction::Out) {
-                        self.error(p.span, bind(vm::QvtOperationalVisitorCS_extentDirectionMismatch, &[]));
+                    let ed =
+                        self.modules[e.module.index()].model_params[e.index as usize].direction;
+                    if (ed == Direction::In && p.direction != Direction::In)
+                        || (ed == Direction::Out && p.direction != Direction::Out)
+                    {
+                        self.error(
+                            p.span,
+                            bind(vm::QvtOperationalVisitorCS_extentDirectionMismatch, &[]),
+                        );
                     }
                 }
             }
@@ -1595,13 +1938,19 @@ impl<'r> Sema<'r> {
                             is_error = true;
                             let om = self.ops[oid.index()].module;
                             let mn = self.modules[om.index()].name.clone();
-                            self.error(span, bind(vm::OperationOverrideWithInvalidReturnType, &[&name, &mn]));
+                            self.error(
+                                span,
+                                bind(vm::OperationOverrideWithInvalidReturnType, &[&name, &mn]),
+                            );
                         }
                     }
                     if !is_error {
                         let m = self.op_module(other);
                         if m.is_none() || m == Some(STDLIB_MODULE) {
-                            self.warning(span, bind(vm::HidingStdlibOperationDiscouraged, &[&name]));
+                            self.warning(
+                                span,
+                                bind(vm::HidingStdlibOperationDiscouraged, &[&name]),
+                            );
                         }
                     }
                 }
@@ -1646,7 +1995,12 @@ impl<'r> Sema<'r> {
     }
 
     /// `doFindCollidingOperation`
-    fn find_colliding_operation(&mut self, op: OpId, owner: TypeId, contextual: bool) -> Option<Collision> {
+    fn find_colliding_operation(
+        &mut self,
+        op: OpId,
+        owner: TypeId,
+        contextual: bool,
+    ) -> Option<Collision> {
         let module = self.ops[op.index()].module;
         let name = self.ops[op.index()].ir.name.clone();
         let mut operations = self.get_operations(owner);
@@ -1659,7 +2013,10 @@ impl<'r> Sema<'r> {
         }
         let mut seen = std::collections::HashSet::new();
         operations.retain(|o| seen.insert(*o));
-        let overridden: Vec<OpRef> = operations.iter().filter_map(|o| self.op_overridden(*o)).collect();
+        let overridden: Vec<OpRef> = operations
+            .iter()
+            .filter_map(|o| self.op_overridden(*o))
+            .collect();
         let mut result = None;
         let me = OpRef::User(op);
         for next in operations {
@@ -1690,14 +2047,17 @@ impl<'r> Sema<'r> {
                         if !self.ops[op.index()].vtable.contains(&nid) {
                             self.ops[op.index()].vtable.push(nid);
                         }
-                        if !self.is_imported_by_access(module, next) && !self.ops[nid.index()].vtable.contains(&op) {
+                        if !self.is_imported_by_access(module, next)
+                            && !self.ops[nid.index()].vtable.contains(&op)
+                        {
                             self.ops[nid.index()].vtable.push(op);
                         }
                     }
                 }
             }
             if owner == next_owner || !contextual {
-                let defined_here = matches!(next, OpRef::User(nid) if self.ops[nid.index()].module == module);
+                let defined_here =
+                    matches!(next, OpRef::User(nid) if self.ops[nid.index()].module == module);
                 if !defined_here {
                     if self.is_imported_by_extends(module, next) && !overridden.contains(&next) {
                         result = Some(Collision::Overrides(next));
@@ -1742,7 +2102,12 @@ impl<'r> Sema<'r> {
     }
 
     /// `findMatchingFromExtended`
-    fn find_matching_from_extended(&mut self, module: ModuleId, op: OpId, depth: usize) -> Option<OpRef> {
+    fn find_matching_from_extended(
+        &mut self,
+        module: ModuleId,
+        op: OpId,
+        depth: usize,
+    ) -> Option<OpRef> {
         if depth > 32 {
             return None;
         }
@@ -1777,13 +2142,23 @@ impl<'r> Sema<'r> {
     }
 
     /// `collectAdditionalOperationsInTypeHierarchy(type, true, result)`
-    fn collect_additional_ops_in_hierarchy(&mut self, env: ModuleId, t: TypeId, out: &mut Vec<OpRef>, depth: usize) {
+    fn collect_additional_ops_in_hierarchy(
+        &mut self,
+        env: ModuleId,
+        t: TypeId,
+        out: &mut Vec<OpRef>,
+        depth: usize,
+    ) {
         if depth > 32 {
             return;
         }
         for next in self.modules[env.index()].additional_types.clone() {
             if t != next && self.ts.ck().relationship(t, next) == STRICT_SUPERTYPE {
-                if let Some((_, l)) = self.modules[env.index()].ctx_ops.iter().find(|(k, _)| *k == next) {
+                if let Some((_, l)) = self.modules[env.index()]
+                    .ctx_ops
+                    .iter()
+                    .find(|(k, _)| *k == next)
+                {
                     out.extend(l.iter().map(|&o| OpRef::User(o)));
                 }
             }
@@ -1821,7 +2196,9 @@ impl<'r> Sema<'r> {
                     if !is_transf {
                         self.error(p.span, bind(vm::IntermediatePropertyNotAllowed, &[]));
                     }
-                    self.modules[id.index()].features.push(ModuleFeature::Interm(ip));
+                    self.modules[id.index()]
+                        .features
+                        .push(ModuleFeature::Interm(ip));
                 }
                 _ => {
                     let g = self.visit_module_property(id, p);
@@ -1839,11 +2216,18 @@ impl<'r> Sema<'r> {
                             self.error(span, bind(vm::ModulePropertyAlreadyDefined, &[&name]));
                         }
                     }
-                    self.modules[id.index()].features.push(ModuleFeature::Global(g));
+                    self.modules[id.index()]
+                        .features
+                        .push(ModuleFeature::Global(g));
                     let me = &mut self.modules[id.index()];
                     // initialisation order: configuration properties first
                     if self.globals[g.index()].is_config {
-                        let pos = me.ir.globals.iter().position(|x| !self.globals[x.index()].is_config).unwrap_or(me.ir.globals.len());
+                        let pos = me
+                            .ir
+                            .globals
+                            .iter()
+                            .position(|x| !self.globals[x.index()].is_config)
+                            .unwrap_or(me.ir.globals.len());
                         me.ir.globals.insert(pos, g);
                     } else {
                         me.ir.globals.push(g);
@@ -1868,7 +2252,13 @@ impl<'r> Sema<'r> {
             if let Some(t) = &p.ty {
                 ty = self.type_cs(t);
                 if let Some(tt) = ty {
-                    if !self.ts.ck().is_primitive(tt) && !self.ts.types.is_collection_like(tt) && !matches!(self.ts.types.get(tt), Type::DataType(_) | Type::Enum(_) | Type::Tuple(_)) {
+                    if !self.ts.ck().is_primitive(tt)
+                        && !self.ts.types.is_collection_like(tt)
+                        && !matches!(
+                            self.ts.types.get(tt),
+                            Type::DataType(_) | Type::Enum(_) | Type::Tuple(_)
+                        )
+                    {
                         let n = self.type_name(tt);
                         self.error(t.span, bind(vm::ConfigPropertyTypeUnsupported, &[&n]));
                     }
@@ -1912,7 +2302,11 @@ impl<'r> Sema<'r> {
             ir: ir::Global {
                 module: id,
                 name,
-                kind: if is_config { ir::GlobalKind::Config } else { ir::GlobalKind::Property },
+                kind: if is_config {
+                    ir::GlobalKind::Config
+                } else {
+                    ir::GlobalKind::Property
+                },
                 ty: ty.unwrap_or(TypeId::NULL),
                 init,
                 span: p.span,
@@ -1926,7 +2320,11 @@ impl<'r> Sema<'r> {
     }
 
     /// `visitContextualPropertyCS`
-    fn visit_contextual_property(&mut self, id: ModuleId, p: &ast::Property) -> Option<ir::IntermPropId> {
+    fn visit_contextual_property(
+        &mut self,
+        id: ModuleId,
+        p: &ast::Property,
+    ) -> Option<ir::IntermPropId> {
         let (name_n, ctx) = scoped_parts(&p.name);
         let name = name_n.map(|n| n.text.clone()).unwrap_or_default();
         let name_span = name_n.map(|n| n.span).unwrap_or(p.span);
@@ -1934,13 +2332,24 @@ impl<'r> Sema<'r> {
         if let Some(t) = &p.ty {
             ty = self.type_cs(t);
             if ty.is_none() {
-                return Some(self.push_interm_prop(id, name, TypeId::NULL, None, None, p.span, name_span));
+                return Some(self.push_interm_prop(
+                    id,
+                    name,
+                    TypeId::NULL,
+                    None,
+                    None,
+                    p.span,
+                    name_span,
+                ));
             }
         }
         let mut init = None;
         let mut init_ty = None;
         if let Some(e) = &p.init {
-            self.warning(e.span, bind(vm::IntermediatePropertiesInitNotSupported, &[]));
+            self.warning(
+                e.span,
+                bind(vm::IntermediatePropertiesInitNotSupported, &[]),
+            );
             self.begin_code(id, None);
             let ex = self.visit_ocl_expression(e);
             let locals = std::mem::take(&mut self.fun.locals);
@@ -1971,7 +2380,10 @@ impl<'r> Sema<'r> {
             Some(CtxType::Type(t)) => self.type_cs_in(t, true),
             Some(CtxType::Path(path)) => {
                 let te = ast::TypeExpr {
-                    kind: ast::TypeKind::Path(ast::PathName { segments: path.to_vec(), span: path_span(path) }),
+                    kind: ast::TypeKind::Path(ast::PathName {
+                        segments: path.to_vec(),
+                        span: path_span(path),
+                    }),
                     span: path_span(path),
                 };
                 self.type_cs_in(&te, true)
@@ -1980,24 +2392,55 @@ impl<'r> Sema<'r> {
         };
         match ctx_ty {
             Some(ct) => {
-                if matches!(self.ts.types.get(ct), Type::Class(_) | Type::Module(_) | Type::ModelType(_) | Type::Tuple(_)) {
+                if matches!(
+                    self.ts.types.get(ct),
+                    Type::Class(_) | Type::Module(_) | Type::ModelType(_) | Type::Tuple(_)
+                ) {
                     context = Some(ct);
                 } else {
                     let span = ctx.as_ref().map(|c| c.span()).unwrap_or(p.span);
-                    self.error(span, bind(vm::QvtOperationalVisitorCS_ContextualPropertyTypeIsNotClass, &[&name]));
+                    self.error(
+                        span,
+                        bind(
+                            vm::QvtOperationalVisitorCS_ContextualPropertyTypeIsNotClass,
+                            &[&name],
+                        ),
+                    );
                 }
             }
-            None => self.error(p.name.span, bind(vm::QvtOperationalVisitorCS_ContextualPropertyTypeIsMissed, &[])),
+            None => self.error(
+                p.name.span,
+                bind(
+                    vm::QvtOperationalVisitorCS_ContextualPropertyTypeIsMissed,
+                    &[],
+                ),
+            ),
         }
         Some(self.push_interm_prop(id, name, ty, context, init, p.span, name_span))
     }
 
     #[allow(clippy::too_many_arguments)]
-    fn push_interm_prop(&mut self, id: ModuleId, name: String, ty: TypeId, context: Option<TypeId>, init: Option<ir::CodeBody>, span: Span, name_span: Span) -> ir::IntermPropId {
+    fn push_interm_prop(
+        &mut self,
+        id: ModuleId,
+        name: String,
+        ty: TypeId,
+        context: Option<TypeId>,
+        init: Option<ir::CodeBody>,
+        span: Span,
+        name_span: Span,
+    ) -> ir::IntermPropId {
         let pid = ir::IntermPropId(self.interm_props.len() as u32);
         let cty = context.unwrap_or(TypeId::NULL);
         self.interm_props.push(IntermPropInfo {
-            ir: ir::IntermProp { module: id, context: cty, name, ty, init, span },
+            ir: ir::IntermProp {
+                module: id,
+                context: cty,
+                name,
+                ty,
+                init,
+                span,
+            },
             context,
             hidden: false,
             name_span,
@@ -2011,7 +2454,13 @@ impl<'r> Sema<'r> {
         let props: Vec<ir::IntermPropId> = self.modules[id.index()]
             .features
             .iter()
-            .filter_map(|f| if let ModuleFeature::Interm(i) = f { Some(*i) } else { None })
+            .filter_map(|f| {
+                if let ModuleFeature::Interm(i) = f {
+                    Some(*i)
+                } else {
+                    None
+                }
+            })
             .collect();
         for &ip in &props {
             let Some(ct) = self.interm_props[ip.index()].context else {
@@ -2019,7 +2468,8 @@ impl<'r> Sema<'r> {
             };
             let name = self.interm_props[ip.index()].ir.name.clone();
             let found = self.lookup_property(ct, &name);
-            let already = (found.is_some() && found != Some(crate::ops::PropRef::Interm(ip))) | self.interm_props[ip.index()].hidden;
+            let already = (found.is_some() && found != Some(crate::ops::PropRef::Interm(ip)))
+                | self.interm_props[ip.index()].hidden;
             let clash = self.hierarchy_clash(id, ip, &props);
             if already || clash {
                 self.interm_props[ip.index()].hidden = true;
@@ -2031,8 +2481,16 @@ impl<'r> Sema<'r> {
 
     /// `IntermediatePropertyHierarchy.hasHierarchyClashes`: another property of the same name on
     /// a sub- or supertype of the context.
-    fn hierarchy_clash(&mut self, _id: ModuleId, ip: ir::IntermPropId, props: &[ir::IntermPropId]) -> bool {
-        let Some(Type::Class(c)) = self.interm_props[ip.index()].context.map(|t| self.ts.types.get(t).clone()) else {
+    fn hierarchy_clash(
+        &mut self,
+        _id: ModuleId,
+        ip: ir::IntermPropId,
+        props: &[ir::IntermPropId],
+    ) -> bool {
+        let Some(Type::Class(c)) = self.interm_props[ip.index()]
+            .context
+            .map(|t| self.ts.types.get(t).clone())
+        else {
             return false;
         };
         let name = self.interm_props[ip.index()].ir.name.clone();
@@ -2040,8 +2498,14 @@ impl<'r> Sema<'r> {
             if o == ip || self.interm_props[o.index()].ir.name != name {
                 continue;
             }
-            if let Some(Type::Class(oc)) = self.interm_props[o.index()].context.map(|t| self.ts.types.get(t).clone()) {
-                if oc != c && (self.ts.meta.class(oc).all_supers.contains(&c) || self.ts.meta.class(c).all_supers.contains(&oc)) {
+            if let Some(Type::Class(oc)) = self.interm_props[o.index()]
+                .context
+                .map(|t| self.ts.types.get(t).clone())
+            {
+                if oc != c
+                    && (self.ts.meta.class(oc).all_supers.contains(&c)
+                        || self.ts.meta.class(c).all_supers.contains(&oc))
+                {
                     return true;
                 }
             }
@@ -2051,7 +2515,12 @@ impl<'r> Sema<'r> {
 
     // ---- pass 6 --------------------------------------------------------------------------------
 
-    fn visit_method_bodies(&mut self, id: ModuleId, _cs: &ModuleCs<'_>, map: &[(MethodCs<'_>, OpId)]) {
+    fn visit_method_bodies(
+        &mut self,
+        id: ModuleId,
+        _cs: &ModuleCs<'_>,
+        map: &[(MethodCs<'_>, OpId)],
+    ) {
         for &(mcs, op) in map {
             self.visit_method(id, mcs, op);
         }
@@ -2084,7 +2553,11 @@ fn new_module_env(name: &str, library: bool, unit: usize, ty: TypeId, header: Sp
     ModuleEnv {
         ir: ir::Module {
             name: name.to_string(),
-            kind: if library { ir::ModuleKind::Library } else { ir::ModuleKind::Transformation },
+            kind: if library {
+                ir::ModuleKind::Library
+            } else {
+                ir::ModuleKind::Transformation
+            },
             blackbox: false,
             source: ir::SourceId(0),
             span: header,
@@ -2149,7 +2622,10 @@ pub(crate) fn has_body(m: MethodCs<'_>) -> bool {
 
 pub(crate) fn is_disjunctive(m: MethodCs<'_>) -> bool {
     match m {
-        MethodCs::Mapping(x) => x.extensions.iter().any(|e| e.kind == TokenKind::KwDisjuncts),
+        MethodCs::Mapping(x) => x
+            .extensions
+            .iter()
+            .any(|e| e.kind == TokenKind::KwDisjuncts),
         _ => false,
     }
 }

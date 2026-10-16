@@ -88,7 +88,9 @@ fn main() {
             "--top" => top = args.next().and_then(|s| s.parse().ok()).unwrap_or(top),
             "--timeout" => timeout = args.next().and_then(|s| s.parse().ok()).unwrap_or(timeout),
             "-h" | "--help" => {
-                eprintln!("oracle_report [--filter substr] [--out path.tsv] [--top N] [--timeout secs]");
+                eprintln!(
+                    "oracle_report [--filter substr] [--out path.tsv] [--top N] [--timeout secs]"
+                );
                 return;
             }
             o => {
@@ -105,8 +107,16 @@ fn main() {
         }
     };
     h.timeout = Duration::from_secs(timeout);
-    let out_path = out_path.unwrap_or_else(|| h.base.join("target/q2-oracle-report.tsv").to_string_lossy().into_owned());
-    println!("setup: {:.2}s (registry, resolvers)", h.setup_time.as_secs_f64());
+    let out_path = out_path.unwrap_or_else(|| {
+        h.base
+            .join("target/q2-oracle-report.tsv")
+            .to_string_lossy()
+            .into_owned()
+    });
+    println!(
+        "setup: {:.2}s (registry, resolvers)",
+        h.setup_time.as_secs_f64()
+    );
     for n in &h.notes {
         println!("  setup note: {n}");
     }
@@ -116,7 +126,10 @@ fn main() {
         .iter()
         .filter(|c| {
             filter.as_deref().is_none_or(|f| {
-                c.id.contains(f) || c.notes.iter().any(|n| n.starts_with("note key ") && n.contains(f))
+                c.id.contains(f)
+                    || c.notes
+                        .iter()
+                        .any(|n| n.starts_with("note key ") && n.contains(f))
             })
         })
         .cloned()
@@ -232,7 +245,13 @@ fn main() {
                 c(&extra),
             );
         }
-        let t = (oracle.problems.len(), run.problems.len(), matched.len(), missing.len(), extra.len());
+        let t = (
+            oracle.problems.len(),
+            run.problems.len(),
+            matched.len(),
+            missing.len(),
+            extra.len(),
+        );
         by_group.entry(g).or_default().add(t.0, t.1, t.2, t.3, t.4);
         total.add(t.0, t.1, t.2, t.3, t.4);
         // same message (and unit, severity) at another position
@@ -248,9 +267,14 @@ fn main() {
                 same_msg_other_pos += 1;
             }
         }
-        for (kind, list, tally) in [("missing", &missing, &mut missing_msgs), ("extra", &extra, &mut extra_msgs)] {
+        for (kind, list, tally) in [
+            ("missing", &missing, &mut missing_msgs),
+            ("extra", &extra, &mut extra_msgs),
+        ] {
             for p in list.iter() {
-                *tally.entry(format!("{} {}", p.sev, normalise(&p.msg))).or_default() += 1;
+                *tally
+                    .entry(format!("{} {}", p.sev, normalise(&p.msg)))
+                    .or_default() += 1;
                 let _ = writeln!(
                     tsv,
                     "{}\t{kind}\t{}\t{}\t{}\t{}\t{}\t{}",
@@ -266,7 +290,11 @@ fn main() {
                 (e, w)
             };
             let pass = |(ce, cw): (i64, i64)| ce == e && (w == -1 || cw == w);
-            let slot = if (e, w) == (0, -1) { &mut chk_default } else { &mut chk_parser };
+            let slot = if (e, w) == (0, -1) {
+                &mut chk_default
+            } else {
+                &mut chk_parser
+            };
             slot.0 += 1;
             if pass(count(&run.problems)) {
                 slot.1 += 1;
@@ -281,7 +309,10 @@ fn main() {
     let compared = ran - no_oracle.len();
     println!();
     println!("== qvto-sema vs Eclipse compile oracle ==");
-    println!("keys: {} selected, {ran} compiled, {compared} compared", cases.len());
+    println!(
+        "keys: {} selected, {ran} compiled, {compared} compared",
+        cases.len()
+    );
     println!(
         "  panics {}, timeouts {}, setup failures {}, without oracle entry {}",
         panics.values().map(Vec::len).sum::<usize>(),
@@ -289,7 +320,10 @@ fn main() {
         setup_failed.len(),
         no_oracle.len()
     );
-    println!("keys fully matching: {full_match}/{compared} ({})", pct(full_match, compared));
+    println!(
+        "keys fully matching: {full_match}/{compared} ({})",
+        pct(full_match, compared)
+    );
     for (g, (n, m)) in &keys_by_group {
         println!("  {g:<10} {m}/{n} ({})", pct(*m, *n));
     }
@@ -329,7 +363,9 @@ fn main() {
     for (g, t) in &by_group {
         row(g, t);
     }
-    println!("missing+extra pairs with the same unit/severity/message at another position: {same_msg_other_pos}");
+    println!(
+        "missing+extra pairs with the same unit/severity/message at another position: {same_msg_other_pos}"
+    );
     println!();
     println!(
         "check problems (TestQvtParser counts): {} cases, ours pass {}, Eclipse oracle passes {}",
@@ -344,23 +380,41 @@ fn main() {
     println!(
         "analysis time (compile calls only): total {:.1} ms, mean {:.3} ms, max {:.1} ms ({})",
         ms(total_time),
-        if ran > 0 { ms(total_time) / ran as f64 } else { 0.0 },
+        if ran > 0 {
+            ms(total_time) / ran as f64
+        } else {
+            0.0
+        },
         ms(max_time.0),
         max_time.1
     );
     // TestQvtParser's inline annotations (ProblemSourceAnnotationHelper.assertMatchingProblems):
     // every problem of an annotated case hits an annotation exactly and vice versa
     {
-        let bundle = h.base.join("reference/eclipse-qvto/tests/org.eclipse.m2m.tests.qvt.oml");
-        let java = std::fs::read_to_string(bundle.join("src/org/eclipse/m2m/tests/qvt/oml/TestQvtParser.java")).unwrap_or_default();
+        let bundle = h
+            .base
+            .join("reference/eclipse-qvto/tests/org.eclipse.m2m.tests.qvt.oml");
+        let java = std::fs::read_to_string(
+            bundle.join("src/org/eclipse/m2m/tests/qvt/oml/TestQvtParser.java"),
+        )
+        .unwrap_or_default();
         let annotated: Vec<String> = java
             .lines()
-            .filter_map(|l| l.trim().strip_prefix("TestData.createSourceChecked(\"").and_then(|r| r.split_once('"')).map(|(d, _)| d.to_string()))
+            .filter_map(|l| {
+                l.trim()
+                    .strip_prefix("TestData.createSourceChecked(\"")
+                    .and_then(|r| r.split_once('"'))
+                    .map(|(d, _)| d.to_string())
+            })
             .collect();
-        let (mut cases_n, mut cases_ok, mut ann_total, mut ann_hit, mut probs_total, mut probs_hit) = (0, 0, 0, 0, 0, 0);
+        let (mut cases_n, mut cases_ok, mut ann_total, mut ann_hit, mut probs_total, mut probs_hit) =
+            (0, 0, 0, 0, 0, 0);
         let mut ora = (0, 0);
         for (case, run) in cases.iter().zip(&runs) {
-            let Some(dir) = annotated.iter().find(|d| run.key.ends_with(&format!("parserTestData/sources/{d}/{d}.qvto"))) else {
+            let Some(dir) = annotated.iter().find(|d| {
+                run.key
+                    .ends_with(&format!("parserTestData/sources/{d}/{d}.qvto"))
+            }) else {
                 continue;
             };
             let dirp = bundle.join("parserTestData/sources").join(dir);
@@ -379,7 +433,9 @@ fn main() {
                         let mut from = 0;
                         while let Some(i) = src[from..].find(&open) {
                             let start = from + i + open.len();
-                            let Some(j) = src[start..].find(&close) else { break };
+                            let Some(j) = src[start..].find(&close) else {
+                                break;
+                            };
                             let end = start + j;
                             let o = src[..start].encode_utf16().count() as i64;
                             let l = src[start..end].encode_utf16().count() as i64;
@@ -390,8 +446,15 @@ fn main() {
                 }
             }
             cases_n += 1;
-            let hit = |p: &Prob| ann.iter().any(|(u, o, l, s)| *u == p.unit && *o == p.offset && *l == p.len && *s == p.sev);
-            let covered = |a: &(String, i64, i64, char), ps: &[Prob]| ps.iter().any(|p| p.unit == a.0 && p.offset == a.1 && p.len == a.2 && p.sev == a.3);
+            let hit = |p: &Prob| {
+                ann.iter().any(|(u, o, l, s)| {
+                    *u == p.unit && *o == p.offset && *l == p.len && *s == p.sev
+                })
+            };
+            let covered = |a: &(String, i64, i64, char), ps: &[Prob]| {
+                ps.iter()
+                    .any(|p| p.unit == a.0 && p.offset == a.1 && p.len == a.2 && p.sev == a.3)
+            };
             let ph = run.problems.iter().filter(|p| hit(p)).count();
             let ah = ann.iter().filter(|a| covered(a, &run.problems)).count();
             probs_total += run.problems.len();
@@ -402,7 +465,8 @@ fn main() {
                 cases_ok += 1;
             }
             if let Some(o) = h.oracle_for(&run.key) {
-                if o.problems.iter().all(|p| hit(p)) && ann.iter().all(|a| covered(a, &o.problems)) {
+                if o.problems.iter().all(|p| hit(p)) && ann.iter().all(|a| covered(a, &o.problems))
+                {
                     ora.0 += 1;
                 }
                 ora.1 += 1;
@@ -452,7 +516,11 @@ fn main() {
         let mut v: Vec<(&String, &usize)> = m.iter().collect();
         v.sort_by(|a, b| b.1.cmp(a.1).then(a.0.cmp(b.0)));
         println!();
-        println!("== top {top} {title} ({} distinct, {} total) ==", v.len(), m.values().sum::<usize>());
+        println!(
+            "== top {top} {title} ({} distinct, {} total) ==",
+            v.len(),
+            m.values().sum::<usize>()
+        );
         for (msg, n) in v.into_iter().take(top) {
             println!("{n:>6}  {msg}");
         }

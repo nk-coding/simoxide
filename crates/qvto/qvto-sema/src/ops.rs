@@ -91,7 +91,11 @@ impl<'r> Sema<'r> {
     pub fn op_param_names(&self, o: OpRef) -> Vec<String> {
         match o {
             OpRef::Std(op, _) => op.desc().params.iter().map(|p| p.0.to_string()).collect(),
-            OpRef::User(id) => self.ops[id.index()].params.iter().map(|p| p.0.clone()).collect(),
+            OpRef::User(id) => self.ops[id.index()]
+                .params
+                .iter()
+                .map(|p| p.0.clone())
+                .collect(),
             OpRef::Meta(m) => self.meta_op_names[m.index()].clone(),
         }
     }
@@ -108,7 +112,9 @@ impl<'r> Sema<'r> {
     /// `uml.getOwningClassifier(operation)`.
     pub fn op_owner(&mut self, o: OpRef) -> TypeId {
         match o {
-            OpRef::Std(_, StdOwner::Stdlib) => self.modules[crate::analyzer::STDLIB_MODULE.index()].ty,
+            OpRef::Std(_, StdOwner::Stdlib) => {
+                self.modules[crate::analyzer::STDLIB_MODULE.index()].ty
+            }
             OpRef::Std(_, owner) => self.stdlib.owner_type(&mut self.ts.types, owner),
             OpRef::User(id) => self.ops[id.index()].owner,
             OpRef::Meta(m) => {
@@ -202,7 +208,9 @@ impl<'r> Sema<'r> {
 
     /// A type in a signature: predefined types by name, others qualified.
     fn sig_type_name(&mut self, t: TypeId, owner: bool) -> String {
-        let predefined = self.ts.ck().is_predefined(t) || self.ts.types.is_collection_like(t) || matches!(self.ts.types.get(t), Type::Tuple(_) | Type::TypeType(_));
+        let predefined = self.ts.ck().is_predefined(t)
+            || self.ts.types.is_collection_like(t)
+            || matches!(self.ts.types.get(t), Type::Tuple(_) | Type::TypeType(_));
         if predefined && !owner {
             self.type_name(t)
         } else {

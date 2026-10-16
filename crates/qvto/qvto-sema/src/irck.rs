@@ -27,13 +27,17 @@ pub fn check_program(p: &Program) -> Vec<String> {
     }
     for (i, m) in p.modules.iter().enumerate() {
         for &o in &m.operations {
-            if o.index() >= p.operations.len() || p.operations[o.index()].module != ModuleId(i as u32) {
-                c.out.push(format!("module {}: foreign operation {o:?}", m.name));
+            if o.index() >= p.operations.len()
+                || p.operations[o.index()].module != ModuleId(i as u32)
+            {
+                c.out
+                    .push(format!("module {}: foreign operation {o:?}", m.name));
             }
         }
         if let Some(e) = m.entry {
             if p.operations[e.index()].module != ModuleId(i as u32) {
-                c.out.push(format!("module {}: entry of another module", m.name));
+                c.out
+                    .push(format!("module {}: entry of another module", m.name));
             }
         }
     }
@@ -55,21 +59,37 @@ impl Checker<'_> {
         let what = format!("op {} ({:?})", op.name, id);
         for p in op.params.iter().chain(op.results.iter()) {
             if p.local.index() >= op.locals.len() {
-                self.out.push(format!("{what}: parameter {} has no slot", p.name));
+                self.out
+                    .push(format!("{what}: parameter {} has no slot", p.name));
             }
         }
-        let s = Scope { what, locals: &op.locals };
+        let s = Scope {
+            what,
+            locals: &op.locals,
+        };
         if let Some(b) = &op.body {
             for e in b {
                 self.expr(&s, e);
             }
         }
         if let Some(m) = &op.mapping {
-            for e in m.when.iter().chain(&m.where_).chain(&m.init).chain(&m.population).chain(&m.end) {
+            for e in m
+                .when
+                .iter()
+                .chain(&m.where_)
+                .chain(&m.init)
+                .chain(&m.population)
+                .chain(&m.end)
+            {
                 self.expr(&s, e);
             }
         }
-        if op.kind == OpKind::Mapping && op.mapping.is_none() && !op.is_blackbox && !op.is_abstract && op.body.is_none() {
+        if op.kind == OpKind::Mapping
+            && op.mapping.is_none()
+            && !op.is_blackbox
+            && !op.is_abstract
+            && op.body.is_none()
+        {
             // declarations without body are fine
         }
     }
@@ -84,15 +104,25 @@ impl Checker<'_> {
 
     fn local(&mut self, s: &Scope<'_>, l: LocalId) {
         if l.index() >= s.locals.len() {
-            self.out.push(format!("{}: local {l:?} out of range", s.what));
+            self.out
+                .push(format!("{}: local {l:?} out of range", s.what));
         } else if s.locals[l.index()].ty == TypeId::NULL {
-            self.out.push(format!("{}: local {} has no type", s.what, s.locals[l.index()].name));
+            self.out.push(format!(
+                "{}: local {} has no type",
+                s.what,
+                s.locals[l.index()].name
+            ));
         }
     }
 
     fn expr(&mut self, s: &Scope<'_>, e: &Expr) {
         if e.ty == TypeId::NULL {
-            self.out.push(format!("{}: expression at {:?} has no type ({:?})", s.what, e.span, kind_name(&e.kind)));
+            self.out.push(format!(
+                "{}: expression at {:?} has no type ({:?})",
+                s.what,
+                e.span,
+                kind_name(&e.kind)
+            ));
         }
         match &e.kind {
             ExprKind::Local(l) => self.local(s, *l),
@@ -126,7 +156,8 @@ impl Checker<'_> {
             }
             ExprKind::Type(t) => {
                 if *t == TypeId::NULL {
-                    self.out.push(format!("{}: type expression without type", s.what));
+                    self.out
+                        .push(format!("{}: type expression without type", s.what));
                 }
             }
             ExprKind::New(n) => {
@@ -252,14 +283,20 @@ pub fn for_each_child(e: &Expr, mut f: impl FnMut(&Expr)) {
             }
         }
         ExprKind::Log(l) => {
-            for x in [&l.message, &l.element, &l.level, &l.when].into_iter().flatten() {
+            for x in [&l.message, &l.element, &l.level, &l.when]
+                .into_iter()
+                .flatten()
+            {
                 f(x);
             }
         }
         ExprKind::Assert(a) => {
             f(&a.cond);
             if let Some(l) = &a.log {
-                for x in [&l.message, &l.element, &l.level, &l.when].into_iter().flatten() {
+                for x in [&l.message, &l.element, &l.level, &l.when]
+                    .into_iter()
+                    .flatten()
+                {
                     f(x);
                 }
             }

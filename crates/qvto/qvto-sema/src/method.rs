@@ -3,12 +3,12 @@
 
 use crate::analyzer::Sema;
 use crate::env::{ModuleEnv, Scope, VarEntry, VarRef};
-use crate::expr::{mk, Ex, Pos};
+use crate::expr::{Ex, Pos, mk};
 use crate::ir::{self, Direction, ExprKind, ModuleId, OpId};
 use crate::messages::{bind, validation as vm};
-use crate::module::{has_body, is_disjunctive, method_decl, scoped_parts, CtxType};
+use crate::module::{CtxType, has_body, is_disjunctive, method_decl, scoped_parts};
 use crate::ops::{OpRef, PropRef};
-use crate::units::{path_span, MethodCs, ModuleCs};
+use crate::units::{MethodCs, ModuleCs, path_span};
 use qvto_model::{Classifier, FeatureKind};
 use qvto_syntax::ast;
 use qvto_syntax::{Span, TokenKind};
@@ -84,14 +84,32 @@ impl<'r> Sema<'r> {
             }
         }
         if self.modules[module.index()].blackbox {
-            self.error(d.header_node(), bind(vm::QvtOperationalVisitorCS_operationDefinitionInsideBlackboxModule, &[&d.repr()]));
+            self.error(
+                d.header_node(),
+                bind(
+                    vm::QvtOperationalVisitorCS_operationDefinitionInsideBlackboxModule,
+                    &[&d.repr()],
+                ),
+            );
         }
         if self.ops[op.index()].ir.is_blackbox && !is_disjunctive(mcs) {
             let n = self.blackbox_handler_count(op);
             if n == 0 {
-                self.warning(d.header_node(), bind(vm::QvtOperationalVisitorCS_noBlackboxImplementationFound, &[&d.repr()]));
+                self.warning(
+                    d.header_node(),
+                    bind(
+                        vm::QvtOperationalVisitorCS_noBlackboxImplementationFound,
+                        &[&d.repr()],
+                    ),
+                );
             } else if n > 1 {
-                self.warning(d.header_node(), bind(vm::QvtOperationalVisitorCS_ambiguousBlackboxImplementationFound, &[&d.repr()]));
+                self.warning(
+                    d.header_node(),
+                    bind(
+                        vm::QvtOperationalVisitorCS_ambiguousBlackboxImplementationFound,
+                        &[&d.repr()],
+                    ),
+                );
             }
         }
         self.end_operation(op);
@@ -111,16 +129,24 @@ impl<'r> Sema<'r> {
             }
             if let Some(bb) = &self.units[u].source.blackbox {
                 let name = self.modules[m.index()].name.clone();
-                if !native.iter().any(|(b, n)| std::rc::Rc::ptr_eq(b, bb) && *n == name) {
+                if !native
+                    .iter()
+                    .any(|(b, n)| std::rc::Rc::ptr_eq(b, bb) && *n == name)
+                {
                     native.push((bb.clone(), name));
                 }
             }
         }
-        let candidates: Vec<(std::rc::Rc<crate::blackbox::BlackboxUnit>, Option<String>)> = if native.is_empty() {
-            self.resolver.blackbox_units().into_iter().filter_map(|u| u.blackbox.map(|b| (b, None))).collect()
-        } else {
-            native.into_iter().map(|(b, n)| (b, Some(n))).collect()
-        };
+        let candidates: Vec<(std::rc::Rc<crate::blackbox::BlackboxUnit>, Option<String>)> =
+            if native.is_empty() {
+                self.resolver
+                    .blackbox_units()
+                    .into_iter()
+                    .filter_map(|u| u.blackbox.map(|b| (b, None)))
+                    .collect()
+            } else {
+                native.into_iter().map(|(b, n)| (b, Some(n))).collect()
+            };
         let mut count = 0;
         for (unit, only) in candidates {
             if unit.load_error {
@@ -140,12 +166,21 @@ impl<'r> Sema<'r> {
         count
     }
 
-    fn blackbox_matches(&mut self, op: OpId, bm: &crate::blackbox::BlackboxModule, b: &crate::blackbox::BlackboxOp) -> bool {
+    fn blackbox_matches(
+        &mut self,
+        op: OpId,
+        bm: &crate::blackbox::BlackboxModule,
+        b: &crate::blackbox::BlackboxOp,
+    ) -> bool {
         let info = self.ops[op.index()].ir.clone();
         if b.name != info.name {
             return false;
         }
-        let bctx = b.context.as_deref().filter(|c| *c != "-").map(|c| self.parse_bb_type(c));
+        let bctx = b
+            .context
+            .as_deref()
+            .filter(|c| *c != "-")
+            .map(|c| self.parse_bb_type(c));
         match (info.context, bctx) {
             (None, None) => {
                 if !bm.library {
@@ -168,7 +203,11 @@ impl<'r> Sema<'r> {
                 return false;
             }
         }
-        let bret = if b.result.is_empty() || b.result == "-" { TypeId::OCL_VOID } else { self.parse_bb_type(&b.result) };
+        let bret = if b.result.is_empty() || b.result == "-" {
+            TypeId::OCL_VOID
+        } else {
+            self.parse_bb_type(&b.result)
+        };
         match info.results.first() {
             None => bret == TypeId::OCL_VOID,
             Some(r) => self.ts.ck().exact(bret, r.ty),
@@ -176,7 +215,12 @@ impl<'r> Sema<'r> {
     }
 
     /// `visitConstructorCS`
-    fn visit_constructor(&mut self, c: &ast::Constructor, op: OpId, d: &crate::module::MethodDecl<'_>) {
+    fn visit_constructor(
+        &mut self,
+        c: &ast::Constructor,
+        op: OpId,
+        d: &crate::module::MethodDecl<'_>,
+    ) {
         let info = &self.ops[op.index()];
         let ctx = info.ir.context;
         match ctx {
@@ -190,7 +234,9 @@ impl<'r> Sema<'r> {
         }
         self.delete_var("self");
         let rt = ctx.unwrap_or(TypeId::NULL);
-        let l = self.fun.new_local("result", rt, ir::LocalKind::Result, c.decl_span);
+        let l = self
+            .fun
+            .new_local("result", rt, ir::LocalKind::Result, c.decl_span);
         self.fun.extra[l.index()].param = Some(crate::env::ParamInfo {
             direction: Direction::Out,
             mapping_param: false,
@@ -205,7 +251,13 @@ impl<'r> Sema<'r> {
     }
 
     /// `visitMappingQueryCS` (helpers, queries, `main`)
-    fn visit_query(&mut self, op: OpId, d: &crate::module::MethodDecl<'_>, stmts: Option<&[ast::Expr]>, simple: bool) {
+    fn visit_query(
+        &mut self,
+        op: OpId,
+        d: &crate::module::MethodDecl<'_>,
+        stmts: Option<&[ast::Expr]>,
+        simple: bool,
+    ) {
         let info = &self.ops[op.index()];
         if info.contextual && info.ir.context_direction != Direction::In {
             let span = d.name.map(|n| n.span).unwrap_or(d.decl_span);
@@ -217,7 +269,11 @@ impl<'r> Sema<'r> {
         }
         let nres = self.ops[op.index()].ir.results.len();
         if nres <= 1 {
-            let ret = if nres == 0 { self.ops[op.index()].ret } else { self.ops[op.index()].ir.results[0].ty };
+            let ret = if nres == 0 {
+                self.ops[op.index()].ret
+            } else {
+                self.ops[op.index()].ir.results[0].ty
+            };
             let last = body.as_ref().and_then(|b| b.last());
             if ret != TypeId::OCL_VOID {
                 if let Some(last) = last {
@@ -226,7 +282,10 @@ impl<'r> Sema<'r> {
                     if lt != TypeId::NULL && !self.ts.ck().assignable(ret, lt) && !det {
                         let a = self.full_name(lt);
                         let b = self.full_name(ret);
-                        self.error(d.decl_span, bind(vm::bodyTypeNotCompatibleWithReturnTypeError, &[&a, &b]));
+                        self.error(
+                            d.decl_span,
+                            bind(vm::bodyTypeNotCompatibleWithReturnTypeError, &[&a, &b]),
+                        );
                     }
                 }
             }
@@ -246,8 +305,15 @@ impl<'r> Sema<'r> {
     /// The span of the direction keyword of a mapping declaration.
     fn direction_span(&self, d: &crate::module::MethodDecl<'_>) -> Span {
         let src = self.src();
-        let end = d.context.as_ref().map(|c| c.span().start).or(d.name.map(|n| n.span.start)).unwrap_or(d.decl_span.end);
-        let text = src.get(d.decl_span.start as usize..end as usize).unwrap_or("");
+        let end = d
+            .context
+            .as_ref()
+            .map(|c| c.span().start)
+            .or(d.name.map(|n| n.span.start))
+            .unwrap_or(d.decl_span.end);
+        let text = src
+            .get(d.decl_span.start as usize..end as usize)
+            .unwrap_or("");
         for kw in ["inout", "out", "in"] {
             if let Some(i) = find_word(text, kw) {
                 let s = d.decl_span.start + i as u32;
@@ -258,7 +324,12 @@ impl<'r> Sema<'r> {
     }
 
     /// `visitMappingRuleCS`
-    fn visit_mapping_rule(&mut self, m: &ast::Mapping, op: OpId, d: &crate::module::MethodDecl<'_>) {
+    fn visit_mapping_rule(
+        &mut self,
+        m: &ast::Mapping,
+        op: OpId,
+        d: &crate::module::MethodDecl<'_>,
+    ) {
         let info = &self.ops[op.index()];
         if info.contextual && info.ir.context_direction == Direction::Out {
             let span = self.direction_span(d);
@@ -296,7 +367,11 @@ impl<'r> Sema<'r> {
                 if let Some(s) = self.fun.scopes.last_mut() {
                     s.in_init = true;
                 }
-                init = self.statements(&b.stmts, false).into_iter().map(|x| x.e).collect();
+                init = self
+                    .statements(&b.stmts, false)
+                    .into_iter()
+                    .map(|x| x.e)
+                    .collect();
                 if let Some(s) = self.fun.scopes.last_mut() {
                     s.in_init = false;
                 }
@@ -304,7 +379,9 @@ impl<'r> Sema<'r> {
         }
         if m.results.len() > 1 {
             let rt = self.ops[op.index()].ret;
-            let l = self.fun.new_local("result", rt, ir::LocalKind::Result, d.decl_span);
+            let l = self
+                .fun
+                .new_local("result", rt, ir::LocalKind::Result, d.decl_span);
             self.add_var("result", VarRef::Local(l), true);
             self.ops[op.index()].ir.result_local = Some(l);
         }
@@ -312,7 +389,9 @@ impl<'r> Sema<'r> {
         if let Some(body) = &m.body {
             if let Some(p) = &body.population {
                 let unique_result = m.results.len() == 1;
-                let implicit_ctx = m.results.is_empty() && d.context.is_some() && m.direction == Some(TokenKind::KwInout);
+                let implicit_ctx = m.results.is_empty()
+                    && d.context.is_some()
+                    && m.direction == Some(TokenKind::KwInout);
                 if !p.explicit && (unique_result || implicit_ctx) {
                     let vname = if unique_result { "result" } else { "self" };
                     let var = ast::Name {
@@ -320,12 +399,21 @@ impl<'r> Sema<'r> {
                         kind: ast::NameKind::Ident,
                         span: p.body.span,
                     };
-                    let x = self.object_core(Some(&var), None, &p.body.stmts, p.body.span, false, Some(op));
+                    let x = self.object_core(
+                        Some(&var),
+                        None,
+                        &p.body.stmts,
+                        p.body.span,
+                        false,
+                        Some(op),
+                    );
                     population.push(x.e);
                 } else {
                     for s in &p.body.stmts {
                         let x = match &s.kind {
-                            ast::ExprKind::Object(o) => Some(self.object_exp(o, s.span, true, Some(op))),
+                            ast::ExprKind::Object(o) => {
+                                Some(self.object_exp(o, s.span, true, Some(op)))
+                            }
                             _ => self.visit_ocl_expression_at(s, Pos::Block),
                         };
                         if let Some(x) = x {
@@ -338,22 +426,39 @@ impl<'r> Sema<'r> {
         let mut end = Vec::new();
         if let Some(body) = &m.body {
             if let Some(b) = &body.end {
-                end = self.statements(&b.stmts, false).into_iter().map(|x| x.e).collect();
+                end = self
+                    .statements(&b.stmts, false)
+                    .into_iter()
+                    .map(|x| x.e)
+                    .collect();
             }
         }
         // abstract out parameters and results must be initialised in the init section
         let has_init = m.body.as_ref().is_some_and(|b| b.init.is_some());
         let check: Vec<TypeId> = {
             let info = &self.ops[op.index()].ir;
-            info.params.iter().filter(|p| p.direction == Direction::Out).map(|p| p.ty).chain(info.results.iter().map(|r| r.ty)).collect()
+            info.params
+                .iter()
+                .filter(|p| p.direction == Direction::Out)
+                .map(|p| p.ty)
+                .chain(info.results.iter().map(|r| r.ty))
+                .collect()
         };
         let is_abstract = m.qualifiers.contains(&TokenKind::KwAbstract);
         let blackbox = self.ops[op.index()].ir.is_blackbox;
         for t in check {
             if let Type::Class(c) = *self.ts.types.get(t) {
                 let ci = self.ts.meta.class(c);
-                if (ci.is_abstract || ci.is_interface) && !has_init && !blackbox && !is_abstract && !is_disjunctive(MethodCs::Mapping(m)) {
-                    self.error(d.header_node(), vm::QvtOperationalVisitorCS_AbstractTypesNotInitialized);
+                if (ci.is_abstract || ci.is_interface)
+                    && !has_init
+                    && !blackbox
+                    && !is_abstract
+                    && !is_disjunctive(MethodCs::Mapping(m))
+                {
+                    self.error(
+                        d.header_node(),
+                        vm::QvtOperationalVisitorCS_AbstractTypesNotInitialized,
+                    );
                 }
             }
         }
@@ -373,7 +478,12 @@ impl<'r> Sema<'r> {
     }
 
     /// `processMappingExtensions`
-    fn process_mapping_extensions(&mut self, m: &ast::Mapping, op: OpId, d: &crate::module::MethodDecl<'_>) -> (Vec<OpId>, Vec<OpId>, Vec<OpId>) {
+    fn process_mapping_extensions(
+        &mut self,
+        m: &ast::Mapping,
+        op: OpId,
+        d: &crate::module::MethodDecl<'_>,
+    ) -> (Vec<OpId>, Vec<OpId>, Vec<OpId>) {
         let mut inherits = Vec::new();
         let mut merges = Vec::new();
         let mut disjuncts = Vec::new();
@@ -392,20 +502,38 @@ impl<'r> Sema<'r> {
                             self.error(sn.span, bind(vm::QvtOperationalVisitorCS_unsupportedInheritanceOnBlackboxMapping, &[&repr, &d.repr()]));
                         }
                         if self.ops[target.index()].ir.is_blackbox {
-                            self.error(sn.span, bind(vm::QvtOperationalVisitorCS_unsupportedInheritedBlackboxMapping, &[&repr, &d.repr()]));
+                            self.error(
+                                sn.span,
+                                bind(
+                                    vm::QvtOperationalVisitorCS_unsupportedInheritedBlackboxMapping,
+                                    &[&repr, &d.repr()],
+                                ),
+                            );
                         }
                         &mut inherits
                     }
                     "merges" => {
                         if self.ops[target.index()].ir.is_blackbox {
-                            self.error(sn.span, bind(vm::QvtOperationalVisitorCS_unsupportedMergedBlackboxMapping, &[&repr, &d.repr()]));
+                            self.error(
+                                sn.span,
+                                bind(
+                                    vm::QvtOperationalVisitorCS_unsupportedMergedBlackboxMapping,
+                                    &[&repr, &d.repr()],
+                                ),
+                            );
                         }
                         &mut merges
                     }
                     _ => &mut disjuncts,
                 };
                 if list.contains(&target) {
-                    self.error(sn.span, bind(vm::QvtOperationalVisitorCS_duplicateMappingRereferenceInExtensionKind, &[kind, &repr]));
+                    self.error(
+                        sn.span,
+                        bind(
+                            vm::QvtOperationalVisitorCS_duplicateMappingRereferenceInExtensionKind,
+                            &[kind, &repr],
+                        ),
+                    );
                 } else {
                     list.push(target);
                 }
@@ -421,7 +549,10 @@ impl<'r> Sema<'r> {
     }
 
     /// `resolveMappingOperationReference`
-    pub(crate) fn resolve_mapping_operation_reference(&mut self, sn: &ast::ScopedName) -> Vec<OpId> {
+    pub(crate) fn resolve_mapping_operation_reference(
+        &mut self,
+        sn: &ast::ScopedName,
+    ) -> Vec<OpId> {
         let (name, ctx) = scoped_parts(sn);
         let mut result = Vec::new();
         let mut owning: Option<TypeId> = None;
@@ -460,14 +591,34 @@ impl<'r> Sema<'r> {
                     (!has_type && owner_null) || Some(info.owner) == owning
                 })
                 .collect();
-            result = local.iter().copied().filter(|o| !self.ops[o.index()].overridden.is_some_and(|ov| local.contains(&ov))).collect();
+            result = local
+                .iter()
+                .copied()
+                .filter(|o| {
+                    !self.ops[o.index()]
+                        .overridden
+                        .is_some_and(|ov| local.contains(&ov))
+                })
+                .collect();
         }
         if result.is_empty() {
             if owning.is_some() {
-                self.error(sn.span, bind(vm::QvtOperationalVisitorCS_unresolvedMappingOperationReference, &[&scoped_name_string(sn)]));
+                self.error(
+                    sn.span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_unresolvedMappingOperationReference,
+                        &[&scoped_name_string(sn)],
+                    ),
+                );
             }
         } else if result.len() > 1 {
-            self.error(sn.span, bind(vm::QvtOperationalVisitorCS_ambiguousMappingOperationReference, &[&scoped_name_string(sn)]));
+            self.error(
+                sn.span,
+                bind(
+                    vm::QvtOperationalVisitorCS_ambiguousMappingOperationReference,
+                    &[&scoped_name_string(sn)],
+                ),
+            );
         }
         result
     }
@@ -516,7 +667,10 @@ impl<'r> Sema<'r> {
         }
         self.end_code();
         if element.is_none() && !found_classifier {
-            self.error(t.element.span, bind(vm::unresolvedNameError, &[&scoped_name_string(&t.element)]));
+            self.error(
+                t.element.span,
+                bind(vm::unresolvedNameError, &[&scoped_name_string(&t.element)]),
+            );
             return;
         }
         if let (Some(p), true, Some(v)) = (element, tag_id == "alias", value) {
@@ -539,20 +693,28 @@ impl<'r> Sema<'r> {
         let new_name = r.property.text.clone();
         let Some(p) = self.lookup_property(ty, &orig) else {
             let tn = self.full_name(ty);
-            self.error(r.new_name.span, bind(vm::noPropertyInTypeError, &[&orig, &tn]));
+            self.error(
+                r.new_name.span,
+                bind(vm::noPropertyInTypeError, &[&orig, &tn]),
+            );
             self.end_code();
             return;
         };
         if self.lookup_property(ty, &new_name).is_some() {
             let tn = self.full_name(ty);
-            self.error(r.property.span, bind(vm::propertyAlreadyExistsInTypeError, &[&new_name, &tn]));
+            self.error(
+                r.property.span,
+                bind(vm::propertyAlreadyExistsInTypeError, &[&new_name, &tn]),
+            );
             self.end_code();
             return;
         }
         self.end_code();
         let owner = self.prop_owner(p);
         let orig_name = self.prop_name(p);
-        self.modules[m.index()].aliases.push((new_name, owner, orig_name));
+        self.modules[m.index()]
+            .aliases
+            .push((new_name, owner, orig_name));
     }
 
     // ---- intermediate classes ------------------------------------------------------------------
@@ -566,7 +728,10 @@ impl<'r> Sema<'r> {
         let name = self.modules[m.index()].name.clone();
         let mp = self.ts.meta.add_package(&name, None, None, None);
         let uri = "http://www.eclipse.org/qvt/1.0.0/Operational/Expressions/_INTERMEDIATE";
-        let p = self.ts.meta.add_package("_INTERMEDIATE", Some(uri), Some("_intermediate"), Some(mp));
+        let p =
+            self.ts
+                .meta
+                .add_package("_INTERMEDIATE", Some(uri), Some("_intermediate"), Some(mp));
         self.modules[m.index()].interm_package = Some(p);
         let idx = self.model_types.len() as u32;
         let ty = self.ts.types.intern(Type::ModelType(idx));
@@ -598,7 +763,11 @@ impl<'r> Sema<'r> {
         let mut created: Vec<(String, qvto_model::ClassId, &ast::ClassDef)> = Vec::new();
         for c in cs.classifiers.iter().copied() {
             if !is_transformation {
-                let msg = if c.exception { vm::ExceptionDefNotAllowed } else { vm::IntermediateClassifierNotAllowed };
+                let msg = if c.exception {
+                    vm::ExceptionDefNotAllowed
+                } else {
+                    vm::IntermediateClassifierNotAllowed
+                };
                 self.error(c.span, bind(msg, &[]));
             }
             if created.iter().any(|(n, _, _)| *n == c.name.text) {
@@ -606,7 +775,13 @@ impl<'r> Sema<'r> {
                 continue;
             }
             if self.modules[m.index()].blackbox {
-                self.error(c.span, bind(vm::QvtOperationalVisitorCS_intermediateClassDefinitionInsideBlackboxModule, &[&c.name.text]));
+                self.error(
+                    c.span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_intermediateClassDefinitionInsideBlackboxModule,
+                        &[&c.name.text],
+                    ),
+                );
             }
             let p = self.intermediate_package(m);
             let cid = self.ts.meta.add_class(p, &c.name.text, false, false);
@@ -622,7 +797,9 @@ impl<'r> Sema<'r> {
             for te in &c.extends {
                 if let ast::TypeKind::Path(p) = &te.kind {
                     if p.segments.len() == 1 {
-                        if let Some((_, ext, _)) = created.iter().find(|(n, _, _)| *n == p.segments[0].text) {
+                        if let Some((_, ext, _)) =
+                            created.iter().find(|(n, _, _)| *n == p.segments[0].text)
+                        {
                             self.ts.meta.class_mut(*cid).supers.push(*ext);
                             continue;
                         }
@@ -665,7 +842,10 @@ impl<'r> Sema<'r> {
             for (n, _, p) in &names {
                 if names.iter().filter(|(x, _, _)| x == n).count() > 1 {
                     let cn = self.ts.meta.class(*cid).name.to_string();
-                    self.error(p.name.span, bind(vm::DuplicateProperty, &[&format!("{cn}.{n}")]));
+                    self.error(
+                        p.name.span,
+                        bind(vm::DuplicateProperty, &[&format!("{cn}.{n}")]),
+                    );
                 }
             }
         }
@@ -679,7 +859,11 @@ impl<'r> Sema<'r> {
             }
         }
         for &c in &cyclic {
-            self.ts.meta.class_mut(c).supers.retain(|s| !ids.contains(s));
+            self.ts
+                .meta
+                .class_mut(c)
+                .supers
+                .retain(|s| !ids.contains(s));
         }
         let _ = self.ts.meta.finish_classes();
         for (_, cid, c) in &created {
@@ -714,7 +898,11 @@ impl<'r> Sema<'r> {
                     }
                 }
             }
-            let class_inits: Vec<(qvto_model::FeatureId, ir::CodeBody)> = inits.iter().filter(|(o, _, _)| o == cid).map(|(_, f, b)| (*f, b.clone())).collect();
+            let class_inits: Vec<(qvto_model::FeatureId, ir::CodeBody)> = inits
+                .iter()
+                .filter(|(o, _, _)| o == cid)
+                .map(|(_, f, b)| (*f, b.clone()))
+                .collect();
             let idx = self.interm_classes.len() as u32;
             self.interm_classes.push(ir::IntermClass {
                 module: m,
@@ -732,7 +920,12 @@ impl<'r> Sema<'r> {
         self.cycle_impl(c, ids, &mut visited)
     }
 
-    fn cycle_impl(&self, c: qvto_model::ClassId, ids: &[qvto_model::ClassId], visited: &mut Vec<qvto_model::ClassId>) -> bool {
+    fn cycle_impl(
+        &self,
+        c: qvto_model::ClassId,
+        ids: &[qvto_model::ClassId],
+        visited: &mut Vec<qvto_model::ClassId>,
+    ) -> bool {
         for s in self.ts.meta.class(c).supers.clone() {
             if !ids.contains(&s) {
                 continue;
@@ -771,13 +964,22 @@ impl<'r> Sema<'r> {
         if let Some(p) = self.placeholder_pkg {
             return p;
         }
-        let p = self.ts.meta.add_package("_qvto_types", Some("urn:qvto-rs:types"), Some("_qvto_types"), None);
+        let p = self.ts.meta.add_package(
+            "_qvto_types",
+            Some("urn:qvto-rs:types"),
+            Some("_qvto_types"),
+            None,
+        );
         self.placeholder_pkg = Some(p);
         p
     }
 
     /// `visitClassifierPropertyCS`
-    fn visit_classifier_property(&mut self, c: qvto_model::ClassId, p: &ast::ClassProperty) -> qvto_model::FeatureId {
+    fn visit_classifier_property(
+        &mut self,
+        c: qvto_model::ClassId,
+        p: &ast::ClassProperty,
+    ) -> qvto_model::FeatureId {
         let ty = self.visit_type_cs(&p.ty);
         let is_ref = ty.is_some_and(|t| matches!(self.ts.types.get(t), Type::Class(_)));
         let cl = match ty {
@@ -786,11 +988,17 @@ impl<'r> Sema<'r> {
                 let p0 = self.placeholder_package();
                 match self.ts.meta.classifier_by_name(p0, "OclVoid") {
                     Some(c) => c,
-                    None => Classifier::DataType(self.ts.meta.add_data_type(p0, "OclVoid", None, false)),
+                    None => {
+                        Classifier::DataType(self.ts.meta.add_data_type(p0, "OclVoid", None, false))
+                    }
                 }
             }
         };
-        let kind = if is_ref { FeatureKind::Reference } else { FeatureKind::Attribute };
+        let kind = if is_ref {
+            FeatureKind::Reference
+        } else {
+            FeatureKind::Attribute
+        };
         let f = self.ts.meta.add_feature(c, &p.name.text, kind, cl);
         if let Some(t) = ty {
             self.interm_feature_types.insert(f, t);
@@ -802,13 +1010,22 @@ impl<'r> Sema<'r> {
                 if !is_ref {
                     self.ts.meta.feature_mut(f).id = true;
                 } else {
-                    self.error(st.span, bind(vm::IntermClassifier_unapplicableStereotypeQualifier, &[q]));
+                    self.error(
+                        st.span,
+                        bind(vm::IntermClassifier_unapplicableStereotypeQualifier, &[q]),
+                    );
                 }
             } else {
-                self.warning(st.span, bind(vm::IntermClassifier_unknownStereotypeQualifier, &[q]));
+                self.warning(
+                    st.span,
+                    bind(vm::IntermClassifier_unknownStereotypeQualifier, &[q]),
+                );
             }
             if seen.iter().any(|s| s == q) {
-                self.warning(st.span, bind(vm::IntermClassifier_duplicatedStereotypeQualifier, &[q]));
+                self.warning(
+                    st.span,
+                    bind(vm::IntermClassifier_duplicatedStereotypeQualifier, &[q]),
+                );
             }
             seen.push(q.to_string());
         }
@@ -824,7 +1041,10 @@ impl<'r> Sema<'r> {
                     if is_ref {
                         self.ts.meta.feature_mut(f).containment = true;
                     } else {
-                        self.error(span, bind(vm::IntermClassifier_referenceOnlyFeatureKey, &[key]));
+                        self.error(
+                            span,
+                            bind(vm::IntermClassifier_referenceOnlyFeatureKey, &[key]),
+                        );
                     }
                     composes = Some(span);
                 }
@@ -832,22 +1052,43 @@ impl<'r> Sema<'r> {
                     if is_ref {
                         self.ts.meta.feature_mut(f).containment = false;
                     } else {
-                        self.error(span, bind(vm::IntermClassifier_referenceOnlyFeatureKey, &[key]));
+                        self.error(
+                            span,
+                            bind(vm::IntermClassifier_referenceOnlyFeatureKey, &[key]),
+                        );
                     }
                 }
                 "readonly" => self.ts.meta.feature_mut(f).changeable = false,
-                "derived" => self.warning(span, bind(vm::IntermClassifier_unsupportedFeatureKey, &[key])),
+                "derived" => self.warning(
+                    span,
+                    bind(vm::IntermClassifier_unsupportedFeatureKey, &[key]),
+                ),
                 "static" => static_ = Some(span),
                 _ => {}
             }
             if keys.contains(k) {
-                self.warning(span, bind(vm::IntermClassifier_duplicatedFeatureKey, &[key]));
+                self.warning(
+                    span,
+                    bind(vm::IntermClassifier_duplicatedFeatureKey, &[key]),
+                );
             }
             keys.push(*k);
         }
         if let (Some(a), Some(b)) = (composes, static_) {
-            self.error(a, bind(vm::IntermClassifier_incompatibleFeatureKeys, &["composes", "static"]));
-            self.error(b, bind(vm::IntermClassifier_incompatibleFeatureKeys, &["composes", "static"]));
+            self.error(
+                a,
+                bind(
+                    vm::IntermClassifier_incompatibleFeatureKeys,
+                    &["composes", "static"],
+                ),
+            );
+            self.error(
+                b,
+                bind(
+                    vm::IntermClassifier_incompatibleFeatureKeys,
+                    &["composes", "static"],
+                ),
+            );
         }
         if let Some(mult) = &p.multiplicity {
             let (l, u) = self.visit_multiplicity(mult);
@@ -895,7 +1136,11 @@ impl<'r> Sema<'r> {
     }
 
     /// `initClassifierPropertyCS`: the initialiser (in the module environment) and the opposite.
-    fn init_classifier_property(&mut self, f: qvto_model::FeatureId, p: &ast::ClassProperty) -> Option<ir::CodeBody> {
+    fn init_classifier_property(
+        &mut self,
+        f: qvto_model::FeatureId,
+        p: &ast::ClassProperty,
+    ) -> Option<ir::CodeBody> {
         let m = self.cur_module;
         let mut body = None;
         if let Some(e) = &p.init {
@@ -937,22 +1182,37 @@ impl<'r> Sema<'r> {
                 match fty.map(|t| self.ts.types.get(t).clone()) {
                     Some(Type::Class(c)) => {
                         let all = self.ts.meta.class(c).all_features.to_vec();
-                        let opp = all.into_iter().find(|x| self.ts.meta.feature(*x).name.as_ref() == o.name.text && self.ts.meta.feature(*x).kind == FeatureKind::Reference);
+                        let opp = all.into_iter().find(|x| {
+                            self.ts.meta.feature(*x).name.as_ref() == o.name.text
+                                && self.ts.meta.feature(*x).kind == FeatureKind::Reference
+                        });
                         match opp {
                             Some(x) => self.ts.meta.feature_mut(f).opposite = Some(x),
                             None => {
                                 let tn = self.full_name(fty.unwrap());
-                                self.error(ospan, bind(vm::IntermClassifier_invalideOppositeName, &[&o.name.text, &tn]));
+                                self.error(
+                                    ospan,
+                                    bind(
+                                        vm::IntermClassifier_invalideOppositeName,
+                                        &[&o.name.text, &tn],
+                                    ),
+                                );
                             }
                         }
                     }
                     _ => {
                         let tn = fty.map(|t| self.full_name(t)).unwrap_or_default();
-                        self.error(ospan, bind(vm::IntermClassifier_invalideOppositeType, &[&tn]));
+                        self.error(
+                            ospan,
+                            bind(vm::IntermClassifier_invalideOppositeType, &[&tn]),
+                        );
                     }
                 }
             } else {
-                self.error(ospan, bind(vm::IntermClassifier_oppositeOnlyForReferences, &[]));
+                self.error(
+                    ospan,
+                    bind(vm::IntermClassifier_oppositeOnlyForReferences, &[]),
+                );
             }
         }
         body

@@ -54,7 +54,9 @@ impl<'r> Sema<'r> {
         match v {
             VarRef::Local(l) => self.fun.locals[l.index()].ty,
             VarRef::This(m) => self.modules[m.index()].ty,
-            VarRef::ModelParam(p) => self.modules[p.module.index()].model_params[p.index as usize].ty,
+            VarRef::ModelParam(p) => {
+                self.modules[p.module.index()].model_params[p.index as usize].ty
+            }
         }
     }
 
@@ -62,7 +64,9 @@ impl<'r> Sema<'r> {
         match v {
             VarRef::Local(l) => self.fun.locals[l.index()].name.clone(),
             VarRef::This(_) => "this".into(),
-            VarRef::ModelParam(p) => self.modules[p.module.index()].model_params[p.index as usize].name.clone(),
+            VarRef::ModelParam(p) => self.modules[p.module.index()].model_params[p.index as usize]
+                .name
+                .clone(),
         }
     }
 
@@ -115,7 +119,11 @@ impl<'r> Sema<'r> {
 
     fn lookup_local_at(&self, level: usize, name: &str) -> Option<VarRef> {
         let s = &self.fun.scopes[level];
-        let r = s.vars.iter().find(|v| v.named && v.name == name).map(|v| v.var);
+        let r = s
+            .vars
+            .iter()
+            .find(|v| v.named && v.name == name)
+            .map(|v| v.var);
         if r.is_some() {
             return r;
         }
@@ -144,7 +152,10 @@ impl<'r> Sema<'r> {
                 .vars
                 .iter()
                 .find(|v| v.named && v.name == name)
-                .or_else(|| name.strip_prefix('_').and_then(|u| s.vars.iter().find(|v| v.named && v.name == u)));
+                .or_else(|| {
+                    name.strip_prefix('_')
+                        .and_then(|u| s.vars.iter().find(|v| v.named && v.name == u))
+                });
             if let Some(v) = r {
                 return Some(v.var);
             }
@@ -177,7 +188,10 @@ impl<'r> Sema<'r> {
                 }
                 if let Type::Collection(k, _) = *self.ts.types.get(owner) {
                     if k != qvto_types::CollKind::Collection {
-                        let c = self.ts.types.collection(qvto_types::CollKind::Collection, TypeId::T);
+                        let c = self
+                            .ts
+                            .types
+                            .collection(qvto_types::CollKind::Collection, TypeId::T);
                         return self.has_operation(c, name, args);
                     }
                 }
@@ -204,12 +218,21 @@ impl<'r> Sema<'r> {
     }
 
     /// `QvtOperationalEnv.lookupImplicitSourceForOperation`
-    pub fn implicit_source_for_operation(&mut self, name: &str, args: &[Arg]) -> Result<Option<VarRef>, AmbiguousSource> {
+    pub fn implicit_source_for_operation(
+        &mut self,
+        name: &str,
+        args: &[Arg],
+    ) -> Result<Option<VarRef>, AmbiguousSource> {
         let top = self.fun.scopes.len() - 1;
         self.implicit_op_at(top, name, args)
     }
 
-    fn implicit_op_at(&mut self, level: usize, name: &str, args: &[Arg]) -> Result<Option<VarRef>, AmbiguousSource> {
+    fn implicit_op_at(
+        &mut self,
+        level: usize,
+        name: &str,
+        args: &[Arg],
+    ) -> Result<Option<VarRef>, AmbiguousSource> {
         let mut r = self.abstract_implicit_op(level, name, args);
         if r.is_none() {
             if level > 0 {
@@ -228,7 +251,11 @@ impl<'r> Sema<'r> {
     }
 
     /// The root environment's search in extended modules and accessed libraries.
-    fn root_implicit_op(&mut self, name: &str, args: &[Arg]) -> Result<Option<VarRef>, AmbiguousSource> {
+    fn root_implicit_op(
+        &mut self,
+        name: &str,
+        args: &[Arg],
+    ) -> Result<Option<VarRef>, AmbiguousSource> {
         let Some(m) = self.fun.module else {
             return Ok(None);
         };
@@ -324,12 +351,21 @@ impl<'r> Sema<'r> {
         let saved = self.cur_module;
         self.cur_module = m;
         let t = self.modules[m.index()].ty;
-        let own = if m != crate::analyzer::STDLIB_MODULE && self.property_fits(t, name) { Some(VarRef::This(m)) } else { None };
+        let own = if m != crate::analyzer::STDLIB_MODULE && self.property_fits(t, name) {
+            Some(VarRef::This(m))
+        } else {
+            None
+        };
         self.cur_module = saved;
         if own.is_some() {
             return own;
         }
-        let ext: Vec<ModuleId> = self.modules[m.index()].by_extension.iter().copied().filter(|x| *x != crate::analyzer::STDLIB_MODULE).collect();
+        let ext: Vec<ModuleId> = self.modules[m.index()]
+            .by_extension
+            .iter()
+            .copied()
+            .filter(|x| *x != crate::analyzer::STDLIB_MODULE)
+            .collect();
         for e in ext {
             if let Some(r) = self.module_implicit_prop(e, name, depth + 1) {
                 return Some(r);

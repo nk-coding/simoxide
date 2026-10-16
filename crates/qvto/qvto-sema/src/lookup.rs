@@ -3,12 +3,12 @@
 //! `matchArgsWithExactitude` and `resolveGenericType`, the additional (contextual) operations of
 //! `QvtEnvironmentBase` and `QvtTypeResolverImpl`, and `findAttribute`/`getAttributes`.
 
-use crate::analyzer::{Sema, STDLIB_MODULE};
+use crate::analyzer::{STDLIB_MODULE, Sema};
 use crate::env::ModuleFeature;
 use crate::ir::{ModuleId, OpId};
 use crate::ops::{Arg, OpRef, PropRef};
 use qvto_types::rel::*;
-use qvto_types::{owner_ops, CollKind, Section, StdOwner, TParam, Type, TypeId};
+use qvto_types::{CollKind, Section, StdOwner, TParam, Type, TypeId, owner_ops};
 
 /// Relation of `TypeCheckerImpl.getMoreSpecificByParameters`.
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -209,7 +209,12 @@ impl<'r> Sema<'r> {
 
     /// `QvtTypeResolverImpl.getAdditionalOperations`: local, then the extended modules', then
     /// the access-imported libraries' local ones.
-    fn resolver_additional_operations(&mut self, env: ModuleId, owner: TypeId, out: &mut Vec<OpRef>) {
+    fn resolver_additional_operations(
+        &mut self,
+        env: ModuleId,
+        owner: TypeId,
+        out: &mut Vec<OpRef>,
+    ) {
         self.local_additional_operations(env, owner, out);
         for e in self.all_extended(env) {
             self.local_additional_operations(e, owner, out);
@@ -255,7 +260,11 @@ impl<'r> Sema<'r> {
         self.delegate_ops(env, owner, out);
         let is_coll = self.ts.ck().is_collection_like(owner);
         let is_tuple = matches!(self.ts.types.get(owner), Type::Tuple(_));
-        if self.modules[env.index()].defines_ocl_any_features && !is_coll && !is_tuple && owner != TypeId::OCL_ANY {
+        if self.modules[env.index()].defines_ocl_any_features
+            && !is_coll
+            && !is_tuple
+            && owner != TypeId::OCL_ANY
+        {
             self.extract_ctx_ops(env, TypeId::OCL_ANY, out);
             self.delegate_ops(env, TypeId::OCL_ANY, out);
         }
@@ -265,7 +274,13 @@ impl<'r> Sema<'r> {
     }
 
     /// `getLocalCollectionAdditionalOperations`
-    fn local_collection_ops(&mut self, env: ModuleId, coll: TypeId, include_super: bool, out: &mut Vec<OpRef>) {
+    fn local_collection_ops(
+        &mut self,
+        env: ModuleId,
+        coll: TypeId,
+        include_super: bool,
+        out: &mut Vec<OpRef>,
+    ) {
         let types = self.modules[env.index()].additional_types.clone();
         for next in types {
             if !self.ts.ck().is_collection_like(next) {
@@ -277,7 +292,11 @@ impl<'r> Sema<'r> {
                 self.ts.ck().exact(coll, next)
             };
             if matching {
-                if let Some((_, l)) = self.modules[env.index()].ctx_ops.iter().find(|(t, _)| *t == next) {
+                if let Some((_, l)) = self.modules[env.index()]
+                    .ctx_ops
+                    .iter()
+                    .find(|(t, _)| *t == next)
+                {
                     out.extend(l.iter().map(|&o| OpRef::User(o)));
                 }
                 self.delegate_ops(env, next, out);
@@ -345,11 +364,7 @@ impl<'r> Sema<'r> {
         let owner_elem = |s: &Sema, owner: TypeId| -> TypeId {
             match *s.ts.types.get(owner) {
                 Type::Collection(_, e) | Type::List(e) | Type::Dict(_, e) => {
-                    if e == TypeId::OCL_VOID {
-                        TypeId::T
-                    } else {
-                        e
-                    }
+                    if e == TypeId::OCL_VOID { TypeId::T } else { e }
                 }
                 _ => owner,
             }
@@ -427,7 +442,12 @@ impl<'r> Sema<'r> {
 
     /// `TypeCheckerImpl.findMostSpecificOperationMatching`. `Err` carries the ambiguous
     /// matches (`AmbiguousLookupException`).
-    pub fn find_most_specific_operation(&mut self, owner: TypeId, name: &str, args: &[Arg]) -> Result<Option<OpRef>, Vec<OpRef>> {
+    pub fn find_most_specific_operation(
+        &mut self,
+        owner: TypeId,
+        name: &str,
+        args: &[Arg],
+    ) -> Result<Option<OpRef>, Vec<OpRef>> {
         let mut ops = self.get_operations(owner);
         dedup_keep_first(&mut ops);
         let mut matches: Vec<OpRef> = Vec::new();
@@ -467,7 +487,11 @@ impl<'r> Sema<'r> {
     }
 
     /// `TypeCheckerImpl.getMostSpecificOperation`
-    pub fn most_specific_operation(&mut self, matching: &[OpRef], args: &[Arg]) -> Result<OpRef, Vec<OpRef>> {
+    pub fn most_specific_operation(
+        &mut self,
+        matching: &[OpRef],
+        args: &[Arg],
+    ) -> Result<OpRef, Vec<OpRef>> {
         let mut ambiguous: Vec<OpRef> = Vec::new();
         let mut most = matching[0];
         for &next in &matching[1..] {
@@ -552,9 +576,7 @@ impl<'r> Sema<'r> {
                 result = Some(r);
                 continue;
             }
-            if result != Some(r)
-                && result != Some(Relation::Identical)
-                && r != Relation::Identical
+            if result != Some(r) && result != Some(Relation::Identical) && r != Relation::Identical
             {
                 return Some(Relation::Ambiguous);
             }
@@ -580,7 +602,11 @@ impl<'r> Sema<'r> {
             Type::Class(c) => self.ts.meta.feature_by_name(c, name).map(PropRef::Feature),
             Type::Module(m) => {
                 let me = &self.modules[m as usize];
-                me.features.iter().copied().find(|f| self.feature_name(*f) == name).map(PropRef::from)
+                me.features
+                    .iter()
+                    .copied()
+                    .find(|f| self.feature_name(*f) == name)
+                    .map(PropRef::from)
             }
             Type::Tuple(parts) => parts
                 .iter()
@@ -757,7 +783,12 @@ impl<'r> Sema<'r> {
         out
     }
 
-    fn resolver_additional_attributes(&mut self, env: ModuleId, owner: TypeId, out: &mut Vec<PropRef>) {
+    fn resolver_additional_attributes(
+        &mut self,
+        env: ModuleId,
+        owner: TypeId,
+        out: &mut Vec<PropRef>,
+    ) {
         self.local_additional_attributes(env, owner, out);
         for e in self.all_extended(env) {
             self.local_additional_attributes(e, owner, out);
@@ -769,7 +800,12 @@ impl<'r> Sema<'r> {
         }
     }
 
-    fn local_additional_attributes(&mut self, env: ModuleId, owner: TypeId, out: &mut Vec<PropRef>) {
+    fn local_additional_attributes(
+        &mut self,
+        env: ModuleId,
+        owner: TypeId,
+        out: &mut Vec<PropRef>,
+    ) {
         for f in &self.modules[env.index()].features {
             if let ModuleFeature::Interm(i) = f {
                 let p = &self.interm_props[i.index()];

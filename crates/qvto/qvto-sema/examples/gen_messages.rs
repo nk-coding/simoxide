@@ -144,8 +144,8 @@ fn main() {
     for (module, which, rel) in BUNDLES {
         let base = if *which == "qvto" { &qvto } else { &ocl };
         let path = base.join(rel);
-        let text = std::fs::read_to_string(&path)
-            .unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+        let text =
+            std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
         let props = parse_properties(&text);
         writeln!(out, "/// `{}`", rel.rsplit('/').next().unwrap()).unwrap();
         writeln!(out, "#[allow(non_upper_case_globals, dead_code)]").unwrap();
@@ -153,7 +153,13 @@ fn main() {
         for (k, v) in &props {
             let ident: String = k
                 .chars()
-                .map(|c| if c.is_ascii_alphanumeric() || c == '_' { c } else { '_' })
+                .map(|c| {
+                    if c.is_ascii_alphanumeric() || c == '_' {
+                        c
+                    } else {
+                        '_'
+                    }
+                })
                 .collect();
             writeln!(out, "    pub const {ident}: &str = {v:?};").unwrap();
         }

@@ -267,7 +267,13 @@ impl<'r> Sema<'r> {
 
     /// `customSimpleNameCS`: type, variable, property, then the error. `source` is the explicit
     /// source of `src.name`.
-    pub(crate) fn simple_name(&mut self, name: &str, name_span: Span, source: Option<Ex>, cst: Span) -> Ex {
+    pub(crate) fn simple_name(
+        &mut self,
+        name: &str,
+        name_span: Span,
+        source: Option<Ex>,
+        cst: Span,
+    ) -> Ex {
         if let Some(s) = &source {
             if s.err {
                 // the unparseable source itself, with the CS node's positions
@@ -289,7 +295,11 @@ impl<'r> Sema<'r> {
         let (src, owner) = match source {
             Some(s) => {
                 let t = s.ty();
-                let o = if self.ts.types.is_collection_like(t) { self.ts.types.element(t).unwrap() } else { t };
+                let o = if self.ts.types.is_collection_like(t) {
+                    self.ts.types.element(t).unwrap()
+                } else {
+                    t
+                };
                 (Some(s), o)
             }
             None => match self.implicit_source_for_property(name) {
@@ -301,7 +311,11 @@ impl<'r> Sema<'r> {
                 None => (None, TypeId::NULL),
             },
         };
-        let prop = if owner == TypeId::NULL { None } else { self.lookup_property(owner, name) };
+        let prop = if owner == TypeId::NULL {
+            None
+        } else {
+            self.lookup_property(owner, name)
+        };
         if let (Some(p), Some(src)) = (prop, src) {
             let pty = self.prop_type(p);
             let src_var = if let Info::Var(v) = src.info { v } else { None };
@@ -368,8 +382,18 @@ impl<'r> Sema<'r> {
             bt = self.flattened_element(bt);
         }
         let st = src.ty();
-        let seq = matches!(self.ts.types.get(st), Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _) | Type::List(_));
-        let ty = self.ts.types.collection(if seq { CollKind::Sequence } else { CollKind::Bag }, bt);
+        let seq = matches!(
+            self.ts.types.get(st),
+            Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _) | Type::List(_)
+        );
+        let ty = self.ts.types.collection(
+            if seq {
+                CollKind::Sequence
+            } else {
+                CollKind::Bag
+            },
+            bt,
+        );
         let err = src.err;
         let lp = ir::Loop {
             kind: LoopKind::Collect,
@@ -390,8 +414,18 @@ impl<'r> Sema<'r> {
     /// `createImplicitXCollect`
     pub fn implicit_xcollect(&mut self, src: Ex, it: ir::LocalId, body: Ex, cst: Span) -> Ex {
         let st = src.ty();
-        let seq = matches!(self.ts.types.get(st), Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _) | Type::List(_));
-        let ty = self.ts.types.collection(if seq { CollKind::Sequence } else { CollKind::Bag }, body.ty());
+        let seq = matches!(
+            self.ts.types.get(st),
+            Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _) | Type::List(_)
+        );
+        let ty = self.ts.types.collection(
+            if seq {
+                CollKind::Sequence
+            } else {
+                CollKind::Bag
+            },
+            body.ty(),
+        );
         let lp = ir::Loop {
             kind: LoopKind::XCollect,
             source: src.e,
@@ -427,7 +461,9 @@ impl<'r> Sema<'r> {
             Some(owner) => {
                 if let Type::Enum(e) = *self.ts.types.get(owner) {
                     let info = self.ts.meta.enumeration(e);
-                    let lit = info.by_name(last).or_else(|| last.strip_prefix('_').and_then(|u| info.by_name(u)));
+                    let lit = info
+                        .by_name(last)
+                        .or_else(|| last.strip_prefix('_').and_then(|u| info.by_name(u)));
                     if let Some(i) = lit {
                         return self.ex(ExprKind::EnumLit(e, i), owner, cst);
                     }
@@ -451,7 +487,10 @@ impl<'r> Sema<'r> {
 
     /// `getUnrecognizedTypeMessage` bound with the name list (`[a, b]`).
     pub fn unrecognized_type_message(&self, names: &[&str]) -> String {
-        bind(om::UnrecognizedType_ERROR_, &[&format!("[{}]", names.join(", "))])
+        bind(
+            om::UnrecognizedType_ERROR_,
+            &[&format!("[{}]", names.join(", "))],
+        )
     }
 
     pub fn type_exp(&mut self, t: TypeId, span: Span) -> Ex {
@@ -490,7 +529,11 @@ impl<'r> Sema<'r> {
         }
     }
 
-    fn literal_parts(&mut self, parts: &[ast::CollectionPart], cst: Span) -> (Vec<CollPart>, Option<TypeId>, bool) {
+    fn literal_parts(
+        &mut self,
+        parts: &[ast::CollectionPart],
+        cst: Span,
+    ) -> (Vec<CollPart>, Option<TypeId>, bool) {
         let mut out = Vec::new();
         let mut elem: Option<TypeId> = None;
         let mut err = false;
@@ -510,7 +553,10 @@ impl<'r> Sema<'r> {
     fn collection_literal(&mut self, k: TokenKind, parts: &[ast::CollectionPart], cst: Span) -> Ex {
         let kind = crate::names::coll_kind(k);
         let (out, elem, err) = self.literal_parts(parts, cst);
-        let ty = self.ts.types.collection(kind, elem.unwrap_or(TypeId::OCL_VOID));
+        let ty = self
+            .ts
+            .types
+            .collection(kind, elem.unwrap_or(TypeId::OCL_VOID));
         let mut x = self.ex(ExprKind::Coll(kind, out), ty, cst);
         x.err = err;
         x
@@ -518,7 +564,8 @@ impl<'r> Sema<'r> {
 
     /// `getCommonSuperType` of the analyser: errors reported at `cst`, `OclVoid` on failure.
     pub fn common_super_type_or_void(&mut self, cst: Span, a: TypeId, b: TypeId) -> TypeId {
-        self.common_super_type_at(cst, a, b).unwrap_or(TypeId::OCL_VOID)
+        self.common_super_type_at(cst, a, b)
+            .unwrap_or(TypeId::OCL_VOID)
     }
 
     /// `TypeUtil.commonSuperType(problemObject, ...)`: `None` (with the error) when there is
@@ -531,8 +578,12 @@ impl<'r> Sema<'r> {
                 let msg = match e {
                     E::TypeMismatch(x, y) => bind(om::TypeMismatch_ERROR_, &[&x, &y]),
                     E::TupleTypeMismatch(x, y) => bind(om::TupleTypeMismatch_ERROR_, &[&x, &y]),
-                    E::TupleFieldNumMismatch(x, y) => bind(om::TupleFieldNumMismatch_ERROR_, &[&x, &y]),
-                    E::TupleFieldNotFound(x, f, y) => bind(om::TupleFieldNotFound_ERROR_, &[&x, &f, &y]),
+                    E::TupleFieldNumMismatch(x, y) => {
+                        bind(om::TupleFieldNumMismatch_ERROR_, &[&x, &y])
+                    }
+                    E::TupleFieldNotFound(x, f, y) => {
+                        bind(om::TupleFieldNotFound_ERROR_, &[&x, &f, &y])
+                    }
                 };
                 self.error(cst, msg);
                 None
@@ -612,7 +663,8 @@ impl<'r> Sema<'r> {
             tparts.push((name.clone().into(), ty));
             values.push((
                 name.into_boxed_str(),
-                val.map(|x| x.e).unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, v.span)),
+                val.map(|x| x.e)
+                    .unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, v.span)),
             ));
         }
         let ty = self.tuple_type(tparts);
@@ -640,7 +692,9 @@ impl<'r> Sema<'r> {
         let sub = self.let_exp(rest, body, cst);
         self.delete_var(&name);
         let ty = sub.ty();
-        let init_e = init.map(|x| x.e).unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, d.span));
+        let init_e = init
+            .map(|x| x.e)
+            .unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, d.span));
         let mut x = self.ex(ExprKind::Let(l, Box::new(init_e), Box::new(sub.e)), ty, cst);
         x.err = sub.err;
         x
@@ -648,10 +702,17 @@ impl<'r> Sema<'r> {
 
     /// `variableDeclarationCS` (QVTo: the type defaults to the initialiser's): a new local,
     /// added to the environment when `add`. Returns the local and the analysed initialiser.
-    pub fn variable_declaration(&mut self, d: &ast::VarDecl, kind: ir::LocalKind, add: bool) -> (ir::LocalId, Option<Ex>) {
+    pub fn variable_declaration(
+        &mut self,
+        d: &ast::VarDecl,
+        kind: ir::LocalKind,
+        add: bool,
+    ) -> (ir::LocalId, Option<Ex>) {
         let ty = d.ty.as_ref().and_then(|t| self.type_cs(t));
         let init = d.init.as_ref().map(|(_, e)| self.expr_d(e));
-        let ty = ty.or_else(|| init.as_ref().map(|x| x.ty())).unwrap_or(TypeId::NULL);
+        let ty = ty
+            .or_else(|| init.as_ref().map(|x| x.ty()))
+            .unwrap_or(TypeId::NULL);
         let l = self.fun.new_local(&d.name.text, ty, kind, d.span);
         if add {
             self.add_var_or_error(&d.name.text, l, d.span);
@@ -674,7 +735,11 @@ impl<'r> Sema<'r> {
             return self.if_as_switch(i, cst, pos);
         }
         let c = self.expr_d(&i.cond);
-        let inner = if pos == Pos::Block { Pos::Branch } else { Pos::Other };
+        let inner = if pos == Pos::Block {
+            Pos::Branch
+        } else {
+            Pos::Other
+        };
         let t = self.expr_at(&i.then, inner, i.then.span);
         let e = i.els.as_ref().and_then(|x| {
             let sp = self.else_span(i.then.span.end, x.span);
@@ -694,8 +759,14 @@ impl<'r> Sema<'r> {
             (Some(a), Some(b)) => a.err || b.err,
             _ => false,
         };
-        let then_e = t.map(|x| x.e).unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, i.then.span));
-        let mut x = self.ex(ExprKind::If(Box::new(c.e), Box::new(then_e), e.map(|x| Box::new(x.e))), ty, cst);
+        let then_e = t
+            .map(|x| x.e)
+            .unwrap_or_else(|| mk(ExprKind::Null, TypeId::OCL_VOID, i.then.span));
+        let mut x = self.ex(
+            ExprKind::If(Box::new(c.e), Box::new(then_e), e.map(|x| Box::new(x.e))),
+            ty,
+            cst,
+        );
         x.err = err;
         x.det = det;
         x.info = Info::If;
@@ -710,7 +781,11 @@ impl<'r> Sema<'r> {
         }
         let else_cst = match (&i.els, i.c_style) {
             (Some(x), false) => {
-                let from = i.elifs.last().map(|(_, t)| t.span.end).unwrap_or(i.then.span.end);
+                let from = i
+                    .elifs
+                    .last()
+                    .map(|(_, t)| t.span.end)
+                    .unwrap_or(i.then.span.end);
                 Some(self.else_span(from, x.span))
             }
             (Some(x), true) => Some(x.span),
@@ -748,7 +823,13 @@ impl<'r> Sema<'r> {
             pos,
         };
         if pos.warns_equality() && name == "=" {
-            self.warning(cs.name_span, bind(vm::QvtOperationalVisitorCS_possibleEqualityInsteadOfAssignment, &[]));
+            self.warning(
+                cs.name_span,
+                bind(
+                    vm::QvtOperationalVisitorCS_possibleEqualityInsteadOfAssignment,
+                    &[],
+                ),
+            );
         }
         let src = self.expr_d(a);
         let arg = self.expr_d(b);
@@ -796,7 +877,11 @@ impl<'r> Sema<'r> {
         if c.qualifier.len() > 1 && c.source.is_none() {
             return self.static_operation_call(c, cst, pos);
         }
-        let module = if c.qualifier.len() == 1 { Some(c.qualifier[0].clone()) } else { None };
+        let module = if c.qualifier.len() == 1 {
+            Some(c.qualifier[0].clone())
+        } else {
+            None
+        };
         let cs = CallCs {
             span: cst,
             name_span: c.name.span,
@@ -807,7 +892,13 @@ impl<'r> Sema<'r> {
             pos,
         };
         if pos.warns_equality() && name == "=" {
-            self.warning(cs.name_span, bind(vm::QvtOperationalVisitorCS_possibleEqualityInsteadOfAssignment, &[]));
+            self.warning(
+                cs.name_span,
+                bind(
+                    vm::QvtOperationalVisitorCS_possibleEqualityInsteadOfAssignment,
+                    &[],
+                ),
+            );
         }
         let src = match &c.source {
             Some((s, NavOp::Arrow)) => Some(self.collection_source(s)),
@@ -857,7 +948,13 @@ impl<'r> Sema<'r> {
             pos,
         };
         if pos.warns_equality() && c.name.text == "=" {
-            self.warning(cs.name_span, bind(vm::QvtOperationalVisitorCS_possibleEqualityInsteadOfAssignment, &[]));
+            self.warning(
+                cs.name_span,
+                bind(
+                    vm::QvtOperationalVisitorCS_possibleEqualityInsteadOfAssignment,
+                    &[],
+                ),
+            );
         }
         let names: Vec<&str> = c.qualifier.iter().map(|n| n.text.as_str()).collect();
         let pspan = path_span_of(&c.qualifier);
@@ -890,7 +987,13 @@ impl<'r> Sema<'r> {
     /// Classic OCL's `operationCallExpCS` (dot and arrow forms, implicit source, implicit
     /// collect) followed by QVTo's checks, for a call whose source (if any) and arguments are
     /// analysed.
-    pub(crate) fn operation_call(&mut self, cs: &CallCs, name: &str, src: Option<Ex>, args: Vec<Ex>) -> Ex {
+    pub(crate) fn operation_call(
+        &mut self,
+        cs: &CallCs,
+        name: &str,
+        src: Option<Ex>,
+        args: Vec<Ex>,
+    ) -> Ex {
         let had_source = src.is_some();
         let src = match src {
             Some(s) => s,
@@ -900,7 +1003,11 @@ impl<'r> Sema<'r> {
         let st = src.ty();
         let src_var = if let Info::Var(v) = src.info { v } else { None };
         let implicit_collect = cs.accessor == Accessor::Dot && self.ts.types.is_collection_like(st);
-        let owner = if implicit_collect { self.ts.types.element(st).unwrap_or(TypeId::OCL_VOID) } else { st };
+        let owner = if implicit_collect {
+            self.ts.types.element(st).unwrap_or(TypeId::OCL_VOID)
+        } else {
+            st
+        };
         let is_static = matches!(self.ts.types.get(owner), Type::TypeType(_));
         if implicit_collect {
             let (it, it_name) = self.new_temp_iterator(st);
@@ -933,7 +1040,14 @@ impl<'r> Sema<'r> {
 
     /// QVTo's checks after classic OCL's `operationCallExpCS` returned an `OperationCallExp`,
     /// then `validateOperationCall`.
-    fn post_operation_call(&mut self, cs: &CallCs, mut result: Ex, op: Option<OpRef>, src_var: Option<VarRef>, had_source: bool) -> Ex {
+    fn post_operation_call(
+        &mut self,
+        cs: &CallCs,
+        mut result: Ex,
+        op: Option<OpRef>,
+        src_var: Option<VarRef>,
+        had_source: bool,
+    ) -> Ex {
         if let Some(OpRef::Std(sop, _)) = op {
             let d = sop.desc();
             if d.deprecated {
@@ -944,7 +1058,11 @@ impl<'r> Sema<'r> {
                 self.warning(cs.span, msg);
             }
             if let Some(reason) = d.unsupported {
-                let m = if reason.is_empty() { vm::UnsupportedElement } else { reason };
+                let m = if reason.is_empty() {
+                    vm::UnsupportedElement
+                } else {
+                    reason
+                };
                 self.error(cs.span, bind(m, &[d.name]));
             }
         }
@@ -983,18 +1101,33 @@ impl<'r> Sema<'r> {
         let Ex { e, err, info, .. } = call;
         let ir::Expr { kind, ty, span } = e;
         let ExprKind::Call(c) = kind else {
-            return Ex { e: mk(kind, ty, span), err, info, det: false };
+            return Ex {
+                e: mk(kind, ty, span),
+                err,
+                info,
+                det: false,
+            };
         };
         let mut c = *c;
         let Some(src) = c.source.take() else {
             return self.ex(ExprKind::Call(Box::new(c)), ty, span);
         };
-        let src_ex = Ex { e: src, err, info: Info::Other, det: false };
+        let src_ex = Ex {
+            e: src,
+            err,
+            info: Info::Other,
+            det: false,
+        };
         let (it, it_name) = self.new_temp_iterator(src_ex.ty());
         let ity = self.fun.locals[it.index()].ty;
         c.source = Some(mk(ExprKind::Local(it), ity, cs.span));
         self.delete_var(&it_name);
-        let body = Ex { e: mk(ExprKind::Call(Box::new(c)), ty, span), err: false, info, det: false };
+        let body = Ex {
+            e: mk(ExprKind::Call(Box::new(c)), ty, span),
+            err: false,
+            info,
+            det: false,
+        };
         self.implicit_xcollect(src_ex, it, body, cs.span)
     }
 
@@ -1012,7 +1145,10 @@ impl<'r> Sema<'r> {
                         other => format!("'{}'", self.var_name(*other)),
                     })
                     .collect();
-                self.warning(cs.name_span, bind(vm::AmbiguousImplicitSourceReference, &[&names.join(", ")]));
+                self.warning(
+                    cs.name_span,
+                    bind(vm::AmbiguousImplicitSourceReference, &[&names.join(", ")]),
+                );
                 list.first().copied()
             }
         };
@@ -1030,12 +1166,23 @@ impl<'r> Sema<'r> {
         Arg {
             ty: x.ty(),
             type_exp: matches!(x.info, Info::TypeExp(_)),
-            referred: if let Info::TypeExp(t) = x.info { Some(t) } else { None },
+            referred: if let Info::TypeExp(t) = x.info {
+                Some(t)
+            } else {
+                None
+            },
         }
     }
 
     /// QVTo's `lookupOperation`: module-qualified lookups, ambiguity as a warning.
-    pub(crate) fn lookup_operation(&mut self, problem: Span, module: Option<&ast::Name>, owner: TypeId, name: &str, args: &[Arg]) -> Option<OpRef> {
+    pub(crate) fn lookup_operation(
+        &mut self,
+        problem: Span,
+        module: Option<&ast::Name>,
+        owner: TypeId,
+        name: &str,
+        args: &[Arg],
+    ) -> Option<OpRef> {
         if owner == TypeId::NULL {
             return None;
         }
@@ -1079,7 +1226,10 @@ impl<'r> Sema<'r> {
             let s = self.format_op_signature(*o);
             parts.push(format!("'{s}'"));
         }
-        self.warning(problem, bind(vm::AmbiguousOperationReference, &[&parts.join(", ")]));
+        self.warning(
+            problem,
+            bind(vm::AmbiguousOperationReference, &[&parts.join(", ")]),
+        );
         Some(filtered[0])
     }
 
@@ -1092,7 +1242,13 @@ impl<'r> Sema<'r> {
 
     /// `qualifiedOperationLookup`: `M::op(...)` in the module `M` of the extension hierarchy or
     /// an accessed library.
-    fn qualified_operation_lookup(&mut self, mq: &ast::Name, owner: TypeId, name: &str, args: &[Arg]) -> Option<OpRef> {
+    fn qualified_operation_lookup(
+        &mut self,
+        mq: &ast::Name,
+        owner: TypeId,
+        name: &str,
+        args: &[Arg],
+    ) -> Option<OpRef> {
         let cur = self.cur_module;
         let target = mq.text.as_str();
         let envs: Vec<ir::ModuleId> = if self.modules[cur.index()].name == target {
@@ -1111,7 +1267,11 @@ impl<'r> Sema<'r> {
             if self.modules[e.index()].name != target {
                 continue;
             }
-            let actual_owner = if matches!(self.ts.types.get(owner), Type::Module(_)) { self.modules[e.index()].ty } else { owner };
+            let actual_owner = if matches!(self.ts.types.get(owner), Type::Module(_)) {
+                self.modules[e.index()].ty
+            } else {
+                owner
+            };
             let saved = self.cur_module;
             self.cur_module = e;
             let mut r = self.find_most_specific_operation(actual_owner, name, args);
@@ -1154,12 +1314,24 @@ impl<'r> Sema<'r> {
     }
 
     /// QVTo's `genOperationCallExp`: the operation, the IR call and its type.
-    pub(crate) fn gen_operation_call(&mut self, cs: &CallCs, name: &str, src: Option<Ex>, owner: TypeId, args: Vec<Ex>) -> (Ex, Option<OpRef>) {
+    pub(crate) fn gen_operation_call(
+        &mut self,
+        cs: &CallCs,
+        name: &str,
+        src: Option<Ex>,
+        owner: TypeId,
+        args: Vec<Ex>,
+    ) -> (Ex, Option<OpRef>) {
         let a: Vec<Arg> = args.iter().map(|x| self.arg_of(x)).collect();
         let mut op_owner = owner;
         let src_ty = self.call_msg_src.take().or(src.as_ref().map(|s| s.ty()));
-        let arrow_coll = cs.accessor == Accessor::Arrow && src_ty.is_some_and(|t| self.ts.types.is_collection_like(t));
-        if arrow_coll && self.lookup_operation(cs.span, None, owner, name, &a).is_none() {
+        let arrow_coll = cs.accessor == Accessor::Arrow
+            && src_ty.is_some_and(|t| self.ts.types.is_collection_like(t));
+        if arrow_coll
+            && self
+                .lookup_operation(cs.span, None, owner, name, &a)
+                .is_none()
+        {
             op_owner = self.ts.types.element(owner).unwrap_or(TypeId::OCL_VOID);
         }
         let op = self.lookup_operation(cs.name_span, cs.module.as_ref(), op_owner, name, &a);
@@ -1171,16 +1343,28 @@ impl<'r> Sema<'r> {
                     if i > 0 {
                         s.push_str(", ");
                     }
-                    let n = if x.ty == TypeId::NULL { "null".to_string() } else { self.type_name(x.ty) };
+                    let n = if x.ty == TypeId::NULL {
+                        "null".to_string()
+                    } else {
+                        self.type_name(x.ty)
+                    };
                     s.push_str(&n);
                 }
                 s.push(')');
                 let on = self.type_name(op_owner);
                 let msg = if src_ty.unwrap_or(TypeId::NULL) == op_owner {
-                    bind(vm::QvtOperationalVisitorCS_OperationNotFound_ERROR_, &[&s, &on])
+                    bind(
+                        vm::QvtOperationalVisitorCS_OperationNotFound_ERROR_,
+                        &[&s, &on],
+                    )
                 } else {
-                    let sn = src_ty.map(|t| self.type_name(t)).unwrap_or_else(|| "null".into());
-                    bind(vm::QvtOperationalVisitorCS_OperationNotFoundForCollectionAndItsElement, &[&s, &sn, &on])
+                    let sn = src_ty
+                        .map(|t| self.type_name(t))
+                        .unwrap_or_else(|| "null".into());
+                    bind(
+                        vm::QvtOperationalVisitorCS_OperationNotFoundForCollectionAndItsElement,
+                        &[&s, &sn, &on],
+                    )
                 };
                 self.error(cs.span, msg);
             }
@@ -1222,7 +1406,13 @@ impl<'r> Sema<'r> {
 
     /// `TypeCheckerImpl.getResultType`: QVTo operations through the generics resolver, classic
     /// OCL's by operation code.
-    pub(crate) fn result_type(&mut self, problem: Span, owner: TypeId, o: OpRef, args: &[Arg]) -> Option<TypeId> {
+    pub(crate) fn result_type(
+        &mut self,
+        problem: Span,
+        owner: TypeId,
+        o: OpRef,
+        args: &[Arg],
+    ) -> Option<TypeId> {
         let is_ocl = matches!(o, OpRef::Std(s, _) if s.desc().section == Section::Ocl);
         if !is_ocl {
             if self.op_module(o).is_some() {
@@ -1244,7 +1434,13 @@ impl<'r> Sema<'r> {
     }
 
     /// `GenericsResolver.resolveOperationReturnType`
-    fn generic_return_type(&mut self, problem: Span, source: TypeId, o: OpRef, args: &[Arg]) -> TypeId {
+    fn generic_return_type(
+        &mut self,
+        problem: Span,
+        source: TypeId,
+        o: OpRef,
+        args: &[Arg],
+    ) -> TypeId {
         let mut bind_map: Vec<(TypeId, TypeId)> = Vec::new();
         let ret = self.op_ret(o);
         if is_generic_param(ret) {
@@ -1292,7 +1488,11 @@ impl<'r> Sema<'r> {
         } else if is_generic_param(formal) {
             set_binding(m, formal, actual);
             if !m.iter().any(|(k, _)| *k == TypeId::T2) {
-                let v = if acoll { self.flattened_element(actual) } else { actual };
+                let v = if acoll {
+                    self.flattened_element(actual)
+                } else {
+                    actual
+                };
                 set_binding(m, TypeId::T2, v);
             }
         }
@@ -1323,7 +1523,11 @@ impl<'r> Sema<'r> {
                 self.ts.types.dict(bk, bv)
             }
             Type::TypeType(r) => {
-                let rt = if t == TypeId::OCL_TYPE { self.bound(problem, TypeId::T, m) } else { self.bound(problem, r, m) };
+                let rt = if t == TypeId::OCL_TYPE {
+                    self.bound(problem, TypeId::T, m)
+                } else {
+                    self.bound(problem, r, m)
+                };
                 self.ts.types.type_type(rt)
             }
             _ => self.bound(problem, t, m),
@@ -1335,10 +1539,15 @@ impl<'r> Sema<'r> {
             let a = m.iter().find(|(k, _)| *k == TypeId::T).map(|(_, v)| *v);
             let b = m.iter().find(|(k, _)| *k == TypeId::T2).map(|(_, v)| *v);
             if let (Some(a), Some(b)) = (a, b) {
-                return self.common_super_type_at(problem, a, b).unwrap_or(TypeId::OCL_ANY);
+                return self
+                    .common_super_type_at(problem, a, b)
+                    .unwrap_or(TypeId::OCL_ANY);
             }
         }
-        m.iter().find(|(k, _)| *k == x).map(|(_, v)| *v).unwrap_or(x)
+        m.iter()
+            .find(|(k, _)| *k == x)
+            .map(|(_, v)| *v)
+            .unwrap_or(x)
     }
 
     // ---- navigation ----------------------------------------------------------------------------
@@ -1355,9 +1564,18 @@ impl<'r> Sema<'r> {
     // ---- validation of calls -------------------------------------------------------------------
 
     /// `validateOperationCall`
-    pub(crate) fn validate_operation_call(&mut self, cs: &CallCs, call: &Ex, o: OpRef, src_var: Option<VarRef>) {
+    pub(crate) fn validate_operation_call(
+        &mut self,
+        cs: &CallCs,
+        call: &Ex,
+        o: OpRef,
+        src_var: Option<VarRef>,
+    ) {
         let (src_ty, arg_tys): (Option<TypeId>, Vec<TypeId>) = match &call.e.kind {
-            ExprKind::Call(c) => (c.source.as_ref().map(|s| s.ty), c.args.iter().map(|a| a.ty).collect()),
+            ExprKind::Call(c) => (
+                c.source.as_ref().map(|s| s.ty),
+                c.args.iter().map(|a| a.ty).collect(),
+            ),
             _ => (None, Vec::new()),
         };
         let name = self.op_name(o).to_string();
@@ -1382,7 +1600,10 @@ impl<'r> Sema<'r> {
             }
         }
         if self.op_is_mapping(o) && cs.mapping.is_none() {
-            self.warning(cs.span, bind(vm::QvtOperationalVisitorCS_mapKeywordNotUsed, &[&name]));
+            self.warning(
+                cs.span,
+                bind(vm::QvtOperationalVisitorCS_mapKeywordNotUsed, &[&name]),
+            );
         }
         if let OpRef::Std(s, _) = o {
             if is_mutator(s) {
@@ -1398,23 +1619,41 @@ impl<'r> Sema<'r> {
     fn incorrect_cast(&self, s: TypeId, t: TypeId) -> bool {
         match (self.ts.types.get(s), self.ts.types.get(t)) {
             (Type::Real, tt) => matches!(tt, Type::Integer),
-            (Type::Collection(CollKind::Set, _), tt) => !matches!(tt, Type::Collection(CollKind::Set, _)),
-            (Type::Collection(CollKind::Bag, _), tt) => !matches!(tt, Type::Collection(CollKind::Bag, _)),
-            (Type::Collection(CollKind::Sequence, _), tt) => !matches!(tt, Type::Collection(CollKind::Sequence, _)),
-            (Type::Collection(CollKind::OrderedSet, _), tt) => !matches!(tt, Type::Collection(CollKind::OrderedSet | CollKind::Set, _)),
+            (Type::Collection(CollKind::Set, _), tt) => {
+                !matches!(tt, Type::Collection(CollKind::Set, _))
+            }
+            (Type::Collection(CollKind::Bag, _), tt) => {
+                !matches!(tt, Type::Collection(CollKind::Bag, _))
+            }
+            (Type::Collection(CollKind::Sequence, _), tt) => {
+                !matches!(tt, Type::Collection(CollKind::Sequence, _))
+            }
+            (Type::Collection(CollKind::OrderedSet, _), tt) => !matches!(
+                tt,
+                Type::Collection(CollKind::OrderedSet | CollKind::Set, _)
+            ),
             _ => false,
         }
     }
 
     /// `DeprecatedImplicitSourceCallHelper.validateCallExp` for a call on an implicit source.
-    pub(crate) fn validate_implicit_source(&mut self, cause: Span, src_var: Option<VarRef>, op: Option<OpRef>, prop: Option<PropRef>) {
+    pub(crate) fn validate_implicit_source(
+        &mut self,
+        cause: Span,
+        src_var: Option<VarRef>,
+        op: Option<OpRef>,
+        prop: Option<PropRef>,
+    ) {
         let Some(v) = src_var else {
             return;
         };
         let vn = self.var_name(v);
         if vn == "self" {
             if self.fun.object_self_depth == 0 {
-                self.error(cause, vm::DeprecatedImplicitSourceCall_contextualImplicitCall);
+                self.error(
+                    cause,
+                    vm::DeprecatedImplicitSourceCall_contextualImplicitCall,
+                );
             }
         } else if vn == "this" {
             let owner = match (op, prop) {
@@ -1424,7 +1663,10 @@ impl<'r> Sema<'r> {
             };
             if let Some(owner) = owner {
                 if !matches!(self.ts.types.get(owner), Type::Module(_)) {
-                    self.warning(cause, vm::DeprecatedImplicitSourceCall_moduleScopeImplicitCall);
+                    self.warning(
+                        cause,
+                        vm::DeprecatedImplicitSourceCall_moduleScopeImplicitCall,
+                    );
                 }
             }
         }
@@ -1432,7 +1674,19 @@ impl<'r> Sema<'r> {
 }
 
 /// `AbstractOCLParser.createIteratorNames`
-const OCL_ITERATORS: [&str; 11] = ["any", "collect", "collectNested", "exists", "forAll", "isUnique", "one", "reject", "select", "sortedBy", "closure"];
+const OCL_ITERATORS: [&str; 11] = [
+    "any",
+    "collect",
+    "collectNested",
+    "exists",
+    "forAll",
+    "isUnique",
+    "one",
+    "reject",
+    "select",
+    "sortedBy",
+    "closure",
+];
 
 fn is_generic_param(t: TypeId) -> bool {
     t == TypeId::T || t == TypeId::T2 || t == TypeId::KEY_T
@@ -1456,7 +1710,11 @@ pub(crate) fn path_span_of(names: &[ast::Name]) -> Span {
 /// The span of an infix operator between two operands.
 fn operator_span(src: &str, from: u32, to: u32, name: &str) -> Option<Span> {
     let between = src.get(from as usize..to as usize)?;
-    let spelled = if name == "<>" && !between.contains("<>") { "!=" } else { name };
+    let spelled = if name == "<>" && !between.contains("<>") {
+        "!="
+    } else {
+        name
+    };
     let i = between.find(spelled)?;
     let start = from + i as u32;
     Some(Span::new(start, start + spelled.len() as u32))
@@ -1464,7 +1722,9 @@ fn operator_span(src: &str, from: u32, to: u32, name: &str) -> Option<Span> {
 
 /// Java `Double.valueOf` for a QVTo real literal.
 fn parse_real(t: &str) -> f64 {
-    t.trim_end_matches(['d', 'D', 'f', 'F']).parse().unwrap_or(0.0)
+    t.trim_end_matches(['d', 'D', 'f', 'F'])
+        .parse()
+        .unwrap_or(0.0)
 }
 
 fn is_mutator(s: StdOp) -> bool {

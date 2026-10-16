@@ -180,7 +180,10 @@ impl<'r> Sema<'r> {
     /// `TypeResolver.resolveTupleType`: an existing tuple type with the same part names whose
     /// part types are the same OCL types (`EString` and `String` alike) is reused.
     pub fn tuple_type(&mut self, parts: Vec<(Box<str>, TypeId)>) -> TypeId {
-        let key: Vec<(Box<str>, TypeId)> = parts.iter().map(|(n, t)| (n.clone(), self.ts.ck().ocl_type(*t))).collect();
+        let key: Vec<(Box<str>, TypeId)> = parts
+            .iter()
+            .map(|(n, t)| (n.clone(), self.ts.ck().ocl_type(*t)))
+            .collect();
         for i in 0..self.tuple_types.len() {
             let t = self.tuple_types[i];
             let qvto_types::Type::Tuple(existing) = self.ts.types.get(t).clone() else {
@@ -241,7 +244,11 @@ impl<'r> Sema<'r> {
                 imports: u.imports.iter().map(|x| remap[x]).collect(),
             });
         }
-        let main_module = self.units[main].modules.first().copied().unwrap_or(STDLIB_MODULE);
+        let main_module = self.units[main]
+            .modules
+            .first()
+            .copied()
+            .unwrap_or(STDLIB_MODULE);
         let program = self.into_program(main_module);
         Compilation { units, program }
     }

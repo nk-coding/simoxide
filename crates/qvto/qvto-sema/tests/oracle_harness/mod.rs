@@ -30,8 +30,8 @@ use qvto_emf::ResourceSet;
 use qvto_emf::config::Config;
 use qvto_model::{MetaRegistry, ModelStore};
 use qvto_sema::{
-    BlackboxModule, BlackboxOp, BlackboxOpKind, BlackboxParam, BlackboxUnit, Severity, UnitResolver,
-    UnitSource,
+    BlackboxModule, BlackboxOp, BlackboxOpKind, BlackboxParam, BlackboxUnit, Severity,
+    UnitResolver, UnitSource,
 };
 use qvto_testkit::case::{Case, Check};
 use std::cell::RefCell;
@@ -87,8 +87,14 @@ pub const ECLIPSE_ALIASES: &[(&str, &str)] = &[(
 /// Models of the EMF jars (not in the reference checkouts), copied to
 /// `tests/fixtures/emf-models`: (nsURI, platform URI).
 const EMF_JAR_MODELS: &[(&str, &str)] = &[
-    ("http://www.eclipse.org/emf/2003/XMLType", "platform:/plugin/org.eclipse.emf.ecore/model/XMLType.ecore"),
-    ("http://www.w3.org/XML/1998/namespace", "platform:/plugin/org.eclipse.emf.ecore/model/XMLNamespace.ecore"),
+    (
+        "http://www.eclipse.org/emf/2003/XMLType",
+        "platform:/plugin/org.eclipse.emf.ecore/model/XMLType.ecore",
+    ),
+    (
+        "http://www.w3.org/XML/1998/namespace",
+        "platform:/plugin/org.eclipse.emf.ecore/model/XMLNamespace.ecore",
+    ),
     (
         "http:///org/eclipse/emf/ecore/util/ExtendedMetaData",
         "platform:/plugin/org.eclipse.emf.ecore/model/ExtendedMetaData.ecore",
@@ -101,7 +107,10 @@ const EMF_JAR_MODELS: &[(&str, &str)] = &[
         "http:///org/eclipse/emf/ecore/util/DateConversionDelegateAnnotation",
         "platform:/plugin/org.eclipse.emf.ecore/model/DateConversionDelegateAnnotation.ecore",
     ),
-    ("http://www.eclipse.org/emf/2003/Change", "platform:/plugin/org.eclipse.emf.ecore.change/model/Change.ecore"),
+    (
+        "http://www.eclipse.org/emf/2003/Change",
+        "platform:/plugin/org.eclipse.emf.ecore.change/model/Change.ecore",
+    ),
 ];
 
 const ECORE_NS: &str = "http://www.eclipse.org/emf/2002/Ecore";
@@ -212,7 +221,12 @@ pub fn case_key(case: &Case) -> String {
 }
 
 pub fn case_env(case: &Case) -> String {
-    note(case, "note env ").unwrap_or("?").split(' ').next().unwrap_or("?").to_string()
+    note(case, "note env ")
+        .unwrap_or("?")
+        .split(' ')
+        .next()
+        .unwrap_or("?")
+        .to_string()
 }
 
 /// `CaseRunner.oneLine`
@@ -369,14 +383,24 @@ impl CaseResolver<'_> {
         self.file_unit(main.to_path_buf(), self.main_qname.clone(), 0)
     }
 
-    fn file_unit(&self, path: PathBuf, qualified_name: String, resolver: usize) -> Option<UnitSource> {
+    fn file_unit(
+        &self,
+        path: PathBuf,
+        qualified_name: String,
+        resolver: usize,
+    ) -> Option<UnitSource> {
         let text = read_text(&path)?;
         let key = file_key(&path);
-        self.unit_resolver.borrow_mut().insert(key.clone(), resolver);
+        self.unit_resolver
+            .borrow_mut()
+            .insert(key.clone(), resolver);
         Some(UnitSource {
             key,
             qualified_name,
-            file_name: path.file_name().map(|f| f.to_string_lossy().into_owned()).unwrap_or_default(),
+            file_name: path
+                .file_name()
+                .map(|f| f.to_string_lossy().into_owned())
+                .unwrap_or_default(),
             path: Some(path),
             text,
             blackbox: None,
@@ -448,7 +472,12 @@ impl UnitResolver for CaseResolver<'_> {
     }
 
     fn resolve(&self, importer: &UnitSource, qualified_name: &str) -> Option<UnitSource> {
-        let r = self.unit_resolver.borrow().get(&importer.key).copied().unwrap_or(0);
+        let r = self
+            .unit_resolver
+            .borrow()
+            .get(&importer.key)
+            .copied()
+            .unwrap_or(0);
         if let Some(u) = self.try_bases(r, qualified_name) {
             return Some(u);
         }
@@ -508,7 +537,10 @@ impl ResolveData {
                 containers: vec![String::new()],
             })
         } else {
-            self.bundles.iter().find(|b| canon.starts_with(&b.root)).cloned()
+            self.bundles
+                .iter()
+                .find(|b| canon.starts_with(&b.root))
+                .cloned()
         };
         if let Some(b) = bundle
             && let Ok(rel) = canon.strip_prefix(&b.root)
@@ -523,7 +555,13 @@ impl ResolveData {
             let bases = b
                 .containers
                 .iter()
-                .map(|c| if c.is_empty() { root.clone() } else { root.join(c) })
+                .map(|c| {
+                    if c.is_empty() {
+                        root.clone()
+                    } else {
+                        root.join(c)
+                    }
+                })
                 .collect();
             let mut q = rel_s.clone();
             if let (Some(dot), slash) = (q.rfind('.'), q.rfind('/')) {
@@ -546,7 +584,10 @@ impl ResolveData {
             );
         }
         let folder = main.parent().map(Path::to_path_buf).unwrap_or_default();
-        let stem = main.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
+        let stem = main
+            .file_stem()
+            .map(|s| s.to_string_lossy().into_owned())
+            .unwrap_or_default();
         (
             FileResolver {
                 bases: vec![folder],
@@ -581,7 +622,13 @@ fn parse_kind(s: &str) -> BlackboxOpKind {
 /// ids listed per env.
 fn read_blackboxes(
     path: &Path,
-) -> Result<(HashMap<String, HashMap<String, (String, BlackboxUnit)>>, HashMap<String, String>), String> {
+) -> Result<
+    (
+        HashMap<String, HashMap<String, (String, BlackboxUnit)>>,
+        HashMap<String, String>,
+    ),
+    String,
+> {
     let text = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let mut envs: HashMap<String, HashMap<String, (String, BlackboxUnit)>> = HashMap::new();
     let mut case_env = HashMap::new();
@@ -612,7 +659,11 @@ fn read_blackboxes(
                 let m = BlackboxModule {
                     name: get(3).to_string(),
                     library: get(4) == "Library",
-                    metamodels: get(6).split(',').filter(|s| !s.is_empty()).map(String::from).collect(),
+                    metamodels: get(6)
+                        .split(',')
+                        .filter(|s| !s.is_empty())
+                        .map(String::from)
+                        .collect(),
                     ops: Vec::new(),
                 };
                 if let Some((_, u)) = envs.get_mut(get(1)).and_then(|e| e.get_mut(get(2))) {
@@ -634,7 +685,10 @@ fn read_blackboxes(
                         }
                     })
                     .collect();
-                let flags: Vec<&str> = get(11).split([',', ' ']).filter(|s| !s.is_empty()).collect();
+                let flags: Vec<&str> = get(11)
+                    .split([',', ' '])
+                    .filter(|s| !s.is_empty())
+                    .collect();
                 let op = BlackboxOp {
                     name: get(4).to_string(),
                     kind: parse_kind(get(5)),
@@ -719,9 +773,14 @@ fn install_panic_hook() {
     ONCE.call_once(|| {
         let default = std::panic::take_hook();
         std::panic::set_hook(Box::new(move |info| {
-            let ours = std::thread::current().name().is_some_and(|n| n.starts_with("oracle-case"));
+            let ours = std::thread::current()
+                .name()
+                .is_some_and(|n| n.starts_with("oracle-case"));
             if ours {
-                let loc = info.location().map(|l| format!("{}:{}", l.file(), l.line())).unwrap_or_default();
+                let loc = info
+                    .location()
+                    .map(|l| format!("{}:{}", l.file(), l.line()))
+                    .unwrap_or_default();
                 let msg = if let Some(s) = info.payload().downcast_ref::<&str>() {
                     s.to_string()
                 } else if let Some(s) = info.payload().downcast_ref::<String>() {
@@ -746,7 +805,8 @@ impl Harness {
         let t0 = Instant::now();
         let base = repo_root();
         let sema = base.join("crates/qvto-sema");
-        let cases = qvto_testkit::case::read_cases(&sema.join("tests/data/compile.cases")).map_err(|e| e.to_string())?;
+        let cases = qvto_testkit::case::read_cases(&sema.join("tests/data/compile.cases"))
+            .map_err(|e| e.to_string())?;
         let oracle = read_oracle(&sema.join("tests/fixtures/eclipse-compile-oracle.tsv"))?;
         let mut notes = Vec::new();
 
@@ -767,13 +827,23 @@ impl Harness {
             pcm_aliases = pcm.aliases.clone();
             conf.aliases.extend(pcm.aliases);
         } else {
-            notes.push(format!("{PCM_CONF} missing: SimuLizar/SPD cases are skipped"));
+            notes.push(format!(
+                "{PCM_CONF} missing: SimuLizar/SPD cases are skipped"
+            ));
         }
         let emf_dir = file_dir_uri(&sema.join("tests/fixtures/emf-models"));
-        conf.maps.push(("platform:/plugin/org.eclipse.emf.ecore/model/".into(), emf_dir.clone()));
-        conf.maps.push(("platform:/plugin/org.eclipse.emf.ecore.change/model/".into(), emf_dir));
+        conf.maps.push((
+            "platform:/plugin/org.eclipse.emf.ecore/model/".into(),
+            emf_dir.clone(),
+        ));
+        conf.maps.push((
+            "platform:/plugin/org.eclipse.emf.ecore.change/model/".into(),
+            emf_dir,
+        ));
         for (ns, loc) in EMF_JAR_MODELS {
-            conf.ns_index.entry(ns.to_string()).or_insert_with(|| loc.to_string());
+            conf.ns_index
+                .entry(ns.to_string())
+                .or_insert_with(|| loc.to_string());
         }
         let mut rs = ResourceSet::new();
         for (from, to) in &conf.maps {
@@ -797,14 +867,20 @@ impl Harness {
                         notes.push(format!("registered package {ns}: {loc} does not load: {e}"));
                     }
                     if rs.graph.meta().package_by_ns_uri(ns).is_none() {
-                        notes.push(format!("registered package {ns}: not registered after loading {loc}"));
+                        notes.push(format!(
+                            "registered package {ns}: not registered after loading {loc}"
+                        ));
                     }
                 }
-                None => notes.push(format!("registered package {ns}: no .ecore file (not in the registry)")),
+                None => notes.push(format!(
+                    "registered package {ns}: no .ecore file (not in the registry)"
+                )),
             }
         }
         // `alias` lines of the PCM configuration are global registry keys in the oracle
-        let aliases = ECLIPSE_ALIASES.iter().map(|(k, n)| (k.to_string(), n.to_string()));
+        let aliases = ECLIPSE_ALIASES
+            .iter()
+            .map(|(k, n)| (k.to_string(), n.to_string()));
         for (key, ns) in aliases.chain(pcm_aliases) {
             match rs.graph.meta().package_by_ns_uri(&ns) {
                 Some(p) => rs.graph.meta_mut().register_alias(&key, p),
@@ -818,7 +894,11 @@ impl Harness {
         let mut bundles = Vec::new();
         let tests_dir = base.join("reference/eclipse-qvto/tests");
         if let Ok(rd) = std::fs::read_dir(&tests_dir) {
-            let mut dirs: Vec<PathBuf> = rd.flatten().map(|e| e.path()).filter(|p| p.is_dir()).collect();
+            let mut dirs: Vec<PathBuf> = rd
+                .flatten()
+                .map(|e| e.path())
+                .filter(|p| p.is_dir())
+                .collect();
             dirs.sort();
             for d in dirs {
                 let px = d.join("plugin.xml");
@@ -833,14 +913,23 @@ impl Harness {
             return Err(format!("{} missing", tests_dir.display()));
         }
         let classpath_roots = vec![base.join(TEST_BUNDLE), base.join(SAMPLES_PLUGIN)];
-        let (blackboxes, case_bb_env) = read_blackboxes(&base.join("crates/qvto-types/data/blackboxes.tsv"))?;
+        let (blackboxes, case_bb_env) =
+            read_blackboxes(&base.join("crates/qvto-types/data/blackboxes.tsv"))?;
         let mut norm_prefixes = Vec::new();
         for sub in ["reference/eclipse-qvto", "reference/eclipse-ocl", ""] {
-            let p = if sub.is_empty() { base.clone() } else { base.join(sub) };
+            let p = if sub.is_empty() {
+                base.clone()
+            } else {
+                base.join(sub)
+            };
             if !p.exists() {
                 continue;
             }
-            let to = if sub.is_empty() { "${root}".to_string() } else { format!("${{root}}/{sub}") };
+            let to = if sub.is_empty() {
+                "${root}".to_string()
+            } else {
+                format!("${{root}}/{sub}")
+            };
             let real = canonical(&p).to_string_lossy().into_owned();
             let abs = p.to_string_lossy().into_owned();
             if real != abs {
@@ -884,14 +973,22 @@ impl Harness {
             return Vec::new();
         };
         uris.into_iter()
-            .filter(|u| [".ecore", ".xcore", ".emof", ".oclinecore"].iter().any(|x| u.ends_with(x)))
+            .filter(|u| {
+                [".ecore", ".xcore", ".emof", ".oclinecore"]
+                    .iter()
+                    .any(|x| u.ends_with(x))
+            })
             .filter(|u| self.base_meta.package_by_ns_uri(u).is_none())
             .collect()
     }
 
     /// The package registry for a case: the base one, plus the case's `mmfile`s, plus the
     /// metamodel files its units refer to by location.
-    fn registry_for(&self, case: &Case, main: &Path) -> Result<(MetaRegistry, Vec<qvto_sema::MetaOperation>), String> {
+    fn registry_for(
+        &self,
+        case: &Case,
+        main: &Path,
+    ) -> Result<(MetaRegistry, Vec<qvto_sema::MetaOperation>), String> {
         let files = self.metamodel_file_uris(case, main);
         if case.mmfiles.is_empty() && files.is_empty() {
             return Ok((self.base_meta.clone(), self.base_ops.clone()));
@@ -902,7 +999,10 @@ impl Harness {
         }
         if !case.mmfiles.is_empty() {
             // TestQvtStandaloneExecutor maps the workspace URI of Ecore.ecore to Ecore's resource
-            rs.add_alias("platform:/resource/org.eclipse.emf.ecore/model/Ecore.ecore", ECORE_NS);
+            rs.add_alias(
+                "platform:/resource/org.eclipse.emf.ecore/model/Ecore.ecore",
+                ECORE_NS,
+            );
         }
         for mm in &case.mmfiles {
             let p = case.path(&self.base, mm);
@@ -910,14 +1010,19 @@ impl Harness {
             rs.register(r).map_err(|e| format!("mmfile {mm}: {e}"))?;
         }
         for uri in files {
-            if rs.graph.meta().package_by_ns_uri(&uri).is_some() || rs.load_metamodel(&uri).is_err() {
+            if rs.graph.meta().package_by_ns_uri(&uri).is_some() || rs.load_metamodel(&uri).is_err()
+            {
                 continue;
             }
             let Some(r) = rs.get_resource(&uri, false) else {
                 continue;
             };
             // EmfUtil.getFirstEPackageContent
-            let first = rs.graph.roots(r).iter().find_map(|o| rs.graph.links().obj_package.get(o).copied());
+            let first = rs
+                .graph
+                .roots(r)
+                .iter()
+                .find_map(|o| rs.graph.links().obj_package.get(o).copied());
             if let Some(p) = first {
                 rs.graph.meta_mut().register_alias(&uri, p);
             }
@@ -983,7 +1088,9 @@ impl Harness {
                 run.status = RunStatus::Timeout;
                 run.elapsed = self.timeout;
             }
-            Err(mpsc::RecvTimeoutError::Disconnected) => run.status = RunStatus::Panic("worker died".into()),
+            Err(mpsc::RecvTimeoutError::Disconnected) => {
+                run.status = RunStatus::Panic("worker died".into())
+            }
         }
         run
     }
@@ -1007,7 +1114,11 @@ fn compile_case(
         let t = Instant::now();
         let comp = qvto_sema::compile_with_operations(source, &resolver, meta, ops);
         let elapsed = t.elapsed();
-        let ir_issues = if comp.has_errors() { Vec::new() } else { qvto_sema::irck::check_program(&comp.program) };
+        let ir_issues = if comp.has_errors() {
+            Vec::new()
+        } else {
+            qvto_sema::irck::check_program(&comp.program)
+        };
         let mut out = Vec::new();
         let mut seen = std::collections::HashSet::new();
         for u in &comp.units {
@@ -1024,7 +1135,11 @@ fn compile_case(
                 };
                 out.push(Prob {
                     unit: u.source.file_name.clone(),
-                    sev: if p.severity == Severity::Error { 'E' } else { 'W' },
+                    sev: if p.severity == Severity::Error {
+                        'E'
+                    } else {
+                        'W'
+                    },
                     line,
                     offset: o as i64,
                     len: l as i64,
@@ -1058,7 +1173,16 @@ pub fn meta_operations(g: &qvto_emf::graph::Graph) -> Vec<qvto_sema::MetaOperati
         };
         let ordered = !matches!(g.get(o, e.typed_ordered), Datum::Bool(false));
         let unique = !matches!(g.get(o, e.typed_unique), Datum::Bool(false));
-        *out_ty = ty.map(|c| (c, qvto_sema::MetaMultiplicity { many: upper > 1 || upper < 0, ordered, unique }));
+        *out_ty = ty.map(|c| {
+            (
+                c,
+                qvto_sema::MetaMultiplicity {
+                    many: upper > 1 || upper < 0,
+                    ordered,
+                    unique,
+                },
+            )
+        });
     };
     let classes: Vec<qvto_model::ClassId> = g.meta().classes().collect();
     for c in classes {
@@ -1093,7 +1217,12 @@ pub fn meta_operations(g: &qvto_emf::graph::Graph) -> Vec<qvto_sema::MetaOperati
                 }
             }
             if ok {
-                out.push(qvto_sema::MetaOperation { class: c, name, params, result });
+                out.push(qvto_sema::MetaOperation {
+                    class: c,
+                    name,
+                    params,
+                    result,
+                });
             }
         }
     }

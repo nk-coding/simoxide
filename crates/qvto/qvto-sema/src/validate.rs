@@ -8,7 +8,7 @@ use crate::messages::{bind, ocl as om, validation as vm};
 use crate::module::is_disjunctive;
 use crate::units::MethodCs;
 use qvto_syntax::Span;
-use qvto_types::{rel, CollKind, Type, TypeId};
+use qvto_types::{CollKind, Type, TypeId, rel};
 
 /// An ancestor of the node being validated.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -63,7 +63,9 @@ impl<'r> Sema<'r> {
                 self.v_expr(&b.expr, &ctx, &mut anc);
             }
         }
-        let props: Vec<usize> = (0..self.interm_props.len()).filter(|&i| self.interm_props[i].ir.module == m).collect();
+        let props: Vec<usize> = (0..self.interm_props.len())
+            .filter(|&i| self.interm_props[i].ir.module == m)
+            .collect();
         for i in props {
             if let Some(b) = self.interm_props[i].ir.init.clone() {
                 let ctx = Ctx {
@@ -86,19 +88,34 @@ impl<'r> Sema<'r> {
             if matches!(self.ts.types.get(ct), Type::Module(_)) {
                 let tn = self.qualified_name(ct);
                 let src = self.src();
-                let span = mcs.map(|c| crate::module::method_decl(c, &src)).and_then(|d| d.context.map(|c| c.span())).unwrap_or(info.decl_span);
-                self.error(span, bind(vm::QvtOperationalValidationVisitor_invalidContextualType, &[&tn]));
+                let span = mcs
+                    .map(|c| crate::module::method_decl(c, &src))
+                    .and_then(|d| d.context.map(|c| c.span()))
+                    .unwrap_or(info.decl_span);
+                self.error(
+                    span,
+                    bind(
+                        vm::QvtOperationalValidationVisitor_invalidContextualType,
+                        &[&tn],
+                    ),
+                );
             }
         }
         self.validate_unique_param_names(op);
         for p in &info.params {
             if p.name.trim().is_empty() {
-                self.error(p.span, vm::QvtOperationalValidationVisitor_parameterNamedRequired);
+                self.error(
+                    p.span,
+                    vm::QvtOperationalValidationVisitor_parameterNamedRequired,
+                );
             }
         }
         for r in &info.results {
             if r.name.trim().is_empty() {
-                self.error(r.span, vm::QvtOperationalValidationVisitor_parameterNamedRequired);
+                self.error(
+                    r.span,
+                    vm::QvtOperationalValidationVisitor_parameterNamedRequired,
+                );
             }
         }
         match info.kind {
@@ -115,7 +132,10 @@ impl<'r> Sema<'r> {
             }
             OpKind::Entry => {
                 if self.modules[module.index()].is_library {
-                    self.error(Span::new(info.decl_span.start, info.span.end), vm::QvtOperationalValidationVisitor_MainInLibraryError);
+                    self.error(
+                        Span::new(info.decl_span.start, info.span.end),
+                        vm::QvtOperationalValidationVisitor_MainInLibraryError,
+                    );
                 }
                 for p in &info.params {
                     self.warning(p.span, bind(vm::EntryOp_DepricatedParamDecl, &[]));
@@ -124,13 +144,23 @@ impl<'r> Sema<'r> {
             _ => {}
         }
         // visitOperationBody (non-mapping bodies)
-        if info.kind != OpKind::Mapping && info.result_ty != TypeId::OCL_VOID && info.results.len() == 1 {
+        if info.kind != OpKind::Mapping
+            && info.result_ty != TypeId::OCL_VOID
+            && info.results.len() == 1
+        {
             if let Some(body) = &info.body {
                 let n = body.len();
                 let last_det = n > 0 && self.is_deterministic(&body[n - 1]);
                 if (n == 0 && !info.is_blackbox) || (n > 1 && !last_det) {
-                    let end = info.results.last().map(|r| r.span.end).unwrap_or(info.decl_span.start);
-                    self.warning(Span::new(info.decl_span.start, end), vm::useReturnExpForOperationResult);
+                    let end = info
+                        .results
+                        .last()
+                        .map(|r| r.span.end)
+                        .unwrap_or(info.decl_span.start);
+                    self.warning(
+                        Span::new(info.decl_span.start, end),
+                        vm::useReturnExpForOperationResult,
+                    );
                 }
             }
         }
@@ -172,21 +202,35 @@ impl<'r> Sema<'r> {
         let model: Vec<String> = if self.modules[module.index()].is_library {
             Vec::new()
         } else {
-            self.modules[module.index()].model_params.iter().map(|p| p.name.clone()).collect()
+            self.modules[module.index()]
+                .model_params
+                .iter()
+                .map(|p| p.name.clone())
+                .collect()
         };
-        let params: Vec<(String, Span)> = info.params.iter().map(|p| (p.name.clone(), p.span)).collect();
-        let results: Vec<(String, Span)> = info.results.iter().map(|p| (p.name.clone(), p.span)).collect();
-        let check = |s: &mut Self, list: &[(String, Span)], scope: &[(String, Span)], same: bool| {
-            for (i, (n, sp)) in list.iter().enumerate() {
-                let found = scope.iter().enumerate().find(|(_, (sn, _))| sn == n);
-                if let Some((j, _)) = found {
-                    if !(same && i == j) {
-                        s.error(*sp, bind(vm::NameAlreadyDefinedError, &[n]));
+        let params: Vec<(String, Span)> = info
+            .params
+            .iter()
+            .map(|p| (p.name.clone(), p.span))
+            .collect();
+        let results: Vec<(String, Span)> = info
+            .results
+            .iter()
+            .map(|p| (p.name.clone(), p.span))
+            .collect();
+        let check =
+            |s: &mut Self, list: &[(String, Span)], scope: &[(String, Span)], same: bool| {
+                for (i, (n, sp)) in list.iter().enumerate() {
+                    let found = scope.iter().enumerate().find(|(_, (sn, _))| sn == n);
+                    if let Some((j, _)) = found {
+                        if !(same && i == j) {
+                            s.error(*sp, bind(vm::NameAlreadyDefinedError, &[n]));
+                        }
                     }
                 }
-            }
-        };
-        let model_list: Vec<(String, Span)> = model.into_iter().map(|n| (n, Span::default())).collect();
+            };
+        let model_list: Vec<(String, Span)> =
+            model.into_iter().map(|n| (n, Span::default())).collect();
         check(self, &params, &model_list, false);
         check(self, &params, &params, true);
         check(self, &results, &model_list, false);
@@ -201,7 +245,9 @@ impl<'r> Sema<'r> {
         }
         let elem_class = self.ts.types.class(self.ts.std.element);
         let bad = matches!(self.ts.types.get(t), Type::ModelType(_) | Type::Module(_))
-            || (!self.ts.ck().is_user_model_element(t) && !self.ts.types.is_collection_like(t) && t != elem_class);
+            || (!self.ts.ck().is_user_model_element(t)
+                && !self.ts.types.is_collection_like(t)
+                && t != elem_class);
         if bad {
             let tn = self.qualified_name(t);
             self.error(span, bind(vm::nonModelTypeError, &[&tn]));
@@ -228,7 +274,10 @@ impl<'r> Sema<'r> {
             return;
         };
         let refs = self.ext_refs.get(&op).cloned().unwrap_or_default();
-        let op_span = Span::new(self.ops[op.index()].ir.decl_span.start, self.ops[op.index()].ir.span.end);
+        let op_span = Span::new(
+            self.ops[op.index()].ir.decl_span.start,
+            self.ops[op.index()].ir.span.end,
+        );
         // inherits
         self.validate_extension_list(op, &m.inherits, &refs[0], "inherits", op_span, true);
         if !m.disjuncts.is_empty() {
@@ -241,7 +290,11 @@ impl<'r> Sema<'r> {
                     let empty_content = match &body.population {
                         None => true,
                         Some(p) => {
-                            let implicit = !p.explicit && (ma.results.len() == 1 || (ma.results.is_empty() && ma.name.names.len() > 1 && ma.direction == Some(qvto_syntax::TokenKind::KwInout)));
+                            let implicit = !p.explicit
+                                && (ma.results.len() == 1
+                                    || (ma.results.is_empty()
+                                        && ma.name.names.len() > 1
+                                        && ma.direction == Some(qvto_syntax::TokenKind::KwInout)));
                             if implicit {
                                 Some(p.body.span) == body_span
                             } else {
@@ -252,18 +305,37 @@ impl<'r> Sema<'r> {
                     let non_empty = !empty_content || body.init.is_some() || body.end.is_some();
                     if non_empty {
                         let qn = self.mapping_qualified_name(op);
-                        self.warning(body.span, bind(vm::MappingExtension_disjunctingMappingBodyNotExecuted, &[&qn]));
+                        self.warning(
+                            body.span,
+                            bind(
+                                vm::MappingExtension_disjunctingMappingBodyNotExecuted,
+                                &[&qn],
+                            ),
+                        );
                     }
                 }
             }
             let use_refs = refs[1].len() == m.disjuncts.len();
-            for (kind, list, krefs) in [("inherits", &m.inherits, &refs[0]), ("merges", &m.merges, &refs[2])] {
+            for (kind, list, krefs) in [
+                ("inherits", &m.inherits, &refs[0]),
+                ("merges", &m.merges, &refs[2]),
+            ] {
                 let use_k = krefs.len() == list.len();
                 for (pos, ext) in list.iter().enumerate() {
-                    let span = if use_k { krefs.get(pos).copied().unwrap_or(op_span) } else { op_span };
+                    let span = if use_k {
+                        krefs.get(pos).copied().unwrap_or(op_span)
+                    } else {
+                        op_span
+                    };
                     let a = self.mapping_qualified_name(op);
                     let b = self.mapping_qualified_name(*ext);
-                    self.error(span, bind(vm::MappingExtension_illegalExtensionKindOnDisjunctingMapping, &[&a, kind, &b]));
+                    self.error(
+                        span,
+                        bind(
+                            vm::MappingExtension_illegalExtensionKindOnDisjunctingMapping,
+                            &[&a, kind, &b],
+                        ),
+                    );
                 }
             }
             // out parameters of the disjuncted mappings
@@ -282,7 +354,13 @@ impl<'r> Sema<'r> {
                         let span = refs[1].get(pos).copied().unwrap_or(op_span);
                         let a = self.mapping_qualified_name(*ext);
                         let b = self.mapping_qualified_name(op);
-                        self.error(span, bind(vm::MappingExtension_illegalOutParamDisjunctingMapping, &[&a, &p.name, &b]));
+                        self.error(
+                            span,
+                            bind(
+                                vm::MappingExtension_illegalOutParamDisjunctingMapping,
+                                &[&a, &p.name, &b],
+                            ),
+                        );
                     }
                 }
             }
@@ -292,7 +370,15 @@ impl<'r> Sema<'r> {
         let _ = is_disjunctive;
     }
 
-    fn validate_extension_list(&mut self, op: OpId, list: &[OpId], refs: &[Span], kind: &str, op_span: Span, inherit: bool) {
+    fn validate_extension_list(
+        &mut self,
+        op: OpId,
+        list: &[OpId],
+        refs: &[Span],
+        kind: &str,
+        op_span: Span,
+        inherit: bool,
+    ) {
         let use_refs = refs.len() == list.len();
         for (i, ext) in list.iter().enumerate() {
             // caller/callee: inherits(extended, extending), merges(extended=merged... ) as Eclipse
@@ -303,10 +389,20 @@ impl<'r> Sema<'r> {
             };
             let _ = inherit;
             if !ok {
-                let span = if use_refs { refs.get(i).copied().unwrap_or(op_span) } else { op_span };
+                let span = if use_refs {
+                    refs.get(i).copied().unwrap_or(op_span)
+                } else {
+                    op_span
+                };
                 let a = self.mapping_qualified_name(*ext);
                 let b = self.mapping_qualified_name(op);
-                self.error(span, bind(vm::MappingExtension_nonConformantSignatureForMappingExtension, &[&a, kind, &b]));
+                self.error(
+                    span,
+                    bind(
+                        vm::MappingExtension_nonConformantSignatureForMappingExtension,
+                        &[&a, kind, &b],
+                    ),
+                );
             }
         }
     }
@@ -345,7 +441,8 @@ impl<'r> Sema<'r> {
                 }
             }
         }
-        a.results.len() == 1 || self.ts.ck().relationship(a.result_ty, b.result_ty) & rel::SUBTYPE != 0
+        a.results.len() == 1
+            || self.ts.ck().relationship(a.result_ty, b.result_ty) & rel::SUBTYPE != 0
     }
 
     /// `QvtOperationalVisitorCS.isOclExpDeterministic` on the IR.
@@ -355,14 +452,20 @@ impl<'r> Sema<'r> {
             ExprKind::Block(b) => b.len() == 1 && self.is_deterministic(&b[0]),
             ExprKind::If(_, t, Some(el)) => self.is_deterministic(t) && self.is_deterministic(el),
             ExprKind::If(_, _, None) => false,
-            ExprKind::Switch(alts, els) => els.as_ref().is_some_and(|x| self.is_deterministic(x)) && alts.iter().all(|(_, b)| self.is_deterministic(b)),
+            ExprKind::Switch(alts, els) => {
+                els.as_ref().is_some_and(|x| self.is_deterministic(x))
+                    && alts.iter().all(|(_, b)| self.is_deterministic(b))
+            }
             ExprKind::Compute(_, _, b) => self.is_deterministic(b),
             _ => false,
         }
     }
 
     fn local_ty(&self, ctx: &Ctx<'_>, l: ir::LocalId) -> TypeId {
-        ctx.locals.get(l.index()).map(|x| x.ty).unwrap_or(TypeId::NULL)
+        ctx.locals
+            .get(l.index())
+            .map(|x| x.ty)
+            .unwrap_or(TypeId::NULL)
     }
 
     /// Validates an expression and its children. `anc`: the ancestors, innermost last.
@@ -371,13 +474,23 @@ impl<'r> Sema<'r> {
         match &e.kind {
             ExprKind::Local(l) => {
                 let lt = self.local_ty(ctx, *l);
-                let name = ctx.locals.get(l.index()).map(|x| x.name.clone()).unwrap_or_default();
+                let name = ctx
+                    .locals
+                    .get(l.index())
+                    .map(|x| x.name.clone())
+                    .unwrap_or_default();
                 if lt == TypeId::NULL || e.ty == TypeId::NULL {
                     self.error(span, bind(om::IncompleteVariableExp_ERROR_, &[&name]));
                 } else if name == "result" && matches!(self.ts.types.get(lt), Type::Tuple(_)) {
-                    let is_param = ctx.extras.and_then(|x| x.get(l.index())).is_some_and(|x| x.param.is_some());
+                    let is_param = ctx
+                        .extras
+                        .and_then(|x| x.get(l.index()))
+                        .is_some_and(|x| x.param.is_some());
                     if !is_param {
-                        self.warning(span, bind(vm::QvtOperationalVisitorCS_deprecatedResultTupleAccess, &[]));
+                        self.warning(
+                            span,
+                            bind(vm::QvtOperationalVisitorCS_deprecatedResultTupleAccess, &[]),
+                        );
                     }
                 }
             }
@@ -390,10 +503,16 @@ impl<'r> Sema<'r> {
             }
             ExprKind::If(c, t, el) => {
                 if c.ty != TypeId::BOOLEAN {
-                    self.error(span, bind(vm::QvtOperationalVisitorCS_ifExpNonBooleanCond, &[]));
+                    self.error(
+                        span,
+                        bind(vm::QvtOperationalVisitorCS_ifExpNonBooleanCond, &[]),
+                    );
                 }
                 if el.is_none() && anc.contains(&Anc::VarInit) {
-                    self.warning(span, bind(vm::QvtOperationalVisitorCS_ifExpWithoutElseAssignment, &[]));
+                    self.warning(
+                        span,
+                        bind(vm::QvtOperationalVisitorCS_ifExpWithoutElseAssignment, &[]),
+                    );
                 }
                 anc.push(Anc::If);
                 self.v_expr(c, ctx, anc);
@@ -405,7 +524,11 @@ impl<'r> Sema<'r> {
                 return;
             }
             ExprKind::Break | ExprKind::Continue => {
-                let name = if matches!(e.kind, ExprKind::Break) { "BreakExp" } else { "ContinueExp" };
+                let name = if matches!(e.kind, ExprKind::Break) {
+                    "BreakExp"
+                } else {
+                    "ContinueExp"
+                };
                 let mut found = false;
                 for a in anc.iter().rev() {
                     match a {
@@ -418,15 +541,27 @@ impl<'r> Sema<'r> {
                     }
                 }
                 if !found {
-                    self.error(span, bind(vm::BreakContinue_InvalidExpressionUsage, &[name]));
+                    self.error(
+                        span,
+                        bind(vm::BreakContinue_InvalidExpressionUsage, &[name]),
+                    );
                 } else if matches!(anc.last(), Some(Anc::Ocl) | Some(Anc::OpBody)) {
-                    self.error(span, bind(vm::BreakContinue_InvalidExpressionOwner, &[name]));
+                    self.error(
+                        span,
+                        bind(vm::BreakContinue_InvalidExpressionOwner, &[name]),
+                    );
                 }
             }
             ExprKind::VarInit { init, .. } => {
-                let ok = matches!(anc.last(), Some(Anc::OpBody) | Some(Anc::Block) | Some(Anc::Assign) | Some(Anc::VarInit));
+                let ok = matches!(
+                    anc.last(),
+                    Some(Anc::OpBody) | Some(Anc::Block) | Some(Anc::Assign) | Some(Anc::VarInit)
+                );
                 if !ok {
-                    self.error(span, vm::QvtOperationalValidationVisitor_CannotDeclareVariables);
+                    self.error(
+                        span,
+                        vm::QvtOperationalValidationVisitor_CannotDeclareVariables,
+                    );
                 }
                 if let Some(i) = init {
                     anc.push(Anc::VarInit);
@@ -439,12 +574,18 @@ impl<'r> Sema<'r> {
                 self.validate_return(e, v.as_deref(), ctx);
             }
             ExprKind::Global(_) if e.ty == TypeId::NULL => {
-                self.error(span, bind(om::NullNavigationType_ERROR_, &["this.\"<null>\""]));
+                self.error(
+                    span,
+                    bind(om::NullNavigationType_ERROR_, &["this.\"<null>\""]),
+                );
             }
             ExprKind::Assign(a) => {
                 if let ir::LValue::Global(g) = &a.target {
                     if self.globals[g.index()].ir.ty == TypeId::NULL {
-                        self.error(a.target_span, bind(om::NullNavigationType_ERROR_, &["this.\"<null>\""]));
+                        self.error(
+                            a.target_span,
+                            bind(om::NullNavigationType_ERROR_, &["this.\"<null>\""]),
+                        );
                     }
                 }
             }
@@ -453,7 +594,11 @@ impl<'r> Sema<'r> {
             }
             ExprKind::Loop(lp) => {
                 self.validate_loop(e, lp, ctx);
-                let a = if is_ocl_loop(lp.kind) { Anc::OclLoop } else { Anc::ImpLoop };
+                let a = if is_ocl_loop(lp.kind) {
+                    Anc::OclLoop
+                } else {
+                    Anc::ImpLoop
+                };
                 anc.push(a);
                 self.v_expr(&lp.source, ctx, anc);
                 if let Some((_, i)) = &lp.acc {
@@ -499,7 +644,11 @@ impl<'r> Sema<'r> {
                 self.error(e.span, vm::missingReturnValueError);
             }
         } else if !(actual != TypeId::NULL && value.is_none() && declared == TypeId::OCL_VOID) {
-            let tn = if declared == TypeId::NULL { String::new() } else { self.qualified_name(declared) };
+            let tn = if declared == TypeId::NULL {
+                String::new()
+            } else {
+                self.qualified_name(declared)
+            };
             self.error(e.span, bind(vm::typeMismatchError, &[&tn]));
         }
         if ctx.mapping_body {
@@ -517,11 +666,19 @@ impl<'r> Sema<'r> {
                         if i > 0 {
                             s.push_str(", ");
                         }
-                        let n = if a.ty == TypeId::NULL { "null".to_string() } else { self.type_name(a.ty) };
+                        let n = if a.ty == TypeId::NULL {
+                            "null".to_string()
+                        } else {
+                            self.type_name(a.ty)
+                        };
                         s.push_str(&n);
                     }
                     s.push(')');
-                    let src = c.source.as_ref().map(|x| self.type_name(x.ty)).unwrap_or_else(|| "null".into());
+                    let src = c
+                        .source
+                        .as_ref()
+                        .map(|x| self.type_name(x.ty))
+                        .unwrap_or_else(|| "null".into());
                     self.error(e.span, bind(vm::OperationIsUndefined, &[&s, &src]));
                 }
             }
@@ -531,13 +688,25 @@ impl<'r> Sema<'r> {
                 let disjuncts_empty = info.mapping.as_ref().is_none_or(|m| m.disjuncts.is_empty());
                 if abstract_out && info.is_abstract && disjuncts_empty {
                     let qn = self.mapping_qualified_name(*op);
-                    self.error(e.span, bind(vm::directCallToAbstractMappingDisallowed, &[&qn]));
+                    self.error(
+                        e.span,
+                        bind(vm::directCallToAbstractMappingDisallowed, &[&qn]),
+                    );
                 }
                 for (a, p) in c.args.iter().zip(info.params.iter()) {
                     if p.direction != Direction::Out {
                         continue;
                     }
-                    if !matches!(a.kind, ExprKind::Local(_) | ExprKind::Prop(..) | ExprKind::Global(_) | ExprKind::IntermProp(..) | ExprKind::TupleProp(..) | ExprKind::ModelParam(_) | ExprKind::This(_)) {
+                    if !matches!(
+                        a.kind,
+                        ExprKind::Local(_)
+                            | ExprKind::Prop(..)
+                            | ExprKind::Global(_)
+                            | ExprKind::IntermProp(..)
+                            | ExprKind::TupleProp(..)
+                            | ExprKind::ModelParam(_)
+                            | ExprKind::This(_)
+                    ) {
                         self.error(a.span, vm::outParamNotAnLValueError);
                     }
                     if a.ty != p.ty {
@@ -557,14 +726,20 @@ impl<'r> Sema<'r> {
         let ty = e.ty;
         let st = lp.source.ty;
         let Some(body) = &lp.body else {
-            self.error(e.span, bind(vm::QvtOperationalVisitorCS_iterateExpIncomplete, &[]));
+            self.error(
+                e.span,
+                bind(vm::QvtOperationalVisitorCS_iterateExpIncomplete, &[]),
+            );
             return;
         };
         if lp.kind == LoopKind::Iterate {
             return;
         }
         if ty == TypeId::NULL || lp.iterators.is_empty() {
-            self.error(e.span, bind(vm::QvtOperationalVisitorCS_iterateExpIncomplete, &[]));
+            self.error(
+                e.span,
+                bind(vm::QvtOperationalVisitorCS_iterateExpIncomplete, &[]),
+            );
             return;
         }
         let predefined = self.ts.types.is_collection_like(st) || self.ts.ck().is_predefined(st);
@@ -572,42 +747,113 @@ impl<'r> Sema<'r> {
             return;
         }
         let bool_ty = TypeId::BOOLEAN;
-        if matches!(lp.kind, LoopKind::ForAll | LoopKind::Exists | LoopKind::IsUnique) && ty != bool_ty {
-            self.error(e.span, bind(vm::QvtOperationalVisitorCS_TypeConformanceIteratorResult_ERROR_, &[]));
+        if matches!(
+            lp.kind,
+            LoopKind::ForAll | LoopKind::Exists | LoopKind::IsUnique
+        ) && ty != bool_ty
+        {
+            self.error(
+                e.span,
+                bind(
+                    vm::QvtOperationalVisitorCS_TypeConformanceIteratorResult_ERROR_,
+                    &[],
+                ),
+            );
             return;
         }
         if lp.kind == LoopKind::Collect {
-            let seq_src = matches!(self.ts.types.get(st), Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _) | Type::List(_));
+            let seq_src = matches!(
+                self.ts.types.get(st),
+                Type::Collection(CollKind::Sequence | CollKind::OrderedSet, _) | Type::List(_)
+            );
             if seq_src {
-                if !matches!(self.ts.types.get(ty), Type::Collection(CollKind::Sequence, _)) {
-                    self.error(e.span, bind(vm::QvtOperationalVisitorCS_TypeConformanceCollectSequence_ERROR_, &[]));
+                if !matches!(
+                    self.ts.types.get(ty),
+                    Type::Collection(CollKind::Sequence, _)
+                ) {
+                    self.error(
+                        e.span,
+                        bind(
+                            vm::QvtOperationalVisitorCS_TypeConformanceCollectSequence_ERROR_,
+                            &[],
+                        ),
+                    );
                     return;
                 }
             } else if !matches!(self.ts.types.get(ty), Type::Collection(CollKind::Bag, _)) {
-                self.error(e.span, bind(vm::QvtOperationalVisitorCS_TypeConformanceCollectBag_ERROR_, &[]));
+                self.error(
+                    e.span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_TypeConformanceCollectBag_ERROR_,
+                        &[],
+                    ),
+                );
                 return;
             }
         }
         if matches!(lp.kind, LoopKind::Select | LoopKind::Reject) {
-            let list_ok = matches!(self.ts.types.get(st), Type::List(_)) && matches!(self.ts.types.get(ty), Type::Collection(CollKind::Sequence, _));
+            let list_ok = matches!(self.ts.types.get(st), Type::List(_))
+                && matches!(
+                    self.ts.types.get(ty),
+                    Type::Collection(CollKind::Sequence, _)
+                );
             if !list_ok && !self.ts.ck().exact(ty, st) {
-                self.error(e.span, bind(vm::QvtOperationalVisitorCS_TypeConformanceSelectReject_ERROR_, &[]));
+                self.error(
+                    e.span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_TypeConformanceSelectReject_ERROR_,
+                        &[],
+                    ),
+                );
                 return;
             }
         }
-        if matches!(lp.kind, LoopKind::Select | LoopKind::Reject | LoopKind::ForAll | LoopKind::Any | LoopKind::Exists | LoopKind::One) && body.ty != bool_ty {
-            self.error(e.span, bind(vm::QvtOperationalVisitorCS_TypeConformanceIteratorBodyBoolean_ERROR_, &[]));
+        if matches!(
+            lp.kind,
+            LoopKind::Select
+                | LoopKind::Reject
+                | LoopKind::ForAll
+                | LoopKind::Any
+                | LoopKind::Exists
+                | LoopKind::One
+        ) && body.ty != bool_ty
+        {
+            self.error(
+                e.span,
+                bind(
+                    vm::QvtOperationalVisitorCS_TypeConformanceIteratorBodyBoolean_ERROR_,
+                    &[],
+                ),
+            );
             return;
         }
         if !self.ts.types.is_collection_like(st) {
-            self.error(e.span, bind(vm::QvtOperationalVisitorCS_IteratorSource_ERROR_, &[]));
+            self.error(
+                e.span,
+                bind(vm::QvtOperationalVisitorCS_IteratorSource_ERROR_, &[]),
+            );
             return;
         }
-        if lp.kind == LoopKind::Closure && !matches!(self.ts.types.get(ty), Type::Collection(CollKind::Set | CollKind::OrderedSet, _)) {
-            self.error(e.span, bind(vm::QvtOperationalVisitorCS_TypeConformanceClosure_ERROR_, &[]));
+        if lp.kind == LoopKind::Closure
+            && !matches!(
+                self.ts.types.get(ty),
+                Type::Collection(CollKind::Set | CollKind::OrderedSet, _)
+            )
+        {
+            self.error(
+                e.span,
+                bind(
+                    vm::QvtOperationalVisitorCS_TypeConformanceClosure_ERROR_,
+                    &[],
+                ),
+            );
             return;
         }
-        let max = if matches!(lp.kind, LoopKind::ForAll | LoopKind::Exists) { 2 } else { 1 };
+        let max = if matches!(lp.kind, LoopKind::ForAll | LoopKind::Exists) {
+            2
+        } else {
+            1
+        };
         if lp.iterators.len() > max {
             return;
         }
@@ -615,7 +861,13 @@ impl<'r> Sema<'r> {
         for it in &lp.iterators {
             let t = self.local_ty(ctx, *it);
             if !self.ts.ck().exact(t, elem) {
-                self.error(e.span, bind(vm::QvtOperationalVisitorCS_TypeConformanceIteratorExpLoopVar_ERROR_, &[]));
+                self.error(
+                    e.span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_TypeConformanceIteratorExpLoopVar_ERROR_,
+                        &[],
+                    ),
+                );
                 return;
             }
         }
@@ -636,7 +888,13 @@ impl<'r> Sema<'r> {
                 let ci = self.ts.meta.class(c);
                 if ci.is_abstract || ci.is_interface {
                     let tn = self.qualified_name(t);
-                    self.error(e.span, bind(vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType, &[&tn]));
+                    self.error(
+                        e.span,
+                        bind(
+                            vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType,
+                            &[&tn],
+                        ),
+                    );
                 }
             }
             return;
@@ -646,38 +904,72 @@ impl<'r> Sema<'r> {
                 let ci = self.ts.meta.class(c);
                 if ci.is_abstract || ci.is_interface {
                     let tn = self.qualified_name(t);
-                    self.error(e.span, bind(vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType, &[&tn]));
+                    self.error(
+                        e.span,
+                        bind(
+                            vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType,
+                            &[&tn],
+                        ),
+                    );
                 }
                 return;
             }
         }
         if self.ts.types.is_collection_like(t) {
             // an abstract collection type (Collection(T)) cannot be instantiated
-            if matches!(self.ts.types.get(t), Type::Collection(CollKind::Collection, _)) {
+            if matches!(
+                self.ts.types.get(t),
+                Type::Collection(CollKind::Collection, _)
+            ) {
                 let tn = self.qualified_name(t);
-                self.error(e.span, bind(vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType, &[&tn]));
+                self.error(
+                    e.span,
+                    bind(
+                        vm::QvtOperationalVisitorCS_canNotInstantiateAbstractType,
+                        &[&tn],
+                    ),
+                );
             }
         } else if class.is_none() && self.is_data_type(t) {
             let string_arg = n.args.len() == 1 && self.is_string_type(n.args[0].ty);
             if !string_arg {
-                let args: Vec<String> = n.args.iter().map(|a| self.expr_to_string(a, ctx)).collect();
+                let args: Vec<String> =
+                    n.args.iter().map(|a| self.expr_to_string(a, ctx)).collect();
                 let tn = self.qualified_name(t);
-                self.error(e.span, bind(vm::QvtOperationalValidationVisitor_invalidParamsForDatatypeInstantiation, &[&format!("[{}]", args.join(", ")), &tn]));
+                self.error(
+                    e.span,
+                    bind(
+                        vm::QvtOperationalValidationVisitor_invalidParamsForDatatypeInstantiation,
+                        &[&format!("[{}]", args.join(", ")), &tn],
+                    ),
+                );
             }
         } else if class.is_none() {
             let tn = self.qualified_name(t);
-            self.error(e.span, bind(vm::QvtOperationalValidationVisitor_invalidInstantiatedType, &[&tn]));
+            self.error(
+                e.span,
+                bind(
+                    vm::QvtOperationalValidationVisitor_invalidInstantiatedType,
+                    &[&tn],
+                ),
+            );
         }
     }
 
     fn is_data_type(&self, t: TypeId) -> bool {
-        !matches!(self.ts.types.get(t), Type::Class(_) | Type::Module(_) | Type::ModelType(_) | Type::Null)
+        !matches!(
+            self.ts.types.get(t),
+            Type::Class(_) | Type::Module(_) | Type::ModelType(_) | Type::Null
+        )
     }
 
     fn is_string_type(&self, t: TypeId) -> bool {
         match self.ts.types.get(t) {
             Type::String => true,
-            Type::DataType(d) => self.ts.meta.data_type(*d).instance_class_name.as_deref() == Some("java.lang.String"),
+            Type::DataType(d) => {
+                self.ts.meta.data_type(*d).instance_class_name.as_deref()
+                    == Some("java.lang.String")
+            }
             _ => false,
         }
     }
@@ -685,7 +977,11 @@ impl<'r> Sema<'r> {
     /// A rough `toString` of an argument expression for messages.
     fn expr_to_string(&self, e: &ir::Expr, ctx: &Ctx<'_>) -> String {
         match &e.kind {
-            ExprKind::Local(l) => ctx.locals.get(l.index()).map(|x| x.name.clone()).unwrap_or_default(),
+            ExprKind::Local(l) => ctx
+                .locals
+                .get(l.index())
+                .map(|x| x.name.clone())
+                .unwrap_or_default(),
             ExprKind::Real(r) => format!("{r:?}"),
             ExprKind::Str(s) => format!("'{s}'"),
             ExprKind::Int(i) => i.to_string(),
@@ -698,30 +994,62 @@ impl<'r> Sema<'r> {
     fn validate_new_transformation(&mut self, e: &ir::Expr, m: ModuleId, args: &[ir::Expr]) {
         if !self.modules[m.index()].blackbox {
             let entry = self.main_operation(m);
-            let ok = entry.is_some_and(|o| self.ops[o.index()].ir.kind == OpKind::Entry && self.ops[o.index()].ir.params.is_empty());
+            let ok = entry.is_some_and(|o| {
+                self.ops[o.index()].ir.kind == OpKind::Entry
+                    && self.ops[o.index()].ir.params.is_empty()
+            });
             if !ok {
                 let n = self.modules[m.index()].name.clone();
-                self.error(e.span, bind(vm::QvtOperationalValidationVisitor_ParameterlessMainExpected, &[&n]));
+                self.error(
+                    e.span,
+                    bind(
+                        vm::QvtOperationalValidationVisitor_ParameterlessMainExpected,
+                        &[&n],
+                    ),
+                );
             }
         }
-        let formal: Vec<TypeId> = self.modules[m.index()].model_params.iter().map(|p| p.ty).collect();
+        let formal: Vec<TypeId> = self.modules[m.index()]
+            .model_params
+            .iter()
+            .map(|p| p.ty)
+            .collect();
         if args.len() == formal.len() {
             for (a, f) in args.iter().zip(formal.iter()) {
-                let compatible = match (self.ts.types.get(*f).clone(), self.ts.types.get(a.ty).clone()) {
+                let compatible = match (
+                    self.ts.types.get(*f).clone(),
+                    self.ts.types.get(a.ty).clone(),
+                ) {
                     (Type::ModelType(x), Type::ModelType(y)) => self.compatible_model_types(x, y),
                     _ => false,
                 };
                 if !compatible {
                     let an = self.type_name(a.ty);
                     let fname = self.type_name(*f);
-                    self.error(a.span, bind(vm::QvtOperationalValidationVisitor_incompatibleArgumentModelType, &[&an, &fname]));
+                    self.error(
+                        a.span,
+                        bind(
+                            vm::QvtOperationalValidationVisitor_incompatibleArgumentModelType,
+                            &[&an, &fname],
+                        ),
+                    );
                 }
             }
         } else {
             let n = self.modules[m.index()].name.clone();
             let actual: Vec<String> = args.iter().map(|a| self.type_name(a.ty)).collect();
             let formal_s: Vec<String> = formal.iter().map(|t| self.type_name(*t)).collect();
-            self.error(e.span, bind(vm::QvtOperationalValidationVisitor_unresolvedTransformationSignature, &[&n, &format!("({})", actual.join(", ")), &format!("({})", formal_s.join(", "))]));
+            self.error(
+                e.span,
+                bind(
+                    vm::QvtOperationalValidationVisitor_unresolvedTransformationSignature,
+                    &[
+                        &n,
+                        &format!("({})", actual.join(", ")),
+                        &format!("({})", formal_s.join(", ")),
+                    ],
+                ),
+            );
         }
     }
 
@@ -765,7 +1093,14 @@ fn anc_of(k: &ExprKind) -> Anc {
         ExprKind::Assign(_) => Anc::Assign,
         ExprKind::Compute(..) => Anc::Compute,
         ExprKind::Object(_) => Anc::OpBody,
-        ExprKind::Try(_) | ExprKind::Log(_) | ExprKind::Assert(_) | ExprKind::Return(_) | ExprKind::Raise(..) | ExprKind::New(_) | ExprKind::NewTransformation(..) | ExprKind::Resolve(_) => Anc::Imperative,
+        ExprKind::Try(_)
+        | ExprKind::Log(_)
+        | ExprKind::Assert(_)
+        | ExprKind::Return(_)
+        | ExprKind::Raise(..)
+        | ExprKind::New(_)
+        | ExprKind::NewTransformation(..)
+        | ExprKind::Resolve(_) => Anc::Imperative,
         _ => Anc::Ocl,
     }
 }

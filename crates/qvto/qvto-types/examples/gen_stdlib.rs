@@ -267,7 +267,10 @@ fn main() {
         }
         seen.push((section, owner));
         let list = &owner_lists[&(section, owner)];
-        let names: Vec<String> = list.iter().map(|&i| format!("StdOp::{}", ops[i].0)).collect();
+        let names: Vec<String> = list
+            .iter()
+            .map(|&i| format!("StdOp::{}", ops[i].0))
+            .collect();
         let sec = match section {
             "ocl" => "Section::Ocl",
             "qvto" => "Section::Qvto",

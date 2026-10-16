@@ -10,5 +10,5 @@ pub mod stdlib;
 pub mod ty;
 
 pub use check::{Checker, ModelTypeInfo, ModuleTypeInfo, SuperTypeError, rel};
-pub use stdlib::{owner_ops, owners, Section, StdClasses, StdLib, StdOp, StdOpDesc, StdOwner};
+pub use stdlib::{Section, StdClasses, StdLib, StdOp, StdOpDesc, StdOwner, owner_ops, owners};
 pub use ty::{CollKind, TParam, Type, TypeId, TypeTable};
