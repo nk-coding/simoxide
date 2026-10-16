@@ -155,8 +155,16 @@ where
                 _ => false,
             },
             Type::Dict(..) => matches!(v, Value::Dict(_)),
-            Type::Tuple(_) => match v {
-                Value::Tuple(tp) => tp.type_id == t.0,
+            // structural: the same part names, each value of its part's type
+            Type::Tuple(parts) => match v {
+                Value::Tuple(tp) => {
+                    tp.type_id == t.0
+                        || (tp.names.len() == parts.len()
+                            && parts.iter().all(|(n, pt)| {
+                                tp.get(n)
+                                    .is_some_and(|x| x.is_null() || self.is_kind_of(x, *pt))
+                            }))
+                }
                 _ => false,
             },
             Type::ModelType(m) => match v {
