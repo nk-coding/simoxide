@@ -15,7 +15,7 @@ use qvto_sema::ir::GlobalId;
 use qvto_sema::ir::{IntermPropId, ModuleId, OpId};
 use qvto_types::{StdOp, TypeId};
 use std::cell::RefCell;
-use std::collections::HashMap;
+use qvto_runtime::fxhash::FxHashMap as HashMap;
 use std::rc::Rc;
 
 /// A store's object handle as a dense `u32` (the VM's `ObjRef::host`).
@@ -253,18 +253,18 @@ where
             globals: vec![Value::Null; prog.ir.globals.len()],
             local: Vec::new(),
             extents: Vec::new(),
-            param_extents: HashMap::new(),
+            param_extents: HashMap::default(),
             unbound_extent: 0,
             next_extent_uri: 0,
             traces: Traces::default(),
             log: String::new(),
             diags: Vec::new(),
             opts,
-            vcache: RefCell::new(HashMap::new()),
-            interm: HashMap::new(),
+            vcache: RefCell::new(HashMap::default()),
+            interm: HashMap::default(),
             late: Vec::new(),
             prims: crate::stdlib::prims(),
-            str_counters: HashMap::new(),
+            str_counters: HashMap::default(),
             steps: 0,
             errors: Vec::new(),
             class_local: Vec::new(),
@@ -275,15 +275,15 @@ where
                 .flat_map(|c| c.feature_types.iter().copied())
                 .collect(),
             interm_info: crate::objects::IntermInfo::default(),
-            interm_vals: HashMap::new(),
-            static_vals: HashMap::new(),
-            interm_extents: HashMap::new(),
+            interm_vals: HashMap::default(),
+            static_vals: HashMap::default(),
+            interm_extents: HashMap::default(),
             inc_trace: Vec::new(),
             nested: Vec::new(),
             nested_globals: Vec::new(),
             bound_nested: Vec::new(),
             cur_transf: prog.ir.main_module,
-            regexes: RefCell::new(HashMap::new()),
+            regexes: RefCell::new(HashMap::default()),
             native: Default::default(),
             std_src_ty: TypeId::OCL_VOID,
             std_res_ty: TypeId::OCL_VOID,

@@ -13,7 +13,7 @@ use qvto_runtime::coll::Coll;
 use qvto_runtime::eq::{java_equals, java_hash};
 use qvto_runtime::{HashEnv, Value};
 use qvto_sema::ir::{Direction, OpId, ResolveKind};
-use std::collections::HashMap;
+use qvto_runtime::fxhash::FxHashMap as HashMap;
 use std::rc::Rc;
 
 #[derive(Clone, Debug)]

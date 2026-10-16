@@ -52,10 +52,10 @@ pub(crate) struct IntermInfo {
     /// Per class: an intermediate class (store or local).
     pub interm_class: Vec<bool>,
     /// Engine-held features of store objects (the attributes of intermediate classes).
-    pub vm_held: std::collections::HashSet<FeatureId>,
-    pub statics: std::collections::HashSet<FeatureId>,
+    pub vm_held: qvto_runtime::fxhash::FxHashSet<FeatureId>,
+    pub statics: qvto_runtime::fxhash::FxHashSet<FeatureId>,
     /// The initialiser of a feature: its class (index into `interm_classes`) and position.
-    pub init_of: std::collections::HashMap<FeatureId, (usize, usize)>,
+    pub init_of: qvto_runtime::fxhash::FxHashMap<FeatureId, (usize, usize)>,
 }
 
 impl IntermInfo {

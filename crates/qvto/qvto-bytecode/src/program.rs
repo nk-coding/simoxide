@@ -236,6 +236,9 @@ pub struct Program {
     pub meta_bodies: Vec<Option<(BodyCode, Vec<Reg>)>>,
     /// OCL derivations of features (`ir.derivations`).
     pub derivations: std::collections::HashMap<FeatureId, BodyCode>,
+    /// Per operation of `ir.operations`: the operation that overrides it in the end
+    /// (`extends`), itself if none.
+    pub overriding: Vec<OpId>,
 }
 
 impl Program {

@@ -122,6 +122,7 @@ pub fn compile(ir: ir::Program) -> CResult<Program> {
             compile_body(&ir, ir.main_module, b, &name, &mut consts, &mut chunks)?,
         );
     }
+    let overriding = overriding_table(&ir);
     Ok(Program {
         ir,
         consts: consts.consts,
@@ -132,7 +133,34 @@ pub fn compile(ir: ir::Program) -> CResult<Program> {
         model_type_where,
         meta_bodies,
         derivations,
+        overriding,
     })
+}
+
+/// Per operation: the last operation of the chain of operations that override it (`extends`;
+/// the first overriding operation in declaration order at each step), itself if none.
+fn overriding_table(ir: &ir::Program) -> Vec<OpId> {
+    let n = ir.operations.len();
+    let mut first: Vec<Option<u32>> = vec![None; n];
+    for (i, o) in ir.operations.iter().enumerate() {
+        if let Some(t) = o.overrides
+            && first[t.index()].is_none()
+        {
+            first[t.index()] = Some(i as u32);
+        }
+    }
+    (0..n)
+        .map(|op| {
+            let mut cur = op as u32;
+            for _ in 0..n {
+                match first[cur as usize] {
+                    Some(i) if i != cur => cur = i,
+                    _ => break,
+                }
+            }
+            OpId(cur)
+        })
+        .collect()
 }
 
 #[derive(Default)]

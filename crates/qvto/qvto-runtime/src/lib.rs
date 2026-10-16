@@ -17,6 +17,7 @@ pub mod coll;
 pub mod dict;
 pub mod display;
 pub mod eq;
+pub mod fxhash;
 pub mod identity;
 pub mod java;
 pub mod model;

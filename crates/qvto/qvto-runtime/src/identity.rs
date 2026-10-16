@@ -168,18 +168,35 @@ impl IdentityHashSource for Sequential {
 
 /// Memoised identity hashes: one value per key for the whole run, as in Java.
 pub struct IdentityHashes {
-    memo: HashMap<IdentityKey, i32>,
+    /// Host objects by index (the common key; a dense table).
+    objs: Vec<Option<i32>>,
+    memo: crate::fxhash::FxHashMap<IdentityKey, i32>,
     source: Box<dyn IdentityHashSource>,
 }
 
 impl IdentityHashes {
     pub fn new(source: Box<dyn IdentityHashSource>) -> Self {
         IdentityHashes {
-            memo: HashMap::new(),
+            objs: Vec::new(),
+            memo: Default::default(),
             source,
         }
     }
     pub fn get(&mut self, key: IdentityKey) -> i32 {
+        if let IdentityKey::Obj(o) = key
+            && !o.is_local()
+        {
+            let i = o.index() as usize;
+            if let Some(Some(h)) = self.objs.get(i) {
+                return *h;
+            }
+            let h = self.source.draw(key);
+            if self.objs.len() <= i {
+                self.objs.resize(i + 1, None);
+            }
+            self.objs[i] = Some(h);
+            return h;
+        }
         if let Some(&h) = self.memo.get(&key) {
             return h;
         }
@@ -189,6 +206,11 @@ impl IdentityHashes {
     }
     /// The value if it was already drawn.
     pub fn peek(&self, key: IdentityKey) -> Option<i32> {
+        if let IdentityKey::Obj(o) = key
+            && !o.is_local()
+        {
+            return self.objs.get(o.index() as usize).copied().flatten();
+        }
         self.memo.get(&key).copied()
     }
 }

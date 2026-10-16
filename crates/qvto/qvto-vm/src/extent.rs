@@ -10,7 +10,7 @@ use crate::vm::ObjHandle;
 use qvto_model::{ModelStore, ResourceId};
 use qvto_runtime::ObjRef;
 use qvto_sema::ir::{Direction, ModuleId};
-use std::collections::HashMap;
+use qvto_runtime::fxhash::FxHashMap as HashMap;
 
 const INITIAL_EXTENT_SIZE: usize = 150;
 
@@ -48,7 +48,7 @@ impl Extent {
             direction,
             label,
             initial: Vec::new(),
-            initial_container: HashMap::new(),
+            initial_container: HashMap::default(),
             additional: Vec::new(),
             count_after_purge: 0,
             purge_limit: INITIAL_EXTENT_SIZE,

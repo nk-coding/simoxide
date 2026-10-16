@@ -126,16 +126,9 @@ where
         if self.is_library_native(op) {
             return op;
         }
-        let ir = &self.prog.ir;
-        // the main module's chain: follow the operations that override `op` to the last one
-        let mut cur = op;
-        for _ in 0..ir.operations.len() {
-            match ir.operations.iter().position(|o| o.overrides == Some(cur)) {
-                Some(i) if OpId(i as u32) != cur => cur = OpId(i as u32),
-                _ => break,
-            }
-        }
-        cur
+        // the main module's chain: the operations that override `op` to the last one
+        // (computed with the program)
+        self.prog.overriding[op.index()]
     }
 
     fn check_depth(&self) -> VmResult<()> {
