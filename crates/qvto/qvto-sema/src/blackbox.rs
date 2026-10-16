@@ -16,6 +16,35 @@ pub struct BlackboxUnit {
     /// Eclipse failed to load (part of) the unit; the unit then has the error
     /// `Failed to load unit '<name>'. See error log for details`.
     pub load_error: bool,
+    /// For a unit that failed to load: its modules when loaded with a registry that also holds
+    /// the given packages. Eclipse loads a library without metamodels against the importing
+    /// module's registry when it looks for the implementation of a `blackbox` operation (the
+    /// first load wins); with its model types' packages the unit can load (`bug565747`).
+    pub alt: Option<(Vec<String>, Vec<BlackboxModule>)>,
+}
+
+/// The marker of an alternative load of a unit in the signature table (`<unit>#with=<uris>`).
+pub const ALT_MARKER: &str = "#with=";
+
+/// Moves the alternative loads (units named `<unit>#with=<uri,...>`) into their units.
+pub fn attach_alternatives(units: &mut Vec<(String, BlackboxUnit)>) {
+    let mut alts = Vec::new();
+    units.retain(|(name, u)| match name.split_once(ALT_MARKER) {
+        Some((base, uris)) => {
+            alts.push((
+                base.to_string(),
+                uris.split(',').filter(|s| !s.is_empty()).map(String::from).collect(),
+                u.modules.clone(),
+            ));
+            false
+        }
+        None => true,
+    });
+    for (base, uris, modules) in alts {
+        if let Some((_, u)) = units.iter_mut().find(|(n, _)| *n == base) {
+            u.alt = Some((uris, modules));
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default)]

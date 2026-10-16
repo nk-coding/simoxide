@@ -645,6 +645,7 @@ fn read_blackboxes(path: &Path) -> Result<(BlackboxEnvs, HashMap<String, String>
                 let unit = BlackboxUnit {
                     modules: Vec::new(),
                     load_error: get(4) != "OK",
+                    alt: None,
                 };
                 envs.entry(get(1).to_string())
                     .or_default()
@@ -706,6 +707,12 @@ fn read_blackboxes(path: &Path) -> Result<(BlackboxEnvs, HashMap<String, String>
             }
             _ => {}
         }
+    }
+    for e in envs.values_mut() {
+        let mut list: Vec<(String, BlackboxUnit)> = e.iter().map(|(k, (_, u))| (k.clone(), u.clone())).collect();
+        qvto_sema::attach_alternatives(&mut list);
+        let files: HashMap<String, String> = e.iter().map(|(k, (f, _))| (k.clone(), f.clone())).collect();
+        *e = list.into_iter().map(|(k, u)| { let f = files[&k].clone(); (k, (f, u)) }).collect();
     }
     Ok((envs, case_env))
 }

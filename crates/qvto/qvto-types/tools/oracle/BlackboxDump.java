@@ -183,6 +183,9 @@ public class BlackboxDump {
 		for (BlackboxUnitDescriptor d : new ArrayList<>(BlackboxRegistry.INSTANCE.getCompilationUnitDescriptors(ctx))) dumpUnit(d, registry, sb);
 	}
 
+	/** Packages a failed unit is loaded again with ({@code ALT} rows). */
+	static final String[] ALT_PACKAGES = { org.eclipse.emf.ecore.EcorePackage.eNS_URI };
+
 	static void dumpUnit(BlackboxUnitDescriptor d, EPackage.Registry registry, StringBuilder sb) {
 		String unit = d.getQualifiedName();
 		BlackboxUnit u;
@@ -193,9 +196,40 @@ public class BlackboxDump {
 			flatten(e.getDiagnostic(), msgs);
 			String err = String.join(" | ", msgs).replace('\t', ' ').replace('\n', ' ');
 			sb.append("unit\t\u0000\t").append(unit).append('\t').append(d.getURI()).append("\tERROR\t").append(err).append('\n');
+			// A library without metamodels infers Java types from the keys of its load context's
+			// registry. When Eclipse looks for the implementation of a `blackbox` operation, the
+			// context is the importing module's registry, which holds its model types' packages:
+			// the unit then loads (first load wins, `JavaBlackboxProvider.load`). The signatures
+			// with those packages, for modules whose model types use them: unit `<unit>#with=<uris>`.
+			try {
+				java.lang.reflect.Method unload = null;
+				for (Class<?> c = d.getClass(); c != null && unload == null; c = c.getSuperclass()) {
+					try {
+						unload = c.getDeclaredMethod("unload");
+					} catch (NoSuchMethodException x) {
+						// superclass
+					}
+				}
+				if (unload == null) return;
+				unload.setAccessible(true);
+				unload.invoke(d);
+				EPackage.Registry alt = new org.eclipse.emf.ecore.impl.EPackageRegistryImpl(registry);
+				for (String uri : ALT_PACKAGES) alt.put(uri, registry.getEPackage(uri));
+				BlackboxUnit au = d.load(new LoadContext(alt));
+				String key = unit + "#with=" + String.join(",", ALT_PACKAGES);
+				sb.append("unit\t\u0000\t").append(key).append('\t').append(d.getURI()).append("\tOK\n");
+				dumpModules(d, au, key, sb);
+				unload.invoke(d);
+			} catch (BlackboxException | ReflectiveOperationException x) {
+				// no alternative
+			}
 			return;
 		}
 		sb.append("unit\t\u0000\t").append(unit).append('\t').append(d.getURI()).append("\tOK\n");
+		dumpModules(d, u, unit, sb);
+	}
+
+	static void dumpModules(BlackboxUnitDescriptor d, BlackboxUnit u, String unit, StringBuilder sb) {
 		Map<String, Object> handles = moduleHandles(d);
 		for (QvtOperationalModuleEnv env : u.getElements()) {
 			Module module = env.getModuleContextType();

@@ -30,7 +30,10 @@ mod units;
 mod validate;
 mod vars;
 
-pub use blackbox::{BlackboxModule, BlackboxOp, BlackboxOpKind, BlackboxParam, BlackboxUnit};
+pub use blackbox::{
+    ALT_MARKER, BlackboxModule, BlackboxOp, BlackboxOpKind, BlackboxParam, BlackboxUnit,
+    attach_alternatives,
+};
 pub use diag::{Problem, Problems, Severity};
 pub use units::{
     Compilation, MetaMultiplicity, MetaOperation, UnitResolver, UnitResult, UnitSource, compile,

@@ -116,17 +116,20 @@ impl Catalog {
                     let uri = get(3);
                     let file_name = uri.rsplit('/').next().unwrap_or(uri).to_string();
                     let env = cat.envs.entry(get(1).to_string()).or_default();
-                    index.insert((get(1).to_string(), get(2).to_string()), env.len());
-                    env.push(CatalogUnit {
-                        qualified_name: get(2).to_string(),
-                        file_name,
-                        unit: Rc::new(BlackboxUnit::default()),
-                    });
+                    if !get(2).contains(qvto_sema::ALT_MARKER) {
+                        index.insert((get(1).to_string(), get(2).to_string()), env.len());
+                        env.push(CatalogUnit {
+                            qualified_name: get(2).to_string(),
+                            file_name,
+                            unit: Rc::new(BlackboxUnit::default()),
+                        });
+                    }
                     units.insert(
                         (get(1).to_string(), get(2).to_string()),
                         BlackboxUnit {
                             modules: Vec::new(),
                             load_error: get(4) != "OK",
+                            alt: None,
                         },
                     );
                 }
@@ -185,9 +188,16 @@ impl Catalog {
                 _ => {}
             }
         }
+        let mut by_env: HashMap<String, Vec<(String, BlackboxUnit)>> = HashMap::new();
         for ((env, unit), u) in units {
-            let i = index[&(env.clone(), unit)];
-            cat.envs.get_mut(&env).expect("env")[i].unit = Rc::new(u);
+            by_env.entry(env).or_default().push((unit, u));
+        }
+        for (env, mut list) in by_env {
+            qvto_sema::attach_alternatives(&mut list);
+            for (unit, u) in list {
+                let i = index[&(env.clone(), unit)];
+                cat.envs.get_mut(&env).expect("env")[i].unit = Rc::new(u);
+            }
         }
         Ok(cat)
     }

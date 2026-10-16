@@ -152,12 +152,27 @@ impl<'r> Sema<'r> {
             } else {
                 native.into_iter().map(|(b, n)| (b, Some(n))).collect()
             };
+        // the packages of the module's model types (its environment's registry)
+        let mut uris: Vec<String> = Vec::new();
+        for (_, mt) in &self.modules[module.index()].model_types {
+            for &p in &self.model_types[mt.index()].decl.packages {
+                if let Some(u) = &self.ts.meta.package(p).ns_uri {
+                    uris.push(u.to_string());
+                }
+            }
+        }
         let mut found = Vec::new();
         for (unit, only) in candidates {
-            if unit.load_error {
-                continue;
-            }
-            for bm in &unit.modules {
+            let modules = if !unit.load_error {
+                &unit.modules
+            } else {
+                // a registered unit first loaded here, with the module's registry
+                match &unit.alt {
+                    Some((need, ms)) if only.is_none() && need.iter().all(|u| uris.contains(u)) => ms,
+                    _ => continue,
+                }
+            };
+            for bm in modules {
                 if only.as_ref().is_some_and(|n| *n != bm.name) {
                     continue;
                 }
