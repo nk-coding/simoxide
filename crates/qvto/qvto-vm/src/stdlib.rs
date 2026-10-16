@@ -572,6 +572,43 @@ where
         {
             return Ok(Value::Invalid);
         }
+        // classic OCL: an invalid argument of a one-argument operation (other than the boolean
+        // ones) makes the call invalid
+        if op.desc().section == Section::Ocl
+            && args.len() == 2
+            && a1.is_invalid()
+            && !matches!(prim, And | Or | Implies | Xor | Not)
+        {
+            return Ok(Value::Invalid);
+        }
+        // so do QVTo's collection handlers (`SetTypeOperations`, `OrderedSetTypeOperations`,
+        // `CollectionTypeOperations`, shared by List)
+        if matches!(
+            prim,
+            QIncluding
+                | LIncluding
+                | QExcluding
+                | LExcluding
+                | QAppend
+                | LAppend
+                | QPrepend
+                | LPrepend
+                | QIndexOf
+                | LIndexOf
+                | QIncludes
+                | QExcludes
+                | QCount
+                | QUnion
+                | LUnion
+                | QIntersection
+                | QMinus
+                | QSymDiff
+        ) && a1.is_invalid()
+            || matches!(prim, QInsertAt | LInsertAtIndex)
+                && args.get(2).is_some_and(|v| v.is_invalid())
+        {
+            return Ok(Value::Invalid);
+        }
         Ok(match prim {
             Eq | Ne | QEq | QNe => {
                 if s.is_invalid() || a1.is_invalid() {
@@ -874,7 +911,43 @@ where
                 },
                 None => Value::Invalid,
             },
-            Product => self.swallow("product() is not supported yet"),
+            Product => {
+                // CollectionUtil.product: a Set of Tuple(first, second) of the call's element type
+                let (Some(_), Some(_)) = (self.as_coll(&s), self.as_coll(&a1)) else {
+                    return Ok(Value::Invalid);
+                };
+                let tt = self
+                    .prog
+                    .ir
+                    .types
+                    .element(self.std_res_ty)
+                    .unwrap_or(TypeId::OCL_VOID);
+                let names: Rc<[Str]> = match self.prog.ir.types.get(tt) {
+                    qvto_types::Type::Tuple(parts) => parts.iter().map(|(n, _)| Str::new(n)).collect(),
+                    _ => [Str::new("first"), Str::new("second")].into_iter().collect(),
+                };
+                let pos = |w: &str, d: usize| names.iter().position(|n| n.to_string() == w).unwrap_or(d);
+                let (first, second) = (pos("first", 0), pos("second", 1));
+                let xs = Iter::of(&s).items;
+                let ys = Iter::of(&a1).items;
+                let mut out = self.new_coll(qvto_bytecode::insn::coll_kind::SET);
+                for x in xs.iter() {
+                    for y in ys.iter() {
+                        let mut vals = vec![Value::Null; names.len()];
+                        vals[first] = x.clone();
+                        if second < vals.len() {
+                            vals[second] = y.clone();
+                        }
+                        let t = qvto_runtime::tuple::Tuple::new(
+                            tt.0,
+                            names.clone(),
+                            vals.into_boxed_slice(),
+                        );
+                        push(&mut out, Value::Tuple(Rc::new(t)), &self.env);
+                    }
+                }
+                out
+            }
             SelectByKind | SelectByType | LSelectByKind | LSelectByType => {
                 let Some(t) = type_arg(&a1) else {
                     return Ok(Value::Invalid);

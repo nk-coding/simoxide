@@ -84,12 +84,13 @@ other than `eContainer`/`eContents`/`eAllContents`/`eIsProxy` (no OCL bodies of 
   overflow with Eclipse's stack trace text, `raise`/`try`, fatal assertions, mappings with
   traces and `resolveone`, `when` and `xmap`, out parameters, disjuncts, virtual dispatch,
   collections, `Dict` and `List`, objects in out extents.
-- End to end (`qvto conform --engine qvto`, the analyser of branch `q2` in progress): 338 of
+- End to end (`qvto conform --engine qvto`, the analyser of branch `q2` in progress): 400 of
   the 494 runnable Eclipse cases equal the Java runner strictly (models, log, severity, code,
-  stack, problems), 339 pass Eclipse's checks; `TestQvtInterpreter` 192 of 309. Of the
-  failures, 114 are cases the analyser rejects and 29 parser cases with other diagnostics;
-  most others trace back to the analyser's output (source ids in stack traces, `raise 'msg'`,
-  overloads) or Q4 features. Corpus: 5 of 24 (the others do not compile yet).
+  stack, problems), 401 pass Eclipse's checks, fast mode the same; `TestQvtInterpreter` 247 of
+  309. Of the failures, 49 are cases the analyser rejects and 22 parser cases with other
+  diagnostics; most others trace back to the analyser's output (source ids in stack traces,
+  overloads such as `List::insertAt`, QVTo's `Sequence::insertAt` shadowing OCL's) or Q4
+  features (blackboxes, `Model::copy`). Corpus: 22 of 24 strictly.
 - Performance (`qvto bench --java`, release build, median of 20 runs; Java: the reference
   runner, same cases repeated in one JVM, median of the second half):
 

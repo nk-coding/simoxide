@@ -411,22 +411,15 @@ where
         self.assign_value(ty, old, rhs, reset)
     }
 
-    /// `callSetter` of an undefined value on a module property: a collection property is
-    /// cleared by `:=` and unchanged by `+=`; a single-valued one is unset (its type default)
-    /// by `:=` of invalid or of null for primitive types, else unchanged.
+    /// `callSetter` of an undefined value on a module property. Module properties are
+    /// single-valued features (also of collection types) whose OCL types accept null: `assign`
+    /// gives the new value, an invalid one unsets the feature (null) on `:=` and leaves it
+    /// unchanged on `+=`.
     pub(crate) fn property_undefined(&self, ty: TypeId, old: Value, rhs: Value, reset: bool) -> Value {
-        let types = &self.prog.ir.types;
-        if types.is_collection_like(ty) {
-            return if reset { self.default_value(ty) } else { old };
-        }
-        let primitive = matches!(
-            types.get(ty),
-            Type::Boolean | Type::Integer | Type::Real | Type::UnlimitedNatural
-        );
-        if rhs.is_invalid() || primitive {
-            if reset { self.default_value(ty) } else { old }
+        if rhs.is_invalid() {
+            if reset { Value::Null } else { old }
         } else {
-            rhs
+            self.assign_value(ty, old, rhs, reset)
         }
     }
 

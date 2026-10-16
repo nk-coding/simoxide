@@ -183,6 +183,8 @@ where
     pub(crate) cur_transf: ModuleId,
     /// Static type of the receiver of the current `CallStdX`.
     pub(crate) std_src_ty: TypeId,
+    /// The static type of that call.
+    pub(crate) std_res_ty: TypeId,
     pub(crate) regexes: RefCell<HashMap<(String, bool), Result<regex::Regex, String>>>,
 }
 
@@ -249,6 +251,7 @@ where
             cur_transf: prog.ir.main_module,
             regexes: RefCell::new(HashMap::new()),
             std_src_ty: TypeId::OCL_VOID,
+            std_res_ty: TypeId::OCL_VOID,
         };
         if let Some(src) = vm.opts.id_source.take() {
             vm.env = RunEnv::new(vm.opts.mode, Some(src));
@@ -681,12 +684,14 @@ where
                         src_unlimited,
                         arg_unlimited,
                         src_ty,
+                        res_ty,
                     } = chunk.sites[site as usize]
                     else {
                         unreachable!()
                     };
                     let at = base + b as usize;
                     self.std_src_ty = src_ty;
+                    self.std_res_ty = res_ty;
                     match self.call_std(op, at, src_unlimited, arg_unlimited) {
                         Ok(v) => w!(self, base, dst) = v,
                         Err(e) => fail!(e),

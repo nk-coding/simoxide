@@ -37,6 +37,8 @@ pub enum Site {
         /// The receiver's static type (`sum` of an empty collection: `0`, `0.0` or null by
         /// element type).
         src_ty: TypeId,
+        /// The call's static type (`product`: the tuple type of its elements).
+        res_ty: TypeId,
     },
     Mapping {
         op: OpId,

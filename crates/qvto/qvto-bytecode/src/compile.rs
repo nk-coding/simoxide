@@ -1337,13 +1337,14 @@ impl<'a> Builder<'a> {
         let base = self.call_args(c)?;
         let src_unlimited = c.source.as_ref().is_some_and(|s| self.is_unlimited(s));
         let arg_unlimited = c.args.first().is_some_and(|a| self.is_unlimited(a));
-        let needs_type = op.name() == "sum";
+        let needs_type = matches!(op.name(), "sum" | "product");
         if src_unlimited || arg_unlimited || needs_type {
             let site = self.site(Site::Std {
                 op,
                 src_unlimited,
                 arg_unlimited,
                 src_ty: c.source.as_ref().map(|s| s.ty).unwrap_or(TypeId::OCL_VOID),
+                res_ty: e.ty,
             })?;
             self.emit(Insn::CallStdX { dst, base, site });
         } else {
@@ -1378,13 +1379,14 @@ impl<'a> Builder<'a> {
         }
         let src_unlimited = c.source.as_ref().is_some_and(|s| self.is_unlimited(s));
         let arg_unlimited = c.args.first().is_some_and(|a| self.is_unlimited(a));
-        let needs_type = op.name() == "sum";
+        let needs_type = matches!(op.name(), "sum" | "product");
         if src_unlimited || arg_unlimited || needs_type {
             let site = self.site(Site::Std {
                 op,
                 src_unlimited,
                 arg_unlimited,
                 src_ty: c.source.as_ref().map(|s| s.ty).unwrap_or(TypeId::OCL_VOID),
+                res_ty: e.ty,
             })?;
             self.emit(Insn::CallStdX { dst, base, site });
         } else {
