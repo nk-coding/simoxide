@@ -8,7 +8,7 @@ use crate::vm::{Diag, ObjHandle, Vm};
 use qvto_bytecode::Site;
 use qvto_model::ModelStore;
 use qvto_runtime::{ObjRef, Value};
-use qvto_sema::ir::{Direction, GlobalKind};
+use qvto_sema::ir::{Direction, GlobalKind, ModuleId};
 use qvto_types::Type;
 
 /// The result of a run, in the terms of Eclipse's `ExecutionDiagnostic`.
@@ -211,14 +211,22 @@ where
         for (mi, m) in ir.modules.iter().enumerate() {
             self.init_module(mi, m)?;
         }
+        self.run_transformation_module(ir.main_module)
+    }
+
+    /// Model type conditions, the entry operation, deferred assignments of a transformation
+    /// whose model parameters are bound.
+    fn run_transformation_module(&mut self, module: ModuleId) -> VmResult<Value> {
+        let prog = self.prog;
+        let ir = &prog.ir;
         // model type conditions of the non-out parameters
-        let main = &ir.modules[ir.main_module.index()];
+        let main = &ir.modules[module.index()];
         for (i, mp) in main.model_params.iter().enumerate() {
             if mp.direction == Direction::Out {
                 continue;
             }
             if let Some(code) = &prog.model_type_where[mp.model_type.index()] {
-                let x = self.param_extents[&(ir.main_module.0, i as u32)];
+                let x = self.param_extents[&(module.0, i as u32)];
                 let ok = self.run_body(code, Value::Model(x as u32))?;
                 if !ok.is_true() {
                     return Err(self.error(
@@ -247,7 +255,7 @@ where
             if let Some(x) = p.extent {
                 matched = x.index as usize;
             }
-            match self.param_extents.get(&(ir.main_module.0, matched as u32)) {
+            match self.param_extents.get(&(module.0, matched as u32)) {
                 Some(&x) => {
                     if let Some(&o) = self.extents[x].initial.first() {
                         args.push(Value::Obj(o));
@@ -268,6 +276,101 @@ where
         let v = self.execute_op(entry, Value::Null, args)?;
         self.process_deferred()?;
         Ok(v)
+    }
+
+    /// `new T(m1, ...)`: a transformation instance on the given models, its properties
+    /// initialised (`callTransformationImplicitConstructor`).
+    pub(crate) fn new_transformation(
+        &mut self,
+        module: ModuleId,
+        at: usize,
+        nargs: usize,
+    ) -> VmResult<Value> {
+        let mut models = Vec::with_capacity(nargs);
+        for i in 0..nargs {
+            match self.regs[at + i] {
+                Value::Model(x) => models.push(x as usize),
+                _ => {
+                    return Err(self.runtime_error("Undefined model passed to transformation"));
+                }
+            }
+        }
+        let k = self.nested.len();
+        self.nested.push((module, models));
+        let saved = self.bind_nested(k);
+        let m = &self.prog.ir.modules[module.index()];
+        let r = self.init_module(module.index(), m);
+        self.unbind_nested(module, saved);
+        r?;
+        Ok(Value::Instance(NESTED | k as u32))
+    }
+
+    fn bind_nested(&mut self, k: usize) -> Vec<Option<usize>> {
+        let (module, models) = self.nested[k].clone();
+        let n = self.prog.ir.modules[module.index()].model_params.len();
+        let mut saved = Vec::with_capacity(n);
+        for i in 0..n {
+            let key = (module.0, i as u32);
+            saved.push(self.param_extents.get(&key).copied());
+            match models.get(i) {
+                Some(&x) => {
+                    self.param_extents.insert(key, x);
+                }
+                None => {
+                    self.param_extents.remove(&key);
+                }
+            }
+        }
+        saved
+    }
+
+    fn unbind_nested(&mut self, module: ModuleId, saved: Vec<Option<usize>>) {
+        for (i, s) in saved.into_iter().enumerate() {
+            let key = (module.0, i as u32);
+            match s {
+                Some(x) => {
+                    self.param_extents.insert(key, x);
+                }
+                None => {
+                    self.param_extents.remove(&key);
+                }
+            }
+        }
+    }
+
+    /// `Transformation::transform()`: runs a transformation instance; the result is a `Status`
+    /// (failed with the exception for QVT exceptions other than interruptions).
+    pub(crate) fn transform(&mut self, v: &Value) -> VmResult<Value> {
+        let k = match v {
+            Value::Instance(i) if i & NESTED != 0 => (i & !NESTED) as usize,
+            _ => return Ok(Value::Invalid),
+        };
+        let module = self.nested[k].0;
+        if self.prog.ir.modules[module.index()].entry.is_none() {
+            return Ok(Value::Invalid);
+        }
+        let saved = self.bind_nested(k);
+        let saved_transf = std::mem::replace(&mut self.cur_transf, module);
+        let saved_late = std::mem::take(&mut self.late);
+        let r = self.run_transformation_module(module);
+        self.late = saved_late;
+        self.cur_transf = saved_transf;
+        self.unbind_nested(module, saved);
+        let status_class = self.prog.ir.std_classes.status;
+        let (ok, exc) = match r {
+            Ok(_) => (true, Value::Null),
+            Err(u) => {
+                let e = u.error().clone();
+                if e.kind == ErrorKind::Interrupted {
+                    return Err(u);
+                }
+                let exc = self.exception_value(&e);
+                (false, exc)
+            }
+        };
+        let o = self.new_local(status_class);
+        self.local[o.index() as usize].status = Some((ok, exc));
+        Ok(Value::Obj(o))
     }
 
     fn init_module(&mut self, mi: usize, m: &qvto_sema::ir::Module) -> VmResult<()> {
@@ -449,3 +552,6 @@ fn generated_param(name: &str) -> bool {
 fn direction_compatible(main: Direction, other: Direction) -> bool {
     main != Direction::In || other == Direction::In
 }
+
+/// The bit of `Value::Instance` that marks instances made with `new T(...)`.
+pub(crate) const NESTED: u32 = 1 << 31;

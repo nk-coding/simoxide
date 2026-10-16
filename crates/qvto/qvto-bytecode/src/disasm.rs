@@ -80,6 +80,7 @@ fn insn(p: &Program, c: &Chunk, i: &crate::Insn) -> String {
                 | CallMapping { site: x, .. }
                 | CallMeta { site: x, .. }
                 | New { site: x, .. }
+                | NewTransformation { site: x, .. }
                 | GetPropW { site: x, .. }
                 | GetTuple { site: x, .. }
                 | GetInterm { site: x, .. }

@@ -77,6 +77,8 @@ pub struct LocalObj {
     pub slots: Vec<Value>,
     /// Exceptions: the message and the stack trace.
     pub exception: Option<(Option<String>, Vec<StackElem>)>,
+    /// `Status`: success and the raised exception.
+    pub status: Option<(bool, Value)>,
 }
 
 /// A frame of the call stack (for stack traces).
@@ -174,6 +176,11 @@ where
     pub(crate) class_local: Vec<bool>,
     /// Virtual tables computed by the VM where the IR has none (see `calls::vtable`).
     pub(crate) vtables: Vec<Vec<OpId>>,
+    /// Transformation instances made with `new T(...)`: the module and the extents of its
+    /// model parameters (`Value::Instance(NESTED | index)`).
+    pub(crate) nested: Vec<(ModuleId, Vec<usize>)>,
+    /// The transformation whose model parameters receive created objects by default.
+    pub(crate) cur_transf: ModuleId,
     /// Static type of the receiver of the current `CallStdX`.
     pub(crate) std_src_ty: TypeId,
     pub(crate) regexes: RefCell<HashMap<(String, bool), Result<regex::Regex, String>>>,
@@ -238,6 +245,8 @@ where
             errors: Vec::new(),
             class_local: Vec::new(),
             vtables: Vec::new(),
+            nested: Vec::new(),
+            cur_transf: prog.ir.main_module,
             regexes: RefCell::new(HashMap::new()),
             std_src_ty: TypeId::OCL_VOID,
         };
@@ -733,6 +742,18 @@ where
                         Err(e) => fail!(e),
                     }
                 }
+                Insn::NewTransformation { dst, base: b, site } => {
+                    set_pc!();
+                    let Site::NewTransformation { module, nargs } = chunk.sites[site as usize]
+                    else {
+                        unreachable!()
+                    };
+                    let at = base + b as usize;
+                    match self.new_transformation(module, at, nargs as usize) {
+                        Ok(v) => w!(self, base, dst) = v,
+                        Err(e) => fail!(e),
+                    }
+                }
                 Insn::GetProp { dst, obj, feature } => {
                     let o = std::mem::take(&mut w!(self, base, obj));
                     let res = self.get_prop(&o, FeatureId(feature as u32));
@@ -1113,6 +1134,10 @@ where
             names,
             values.into_boxed_slice(),
         )))
+    }
+
+    pub(crate) fn exception_value(&mut self, e: &QvtError) -> Value {
+        self.exception_object(e)
     }
 
     fn exception_object(&mut self, e: &QvtError) -> Value {

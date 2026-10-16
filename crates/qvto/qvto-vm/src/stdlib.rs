@@ -217,6 +217,11 @@ pub enum Prim {
     MAllInstances,
     MCopy,
     MCreateEmptyModel,
+    // Transformation, Status
+    TTransform,
+    StSucceeded,
+    StFailed,
+    StRaisedException,
     // module
     Dump,
     /// Declared by Eclipse but not implemented there (or not here yet).
@@ -443,6 +448,10 @@ fn prim_of(op: StdOp) -> Prim {
             (StdOwner::Model, "copy") => MCopy,
             (StdOwner::Model, "createEmptyModel") => MCreateEmptyModel,
             (StdOwner::Stdlib, "dump") => Dump,
+            (StdOwner::Transformation, "transform") => TTransform,
+            (StdOwner::Status, "succeeded") => StSucceeded,
+            (StdOwner::Status, "failed") => StFailed,
+            (StdOwner::Status, "raisedException") => StRaisedException,
             _ => Unsupported,
         },
     }
@@ -1295,6 +1304,18 @@ where
                 self.remove_element(*x as usize, *r);
                 Value::Null
             }
+            TTransform => return self.transform(&s),
+            StSucceeded | StFailed | StRaisedException => match &s {
+                Value::Obj(r) if r.is_local() => match &self.local[r.index() as usize].status {
+                    Some((ok, exc)) => match prim {
+                        StSucceeded => Value::Bool(*ok),
+                        StFailed => Value::Bool(!*ok),
+                        _ => exc.clone(),
+                    },
+                    None => Value::Invalid,
+                },
+                _ => Value::Invalid,
+            },
             MCopy | MCreateEmptyModel | Unsupported => {
                 return Err(
                     self.runtime_error(format!("operation '{}' is not supported", op.desc().name))

@@ -173,7 +173,14 @@ where
                 _ => false,
             },
             Type::Module(m) => match v {
-                Value::Instance(i) => *i == *m || self.module_extends(*i, *m),
+                Value::Instance(i) => {
+                    let i = if i & crate::run::NESTED != 0 {
+                        self.nested[(i & !crate::run::NESTED) as usize].0.0
+                    } else {
+                        *i
+                    };
+                    i == *m || self.module_extends(i, *m)
+                }
                 _ => false,
             },
             Type::TypeType(_) => matches!(v, Value::Type(_)),

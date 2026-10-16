@@ -106,6 +106,7 @@ where
             class,
             slots: vec![Value::Null; n],
             exception: None,
+            status: None,
         });
         ObjRef::local((self.local.len() - 1) as u32)
     }
@@ -224,7 +225,8 @@ where
             return self.unbound_extent;
         }
         let ir = &self.prog.ir;
-        let main = &ir.modules[ir.main_module.index()];
+        let cur = self.cur_transf;
+        let main = &ir.modules[cur.index()];
         let root = self.root_package(ir.meta.class(class).package);
         for (i, mp) in main.model_params.iter().enumerate() {
             if mp.direction == Direction::In {
@@ -232,7 +234,7 @@ where
             }
             let mt = &ir.model_types[mp.model_type.index()];
             if mt.packages.first() == Some(&root)
-                && let Some(&e) = self.param_extents.get(&(ir.main_module.0, i as u32))
+                && let Some(&e) = self.param_extents.get(&(cur.0, i as u32))
             {
                 return e;
             }
@@ -241,7 +243,7 @@ where
             if mp.direction == Direction::In {
                 continue;
             }
-            if let Some(&e) = self.param_extents.get(&(ir.main_module.0, i as u32)) {
+            if let Some(&e) = self.param_extents.get(&(cur.0, i as u32)) {
                 return e;
             }
         }

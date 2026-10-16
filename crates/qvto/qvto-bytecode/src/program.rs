@@ -50,6 +50,10 @@ pub enum Site {
         constructor: Option<OpId>,
         nargs: u16,
     },
+    NewTransformation {
+        module: ModuleId,
+        nargs: u16,
+    },
     Feature(FeatureId),
     /// A tuple part name.
     Name(Box<str>),

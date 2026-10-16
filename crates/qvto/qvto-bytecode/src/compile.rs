@@ -1053,15 +1053,19 @@ impl<'a> Builder<'a> {
                 self.ip = e.span.start;
                 self.release(m);
             }
-            ExprKind::NewTransformation(_, args) => {
-                for a in args {
-                    self.stmt(a)?;
+            ExprKind::NewTransformation(module, args) => {
+                let m = self.mark();
+                let base = self.alloc_n(args.len().max(1) as u32)?;
+                for (i, a) in args.iter().enumerate() {
+                    self.expr(a, base + i as Reg)?;
                 }
-                let site = self.site(Site::Unsupported(
-                    "instantiation of a transformation (new T(...)) is not supported yet".into(),
-                ))?;
-                self.emit(Insn::Unsupported { site });
-                self.emit(Insn::LoadInvalid { dst });
+                let site = self.site(Site::NewTransformation {
+                    module: *module,
+                    nargs: args.len() as u16,
+                })?;
+                self.emit(Insn::NewTransformation { dst, base, site });
+                self.ip = e.span.start;
+                self.release(m);
             }
             ExprKind::Resolve(r) => self.resolve(r, dst)?,
         }
