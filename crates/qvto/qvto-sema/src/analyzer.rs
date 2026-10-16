@@ -70,6 +70,8 @@ pub(crate) struct Sema<'r> {
     pub op_extras: Vec<Vec<crate::env::LocalExtra>>,
     /// Declared OCL types of intermediate class features (the registry keeps a classifier).
     pub interm_feature_types: HashMap<qvto_model::FeatureId, TypeId>,
+    /// `static` features of intermediate classes.
+    pub interm_static: std::collections::HashSet<qvto_model::FeatureId>,
     /// Package of placeholder data types for intermediate features of non-classifier types.
     pub placeholder_pkg: Option<qvto_model::PackageId>,
     /// Source references of mapping extensions per mapping: inherits, disjuncts, merges
@@ -120,6 +122,7 @@ impl<'r> Sema<'r> {
             late_resolves: Vec::new(),
             op_extras: Vec::new(),
             interm_feature_types: HashMap::new(),
+            interm_static: std::collections::HashSet::new(),
             placeholder_pkg: None,
             ext_refs: HashMap::new(),
             meta_ops: Vec::new(),

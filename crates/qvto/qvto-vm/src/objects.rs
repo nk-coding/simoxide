@@ -17,9 +17,10 @@ use qvto_types::{CollKind, Type, TypeId};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Which classes have engine-local instances: QVTo's library classes and the intermediate
-/// classes of the program.
-pub fn local_classes(p: &Program) -> Vec<bool> {
+/// Which classes have engine-local instances: QVTo's library classes, the exception classes
+/// of the program, and its intermediate classes unless the store took them
+/// ([`IntermInfo::in_store`]).
+pub fn local_classes(p: &Program, interm_in_store: bool) -> Vec<bool> {
     let meta = &p.ir.meta;
     let mut v = vec![false; meta.class_count()];
     for c in meta.classes() {
@@ -27,10 +28,93 @@ pub fn local_classes(p: &Program) -> Vec<bool> {
             v[c.index()] = true;
         }
     }
+    let exception = p.ir.std_classes.exception;
     for ic in &p.ir.interm_classes {
-        v[ic.class.index()] = true;
+        if !interm_in_store || ic.exception || meta.is_subclass(ic.class, exception) {
+            v[ic.class.index()] = true;
+        }
     }
     v
+}
+
+/// Instances of intermediate classes. Eclipse makes them dynamic EMF objects of the
+/// `_INTERMEDIATE` package (`IntermediateClassFactory`), in an intermediate extent of the
+/// transformation: references have EMF's semantics (containment, opposites, container
+/// references), also towards model objects. When the store accepts the program's classes
+/// ([`ModelStore::extend_meta`]), they are store objects whose references the store keeps; the
+/// attributes (OCL-typed: collections, tuples, `OclAny`, ...) and the `static` features are
+/// kept by the engine. Otherwise they are engine-local objects without EMF semantics.
+#[derive(Default)]
+pub(crate) struct IntermInfo {
+    pub in_store: bool,
+    /// Per class: an intermediate class whose instances are store objects.
+    pub store_class: Vec<bool>,
+    /// Per class: an intermediate class (store or local).
+    pub interm_class: Vec<bool>,
+    /// Engine-held features of store objects (the attributes of intermediate classes).
+    pub vm_held: std::collections::HashSet<FeatureId>,
+    pub statics: std::collections::HashSet<FeatureId>,
+    /// The initialiser of a feature: its class (index into `interm_classes`) and position.
+    pub init_of: std::collections::HashMap<FeatureId, (usize, usize)>,
+}
+
+impl IntermInfo {
+    pub fn new<S: ModelStore>(p: &Program, store: &mut S) -> IntermInfo {
+        let ir = &p.ir;
+        let mut info = IntermInfo::default();
+        if ir.interm_classes.is_empty() {
+            return info;
+        }
+        let meta = &ir.meta;
+        let exception = ir.std_classes.exception;
+        let user: Vec<ClassId> = ir
+            .interm_classes
+            .iter()
+            .filter(|ic| !ic.exception && !meta.is_subclass(ic.class, exception))
+            .map(|ic| ic.class)
+            .collect();
+        if !user.is_empty() {
+            info.in_store = if store.meta().extends(meta) && meta.extends(store.meta()) {
+                true
+            } else {
+                // the store checks changeability on `set`; Eclipse initialises `readonly`
+                // features with the feature made changeable for a moment
+                let mut m = meta.clone();
+                for &c in &user {
+                    for f in m.class(c).features.clone() {
+                        m.feature_mut(f).changeable = true;
+                    }
+                }
+                store.extend_meta(&m)
+            };
+        }
+        info.store_class = vec![false; meta.class_count()];
+        info.interm_class = vec![false; meta.class_count()];
+        for (ci, ic) in ir.interm_classes.iter().enumerate() {
+            info.interm_class[ic.class.index()] = true;
+            if info.in_store && user.contains(&ic.class) {
+                info.store_class[ic.class.index()] = true;
+                for &f in &meta.class(ic.class).features {
+                    if !meta.feature(f).is_reference() {
+                        info.vm_held.insert(f);
+                    }
+                }
+            }
+            info.statics.extend(ic.static_features.iter().copied());
+            for (i, (f, _)) in p.interm_inits[ci].iter().enumerate() {
+                info.init_of.insert(*f, (ci, i));
+            }
+        }
+        info
+    }
+
+    pub fn is_store_class(&self, c: ClassId) -> bool {
+        self.store_class.get(c.index()).copied().unwrap_or(false)
+    }
+
+    pub fn is_interm_class(&self, c: ClassId) -> bool {
+        self.interm_class.get(c.index()).copied().unwrap_or(false)
+    }
 }
 
 /// The Java number class an assigned value is converted to (`NumberConversions.convertNumber`).
@@ -126,9 +210,14 @@ where
         }
         if self.is_local_class(class) {
             let o = self.new_local(class);
-            self.init_local_features(o, class)?;
             let x = self.default_extent(class, extent);
-            self.put_to_extent(o, x)?;
+            if self.interm_info.is_interm_class(class) {
+                self.put_to_extent(o, x)?;
+                self.init_interm_features(o, class)?;
+            } else {
+                self.init_interm_features(o, class)?;
+                self.put_to_extent(o, x)?;
+            }
             return Ok(Value::Obj(o));
         }
         let h = match self.store.create(class) {
@@ -143,6 +232,9 @@ where
         let o = ObjRef::host(h.to_u32());
         let x = self.default_extent(class, extent);
         self.put_to_extent(o, x)?;
+        if self.interm_info.is_store_class(class) {
+            self.init_interm_features(o, class)?;
+        }
         Ok(Value::Obj(o))
     }
 
@@ -152,31 +244,39 @@ where
         format!("{}::{}", meta.package_path(ci.package, "::"), ci.name)
     }
 
-    fn init_local_features(&mut self, o: ObjRef, class: ClassId) -> VmResult<()> {
-        let meta = &self.prog.ir.meta;
-        let feats: Vec<FeatureId> = meta.class(class).all_features.to_vec();
-        for (slot, f) in feats.iter().enumerate() {
-            let v = self.feature_default(*f);
-            self.local[o.index() as usize].slots[slot] = v;
-        }
-        // initialisers of the class and its intermediate superclasses
+    /// `IntermediateClassFactory.doInstancePropertyInit`: every feature in
+    /// `eAllStructuralFeatures` order gets its initialiser's value, else (or for null) the type
+    /// default, through `callSetter` with reset; an initialised `static` feature is skipped.
+    fn init_interm_features(&mut self, o: ObjRef, class: ClassId) -> VmResult<()> {
         let prog = self.prog;
-        for (ci, ic) in prog.ir.interm_classes.iter().enumerate() {
-            if !prog.ir.meta.is_subclass(class, ic.class) {
+        let meta = &prog.ir.meta;
+        let feats: Vec<FeatureId> = meta.class(class).all_features.to_vec();
+        if o.is_local() {
+            for (slot, f) in feats.iter().enumerate() {
+                let v = self.feature_default(*f);
+                self.local[o.index() as usize].slots[slot] = v;
+            }
+            if !self.interm_info.is_interm_class(class) {
+                return Ok(());
+            }
+        }
+        for f in feats {
+            if self.interm_info.statics.contains(&f) && self.static_vals.contains_key(&f) {
                 continue;
             }
-            for (f, code) in &prog.interm_inits[ci] {
-                let v = self.run_body(code, Value::Obj(o))?;
-                let v = if v.is_null() {
-                    self.feature_default(*f)
-                } else {
-                    v
-                };
-                // `callSetter(instance, feature, value, isUndefined, true)`
-                if prog.ir.meta.slot(class, *f).is_some() {
-                    self.set_prop(&Value::Obj(o), *f, v, true)?;
+            let v = match self.interm_info.init_of.get(&f).copied() {
+                Some((ci, i)) => {
+                    let code = &prog.interm_inits[ci][i].1;
+                    self.run_body(code, Value::Obj(o))?
                 }
-            }
+                None => Value::Null,
+            };
+            let v = if v.is_null() {
+                self.feature_default(f)
+            } else {
+                v
+            };
+            self.set_prop(&Value::Obj(o), f, v, true)?;
         }
         Ok(())
     }
@@ -218,7 +318,7 @@ where
     /// classes: the intermediate extent; model classes: the first non-`in` parameter whose
     /// model type's first metamodel is the class's root package, else the first non-`in`
     /// parameter, else the unbound extent).
-    pub(crate) fn default_extent(&self, class: ClassId, extent: Option<ModelParamRef>) -> usize {
+    pub(crate) fn default_extent(&mut self, class: ClassId, extent: Option<ModelParamRef>) -> usize {
         if let Some(x) = extent {
             // a parameter of a module that is not bound in this run (an imported
             // transformation's own extent): not an output
@@ -227,6 +327,9 @@ where
                 .get(&(x.module.0, x.index))
                 .copied()
                 .unwrap_or(self.unbound_extent);
+        }
+        if self.interm_info.is_interm_class(class) {
+            return self.intermediate_extent();
         }
         if self.is_local_class(class) {
             return self.unbound_extent;
@@ -255,6 +358,23 @@ where
             }
         }
         self.unbound_extent
+    }
+
+    /// The intermediate extent of the current transformation (no model parameter: neither an
+    /// output nor searched by `allInstances`).
+    fn intermediate_extent(&mut self) -> usize {
+        let m = self.cur_transf.0;
+        if let Some(&x) = self.interm_extents.get(&m) {
+            return x;
+        }
+        self.extents.push(crate::extent::Extent::new(
+            None,
+            Direction::Out,
+            "intermediate".into(),
+        ));
+        let x = self.extents.len() - 1;
+        self.interm_extents.insert(m, x);
+        x
     }
 
     fn root_package(&self, mut p: qvto_model::PackageId) -> qvto_model::PackageId {
@@ -540,12 +660,22 @@ where
         };
         let meta = &self.prog.ir.meta;
         let fi = meta.feature(f);
+        if self.interm_info.statics.contains(&f) {
+            // `IntermediateStaticFieldAdapter.eGet`
+            return Ok(self.static_vals.get(&f).cloned().unwrap_or(Value::Null));
+        }
         if r.is_local() {
             let lo = &self.local[r.index() as usize];
             return match meta.slot(lo.class, f) {
                 Some(s) => Ok(lo.slots[s].clone()),
                 None => Err(self.runtime_error(format!("Unknown property '{}'", fi.name))),
             };
+        }
+        if self.interm_info.vm_held.contains(&f) {
+            return Ok(match self.interm_vals.get(&(r.index(), f)) {
+                Some(v) => v.clone(),
+                None => self.feature_default(f),
+            });
         }
         let h = S::Obj::from_u32(r.index());
         let class = self.store.class_of(h);
@@ -613,7 +743,16 @@ where
             _ => return Ok(()),
         };
         let ft = self.feature_ocl_type(f);
-        let undefined = v.is_undefined();
+        if self.interm_info.statics.contains(&f) {
+            // `IntermediateStaticFieldAdapter.eSet`
+            let cur = match self.static_vals.get(&f) {
+                Some(v) => v.clone(),
+                None => self.feature_default(f),
+            };
+            let nv = self.engine_feature_value(f, &ft, cur, v, reset);
+            self.static_vals.insert(f, nv);
+            return Ok(());
+        }
         if r.is_local() {
             let class = self.local[r.index() as usize].class;
             let Some(slot) = self.prog.ir.meta.slot(class, f) else {
@@ -621,32 +760,20 @@ where
                 return Err(self.runtime_error(format!("Unknown property '{name}'")));
             };
             let cur = self.local[r.index() as usize].slots[slot].clone();
-            let nv = if ft.many {
-                if undefined {
-                    if reset { self.new_coll_like(&cur) } else { cur }
-                } else {
-                    self.assign_coll(&ft, cur, v, reset)
-                }
-            } else if let Some(&ty) = self
-                .interm_feature_ty
-                .get(&f)
-                .filter(|t| self.prog.ir.types.is_collection_like(**t))
-            {
-                // a single-valued feature of a collection type: `assign` on its OCL type
-                let nv = self.assign_value(ty, cur.clone(), v, reset);
-                if nv.is_invalid() {
-                    if reset { Value::Null } else { cur }
-                } else {
-                    nv
-                }
-            } else if v.is_invalid() {
-                if reset { Value::Null } else { cur }
-            } else {
-                convert_number(v, ft.num)
-            };
+            let nv = self.engine_feature_value(f, &ft, cur, v, reset);
             self.local[r.index() as usize].slots[slot] = nv;
             return Ok(());
         }
+        if self.interm_info.vm_held.contains(&f) {
+            let cur = match self.interm_vals.get(&(r.index(), f)) {
+                Some(v) => v.clone(),
+                None => self.feature_default(f),
+            };
+            let nv = self.engine_feature_value(f, &ft, cur, v, reset);
+            self.interm_vals.insert((r.index(), f), nv);
+            return Ok(());
+        }
+        let undefined = v.is_undefined();
         let h = S::Obj::from_u32(r.index());
         if self.opts.readonly_guard {
             self.check_readonly(r, f, &v)?;
@@ -722,6 +849,41 @@ where
             self.swallow(model_error_text(&e));
         }
         Ok(())
+    }
+
+    /// `callSetter` on a feature value the engine keeps (local objects, attributes of
+    /// intermediate objects, static features): the new value from the current one.
+    fn engine_feature_value(
+        &self,
+        f: FeatureId,
+        ft: &FeatureType,
+        cur: Value,
+        v: Value,
+        reset: bool,
+    ) -> Value {
+        if ft.many {
+            if v.is_undefined() {
+                if reset { self.new_coll_like(&cur) } else { cur }
+            } else {
+                self.assign_coll(ft, cur, v, reset)
+            }
+        } else if let Some(&ty) = self
+            .interm_feature_ty
+            .get(&f)
+            .filter(|t| self.prog.ir.types.is_collection_like(**t))
+        {
+            // a single-valued feature of a collection type: `assign` on its OCL type
+            let nv = self.assign_value(ty, cur.clone(), v, reset);
+            if nv.is_invalid() {
+                if reset { Value::Null } else { cur }
+            } else {
+                nv
+            }
+        } else if v.is_invalid() {
+            if reset { Value::Null } else { cur }
+        } else {
+            convert_number(v, ft.num)
+        }
     }
 
     fn assign_coll(&self, ft: &FeatureType, cur: Value, v: Value, reset: bool) -> Value {
@@ -873,6 +1035,7 @@ where
     /// `EcoreUtil.Copier.copyReferences`: non-containment references of the copies, targets
     /// inside the copied set mapped to their copies (others kept unless bidirectional).
     pub(crate) fn copy_references(&mut self, map: &[(S::Obj, S::Obj)]) {
+        self.copy_engine_attributes(map);
         let meta = &self.prog.ir.meta;
         for &(o, c) in map {
             let class = self.store.class_of(o);
@@ -905,6 +1068,30 @@ where
                     && let Some(ct) = map_target(t)
                 {
                     let _ = self.store.set(c, f, Datum::Obj(ct));
+                }
+            }
+        }
+    }
+
+    /// `Copier.copyAttribute` of the attributes of intermediate objects the engine keeps
+    /// (values shared, as Java's references).
+    fn copy_engine_attributes(&mut self, map: &[(S::Obj, S::Obj)]) {
+        if self.interm_info.vm_held.is_empty() {
+            return;
+        }
+        let meta = &self.prog.ir.meta;
+        for &(o, c) in map {
+            let class = self.store.class_of(o);
+            if !self.interm_info.is_store_class(class) {
+                continue;
+            }
+            for &f in meta.class(class).all_features.iter() {
+                let fi = meta.feature(f);
+                if !self.interm_info.vm_held.contains(&f) || !fi.changeable || fi.derived {
+                    continue;
+                }
+                if let Some(v) = self.interm_vals.get(&(o.to_u32(), f)).cloned() {
+                    self.interm_vals.insert((c.to_u32(), f), v);
                 }
             }
         }

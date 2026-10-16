@@ -524,7 +524,7 @@ impl Graph {
     /// The link `source.f -> target` was made: update `target`'s side (`eInverseAdd`).
     pub(crate) fn inverse_add(&mut self, target: ObjId, source: ObjId, f: FeatureId) {
         let fi = self.meta.feature(f);
-        if fi.containment {
+        if fi.containment && !self.containment_with_plain_inverse(f) {
             if self.objs[target.index()].container.is_some() {
                 self.remove_from_container(target);
             }
@@ -548,7 +548,7 @@ impl Graph {
     /// The link `source.f -> target` was cut: update `target`'s side (`eInverseRemove`).
     pub(crate) fn inverse_remove(&mut self, target: ObjId, source: ObjId, f: FeatureId) {
         let fi = self.meta.feature(f);
-        if fi.containment {
+        if fi.containment && !self.containment_with_plain_inverse(f) {
             self.basic_set_container(target, None);
         } else if let Some(g) = fi.opposite {
             if self.meta.is_container(g) {
@@ -564,6 +564,17 @@ impl Graph {
                 self.set_slot(target, g, Slot::Unset);
             }
         }
+    }
+
+    /// A containment whose `eOpposite` is no container reference (the opposite was set on one
+    /// side only, as QVTo does for `composes x : T opposites y` of intermediate classes): EMF's
+    /// `EObjectContainmentWithInverseEList` then only updates the opposite's value on the
+    /// target (`eInverseAdd` with a plain reference delegate); the target gets no container.
+    fn containment_with_plain_inverse(&self, f: FeatureId) -> bool {
+        self.meta
+            .feature(f)
+            .opposite
+            .is_some_and(|g| !self.meta.is_container(g))
     }
 
     fn has_inverse(&self, f: FeatureId) -> bool {
@@ -1233,6 +1244,16 @@ fn kind_accepts(kind: DataKind, d: &Datum<'_, ObjId>) -> bool {
 
 impl ModelStore for Graph {
     type Obj = ObjId;
+
+    fn extend_meta(&mut self, meta: &MetaRegistry) -> bool {
+        if !meta.extends(&self.meta) {
+            return false;
+        }
+        // the registry of a dynamic resource set only grows: the new entries need no links
+        // (they have no `EClass` objects) and no hooks (they are not Ecore's)
+        self.meta = meta.clone();
+        true
+    }
 
     fn meta(&self) -> &MetaRegistry {
         &self.meta

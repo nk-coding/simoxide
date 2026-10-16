@@ -921,6 +921,11 @@ impl<'r> Sema<'r> {
                 .collect();
             let idx = self.interm_classes.len() as u32;
             let own: Vec<qvto_model::FeatureId> = self.ts.meta.class(*cid).features.clone();
+            let static_features = own
+                .iter()
+                .copied()
+                .filter(|f| self.interm_static.contains(f))
+                .collect();
             let feature_types = own.into_iter().map(|f| (f, self.feature_type(f))).collect();
             self.interm_classes.push(ir::IntermClass {
                 module: m,
@@ -928,6 +933,7 @@ impl<'r> Sema<'r> {
                 exception: c.exception,
                 inits: class_inits,
                 feature_types,
+                static_features,
                 span: c.span,
             });
             self.modules[m.index()].ir.classes.push(idx);
@@ -1082,7 +1088,11 @@ impl<'r> Sema<'r> {
                     span,
                     bind(vm::IntermClassifier_unsupportedFeatureKey, &[key]),
                 ),
-                "static" => static_ = Some(span),
+                "static" => {
+                    // `IntermediateClassFactory.markFeatureAsStatic`
+                    self.interm_static.insert(f);
+                    static_ = Some(span)
+                }
                 _ => {}
             }
             if keys.contains(k) {

@@ -260,6 +260,9 @@ pub struct IntermClass {
     /// registry keeps a classifier per feature; for types it cannot represent (collections,
     /// `List`, `Dict`, tuples, `OclAny`, ...) that is a placeholder data type.
     pub feature_types: Vec<(FeatureId, TypeId)>,
+    /// The own features declared `static`: one value shared by all instances
+    /// (`IntermediateClassFactory.markFeatureAsStatic`), initialised by the first instance.
+    pub static_features: Vec<FeatureId>,
     pub span: Span,
 }
 

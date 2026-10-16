@@ -192,6 +192,16 @@ pub trait ModelStore {
         None
     }
 
+    /// Grows the store's registry to `meta`, which must [extend](MetaRegistry::extends) it:
+    /// the classes a program adds to the metamodels it was compiled against (QVTo's intermediate
+    /// classes, whose instances Eclipse keeps as dynamic EMF objects). `false` if the store
+    /// cannot (a store with fixed metamodels) or `meta` does not extend its registry; the engine
+    /// then keeps such objects itself, without EMF semantics.
+    fn extend_meta(&mut self, meta: &MetaRegistry) -> bool {
+        let _ = meta;
+        false
+    }
+
     // ---- provided ----
 
     /// `ECollections.setEList(list, values)`: makes the list equal to `values` with EMF's

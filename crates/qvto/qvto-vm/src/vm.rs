@@ -180,6 +180,14 @@ where
     pub(crate) class_local: Vec<bool>,
     /// The declared OCL types of intermediate class features (`IntermClass::feature_types`).
     pub(crate) interm_feature_ty: HashMap<qvto_model::FeatureId, TypeId>,
+    /// Where instances of intermediate classes live and how their features are kept.
+    pub(crate) interm_info: crate::objects::IntermInfo,
+    /// Values of the engine-held features (attributes) of intermediate objects in the store.
+    pub(crate) interm_vals: HashMap<(u32, qvto_model::FeatureId), Value>,
+    /// Values of `static` intermediate features (`IntermediateStaticFieldAdapter`).
+    pub(crate) static_vals: HashMap<qvto_model::FeatureId, Value>,
+    /// The intermediate extent of each transformation (`getIntermediateExtent`).
+    pub(crate) interm_extents: HashMap<u32, usize>,
     /// Transformation instances made with `new T(...)`: the module and the extents of its
     /// model parameters (`Value::Instance(NESTED | index)`).
     pub(crate) nested: Vec<(ModuleId, Vec<usize>)>,
@@ -258,6 +266,10 @@ where
                 .iter()
                 .flat_map(|c| c.feature_types.iter().copied())
                 .collect(),
+            interm_info: crate::objects::IntermInfo::default(),
+            interm_vals: HashMap::new(),
+            static_vals: HashMap::new(),
+            interm_extents: HashMap::new(),
             nested: Vec::new(),
             cur_transf: prog.ir.main_module,
             regexes: RefCell::new(HashMap::new()),
@@ -269,7 +281,8 @@ where
             vm.env = RunEnv::new(vm.opts.mode, Some(src));
         }
         vm.consts = prog.consts.iter().map(const_value).collect();
-        vm.class_local = crate::objects::local_classes(prog);
+        vm.interm_info = crate::objects::IntermInfo::new(prog, vm.store);
+        vm.class_local = crate::objects::local_classes(prog, vm.interm_info.in_store);
         vm
     }
 

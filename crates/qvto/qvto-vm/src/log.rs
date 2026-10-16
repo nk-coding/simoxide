@@ -13,10 +13,18 @@ use std::fmt::Write;
 struct Fmt<'a> {
     prog: &'a qvto_bytecode::Program,
     class_of: &'a dyn Fn(ObjRef) -> Option<qvto_model::ClassId>,
+    interm: &'a crate::objects::IntermInfo,
 }
 
 impl ObjectFormat for Fmt<'_> {
     fn object(&self, o: ObjRef, env: &dyn HashEnv, out: &mut String) {
+        if let Some(c) = (self.class_of)(o)
+            && self.interm.is_interm_class(c)
+        {
+            // `IntermediateClassInstance.toString`
+            out.push_str(&self.prog.ir.meta.class(c).name);
+            return;
+        }
         let key = IdentityKey::Obj(o);
         let _ = write!(out, "{}@{:x}", env.class_name(key), env.identity_hash(key));
         if let Some(c) = (self.class_of)(o) {
@@ -88,6 +96,7 @@ where
         let f = Fmt {
             prog: self.prog,
             class_of: &class_of,
+            interm: &self.interm_info,
         };
         java_to_string(v, &self.env, &f, out);
     }

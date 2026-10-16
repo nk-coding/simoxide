@@ -287,6 +287,42 @@ impl MetaRegistry {
         (0..self.classes.len() as u32).map(ClassId)
     }
 
+    /// Whether `self` holds every entry of `base` under the same id (same names and owners),
+    /// possibly followed by more: `base` as a program grows it (QVTo's library classes,
+    /// intermediate classes).
+    pub fn extends(&self, base: &MetaRegistry) -> bool {
+        base.packages.len() <= self.packages.len()
+            && base.classes.len() <= self.classes.len()
+            && base.features.len() <= self.features.len()
+            && base.data_types.len() <= self.data_types.len()
+            && base.enums.len() <= self.enums.len()
+            && base
+                .packages
+                .iter()
+                .zip(&self.packages)
+                .all(|(a, b)| a.name == b.name && a.ns_uri == b.ns_uri)
+            && base
+                .classes
+                .iter()
+                .zip(&self.classes)
+                .all(|(a, b)| a.name == b.name && a.package == b.package)
+            && base
+                .features
+                .iter()
+                .zip(&self.features)
+                .all(|(a, b)| a.name == b.name && a.owner == b.owner)
+            && base
+                .data_types
+                .iter()
+                .zip(&self.data_types)
+                .all(|(a, b)| a.name == b.name && a.package == b.package)
+            && base
+                .enums
+                .iter()
+                .zip(&self.enums)
+                .all(|(a, b)| a.name == b.name && a.package == b.package)
+    }
+
     /// The package registered under a namespace URI (top-level or nested).
     pub fn package_by_ns_uri(&self, ns_uri: &str) -> Option<PackageId> {
         self.by_ns_uri.get(ns_uri).copied()
