@@ -692,6 +692,91 @@ where
         }
     }
 
+    /// `String.replaceFirst(regex, replacement)` (Java syntax).
+    pub fn native_replace_first(
+        &self,
+        s: &str,
+        regex: &str,
+        replacement: &str,
+    ) -> Result<String, NativeError> {
+        let re = self
+            .regex_find(&qvto_runtime::Str::new(regex))
+            .map_err(java_exception)?;
+        let rep = crate::jregex::replacement(replacement).map_err(java_exception)?;
+        Ok(re.replace(s, rep.as_str()).into_owned())
+    }
+
+    /// `String.split(regex, limit)` (`Pattern.split`: no leading empty string for a zero-width
+    /// match at the start, trailing empty strings removed when `limit == 0`).
+    pub fn native_split(&self, s: &str, regex: &str, limit: i32) -> Result<Vec<String>, NativeError> {
+        let re = self
+            .regex_find(&qvto_runtime::Str::new(regex))
+            .map_err(java_exception)?;
+        let limited = limit > 0;
+        let mut out: Vec<String> = Vec::new();
+        let mut index = 0usize;
+        for m in re.find_iter(s) {
+            if !limited || out.len() < (limit - 1) as usize {
+                if index == 0 && m.start() == 0 && m.end() == 0 {
+                    continue;
+                }
+                out.push(s[index..m.start()].to_string());
+                index = m.end();
+            } else if out.len() == (limit - 1) as usize {
+                out.push(s[index..].to_string());
+                index = m.end();
+            }
+        }
+        if index == 0 {
+            return Ok(vec![s.to_string()]);
+        }
+        if !limited || out.len() < limit as usize {
+            out.push(s[index..].to_string());
+        }
+        if limit == 0 {
+            while out.last().is_some_and(|x| x.is_empty()) {
+                out.pop();
+            }
+        }
+        Ok(out)
+    }
+
+    /// The name of an enumeration literal value (`Enumerator.getName()`).
+    pub fn native_enum_name(&self, v: &Value) -> Option<String> {
+        let Value::Enum(e) = v else { return None };
+        let info = self
+            .prog
+            .ir
+            .meta
+            .enumeration(qvto_model::EnumId(e.enum_id));
+        info.literals
+            .get(e.literal as usize)
+            .map(|l| l.name.to_string())
+    }
+
+    /// `MutableList.add(value)` on a QVTo `List` (shared, mutated in place).
+    pub fn native_list_add(&self, list: &Value, value: Value) {
+        if let Value::List(l) = list {
+            l.borrow_mut().items.push(value);
+        }
+    }
+
+    /// Whether `v` is an instance of the class `name` of the package `ns_uri`.
+    pub fn native_instance_of(&self, v: &Value, ns_uri: &str, name: &str) -> bool {
+        match self.native_class_by_name(ns_uri, name) {
+            Some(c) => self.value_conforms_to_class(v, c),
+            None => false,
+        }
+    }
+
+    /// The object of a classifier (`EClass`, `EDataType`, `EEnum`), if the store has it.
+    pub fn native_classifier_object(&self, c: qvto_model::Classifier) -> Value {
+        match self.store.classifier_object(c) {
+            Some(o) => Value::Obj(ObjRef::host(o.to_u32())),
+            None => Value::Null,
+        }
+    }
+
     /// The value of a single-valued attribute as the store keeps it.
     pub fn native_attr(&self, v: &Value, f: FeatureId) -> Value {
         match v {
@@ -702,4 +787,18 @@ where
             _ => Value::Null,
         }
     }
+}
+
+/// A Java exception from an error text `Class: message` (the VM's texts of Java errors).
+fn java_exception(text: String) -> NativeError {
+    let (class, message) = match text.split_once(": ") {
+        Some((c, m)) => (c.to_string(), Some(m.to_string())),
+        None => (text, None),
+    };
+    let class = match class.as_str() {
+        "PatternSyntaxException" => "java.util.regex.PatternSyntaxException".to_string(),
+        "IllegalArgumentException" => "java.lang.IllegalArgumentException".to_string(),
+        _ => class,
+    };
+    NativeError::Exception { class, message }
 }

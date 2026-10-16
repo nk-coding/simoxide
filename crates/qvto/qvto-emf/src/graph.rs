@@ -1213,6 +1213,30 @@ impl ModelStore for Graph {
     fn meta(&self) -> &MetaRegistry {
         &self.meta
     }
+
+    fn classifier_object(&self, c: Classifier) -> Option<ObjId> {
+        self.links.classifier_obj.get(&c).copied()
+    }
+
+    fn object_classifier(&self, o: ObjId) -> Option<Classifier> {
+        self.links.obj_classifier.get(&o).copied()
+    }
+
+    fn feature_object(&self, f: FeatureId) -> Option<ObjId> {
+        self.links.feature_obj.get(&f).copied()
+    }
+
+    fn object_feature(&self, o: ObjId) -> Option<FeatureId> {
+        self.links.obj_feature.get(&o).copied()
+    }
+
+    fn package_object(&self, p: PackageId) -> Option<ObjId> {
+        self.links.package_obj.get(&p).copied()
+    }
+
+    fn object_package(&self, o: ObjId) -> Option<PackageId> {
+        self.links.obj_package.get(&o).copied()
+    }
     fn class_of(&self, o: ObjId) -> ClassId {
         self.objs[o.index()].class
     }

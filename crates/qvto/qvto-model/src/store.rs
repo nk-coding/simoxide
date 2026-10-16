@@ -1,8 +1,8 @@
 //! The model store trait: how the engine reads and writes models.
 
 use crate::datum::{Datum, OwnedDatum};
-use crate::ids::{ClassId, FeatureId, ResourceId};
-use crate::meta::MetaRegistry;
+use crate::ids::{ClassId, FeatureId, PackageId, ResourceId};
+use crate::meta::{Classifier, MetaRegistry};
 use std::fmt;
 use std::hash::Hash;
 
@@ -157,6 +157,40 @@ pub trait ModelStore {
     fn remove_root(&mut self, r: ResourceId, o: Self::Obj) -> bool;
     /// `EcoreUtil.delete(o)`.
     fn delete(&mut self, o: Self::Obj);
+
+    // ---- metamodel objects (optional) ----
+
+    /// The object of a classifier (an `EClass`, `EDataType` or `EEnum` instance) if the store
+    /// keeps its metamodels as objects, for `eClass()` and reflective Ecore navigation.
+    fn classifier_object(&self, c: Classifier) -> Option<Self::Obj> {
+        let _ = c;
+        None
+    }
+    /// The classifier an object represents, if it is a metamodel object of the registry.
+    fn object_classifier(&self, o: Self::Obj) -> Option<Classifier> {
+        let _ = o;
+        None
+    }
+    /// The object of a structural feature (`EAttribute`/`EReference` instance).
+    fn feature_object(&self, f: FeatureId) -> Option<Self::Obj> {
+        let _ = f;
+        None
+    }
+    /// The feature an object represents.
+    fn object_feature(&self, o: Self::Obj) -> Option<FeatureId> {
+        let _ = o;
+        None
+    }
+    /// The object of a package (`EPackage` instance).
+    fn package_object(&self, p: PackageId) -> Option<Self::Obj> {
+        let _ = p;
+        None
+    }
+    /// The package an object represents.
+    fn object_package(&self, o: Self::Obj) -> Option<PackageId> {
+        let _ = o;
+        None
+    }
 
     // ---- provided ----
 

@@ -2,6 +2,7 @@
 //! runner's fixtures), `qvto run` (compile and run a transformation), `qvto disasm` (the
 //! compiled program), `qvto bench` (run times of cases against the warm Java runner).
 
+mod bbox;
 mod engine;
 
 use qvto_model::ModelStore;

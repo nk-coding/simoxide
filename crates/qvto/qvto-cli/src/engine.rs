@@ -396,6 +396,7 @@ fn execute(
     let t1 = Instant::now();
     let (out, log) = {
         let mut vm = qvto::Vm::new(program, &mut rs.graph, opts);
+        vm.set_natives(std::rc::Rc::new(crate::bbox::natives()));
         let out = vm.run_transformation(args);
         (out, std::mem::take(&mut vm.log))
     };

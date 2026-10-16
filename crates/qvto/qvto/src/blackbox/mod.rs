@@ -19,6 +19,9 @@
 //! [`stdlib`] holds QVTo's own deprecated libraries (`Strings`, `emf.tools`) with their
 //! signatures and implementations.
 
+pub mod java;
+pub mod stdlib;
+
 pub use qvto_sema::{BlackboxModule, BlackboxOp, BlackboxOpKind, BlackboxParam, BlackboxUnit};
 pub use qvto_vm::{NativeCall, NativeError, NativeFn, NativeResult, Natives, java_method_key};
 
