@@ -240,3 +240,22 @@ pub fn fnv64(b: &[u8]) -> String {
     }
     format!("{h:016x}")
 }
+
+/// The object at a canonical path (`/0/@f.1/@g`) of resource `r`.
+pub fn object_at<S: ModelStore>(s: &S, r: ResourceId, path: &str) -> Option<S::Obj> {
+    let mut segs = path.split('/').skip(1);
+    let mut cur = *s.roots(r).get(segs.next()?.parse::<usize>().ok()?)?;
+    for seg in segs {
+        let body = seg.strip_prefix('@')?;
+        let (name, idx) = match body.rsplit_once('.') {
+            Some((n, i)) if !i.is_empty() && i.bytes().all(|c| c.is_ascii_digit()) => (n, Some(i.parse::<usize>().ok()?)),
+            _ => (body, None),
+        };
+        let f = s.meta().feature_by_name(s.class_of(cur), name)?;
+        cur = match idx {
+            Some(i) => s.get_at(cur, f, i).as_obj()?,
+            None => s.get(cur, f).as_obj()?,
+        };
+    }
+    Some(cur)
+}

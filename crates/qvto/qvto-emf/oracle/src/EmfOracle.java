@@ -24,6 +24,8 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
  *       writes <outdir>/results.tsv: path, status, error count, fnv64 of the save, of the dump.
  *   scripts <config> <contract.ecore> <indir> <outdir>
  *       Runs the model-API scripts of <indir> on dynamic EMF (see ScriptRunner).
+ *   pairs <config> <list> <out>
+ *       Lenient comparisons of model pairs with perturbations (see Pairs).
  *   compare <config> <a> <b>
  *       Prints EQUAL or DIFFERENT: the Eclipse suite's TreeComparator on two model files.
  *
@@ -49,6 +51,7 @@ public class EmfOracle {
             case "compare": System.out.println(compare(args[2], args[3]) ? "EQUAL" : "DIFFERENT"); break;
             case "ecore": saveEcore(args[2]); break;
             case "scripts": ScriptRunner.run(args[2], Paths.get(args[3]), Paths.get(args[4])); break;
+            case "pairs": Pairs.run(Paths.get(args[2]), Paths.get(args[3])); break;
             default: throw new IllegalArgumentException(args[0]);
         }
     }
