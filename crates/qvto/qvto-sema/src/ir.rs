@@ -377,6 +377,9 @@ pub struct MappingInfo {
     pub inherits: Vec<OpId>,
     pub merges: Vec<OpId>,
     pub disjuncts: Vec<OpId>,
+    /// The mapping body (`{ ... }`, Eclipse's `MappingBody`): the current instruction of the
+    /// mapping's frame while its inherited mappings run.
+    pub body_span: Option<Span>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]

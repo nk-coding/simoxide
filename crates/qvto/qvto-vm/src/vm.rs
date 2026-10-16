@@ -921,6 +921,10 @@ where
                     let rhs = std::mem::take(&mut w!(self, base, src));
                     w!(self, base, dst) = if property && rhs.is_undefined() {
                         self.property_undefined(ty, old, rhs, !add)
+                    } else if property && !self.prog.ir.types.is_collection_like(ty) {
+                        // `callSetter` stores the number as the property's type
+                        let v = self.assign_fast(ty, old, rhs, !add, same_elem);
+                        crate::objects::convert_number(v, self.num_class_of_type(ty))
                     } else {
                         self.assign_fast(ty, old, rhs, !add, same_elem)
                     };

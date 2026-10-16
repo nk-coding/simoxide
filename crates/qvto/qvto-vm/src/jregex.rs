@@ -56,6 +56,38 @@ pub fn replacement(r: &str) -> Result<String, String> {
     Ok(out)
 }
 
+/// `Matcher.replaceAll`/`replaceFirst`: Java's `find` loop, which (unlike `regex`'s
+/// iterators) also reports an empty match right after a non-empty one (`"ab".replaceAll(".*",
+/// "-")` is `"--"`); after an empty match the search resumes one character further. `rep` is a
+/// [`replacement`].
+pub fn replace(re: &Regex, text: &str, rep: &str, all: bool) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut last = 0;
+    let mut from = 0;
+    while from <= text.len() {
+        let Some(c) = re.captures_at(text, from) else {
+            break;
+        };
+        let m = c.get(0).expect("group 0");
+        out.push_str(&text[last..m.start()]);
+        c.expand(rep, &mut out);
+        last = m.end();
+        if !all {
+            break;
+        }
+        from = if m.end() == m.start() {
+            match text[m.end()..].chars().next() {
+                Some(ch) => m.end() + ch.len_utf8(),
+                None => break,
+            }
+        } else {
+            m.end()
+        };
+    }
+    out.push_str(&text[last..]);
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -67,5 +99,15 @@ mod tests {
         assert!(replacement("$").is_err());
         let re = compile_full("[a-z]+").unwrap();
         assert!(re.is_match("abc") && !re.is_match("abc1"));
+        let f = |p: &str, t: &str, r: &str, all: bool| {
+            replace(&compile_find(p).unwrap(), t, &replacement(r).unwrap(), all)
+        };
+        // java.lang.String.replaceAll / replaceFirst (JDK 21)
+        assert_eq!(f(".*", "ab", "-", true), "--");
+        assert_eq!(f(".*", "", "-", true), "-");
+        assert_eq!(f("x*", "ab", "-", true), "-a-b-");
+        assert_eq!(f("a|", "aab", "<$0>", true), "<a><a><>b<>");
+        assert_eq!(f(".*", "ab", "-", false), "-");
+        assert_eq!(f("(a)(b)", "xaby", "$2$1", true), "xbay");
     }
 }

@@ -23,3 +23,78 @@ in model.xmi
 mmfile ../fuzz.ecore
 note oclIsTypeOf/oclIsKindOf of 22 kinds of values against 20 types
 end
+
+case fuzz_numconv
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/numconv
+qvto numconv.qvto
+in numconv.xmi
+mmfile ../fuzz.ecore
+note numbers stored in module properties and intermediate class features are converted to the declared type
+end
+
+case fuzz_inherit_ip_a
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/inherit_ip
+qvto a.qvto
+in a.xmi
+mmfile ../fuzz.ecore
+note the mapping body is the current instruction while inherited mappings run
+end
+
+case fuzz_inherit_ip_b
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/inherit_ip
+qvto b.qvto
+in b.xmi
+mmfile ../fuzz.ecore
+note the mapping body is the current instruction while inherited mappings run
+end
+
+case fuzz_inherit_ip_c
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/inherit_ip
+qvto c.qvto
+in c.xmi
+mmfile ../fuzz.ecore
+note the mapping body is the current instruction while inherited mappings run
+end
+
+case fuzz_inherit_ip_d
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/inherit_ip
+qvto d.qvto
+in d.xmi
+mmfile ../fuzz.ecore
+note the mapping body is the current instruction while inherited mappings run
+end
+
+case fuzz_inherit_ip_e
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/inherit_ip
+qvto e.qvto
+in e.xmi
+mmfile ../fuzz.ecore
+note the mapping body is the current instruction while inherited mappings run
+end
+
+case fuzz_regex
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/regex
+qvto regex.qvto
+note Java's find loop in replaceAll (an empty match after a non-empty one)
+end

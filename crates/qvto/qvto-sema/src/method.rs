@@ -508,6 +508,7 @@ impl<'r> Sema<'r> {
             inherits,
             merges,
             disjuncts,
+            body_span: m.body.as_ref().map(|b| b.span),
         });
     }
 

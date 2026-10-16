@@ -859,11 +859,7 @@ where
                         ) {
                             (Ok(re), Ok(rep)) => {
                                 let text = x.to_str_lossy();
-                                let out = if prim == ReplaceAll {
-                                    re.replace_all(&text, rep.as_str()).into_owned()
-                                } else {
-                                    re.replacen(&text, 1, rep.as_str()).into_owned()
-                                };
+                                let out = crate::jregex::replace(&re, &text, &rep, prim == ReplaceAll);
                                 Value::str(&out)
                             }
                             (Err(m), _) | (_, Err(m)) => self.swallow(m),

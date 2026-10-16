@@ -1,0 +1,15 @@
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation a(in m : FZ, out o : FZ);
+main() {
+  m.objectsOfType(FZ::Node)->any(true).map n1();
+}
+mapping FZ::Node::n0() : FZ::Node
+  where { false }
+{
+  result.name := 'x';
+}
+mapping FZ::Node::n1() : FZ::Node inherits FZ::Node::n0
+  
+{
+  result.name := 'y';
+}

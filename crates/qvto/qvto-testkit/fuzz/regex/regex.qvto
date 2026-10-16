@@ -1,0 +1,11 @@
+transformation regex();
+main() {
+  log('r1', 'ab'.replaceAll('.*', '-'));
+  log('r2', ''.replaceAll('.*', '-'));
+  log('r3', 'ab'.replaceAll('x*', '-'));
+  log('r4', 'aab'.replaceAll('a|', '<$0>'));
+  log('r5', 'ab'.replaceFirst('.*', '-'));
+  log('r6', 'xaby'.replaceAll('(a)(b)', '$2$1'));
+  log('r7', '日本'.replaceAll('.*', '\\$'));
+  log('r8', 'a b  c'.replaceAll('\\s*', '_'));
+}

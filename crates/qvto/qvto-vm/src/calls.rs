@@ -603,6 +603,13 @@ where
         self.add_trace(op, o.context.map(|_| src.clone()), params, result);
         // inherited mappings
         if let Some(m) = &o.mapping {
+            if code.init.is_none()
+                && !m.inherits.is_empty()
+                && let Some(f) = self.frames.last_mut()
+            {
+                // Eclipse's current instruction: the mapping body
+                f.fixed_ip = Some(m.body_span.map_or(o.span.start, |s| s.start));
+            }
             for &inh in &m.inherits {
                 let inh = self.overriding(inh);
                 self.reusing_call(op, inh, src, args, base)?;

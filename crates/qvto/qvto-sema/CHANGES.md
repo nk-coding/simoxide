@@ -5,6 +5,7 @@ first version is listed here, newest first.
 
 | Date | Change |
 |---|---|
+| 2026-10-17 | `MappingInfo::body_span`: the span of the mapping body, the current instruction while inherited mappings run (Q7). |
 | 2026-10-17 | `ExprKind::ModuleProp(inst, g)` / `LValue::ModuleProp(inst, g)`: a property read or written through a transformation instance other than `this` (`t.p` with `t := new T(...)`); `Global(g)` stays the property of the running instance (Q4b). |
 | 2026-10-17 | `MetaOp::body` (`MetaBody`: a `CodeBody` with `self` and the parameters' variables): the analysed OCL body of an operation of a dynamic class (`http://www.eclipse.org/2007/OCL` annotation, `body`); `Program::derivations`: OCL derivations of features (`derive`). Hosts pass them with `compile_with_metamodel` (`MetaOperation::body`, `MetaDerivation` in `qvto-model`) (Q4b). |
 | 2026-10-17 | `IntermClass::static_features`: the own features declared `static` (one value for all instances) (Q4b). |

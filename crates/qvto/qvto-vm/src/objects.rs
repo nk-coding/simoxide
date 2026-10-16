@@ -712,7 +712,14 @@ where
         FeatureType {
             many: fi.is_many(),
             kind: CollKind::of_feature(fi.ordered, fi.unique),
-            num: self.num_class_of_feature(f),
+            // intermediate class features convert to their declared OCL type
+            num: match self.interm_feature_ty.get(&f) {
+                Some(&t) => {
+                    let t = if self.prog.ir.types.is_collection_like(t) { self.element_type(t) } else { t };
+                    self.num_class_of_type(t)
+                }
+                None => self.num_class_of_feature(f),
+            },
             primitive: matches!(fi.ty, Classifier::DataType(d)
                 if matches!(self.prog.ir.meta.data_type(d).instance_class_name.as_deref(),
                     Some("int" | "long" | "short" | "byte" | "char" | "double" | "float" | "boolean"))),

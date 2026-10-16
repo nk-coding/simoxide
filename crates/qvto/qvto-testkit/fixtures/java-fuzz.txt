@@ -1,4 +1,266 @@
 qvto-testkit java fixture 1
+@case fuzz_inherit_ip_a
+@file result.txt 218
+id	fuzz_inherit_ip_a
+load	OK
+params	in:m,out:o
+severity	ERROR
+code	100
+message	Postcondition failed in mapping 'n0'
+exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
+trace-records	-1
+verdict	pass
+
+@file out.jsonl 37
+{"resource":"extent1.xmi","roots":0}
+
+@file log.txt 200
+Terminating execution...
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at a::Node::n0(a.qvto:7)
+	at a::Node::n1(a.qvto:13)
+	at a::main(a.qvto:4)
+
+@file stack.txt 174
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at a::Node::n0(a.qvto:7)
+	at a::Node::n1(a.qvto:13)
+	at a::main(a.qvto:4)
+@file diag.txt 54
+exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_inherit_ip_b
+@file result.txt 218
+id	fuzz_inherit_ip_b
+load	OK
+params	in:m,out:o
+severity	ERROR
+code	100
+message	Postcondition failed in mapping 'n0'
+exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
+trace-records	-1
+verdict	pass
+
+@file out.jsonl 37
+{"resource":"extent1.xmi","roots":0}
+
+@file log.txt 200
+Terminating execution...
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at b::Node::n0(b.qvto:7)
+	at b::Node::n1(b.qvto:13)
+	at b::main(b.qvto:4)
+
+@file stack.txt 174
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at b::Node::n0(b.qvto:7)
+	at b::Node::n1(b.qvto:13)
+	at b::main(b.qvto:4)
+@file diag.txt 54
+exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_inherit_ip_c
+@file result.txt 218
+id	fuzz_inherit_ip_c
+load	OK
+params	in:m,out:o
+severity	ERROR
+code	100
+message	Postcondition failed in mapping 'n0'
+exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
+trace-records	-1
+verdict	pass
+
+@file out.jsonl 37
+{"resource":"extent1.xmi","roots":0}
+
+@file log.txt 200
+Terminating execution...
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at c::Node::n0(c.qvto:7)
+	at c::Node::n1(c.qvto:14)
+	at c::main(c.qvto:4)
+
+@file stack.txt 174
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at c::Node::n0(c.qvto:7)
+	at c::Node::n1(c.qvto:14)
+	at c::main(c.qvto:4)
+@file diag.txt 54
+exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_inherit_ip_d
+@file result.txt 218
+id	fuzz_inherit_ip_d
+load	OK
+params	in:m,out:o
+severity	ERROR
+code	100
+message	Postcondition failed in mapping 'n0'
+exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
+trace-records	-1
+verdict	pass
+
+@file out.jsonl 37
+{"resource":"extent1.xmi","roots":0}
+
+@file log.txt 200
+Terminating execution...
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at d::Node::n0(d.qvto:7)
+	at d::Node::n1(d.qvto:13)
+	at d::main(d.qvto:4)
+
+@file stack.txt 174
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at d::Node::n0(d.qvto:7)
+	at d::Node::n1(d.qvto:13)
+	at d::main(d.qvto:4)
+@file diag.txt 54
+exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_inherit_ip_e
+@file result.txt 218
+id	fuzz_inherit_ip_e
+load	OK
+params	in:m,out:o
+severity	ERROR
+code	100
+message	Postcondition failed in mapping 'n0'
+exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
+trace-records	-1
+verdict	pass
+
+@file out.jsonl 37
+{"resource":"extent1.xmi","roots":0}
+
+@file log.txt 200
+Terminating execution...
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at e::Node::n0(e.qvto:7)
+	at e::Node::n1(e.qvto:11)
+	at e::main(e.qvto:4)
+
+@file stack.txt 174
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at e::Node::n0(e.qvto:7)
+	at e::Node::n1(e.qvto:11)
+	at e::main(e.qvto:4)
+@file diag.txt 54
+exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_numconv
+@file result.txt 150
+id	fuzz_numconv
+load	WARNING
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 347
+{"resource":"extent1.xmi","roots":2}
+{"path":"/0","type":"http://qvto-rs/fuzz#Node","attrs":{"name":null,"value":"-2147483648","big":"2147483648","weight":"9.223372036854776E18","flag":"false","kind":"A","tags":[],"nums":["-1"]},"refs":{}}
+{"path":"/1","type":"http://qvto-rs/fuzz#Item","attrs":{"name":null,"count":"-1","ratio":"3.0"},"refs":{}}
+
+@file log.txt 535
+v, data: 9223372036854775807
+p, data: -1
+ica, data: -1
+ica2
+icr, data: 9.223372036854776E18
+icr2, data: 3.0
+pr, data: 3.0
+pr2, data: 9.223372036854776E18
+ics, data: [-1, 1]
+ics2, data: [-1, 1, -1]
+nv, data: -1
+nb, data: 0
+nw, data: 9.223372036854776E18
+nn, data: [-1]
+nv2, data: -2147483648
+nb2, data: 5
+nb3, data: 2147483648
+s, data: [9223372036854775807]
+r, data: 9223372036854775807
+r2, data: 3
+t, data: Tuple{a = 9223372036854775807}
+l, data: [9223372036854775807]
+itc, data: -1
+itr, data: 2.5
+itr2, data: Infinity
+itr3, data: 3.0
+
+@file diag.txt 1110
+problem	warning	numconv.qvto	10	345	8	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+problem	warning	numconv.qvto	13	690	3	Local variable declaration 'big' hides property with the same name of type 'Node'
+problem	warning	numconv.qvto	20	1194	14	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+load	0	WARNING	0	OK
+load	1	WARNING	0	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+load	1	WARNING	0	Local variable declaration 'big' hides property with the same name of type 'Node'
+load	1	WARNING	0	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+exec	1	OK	0	v
+exec	1	OK	0	p
+exec	1	OK	0	ica
+exec	1	OK	0	ica2
+exec	1	OK	0	icr
+exec	1	OK	0	icr2
+exec	1	OK	0	pr
+exec	1	OK	0	pr2
+exec	1	OK	0	ics
+exec	1	OK	0	ics2
+exec	1	OK	0	nv
+exec	1	OK	0	nb
+exec	1	OK	0	nw
+exec	1	OK	0	nn
+exec	1	OK	0	nv2
+exec	1	OK	0	nb2
+exec	1	OK	0	nb3
+exec	1	OK	0	s
+exec	1	OK	0	r
+exec	1	OK	0	r2
+exec	1	OK	0	t
+exec	1	OK	0	l
+exec	1	OK	0	itc
+exec	1	OK	0	itr
+exec	1	OK	0	itr2
+exec	1	OK	0	itr3
+
+@case fuzz_regex
+@file result.txt 133
+id	fuzz_regex
+load	OK
+params	
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 123
+r1, data: --
+r2, data: -
+r3, data: -a-b-
+r4, data: <a><a><>b<>
+r5, data: -
+r6, data: xbay
+r7, data: $$
+r8, data: _a__b__c_
+
+@file diag.txt 120
+exec	1	OK	0	r1
+exec	1	OK	0	r2
+exec	1	OK	0	r3
+exec	1	OK	0	r4
+exec	1	OK	0	r5
+exec	1	OK	0	r6
+exec	1	OK	0	r7
+exec	1	OK	0	r8
+
 @case fuzz_typematrix
 @file result.txt 142
 id	fuzz_typematrix
