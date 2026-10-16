@@ -79,13 +79,15 @@ Status values: done, next, open, parked.
   `try`, the standard library over `qvto-runtime`, compat and fast mode) pass unit tests on
   hand-written IR; the conformance adapter (`qvto conform --engine qvto`) runs the whole
   pipeline; some Eclipse cases pass strictly; a first comparison with the warm Java runner.
-  Done 2026-10-17 (`crates/qvto-vm/README.md`, "Verification"; branch `q3a` on Q2's work in
-  progress): 400 of the 494 runnable Eclipse cases equal the Java runner strictly (81.0 %; 401
-  pass Eclipse's checks, fast mode the same); `TestQvtInterpreter` 247 of 309 (80 %, the Q3b
-  target is 50 %), `TestQvtParser` 132 of 154. Of the 94 others: 49 cases the analyser rejects
-  and 22 parser cases with other diagnostics (both Q2), 14 wrong outcomes (blackboxes,
-  `Model::copy`/`createEmptyModel` (Q4), overloads the analyser resolves differently), 5 stack
-  traces (source ids of the analyser), 3 models. Corpus: 22 of 24 strictly, 23 pass. Run
+  Done 2026-10-17 (`crates/qvto-vm/README.md`, "Verification"): 424 of the 494 runnable
+  Eclipse cases equal the Java runner strictly (85.8 %; 425 pass Eclipse's checks, fast mode
+  the same); `TestQvtInterpreter` 262 of 309 (85 %, the Q3b target is 50 %), `TestQvtParser` 137
+  of 154. Of the 70 others: 39 do not compile, almost all for Q4 (Java blackbox libraries such
+  as `Strings`, `org.bar.Foo`, `emf.tools`; the QVT and XMLType metamodels missing from the
+  registry); 17 parser cases with other diagnostics (Q2); 12 wrong outcomes (blackboxes,
+  `Model::copy`/`createEmptyModel`, `raise 'msg'` and `insertAt` overloads from the analyser,
+  opposites of intermediate classes); 1 model (an implicit-iterator `iterate` the analyser
+  rejects). Corpus: 22 of 24 strictly, 23 pass (SPD's main needs its blackbox library). Run
   times against the warm Java runner (median of repeated runs in one JVM): suite cases
   0.03–0.05 ms vs 2.6–9 ms, SimuLizar rules 0.04–0.07 ms vs 4.7–7.7 ms; compile 0.1–0.5 ms;
   micro benchmarks 2.2× (collections) to 7× (arithmetic loop) and 2 900× (`including` in a
