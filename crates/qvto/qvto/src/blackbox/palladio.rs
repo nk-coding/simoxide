@@ -32,7 +32,7 @@ pub fn catalog() -> Catalog {
 }
 
 /// Binds `getSimulationTime()` to the host's simulation clock.
-pub fn register_simulation_time<S: ModelStore + 'static>(
+pub fn register_simulation_time<S: ModelStore>(
     n: &mut Natives<S>,
     time: impl Fn() -> f64 + 'static,
 ) where
