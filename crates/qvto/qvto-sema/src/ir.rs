@@ -151,7 +151,8 @@ pub enum Direction {
 pub struct Module {
     pub name: String,
     pub kind: ModuleKind,
-    /// `blackbox transformation ...;` (no body; implemented by the host).
+    /// Implemented by the host: `blackbox transformation ...;` (no body), or a module of a Java
+    /// (native) blackbox unit.
     pub blackbox: bool,
     pub source: SourceId,
     pub span: Span,
@@ -323,7 +324,8 @@ pub struct Operation {
     pub decl_span: Span,
     pub span: Span,
     /// The Java method implementing an operation of a Java blackbox library
-    /// (`pkg.Class#name(java.lang.String, ...)`).
+    /// (`pkg.Class#name(java.lang.String, ...)`), also of a `blackbox` operation declared in
+    /// QVTo whose implementation the analyser found (exactly one match).
     pub blackbox_impl: Option<String>,
 }
 

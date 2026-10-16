@@ -238,10 +238,9 @@ where
     fn execute_op_at(&mut self, op: OpId, src: Value, args_at: usize) -> VmResult<Value> {
         self.check_depth()?;
         let o = self.prog.op(op);
-        if o.is_blackbox {
-            return Err(
-                self.runtime_error(format!("No blackbox implementation found for '{}'", o.name))
-            );
+        if o.is_blackbox && (o.kind != OpKind::Mapping || self.is_library_native(op)) {
+            let args = self.native_args(op, args_at);
+            return self.call_native(op, src, args);
         }
         if o.kind == OpKind::Mapping {
             let n = o.params.len();
@@ -379,6 +378,12 @@ where
             op = self.overriding(op);
         }
         self.check_depth()?;
+        if self.is_library_native(op) {
+            // a mapping of a native library: called as an OCL operation (no mapping protocol)
+            let v = self.call_native(op, src, args)?;
+            let rt = self.prog.op(referred).result_ty;
+            return Ok(self.list_coercion(rt, v));
+        }
         let r = self.execute_mapping(op, src, args, None)?;
         if strict && r.status.failed() {
             let name = self.prog.op(op).name.clone();
@@ -538,9 +543,18 @@ where
             return self.dispatch_disjuncts(op, src, args, base);
         }
         if o.is_blackbox {
-            return Err(
-                self.runtime_error(format!("No blackbox implementation found for '{}'", o.name))
-            );
+            // a `blackbox mapping`: the native result, the trace record, merged mappings
+            let value = self.native_mapping_body(op, src, args, base)?;
+            let params = self.params_of(op, base, args);
+            self.add_trace(op, o.context.map(|_| src.clone()), params, Some(value.clone()));
+            if let Some(m) = &o.mapping {
+                for &mg in &m.merges {
+                    let mg = self.overriding(mg);
+                    self.reusing_call(op, mg, src, args, base)?;
+                }
+            }
+            self.results_to_extents(op, base)?;
+            return Ok((value, MappingStatus::Executed));
         }
         // setupInitialResultValues
         for p in &o.results {
@@ -615,7 +629,13 @@ where
                 self.reusing_call(op, mg, src, args, base)?;
             }
         }
-        // results without container and resource go to their extent
+        self.results_to_extents(op, base)?;
+        Ok((value, MappingStatus::Executed))
+    }
+
+    /// Results without container and resource go to their extent.
+    fn results_to_extents(&mut self, op: OpId, base: usize) -> VmResult<()> {
+        let o = self.prog.op(op);
         for p in &o.results {
             if let Value::Obj(r) = self.regs[base + p.local.index()].clone() {
                 let orphan = if r.is_local() {
@@ -631,7 +651,7 @@ where
                 }
             }
         }
-        Ok((value, MappingStatus::Executed))
+        Ok(())
     }
 
     fn create_instance_of(

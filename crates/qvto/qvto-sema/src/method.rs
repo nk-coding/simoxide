@@ -93,7 +93,12 @@ impl<'r> Sema<'r> {
             );
         }
         if self.ops[op.index()].ir.is_blackbox && !is_disjunctive(mcs) {
-            let n = self.blackbox_handler_count(op);
+            let handlers = self.blackbox_handlers(op);
+            let n = handlers.len();
+            if n == 1 {
+                // the implementation the evaluator will call (`getBlackboxCallHandler`)
+                self.ops[op.index()].ir.blackbox_impl = handlers.into_iter().next();
+            }
             if n == 0 {
                 self.warning(
                     d.header_node(),
@@ -115,10 +120,10 @@ impl<'r> Sema<'r> {
         self.end_operation(op);
     }
 
-    /// The number of Java implementations of a `blackbox` operation declared in QVTo
-    /// (`BlackboxRegistry.getBlackboxCallHandler`, `OperationMatcher.matchOperation`): in the
-    /// blackbox units the module imports, else in all registered units.
-    fn blackbox_handler_count(&mut self, op: OpId) -> usize {
+    /// The Java implementations (their `java_method`s) of a `blackbox` operation declared in
+    /// QVTo (`BlackboxRegistry.getBlackboxCallHandler`, `OperationMatcher.matchOperation`): in
+    /// the blackbox units the module imports, else in all registered units.
+    fn blackbox_handlers(&mut self, op: OpId) -> Vec<String> {
         let module = self.ops[op.index()].module;
         let mut native: Vec<(std::rc::Rc<crate::blackbox::BlackboxUnit>, String)> = Vec::new();
         let me = &self.modules[module.index()];
@@ -147,7 +152,7 @@ impl<'r> Sema<'r> {
             } else {
                 native.into_iter().map(|(b, n)| (b, Some(n))).collect()
             };
-        let mut count = 0;
+        let mut found = Vec::new();
         for (unit, only) in candidates {
             if unit.load_error {
                 continue;
@@ -158,12 +163,12 @@ impl<'r> Sema<'r> {
                 }
                 for bop in &bm.ops {
                     if self.blackbox_matches(op, bm, bop) {
-                        count += 1;
+                        found.push(bop.java_method.clone());
                     }
                 }
             }
         }
-        count
+        found
     }
 
     fn blackbox_matches(

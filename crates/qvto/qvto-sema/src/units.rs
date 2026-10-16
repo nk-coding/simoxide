@@ -88,24 +88,9 @@ pub fn compile(main: UnitSource, resolver: &dyn UnitResolver, meta: MetaRegistry
     compile_with_operations(main, resolver, meta, &[])
 }
 
-/// An operation of a metamodel class (`EOperation`), for calls like `cls.getEStructuralFeature(n)`.
-/// The registry has no operations; the host supplies them.
-#[derive(Clone, Debug)]
-pub struct MetaOperation {
-    pub class: qvto_model::ClassId,
-    pub name: String,
-    /// Name, type and multiplicity (`upperBound > 1 || < 0`, ordered, unique) of each parameter.
-    pub params: Vec<(String, qvto_model::Classifier, MetaMultiplicity)>,
-    /// The result type; `None` for `void`.
-    pub result: Option<(qvto_model::Classifier, MetaMultiplicity)>,
-}
-
-#[derive(Copy, Clone, Debug, Default)]
-pub struct MetaMultiplicity {
-    pub many: bool,
-    pub ordered: bool,
-    pub unique: bool,
-}
+/// Operations of metamodel classes (`EOperation`s): the registry has none; the host supplies
+/// them.
+pub use qvto_model::{MetaMultiplicity, MetaOperation};
 
 /// [`compile`] with the metamodels' operations, in `eOperations` order per class.
 pub fn compile_with_operations(

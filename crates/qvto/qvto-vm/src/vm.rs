@@ -192,6 +192,8 @@ where
     /// The static type of that call.
     pub(crate) std_res_ty: TypeId,
     pub(crate) regexes: RefCell<HashMap<(String, bool), Result<regex::Regex, String>>>,
+    /// Native blackbox implementations and their per-run state (`native.rs`).
+    pub(crate) native: crate::native::NativeState<S>,
 }
 
 /// A register of the current frame (shared). Registers are below the frame's size by
@@ -262,6 +264,7 @@ where
             nested: Vec::new(),
             cur_transf: prog.ir.main_module,
             regexes: RefCell::new(HashMap::new()),
+            native: Default::default(),
             std_src_ty: TypeId::OCL_VOID,
             std_res_ty: TypeId::OCL_VOID,
         };

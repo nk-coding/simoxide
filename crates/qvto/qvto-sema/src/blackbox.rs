@@ -68,6 +68,8 @@ impl<'r> Sema<'r> {
     pub(crate) fn load_blackbox_unit(&mut self, u: usize, bb: &BlackboxUnit) {
         for bm in &bb.modules {
             let id = self.new_module_pub(&bm.name, bm.library, u, Span::default());
+            // implemented by the host (`Module::blackbox`)
+            self.modules[id.index()].ir.blackbox = true;
             self.units[u].modules.push(id);
             self.cur_module = id;
             for uri in &bm.metamodels {

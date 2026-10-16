@@ -1,6 +1,7 @@
 //! The qvto-rs engine under the conformance harness (`qvto conform --engine qvto`): parse,
 //! analyse, compile, bind the case's models, run, and report what the Java runner reports.
 
+use qvto::blackbox::{BlackboxResolver, Catalog, CatalogUnit};
 use qvto::units::{Bundle, FsResolver};
 use qvto_emf::ResourceSet;
 use qvto_model::{ModelStore, ResourceId};
@@ -18,15 +19,51 @@ use std::time::Instant;
 pub struct QvtoEngine {
     pub mode: Mode,
     bundles: Vec<Bundle>,
+    /// The Java blackbox signatures of the corpus (`qvto-types/data/blackboxes.tsv`; parsed on
+    /// the case's thread, the parsed units are not `Send`).
+    signatures: std::sync::Arc<str>,
 }
+
+/// The signatures of the Java blackboxes Eclipse loads for the suite and the corpus.
+pub const BLACKBOX_SIGNATURES: &str = "crates/qvto-types/data/blackboxes.tsv";
 
 impl QvtoEngine {
     pub fn new(root: &Path, mode: Mode) -> QvtoEngine {
+        let signatures = std::fs::read_to_string(root.join(BLACKBOX_SIGNATURES))
+            .unwrap_or_else(|e| {
+                eprintln!("qvto: {BLACKBOX_SIGNATURES}: {e}");
+                String::new()
+            });
         QvtoEngine {
             mode,
             bundles: FsResolver::bundles_below(&root.join("reference/eclipse-qvto/tests")),
+            signatures: signatures.into(),
         }
     }
+}
+
+/// The blackbox units a case sees, as the Java runner registers them: the test bundle's
+/// (`bundle-blackboxes`) or the case's own registrations first (they are also the candidates
+/// for `blackbox` operations declared in QVTo), then Java classes by name.
+fn case_blackboxes(catalog: &Catalog, case: &qvto_testkit::case::Case) -> (Vec<CatalogUnit>, Vec<CatalogUnit>) {
+    let mut envs: Vec<&str> = Vec::new();
+    if case.bundle_blackboxes {
+        envs.push("bundle");
+    }
+    if let Some(e) = catalog.case_env.get(&case.id) {
+        envs.push(e);
+    }
+    let mut registered = Vec::new();
+    let mut classpath = Vec::new();
+    for (i, e) in envs.iter().enumerate() {
+        if i == 0 {
+            registered.extend(catalog.units(e).iter().cloned());
+        } else {
+            classpath.extend(catalog.units(e).iter().cloned());
+        }
+    }
+    classpath.extend(catalog.units("classpath").iter().cloned());
+    (registered, classpath)
 }
 
 fn severity(s: i32) -> Severity {
@@ -51,11 +88,12 @@ impl Engine for QvtoEngine {
         // a thread with a large stack: QVTo calls nest up to the stack depth limit (1000)
         let bundles = self.bundles.clone();
         let mode = self.mode;
+        let signatures = self.signatures.clone();
         let r = std::thread::scope(|s| {
             std::thread::Builder::new()
                 .stack_size(512 << 20)
                 .spawn_scoped(s, || {
-                    std::panic::catch_unwind(AssertUnwindSafe(|| run_case(env, bundles, mode)))
+                    std::panic::catch_unwind(AssertUnwindSafe(|| run_case(env, bundles, &signatures, mode)))
                 })
                 .expect("thread")
                 .join()
@@ -93,7 +131,11 @@ impl Engine for QvtoEngine {
     }
 }
 
-fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
+fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -> Outcome {
+    let catalog = match Catalog::parse(signatures) {
+        Ok(c) => c,
+        Err(e) => return Outcome::with_status(Status::Crashed(format!("{BLACKBOX_SIGNATURES}: {e}"))),
+    };
     let case = env.case;
     let Some(qvto) = env.transformation() else {
         return Outcome::with_status(Status::Unsupported("no transformation".into()));
@@ -113,7 +155,14 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
         },
         from_folder: case.imports_from_folder,
     };
-    let main = match resolver.unit_source(&qvto) {
+    let (registered, classpath) = case_blackboxes(&catalog, case);
+    let file_resolver = resolver;
+    let resolver = BlackboxResolver {
+        inner: &file_resolver,
+        registered,
+        classpath,
+    };
+    let main = match file_resolver.unit_source(&qvto) {
         Ok(m) => m,
         Err(e) => return Outcome::with_status(Status::Crashed(format!("{}: {e}", qvto.display()))),
     };
@@ -129,7 +178,8 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, mode: Mode) -> Outcome {
         }
     }
     let t0 = Instant::now();
-    let compiled = qvto::compile(main, &resolver, rs.graph.meta().clone());
+    let operations = qvto_emf::operations::meta_operations(&rs.graph);
+    let compiled = qvto::compile_with_operations(main, &resolver, rs.graph.meta().clone(), &operations);
     let compile_time = t0.elapsed();
     let mut o = Outcome::with_status(Status::Completed);
     o.compile_time = Some(compile_time);
@@ -416,8 +466,50 @@ pub fn load_metamodel(rs: &mut ResourceSet, uri: &str) -> Result<(), String> {
     if rs.graph.meta().package_by_ns_uri(uri).is_some() {
         return Ok(());
     }
+    // registry keys of the Eclipse environment that the configuration has no file for
+    if let Some((_, target)) = REGISTRY_ALIASES.iter().find(|(k, _)| *k == uri) {
+        load_metamodel(rs, target)?;
+        if let Some(p) = rs.graph.meta().package_by_ns_uri(target) {
+            rs.graph.meta_mut().register_alias(uri, p);
+        }
+        return Ok(());
+    }
+    if let Some((_, file)) = EMF_JAR_MODELS.iter().find(|(k, _)| *k == uri)
+        && rs.ns_location(uri).is_none()
+    {
+        let root = std::env::current_dir()
+            .ok()
+            .and_then(|d| qvto_testkit::find_root(&d))
+            .unwrap_or_default();
+        let loc = qvto_emf::uri::Uri::file(&root.join(file).to_string_lossy()).to_string();
+        rs.add_ns_location(uri, &loc);
+    }
     if let Some(loc) = rs.ns_location(uri).map(String::from) {
         return rs.load_metamodel(&loc).map(|_| ());
     }
     rs.load_metamodel(uri).map(|_| ())
 }
+
+/// Registry keys that are another key's package in the Eclipse environment
+/// (`QVTOperationalPackage` is registered under both spellings).
+const REGISTRY_ALIASES: &[(&str, &str)] = &[(
+    "http://www.eclipse.org/QVT/1.0.0/Operational",
+    "http://www.eclipse.org/qvt/1.0.0/Operational",
+)];
+
+/// Metamodels of the EMF jars registered in the Eclipse environment (copies of their `.ecore`
+/// files in the analyser's fixtures).
+const EMF_JAR_MODELS: &[(&str, &str)] = &[
+    (
+        "http://www.eclipse.org/emf/2003/XMLType",
+        "crates/qvto-sema/tests/fixtures/emf-models/XMLType.ecore",
+    ),
+    (
+        "http://www.w3.org/XML/1998/namespace",
+        "crates/qvto-sema/tests/fixtures/emf-models/XMLNamespace.ecore",
+    ),
+    (
+        "http://www.eclipse.org/emf/2003/Change",
+        "crates/qvto-sema/tests/fixtures/emf-models/Change.ecore",
+    ),
+];

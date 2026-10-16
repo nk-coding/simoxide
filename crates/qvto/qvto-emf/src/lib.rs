@@ -10,6 +10,7 @@ pub mod ecore;
 mod ecore_hooks;
 pub mod fragment;
 pub mod graph;
+pub mod operations;
 pub mod register;
 pub mod resource_set;
 pub mod uri;

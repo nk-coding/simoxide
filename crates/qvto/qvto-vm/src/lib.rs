@@ -16,6 +16,7 @@ pub mod error;
 pub mod extent;
 mod jregex;
 mod log;
+pub mod native;
 mod objects;
 mod run;
 mod stdlib;
@@ -25,6 +26,7 @@ pub mod vm;
 
 pub use env::{RunEnv, TapeHook};
 pub use error::{ErrorKind, QvtError, StackElem, Unwind};
+pub use native::{NativeCall, NativeError, NativeFn, NativeResult, Natives, java_method_key};
 pub use run::RunOutcome;
 pub use stdlib::Prim;
 pub use trace::{TraceRecord, Traces};

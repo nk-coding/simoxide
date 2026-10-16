@@ -240,6 +240,10 @@ where
                 }
             }
         }
+        if main.blackbox && main.kind == qvto_sema::ir::ModuleKind::Transformation {
+            let instance = Value::Instance(module.0);
+            return self.call_native_transformation(module, instance);
+        }
         let Some(entry) = main.entry else {
             return Err(self.runtime_error(format!("Module '{}' is not executable", main.name)));
         };
@@ -347,7 +351,8 @@ where
             _ => return Ok(Value::Invalid),
         };
         let module = self.nested[k].0;
-        if self.prog.ir.modules[module.index()].entry.is_none() {
+        let m = &self.prog.ir.modules[module.index()];
+        if m.entry.is_none() && !m.blackbox {
             return Ok(Value::Invalid);
         }
         let saved = self.bind_nested(k);

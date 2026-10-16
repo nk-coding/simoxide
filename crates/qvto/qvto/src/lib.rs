@@ -10,13 +10,14 @@
 //! let outcome = vm.run_transformation(vec![input_roots, vec![]]);
 //! ```
 
+pub mod blackbox;
 pub mod units;
 
 pub use qvto_bytecode::Program;
 pub use qvto_sema::{Compilation, Problem, UnitResolver, UnitResult, UnitSource};
 pub use qvto_vm::{RunOptions, RunOutcome, Vm};
 
-use qvto_model::MetaRegistry;
+use qvto_model::{MetaOperation, MetaRegistry};
 
 /// The result of compiling a transformation.
 pub struct Compiled {
@@ -37,7 +38,19 @@ impl Compiled {
 /// Parses and analyses `main` and everything it imports against the metamodels of `meta`, and
 /// compiles the program to bytecode.
 pub fn compile(main: UnitSource, resolver: &dyn UnitResolver, meta: MetaRegistry) -> Compiled {
-    let c = qvto_sema::compile(main, resolver, meta);
+    compile_with_operations(main, resolver, meta, &[])
+}
+
+/// [`compile`] with the metamodels' `EOperation`s (`qvto_emf::operations::meta_operations`
+/// reads them from the loaded `.ecore` files), so that calls like `pkg.getEClassifier(n)`
+/// resolve.
+pub fn compile_with_operations(
+    main: UnitSource,
+    resolver: &dyn UnitResolver,
+    meta: MetaRegistry,
+    operations: &[MetaOperation],
+) -> Compiled {
+    let c = qvto_sema::compile_with_operations(main, resolver, meta, operations);
     let has_errors = c.has_errors();
     let Compilation { units, program } = c;
     if has_errors {
