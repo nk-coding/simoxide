@@ -1,0 +1,18 @@
+transformation micro();
+
+helper fib(n : Integer) : Integer {
+	return if n <= 1 then n else fib(n - 1) + fib(n - 2) endif;
+}
+
+main() {
+	var s := 0;
+	var i := 0;
+	while (i < 1000000) { s := s + i; i := i + 1; };
+	log(s.toString());
+	log(fib(25).toString());
+	log(Sequence{1..100000}->select(x | x.mod(3) = 0)->collect(x | x * 2)->sum().toString());
+	var st : Set(Integer) := Set{};
+	var j := 0;
+	while (j < 20000) { st := st->including(j); j := j + 1; };
+	log(st->size().toString());
+}

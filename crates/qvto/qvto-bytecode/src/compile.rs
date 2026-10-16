@@ -239,6 +239,61 @@ fn compile_body(
     })
 }
 
+/// An expression whose evaluation has no side effects and changes no variable.
+fn simple(e: &Expr) -> bool {
+    match &e.kind {
+        ExprKind::Null
+        | ExprKind::Invalid
+        | ExprKind::Bool(_)
+        | ExprKind::Int(_)
+        | ExprKind::Real(_)
+        | ExprKind::Str(_)
+        | ExprKind::Unlimited
+        | ExprKind::EnumLit(..)
+        | ExprKind::Type(_)
+        | ExprKind::Local(_)
+        | ExprKind::This(_)
+        | ExprKind::Global(_)
+        | ExprKind::ModelParam(_) => true,
+        ExprKind::Prop(s, _) | ExprKind::TupleProp(s, _) => simple(s),
+        _ => false,
+    }
+}
+
+/// Whether an expression may read or write the variable (conservative: true when unsure).
+fn mentions_local(e: &Expr, l: LocalId) -> bool {
+    match &e.kind {
+        ExprKind::Local(x) => *x == l,
+        ExprKind::Null
+        | ExprKind::Invalid
+        | ExprKind::Bool(_)
+        | ExprKind::Int(_)
+        | ExprKind::Real(_)
+        | ExprKind::Str(_)
+        | ExprKind::Unlimited
+        | ExprKind::EnumLit(..)
+        | ExprKind::Type(_)
+        | ExprKind::This(_)
+        | ExprKind::Global(_)
+        | ExprKind::ModelParam(_) => false,
+        ExprKind::Prop(s, _) | ExprKind::TupleProp(s, _) | ExprKind::IntermProp(s, _) => {
+            mentions_local(s, l)
+        }
+        ExprKind::Call(c) => match c.callee {
+            Callee::Std(_) => {
+                c.source.as_ref().is_some_and(|s| mentions_local(s, l))
+                    || c.args.iter().any(|a| mentions_local(a, l))
+            }
+            _ => true,
+        },
+        ExprKind::Coll(_, parts) | ExprKind::List(parts) => parts.iter().any(|p| match p {
+            CollPart::Item(x) => mentions_local(x, l),
+            CollPart::Range(a, b) => mentions_local(a, l) || mentions_local(b, l),
+        }),
+        _ => true,
+    }
+}
+
 pub(crate) fn type_name(ir: &ir::Program, t: TypeId) -> String {
     match ir.types.get(t) {
         Type::Class(c) => ir.meta.class(*c).name.to_string(),
@@ -502,6 +557,11 @@ impl<'a> Builder<'a> {
     }
 
     fn stmt(&mut self, e: &Expr) -> CResult<()> {
+        if let ExprKind::Assign(a) = &e.kind {
+            // the value of a statement-level assignment is not needed
+            self.enter(e);
+            return self.assign(a, None);
+        }
         let m = self.mark();
         let r = self.alloc()?;
         self.expr(e, r)?;
@@ -735,7 +795,7 @@ impl<'a> Builder<'a> {
                     self.emit(Insn::LoadNull { dst });
                 }
             }
-            ExprKind::Assign(a) => self.assign(a, dst)?,
+            ExprKind::Assign(a) => self.assign(a, Some(dst))?,
             ExprKind::While(c, body) => {
                 let head = self.pc();
                 let m = self.mark();
@@ -1234,6 +1294,9 @@ impl<'a> Builder<'a> {
             }
             _ => {}
         }
+        if let Some(()) = self.fast_op(e, op, c, dst)? {
+            return Ok(());
+        }
         let m = self.mark();
         let base = self.call_args(c)?;
         let src_unlimited = c.source.as_ref().is_some_and(|s| self.is_unlimited(s));
@@ -1257,6 +1320,115 @@ impl<'a> Builder<'a> {
         self.ip = e.span.start;
         self.release(m);
         Ok(())
+    }
+
+    /// `x->op(args)` with `x`'s value moved into the call.
+    fn call_std_taking(
+        &mut self,
+        e: &Expr,
+        op: StdOp,
+        c: &ir::Call,
+        dst: Reg,
+        x: LocalId,
+    ) -> CResult<()> {
+        let m = self.mark();
+        let base = self.alloc_n(1 + c.args.len() as u32)?;
+        self.emit(Insn::Take {
+            dst: base,
+            src: self.local(x),
+        });
+        for (i, a) in c.args.iter().enumerate() {
+            self.expr(a, base + 1 + i as Reg)?;
+        }
+        let src_unlimited = c.source.as_ref().is_some_and(|s| self.is_unlimited(s));
+        let arg_unlimited = c.args.first().is_some_and(|a| self.is_unlimited(a));
+        let needs_type = op.name() == "sum";
+        if src_unlimited || arg_unlimited || needs_type {
+            let site = self.site(Site::Std {
+                op,
+                src_unlimited,
+                arg_unlimited,
+                src_ty: c.source.as_ref().map(|s| s.ty).unwrap_or(TypeId::OCL_VOID),
+            })?;
+            self.emit(Insn::CallStdX { dst, base, site });
+        } else {
+            self.emit(Insn::CallStd {
+                dst,
+                base,
+                op: op as u16,
+            });
+        }
+        self.ip = e.span.start;
+        self.release(m);
+        Ok(())
+    }
+
+    fn is_numeric(&self, t: TypeId) -> bool {
+        t == TypeId::INTEGER || t == TypeId::REAL
+    }
+
+    /// Operators with instructions of their own: `+ - * < <= > >=` on Integer and Real
+    /// operands, `=`, `<>`, `not`.
+    fn fast_op(&mut self, e: &Expr, op: StdOp, c: &ir::Call, dst: Reg) -> CResult<Option<()>> {
+        let d = op.desc();
+        if d.section != qvto_types::Section::Ocl {
+            return Ok(None);
+        }
+        let Some(src) = &c.source else {
+            return Ok(None);
+        };
+        if self.is_unlimited(src) || c.args.first().is_some_and(|a| self.is_unlimited(a)) {
+            return Ok(None);
+        }
+        if d.name == "not" && c.args.is_empty() {
+            let m = self.mark();
+            let s = self.expr_reg(src)?;
+            self.emit(Insn::Not { dst, src: s });
+            self.release(m);
+            return Ok(Some(()));
+        }
+        if c.args.len() != 1 {
+            return Ok(None);
+        }
+        let arg = &c.args[0];
+        let numeric = self.is_numeric(src.ty) && self.is_numeric(arg.ty);
+        let kind = match d.name {
+            "+" if numeric => 0,
+            "-" if numeric => 1,
+            "*" if numeric => 2,
+            "<" if numeric => 3,
+            "<=" if numeric => 4,
+            ">" if numeric => 5,
+            ">=" if numeric => 6,
+            "=" => 7,
+            "<>" => 8,
+            _ => return Ok(None),
+        };
+        let m = self.mark();
+        // the left operand stays in its variable's register only if the right one cannot
+        // change it
+        let a = if simple(arg) {
+            self.expr_reg(src)?
+        } else {
+            let t = self.alloc()?;
+            self.expr(src, t)?;
+            t
+        };
+        let b = self.expr_reg(arg)?;
+        self.emit(match kind {
+            0 => Insn::Add { dst, a, b },
+            1 => Insn::Sub { dst, a, b },
+            2 => Insn::Mul { dst, a, b },
+            3 => Insn::Lt { dst, a, b },
+            4 => Insn::Le { dst, a, b },
+            5 => Insn::Gt { dst, a, b },
+            6 => Insn::Ge { dst, a, b },
+            7 => Insn::Eq { dst, a, b },
+            _ => Insn::Ne { dst, a, b },
+        });
+        self.ip = e.span.start;
+        self.release(m);
+        Ok(Some(()))
     }
 
     /// Classic OCL's `and`, `or`, `implies` with lax null handling (`EvaluationVisitorImpl`):
@@ -1328,18 +1500,57 @@ impl<'a> Builder<'a> {
         }
     }
 
-    fn assign(&mut self, a: &ir::Assign, dst: Reg) -> CResult<()> {
+    fn assign(&mut self, a: &ir::Assign, dst: Option<Reg>) -> CResult<()> {
         if let Some((r, conv)) = self.late_resolve_of(&a.value) {
-            return self.late_assign(a, r, conv, dst);
+            let m = self.mark();
+            let d = match dst {
+                Some(d) => d,
+                None => self.alloc()?,
+            };
+            self.late_assign(a, r, conv, d)?;
+            self.release(m);
+            return Ok(());
         }
         let m = self.mark();
         let t = self.alloc()?;
-        self.expr(&a.value, t)?;
+        // `x := x->op(...)`: the variable's value moves into the call (its storage can be
+        // reused in place), as `x` is overwritten right after
+        let mut taken = false;
+        if let LValue::Local(x) = &a.target
+            && self.types.is_collection_like(a.target_ty)
+            && let ExprKind::Call(c) = &a.value.kind
+            && let Callee::Std(op) = c.callee
+            && let Some(src) = &c.source
+            && matches!(src.kind, ExprKind::Local(l) if l == *x)
+            && !c.args.iter().any(|arg| mentions_local(arg, *x))
+            && !matches!(
+                op,
+                StdOp::Boolean_and | StdOp::Boolean_or | StdOp::Boolean_implies
+            )
+        {
+            self.enter(&a.value);
+            self.call_std_taking(&a.value, op, c, t, *x)?;
+            taken = true;
+        }
+        if !taken {
+            self.expr(&a.value, t)?;
+        }
+        if let Some(d) = dst {
+            self.emit(Insn::Move { dst: d, src: t });
+        }
         match &a.target {
+            LValue::Local(l) if !self.types.is_collection_like(a.target_ty) => {
+                // a scalar variable: QVTo's assign is the value itself
+                self.emit(Insn::Move {
+                    dst: self.local(*l),
+                    src: t,
+                });
+            }
             LValue::Local(l) => {
                 let site = self.site(Site::Assign {
                     ty: a.target_ty,
                     add: a.add,
+                    same_elem: self.same_elem(a.value.ty, a.target_ty),
                 })?;
                 self.emit(Insn::Assign {
                     dst: self.local(*l),
@@ -1353,6 +1564,7 @@ impl<'a> Builder<'a> {
                 let site = self.site(Site::Assign {
                     ty: a.target_ty,
                     add: a.add,
+                    same_elem: self.same_elem(a.value.ty, a.target_ty),
                 })?;
                 self.emit(Insn::Assign {
                     dst: old,
@@ -1386,9 +1598,23 @@ impl<'a> Builder<'a> {
                 });
             }
         }
-        self.emit(Insn::Move { dst, src: t });
         self.release(m);
         Ok(())
+    }
+
+    /// The element types of a value and of the variable it is assigned to agree (so the
+    /// assignment converts no element).
+    fn same_elem(&self, value_ty: TypeId, target_ty: TypeId) -> bool {
+        match (self.types.element(value_ty), self.types.element(target_ty)) {
+            (Some(a), Some(b)) => {
+                a == b
+                    || !matches!(
+                        self.types.get(b),
+                        Type::Integer | Type::Real | Type::UnlimitedNatural | Type::DataType(_)
+                    )
+            }
+            _ => false,
+        }
     }
 
     /// `x.p := late resolve...`: the owner and the resolve's source are evaluated now, the

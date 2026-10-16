@@ -58,6 +58,8 @@ pub enum Site {
     Assign {
         ty: TypeId,
         add: bool,
+        /// The value's element type is the variable's (no number conversion of elements).
+        same_elem: bool,
     },
     SetProp {
         feature: FeatureId,

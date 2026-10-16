@@ -71,6 +71,9 @@ pub struct JavaHashMap<K, V> {
     size: usize,
     /// Java's `threshold` field (holds the initial capacity before the table is allocated).
     threshold: usize,
+    /// An upper bound of the longest bucket list (lists only grow by insertion; resizes and
+    /// removals shorten them).
+    max_bin_hint: usize,
 }
 
 impl<K, V> Default for JavaHashMap<K, V> {
@@ -102,6 +105,7 @@ impl<K, V> JavaHashMap<K, V> {
             free: Vec::new(),
             size: 0,
             threshold: 0,
+            max_bin_hint: 0,
         }
     }
 
@@ -141,8 +145,18 @@ impl<K, V> JavaHashMap<K, V> {
         }
         best
     }
+    /// Whether every bucket list is shorter than `n` (O(1) unless the insertion history
+    /// leaves that open).
+    pub fn bins_shorter_than(&self, n: usize) -> bool {
+        self.max_bin_hint < n || self.max_bin_len() < n
+    }
+
     /// True if some bucket is a red-black tree.
     pub fn has_tree_bins(&self) -> bool {
+        // a bin becomes a tree only when its list grows beyond the threshold
+        if self.max_bin_hint <= TREEIFY_THRESHOLD {
+            return false;
+        }
         self.table.iter().any(|&h| h != NIL && self.n(h).tree)
     }
 
@@ -191,6 +205,7 @@ impl<K, V> JavaHashMap<K, V> {
         self.nodes.clear();
         self.free.clear();
         self.size = 0;
+        self.max_bin_hint = 0;
     }
 
     /// Entries in Java iteration order.
@@ -843,6 +858,7 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
                 if e == NIL {
                     new_id = self.alloc(hash, key, val, NIL);
                     self.m(p).next = new_id;
+                    self.max_bin_hint = self.max_bin_hint.max(bin_count + 2);
                     if bin_count >= TREEIFY_THRESHOLD - 1 {
                         self.treeify_bin(hash, env);
                     }

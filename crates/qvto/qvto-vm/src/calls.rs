@@ -176,16 +176,15 @@ where
         }
     }
 
-    /// A call of a helper, query, constructor or entry operation.
+    /// A call of a helper, query, constructor or entry operation; receiver at `at`, arguments
+    /// after it (temporaries, moved into the callee's frame).
     pub(crate) fn call_op(&mut self, op: OpId, at: usize, virt: bool) -> VmResult<Value> {
-        let mut src = self.regs[at].clone();
+        let mut src = std::mem::take(&mut self.regs[at]);
         let referred = op;
         let o = self.prog.op(op);
         if let Some(ct) = o.context {
             src = self.list_coercion(ct, src);
         }
-        let n = o.params.len();
-        let args: Vec<Value> = (0..n).map(|i| self.regs[at + 1 + i].clone()).collect();
         if src.is_invalid() {
             return Ok(Value::Invalid);
         }
@@ -201,13 +200,22 @@ where
         if virt {
             op = self.overriding(op);
         }
-        let v = self.execute_op(op, src, args)?;
+        let v = self.execute_op_at(op, src, at + 1)?;
         let rt = self.prog.op(referred).result_ty;
         Ok(self.list_coercion(rt, v))
     }
 
-    /// Runs a non-mapping operation on a new frame.
+    /// Runs a non-mapping operation on a new frame with the given arguments.
     pub(crate) fn execute_op(&mut self, op: OpId, src: Value, args: Vec<Value>) -> VmResult<Value> {
+        let at = self.regs.len();
+        self.regs.extend(args);
+        let r = self.execute_op_at(op, src, at);
+        self.regs.truncate(at);
+        r
+    }
+
+    /// Runs an operation on a new frame; the arguments are the registers from `args_at`.
+    fn execute_op_at(&mut self, op: OpId, src: Value, args_at: usize) -> VmResult<Value> {
         self.check_depth()?;
         let o = self.prog.op(op);
         if o.is_blackbox {
@@ -216,6 +224,8 @@ where
             );
         }
         if o.kind == OpKind::Mapping {
+            let n = o.params.len();
+            let args: Vec<Value> = (0..n).map(|i| self.regs[args_at + i].clone()).collect();
             let r = self.execute_mapping(op, src, args, None)?;
             return Ok(r.value);
         }
@@ -223,12 +233,23 @@ where
             return Ok(Value::Null);
         };
         let (base, ibase) = self.push_frame(op, body);
-        self.bind(op, base, &src, &args);
+        if let Some(sl) = o.self_local
+            && o.context.is_some()
+        {
+            self.regs[base + sl.index()] = src.clone();
+        }
+        for (i, p) in o.params.iter().enumerate() {
+            if p.direction != Direction::Out {
+                let a = std::mem::take(&mut self.regs[args_at + i]);
+                let v = self.list_coercion(p.ty, a);
+                self.regs[base + p.local.index()] = v;
+            }
+        }
         if o.kind == OpKind::Constructor
             && let Some(rl) = o.result_local
         {
             // result := self (Eclipse moves self to result)
-            self.regs[base + rl.index()] = src.clone();
+            self.regs[base + rl.index()] = src;
             if let Some(sl) = o.self_local {
                 self.regs[base + sl.index()] = Value::Null;
             }

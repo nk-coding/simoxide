@@ -534,6 +534,10 @@ where
         self.prim(prim, op, args, src_unl, arg_unl)
     }
 
+    pub(crate) fn prim_call(&mut self, prim: Prim, op: StdOp, args: Vec<Value>) -> VmResult<Value> {
+        self.prim(prim, op, args, false, false)
+    }
+
     fn prim(
         &mut self,
         prim: Prim,

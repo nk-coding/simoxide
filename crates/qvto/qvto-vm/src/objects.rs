@@ -380,6 +380,31 @@ where
         self.prog.ir.types.element(t).unwrap_or(TypeId::OCL_ANY)
     }
 
+    /// [`Vm::assign_value`] with fast paths that keep Eclipse's results: a fresh, unshared
+    /// collection of the variable's kind whose table a copy would rebuild identically is
+    /// taken as is (`:=`), and `+=` reuses an unshared old collection when the copy
+    /// constructor would rebuild it identically.
+    pub(crate) fn assign_fast(
+        &self,
+        ty: TypeId,
+        old: Value,
+        rhs: Value,
+        reset: bool,
+        same_elem: bool,
+    ) -> Value {
+        if reset
+            && same_elem
+            && let Value::Coll(c) = &rhs
+            && let Type::Collection(k, _) = self.prog.ir.types.get(ty)
+            && k.name() == c.kind().ocl_name()
+            && Rc::strong_count(c) == 1
+            && qvto_runtime::coll::ops::fresh_add_equivalent(c)
+        {
+            return rhs;
+        }
+        self.assign_value(ty, old, rhs, reset)
+    }
+
     /// QVTo's `assign(lhsType, old, rhs, isReset)` (`QvtOperationalEvaluationEnv`).
     pub(crate) fn assign_value(&self, ty: TypeId, old: Value, rhs: Value, reset: bool) -> Value {
         let types = &self.prog.ir.types;
@@ -424,26 +449,41 @@ where
         self.list_coercion(ty, new)
     }
 
-    /// QVTo's `append`: List and Dict are mutated, other collections copied.
+    /// QVTo's `append`: List and Dict are mutated, other collections copied
+    /// (`createNewCollection(c)`, which reuses unshared storage when the copy would be
+    /// identical).
     fn append(&self, coll: Value, content: Value, elem: TypeId) -> Value {
-        let mut c = match coll {
-            Value::List(_) | Value::Dict(_) => coll,
-            Value::Coll(c) => {
-                let kind = c.kind();
-                Value::Coll(Rc::new(Coll::copy_of(kind, &c, &self.env)))
-            }
-            other => other,
-        };
         let nc = self.num_class_of_type(elem);
         let converted = convert_number(content.clone(), nc);
-        if converted.is_null() || self.is_kind_of(&converted, elem) {
-            push(&mut c, converted, &self.env);
+        let single = converted.is_null() || self.is_kind_of(&converted, elem);
+        let items: Vec<Value> = if single {
+            vec![converted]
         } else if matches!(content, Value::Coll(_) | Value::List(_) | Value::Dict(_)) {
-            for e in crate::vm::Iter::of(&content).items.iter() {
-                push(&mut c, convert_number(e.clone(), nc), &self.env);
+            crate::vm::Iter::of(&content)
+                .items
+                .iter()
+                .map(|e| convert_number(e.clone(), nc))
+                .collect()
+        } else {
+            Vec::new()
+        };
+        match coll {
+            Value::Coll(c) => {
+                // the copy, then the additions in place
+                let kind = c.kind();
+                let mut v = qvto_runtime::coll::ops::as_same(Value::Coll(c), kind, &self.env);
+                for x in items {
+                    push(&mut v, x, &self.env);
+                }
+                v
+            }
+            mut other => {
+                for x in items {
+                    push(&mut other, x, &self.env);
+                }
+                other
             }
         }
-        c
     }
 
     /// `EvaluationUtil.doImplicitListCoercion`.

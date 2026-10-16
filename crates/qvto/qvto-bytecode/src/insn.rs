@@ -21,6 +21,12 @@ pub enum Insn {
         dst: Reg,
         src: Reg,
     },
+    /// Moves a value out of a register, leaving null (the variable is reassigned right after,
+    /// so the value's storage can be reused in place).
+    Take {
+        dst: Reg,
+        src: Reg,
+    },
     LoadNull {
         dst: Reg,
     },
@@ -105,6 +111,61 @@ pub enum Insn {
     },
     /// Ends the chunk with a value.
     Return {
+        src: Reg,
+    },
+
+    // ---- arithmetic and comparison (OCL operators; fast paths for Integer and Real operands,
+    // classic OCL's general rules otherwise) -----------------------------------------------
+    Add {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
+    Sub {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
+    Mul {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
+    Lt {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
+    Le {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
+    Gt {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
+    Ge {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
+    /// OCL `=`.
+    Eq {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
+    /// OCL `<>`.
+    Ne {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
+    /// Boolean `not`.
+    Not {
+        dst: Reg,
         src: Reg,
     },
 

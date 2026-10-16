@@ -102,7 +102,7 @@ fn default_growth_capacity(n: usize) -> usize {
 }
 
 fn plain<V>(m: &JavaHashMap<Value, V>) -> bool {
-    !m.has_tree_bins() && m.max_bin_len() < 8
+    m.bins_shorter_than(8) && !m.has_tree_bins()
 }
 
 /// True if `createNewCollection(c.kind(), c)` rebuilds exactly `c`'s storage, so a memory
@@ -128,6 +128,40 @@ fn copy_equivalent(c: &Coll) -> bool {
                 && plain(m)
         }
     }
+}
+
+/// `createNewCollection(c)` (the copy constructor of the collection's class), reusing the
+/// storage when the value is unshared and the copy would be identical.
+pub fn as_same(src: Value, kind: CollKind, env: &dyn HashEnv) -> Value {
+    match src {
+        Value::Coll(c) => copy_as(kind, c, env).into(),
+        other => other,
+    }
+}
+
+/// True if adding the elements one by one to a new empty collection of the same kind
+/// (`new HashSet()`, `new BagImpl()`, `new LinkedHashSet()`, `new ArrayList()`) rebuilds exactly
+/// this storage (same table capacity, plain bins), so that the collection itself can stand for
+/// such a copy without changing any iteration order.
+pub fn fresh_add_equivalent(c: &Coll) -> bool {
+    match c {
+        Coll::Sequence(_) | Coll::OrderedSet(_) => true,
+        Coll::Set(Index::Linked(_))
+        | Coll::Bag(super::Bag {
+            index: Index::Linked(_),
+            ..
+        }) => true,
+        Coll::Set(Index::Hash(m)) => fresh_table(m),
+        Coll::Bag(super::Bag {
+            index: Index::Hash(m),
+            ..
+        }) => fresh_table(m),
+    }
+}
+
+fn fresh_table<V>(m: &JavaHashMap<Value, V>) -> bool {
+    (m.capacity() == default_growth_capacity(m.len()) || (m.capacity() == 0 && m.is_empty()))
+        && plain(m)
 }
 
 /// `createNewCollection(kind, c)`, reusing `c`'s storage when that is indistinguishable.
@@ -623,11 +657,13 @@ pub fn qvto_including(src: Value, v: Value, env: &dyn HashEnv) -> Value {
     let Some(op) = Operand::of(src) else {
         return Value::Invalid;
     };
-    let class = op.class;
+    let Operand { class, coll, value } = op;
     let src = if class.is_lhs() {
-        Coll::copy_of(CollKind::Set, &op.coll, env).into()
+        Coll::copy_of(CollKind::Set, &coll, env).into()
     } else {
-        op.value
+        // only the value holds the storage now, so `including` can reuse it
+        drop(coll);
+        value
     };
     rewrap(class, including(src, v, env))
 }
@@ -640,11 +676,12 @@ pub fn qvto_excluding(src: Value, v: &Value, env: &dyn HashEnv) -> Value {
     let Some(op) = Operand::of(src) else {
         return Value::Invalid;
     };
-    let class = op.class;
+    let Operand { class, coll, value } = op;
     let src = if class.is_lhs() {
-        Coll::copy_of(CollKind::Set, &op.coll, env).into()
+        Coll::copy_of(CollKind::Set, &coll, env).into()
     } else {
-        op.value
+        drop(coll);
+        value
     };
     rewrap(class, excluding(src, v, env))
 }

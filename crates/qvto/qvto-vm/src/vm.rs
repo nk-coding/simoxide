@@ -175,9 +175,29 @@ where
     pub(crate) regexes: RefCell<HashMap<(String, bool), Result<regex::Regex, String>>>,
 }
 
+/// A register of the current frame (shared). Registers are below the frame's size by
+/// construction of the compiler (every frame is allocated with its chunk's register count);
+/// debug builds check.
 macro_rules! r {
     ($vm:ident, $base:ident, $r:expr) => {
-        $vm.regs[$base + $r as usize]
+        (*{
+            let i = $base + $r as usize;
+            debug_assert!(i < $vm.regs.len());
+            // SAFETY: in bounds (see above); the reference does not outlive the instruction
+            unsafe { &*$vm.regs.as_ptr().add(i) }
+        })
+    };
+}
+
+/// A register of the current frame (for writing).
+macro_rules! w {
+    ($vm:ident, $base:ident, $r:expr) => {
+        (*{
+            let i = $base + $r as usize;
+            debug_assert!(i < $vm.regs.len());
+            // SAFETY: as for `r!`; no other reference to the register is alive
+            unsafe { &mut *($vm.regs.as_mut_ptr().add(i)) }
+        })
     };
 }
 
@@ -368,7 +388,7 @@ where
                         Some((target, var)) => {
                             if let Some(var) = var {
                                 let exc = self.exception_object(e);
-                                r!(self, base, var) = exc;
+                                w!(self, base, var) = exc;
                             }
                             pc = target;
                         }
@@ -428,35 +448,143 @@ where
             }};
         }
         loop {
-            let insn = code[pc];
+            debug_assert!(pc < code.len());
+            // SAFETY: every chunk ends with `Return` or a jump, and jump targets are inside it
+            let insn = unsafe { *code.get_unchecked(pc) };
             match insn {
                 Insn::Nop => {}
                 Insn::Move { dst, src } => {
                     let v = r!(self, base, src).clone();
-                    r!(self, base, dst) = v;
+                    w!(self, base, dst) = v;
                 }
-                Insn::LoadNull { dst } => r!(self, base, dst) = Value::Null,
-                Insn::LoadInvalid { dst } => r!(self, base, dst) = Value::Invalid,
-                Insn::LoadBool { dst, v } => r!(self, base, dst) = Value::Bool(v),
-                Insn::LoadInt { dst, v } => r!(self, base, dst) = Value::Int(v as i64),
+                Insn::Take { dst, src } => {
+                    let v = std::mem::take(&mut w!(self, base, src));
+                    w!(self, base, dst) = v;
+                }
+                Insn::Add { dst, a, b } => {
+                    let v = match (&r!(self, base, a), &r!(self, base, b)) {
+                        (Value::Int(x), Value::Int(y)) => Value::Int(x.wrapping_add(*y)),
+                        (Value::Real(x), Value::Real(y)) => Value::Real(x + y),
+                        _ => match self.slow_bin(Prim::Add, StdOp::Real_add, base, a, b) {
+                            Ok(v) => v,
+                            Err(e) => fail!(e),
+                        },
+                    };
+                    w!(self, base, dst) = v;
+                }
+                Insn::Sub { dst, a, b } => {
+                    let v = match (&r!(self, base, a), &r!(self, base, b)) {
+                        (Value::Int(x), Value::Int(y)) => Value::Int(x.wrapping_sub(*y)),
+                        (Value::Real(x), Value::Real(y)) => Value::Real(x - y),
+                        _ => match self.slow_bin(Prim::Sub, StdOp::Real_sub, base, a, b) {
+                            Ok(v) => v,
+                            Err(e) => fail!(e),
+                        },
+                    };
+                    w!(self, base, dst) = v;
+                }
+                Insn::Mul { dst, a, b } => {
+                    let v = match (&r!(self, base, a), &r!(self, base, b)) {
+                        (Value::Int(x), Value::Int(y)) => Value::Int(x.wrapping_mul(*y)),
+                        (Value::Real(x), Value::Real(y)) => Value::Real(x * y),
+                        _ => match self.slow_bin(Prim::Mul, StdOp::Real_mul, base, a, b) {
+                            Ok(v) => v,
+                            Err(e) => fail!(e),
+                        },
+                    };
+                    w!(self, base, dst) = v;
+                }
+                Insn::Lt { dst, a, b }
+                | Insn::Le { dst, a, b }
+                | Insn::Gt { dst, a, b }
+                | Insn::Ge { dst, a, b } => {
+                    let fast = match (&r!(self, base, a), &r!(self, base, b)) {
+                        (Value::Int(x), Value::Int(y)) => Some(match insn {
+                            Insn::Lt { .. } => x < y,
+                            Insn::Le { .. } => x <= y,
+                            Insn::Gt { .. } => x > y,
+                            _ => x >= y,
+                        }),
+                        (Value::Real(x), Value::Real(y)) => Some(match insn {
+                            Insn::Lt { .. } => x < y,
+                            Insn::Le { .. } => x <= y,
+                            Insn::Gt { .. } => x > y,
+                            _ => x >= y,
+                        }),
+                        _ => None,
+                    };
+                    let v = match fast {
+                        Some(b) => Value::Bool(b),
+                        None => {
+                            let (prim, op) = match insn {
+                                Insn::Lt { .. } => (Prim::Lt, StdOp::Real_lt),
+                                Insn::Le { .. } => (Prim::Le, StdOp::Real_le),
+                                Insn::Gt { .. } => (Prim::Gt, StdOp::Real_gt),
+                                _ => (Prim::Ge, StdOp::Real_ge),
+                            };
+                            match self.slow_bin(prim, op, base, a, b) {
+                                Ok(v) => v,
+                                Err(e) => fail!(e),
+                            }
+                        }
+                    };
+                    w!(self, base, dst) = v;
+                }
+                Insn::Eq { dst, a, b } | Insn::Ne { dst, a, b } => {
+                    let fast = match (&r!(self, base, a), &r!(self, base, b)) {
+                        (Value::Int(x), Value::Int(y)) => Some(x == y),
+                        (Value::Bool(x), Value::Bool(y)) => Some(x == y),
+                        (Value::Str(x), Value::Str(y)) => Some(x == y),
+                        (Value::Obj(x), Value::Obj(y)) => Some(x == y),
+                        (Value::Enum(x), Value::Enum(y)) => Some(x == y),
+                        _ => None,
+                    };
+                    let ne = matches!(insn, Insn::Ne { .. });
+                    let v = match fast {
+                        Some(e) => Value::Bool(e != ne),
+                        None => {
+                            let (prim, op) = if ne {
+                                (Prim::Ne, StdOp::OclAny_ne)
+                            } else {
+                                (Prim::Eq, StdOp::OclAny_eq)
+                            };
+                            match self.slow_bin(prim, op, base, a, b) {
+                                Ok(v) => v,
+                                Err(e) => fail!(e),
+                            }
+                        }
+                    };
+                    w!(self, base, dst) = v;
+                }
+                Insn::Not { dst, src } => {
+                    let v = match &r!(self, base, src) {
+                        Value::Bool(b) => Value::Bool(!b),
+                        _ => Value::Invalid,
+                    };
+                    w!(self, base, dst) = v;
+                }
+                Insn::LoadNull { dst } => w!(self, base, dst) = Value::Null,
+                Insn::LoadInvalid { dst } => w!(self, base, dst) = Value::Invalid,
+                Insn::LoadBool { dst, v } => w!(self, base, dst) = Value::Bool(v),
+                Insn::LoadInt { dst, v } => w!(self, base, dst) = Value::Int(v as i64),
                 Insn::LoadConst { dst, k } => {
-                    r!(self, base, dst) = self.consts[k as usize].clone();
+                    w!(self, base, dst) = self.consts[k as usize].clone();
                 }
                 Insn::LoadDefault { dst, ty } => {
-                    r!(self, base, dst) = self.default_value(TypeId(ty));
+                    w!(self, base, dst) = self.default_value(TypeId(ty));
                 }
                 Insn::LoadThis { dst, module } => {
-                    r!(self, base, dst) = Value::Instance(module as u32)
+                    w!(self, base, dst) = Value::Instance(module as u32)
                 }
                 Insn::LoadModel { dst, module, index } => {
                     let v = match self.param_extents.get(&(module as u32, index as u32)) {
                         Some(&e) => Value::Model(e as u32),
                         None => Value::Null,
                     };
-                    r!(self, base, dst) = v;
+                    w!(self, base, dst) = v;
                 }
                 Insn::LoadGlobal { dst, g } => {
-                    r!(self, base, dst) = self.globals[g as usize].clone();
+                    w!(self, base, dst) = self.globals[g as usize].clone();
                 }
                 Insn::StoreGlobal { src, g } => {
                     self.globals[g as usize] = r!(self, base, src).clone();
@@ -514,14 +642,14 @@ where
                 }
                 Insn::Return { src } => {
                     *pcr = pc as u32;
-                    return Ok(std::mem::take(&mut r!(self, base, src)));
+                    return Ok(std::mem::take(&mut w!(self, base, src)));
                 }
                 Insn::CallStd { dst, base: b, op } => {
                     set_pc!();
                     let op = StdOp::all()[op as usize];
                     let at = base + b as usize;
                     match self.call_std(op, at, false, false) {
-                        Ok(v) => r!(self, base, dst) = v,
+                        Ok(v) => w!(self, base, dst) = v,
                         Err(e) => fail!(e),
                     }
                 }
@@ -539,7 +667,7 @@ where
                     let at = base + b as usize;
                     self.std_src_ty = src_ty;
                     match self.call_std(op, at, src_unlimited, arg_unlimited) {
-                        Ok(v) => r!(self, base, dst) = v,
+                        Ok(v) => w!(self, base, dst) = v,
                         Err(e) => fail!(e),
                     }
                 }
@@ -551,7 +679,7 @@ where
                     let virt = matches!(insn, Insn::CallVirtual { .. });
                     let at = base + b as usize;
                     match self.call_op(OpId(op as u32), at, virt) {
-                        Ok(v) => r!(self, base, dst) = v,
+                        Ok(v) => w!(self, base, dst) = v,
                         Err(e) => fail!(e),
                     }
                 }
@@ -570,7 +698,7 @@ where
                     };
                     let at = base + b as usize;
                     match self.call_mapping_site(op, at, strict, virtual_) {
-                        Ok(v) => r!(self, base, dst) = v,
+                        Ok(v) => w!(self, base, dst) = v,
                         Err(e) => fail!(e),
                     }
                 }
@@ -581,7 +709,7 @@ where
                     };
                     let at = base + b as usize;
                     match self.call_meta(m, at) {
-                        Ok(v) => r!(self, base, dst) = v,
+                        Ok(v) => w!(self, base, dst) = v,
                         Err(e) => fail!(e),
                     }
                 }
@@ -589,16 +717,16 @@ where
                     set_pc!();
                     let at = base + b as usize;
                     match self.instantiate(&chunk.sites[site as usize], at) {
-                        Ok(v) => r!(self, base, dst) = v,
+                        Ok(v) => w!(self, base, dst) = v,
                         Err(e) => fail!(e),
                     }
                 }
                 Insn::GetProp { dst, obj, feature } => {
-                    let o = std::mem::take(&mut r!(self, base, obj));
+                    let o = std::mem::take(&mut w!(self, base, obj));
                     let res = self.get_prop(&o, FeatureId(feature as u32));
-                    r!(self, base, obj) = o;
+                    w!(self, base, obj) = o;
                     match res {
-                        Ok(v) => r!(self, base, dst) = v,
+                        Ok(v) => w!(self, base, dst) = v,
                         Err(e) => fail!(e),
                     }
                 }
@@ -608,7 +736,7 @@ where
                     };
                     let o = r!(self, base, obj).clone();
                     match self.get_prop(&o, f) {
-                        Ok(v) => r!(self, base, dst) = v,
+                        Ok(v) => w!(self, base, dst) = v,
                         Err(e) => fail!(e),
                     }
                 }
@@ -620,29 +748,29 @@ where
                         Value::Tuple(t) => t.get(name).cloned().unwrap_or(Value::Null),
                         _ => Value::Invalid,
                     };
-                    r!(self, base, dst) = v;
+                    w!(self, base, dst) = v;
                 }
                 Insn::GetInterm { dst, obj, site } => {
                     let Site::Interm(p) = chunk.sites[site as usize] else {
                         unreachable!()
                     };
                     let o = r!(self, base, obj).clone();
-                    r!(self, base, dst) = self.get_interm(&o, p);
+                    w!(self, base, dst) = self.get_interm(&o, p);
                 }
                 Insn::Assign { dst, src, site } => {
-                    let Site::Assign { ty, add } = chunk.sites[site as usize] else {
+                    let Site::Assign { ty, add, same_elem } = chunk.sites[site as usize] else {
                         unreachable!()
                     };
-                    let old = std::mem::take(&mut r!(self, base, dst));
-                    let rhs = r!(self, base, src).clone();
-                    r!(self, base, dst) = self.assign_value(ty, old, rhs, !add);
+                    let old = std::mem::take(&mut w!(self, base, dst));
+                    let rhs = std::mem::take(&mut w!(self, base, src));
+                    w!(self, base, dst) = self.assign_fast(ty, old, rhs, !add, same_elem);
                 }
                 Insn::Coerce { r, site } => {
                     let Site::Type(ty) = chunk.sites[site as usize] else {
                         unreachable!()
                     };
-                    let v = std::mem::take(&mut r!(self, base, r));
-                    r!(self, base, r) = self.list_coercion(ty, v);
+                    let v = std::mem::take(&mut w!(self, base, r));
+                    w!(self, base, r) = self.list_coercion(ty, v);
                 }
                 Insn::SetProp { obj, src, site } => {
                     set_pc!();
@@ -664,22 +792,22 @@ where
                     self.set_interm(&o, prop, v, !add);
                 }
                 Insn::NewColl { dst, kind } => {
-                    r!(self, base, dst) = self.new_coll(kind);
+                    w!(self, base, dst) = self.new_coll(kind);
                 }
                 Insn::NewCollLike { dst, src } => {
                     let v = self.new_coll_like(&r!(self, base, src));
-                    r!(self, base, dst) = v;
+                    w!(self, base, dst) = v;
                 }
                 Insn::LitAdd { coll, val } => {
                     let v = r!(self, base, val).clone();
-                    let c = std::mem::take(&mut r!(self, base, coll));
-                    r!(self, base, coll) = self.lit_add(c, v);
+                    let c = std::mem::take(&mut w!(self, base, coll));
+                    w!(self, base, coll) = self.lit_add(c, v);
                 }
                 Insn::LitRange { coll, lo } => {
                     let a = r!(self, base, lo).clone();
                     let b = r!(self, base, lo + 1).clone();
-                    let c = std::mem::take(&mut r!(self, base, coll));
-                    r!(self, base, coll) = self.lit_range(c, a, b);
+                    let c = std::mem::take(&mut w!(self, base, coll));
+                    w!(self, base, coll) = self.lit_range(c, a, b);
                 }
                 Insn::LitPut { dict, key } => {
                     let k = r!(self, base, key).clone();
@@ -696,7 +824,7 @@ where
                         unreachable!()
                     };
                     let at = base + b as usize;
-                    r!(self, base, dst) = self.new_tuple(*ty, order, at);
+                    w!(self, base, dst) = self.new_tuple(*ty, order, at);
                 }
                 Insn::Push { coll, val } => {
                     let v = r!(self, base, val).clone();
@@ -715,7 +843,7 @@ where
                         Value::Coll(c) => Rc::make_mut(c).add(v, env),
                         _ => true,
                     };
-                    r!(self, base, dst) = Value::Bool(added);
+                    w!(self, base, dst) = Value::Bool(added);
                 }
                 Insn::IterInit { slot, src } => {
                     let it = Iter::of(&r!(self, base, src));
@@ -735,7 +863,7 @@ where
                         _ => None,
                     };
                     match next {
-                        Some(v) => r!(self, base, info.var) = v,
+                        Some(v) => w!(self, base, info.var) = v,
                         None => {
                             pc = target as usize;
                             continue;
@@ -781,7 +909,7 @@ where
                         break;
                     }
                     match found {
-                        Some(x) => r!(self, base, info.var) = x,
+                        Some(x) => w!(self, base, info.var) = x,
                         None => {
                             pc = target as usize;
                             continue;
@@ -809,14 +937,14 @@ where
                     };
                     let es = r!(self, base, elems).clone();
                     let ks = r!(self, base, elems + 1).clone();
-                    r!(self, base, dst) = self.sort_by(es, ks, ordered_set, unlimited);
+                    w!(self, base, dst) = self.sort_by(es, ks, ordered_set, unlimited);
                 }
                 Insn::KindTest { dst, src, site } => {
                     let Site::Type(t) = chunk.sites[site as usize] else {
                         unreachable!()
                     };
                     let v = r!(self, base, src).clone();
-                    r!(self, base, dst) = Value::Bool(self.qvt_kind_of(&v, t));
+                    w!(self, base, dst) = Value::Bool(self.qvt_kind_of(&v, t));
                 }
                 Insn::ObjectInit { var, site } => {
                     set_pc!();
@@ -842,14 +970,14 @@ where
                         }
                     } else {
                         match self.create_object(class, extent) {
-                            Ok(o) => r!(self, base, var) = o,
+                            Ok(o) => w!(self, base, var) = o,
                             Err(e) => fail!(e),
                         }
                     }
                 }
                 Insn::Resolve { dst, base: b, site } => {
                     let src = r!(self, base, b).clone();
-                    r!(self, base, dst) = self.resolve(&chunk.sites[site as usize], src);
+                    w!(self, base, dst) = self.resolve(&chunk.sites[site as usize], src);
                 }
                 Insn::LateResolve { base: b, site } => {
                     let owner = r!(self, base, b).clone();
@@ -900,6 +1028,13 @@ where
             }
             pc += 1;
         }
+    }
+
+    /// A binary operator on operands that are not both Integers or Reals.
+    fn slow_bin(&mut self, prim: Prim, op: StdOp, base: usize, a: u16, b: u16) -> VmResult<Value> {
+        let x = self.regs[base + a as usize].clone();
+        let y = self.regs[base + b as usize].clone();
+        self.prim_call(prim, op, vec![x, y])
     }
 
     /// `createNewCollectionOfSameKind` (QVTo's: List and Dict keep their kind).
