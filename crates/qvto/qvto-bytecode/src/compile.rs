@@ -812,7 +812,12 @@ impl<'a> Builder<'a> {
                         self.release(m);
                     }
                     None => {
-                        self.emit(Insn::LoadDefault { dst: r, ty: ty.0 });
+                        if ty == TypeId::OCL_INVALID {
+                            // `createDefaultInitializationValue`: an `invalid` literal
+                            self.emit(Insn::LoadInvalid { dst: r });
+                        } else {
+                            self.emit(Insn::LoadDefault { dst: r, ty: ty.0 });
+                        }
                         if *with_result {
                             self.emit(Insn::Move { dst, src: r });
                         }

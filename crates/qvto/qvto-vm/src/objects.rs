@@ -1012,12 +1012,13 @@ fn new_dict(env: &dyn qvto_runtime::HashEnv) -> Value {
     Value::Dict(Rc::new(RefCell::new(Dict::new(env))))
 }
 
-/// The owner of a contextual intermediate property value: an object or a module instance
-/// (`intermediate property M::p` on a transformation).
+/// The owner of a contextual intermediate property value: an object, a module instance
+/// (`intermediate property M::p` on a transformation) or a model extent (on a model type).
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 pub(crate) enum IntermOwner {
     Obj(ObjRef),
     Module(u32),
+    Model(u32),
 }
 
 impl IntermOwner {
@@ -1025,6 +1026,7 @@ impl IntermOwner {
         match v {
             Value::Obj(r) => Some(IntermOwner::Obj(*r)),
             Value::Instance(m) => Some(IntermOwner::Module(*m)),
+            Value::Model(m) => Some(IntermOwner::Model(*m)),
             _ => None,
         }
     }
