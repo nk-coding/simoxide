@@ -387,31 +387,44 @@ impl<'r> Sema<'r> {
             self.ops[op.index()].ir.result_local = Some(l);
         }
         let mut population = Vec::new();
-        if let Some(body) = &m.body
-            && let Some(p) = &body.population
-        {
+        if let Some(body) = &m.body {
+            // Eclipse always has a MappingBodyCS: an empty one gets its offsets from the init
+            // and end sections
+            let empty: &[ast::Expr] = &[];
+            let (explicit, stmts) = match &body.population {
+                Some(p) => (p.explicit, &p.body.stmts[..]),
+                None => (false, empty),
+            };
+            let cs_span = match (stmts.first(), stmts.last()) {
+                (Some(a), Some(b)) => a.span.to(b.span),
+                _ => {
+                    let start: i64 = body.init.as_ref().map(|b| b.span.end as i64).unwrap_or(-1);
+                    let mut end: i64 = body.end.as_ref().map(|b| b.span.start as i64 - 1).unwrap_or(-1);
+                    if start > end {
+                        end = start;
+                    }
+                    if start < 0 {
+                        Span::new(body.span.start, body.span.start)
+                    } else {
+                        Span::new(start as u32, end as u32 + 1)
+                    }
+                }
+            };
             let unique_result = m.results.len() == 1;
             let implicit_ctx = m.results.is_empty()
                 && d.context.is_some()
                 && m.direction == Some(TokenKind::KwInout);
-            if !p.explicit && (unique_result || implicit_ctx) {
+            if !explicit && (unique_result || implicit_ctx) {
                 let vname = if unique_result { "result" } else { "self" };
                 let var = ast::Name {
                     text: vname.to_string(),
                     kind: ast::NameKind::Ident,
-                    span: p.body.span,
+                    span: cs_span,
                 };
-                let x = self.object_core(
-                    Some(&var),
-                    None,
-                    &p.body.stmts,
-                    p.body.span,
-                    false,
-                    Some(op),
-                );
+                let x = self.object_core(Some(&var), None, stmts, cs_span, false, Some(op));
                 population.push(x.e);
             } else {
-                for s in &p.body.stmts {
+                for s in stmts {
                     let x = match &s.kind {
                         ast::ExprKind::Object(o) => {
                             Some(self.object_exp(o, s.span, true, Some(op)))
