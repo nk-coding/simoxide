@@ -2485,31 +2485,31 @@ impl<'r> Sema<'r> {
 
     /// `IntermediatePropertyHierarchy.hasHierarchyClashes`: another property of the same name on
     /// a sub- or supertype of the context.
-    fn hierarchy_clash(
-        &mut self,
-        _id: ModuleId,
-        ip: ir::IntermPropId,
-        props: &[ir::IntermPropId],
-    ) -> bool {
-        let Some(Type::Class(c)) = self.interm_props[ip.index()]
-            .context
-            .map(|t| self.ts.types.get(t).clone())
-        else {
+    fn hierarchy_clash(&mut self, id: ModuleId, ip: ir::IntermPropId, _props: &[ir::IntermPropId]) -> bool {
+        let Some(c) = self.interm_props[ip.index()].context else {
             return false;
         };
         let name = self.interm_props[ip.index()].ir.name.clone();
-        for &o in props {
-            if o == ip || self.interm_props[o.index()].ir.name != name {
-                continue;
+        // the contextual properties of the module and the modules it imports
+        let mut modules = vec![id];
+        let mut k = 0;
+        while k < modules.len() {
+            for (imp, _) in self.modules[modules[k].index()].module_imports.clone() {
+                if !modules.contains(&imp) {
+                    modules.push(imp);
+                }
             }
-            if let Some(Type::Class(oc)) = self.interm_props[o.index()]
-                .context
-                .map(|t| self.ts.types.get(t).clone())
-                && oc != c
-                && (self.ts.meta.class(oc).all_supers.contains(&c)
-                    || self.ts.meta.class(c).all_supers.contains(&oc))
-            {
-                return true;
+            k += 1;
+        }
+        let others: Vec<ir::IntermPropId> = (0..self.interm_props.len() as u32)
+            .map(ir::IntermPropId)
+            .filter(|&o| o != ip && modules.contains(&self.interm_props[o.index()].ir.module) && self.interm_props[o.index()].ir.name == name)
+            .collect();
+        for o in others {
+            if let Some(oc) = self.interm_props[o.index()].context {
+                if self.ts.ck().relationship(oc, c) & qvto_types::rel::RELATED_TYPE != 0 {
+                    return true;
+                }
             }
         }
         false
