@@ -262,3 +262,70 @@ fn incremental_update_reuses_recorded_results() {
     assert_eq!(roots[0].index(), old.0);
     assert!(matches!(rs.graph.get(old, name), Datum::Str("old")));
 }
+
+struct OneImport(&'static str, &'static str);
+
+impl UnitResolver for OneImport {
+    fn resolve(&self, _importer: &UnitSource, q: &str) -> Option<UnitSource> {
+        (q == self.0).then(|| UnitSource {
+            key: format!("mem:{q}"),
+            qualified_name: q.into(),
+            file_name: format!("{q}.qvto"),
+            path: None,
+            text: Rc::from(self.1),
+            blackbox: None,
+        })
+    }
+}
+
+#[test]
+fn nested_transformation_instances_have_their_own_properties() {
+    // each `new T(...)` instance keeps its property values; `t.p` reads the instance's (the
+    // expected log is Eclipse's)
+    let mut rs = ResourceSet::new();
+    let _ = rs.ecore_resource();
+    let meta = rs.graph.meta_mut().clone();
+    let main = UnitSource {
+        key: "mem:Outer".into(),
+        qualified_name: "Outer".into(),
+        file_name: "Outer.qvto".into(),
+        path: None,
+        text: Rc::from(r#"import Inner;
+modeltype E uses 'http://www.eclipse.org/emf/2002/Ecore';
+transformation Outer(inout m : E) access Inner;
+property count : Integer = 100;
+main() {
+  var t1 := new Inner(m);
+  var t2 := new Inner(m);
+  t1.transform();
+  t1.transform();
+  t2.transform();
+  log('outer count', count);
+  log('t1 count', t1.count);
+  log('t2 count', t2.count);
+}
+"#),
+        blackbox: None,
+    };
+    let c = qvto::compile(main, &OneImport("Inner", r#"modeltype E uses 'http://www.eclipse.org/emf/2002/Ecore';
+transformation Inner(inout m : E);
+property count : Integer = 0;
+configuration property label : String;
+main() {
+  count := count + 1;
+  log('inner main count', count);
+  log('label', label);
+}
+query bump() : Integer { count := count + 10; return count; }
+"#), meta);
+    let program = c.program.expect("compiles");
+    let mut vm = qvto::Vm::new(&program, &mut rs.graph, qvto::RunOptions::default());
+    let out = vm.run_transformation(vec![Vec::new()]);
+    assert_eq!(out.severity, 0, "{}", out.message);
+    assert_eq!(
+        vm.log,
+        "inner main count, data: 1\nlabel\ninner main count, data: 2\nlabel\n\
+         inner main count, data: 1\nlabel\nouter count, data: 100\nt1 count, data: 2\n\
+         t2 count, data: 1\n"
+    );
+}

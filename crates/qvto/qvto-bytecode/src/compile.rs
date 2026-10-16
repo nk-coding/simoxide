@@ -483,6 +483,10 @@ impl<'a> Builder<'a> {
         Ok((self.chunk.sites.len() - 1) as u16)
     }
 
+    fn global16(&self, g: qvto_sema::ir::GlobalId) -> CResult<u16> {
+        u16::try_from(g.0).or_else(|_| err(format!("{}: too many properties", self.chunk.name)))
+    }
+
     fn konst(&mut self, c: Const) -> u32 {
         self.consts.add(c)
     }
@@ -744,6 +748,17 @@ impl<'a> Builder<'a> {
             }
             ExprKind::Global(g) => {
                 self.emit(Insn::LoadGlobal { dst, g: g.0 });
+            }
+            ExprKind::ModuleProp(inst, g) => {
+                let m = self.mark();
+                let i = self.expr_reg(inst)?;
+                let g16 = self.global16(*g)?;
+                self.emit(Insn::LoadInstGlobal {
+                    dst,
+                    inst: i,
+                    g: g16,
+                });
+                self.release(m);
             }
             ExprKind::ModelParam(p) => {
                 self.emit(Insn::LoadModel {
@@ -1649,6 +1664,32 @@ impl<'a> Builder<'a> {
                     site,
                 });
                 self.emit(Insn::StoreGlobal { src: old, g: g.0 });
+            }
+            LValue::ModuleProp(inst, g) => {
+                let i = self.expr_reg(inst)?;
+                let g16 = self.global16(*g)?;
+                let old = self.alloc()?;
+                self.emit(Insn::LoadInstGlobal {
+                    dst: old,
+                    inst: i,
+                    g: g16,
+                });
+                let site = self.site(Site::Assign {
+                    ty: a.target_ty,
+                    add: a.add,
+                    same_elem: self.same_elem(a.value.ty, a.target_ty),
+                    property: true,
+                })?;
+                self.emit(Insn::Assign {
+                    dst: old,
+                    src: t,
+                    site,
+                });
+                self.emit(Insn::StoreInstGlobal {
+                    src: old,
+                    inst: i,
+                    g: g16,
+                });
             }
             LValue::Prop(owner, f) => {
                 let o = self.expr_reg(owner)?;

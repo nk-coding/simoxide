@@ -71,6 +71,17 @@ pub enum Insn {
         src: Reg,
         g: u32,
     },
+    /// A property of a transformation instance (`t.p`).
+    LoadInstGlobal {
+        dst: Reg,
+        inst: Reg,
+        g: u16,
+    },
+    StoreInstGlobal {
+        src: Reg,
+        inst: Reg,
+        g: u16,
+    },
 
     // ---- control --------------------------------------------------------------------------
     Jump {

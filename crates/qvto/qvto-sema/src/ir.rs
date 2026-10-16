@@ -445,8 +445,11 @@ pub enum ExprKind {
     Local(LocalId),
     /// `this`: the instance of the given module.
     This(ModuleId),
-    /// A module or configuration property.
+    /// A module or configuration property (of the running instance of its module).
     Global(GlobalId),
+    /// `t.p`: a property of the transformation instance `t` (a value of a module type other
+    /// than `this`; each `new T(...)` instance has its own values).
+    ModuleProp(Box<Expr>, GlobalId),
     /// A model parameter as a value (type `Model`).
     ModelParam(ModelParamRef),
 
@@ -582,6 +585,8 @@ pub struct Loop {
 pub enum LValue {
     Local(LocalId),
     Global(GlobalId),
+    /// `t.p := x` on a transformation instance (see [`ExprKind::ModuleProp`]).
+    ModuleProp(Expr, GlobalId),
     Prop(Expr, FeatureId),
     IntermProp(Expr, IntermPropId),
     /// `t.part += x` on a `List`/`Dict` tuple part (the only tuple mutation Eclipse allows).

@@ -11,6 +11,7 @@ use qvto_runtime::coll::{Coll, CollKind};
 use qvto_runtime::dict::{Dict, List};
 use qvto_runtime::identity::IdentityHashSource;
 use qvto_runtime::{EnumLit, Mode, Str, TypeRef, Value};
+use qvto_sema::ir::GlobalId;
 use qvto_sema::ir::{IntermPropId, ModuleId, OpId};
 use qvto_types::{StdOp, TypeId};
 use std::cell::RefCell;
@@ -193,6 +194,11 @@ where
     /// Transformation instances made with `new T(...)`: the module and the extents of its
     /// model parameters (`Value::Instance(NESTED | index)`).
     pub(crate) nested: Vec<(ModuleId, Vec<usize>)>,
+    /// The property values of each nested instance while it is not current (in its module's
+    /// property order).
+    pub(crate) nested_globals: Vec<Vec<Value>>,
+    /// The nested instances made current (`bind_nested`), innermost last.
+    pub(crate) bound_nested: Vec<usize>,
     /// The transformation whose model parameters receive created objects by default.
     pub(crate) cur_transf: ModuleId,
     /// Static type of the receiver of the current `CallStdX`.
@@ -274,6 +280,8 @@ where
             interm_extents: HashMap::new(),
             inc_trace: Vec::new(),
             nested: Vec::new(),
+            nested_globals: Vec::new(),
+            bound_nested: Vec::new(),
             cur_transf: prog.ir.main_module,
             regexes: RefCell::new(HashMap::new()),
             native: Default::default(),
@@ -639,6 +647,15 @@ where
                 }
                 Insn::StoreGlobal { src, g } => {
                     self.globals[g as usize] = r!(self, base, src).clone();
+                }
+                Insn::LoadInstGlobal { dst, inst, g } => {
+                    let v = self.instance_global(&r!(self, base, inst), GlobalId(g as u32));
+                    w!(self, base, dst) = v;
+                }
+                Insn::StoreInstGlobal { src, inst, g } => {
+                    let i = r!(self, base, inst).clone();
+                    let v = r!(self, base, src).clone();
+                    self.set_instance_global(&i, GlobalId(g as u32), v);
                 }
                 Insn::Jump { target } => {
                     if (target as usize) <= pc {

@@ -302,6 +302,8 @@ where
         }
         let k = self.nested.len();
         self.nested.push((module, models));
+        let n = self.prog.ir.modules[module.index()].globals.len();
+        self.nested_globals.push(vec![Value::Null; n]);
         let saved = self.bind_nested(k);
         let m = &self.prog.ir.modules[module.index()];
         let r = self.init_module(module.index(), m);
@@ -310,13 +312,15 @@ where
         Ok(Value::Instance(NESTED | k as u32))
     }
 
-    fn bind_nested(&mut self, k: usize) -> Vec<Option<usize>> {
+    /// Makes nested instance `k` current: its model parameters' extents and its property
+    /// values (each `new T(...)` instance has its own, `ModuleInstance`).
+    fn bind_nested(&mut self, k: usize) -> NestedSaved {
         let (module, models) = self.nested[k].clone();
         let n = self.prog.ir.modules[module.index()].model_params.len();
-        let mut saved = Vec::with_capacity(n);
+        let mut extents = Vec::with_capacity(n);
         for i in 0..n {
             let key = (module.0, i as u32);
-            saved.push(self.param_extents.get(&key).copied());
+            extents.push(self.param_extents.get(&key).copied());
             match models.get(i) {
                 Some(&x) => {
                     self.param_extents.insert(key, x);
@@ -326,11 +330,22 @@ where
                 }
             }
         }
-        saved
+        let gs = &self.prog.ir.modules[module.index()].globals;
+        let mut globals = Vec::with_capacity(gs.len());
+        for (i, g) in gs.iter().enumerate() {
+            let v = self.nested_globals[k].get(i).cloned().unwrap_or(Value::Null);
+            globals.push(std::mem::replace(&mut self.globals[g.index()], v));
+        }
+        self.bound_nested.push(k);
+        NestedSaved {
+            k,
+            extents,
+            globals,
+        }
     }
 
-    fn unbind_nested(&mut self, module: ModuleId, saved: Vec<Option<usize>>) {
-        for (i, s) in saved.into_iter().enumerate() {
+    fn unbind_nested(&mut self, module: ModuleId, saved: NestedSaved) {
+        for (i, s) in saved.extents.into_iter().enumerate() {
             let key = (module.0, i as u32);
             match s {
                 Some(x) => {
@@ -341,6 +356,59 @@ where
                 }
             }
         }
+        let gs = &self.prog.ir.modules[module.index()].globals;
+        let mut mine = Vec::with_capacity(gs.len());
+        for (g, old) in gs.iter().zip(saved.globals) {
+            mine.push(std::mem::replace(&mut self.globals[g.index()], old));
+        }
+        self.nested_globals[saved.k] = mine;
+        self.bound_nested.pop();
+    }
+
+    /// `t.p` of a property of a transformation instance: the bound instance's value, else the
+    /// value the instance keeps.
+    pub(crate) fn instance_global(&self, inst: &Value, g: qvto_sema::ir::GlobalId) -> Value {
+        match self.unbound_instance_slot(inst, g) {
+            Some((k, i)) => self.nested_globals[k].get(i).cloned().unwrap_or(Value::Null),
+            None => self.globals[g.index()].clone(),
+        }
+    }
+
+    pub(crate) fn set_instance_global(
+        &mut self,
+        inst: &Value,
+        g: qvto_sema::ir::GlobalId,
+        v: Value,
+    ) {
+        match self.unbound_instance_slot(inst, g) {
+            Some((k, i)) => {
+                if let Some(x) = self.nested_globals[k].get_mut(i) {
+                    *x = v;
+                }
+            }
+            None => self.globals[g.index()] = v,
+        }
+    }
+
+    /// A nested instance that is not current and the index of the property among its
+    /// module's properties.
+    fn unbound_instance_slot(&self, inst: &Value, g: qvto_sema::ir::GlobalId) -> Option<(usize, usize)> {
+        let Value::Instance(i) = inst else {
+            return None;
+        };
+        if i & NESTED == 0 {
+            return None;
+        }
+        let k = (i & !NESTED) as usize;
+        if self.bound_nested.last() == Some(&k) {
+            return None;
+        }
+        let module = self.nested.get(k)?.0;
+        let pos = self.prog.ir.modules[module.index()]
+            .globals
+            .iter()
+            .position(|x| *x == g)?;
+        Some((k, pos))
     }
 
     /// `Transformation::transform()`: runs a transformation instance; the result is a `Status`
@@ -655,6 +723,13 @@ where
 /// `isModelParamEqual`'s direction rule: an `in` parameter only binds `in` parameters.
 fn direction_compatible(main: Direction, other: Direction) -> bool {
     main != Direction::In || other == Direction::In
+}
+
+/// What [`Vm::bind_nested`] replaced.
+struct NestedSaved {
+    k: usize,
+    extents: Vec<Option<usize>>,
+    globals: Vec<Value>,
 }
 
 /// The bit of `Value::Instance` that marks instances made with `new T(...)`.

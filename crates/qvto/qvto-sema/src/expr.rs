@@ -347,7 +347,10 @@ impl<'r> Sema<'r> {
     pub(crate) fn property_call(&mut self, p: PropRef, src: Ex, ty: TypeId, span: Span) -> Ex {
         let kind = match p {
             PropRef::Feature(f) => ExprKind::Prop(Box::new(src.e), f),
-            PropRef::Global(g) => ExprKind::Global(g),
+            PropRef::Global(g) => match src.e.kind {
+                ExprKind::This(_) => ExprKind::Global(g),
+                _ => ExprKind::ModuleProp(Box::new(src.e), g),
+            },
             PropRef::Interm(i) => ExprKind::IntermProp(Box::new(src.e), i),
             PropRef::TuplePart(t, i) => {
                 let name = match self.ts.types.get(t) {

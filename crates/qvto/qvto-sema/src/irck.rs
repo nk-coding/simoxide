@@ -183,6 +183,7 @@ fn kind_name(k: &ExprKind) -> &'static str {
         ExprKind::If(..) => "if",
         ExprKind::Global(_) => "global",
         ExprKind::Prop(..) => "property",
+        ExprKind::ModuleProp(..) => "module property",
         ExprKind::Null => "null",
         _ => "other",
     }
@@ -213,7 +214,10 @@ pub fn for_each_child(e: &Expr, mut f: impl FnMut(&Expr)) {
                 f(v);
             }
         }
-        ExprKind::Prop(s, _) | ExprKind::TupleProp(s, _) | ExprKind::IntermProp(s, _) => f(s),
+        ExprKind::Prop(s, _)
+        | ExprKind::TupleProp(s, _)
+        | ExprKind::IntermProp(s, _)
+        | ExprKind::ModuleProp(s, _) => f(s),
         ExprKind::Call(c) => {
             if let Some(s) = &c.source {
                 f(s);
@@ -249,7 +253,10 @@ pub fn for_each_child(e: &Expr, mut f: impl FnMut(&Expr)) {
         ExprKind::VarInit { init: Some(i), .. } => f(i),
         ExprKind::Assign(a) => {
             match &a.target {
-                LValue::Prop(s, _) | LValue::IntermProp(s, _) | LValue::TupleProp(s, _) => f(s),
+                LValue::Prop(s, _)
+                | LValue::IntermProp(s, _)
+                | LValue::TupleProp(s, _)
+                | LValue::ModuleProp(s, _) => f(s),
                 _ => {}
             }
             f(&a.value);

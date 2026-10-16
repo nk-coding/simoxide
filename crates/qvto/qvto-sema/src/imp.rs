@@ -1049,6 +1049,7 @@ impl<'r> Sema<'r> {
                 match lv.e.kind {
                     ExprKind::Prop(src, f) => ir::LValue::Prop(*src, f),
                     ExprKind::Global(g) => ir::LValue::Global(g),
+                    ExprKind::ModuleProp(src, g) => ir::LValue::ModuleProp(*src, g),
                     ExprKind::IntermProp(src, i) => ir::LValue::IntermProp(*src, i),
                     ExprKind::TupleProp(src, n) => ir::LValue::TupleProp(*src, n),
                     _ => return None,
@@ -1069,6 +1070,7 @@ impl<'r> Sema<'r> {
             target,
             ir::LValue::Prop(..)
                 | ir::LValue::Global(_)
+                | ir::LValue::ModuleProp(..)
                 | ir::LValue::IntermProp(..)
                 | ir::LValue::TupleProp(..)
         );
@@ -2216,7 +2218,10 @@ impl XBody<'_> {
 fn innermost_iterator_related(it: ir::LocalId, body: &ir::Expr) -> bool {
     let src = match &body.kind {
         ExprKind::Call(c) => c.source.as_ref(),
-        ExprKind::Prop(s, _) | ExprKind::TupleProp(s, _) | ExprKind::IntermProp(s, _) => Some(&**s),
+        ExprKind::Prop(s, _)
+        | ExprKind::TupleProp(s, _)
+        | ExprKind::IntermProp(s, _)
+        | ExprKind::ModuleProp(s, _) => Some(&**s),
         ExprKind::Loop(l) => Some(&l.source),
         ExprKind::Global(_) => return false,
         ExprKind::Resolve(r) => r.source.as_ref(),
