@@ -4,7 +4,9 @@
 
 use crate::ecore::ECORE_NS_URI;
 use crate::graph::{Graph, ObjId};
-use qvto_model::{ClassId, Classifier, Datum, EnumLiteral, FeatureKind, ModelStore, PackageId, ResourceId};
+use qvto_model::{
+    ClassId, Classifier, Datum, EnumLiteral, FeatureKind, ModelStore, PackageId, ResourceId,
+};
 
 fn str_of(g: &Graph, o: ObjId, f: qvto_model::FeatureId) -> Option<String> {
     g.get(o, f).as_str().map(|s| s.to_string())
@@ -19,24 +21,40 @@ fn int_of(g: &Graph, o: ObjId, f: qvto_model::FeatureId) -> i32 {
 }
 
 fn objs(g: &Graph, o: ObjId, f: qvto_model::FeatureId) -> Vec<ObjId> {
-    (0..g.len(o, f)).filter_map(|i| g.get_at(o, f, i).as_obj()).collect()
+    (0..g.len(o, f))
+        .filter_map(|i| g.get_at(o, f, i).as_obj())
+        .collect()
 }
 
 /// Links the built-in Ecore entries to the objects of a resource holding `Ecore.ecore`.
 pub fn link_ecore(g: &mut Graph, r: ResourceId) {
     let e = g.ecore().clone();
-    let Some(&pkg) = g.roots(r).first() else { return };
+    let Some(&pkg) = g.roots(r).first() else {
+        return;
+    };
     g.links_mut().package_obj.insert(e.package, pkg);
     g.links_mut().obj_package.insert(pkg, e.package);
     for c in objs(g, pkg, e.package_classifiers) {
-        let Some(name) = str_of(g, c, e.named_element_name) else { continue };
-        let Some(k) = g.meta().classifier_by_name(e.package, &name) else { continue };
+        let Some(name) = str_of(g, c, e.named_element_name) else {
+            continue;
+        };
+        let Some(k) = g.meta().classifier_by_name(e.package, &name) else {
+            continue;
+        };
         g.links_mut().classifier_obj.insert(k, c);
         g.links_mut().obj_classifier.insert(c, k);
         if let Classifier::Class(cid) = k {
             for f in objs(g, c, e.class_structural_features) {
-                let Some(fname) = str_of(g, f, e.named_element_name) else { continue };
-                let fid = g.meta().class(cid).features.iter().copied().find(|x| *g.meta().feature(*x).name == *fname);
+                let Some(fname) = str_of(g, f, e.named_element_name) else {
+                    continue;
+                };
+                let fid = g
+                    .meta()
+                    .class(cid)
+                    .features
+                    .iter()
+                    .copied()
+                    .find(|x| *g.meta().feature(*x).name == *fname);
                 if let Some(fid) = fid {
                     g.links_mut().feature_obj.insert(fid, f);
                     g.links_mut().obj_feature.insert(f, fid);
@@ -49,12 +67,21 @@ pub fn link_ecore(g: &mut Graph, r: ResourceId) {
 /// Registers every `EPackage` (with subpackages) among the roots of the given resources, in one
 /// batch, so the packages may refer to each other. Classifiers referenced from other resources
 /// must already be registered (or be in the batch). Returns the new packages, top-level first.
-pub fn register_resources(g: &mut Graph, resources: &[ResourceId]) -> Result<Vec<PackageId>, String> {
+pub fn register_resources(
+    g: &mut Graph,
+    resources: &[ResourceId],
+) -> Result<Vec<PackageId>, String> {
     let e = g.ecore().clone();
     let mut packages: Vec<(ObjId, PackageId)> = Vec::new();
     let mut new_classes: Vec<(ObjId, ClassId)> = Vec::new();
     // pass 1: packages and classifiers
-    fn add_pkg(g: &mut Graph, o: ObjId, sup: Option<PackageId>, out: &mut Vec<(ObjId, PackageId)>, classes: &mut Vec<(ObjId, ClassId)>) {
+    fn add_pkg(
+        g: &mut Graph,
+        o: ObjId,
+        sup: Option<PackageId>,
+        out: &mut Vec<(ObjId, PackageId)>,
+        classes: &mut Vec<(ObjId, ClassId)>,
+    ) {
         let e = g.ecore().clone();
         if g.links().obj_package.contains_key(&o) {
             return;
@@ -62,7 +89,9 @@ pub fn register_resources(g: &mut Graph, resources: &[ResourceId]) -> Result<Vec
         let name = str_of(g, o, e.named_element_name).unwrap_or_default();
         let ns_uri = str_of(g, o, e.package_ns_uri);
         let ns_prefix = str_of(g, o, e.package_ns_prefix);
-        let p = g.meta_mut().add_package(&name, ns_uri.as_deref(), ns_prefix.as_deref(), sup);
+        let p = g
+            .meta_mut()
+            .add_package(&name, ns_uri.as_deref(), ns_prefix.as_deref(), sup);
         g.links_mut().package_obj.insert(p, o);
         g.links_mut().obj_package.insert(o, p);
         out.push((o, p));
@@ -70,7 +99,10 @@ pub fn register_resources(g: &mut Graph, resources: &[ResourceId]) -> Result<Vec
             let cname = str_of(g, c, e.named_element_name).unwrap_or_default();
             let class = g.class_of(c);
             let k = if g.meta().is_subclass(class, e.eclass) {
-                let (abs, itf) = (bool_of(g, c, e.class_abstract), bool_of(g, c, e.class_interface));
+                let (abs, itf) = (
+                    bool_of(g, c, e.class_abstract),
+                    bool_of(g, c, e.class_interface),
+                );
                 let cid = g.meta_mut().add_class(p, &cname, abs, itf);
                 let icn = str_of(g, c, e.classifier_instance_class_name);
                 g.meta_mut().class_mut(cid).instance_class_name = icn.map(Into::into);
@@ -83,7 +115,9 @@ pub fn register_resources(g: &mut Graph, resources: &[ResourceId]) -> Result<Vec
                         let n = str_of(g, l, e.named_element_name).unwrap_or_default();
                         EnumLiteral {
                             value: int_of(g, l, e.literal_value),
-                            literal: str_of(g, l, e.literal_literal).unwrap_or_else(|| n.clone()).into(),
+                            literal: str_of(g, l, e.literal_literal)
+                                .unwrap_or_else(|| n.clone())
+                                .into(),
                             name: n.into(),
                         }
                     })
@@ -134,18 +168,26 @@ pub fn register_resources(g: &mut Graph, resources: &[ResourceId]) -> Result<Vec
         for f in objs(g, c, e.class_structural_features) {
             let fname = str_of(g, f, e.named_element_name).unwrap_or_default();
             let is_ref = g.meta().is_subclass(g.class_of(f), e.ereference);
-            let kind = if is_ref { FeatureKind::Reference } else { FeatureKind::Attribute };
+            let kind = if is_ref {
+                FeatureKind::Reference
+            } else {
+                FeatureKind::Attribute
+            };
             let ty_obj = g.get(f, e.typed_type).as_obj();
             let ty = match ty_obj.and_then(|t| g.links().obj_classifier.get(&t).copied()) {
                 Some(k) => k,
                 None => {
-                    errors.push(format!("unresolved type of {}.{fname}", g.meta().class(cid).name));
+                    errors.push(format!(
+                        "unresolved type of {}.{fname}",
+                        g.meta().class(cid).name
+                    ));
                     if is_ref { eobject } else { ejava_object }
                 }
             };
             let fid = g.meta_mut().add_feature(cid, &fname, kind, ty);
             let gt = g.get(f, e.typed_generic_type).as_obj();
-            let type_parameter = gt.is_some_and(|gt| g.get(gt, e.generic_type_parameter).as_obj().is_some());
+            let type_parameter =
+                gt.is_some_and(|gt| g.get(gt, e.generic_type_parameter).as_obj().is_some());
             let lower = int_of(g, f, e.typed_lower);
             let upper = int_of(g, f, e.typed_upper);
             let flags = [
@@ -164,7 +206,15 @@ pub fn register_resources(g: &mut Graph, resources: &[ResourceId]) -> Result<Vec
             let fi = g.meta_mut().feature_mut(fid);
             fi.lower = lower;
             fi.upper = upper;
-            [fi.ordered, fi.unique, fi.changeable, fi.volatile, fi.transient, fi.unsettable, fi.derived] = flags;
+            [
+                fi.ordered,
+                fi.unique,
+                fi.changeable,
+                fi.volatile,
+                fi.transient,
+                fi.unsettable,
+                fi.derived,
+            ] = flags;
             fi.id = id;
             fi.containment = containment;
             fi.resolve_proxies = resolve;
@@ -186,11 +236,17 @@ pub fn register_resources(g: &mut Graph, resources: &[ResourceId]) -> Result<Vec
     for (fid, o) in opposites {
         match g.links().obj_feature.get(&o) {
             Some(&of) => g.meta_mut().feature_mut(fid).opposite = Some(of),
-            None => errors.push(format!("unresolved opposite of {}", g.meta().feature(fid).name)),
+            None => errors.push(format!(
+                "unresolved opposite of {}",
+                g.meta().feature(fid).name
+            )),
         }
     }
     for (fid, k) in keys {
-        let ks: Vec<_> = k.iter().filter_map(|o| g.links().obj_feature.get(o).copied()).collect();
+        let ks: Vec<_> = k
+            .iter()
+            .filter_map(|o| g.links().obj_feature.get(o).copied())
+            .collect();
         g.meta_mut().feature_mut(fid).keys = ks;
     }
     g.meta_mut().finish_classes().map_err(|e| e.to_string())?;

@@ -115,9 +115,11 @@ impl Roles {
 /// Adds the contract package to `reg` (same content as [`CONTRACT_ECORE`]).
 pub fn build_metamodel(reg: &mut MetaRegistry) -> Roles {
     let p = reg.add_package("contract", Some(CONTRACT_NS_URI), Some("contract"), None);
-    let string = Classifier::DataType(reg.add_data_type(p, "String", Some("java.lang.String"), true));
+    let string =
+        Classifier::DataType(reg.add_data_type(p, "String", Some("java.lang.String"), true));
     let int = Classifier::DataType(reg.add_data_type(p, "Int", Some("int"), true));
-    let integer = Classifier::DataType(reg.add_data_type(p, "Integer", Some("java.lang.Integer"), true));
+    let integer =
+        Classifier::DataType(reg.add_data_type(p, "Integer", Some("java.lang.Integer"), true));
     let long = Classifier::DataType(reg.add_data_type(p, "Long", Some("long"), true));
     let double = Classifier::DataType(reg.add_data_type(p, "Double", Some("double"), true));
     let boolean = Classifier::DataType(reg.add_data_type(p, "Boolean", Some("boolean"), true));
@@ -132,7 +134,8 @@ pub fn build_metamodel(reg: &mut MetaRegistry) -> Roles {
     let sub = reg.add_class(p, "Sub", false, false);
     reg.class_mut(node).supers.push(base);
     reg.class_mut(sub).supers.push(node);
-    let attr = |reg: &mut MetaRegistry, c, n: &str, t| reg.add_feature(c, n, FeatureKind::Attribute, t);
+    let attr =
+        |reg: &mut MetaRegistry, c, n: &str, t| reg.add_feature(c, n, FeatureKind::Attribute, t);
     let rf = |reg: &mut MetaRegistry, c, n: &str, t: ClassId| {
         reg.add_feature(c, n, FeatureKind::Reference, Classifier::Class(t))
     };
@@ -306,7 +309,17 @@ pub fn create_defaults<S: ModelStore>(s: &mut S, r: &Roles) {
     assert_eq!(s.get(n, r.parent), Datum::Null);
     assert_eq!(s.len(n, r.tags), 0);
     assert_eq!(s.len(n, r.children), 0);
-    for f in [r.name, r.count, r.label, r.opt, r.kind_attr, r.tags, r.children, r.child, r.friend] {
+    for f in [
+        r.name,
+        r.count,
+        r.label,
+        r.opt,
+        r.kind_attr,
+        r.tags,
+        r.children,
+        r.child,
+        r.friend,
+    ] {
         assert!(!s.is_set(n, f));
     }
     assert!(matches!(s.create(r.base), Err(ModelError::Abstract(_))));
@@ -418,7 +431,11 @@ pub fn non_unique_data_list<S: ModelStore>(s: &mut S, r: &Roles) {
         assert_eq!(s.add(n, r.nums, Datum::Int(v), None), Ok(true));
     }
     s.add(n, r.nums, Datum::Int(2), Some(0)).unwrap();
-    let get = |s: &S| (0..s.len(n, r.nums)).map(|i| s.get_at(n, r.nums, i).as_i64().unwrap()).collect::<Vec<_>>();
+    let get = |s: &S| {
+        (0..s.len(n, r.nums))
+            .map(|i| s.get_at(n, r.nums, i).as_i64().unwrap())
+            .collect::<Vec<_>>()
+    };
     assert_eq!(get(s), [2, 1, 1, 2, 1]);
     assert_eq!(s.remove(n, r.nums, Datum::Int(1)), Ok(true));
     assert_eq!(get(s), [2, 1, 2, 1]);
@@ -641,16 +658,23 @@ pub fn set_list<S: ModelStore>(s: &mut S, r: &Roles) {
     for x in [a, b, c] {
         s.add(p, r.children, Datum::Obj(x), None).unwrap();
     }
-    s.set_list(p, r.children, &[Datum::Obj(c), Datum::Obj(a), Datum::Obj(d)]).unwrap();
+    s.set_list(
+        p,
+        r.children,
+        &[Datum::Obj(c), Datum::Obj(a), Datum::Obj(d)],
+    )
+    .unwrap();
     assert_eq!(objs(s, p, r.children), [c, a, d]);
     assert_eq!(s.container(b), None);
     assert_eq!(s.container(d), Some((p, r.children)));
     for t in ["x", "y", "z"] {
         s.add(p, r.tags, Datum::Str(t), None).unwrap();
     }
-    s.set_list(p, r.tags, &[Datum::Str("z"), Datum::Str("y")]).unwrap();
+    s.set_list(p, r.tags, &[Datum::Str("z"), Datum::Str("y")])
+        .unwrap();
     assert_eq!(strs(s, p, r.tags), ["z", "y"]);
-    s.set_list(p, r.owned, &[Datum::Obj(a), Datum::Obj(b)]).unwrap();
+    s.set_list(p, r.owned, &[Datum::Obj(a), Datum::Obj(b)])
+        .unwrap();
     assert_eq!(single(s, b, r.owner), Some(p));
     s.set_list(p, r.owned, &[Datum::Obj(b)]).unwrap();
     assert_eq!(single(s, a, r.owner), None);
@@ -694,7 +718,13 @@ pub fn move_and_index_errors<S: ModelStore>(s: &mut S, r: &Roles) {
 
 pub fn not_changeable<S: ModelStore>(s: &mut S, r: &Roles) {
     let n = new(s, r);
-    assert!(matches!(s.set(n, r.frozen, Datum::Str("a")), Err(ModelError::NotChangeable(_))));
-    assert!(matches!(s.unset(n, r.frozen), Err(ModelError::NotChangeable(_))));
+    assert!(matches!(
+        s.set(n, r.frozen, Datum::Str("a")),
+        Err(ModelError::NotChangeable(_))
+    ));
+    assert!(matches!(
+        s.unset(n, r.frozen),
+        Err(ModelError::NotChangeable(_))
+    ));
     assert_eq!(s.get(n, r.frozen), Datum::Null);
 }

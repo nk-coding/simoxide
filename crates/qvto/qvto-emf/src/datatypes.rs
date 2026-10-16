@@ -10,7 +10,12 @@ use qvto_model::{Classifier, DataKind, MetaRegistry, PackageId};
 
 /// `createFromString` for a value of type `ty`. `ecore` tells whether the data type belongs to
 /// Ecore's own package (its factory parses booleans strictly).
-pub fn parse_value(meta: &MetaRegistry, ty: Classifier, s: &str, ecore: Option<PackageId>) -> Result<Value, String> {
+pub fn parse_value(
+    meta: &MetaRegistry,
+    ty: Classifier,
+    s: &str,
+    ecore: Option<PackageId>,
+) -> Result<Value, String> {
     match ty {
         Classifier::Enum(e) => meta
             .enumeration(e)
@@ -46,13 +51,24 @@ pub fn parse_kind(kind: DataKind, s: &str, ecore_factory: bool) -> Result<Value,
                 return Err("Expecting true or false".into());
             }
         }
-        DataKind::Int => Value::Int(parse_java_int(s, i32::MIN as i64, i32::MAX as i64).ok_or_else(bad)? as i32),
+        DataKind::Int => {
+            Value::Int(parse_java_int(s, i32::MIN as i64, i32::MAX as i64).ok_or_else(bad)? as i32)
+        }
         DataKind::Long => Value::Long(parse_java_int(s, i64::MIN, i64::MAX).ok_or_else(bad)?),
-        DataKind::Short => Value::Short(parse_java_int(s, i16::MIN as i64, i16::MAX as i64).ok_or_else(bad)? as i16),
-        DataKind::Byte => Value::Byte(parse_java_int(s, i8::MIN as i64, i8::MAX as i64).ok_or_else(bad)? as i8),
+        DataKind::Short => Value::Short(
+            parse_java_int(s, i16::MIN as i64, i16::MAX as i64).ok_or_else(bad)? as i16,
+        ),
+        DataKind::Byte => {
+            Value::Byte(parse_java_int(s, i8::MIN as i64, i8::MAX as i64).ok_or_else(bad)? as i8)
+        }
         DataKind::Char => match parse_java_int(s, i32::MIN as i64, i32::MAX as i64) {
             Some(v) => Value::Char(v as u16),
-            None => Value::Char(*s.encode_utf16().collect::<Vec<_>>().first().ok_or_else(bad)?),
+            None => Value::Char(
+                *s.encode_utf16()
+                    .collect::<Vec<_>>()
+                    .first()
+                    .ok_or_else(bad)?,
+            ),
         },
         DataKind::Double => Value::Double(parse_java_double(s).ok_or_else(bad)?),
         DataKind::Float => Value::Float(parse_java_float(s).ok_or_else(bad)?),
@@ -76,13 +92,18 @@ pub fn value_to_string<O>(meta: &MetaRegistry, v: &qvto_model::OwnedDatum<O>) ->
         Value::Double(d) => java_double_to_string(*d),
         Value::Float(f) => java_float_to_string(*f),
         Value::Str(s) | Value::Other(s) => s.to_string(),
-        Value::Enum(e, i) => meta.enumeration(*e).literals[*i as usize].literal.to_string(),
+        Value::Enum(e, i) => meta.enumeration(*e).literals[*i as usize]
+            .literal
+            .to_string(),
         Value::Obj(_) => return None,
     })
 }
 
 /// `convertToString` of a [`Datum`](qvto_model::Datum).
-pub fn datum_to_string<O: Copy>(meta: &MetaRegistry, d: qvto_model::Datum<'_, O>) -> Option<String> {
+pub fn datum_to_string<O: Copy>(
+    meta: &MetaRegistry,
+    d: qvto_model::Datum<'_, O>,
+) -> Option<String> {
     value_to_string(meta, &d.to_owned())
 }
 
@@ -238,7 +259,11 @@ fn java_layout(sci: &str, negative: bool, a: f64) -> String {
         } else if point as usize >= digits.len() {
             format!("{}{}.0", digits, "0".repeat(point as usize - digits.len()))
         } else {
-            format!("{}.{}", &digits[..point as usize], &digits[point as usize..])
+            format!(
+                "{}.{}",
+                &digits[..point as usize],
+                &digits[point as usize..]
+            )
         };
         format!("{sign}{s}")
     } else {

@@ -9,7 +9,9 @@ use crate::datatypes::value_to_string;
 use crate::fragment::uri_fragment;
 use crate::graph::{Graph, ObjId, ResourceKind};
 use crate::uri::Uri;
-use qvto_model::{ClassId, Classifier, Datum, FeatureId, FeatureKind, ModelStore, PackageId, ResourceId};
+use qvto_model::{
+    ClassId, Classifier, Datum, FeatureId, FeatureKind, ModelStore, PackageId, ResourceId,
+};
 use std::collections::{BTreeMap, HashMap};
 
 /// Save options (the subset of `XMLResource.OPTION_*` that the engine and the tests use).
@@ -66,7 +68,11 @@ struct Doc {
 }
 
 fn jlen(s: &str) -> usize {
-    if s.is_ascii() { s.len() } else { s.encode_utf16().count() }
+    if s.is_ascii() {
+        s.len()
+    } else {
+        s.encode_utf16().count()
+    }
 }
 
 impl Doc {
@@ -193,7 +199,9 @@ impl Escape {
                 '\n' => out.push_str("&#xA;"),
                 '\r' => out.push_str("&#xD;"),
                 '\t' if !text => out.push_str("&#x9;"),
-                '>' if text && i >= 2 && chars[i - 1] == ']' && chars[i - 2] == ']' => out.push_str("&gt;"),
+                '>' if text && i >= 2 && chars[i - 1] == ']' && chars[i - 2] == ']' => {
+                    out.push_str("&gt;")
+                }
                 c if (c as u32) < 0x20 && c != '\t' => {
                     return Err(format!(
                         "An invalid XML character (Unicode: 0x{:x}) was found in the element content:{s}",
@@ -228,7 +236,10 @@ struct Saver<'a> {
 /// resource) and on invalid XML characters.
 pub fn save(g: &Graph, r: ResourceId, opts: &SaveOptions) -> Result<String, String> {
     let res = g.resource(r);
-    let encoding = opts.encoding.clone().unwrap_or_else(|| res.encoding.clone());
+    let encoding = opts
+        .encoding
+        .clone()
+        .unwrap_or_else(|| res.encoding.clone());
     let limit = match encoding.to_ascii_uppercase().as_str() {
         "ASCII" | "US-ASCII" => 127,
         "ISO-8859-1" => 255,
@@ -261,7 +272,10 @@ pub fn save(g: &Graph, r: ResourceId, opts: &SaveOptions) -> Result<String, Stri
         root: None,
         dangling: None,
     };
-    s.doc.add(&format!("<?xml version=\"{}\" encoding=\"{encoding}\"?>", res.xml_version));
+    s.doc.add(&format!(
+        "<?xml version=\"{}\" encoding=\"{encoding}\"?>",
+        res.xml_version
+    ));
     s.doc.add_line();
     let roots = res.roots.clone();
     if roots.len() == 1 {
@@ -315,7 +329,11 @@ impl Saver<'_> {
             Some(x) => x,
             None => {
                 let mut prefix = if ns_uri.is_some() {
-                    meta.package(p).ns_prefix.as_deref().unwrap_or("").to_string()
+                    meta.package(p)
+                        .ns_prefix
+                        .as_deref()
+                        .unwrap_or("")
+                        .to_string()
                 } else {
                     String::new()
                 };
@@ -325,12 +343,17 @@ impl Saver<'_> {
                     .any(|(k, u)| *k == prefix && Some(u.as_str()) != ns_uri.as_deref());
                 if conflict {
                     let mut i = 1;
-                    while self.prefixes.iter().any(|(k, _)| *k == format!("{prefix}_{i}")) {
+                    while self
+                        .prefixes
+                        .iter()
+                        .any(|(k, _)| *k == format!("{prefix}_{i}"))
+                    {
                         i += 1;
                     }
                     prefix = format!("{prefix}_{i}");
                 }
-                self.prefixes.push((prefix.clone(), ns_uri.unwrap_or_default()));
+                self.prefixes
+                    .push((prefix.clone(), ns_uri.unwrap_or_default()));
                 prefix
             }
         };
@@ -405,7 +428,8 @@ impl Saver<'_> {
     }
 
     fn should_save(&self, o: ObjId, f: FeatureId) -> bool {
-        self.g.is_set(o, f) || (self.opts.keep_default_content && self.g.meta().default_literal(f).is_some())
+        self.g.is_set(o, f)
+            || (self.opts.keep_default_content && self.g.meta().default_literal(f).is_some())
     }
 
     fn save_element_id(&mut self, o: ObjId) -> Result<(), String> {
@@ -425,7 +449,9 @@ impl Saver<'_> {
 
     fn ref_values(&self, o: ObjId, f: FeatureId) -> Vec<ObjId> {
         if self.g.meta().feature(f).is_many() {
-            (0..self.g.len(o, f)).filter_map(|i| self.g.get_at(o, f, i).as_obj()).collect()
+            (0..self.g.len(o, f))
+                .filter_map(|i| self.g.get_at(o, f, i).as_obj())
+                .collect()
         } else {
             self.g.get(o, f).as_obj().into_iter().collect()
         }
@@ -528,13 +554,11 @@ impl Saver<'_> {
                         }
                     }
                 }
-                10 | 6 => {
-                    match g.get(o, f).as_obj() {
-                        None if kind == 10 => self.save_nil(&name),
-                        None => {}
-                        Some(v) => self.save_contained(v, f)?,
-                    }
-                }
+                10 | 6 => match g.get(o, f).as_obj() {
+                    None if kind == 10 => self.save_nil(&name),
+                    None => {}
+                    Some(v) => self.save_contained(v, f)?,
+                },
                 7 | 11 => {
                     for v in self.ref_values(o, f) {
                         self.save_contained(v, f)?;
@@ -592,7 +616,9 @@ impl Saver<'_> {
     fn should_save_type(&self, value: ObjId, f: FeatureId) -> bool {
         let fi = self.g.meta().feature(f);
         let class = self.g.class_of(value);
-        let Some(expected) = fi.class_type() else { return false };
+        let Some(expected) = fi.class_type() else {
+            return false;
+        };
         let ei = self.g.meta().class(expected);
         class != expected && (ei.is_abstract || fi.type_parameter)
     }
@@ -719,7 +745,11 @@ impl Saver<'_> {
                         self.dangling(v);
                         return None;
                     }
-                    self.g.resource(r).parsed_uri().trim_fragment().append_fragment(&frag)
+                    self.g
+                        .resource(r)
+                        .parsed_uri()
+                        .trim_fragment()
+                        .append_fragment(&frag)
                 }
             }
         };
@@ -730,7 +760,7 @@ impl Saver<'_> {
         let base = &self.res_uri;
         if self.opts.platform_scheme_aware
             && uri.is_platform()
-            && !(base.segments().first().is_some() && uri.segments().first() == base.segments().first())
+            && !(!base.segments().is_empty() && uri.segments().first() == base.segments().first())
         {
             return uri.clone();
         }
@@ -738,22 +768,38 @@ impl Saver<'_> {
             return uri.clone();
         }
         let d = uri.deresolve(base);
-        if d.has_relative_path() { d } else { uri.clone() }
+        if d.has_relative_path() {
+            d
+        } else {
+            uri.clone()
+        }
     }
 
     fn namespace_declarations(&mut self) {
         // packages(): sorted by prefix
         let mut by_prefix: BTreeMap<String, PackageId> = BTreeMap::new();
-        let pkgs: Vec<(PackageId, String)> = self.packages.iter().map(|(p, x)| (*p, x.clone())).collect();
+        let pkgs: Vec<(PackageId, String)> =
+            self.packages.iter().map(|(p, x)| (*p, x.clone())).collect();
         for (p, prefix) in pkgs {
             by_prefix.entry(prefix).or_insert(p);
         }
         let mut schema = String::new();
         if self.opts.schema_location {
-            for (_, &p) in by_prefix.iter() {
-                let Some(&po) = self.g.links().package_obj.get(&p) else { continue };
-                let Some(r) = self.g.resource_of(po) else { continue };
-                let ns = self.g.meta().package(p).ns_uri.as_deref().unwrap_or("").to_string();
+            for &p in by_prefix.values() {
+                let Some(&po) = self.g.links().package_obj.get(&p) else {
+                    continue;
+                };
+                let Some(r) = self.g.resource_of(po) else {
+                    continue;
+                };
+                let ns = self
+                    .g
+                    .meta()
+                    .package(p)
+                    .ns_uri
+                    .as_deref()
+                    .unwrap_or("")
+                    .to_string();
                 let ruri = self.g.resource(r).uri.clone();
                 if ruri != ns {
                     self.declare_xsi = true;
@@ -778,7 +824,9 @@ impl Saver<'_> {
             self.doc.add_attribute("xmlns:xsi", XSI_NS);
         }
         for (prefix, &p) in by_prefix.iter() {
-            let Some(ns) = self.g.meta().package(p).ns_uri.as_deref() else { continue };
+            let Some(ns) = self.g.meta().package(p).ns_uri.as_deref() else {
+                continue;
+            };
             if ns == self.xmi_uri {
                 continue;
             }

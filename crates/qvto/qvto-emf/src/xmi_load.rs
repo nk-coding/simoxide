@@ -18,8 +18,10 @@ use crate::datatypes::parse_value;
 use crate::fragment::{id_of, resolve_fragment};
 use crate::graph::{Graph, ObjId, ResourceKind, Value};
 use crate::uri::Uri;
-use qvto_model::{ClassId, Classifier, Datum, FeatureId, FeatureKind, ModelStore, PackageId, ResourceId};
 use quick_xml::events::{BytesStart, Event};
+use qvto_model::{
+    ClassId, Classifier, Datum, FeatureId, FeatureKind, ModelStore, PackageId, ResourceId,
+};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Range;
@@ -37,7 +39,6 @@ struct ForwardRef<'a> {
 struct NsDecl<'a> {
     prefix: Cow<'a, str>,
     uri: Cow<'a, str>,
-    is_xsi: bool,
 }
 
 type Attr<'a> = (Cow<'a, str>, Cow<'a, str>);
@@ -71,7 +72,10 @@ pub fn prescan(text: &str) -> Prescan {
             Ok(Event::Start(e)) | Ok(Event::Empty(e)) => {
                 for a in e.attributes().with_checks(false).flatten() {
                     let k = String::from_utf8_lossy(a.key.as_ref()).into_owned();
-                    let v = a.unescape_value().map(|v| v.into_owned()).unwrap_or_default();
+                    let v = a
+                        .unescape_value()
+                        .map(|v| v.into_owned())
+                        .unwrap_or_default();
                     if k == "xmlns" || k.starts_with("xmlns:") {
                         if !out.ns_uris.contains(&v) {
                             out.ns_uris.push(v);
@@ -80,7 +84,8 @@ pub fn prescan(text: &str) -> Prescan {
                         let toks: Vec<&str> = v.split_whitespace().collect();
                         for p in toks.chunks(2) {
                             if p.len() == 2 {
-                                out.schema_locations.push((p[0].to_string(), p[1].to_string()));
+                                out.schema_locations
+                                    .push((p[0].to_string(), p[1].to_string()));
                             }
                         }
                     }
@@ -161,7 +166,8 @@ impl<'a> Parser<'a> {
             self.line_pos = 0;
         }
         if self.pos > self.line_pos {
-            self.line += memchr::memchr_iter(b'\n', &self.text.as_bytes()[self.line_pos..self.pos]).count() as u32;
+            self.line += memchr::memchr_iter(b'\n', &self.text.as_bytes()[self.line_pos..self.pos])
+                .count() as u32;
             self.line_pos = self.pos;
         }
         self.line
@@ -180,14 +186,20 @@ impl<'a> Parser<'a> {
 
     fn emf_error(&mut self, msg: String) {
         let line = self.line();
-        self.g.resource_mut(self.res).errors.push(format!("line {line}: {msg}"));
+        self.g
+            .resource_mut(self.res)
+            .errors
+            .push(format!("line {line}: {msg}"));
     }
 
     fn is_attached(&self, o: ObjId) -> bool {
         if o.0 < self.first_obj {
             return true;
         }
-        self.attached.get((o.0 - self.first_obj) as usize).copied().unwrap_or(false)
+        self.attached
+            .get((o.0 - self.first_obj) as usize)
+            .copied()
+            .unwrap_or(false)
     }
 
     fn set_attached(&mut self, o: ObjId) {
@@ -319,7 +331,12 @@ impl<'a> Parser<'a> {
         r
     }
 
-    fn start_with(&mut self, e: &BytesStart, empty: bool, attrs: &mut Vec<Attr<'a>>) -> Result<(), String> {
+    fn start_with(
+        &mut self,
+        e: &BytesStart,
+        empty: bool,
+        attrs: &mut Vec<Attr<'a>>,
+    ) -> Result<(), String> {
         self.ns_marks.push(self.ns.len());
         let mut spans = std::mem::take(&mut self.attr_spans);
         spans.clear();
@@ -344,7 +361,8 @@ impl<'a> Parser<'a> {
         if self.stack.is_empty()
             && attrs.iter().any(|(k, _)| {
                 k.split_once(':').is_some_and(|(p, l)| {
-                    (l == "schemaLocation" || l == "noNamespaceSchemaLocation") && self.prefix_is_xsi(p)
+                    (l == "schemaLocation" || l == "noNamespaceSchemaLocation")
+                        && self.prefix_is_xsi(p)
                 })
             })
         {
@@ -406,8 +424,7 @@ impl<'a> Parser<'a> {
     }
 
     fn push_ns(&mut self, prefix: Cow<'a, str>, uri: Cow<'a, str>) {
-        let is_xsi = uri == XSI_NS;
-        self.ns.push(NsDecl { prefix, uri, is_xsi });
+        self.ns.push(NsDecl { prefix, uri });
     }
 
     fn is_xsi_type(&self, key: &str) -> bool {
@@ -430,9 +447,11 @@ impl<'a> Parser<'a> {
         let fi = self.g.meta().feature(f);
         match fi.kind {
             FeatureKind::Attribute => {
-                let nil = attrs
-                    .iter()
-                    .any(|(k, v)| k.split_once(':').is_some_and(|(p, n)| n == "nil" && self.prefix_is_xsi(p)) && v == "true");
+                let nil = attrs.iter().any(|(k, v)| {
+                    k.split_once(':')
+                        .is_some_and(|(p, n)| n == "nil" && self.prefix_is_xsi(p))
+                        && v == "true"
+                });
                 Frame::AttrText {
                     obj: parent,
                     feature: f,
@@ -575,12 +594,20 @@ impl<'a> Parser<'a> {
         let live: Vec<ObjId> = cands
             .iter()
             .copied()
-            .filter(|o| self.is_attached(*o) && self.g.resource_of(*o) == Some(self.res) && id_of(self.g, *o).as_deref() == Some(frag))
+            .filter(|o| {
+                self.is_attached(*o)
+                    && self.g.resource_of(*o) == Some(self.res)
+                    && id_of(self.g, *o).as_deref() == Some(frag)
+            })
             .collect();
         match live.len() {
             0 => None,
             1 => Some(live[0]),
-            _ => self.g.resource_contents(self.res).into_iter().find(|o| live.contains(o)),
+            _ => self
+                .g
+                .resource_contents(self.res)
+                .into_iter()
+                .find(|o| live.contains(o)),
         }
     }
 
@@ -659,16 +686,34 @@ impl<'a> Parser<'a> {
         }
         let pos = self.pos;
         if pending.len() > 5 {
-            self.forward_many.push(ForwardRef { obj: o, feature: f, ids: pending, many: true, pos });
+            self.forward_many.push(ForwardRef {
+                obj: o,
+                feature: f,
+                ids: pending,
+                many: true,
+                pos,
+            });
         } else {
             for p in pending {
-                self.forward.push(ForwardRef { obj: o, feature: f, ids: vec![p], many: false, pos });
+                self.forward.push(ForwardRef {
+                    obj: o,
+                    feature: f,
+                    ids: vec![p],
+                    many: false,
+                    pos,
+                });
             }
         }
     }
 
     /// `XMLHelperImpl.setValue` for references. `false` on an error EMF would report.
-    fn set_feature_value(&mut self, o: ObjId, f: FeatureId, v: Option<ObjId>, position: i32) -> bool {
+    fn set_feature_value(
+        &mut self,
+        o: ObjId,
+        f: FeatureId,
+        v: Option<ObjId>,
+        position: i32,
+    ) -> bool {
         let fi = self.g.meta().feature(f).clone();
         if let Some(t) = v
             && let Err(e) = self.g.check_value(f, &Datum::Obj(t))
@@ -687,7 +732,8 @@ impl<'a> Parser<'a> {
             let oi = self.g.meta().feature(opp);
             !oi.transient && oi.is_many()
         });
-        let index_of = |g: &Graph, x: ObjId| (0..g.len(o, f)).position(|i| g.get_at(o, f, i) == Datum::Obj(x));
+        let index_of =
+            |g: &Graph, x: ObjId| (0..g.len(o, f)).position(|i| g.get_at(o, f, i) == Datum::Obj(x));
         match (position, v) {
             (-2, _) => {
                 let _ = self.g.clear(o, f);
@@ -731,7 +777,13 @@ impl<'a> Parser<'a> {
         if let Some(mark) = self.ns_marks.pop() {
             self.ns.truncate(mark);
         }
-        if let Some(Frame::AttrText { obj, feature, text, nil }) = self.stack.pop() {
+        if let Some(Frame::AttrText {
+            obj,
+            feature,
+            text,
+            nil,
+        }) = self.stack.pop()
+        {
             if self.g.meta().feature(feature).is_many() {
                 if nil {
                     self.g.add_unique(obj, feature, Datum::Null, None);
@@ -760,7 +812,9 @@ impl<'a> Parser<'a> {
                 .and_then(|u| u.split_once('#'))
                 .map(|(_, f)| f.to_string());
             let Some(frag) = frag else { continue };
-            let Some(t) = self.lookup(&frag) else { continue };
+            let Some(t) = self.lookup(&frag) else {
+                continue;
+            };
             let class = self.g.class_of(p);
             let feats: Vec<FeatureId> = self.g.meta().class(class).all_features.to_vec();
             for r in feats {
@@ -769,10 +823,14 @@ impl<'a> Parser<'a> {
                 if ri.kind == FeatureKind::Attribute || ri.is_many() || !self.g.is_set(p, r) {
                     continue;
                 }
-                let Some(holder) = self.g.get(p, r).as_obj() else { continue };
+                let Some(holder) = self.g.get(p, r).as_obj() else {
+                    continue;
+                };
                 if self.g.meta().feature(opp).is_many() {
                     let n = self.g.len(holder, opp);
-                    if let Some(pi) = (0..n).position(|i| self.g.get_at(holder, opp, i) == Datum::Obj(p)) {
+                    if let Some(pi) =
+                        (0..n).position(|i| self.g.get_at(holder, opp, i) == Datum::Obj(p))
+                    {
                         let has_t = (0..n).any(|i| self.g.get_at(holder, opp, i) == Datum::Obj(t));
                         let _ = self.g.remove_at(holder, opp, pi);
                         if !has_t {
@@ -805,7 +863,8 @@ impl<'a> Parser<'a> {
         let fwd = std::mem::take(&mut self.forward_many);
         for r in fwd {
             debug_assert!(r.many);
-            let resolved: Vec<(Option<ObjId>, i32)> = r.ids.iter().map(|(id, p)| (self.lookup(id), *p)).collect();
+            let resolved: Vec<(Option<ObjId>, i32)> =
+                r.ids.iter().map(|(id, p)| (self.lookup(id), *p)).collect();
             for ((id, _), (t, _)) in r.ids.iter().zip(&resolved) {
                 if t.is_none() {
                     self.pos = r.pos;
@@ -816,10 +875,18 @@ impl<'a> Parser<'a> {
                 let Some(t) = t else { continue };
                 let p = p as usize;
                 let n = self.g.len(r.obj, r.feature);
-                let found = (0..n).position(|i| self.g.get_at(r.obj, r.feature, i) == Datum::Obj(t));
-                let many_opp = self.g.meta().feature(r.feature).opposite.is_some_and(|o| self.g.meta().feature(o).is_many());
+                let found =
+                    (0..n).position(|i| self.g.get_at(r.obj, r.feature, i) == Datum::Obj(t));
+                let many_opp = self
+                    .g
+                    .meta()
+                    .feature(r.feature)
+                    .opposite
+                    .is_some_and(|o| self.g.meta().feature(o).is_many());
                 let ok = match found {
-                    Some(i) if r.obj == t || many_opp => self.g.move_to(r.obj, r.feature, p, i).is_ok(),
+                    Some(i) if r.obj == t || many_opp => {
+                        self.g.move_to(r.obj, r.feature, p, i).is_ok()
+                    }
                     _ => {
                         if p > n {
                             false
@@ -848,7 +915,8 @@ pub fn kind_for_uri(uri: &Uri) -> ResourceKind {
 
 /// The non-empty tokens of an IDREF(S) value separated by XML whitespace.
 fn id_tokens(s: &str) -> impl Iterator<Item = &str> {
-    s.split([' ', '\t', '\n', '\r', '\x0c']).filter(|t| !t.is_empty())
+    s.split([' ', '\t', '\n', '\r', '\x0c'])
+        .filter(|t| !t.is_empty())
 }
 
 /// Splits the attribute part of a start tag into key and value spans the way quick-xml does.
@@ -899,7 +967,10 @@ fn scan_attributes(raw: &[u8], out: &mut Vec<(Range<usize>, Range<usize>)>) -> b
 /// XML attribute-value normalisation (literal whitespace -> space) followed by unescaping.
 fn normalize_attr(s: Cow<'_, str>) -> Cow<'_, str> {
     let b = s.as_bytes();
-    if !b.iter().fold(false, |acc, &c| acc | (c < 0x20) | (c == b'&')) {
+    if !b
+        .iter()
+        .fold(false, |acc, &c| acc | (c < 0x20) | (c == b'&'))
+    {
         return s;
     }
     let ws = memchr::memchr3(b'\n', b'\r', b'\t', b).is_some();

@@ -154,7 +154,12 @@ pub(crate) fn all_supers(g: &Graph, c: ObjId) -> Vec<ObjId> {
 
 /// For each class in `eAllSuperTypes` order then `c`, the given local list, without duplicates.
 fn accumulate(g: &Graph, c: ObjId, local: &dyn Fn(ObjId) -> Vec<ObjId>) -> Vec<ObjId> {
-    fn rec(g: &Graph, c: ObjId, local: &dyn Fn(ObjId) -> Vec<ObjId>, busy: &mut Vec<ObjId>) -> Vec<ObjId> {
+    fn rec(
+        g: &Graph,
+        c: ObjId,
+        local: &dyn Fn(ObjId) -> Vec<ObjId>,
+        busy: &mut Vec<ObjId>,
+    ) -> Vec<ObjId> {
         let mut out = Vec::new();
         if busy.contains(&c) {
             return out;
@@ -175,7 +180,9 @@ fn accumulate(g: &Graph, c: ObjId, local: &dyn Fn(ObjId) -> Vec<ObjId>) -> Vec<O
 }
 
 pub(crate) fn all_features(g: &Graph, c: ObjId) -> Vec<ObjId> {
-    accumulate(g, c, &|x| g.refs(x, g.ecore.class_structural_features).to_vec())
+    accumulate(g, c, &|x| {
+        g.refs(x, g.ecore.class_structural_features).to_vec()
+    })
 }
 
 fn local_of(g: &Graph, c: ObjId, class: ClassId) -> Vec<ObjId> {
@@ -187,7 +194,10 @@ fn local_of(g: &Graph, c: ObjId, class: ClassId) -> Vec<ObjId> {
 }
 
 fn is_containment(g: &Graph, f: ObjId) -> bool {
-    matches!(g.op_get(f, g.ecore.reference_containment), Datum::Bool(true))
+    matches!(
+        g.op_get(f, g.ecore.reference_containment),
+        Datum::Bool(true)
+    )
 }
 
 fn derived_list(g: &Graph, o: ObjId, f: FeatureId) -> Option<Vec<ObjId>> {
@@ -269,7 +279,13 @@ pub(crate) fn len(g: &Graph, o: ObjId, f: FeatureId, h: Hook) -> Option<usize> {
     }
 }
 
-pub(crate) fn get_at(g: &Graph, o: ObjId, f: FeatureId, h: Hook, i: usize) -> Option<Datum<'_, ObjId>> {
+pub(crate) fn get_at(
+    g: &Graph,
+    o: ObjId,
+    f: FeatureId,
+    h: Hook,
+    i: usize,
+) -> Option<Datum<'_, ObjId>> {
     let from = |v: Vec<ObjId>| v.get(i).map_or(Datum::Null, |x| Datum::Obj(*x));
     match h {
         Hook::SuperTypes | Hook::Exceptions => {
@@ -318,12 +334,16 @@ pub(crate) fn is_set(g: &Graph, o: ObjId, f: FeatureId, h: Hook) -> Option<bool>
 
 /// List operations on Ecore's derived lists (`UnmodifiableEList`).
 fn read_only(f: FeatureId) -> ModelResult<()> {
-    Err(ModelError::Unsupported(format!("UnsupportedOperationException: derived feature {f:?}")))
+    Err(ModelError::Unsupported(format!(
+        "UnsupportedOperationException: derived feature {f:?}"
+    )))
 }
 
 /// `EClassImpl.setInstanceTypeName`'s derivation of the class name.
 fn class_name_of_type_name(t: &str) -> String {
-    const PRIMS: [&str; 8] = ["boolean", "byte", "char", "double", "float", "int", "long", "short"];
+    const PRIMS: [&str; 8] = [
+        "boolean", "byte", "char", "double", "float", "int", "long", "short",
+    ];
     if let Some(i) = t.find('<') {
         let mut c = t[..i].to_string();
         if !(t.contains('.') || PRIMS.contains(&c.as_str())) {
@@ -356,7 +376,13 @@ fn wrap(g: &mut Graph, c: ObjId) -> ObjId {
     gt
 }
 
-pub(crate) fn set(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook, v: Datum<'_, ObjId>) -> Option<ModelResult<()>> {
+pub(crate) fn set(
+    g: &mut Graph,
+    o: ObjId,
+    f: FeatureId,
+    h: Hook,
+    v: Datum<'_, ObjId>,
+) -> Option<ModelResult<()>> {
     let e = g.ecore.clone();
     Some(match h {
         Hook::EType => {
@@ -375,7 +401,7 @@ pub(crate) fn set(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook, v: Datum<'_, O
                     return Some(Err(ModelError::TypeMismatch {
                         feature: f,
                         found: format!("{v:?}"),
-                    }))
+                    }));
                 }
             };
             let (cn, tn) = match (h, s) {
@@ -383,7 +409,8 @@ pub(crate) fn set(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook, v: Datum<'_, O
                 (Hook::InstanceClassName, Some(s)) => (Some(s.clone()), Some(s)),
                 (_, Some(t)) => (Some(class_name_of_type_name(&t)), Some(t)),
             };
-            let to_slot = |x: Option<String>| x.map_or(Slot::Unset, |s| Slot::Data(Value::Str(s.into())));
+            let to_slot =
+                |x: Option<String>| x.map_or(Slot::Unset, |s| Slot::Data(Value::Str(s.into())));
             let ci = g.slot_index(o, e.classifier_instance_class_name).unwrap();
             let ti = g.slot_index(o, e.classifier_instance_type_name).unwrap();
             g.objs[o.index()].slots[ci] = to_slot(cn);
@@ -397,7 +424,9 @@ pub(crate) fn set(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook, v: Datum<'_, O
 
 pub(crate) fn unset(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook) -> Option<ModelResult<()>> {
     match h {
-        Hook::EType | Hook::InstanceClassName | Hook::InstanceTypeName => set(g, o, f, h, Datum::Null),
+        Hook::EType | Hook::InstanceClassName | Hook::InstanceTypeName => {
+            set(g, o, f, h, Datum::Null)
+        }
         Hook::SuperTypes | Hook::Exceptions => Some(g.op_unset(o, generic_list(g, h))),
         Hook::Derived => Some(read_only(f)),
         _ => None,
@@ -405,7 +434,14 @@ pub(crate) fn unset(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook) -> Option<Mo
 }
 
 /// Returns `true` if handled.
-pub(crate) fn add_unique(g: &mut Graph, o: ObjId, _f: FeatureId, h: Hook, v: Datum<'_, ObjId>, at: Option<usize>) -> bool {
+pub(crate) fn add_unique(
+    g: &mut Graph,
+    o: ObjId,
+    _f: FeatureId,
+    h: Hook,
+    v: Datum<'_, ObjId>,
+    at: Option<usize>,
+) -> bool {
     match (h, v) {
         (Hook::SuperTypes | Hook::Exceptions, Datum::Obj(c)) => {
             let gt = wrap(g, c);
@@ -417,7 +453,13 @@ pub(crate) fn add_unique(g: &mut Graph, o: ObjId, _f: FeatureId, h: Hook, v: Dat
     }
 }
 
-pub(crate) fn remove_at(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook, i: usize) -> Option<ModelResult<()>> {
+pub(crate) fn remove_at(
+    g: &mut Graph,
+    o: ObjId,
+    f: FeatureId,
+    h: Hook,
+    i: usize,
+) -> Option<ModelResult<()>> {
     match h {
         Hook::SuperTypes | Hook::Exceptions => Some(g.op_remove_at(o, generic_list(g, h), i)),
         Hook::Derived => Some(read_only(f)),
@@ -425,7 +467,14 @@ pub(crate) fn remove_at(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook, i: usize
     }
 }
 
-pub(crate) fn set_at(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook, i: usize, v: Datum<'_, ObjId>) -> Option<ModelResult<()>> {
+pub(crate) fn set_at(
+    g: &mut Graph,
+    o: ObjId,
+    f: FeatureId,
+    h: Hook,
+    i: usize,
+    v: Datum<'_, ObjId>,
+) -> Option<ModelResult<()>> {
     match h {
         Hook::SuperTypes | Hook::Exceptions => {
             let gt = g.refs(o, generic_list(g, h))[i];
@@ -448,7 +497,14 @@ pub(crate) fn clear(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook) -> Option<Mo
     }
 }
 
-pub(crate) fn move_to(g: &mut Graph, o: ObjId, f: FeatureId, h: Hook, to: usize, from: usize) -> Option<ModelResult<()>> {
+pub(crate) fn move_to(
+    g: &mut Graph,
+    o: ObjId,
+    f: FeatureId,
+    h: Hook,
+    to: usize,
+    from: usize,
+) -> Option<ModelResult<()>> {
     match h {
         Hook::SuperTypes | Hook::Exceptions => Some(g.op_move(o, generic_list(g, h), to, from)),
         Hook::Derived => Some(read_only(f)),

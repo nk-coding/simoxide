@@ -16,8 +16,14 @@ mod from_ecore {
 
     qvto_model::contract_tests!(|| {
         let mut rs = ResourceSet::new();
-        let r = rs.load_text("file:/contract/contract.ecore", CONTRACT_ECORE).unwrap();
-        assert!(rs.graph.resource(r).errors.is_empty(), "{:?}", rs.graph.resource(r).errors);
+        let r = rs
+            .load_text("file:/contract/contract.ecore", CONTRACT_ECORE)
+            .unwrap();
+        assert!(
+            rs.graph.resource(r).errors.is_empty(),
+            "{:?}",
+            rs.graph.resource(r).errors
+        );
         rs.register(r).unwrap();
         let roles = Roles::resolve(qvto_model::ModelStore::meta(&rs.graph)).unwrap();
         (rs.graph, roles)

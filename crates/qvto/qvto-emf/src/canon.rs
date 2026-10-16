@@ -13,7 +13,7 @@
 //!
 //! Generic over [`ModelStore`], so any store can be dumped.
 
-use crate::uri::{decode, Uri};
+use crate::uri::{Uri, decode};
 use qvto_model::{Datum, FeatureKind, ModelStore, ResourceId};
 use std::fmt::Write;
 
@@ -33,7 +33,9 @@ pub fn path<S: ModelStore>(s: &S, o: S::Obj) -> String {
     let mut segs = Vec::new();
     let mut cur = o;
     while s.direct_resource(cur).is_none() {
-        let Some((p, f)) = s.container(cur) else { break };
+        let Some((p, f)) = s.container(cur) else {
+            break;
+        };
         let fi = s.meta().feature(f);
         if fi.is_many() {
             let i = (0..s.len(p, f)).position(|i| s.get_at(p, f, i) == Datum::Obj(cur));
@@ -45,7 +47,11 @@ pub fn path<S: ModelStore>(s: &S, o: S::Obj) -> String {
     }
     let mut out = String::from("/");
     if let Some(r) = s.direct_resource(cur) {
-        let i = s.roots(r).iter().position(|x| *x == cur).map_or(-1, |i| i as i64);
+        let i = s
+            .roots(r)
+            .iter()
+            .position(|x| *x == cur)
+            .map_or(-1, |i| i as i64);
         let _ = write!(out, "{i}");
     }
     for seg in segs.iter().rev() {
@@ -60,7 +66,10 @@ pub fn target<S: ModelStore>(s: &S, t: S::Obj) -> String {
     if let Some(p) = s.proxy_uri(t) {
         let u = Uri::parse(p);
         let trimmed = u.trim_fragment();
-        let last = trimmed.last_segment().map(decode).unwrap_or_else(|| trimmed.to_string());
+        let last = trimmed
+            .last_segment()
+            .map(decode)
+            .unwrap_or_else(|| trimmed.to_string());
         return format!("?{last}#{}", u.fragment().unwrap_or("null"));
     }
     match s.resource_of(t) {
@@ -147,7 +156,12 @@ pub fn object_line<S: ModelStore>(s: &S, o: S::Obj) -> String {
     first = true;
     for &f in class.all_features.iter() {
         let fi = meta.feature(f);
-        if fi.kind != FeatureKind::Reference || fi.containment || meta.is_container(f) || fi.transient || fi.derived {
+        if fi.kind != FeatureKind::Reference
+            || fi.containment
+            || meta.is_container(f)
+            || fi.transient
+            || fi.derived
+        {
             continue;
         }
         if fi.is_many() {
@@ -225,7 +239,13 @@ pub fn first_difference(expected: &str, actual: &str) -> Option<(usize, String, 
         match (a.next(), b.next()) {
             (None, None) => return None,
             (x, y) if x == y => {}
-            (x, y) => return Some((n, x.unwrap_or("<end>").to_string(), y.unwrap_or("<end>").to_string())),
+            (x, y) => {
+                return Some((
+                    n,
+                    x.unwrap_or("<end>").to_string(),
+                    y.unwrap_or("<end>").to_string(),
+                ));
+            }
         }
         n += 1;
     }
@@ -248,7 +268,9 @@ pub fn object_at<S: ModelStore>(s: &S, r: ResourceId, path: &str) -> Option<S::O
     for seg in segs {
         let body = seg.strip_prefix('@')?;
         let (name, idx) = match body.rsplit_once('.') {
-            Some((n, i)) if !i.is_empty() && i.bytes().all(|c| c.is_ascii_digit()) => (n, Some(i.parse::<usize>().ok()?)),
+            Some((n, i)) if !i.is_empty() && i.bytes().all(|c| c.is_ascii_digit()) => {
+                (n, Some(i.parse::<usize>().ok()?))
+            }
             _ => (body, None),
         };
         let f = s.meta().feature_by_name(s.class_of(cur), name)?;

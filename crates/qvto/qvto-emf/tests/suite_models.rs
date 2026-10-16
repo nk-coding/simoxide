@@ -9,11 +9,14 @@
 
 use qvto_emf::canon::{dump, first_difference, fnv64};
 use qvto_emf::config::Config;
-use qvto_emf::xmi_save::{save, SaveOptions};
+use qvto_emf::xmi_save::{SaveOptions, save};
 use std::path::{Path, PathBuf};
 
 fn repo() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").canonicalize().unwrap()
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .unwrap()
 }
 
 /// Models whose metamodel (the QVTo AST) has dynamic subclasses of Ecore's generated classes
@@ -46,8 +49,12 @@ fn suite_models() {
 #[test]
 fn pcm_models() {
     let root = repo();
-    let pcm = std::env::var("QVTO_PCM_DIR").map(PathBuf::from).unwrap_or_else(|_| root.join("target/pcm"));
-    let oracle_dir = std::env::var("QVTO_EMF_ORACLE_PCM").map(PathBuf::from).unwrap_or_else(|_| root.join("target/emf-oracle/pcm"));
+    let pcm = std::env::var("QVTO_PCM_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| root.join("target/pcm"));
+    let oracle_dir = std::env::var("QVTO_EMF_ORACLE_PCM")
+        .map(PathBuf::from)
+        .unwrap_or_else(|_| root.join("target/emf-oracle/pcm"));
     let Ok(expected) = std::fs::read_to_string(oracle_dir.join("results.tsv")) else {
         eprintln!("PCM oracle results missing: skipped");
         return;
@@ -80,12 +87,18 @@ fn check_models(what: &str, root: &Path, config: &Config, expected: &str, oracle
         if my_status == status && my_errors.to_string() == errors {
             load_ok += 1;
         } else {
-            failures.push(format!("{path}: load {my_status}/{my_errors}, EMF {status}/{errors}"));
+            failures.push(format!(
+                "{path}: load {my_status}/{my_errors}, EMF {status}/{errors}"
+            ));
         }
         let Ok(r) = r else { continue };
         let opts = SaveOptions::for_resource(rs.graph.resource(r));
         let text = save(&rs.graph, r, &opts).unwrap_or_else(|e| format!("error: {e}"));
-        let h = if text.starts_with("error: ") { "error".to_string() } else { fnv64(text.as_bytes()) };
+        let h = if text.starts_with("error: ") {
+            "error".to_string()
+        } else {
+            fnv64(text.as_bytes())
+        };
         if h == save_hash {
             save_ok += 1;
         } else {

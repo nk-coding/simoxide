@@ -7,7 +7,7 @@
 //! `Unset` until written, which is how EMF tells "set" from "unset" for unsettable features.
 
 use crate::datatypes;
-use crate::ecore::{register_ecore, EcoreIds};
+use crate::ecore::{EcoreIds, register_ecore};
 use crate::ecore_hooks::{self, Hook};
 use crate::uri::Uri;
 use qvto_model::{
@@ -175,7 +175,10 @@ impl Graph {
     }
     /// The resource with this URI (exact string match).
     pub fn resource_by_uri(&self, uri: &str) -> Option<ResourceId> {
-        self.resources.iter().position(|r| r.uri == uri).map(|i| ResourceId(i as u32))
+        self.resources
+            .iter()
+            .position(|r| r.uri == uri)
+            .map(|i| ResourceId(i as u32))
     }
 
     /// Creates a resource of the given kind (`ResourceSet.createResource`).
@@ -209,7 +212,9 @@ impl Graph {
 
     /// Assigns an `xmi:id` (`XMLResource.setID`) in the object's current resource.
     pub fn set_xmi_id(&mut self, r: ResourceId, o: ObjId, id: Option<&str>) {
-        let maps = self.resources[r.index()].ids.get_or_insert_with(IdMaps::default);
+        let maps = self.resources[r.index()]
+            .ids
+            .get_or_insert_with(IdMaps::default);
         if let Some(old) = maps.to_id.remove(&o) {
             maps.to_obj.remove(&old);
         }
@@ -332,10 +337,6 @@ impl Graph {
         owned_scalar(&datatypes::intrinsic_default(&self.meta, fi.ty))
     }
 
-    pub(crate) fn default_value(&self, f: FeatureId) -> Value {
-        self.default_datum(f).to_owned()
-    }
-
     /// Checks that `v` may be stored in `f` (EMF's `ClassCastException`).
     pub(crate) fn check_value(&self, f: FeatureId, v: &Datum<'_, ObjId>) -> ModelResult<()> {
         let fi = self.meta.feature(f);
@@ -348,7 +349,9 @@ impl Graph {
             (FeatureKind::Reference, _) => false,
             (FeatureKind::Attribute, Datum::Obj(_)) => false,
             (FeatureKind::Attribute, d) => match fi.ty {
-                Classifier::Enum(e) => matches!(d, Datum::Enum(e2, i) if *e2 == e && (*i as usize) < self.meta.enumeration(e).literals.len()),
+                Classifier::Enum(e) => {
+                    matches!(d, Datum::Enum(e2, i) if *e2 == e && (*i as usize) < self.meta.enumeration(e).literals.len())
+                }
                 Classifier::DataType(dt) => kind_accepts(self.meta.data_type(dt).kind, d),
                 Classifier::Class(_) => false,
             },
@@ -367,7 +370,11 @@ impl Graph {
         match v {
             Datum::Obj(x) => self.meta.qualified_name(self.objs[x.index()].class),
             Datum::Enum(e, _) => self.meta.enumeration(*e).name.to_string(),
-            d => format!("{d:?}").split('(').next().unwrap_or("?").to_string(),
+            d => format!("{d:?}")
+                .split('(')
+                .next()
+                .unwrap_or("?")
+                .to_string(),
         }
     }
 
@@ -384,13 +391,6 @@ impl Graph {
     pub(crate) fn refs(&self, o: ObjId, f: FeatureId) -> &[ObjId] {
         match self.slot(o, f) {
             Some(Slot::Refs(v, _)) => v,
-            _ => &[],
-        }
-    }
-
-    pub(crate) fn datas(&self, o: ObjId, f: FeatureId) -> &[Value] {
-        match self.slot(o, f) {
-            Some(Slot::Datas(v, _)) => v,
             _ => &[],
         }
     }
@@ -587,7 +587,12 @@ impl Graph {
     }
 
     /// `eSet` of a container reference (`InternalSettingDelegateSingleContainer.dynamicSet`).
-    fn set_container_feature(&mut self, o: ObjId, f: FeatureId, new: Option<ObjId>) -> ModelResult<()> {
+    fn set_container_feature(
+        &mut self,
+        o: ObjId,
+        f: FeatureId,
+        new: Option<ObjId>,
+    ) -> ModelResult<()> {
         let g = self.meta.feature(f).opposite.expect("container reference");
         let cur = self.objs[o.index()].container;
         let same = match (cur, new) {
@@ -709,11 +714,18 @@ impl Graph {
             }
             Some(Slot::Ref(_)) => true,
             Some(Slot::Data(Value::Null)) => true,
-            Some(Slot::Data(v)) => fi.unsettable || !v.as_datum().java_equals(&self.default_datum(f)),
+            Some(Slot::Data(v)) => {
+                fi.unsettable || !v.as_datum().java_equals(&self.default_datum(f))
+            }
         }
     }
 
-    pub(crate) fn op_set(&mut self, o: ObjId, f: FeatureId, v: Datum<'_, ObjId>) -> ModelResult<()> {
+    pub(crate) fn op_set(
+        &mut self,
+        o: ObjId,
+        f: FeatureId,
+        v: Datum<'_, ObjId>,
+    ) -> ModelResult<()> {
         self.slot_index(o, f)?;
         if !self.meta.feature(f).changeable {
             return Err(ModelError::NotChangeable(f));
@@ -799,7 +811,13 @@ impl Graph {
         (0..self.op_len(o, f)).find(|&i| self.op_get_at(o, f, i).java_equals(v))
     }
 
-    pub(crate) fn op_add(&mut self, o: ObjId, f: FeatureId, v: Datum<'_, ObjId>, at: Option<usize>) -> ModelResult<bool> {
+    pub(crate) fn op_add(
+        &mut self,
+        o: ObjId,
+        f: FeatureId,
+        v: Datum<'_, ObjId>,
+        at: Option<usize>,
+    ) -> ModelResult<bool> {
         self.slot_index(o, f)?;
         self.require_many(f)?;
         // EMF's order: bounds, uniqueness, then validation (null, type)
@@ -809,7 +827,10 @@ impl Graph {
         if let Some(i) = at
             && i > len
         {
-            return Err(ModelError::IndexOutOfBounds { index: i, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: i,
+                size: len,
+            });
         }
         if unique && self.index_of(o, f, &v).is_some() {
             return match at {
@@ -826,7 +847,13 @@ impl Graph {
     }
 
     /// `InternalEList.addUnique`: inserts without the uniqueness check, with inverse updates.
-    pub(crate) fn add_unique(&mut self, o: ObjId, f: FeatureId, v: Datum<'_, ObjId>, at: Option<usize>) {
+    pub(crate) fn add_unique(
+        &mut self,
+        o: ObjId,
+        f: FeatureId,
+        v: Datum<'_, ObjId>,
+        at: Option<usize>,
+    ) {
         let h = self.hook(f);
         if h != Hook::None && ecore_hooks::add_unique(self, o, f, h, v, at) {
             return;
@@ -851,7 +878,12 @@ impl Graph {
         }
     }
 
-    pub(crate) fn op_remove(&mut self, o: ObjId, f: FeatureId, v: Datum<'_, ObjId>) -> ModelResult<bool> {
+    pub(crate) fn op_remove(
+        &mut self,
+        o: ObjId,
+        f: FeatureId,
+        v: Datum<'_, ObjId>,
+    ) -> ModelResult<bool> {
         self.slot_index(o, f)?;
         self.require_many(f)?;
         match self.index_of(o, f, &v) {
@@ -868,7 +900,10 @@ impl Graph {
         self.require_many(f)?;
         let len = self.op_len(o, f);
         if i >= len {
-            return Err(ModelError::IndexOutOfBounds { index: i, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: i,
+                size: len,
+            });
         }
         let h = self.hook(f);
         if h != Hook::None
@@ -889,14 +924,23 @@ impl Graph {
         Ok(())
     }
 
-    pub(crate) fn op_set_at(&mut self, o: ObjId, f: FeatureId, i: usize, v: Datum<'_, ObjId>) -> ModelResult<()> {
+    pub(crate) fn op_set_at(
+        &mut self,
+        o: ObjId,
+        f: FeatureId,
+        i: usize,
+        v: Datum<'_, ObjId>,
+    ) -> ModelResult<()> {
         self.slot_index(o, f)?;
         self.require_many(f)?;
         let fi = self.meta.feature(f);
         let (unique, is_ref) = (fi.unique, fi.kind == FeatureKind::Reference);
         let len = self.op_len(o, f);
         if i >= len {
-            return Err(ModelError::IndexOutOfBounds { index: i, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: i,
+                size: len,
+            });
         }
         if unique
             && let Some(j) = self.index_of(o, f, &v)
@@ -956,15 +1000,27 @@ impl Graph {
         Ok(())
     }
 
-    pub(crate) fn op_move(&mut self, o: ObjId, f: FeatureId, to: usize, from: usize) -> ModelResult<()> {
+    pub(crate) fn op_move(
+        &mut self,
+        o: ObjId,
+        f: FeatureId,
+        to: usize,
+        from: usize,
+    ) -> ModelResult<()> {
         self.slot_index(o, f)?;
         self.require_many(f)?;
         let len = self.op_len(o, f);
         if to >= len {
-            return Err(ModelError::IndexOutOfBounds { index: to, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: to,
+                size: len,
+            });
         }
         if from >= len {
-            return Err(ModelError::IndexOutOfBounds { index: from, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: from,
+                size: len,
+            });
         }
         let h = self.hook(f);
         if h != Hook::None
@@ -986,17 +1042,27 @@ impl Graph {
     }
 
     /// `ResourceImpl.getContents().add` (`eSetResource`).
-    pub(crate) fn op_add_root(&mut self, r: ResourceId, o: ObjId, at: Option<usize>) -> ModelResult<bool> {
+    pub(crate) fn op_add_root(
+        &mut self,
+        r: ResourceId,
+        o: ObjId,
+        at: Option<usize>,
+    ) -> ModelResult<bool> {
         let len = self.resources[r.index()].roots.len();
         if let Some(i) = at
             && i > len
         {
-            return Err(ModelError::IndexOutOfBounds { index: i, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: i,
+                size: len,
+            });
         }
         if self.resources[r.index()].roots.contains(&o) {
             return match at {
                 None => Ok(false),
-                Some(_) => Err(ModelError::Unsupported("The 'no duplicates' constraint is violated".into())),
+                Some(_) => Err(ModelError::Unsupported(
+                    "The 'no duplicates' constraint is violated".into(),
+                )),
             };
         }
         self.resources[r.index()].roots.insert(at.unwrap_or(len), o);
@@ -1028,8 +1094,8 @@ impl Graph {
                 }
             }
         }
-        if old.is_some() && r.is_none() {
-            self.detached(old.unwrap(), o);
+        if let (Some(old), None) = (old, r) {
+            self.detached(old, o);
         }
         self.objs[o.index()].resource = r;
     }
@@ -1131,7 +1197,10 @@ fn kind_accepts(kind: DataKind, d: &Datum<'_, ObjId>) -> bool {
             | (DataKind::Char, Datum::Char(_))
             | (DataKind::Double, Datum::Double(_))
             | (DataKind::Float, Datum::Float(_))
-            | (DataKind::BigInteger | DataKind::BigDecimal | DataKind::Date | DataKind::Other, Datum::Other(_) | Datum::Str(_))
+            | (
+                DataKind::BigInteger | DataKind::BigDecimal | DataKind::Date | DataKind::Other,
+                Datum::Other(_) | Datum::Str(_)
+            )
             | (DataKind::Unloadable, _)
     )
 }
@@ -1194,7 +1263,13 @@ impl ModelStore for Graph {
     fn unset(&mut self, o: ObjId, f: FeatureId) -> ModelResult<()> {
         self.op_unset(o, f)
     }
-    fn add(&mut self, o: ObjId, f: FeatureId, v: Datum<'_, ObjId>, at: Option<usize>) -> ModelResult<bool> {
+    fn add(
+        &mut self,
+        o: ObjId,
+        f: FeatureId,
+        v: Datum<'_, ObjId>,
+        at: Option<usize>,
+    ) -> ModelResult<bool> {
         self.op_add(o, f, v, at)
     }
     fn remove(&mut self, o: ObjId, f: FeatureId, v: Datum<'_, ObjId>) -> ModelResult<bool> {

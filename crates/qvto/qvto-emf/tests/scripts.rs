@@ -12,7 +12,7 @@
 
 use qvto_emf::canon::{first_difference, fnv64};
 use qvto_emf::datatypes::java_double_to_string;
-use qvto_emf::xmi_save::{save, SaveOptions};
+use qvto_emf::xmi_save::{SaveOptions, save};
 use qvto_emf::{Graph, ObjId};
 use qvto_model::contract::Roles;
 use qvto_model::{ClassId, Datum, FeatureId, ModelError, ModelStore, ResourceId};
@@ -38,14 +38,27 @@ impl Rng {
 }
 
 const SINGLE: [&str; 16] = [
-    "name", "id", "count", "label", "opt", "kind", "big", "ratio", "flag", "boxed", "parent", "child", "friend", "owner", "only",
-    "frozen",
+    "name", "id", "count", "label", "opt", "kind", "big", "ratio", "flag", "boxed", "parent",
+    "child", "friend", "owner", "only", "frozen",
 ];
-const MANY: [&str; 9] = ["tags", "nums", "children", "xchildren", "links", "bag", "owned", "targets", "sources"];
+const MANY: [&str; 9] = [
+    "tags",
+    "nums",
+    "children",
+    "xchildren",
+    "links",
+    "bag",
+    "owned",
+    "targets",
+    "sources",
+];
 
 fn value_for(rng: &mut Rng, feature: &str, vars: &[String]) -> String {
     let obj = |rng: &mut Rng| format!("o:{}", vars[rng.below(vars.len())]);
-    let ref_many = matches!(feature, "children" | "xchildren" | "links" | "bag" | "owned" | "targets" | "sources");
+    let ref_many = matches!(
+        feature,
+        "children" | "xchildren" | "links" | "bag" | "owned" | "targets" | "sources"
+    );
     if rng.chance(8) {
         // wrong type or null (dynamic EMF reference lists accept any Java object, so those only
         // get null)
@@ -62,7 +75,11 @@ fn value_for(rng: &mut Rng, feature: &str, vars: &[String]) -> String {
     match feature {
         "name" | "id" | "label" | "opt" | "tags" | "extra" | "frozen" => {
             let v = ["a", "b", "c", "x"][rng.below(4)];
-            if rng.chance(10) { "null".into() } else { format!("s:{v}") }
+            if rng.chance(10) {
+                "null".into()
+            } else {
+                format!("s:{v}")
+            }
         }
         "count" | "nums" => format!("i:{}", rng.below(3)),
         "boxed" => format!("i:{}", rng.below(2)),
@@ -71,7 +88,11 @@ fn value_for(rng: &mut Rng, feature: &str, vars: &[String]) -> String {
         "flag" => ["b:true", "b:false"][rng.below(2)].into(),
         "kind" => ["e:A", "e:B", "e:C"][rng.below(3)].into(),
         _ => {
-            if rng.chance(5) { "null".into() } else { obj(rng) }
+            if rng.chance(5) {
+                "null".into()
+            } else {
+                obj(rng)
+            }
         }
     }
 }
@@ -101,11 +122,19 @@ fn generate(seed: u64) -> Vec<String> {
         let r = format!("r{}", rng.below(2));
         let line = match rng.below(20) {
             0..=4 => {
-                let f = if rng.chance(5) { "extra" } else { SINGLE[rng.below(SINGLE.len())] };
+                let f = if rng.chance(5) {
+                    "extra"
+                } else {
+                    SINGLE[rng.below(SINGLE.len())]
+                };
                 format!("set {v} {f} {}", value_for(&mut rng, f, &vars))
             }
             5 => {
-                let f = if rng.chance(50) { SINGLE[rng.below(SINGLE.len())] } else { MANY[rng.below(MANY.len())] };
+                let f = if rng.chance(50) {
+                    SINGLE[rng.below(SINGLE.len())]
+                } else {
+                    MANY[rng.below(MANY.len())]
+                };
                 format!("unset {v} {f}")
             }
             6..=9 => {
@@ -121,20 +150,37 @@ fn generate(seed: u64) -> Vec<String> {
                 let f = MANY[rng.below(MANY.len())];
                 format!("remove {v} {f} {}", value_for(&mut rng, f, &vars))
             }
-            11 => format!("removeat {v} {} {}", MANY[rng.below(MANY.len())], rng.below(3)),
+            11 => format!(
+                "removeat {v} {} {}",
+                MANY[rng.below(MANY.len())],
+                rng.below(3)
+            ),
             12 => {
                 let f = MANY[rng.below(MANY.len())];
-                format!("setat {v} {f} {} {}", rng.below(3), value_for(&mut rng, f, &vars))
+                format!(
+                    "setat {v} {f} {} {}",
+                    rng.below(3),
+                    value_for(&mut rng, f, &vars)
+                )
             }
             13 => format!("clear {v} {}", MANY[rng.below(MANY.len())]),
-            14 => format!("move {v} {} {} {}", MANY[rng.below(MANY.len())], rng.below(3), rng.below(3)),
+            14 => format!(
+                "move {v} {} {} {}",
+                MANY[rng.below(MANY.len())],
+                rng.below(3),
+                rng.below(3)
+            ),
             15 => {
                 let f = MANY[rng.below(MANY.len())];
                 let k = rng.below(4);
                 let vals: Vec<String> = (0..k)
                     .map(|_| {
                         let x = value_for(&mut rng, f, &vars);
-                        if x == "null" && !matches!(f, "tags" | "nums") { format!("o:{}", vars[0]) } else { x }
+                        if x == "null" && !matches!(f, "tags" | "nums") {
+                            format!("o:{}", vars[0])
+                        } else {
+                            x
+                        }
                     })
                     .collect();
                 format!("setlist {v} {f} {}", vals.join(" "))
@@ -151,7 +197,11 @@ fn generate(seed: u64) -> Vec<String> {
                 if rng.chance(30) {
                     format!("delete {v}")
                 } else {
-                    format!("set {v} {} {}", "friend", value_for(&mut rng, "friend", &vars))
+                    format!(
+                        "set {v} {} {}",
+                        "friend",
+                        value_for(&mut rng, "friend", &vars)
+                    )
                 }
             }
         };
@@ -198,11 +248,23 @@ fn err(e: &ModelError) -> String {
 impl Runner {
     fn new() -> Runner {
         let mut rs = qvto_emf::ResourceSet::new();
-        let r = rs.load_text("http://qvto-rs/contract.ecore", qvto_model::contract::CONTRACT_ECORE).unwrap();
+        let r = rs
+            .load_text(
+                "http://qvto-rs/contract.ecore",
+                qvto_model::contract::CONTRACT_ECORE,
+            )
+            .unwrap();
         rs.register(r).unwrap();
         let roles = Roles::resolve(rs.graph.meta()).unwrap();
         let g = rs.graph;
-        Runner { g, roles, objs: HashMap::new(), order: Vec::new(), names: HashMap::new(), res: Vec::new() }
+        Runner {
+            g,
+            roles,
+            objs: HashMap::new(),
+            order: Vec::new(),
+            names: HashMap::new(),
+            res: Vec::new(),
+        }
     }
 
     fn class(&self, n: &str) -> ClassId {
@@ -214,7 +276,10 @@ impl Runner {
     }
 
     fn feature(&self, o: ObjId, n: &str) -> Result<FeatureId, String> {
-        self.g.meta().feature_by_name(self.g.class_of(o), n).ok_or_else(|| "err NoSuchFeature".to_string())
+        self.g
+            .meta()
+            .feature_by_name(self.g.class_of(o), n)
+            .ok_or_else(|| "err NoSuchFeature".to_string())
     }
 
     fn value<'a>(&self, s: &'a str) -> Datum<'a, ObjId> {
@@ -228,19 +293,32 @@ impl Runner {
             "l" => Datum::Long(v.parse().unwrap()),
             "d" => Datum::Double(v.parse().unwrap()),
             "b" => Datum::Bool(v == "true"),
-            "e" => Datum::Enum(self.roles.kind, ["A", "B", "C"].iter().position(|x| *x == v).unwrap() as u32),
+            "e" => Datum::Enum(
+                self.roles.kind,
+                ["A", "B", "C"].iter().position(|x| *x == v).unwrap() as u32,
+            ),
             "o" => Datum::Obj(self.objs[v]),
             _ => panic!("{s}"),
         }
     }
 
     fn many(&self, f: FeatureId) -> Result<(), String> {
-        if self.g.meta().feature(f).is_many() { Ok(()) } else { Err("err WrongMultiplicity".into()) }
+        if self.g.meta().feature(f).is_many() {
+            Ok(())
+        } else {
+            Err("err WrongMultiplicity".into())
+        }
     }
 
     fn exec(&mut self, a: &[&str]) -> Result<String, String> {
-        let r = |x: Result<(), ModelError>| x.map(|_| "ok".to_string()).map_err(|e| format!("err {}", err(&e)));
-        let rb = |x: Result<bool, ModelError>| x.map(|b| format!("ok {b}")).map_err(|e| format!("err {}", err(&e)));
+        let r = |x: Result<(), ModelError>| {
+            x.map(|_| "ok".to_string())
+                .map_err(|e| format!("err {}", err(&e)))
+        };
+        let rb = |x: Result<bool, ModelError>| {
+            x.map(|b| format!("ok {b}"))
+                .map_err(|e| format!("err {}", err(&e)))
+        };
         match a[0] {
             "new" => {
                 let c = self.class(a[2]);
@@ -262,7 +340,10 @@ impl Runner {
                     return Ok(format!("ok {}", self.g.remove_root(rid, o)));
                 }
                 return match a.get(3) {
-                    Some(i) => r(self.g.add_root(rid, o, Some(i.parse().unwrap())).map(|_| ())),
+                    Some(i) => r(self
+                        .g
+                        .add_root(rid, o, Some(i.parse().unwrap()))
+                        .map(|_| ())),
                     None => rb(self.g.add_root(rid, o, None)),
                 };
             }
@@ -312,12 +393,15 @@ impl Runner {
             }
             "move" => {
                 self.many(f)?;
-                r(self.g.move_to(o, f, a[3].parse().unwrap(), a[4].parse().unwrap()))
+                r(self
+                    .g
+                    .move_to(o, f, a[3].parse().unwrap(), a[4].parse().unwrap()))
             }
             "setlist" => {
                 self.many(f)?;
                 let vals: Vec<Datum<'_, ObjId>> = a[3..].iter().map(|s| self.value(s)).collect();
-                let vals: Vec<qvto_model::OwnedDatum<ObjId>> = vals.iter().map(|d| d.to_owned()).collect();
+                let vals: Vec<qvto_model::OwnedDatum<ObjId>> =
+                    vals.iter().map(|d| d.to_owned()).collect();
                 let refs: Vec<Datum<'_, ObjId>> = vals.iter().map(|d| d.as_datum()).collect();
                 r(self.g.set_list(o, f, &refs))
             }
@@ -344,7 +428,9 @@ impl Runner {
             Datum::Obj(o) => self.names.get(&o).cloned().unwrap_or("?".into()),
             Datum::Str(s) | Datum::Other(s) => s.into(),
             Datum::Double(x) => java_double_to_string(x),
-            Datum::Enum(e, i) => self.g.meta().enumeration(e).literals[i as usize].literal.to_string(),
+            Datum::Enum(e, i) => self.g.meta().enumeration(e).literals[i as usize]
+                .literal
+                .to_string(),
             Datum::Bool(b) => b.to_string(),
             d => d.as_i64().map(|i| i.to_string()).unwrap_or_default(),
         }
@@ -353,17 +439,27 @@ impl Runner {
     fn state(&self, out: &mut String) {
         out.push_str("--\n");
         let rname = |r: Option<ResourceId>| {
-            r.and_then(|r| self.res.iter().find(|(_, x)| *x == r)).map_or("-".to_string(), |(n, _)| n.clone())
+            r.and_then(|r| self.res.iter().find(|(_, x)| *x == r))
+                .map_or("-".to_string(), |(n, _)| n.clone())
         };
         for (n, r) in &self.res {
-            let roots: Vec<String> = self.g.roots(*r).iter().map(|o| self.show(Datum::Obj(*o))).collect();
+            let roots: Vec<String> = self
+                .g
+                .roots(*r)
+                .iter()
+                .map(|o| self.show(Datum::Obj(*o)))
+                .collect();
             out.push_str(&format!("@{n} [{}]\n", roots.join(",")));
         }
         for v in &self.order {
             let o = self.objs[v];
             let class = self.g.meta().class(self.g.class_of(o));
             let c = match self.g.container(o) {
-                Some((p, f)) => format!("{}.{}", self.show(Datum::Obj(p)), self.g.meta().feature(f).name),
+                Some((p, f)) => format!(
+                    "{}.{}",
+                    self.show(Datum::Obj(p)),
+                    self.g.meta().feature(f).name
+                ),
                 None => "-".into(),
             };
             out.push_str(&format!(
@@ -376,7 +472,9 @@ impl Runner {
                 let fi = self.g.meta().feature(f);
                 let set = if self.g.is_set(o, f) { "*" } else { "" };
                 let val = if fi.is_many() {
-                    let items: Vec<String> = (0..self.g.len(o, f)).map(|i| self.show(self.g.get_at(o, f, i))).collect();
+                    let items: Vec<String> = (0..self.g.len(o, f))
+                        .map(|i| self.show(self.g.get_at(o, f, i)))
+                        .collect();
                     format!("[{}]", items.join(","))
                 } else {
                     self.show(self.g.get(o, f))
@@ -401,12 +499,21 @@ fn run(lines: &[String]) -> String {
     for (name, r) in &rn.res {
         for (variant, opts) in [
             ("default", SaveOptions::for_resource(rn.g.resource(*r))),
-            ("runner", SaveOptions { encoding: Some("UTF-8".into()), schema_location: true, ..SaveOptions::for_resource(rn.g.resource(*r)) }),
+            (
+                "runner",
+                SaveOptions {
+                    encoding: Some("UTF-8".into()),
+                    schema_location: true,
+                    ..SaveOptions::for_resource(rn.g.resource(*r))
+                },
+            ),
         ] {
             out.push_str(&format!("~save {name} {variant}\n"));
             match save(&rn.g, *r, &opts) {
                 Ok(t) => out.push_str(&t),
-                Err(e) if e.starts_with("DanglingHREFException") => out.push_str("err DanglingHREFException\n"),
+                Err(e) if e.starts_with("DanglingHREFException") => {
+                    out.push_str("err DanglingHREFException\n")
+                }
                 Err(e) => out.push_str(&format!("err {e}\n")),
             }
         }
@@ -425,7 +532,9 @@ fn scripts_match_emf() {
         }
     }
     let expected = std::fs::read_to_string(data.join("scripts-oracle.tsv")).unwrap();
-    let oracle: Option<PathBuf> = std::env::var("QVTO_EMF_ORACLE_SCRIPTS").ok().map(PathBuf::from);
+    let oracle: Option<PathBuf> = std::env::var("QVTO_EMF_ORACLE_SCRIPTS")
+        .ok()
+        .map(PathBuf::from);
     let mut failures = Vec::new();
     for (i, line) in expected.lines().enumerate() {
         let (_, hash) = line.split_once('\t').unwrap();
@@ -441,7 +550,11 @@ fn scripts_match_emf() {
             failures.push(msg);
         }
     }
-    eprintln!("{} scripts, {} differ", expected.lines().count(), failures.len());
+    eprintln!(
+        "{} scripts, {} differ",
+        expected.lines().count(),
+        failures.len()
+    );
     for f in failures.iter().take(30) {
         eprintln!("{f}");
     }

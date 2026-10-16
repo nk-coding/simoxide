@@ -75,7 +75,10 @@ impl Uri {
     }
     /// A relative path: no scheme, authority, device and no leading `/`.
     pub fn has_relative_path(&self) -> bool {
-        self.hierarchical && !self.absolute_path && self.authority.is_none() && self.device.is_none()
+        self.hierarchical
+            && !self.absolute_path
+            && self.authority.is_none()
+            && self.device.is_none()
     }
     fn has_path(&self) -> bool {
         self.has_absolute_path() || (self.has_relative_path() && !self.segments.is_empty())
@@ -101,7 +104,10 @@ impl Uri {
     /// `platform:/resource/...` or `platform:/plugin/...` with at least two segments.
     pub fn is_platform(&self) -> bool {
         self.hierarchical
-            && self.scheme.as_deref().is_some_and(|s| s.eq_ignore_ascii_case("platform"))
+            && self
+                .scheme
+                .as_deref()
+                .is_some_and(|s| s.eq_ignore_ascii_case("platform"))
             && self.authority.is_none()
             && self.device.is_none()
             && self.segments.len() >= 2
@@ -247,7 +253,9 @@ impl Uri {
         let mut absolute = self.absolute_path;
         let mut segments = self.segments.clone();
         let mut query = self.query.clone();
-        if self.authority == base.authority && (self.has_device_or_path() || !base.has_device_or_path()) {
+        if self.authority == base.authority
+            && (self.has_device_or_path() || !base.has_device_or_path())
+        {
             authority = None;
             if self.device == base.device {
                 let has_path = self.has_path();
@@ -293,7 +301,8 @@ impl Uri {
         self.segments.iter().enumerate().any(|(i, s)| {
             (i < n - 1 && s.is_empty())
                 || s == "."
-                || (s == ".." && (!preserve_root_parents || (i != 0 && self.segments[i - 1] != "..")))
+                || (s == ".."
+                    && (!preserve_root_parents || (i != 0 && self.segments[i - 1] != "..")))
         })
     }
 
@@ -384,7 +393,9 @@ fn parse_without_fragment(s: &str) -> Uri {
         && b[j] == b':'
     {
         let scheme = &s[..j];
-        is_archive = ARCHIVE_SCHEMES.iter().any(|a| a.eq_ignore_ascii_case(scheme));
+        is_archive = ARCHIVE_SCHEMES
+            .iter()
+            .any(|a| a.eq_ignore_ascii_case(scheme));
         is_platform = scheme.eq_ignore_ascii_case("platform");
         u.scheme = Some(scheme.to_string());
         i = j + 1;
@@ -531,8 +542,23 @@ pub fn encode_path(path: &str) -> String {
         let keep = ch.is_ascii_alphanumeric()
             || matches!(
                 ch,
-                '-' | '_' | '.' | '!' | '~' | '*' | '\'' | '(' | ')' | ':' | '@' | '&' | '=' | '+'
-                    | '$' | ',' | ';' | '/'
+                '-' | '_'
+                    | '.'
+                    | '!'
+                    | '~'
+                    | '*'
+                    | '\''
+                    | '('
+                    | ')'
+                    | ':'
+                    | '@'
+                    | '&'
+                    | '='
+                    | '+'
+                    | '$'
+                    | ','
+                    | ';'
+                    | '/'
             );
         if keep {
             out.push(ch);
@@ -610,12 +636,18 @@ mod tests {
         let t = Uri::parse("file:/a/b/c.xmi#/0");
         assert_eq!(t.deresolve(&base).to_string(), "#/0");
         let t = Uri::parse("http://www.eclipse.org/emf/2002/Ecore#//EString");
-        assert_eq!(t.deresolve(&base).to_string(), "http://www.eclipse.org/emf/2002/Ecore#//EString");
+        assert_eq!(
+            t.deresolve(&base).to_string(),
+            "http://www.eclipse.org/emf/2002/Ecore#//EString"
+        );
         let r = Uri::parse("../e/d.xmi#/0").resolve(&base);
         assert_eq!(r.to_string(), "file:/a/e/d.xmi#/0");
         let r = Uri::parse("d.xmi").resolve(&base);
         assert_eq!(r.to_string(), "file:/a/b/d.xmi");
         assert_eq!(Uri::file("/x y/a.ecore").to_string(), "file:/x%20y/a.ecore");
-        assert_eq!(Uri::file("/x y/a.ecore").to_file_path().unwrap(), "/x y/a.ecore");
+        assert_eq!(
+            Uri::file("/x y/a.ecore").to_file_path().unwrap(),
+            "/x y/a.ecore"
+        );
     }
 }

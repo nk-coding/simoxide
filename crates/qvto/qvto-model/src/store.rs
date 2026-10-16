@@ -41,7 +41,10 @@ impl fmt::Display for ModelError {
             }
             ModelError::WrongMultiplicity(x) => write!(f, "wrong multiplicity for feature {x:?}"),
             ModelError::TypeMismatch { feature, found } => {
-                write!(f, "value of type {found} does not conform to feature {feature:?}")
+                write!(
+                    f,
+                    "value of type {found} does not conform to feature {feature:?}"
+                )
             }
             ModelError::IndexOutOfBounds { index, size } => {
                 write!(f, "index={index}, size={size}")
@@ -50,7 +53,9 @@ impl fmt::Display for ModelError {
             ModelError::NullNotAllowed(_) => f.write_str("The 'no null' constraint is violated"),
             ModelError::Abstract(c) => write!(f, "class {c:?} is abstract"),
             ModelError::RecursiveContainment => f.write_str("Recursive containment not allowed"),
-            ModelError::NotChangeable(x) => write!(f, "The feature {x:?} is not a valid changeable feature"),
+            ModelError::NotChangeable(x) => {
+                write!(f, "The feature {x:?} is not a valid changeable feature")
+            }
             ModelError::Unsupported(m) => f.write_str(m),
         }
     }
@@ -124,13 +129,25 @@ pub trait ModelStore {
     fn set(&mut self, o: Self::Obj, f: FeatureId, v: Datum<'_, Self::Obj>) -> ModelResult<()>;
     fn unset(&mut self, o: Self::Obj, f: FeatureId) -> ModelResult<()>;
     /// Appends (`at == None`, `EList.add`) or inserts (`EList.add(index, v)`).
-    fn add(&mut self, o: Self::Obj, f: FeatureId, v: Datum<'_, Self::Obj>, at: Option<usize>) -> ModelResult<bool>;
+    fn add(
+        &mut self,
+        o: Self::Obj,
+        f: FeatureId,
+        v: Datum<'_, Self::Obj>,
+        at: Option<usize>,
+    ) -> ModelResult<bool>;
     /// `EList.remove(Object)`: the first occurrence.
     fn remove(&mut self, o: Self::Obj, f: FeatureId, v: Datum<'_, Self::Obj>) -> ModelResult<bool>;
     /// `EList.remove(int)`.
     fn remove_at(&mut self, o: Self::Obj, f: FeatureId, i: usize) -> ModelResult<()>;
     /// `EList.set(int, Object)`.
-    fn set_at(&mut self, o: Self::Obj, f: FeatureId, i: usize, v: Datum<'_, Self::Obj>) -> ModelResult<()>;
+    fn set_at(
+        &mut self,
+        o: Self::Obj,
+        f: FeatureId,
+        i: usize,
+        v: Datum<'_, Self::Obj>,
+    ) -> ModelResult<()>;
     fn clear(&mut self, o: Self::Obj, f: FeatureId) -> ModelResult<()>;
     /// `EList.move(to, from)`.
     fn move_to(&mut self, o: Self::Obj, f: FeatureId, to: usize, from: usize) -> ModelResult<()>;
@@ -147,7 +164,12 @@ pub trait ModelStore {
     /// sequence of moves, inserts and removals (so containment and opposites see the same
     /// changes as in EMF). On an error the list may be partially updated; QVTo then falls back to
     /// clear and add all.
-    fn set_list(&mut self, o: Self::Obj, f: FeatureId, values: &[Datum<'_, Self::Obj>]) -> ModelResult<()> {
+    fn set_list(
+        &mut self,
+        o: Self::Obj,
+        f: FeatureId,
+        values: &[Datum<'_, Self::Obj>],
+    ) -> ModelResult<()> {
         let protos: Vec<OwnedDatum<Self::Obj>> = values.iter().map(|v| v.to_owned()).collect();
         let index_in_list = |s: &Self, x: &OwnedDatum<Self::Obj>, from: usize| -> Option<usize> {
             (from..s.len(o, f)).find(|&i| s.get_at(o, f, i).java_equals(&x.as_datum()))

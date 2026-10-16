@@ -365,7 +365,8 @@ impl MetaRegistry {
         }
         let bits = &self.classes[c.index()].supertype_bits;
         let i = sup.index();
-        bits.get(i / 64).is_some_and(|w| w & (1u64 << (i % 64)) != 0)
+        bits.get(i / 64)
+            .is_some_and(|w| w & (1u64 << (i % 64)) != 0)
     }
 
     /// Ecore's `EObject`, if Ecore is registered.
@@ -432,7 +433,13 @@ impl MetaRegistry {
     }
 
     /// Declares a class; its derived tables are computed by [`MetaRegistry::finish_classes`].
-    pub fn add_class(&mut self, p: PackageId, name: &str, is_abstract: bool, is_interface: bool) -> ClassId {
+    pub fn add_class(
+        &mut self,
+        p: PackageId,
+        name: &str,
+        is_abstract: bool,
+        is_interface: bool,
+    ) -> ClassId {
         let id = ClassId(self.classes.len() as u32);
         self.classes.push(ClassInfo {
             name: name.into(),
@@ -451,7 +458,9 @@ impl MetaRegistry {
             supertype_bits: Box::new([]),
             finished: false,
         });
-        self.packages[p.index()].classifiers.push(Classifier::Class(id));
+        self.packages[p.index()]
+            .classifiers
+            .push(Classifier::Class(id));
         id
     }
 
@@ -472,7 +481,9 @@ impl MetaRegistry {
             primitive,
             serializable,
         });
-        self.packages[p.index()].classifiers.push(Classifier::DataType(id));
+        self.packages[p.index()]
+            .classifiers
+            .push(Classifier::DataType(id));
         id
     }
 
@@ -484,13 +495,21 @@ impl MetaRegistry {
             literals,
             serializable: true,
         });
-        self.packages[p.index()].classifiers.push(Classifier::Enum(id));
+        self.packages[p.index()]
+            .classifiers
+            .push(Classifier::Enum(id));
         id
     }
 
     /// Adds a feature to class `c` with EMF's defaults (`[0..1]`, ordered, unique, changeable,
     /// resolving proxies); adjust it with [`MetaRegistry::feature_mut`].
-    pub fn add_feature(&mut self, c: ClassId, name: &str, kind: FeatureKind, ty: Classifier) -> FeatureId {
+    pub fn add_feature(
+        &mut self,
+        c: ClassId,
+        name: &str,
+        kind: FeatureKind,
+        ty: Classifier,
+    ) -> FeatureId {
         let id = FeatureId(self.features.len() as u32);
         let local_index = self.classes[c.index()].features.len() as u32;
         self.features.push(FeatureInfo {
@@ -543,9 +562,9 @@ impl MetaRegistry {
             .filter(|c| !self.classes[c.index()].finished)
             .collect();
         let mut state = vec![0u8; n]; // 0 = todo, 1 = in progress, 2 = done
-        for c in 0..n {
-            if self.classes[c].finished {
-                state[c] = 2;
+        for (st, c) in state.iter_mut().zip(&self.classes) {
+            if c.finished {
+                *st = 2;
             }
         }
         let mut errors = Vec::new();
@@ -563,7 +582,10 @@ impl MetaRegistry {
         match state[c.index()] {
             2 => return,
             1 => {
-                errors.push(format!("cyclic supertypes at {}", self.classes[c.index()].name));
+                errors.push(format!(
+                    "cyclic supertypes at {}",
+                    self.classes[c.index()].name
+                ));
                 return;
             }
             _ => {}

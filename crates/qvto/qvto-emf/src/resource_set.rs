@@ -54,7 +54,8 @@ impl ResourceSet {
     /// Registers the location of the metamodel defining a namespace URI (like a package
     /// registry descriptor); it is loaded and registered when a document uses the namespace.
     pub fn add_ns_location(&mut self, ns_uri: &str, location: &str) {
-        self.ns_locations.insert(ns_uri.to_string(), location.to_string());
+        self.ns_locations
+            .insert(ns_uri.to_string(), location.to_string());
     }
 
     /// Registers a package-registry alias: documents at `key` are the package with `ns_uri`
@@ -67,7 +68,11 @@ impl ResourceSet {
     pub fn normalize(&self, uri: &str) -> String {
         let mut best: Option<&(String, String)> = None;
         for m in &self.uri_map {
-            let hit = if m.0.ends_with('/') { uri.starts_with(&m.0) } else { uri == m.0 };
+            let hit = if m.0.ends_with('/') {
+                uri.starts_with(&m.0)
+            } else {
+                uri == m.0
+            };
             if hit && best.is_none_or(|b| m.0.len() > b.0.len()) {
                 best = Some(m);
             }
@@ -84,7 +89,9 @@ impl ResourceSet {
         if let Some(r) = self.ecore_resource {
             return r;
         }
-        let r = self.graph.create_resource_kind(ECORE_NS_URI, ResourceKind::Ecore);
+        let r = self
+            .graph
+            .create_resource_kind(ECORE_NS_URI, ResourceKind::Ecore);
         xmi_load::load(&mut self.graph, r, ECORE_ECORE).expect("bundled Ecore.ecore");
         link_ecore(&mut self.graph, r);
         self.ecore_resource = Some(r);
@@ -94,7 +101,9 @@ impl ResourceSet {
     fn read(&self, uri: &str) -> Result<String, String> {
         let n = self.normalize(uri);
         let u = Uri::parse(&n);
-        let path = u.to_file_path().ok_or_else(|| format!("cannot open {uri} (normalized {n})"))?;
+        let path = u
+            .to_file_path()
+            .ok_or_else(|| format!("cannot open {uri} (normalized {n})"))?;
         std::fs::read_to_string(&path).map_err(|e| format!("{path}: {e}"))
     }
 
@@ -105,10 +114,18 @@ impl ResourceSet {
             return Some(r);
         }
         let norm = self.normalize(&uri);
-        if let Some(r) = self.graph.resource_ids().find(|r| self.normalize(&self.graph.resource(*r).uri) == norm) {
+        if let Some(r) = self
+            .graph
+            .resource_ids()
+            .find(|r| self.normalize(&self.graph.resource(*r).uri) == norm)
+        {
             return Some(r);
         }
-        let key = self.aliases.get(&uri).cloned().unwrap_or_else(|| uri.clone());
+        let key = self
+            .aliases
+            .get(&uri)
+            .cloned()
+            .unwrap_or_else(|| uri.clone());
         if key == ECORE_NS_URI {
             return Some(self.ecore_resource());
         }
@@ -120,10 +137,7 @@ impl ResourceSet {
         if !load || self.failed.contains_key(&uri) {
             return None;
         }
-        match self.load(&uri) {
-            Ok(r) => Some(r),
-            Err(_) => None,
-        }
+        self.load(&uri).ok()
     }
 
     /// Loads the document at `uri` into a new resource (the namespaces it uses are registered
@@ -163,7 +177,10 @@ impl ResourceSet {
         if self.graph.meta().package_by_ns_uri(ns).is_some() || ns.is_empty() {
             return;
         }
-        if ns == "http://www.omg.org/XMI" || ns.starts_with("http://schema.omg.org/") || ns == crate::xmi_load::XSI_NS {
+        if ns == "http://www.omg.org/XMI"
+            || ns.starts_with("http://schema.omg.org/")
+            || ns == crate::xmi_load::XSI_NS
+        {
             return;
         }
         if let Some(l) = self.ns_locations.get(ns).cloned() {
@@ -179,13 +196,24 @@ impl ResourceSet {
         else {
             return;
         };
-        if self.load_metamodel(&loc.trim_fragment().to_string()).is_err() && self.graph.meta().package_by_ns_uri(ns).is_none() {
+        if self
+            .load_metamodel(&loc.trim_fragment().to_string())
+            .is_err()
+            && self.graph.meta().package_by_ns_uri(ns).is_none()
+        {
             return;
         }
-        let Some(r) = self.get_resource(&loc.trim_fragment().to_string(), false) else { return };
+        let Some(r) = self.get_resource(&loc.trim_fragment().to_string(), false) else {
+            return;
+        };
         let target = match loc.fragment() {
             Some(f) => resolve_fragment(&self.graph, r, f),
-            None => self.graph.roots(r).iter().copied().find(|o| self.graph.links().obj_package.contains_key(o)),
+            None => self
+                .graph
+                .roots(r)
+                .iter()
+                .copied()
+                .find(|o| self.graph.links().obj_package.contains_key(o)),
         };
         if let Some(o) = target
             && let Some(&p) = self.graph.links().obj_package.get(&o)
@@ -198,9 +226,12 @@ impl ResourceSet {
     /// Loads (if needed) and registers the packages of a metamodel resource and of the
     /// metamodel resources it refers to.
     pub fn load_metamodel(&mut self, uri: &str) -> Result<Vec<PackageId>, String> {
-        let r = self
-            .get_resource(uri, true)
-            .ok_or_else(|| self.failed.get(uri).cloned().unwrap_or_else(|| format!("cannot load {uri}")))?;
+        let r = self.get_resource(uri, true).ok_or_else(|| {
+            self.failed
+                .get(uri)
+                .cloned()
+                .unwrap_or_else(|| format!("cannot load {uri}"))
+        })?;
         self.register(r)
     }
 
@@ -213,10 +244,11 @@ impl ResourceSet {
 
     fn is_ecore_model(&self, r: ResourceId) -> bool {
         let e = self.graph.ecore();
-        self.graph
-            .roots(r)
-            .iter()
-            .any(|o| self.graph.meta().is_subclass(self.graph.class_of(*o), e.epackage))
+        self.graph.roots(r).iter().any(|o| {
+            self.graph
+                .meta()
+                .is_subclass(self.graph.class_of(*o), e.epackage)
+        })
     }
 
     /// Registers the packages of resource `r` (with the metamodels it depends on).
@@ -268,7 +300,11 @@ impl ResourceSet {
         let frag = u.fragment().unwrap_or("").to_string();
         let r = self.get_resource(&u.trim_fragment().to_string(), true)?;
         let t = resolve_fragment(&self.graph, r, &frag)?;
-        if self.graph.is_proxy(t) { None } else { Some(t) }
+        if self.graph.is_proxy(t) {
+            None
+        } else {
+            Some(t)
+        }
     }
 
     /// Resolves the proxies referenced by objects of `r` (`EcoreUtil.resolveAll(resource)`).
@@ -306,8 +342,16 @@ impl ResourceSet {
 impl Graph {
     /// Replaces proxy `p` by `t` in `holder.f` (proxy resolution: no inverse update, except that
     /// a resolved containment proxy without container becomes contained).
-    pub(crate) fn replace_proxy(&mut self, holder: ObjId, f: qvto_model::FeatureId, p: ObjId, t: ObjId) {
-        let Ok(i) = self.slot_index(holder, f) else { return };
+    pub(crate) fn replace_proxy(
+        &mut self,
+        holder: ObjId,
+        f: qvto_model::FeatureId,
+        p: ObjId,
+        t: ObjId,
+    ) {
+        let Ok(i) = self.slot_index(holder, f) else {
+            return;
+        };
         match &mut self.objs[holder.index()].slots[i] {
             Slot::Ref(r) if *r == Some(p) => *r = Some(t),
             Slot::Refs(v, _) => {

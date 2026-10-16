@@ -37,7 +37,10 @@ pub fn path_fragment(g: &Graph, r: ResourceId, o: ObjId) -> String {
     let root_segment = |x: ObjId| {
         let roots = &g.resource(r).roots;
         if roots.len() > 1 {
-            roots.iter().position(|y| *y == x).map_or("-1".to_string(), |i| i.to_string())
+            roots
+                .iter()
+                .position(|y| *y == x)
+                .map_or("-1".to_string(), |i| i.to_string())
         } else {
             String::new()
         }
@@ -94,7 +97,9 @@ pub fn segment(g: &Graph, parent: ObjId, f: FeatureId, child: ObjId) -> String {
                 if x == child {
                     break;
                 }
-                if meta.is_subclass(g.class_of(x), e.enamed_element) && str_attr(g, x, e.named_element_name) == name {
+                if meta.is_subclass(g.class_of(x), e.enamed_element)
+                    && str_attr(g, x, e.named_element_name) == name
+                {
                     count += 1;
                 }
             }
@@ -108,12 +113,18 @@ pub fn segment(g: &Graph, parent: ObjId, f: FeatureId, child: ObjId) -> String {
                 if x == child {
                     break;
                 }
-                if meta.is_subclass(g.class_of(x), e.eannotation) && str_attr(g, x, e.annotation_source) == source {
+                if meta.is_subclass(g.class_of(x), e.eannotation)
+                    && str_attr(g, x, e.annotation_source) == source
+                {
                     count += 1;
                 }
             }
             let s = source.map_or("%".to_string(), |s| encode_segment(&s));
-            return if count > 0 { format!("%{s}%.{count}") } else { format!("%{s}%") };
+            return if count > 0 {
+                format!("%{s}%.{count}")
+            } else {
+                format!("%{s}%")
+            };
         }
     }
     let fi = meta.feature(f);
@@ -136,7 +147,10 @@ pub fn segment(g: &Graph, parent: ObjId, f: FeatureId, child: ObjId) -> String {
                         if i > 0 {
                             s.push(',');
                         }
-                        encode_value(&mut s, value_to_string(meta, &g.get_at(child, a, i).to_owned()));
+                        encode_value(
+                            &mut s,
+                            value_to_string(meta, &g.get_at(child, a, i).to_owned()),
+                        );
                     }
                     s.push(']');
                 } else {
@@ -165,7 +179,25 @@ pub fn encode_segment(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     for ch in s.chars() {
         let keep = ch.is_ascii_alphanumeric()
-            || matches!(ch, '-' | '_' | '.' | '!' | '~' | '*' | '\'' | '(' | ')' | ';' | ':' | '@' | '&' | '=' | '+' | '$' | ',');
+            || matches!(
+                ch,
+                '-' | '_'
+                    | '.'
+                    | '!'
+                    | '~'
+                    | '*'
+                    | '\''
+                    | '('
+                    | ')'
+                    | ';'
+                    | ':'
+                    | '@'
+                    | '&'
+                    | '='
+                    | '+'
+                    | '$'
+                    | ','
+            );
         if keep {
             out.push(ch);
         } else {
@@ -187,7 +219,11 @@ pub fn resolve_fragment(g: &Graph, r: ResourceId, frag: &str) -> Option<ObjId> {
         let mut cur = if let Some(id) = root.strip_prefix('?') {
             by_id(g, r, id)?
         } else {
-            let i: usize = if root.is_empty() { 0 } else { root.parse().ok()? };
+            let i: usize = if root.is_empty() {
+                0
+            } else {
+                root.parse().ok()?
+            };
             *roots.get(i)?
         };
         for s in segs {
@@ -229,9 +265,15 @@ pub fn child_by_segment(g: &Graph, o: ObjId, s: &str) -> Option<ObjId> {
             if idx != 0 && (rest.is_empty() || rest.starts_with('.')) {
                 let enc = &s[1..idx];
                 let source = if enc == "%" { None } else { Some(decode(enc)) };
-                let mut count: usize = if rest.is_empty() { 0 } else { rest[1..].parse().ok()? };
+                let mut count: usize = if rest.is_empty() {
+                    0
+                } else {
+                    rest[1..].parse().ok()?
+                };
                 for x in g.contents(o) {
-                    if meta.is_subclass(g.class_of(x), e.eannotation) && str_attr(g, x, e.annotation_source) == source {
+                    if meta.is_subclass(g.class_of(x), e.eannotation)
+                        && str_attr(g, x, e.annotation_source) == source
+                    {
                         if count == 0 {
                             return Some(x);
                         }
@@ -248,9 +290,15 @@ pub fn child_by_segment(g: &Graph, o: ObjId, s: &str) -> Option<ObjId> {
             },
             None => (s, 0),
         };
-        let name = if name == "%" { None } else { Some(decode(name)) };
+        let name = if name == "%" {
+            None
+        } else {
+            Some(decode(name))
+        };
         for x in g.contents(o) {
-            if meta.is_subclass(g.class_of(x), e.enamed_element) && str_attr(g, x, e.named_element_name) == name {
+            if meta.is_subclass(g.class_of(x), e.enamed_element)
+                && str_attr(g, x, e.named_element_name) == name
+            {
                 if count == 0 {
                     return Some(x);
                 }
@@ -264,7 +312,9 @@ pub fn child_by_segment(g: &Graph, o: ObjId, s: &str) -> Option<ObjId> {
         let i = body.find('[')?;
         let f = meta.feature_by_name(g.class_of(o), &body[..i])?;
         let pred = &body[i + 1..body.len() - 1];
-        return (0..g.len(o, f)).filter_map(|k| g.get_at(o, f, k).as_obj()).find(|&x| matches_predicate(g, x, pred));
+        return (0..g.len(o, f))
+            .filter_map(|k| g.get_at(o, f, k).as_obj())
+            .find(|&x| matches_predicate(g, x, pred));
     }
     if let Some(dot) = body.rfind('.')
         && body[dot + 1..].bytes().all(|c| c.is_ascii_digit())
@@ -286,19 +336,26 @@ fn matches_predicate(g: &Graph, x: ObjId, pred: &str) -> bool {
     // name='value',other='v2' (single-valued keys only)
     let mut rest = pred;
     while !rest.is_empty() {
-        let Some(eq) = rest.find('=') else { return false };
-        let name = &rest[..eq];
-        let after = &rest[eq + 1..];
-        let (val, next) = if let Some(q) = after.strip_prefix('\'').or_else(|| after.strip_prefix('"')) {
-            let quote = after.as_bytes()[0] as char;
-            let Some(end) = q.find(quote) else { return false };
-            (Some(decode(&q[..end])), &q[end + 1..])
-        } else if let Some(n) = after.strip_prefix("null") {
-            (None, n)
-        } else {
+        let Some(eq) = rest.find('=') else {
             return false;
         };
-        let Some(f) = g.meta().feature_by_name(g.class_of(x), name) else { return false };
+        let name = &rest[..eq];
+        let after = &rest[eq + 1..];
+        let (val, next) =
+            if let Some(q) = after.strip_prefix('\'').or_else(|| after.strip_prefix('"')) {
+                let quote = after.as_bytes()[0] as char;
+                let Some(end) = q.find(quote) else {
+                    return false;
+                };
+                (Some(decode(&q[..end])), &q[end + 1..])
+            } else if let Some(n) = after.strip_prefix("null") {
+                (None, n)
+            } else {
+                return false;
+            };
+        let Some(f) = g.meta().feature_by_name(g.class_of(x), name) else {
+            return false;
+        };
         if value_to_string(g.meta(), &g.get(x, f).to_owned()) != val {
             return false;
         }

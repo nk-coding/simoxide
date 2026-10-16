@@ -91,7 +91,9 @@ impl Config {
         for (ns, loc) in &self.ns_index {
             rs.add_ns_location(ns, loc);
         }
-        if let Some(dir) = std::path::absolute(model).ok().and_then(|p| p.parent().map(|d| d.to_path_buf()))
+        if let Some(dir) = std::path::absolute(model)
+            .ok()
+            .and_then(|p| p.parent().map(|d| d.to_path_buf()))
             && let Ok(rd) = std::fs::read_dir(&dir)
         {
             let mut local: Vec<PathBuf> = rd
@@ -129,7 +131,9 @@ fn collect_ecore(d: &Path, out: &mut Vec<PathBuf>) {
 
 /// The nsURIs declared by the `EPackage` / `eSubpackages` start tags of an `.ecore` file.
 pub fn ns_uris_of_file(f: &Path) -> Vec<String> {
-    std::fs::read_to_string(f).map(|t| ns_uris(&t)).unwrap_or_default()
+    std::fs::read_to_string(f)
+        .map(|t| ns_uris(&t))
+        .unwrap_or_default()
 }
 
 pub fn ns_uris(text: &str) -> Vec<String> {
@@ -139,13 +143,17 @@ pub fn ns_uris(text: &str) -> Vec<String> {
     while let Some(k) = memchr::memchr(b'<', &b[i..]) {
         let start = i + k + 1;
         let mut j = start;
-        while j < b.len() && (b[j].is_ascii_alphanumeric() || matches!(b[j], b'_' | b':' | b'.' | b'-')) {
+        while j < b.len()
+            && (b[j].is_ascii_alphanumeric() || matches!(b[j], b'_' | b':' | b'.' | b'-'))
+        {
             j += 1;
         }
         let name = &text[start..j];
         let local = name.rsplit(':').next().unwrap_or(name);
         let tag_end = memchr::memchr(b'>', &b[j..]).map_or(b.len(), |e| j + e);
-        if (local == "EPackage" || local == "eSubpackages") && (j == b.len() || !b[j].is_ascii_alphanumeric()) {
+        if (local == "EPackage" || local == "eSubpackages")
+            && (j == b.len() || !b[j].is_ascii_alphanumeric())
+        {
             let tag = &text[j..tag_end];
             let tb = tag.as_bytes();
             let mut p = 0;

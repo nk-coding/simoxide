@@ -17,7 +17,10 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 fn repo() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").canonicalize().unwrap()
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .unwrap()
 }
 
 fn load(config: &Config, root: &Path, path: &str) -> Option<(ResourceSet, ResourceId)> {
@@ -49,8 +52,13 @@ fn perturbations(rs: &ResourceSet, r: ResourceId) -> Vec<String> {
         want(objs.iter().find_map(|&o| {
             feats(o).into_iter().find_map(|f| {
                 let fi = meta.feature(f);
-                (fi.kind == FeatureKind::Reference && fi.is_many() && fi.containment == containment && !fi.derived
-                    && !meta.is_container(f) && fi.changeable && g.len(o, f) >= 2)
+                (fi.kind == FeatureKind::Reference
+                    && fi.is_many()
+                    && fi.containment == containment
+                    && !fi.derived
+                    && !meta.is_container(f)
+                    && fi.changeable
+                    && g.len(o, f) >= 2)
                     .then(|| format!("reverse {} {}", path(o), fi.name))
             })
         }));
@@ -59,25 +67,48 @@ fn perturbations(rs: &ResourceSet, r: ResourceId) -> Vec<String> {
     want(objs.iter().find_map(|&o| {
         feats(o).into_iter().find_map(|f| {
             let fi = meta.feature(f);
-            (fi.kind == FeatureKind::Attribute && !fi.is_many() && !fi.derived && fi.changeable
+            (fi.kind == FeatureKind::Attribute
+                && !fi.is_many()
+                && !fi.derived
+                && fi.changeable
                 && matches!(g.get(o, f), Datum::Str(s) if !s.is_empty() && !s.contains(' ')))
-                .then(|| format!("setattr {} {} {}_x", path(o), fi.name, g.get(o, f).as_str().unwrap()))
+            .then(|| {
+                format!(
+                    "setattr {} {} {}_x",
+                    path(o),
+                    fi.name,
+                    g.get(o, f).as_str().unwrap()
+                )
+            })
         })
     }));
     // the last non-root object deleted
-    want(objs.iter().rev().find(|&&o| g.container(o).is_some()).map(|&o| format!("delete {}", path(o))));
+    want(
+        objs.iter()
+            .rev()
+            .find(|&&o| g.container(o).is_some())
+            .map(|&o| format!("delete {}", path(o))),
+    );
     // a single reference retargeted to another object of the same class
     want(objs.iter().find_map(|&o| {
         feats(o).into_iter().find_map(|f| {
             let fi = meta.feature(f);
-            if fi.kind != FeatureKind::Reference || fi.is_many() || fi.containment || meta.is_container(f) || fi.derived || !fi.changeable {
+            if fi.kind != FeatureKind::Reference
+                || fi.is_many()
+                || fi.containment
+                || meta.is_container(f)
+                || fi.derived
+                || !fi.changeable
+            {
                 return None;
             }
             let t = g.get(o, f).as_obj()?;
             if g.resource_of(t) != Some(r) {
                 return None;
             }
-            let other = objs.iter().find(|&&x| x != t && g.class_of(x) == g.class_of(t))?;
+            let other = objs
+                .iter()
+                .find(|&&x| x != t && g.class_of(x) == g.class_of(t))?;
             Some(format!("retarget {} {} {}", path(o), fi.name, path(*other)))
         })
     }));
@@ -142,19 +173,28 @@ fn lenient_comparison_matches_suite_comparer() {
         }
     }
     for m in &models {
-        let Some((rs, r)) = load(&config, &root, m) else { continue };
+        let Some((rs, r)) = load(&config, &root, m) else {
+            continue;
+        };
         pairs.push((m.clone(), m.clone(), "-".into()));
         for p in perturbations(&rs, r) {
             pairs.push((m.clone(), m.clone(), p));
         }
     }
     if let Ok(f) = std::env::var("QVTO_EMF_WRITE_PAIRS") {
-        let text: String = pairs.iter().map(|(a, b, p)| format!("{a}\t{b}\t{p}\n")).collect();
+        let text: String = pairs
+            .iter()
+            .map(|(a, b, p)| format!("{a}\t{b}\t{p}\n"))
+            .collect();
         std::fs::write(f, text).unwrap();
     }
     let expected = std::fs::read_to_string(data.join("compare-oracle.tsv")).unwrap();
     let verdicts: Vec<&str> = expected.lines().collect();
-    assert_eq!(verdicts.len(), pairs.len(), "pair list changed: regenerate compare-oracle.tsv");
+    assert_eq!(
+        verdicts.len(),
+        pairs.len(),
+        "pair list changed: regenerate compare-oracle.tsv"
+    );
     let (mut agree, mut equal, mut lenient_only) = (0, 0, 0);
     let mut failures = Vec::new();
     let mut skipped = 0;
@@ -164,7 +204,9 @@ fn lenient_comparison_matches_suite_comparer() {
             skipped += 1;
             continue;
         }
-        let (Some((ra, xa)), Some((mut rb, xb))) = (load(&config, &root, a), load(&config, &root, b)) else {
+        let (Some((ra, xa)), Some((mut rb, xb))) =
+            (load(&config, &root, a), load(&config, &root, b))
+        else {
             failures.push(format!("{a} / {b}: load failed"));
             continue;
         };

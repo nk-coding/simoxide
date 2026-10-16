@@ -21,7 +21,10 @@ pub(crate) struct El {
 
 impl El {
     pub fn attr(&self, k: &str) -> Option<&str> {
-        self.attrs.iter().find(|(a, _)| a == k).map(|(_, v)| v.as_str())
+        self.attrs
+            .iter()
+            .find(|(a, _)| a == k)
+            .map(|(_, v)| v.as_str())
     }
     pub fn children<'a>(&'a self, name: &'a str) -> impl Iterator<Item = &'a El> + 'a {
         self.children.iter().filter(move |c| c.name == name)
@@ -61,7 +64,10 @@ fn element(e: &quick_xml::events::BytesStart) -> Result<El, String> {
     for a in e.attributes() {
         let a = a.map_err(|x| x.to_string())?;
         let v = a.unescape_value().map_err(|x| x.to_string())?;
-        el.attrs.push((String::from_utf8_lossy(a.key.as_ref()).into_owned(), v.into_owned()));
+        el.attrs.push((
+            String::from_utf8_lossy(a.key.as_ref()).into_owned(),
+            v.into_owned(),
+        ));
     }
     Ok(el)
 }
@@ -216,7 +222,11 @@ impl EcoreIds {
 
 /// Registers the Ecore package in an empty registry and returns its ids.
 pub fn register_ecore(reg: &mut MetaRegistry) -> EcoreIds {
-    assert_eq!(reg.class_count(), 0, "Ecore must be the first package of a registry");
+    assert_eq!(
+        reg.class_count(),
+        0,
+        "Ecore must be the first package of a registry"
+    );
     let root = parse_tree(ECORE_ECORE).expect("bundled Ecore.ecore");
     let p = reg.add_package(
         root.attr("name").unwrap(),
@@ -278,14 +288,24 @@ pub fn register_ecore(reg: &mut MetaRegistry) -> EcoreIds {
             };
             let ty = f
                 .attr("eType")
-                .or_else(|| f.children("eGenericType").next().and_then(|g| g.attr("eClassifier")))
+                .or_else(|| {
+                    f.children("eGenericType")
+                        .next()
+                        .and_then(|g| g.attr("eClassifier"))
+                })
                 .map(lookup)
                 .unwrap();
             let fid = reg.add_feature(cid, f.attr("name").unwrap(), kind, ty);
             let b = |k: &str, d: bool| f.attr(k).map(|v| v == "true").unwrap_or(d);
             let fi = reg.feature_mut(fid);
-            fi.lower = f.attr("lowerBound").and_then(|v| v.parse().ok()).unwrap_or(0);
-            fi.upper = f.attr("upperBound").and_then(|v| v.parse().ok()).unwrap_or(1);
+            fi.lower = f
+                .attr("lowerBound")
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(0);
+            fi.upper = f
+                .attr("upperBound")
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(1);
             fi.ordered = b("ordered", true);
             fi.unique = b("unique", true);
             fi.changeable = b("changeable", true);
@@ -304,8 +324,15 @@ pub fn register_ecore(reg: &mut MetaRegistry) -> EcoreIds {
     }
     for (f, o) in opposites {
         let (c, n) = o.split_once('/').unwrap();
-        let Classifier::Class(c) = by_name[c] else { unreachable!() };
-        let g = reg.class(c).features.iter().copied().find(|g| &*reg.feature(*g).name == n);
+        let Classifier::Class(c) = by_name[c] else {
+            unreachable!()
+        };
+        let g = reg
+            .class(c)
+            .features
+            .iter()
+            .copied()
+            .find(|g| &*reg.feature(*g).name == n);
         reg.feature_mut(f).opposite = g;
     }
     reg.finish_classes().expect("Ecore metamodel");
@@ -329,7 +356,10 @@ mod tests {
         assert_eq!(names, ["EModelElement", "ENamedElement", "EClassifier"]);
         assert_eq!(reg.feature(c.all_features[0]).name.as_ref(), "eAnnotations");
         assert!(reg.feature(e.class_structural_features).containment);
-        assert_eq!(reg.feature(e.class_structural_features).opposite, Some(e.feature_containing_class));
+        assert_eq!(
+            reg.feature(e.class_structural_features).opposite,
+            Some(e.feature_containing_class)
+        );
         assert!(reg.is_container(e.feature_containing_class));
         assert!(reg.is_subclass(e.eattribute, e.etyped_element));
         assert_eq!(reg.package_by_ns_uri(ECORE_NS_URI), Some(e.package));
