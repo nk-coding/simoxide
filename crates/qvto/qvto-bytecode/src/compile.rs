@@ -101,6 +101,27 @@ pub fn compile(ir: ir::Program) -> CResult<Program> {
             None => None,
         });
     }
+    // OCL bodies of metamodel operations and derivations (in the main module's environment)
+    let mut meta_bodies = Vec::with_capacity(ir.meta_ops.len());
+    for mo in &ir.meta_ops {
+        meta_bodies.push(match &mo.body {
+            Some(b) => {
+                let name = format!("{}::{}", ir.meta.class(mo.class).name, mo.name);
+                let code = compile_body(&ir, ir.main_module, &b.code, &name, &mut consts, &mut chunks)?;
+                Some((code, b.params.iter().map(|l| l.0 as Reg).collect()))
+            }
+            None => None,
+        });
+    }
+    let mut derivations = HashMap::new();
+    for (f, b) in &ir.derivations {
+        let fi = ir.meta.feature(*f);
+        let name = format!("{}::{}", ir.meta.class(fi.owner).name, fi.name);
+        derivations.insert(
+            *f,
+            compile_body(&ir, ir.main_module, b, &name, &mut consts, &mut chunks)?,
+        );
+    }
     Ok(Program {
         ir,
         consts: consts.consts,
@@ -109,6 +130,8 @@ pub fn compile(ir: ir::Program) -> CResult<Program> {
         globals,
         interm_inits,
         model_type_where,
+        meta_bodies,
+        derivations,
     })
 }
 

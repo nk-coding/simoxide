@@ -275,3 +275,8 @@ pub fn classifier_of(g: &Graph, o: ObjId) -> Option<Classifier> {
 pub fn class_object(g: &Graph, c: ClassId) -> Option<ObjId> {
     g.links().classifier_obj.get(&Classifier::Class(c)).copied()
 }
+
+/// The `EAttribute`/`EReference` object of a registry feature, if linked.
+pub fn feature_object(g: &Graph, f: qvto_model::FeatureId) -> Option<ObjId> {
+    g.links().feature_obj.get(&f).copied()
+}

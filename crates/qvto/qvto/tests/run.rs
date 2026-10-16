@@ -90,3 +90,114 @@ fn ocl_two_argument_operations_with_invalid_arguments() {
         "seq, data: <Invalid>\noset, data: <Invalid>\nsub, data: <Invalid>\nseq2, data: <Invalid>\n"
     );
 }
+
+const ANNOTATED: &str = r##"<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="A" nsURI="urn:annotated" nsPrefix="a">
+  <eClassifiers xsi:type="ecore:EClass" name="Base">
+    <eOperations name="op" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="http://www.eclipse.org/2007/OCL"><details key="body" value="'Base::op ' + p"/></eAnnotations>
+      <eParameters name="p" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Sub" eSuperTypes="#//Base">
+    <eOperations name="op" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="http://www.eclipse.org/2007/OCL"><details key="body" value="'Sub::op ' + p + ' ' + name"/></eAnnotations>
+      <eParameters name="p" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="upper" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" derived="true">
+      <eAnnotations source="http://www.eclipse.org/2007/OCL"><details key="derive" value="name.toUpper()"/></eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="broken" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" derived="true">
+      <eAnnotations source="http://www.eclipse.org/2007/OCL"><details key="derive" value="nothing.here"/></eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+</ecore:EPackage>"##;
+
+#[test]
+fn ocl_annotation_bodies_and_derivations() {
+    // `OCLAnnotationSupport`: bodies of operations of dynamic classes, dispatched on the
+    // instance's class; derived attributes evaluate their derivation; unparseable ones are
+    // invalid (checked with Eclipse on the `oclannotation` case's metamodel)
+    let mut rs = ResourceSet::new();
+    let _ = rs.ecore_resource();
+    let r = rs.load_text("file:/a.ecore", ANNOTATED).unwrap();
+    rs.register(r).unwrap();
+    let ops = qvto_emf::operations::meta_operations(&rs.graph);
+    let ders = qvto_emf::operations::meta_derivations(&rs.graph);
+    let main = UnitSource {
+        key: "mem:t".into(),
+        qualified_name: "t".into(),
+        file_name: "t.qvto".into(),
+        path: None,
+        text: Rc::from(
+            "modeltype A uses 'urn:annotated';
+             transformation t(out o : A);
+             main() {
+               var s := object Sub { name := 'x' };
+               log(s.oclAsType(Base).op('1'));
+               log(object Base { name := 'b' }.op('2'));
+               log(s.upper);
+               log('broken', s.broken);
+             }",
+        ),
+        blackbox: None,
+    };
+    let meta = rs.graph.meta_mut().clone();
+    let c = qvto::compile_with_metamodel(main, &NoImports, meta, &ops, &ders);
+    let program = c.program.expect("compiles");
+    let mut vm = qvto::Vm::new(&program, &mut rs.graph, qvto::RunOptions::default());
+    let out = vm.run_transformation(vec![Vec::new()]);
+    assert_eq!(out.severity, 0, "{}", out.message);
+    assert_eq!(vm.log, "Sub::op 1 x\nBase::op 2\nX\nbroken, data: <Invalid>\n");
+}
+
+#[test]
+fn intermediate_classes_have_emf_semantics() {
+    // intermediate objects are store objects (containment, one-sided opposites, container
+    // references, deepclone), with static and OCL-typed features kept by the engine; the
+    // expected log is Eclipse's
+    let log = log_of(
+        r#"modeltype Ecore uses 'http://www.eclipse.org/emf/2002/Ecore';
+transformation im2(out m : Ecore);
+intermediate class Node {
+  name : String;
+  composes kids : Node[*] opposites parent;
+  references parent : Node;
+  references peer : Node opposites peer2;
+  references peer2 : Node;
+  static count : Integer = 7;
+  tags : Sequence(String);
+}
+main() {
+  var a := object Node { name := 'a' };
+  var b := object Node { name := 'b' };
+  a.kids += b;
+  log('parent', b.parent.name);
+  log('kids', a.kids->collect(name));
+  a.peer := b;
+  log('peer2', b.peer2.name);
+  log('count', a.count);
+  a.count := 3;
+  log('count b', b.count);
+  var c := object Node { name := 'c' };
+  log('count c', c.count);
+  b.tags += 'x'; b.tags += 'y';
+  log('tags', b.tags);
+  var d := b.deepclone().oclAsType(Node);
+  log('clone', Sequence{d.name, d.tags->size().toString()});
+  log('clone parent', d.parent);
+  b.parent := c;
+  log('moved', c.kids->size(), a.kids->size());
+  log('list', Sequence{a, b});
+}
+"#,
+    );
+    assert_eq!(
+        log,
+        "parent, data: a\nkids, data: {b=1}\npeer2, data: a\ncount, data: 7\ncount b, data: 3\n\
+         count c, data: 3\ntags, data: [x, y]\nclone, data: [b, 2]\nclone parent, data: Node\n\
+         Level 1 - moved, data: 0\nlist, data: [Node, Node]\n"
+    );
+}

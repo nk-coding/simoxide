@@ -50,7 +50,19 @@ pub fn compile_with_operations(
     meta: MetaRegistry,
     operations: &[MetaOperation],
 ) -> Compiled {
-    let c = qvto_sema::compile_with_operations(main, resolver, meta, operations);
+    compile_with_metamodel(main, resolver, meta, operations, &[])
+}
+
+/// [`compile_with_operations`] with the OCL derivations of the metamodels' features
+/// (`qvto_emf::operations::meta_derivations`).
+pub fn compile_with_metamodel(
+    main: UnitSource,
+    resolver: &dyn UnitResolver,
+    meta: MetaRegistry,
+    operations: &[MetaOperation],
+    derivations: &[qvto_model::MetaDerivation],
+) -> Compiled {
+    let c = qvto_sema::compile_with_metamodel(main, resolver, meta, operations, derivations);
     let has_errors = c.has_errors();
     let Compilation { units, program } = c;
     if has_errors {

@@ -54,6 +54,27 @@ pub(crate) fn parse_unit(src: &str, lexed: Lexed) -> (Unit, Vec<Diagnostic>) {
     (unit, diags)
 }
 
+/// Parses a single OCL expression (the text of an `EOperation` body or a derivation in an
+/// OCL annotation); tokens after it are an error.
+pub(crate) fn parse_expression(src: &str, lexed: Lexed) -> (crate::ast::Expr, Vec<Diagnostic>) {
+    let mut p = Parser {
+        src,
+        toks: lexed.tokens,
+        pos: 0,
+        diags: lexed.diagnostics,
+        depth: 0,
+        too_deep: false,
+    };
+    let e = p.expr();
+    if !p.at(K::Eof) {
+        let t = p.tok();
+        p.error(Code::UnexpectedTokens, t.span, "unexpected tokens after the expression");
+    }
+    let mut diags = p.diags;
+    diags.sort_by_key(|d| (d.span.start, d.span.end));
+    (e, diags)
+}
+
 impl<'s> Parser<'s> {
     // ----------------------------------------------------------------------------------------
     // Token cursor

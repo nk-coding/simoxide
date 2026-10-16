@@ -99,9 +99,22 @@ pub fn compile_with_operations(
     meta: MetaRegistry,
     ops: &[MetaOperation],
 ) -> Compilation {
+    compile_with_metamodel(main, resolver, meta, ops, &[])
+}
+
+/// [`compile_with_operations`] with the OCL derivations of the metamodels' features.
+pub fn compile_with_metamodel(
+    main: UnitSource,
+    resolver: &dyn UnitResolver,
+    meta: MetaRegistry,
+    ops: &[MetaOperation],
+    derivations: &[qvto_model::MetaDerivation],
+) -> Compilation {
     let mut sema = Sema::new(resolver, meta);
     sema.add_meta_operations(ops);
+    sema.derivation_texts = derivations.to_vec();
     let main_idx = sema.compile_unit(main);
+    sema.analyse_annotation_bodies(main_idx);
     sema.finish(main_idx)
 }
 
@@ -125,7 +138,9 @@ impl<'r> Sema<'r> {
                 name: o.name.clone(),
                 params,
                 result,
+                body: None,
             });
+            self.meta_op_bodies.push(o.body.clone());
             self.meta_op_names.push(names);
             self.class_ops.entry(o.class).or_default().push(id);
         }

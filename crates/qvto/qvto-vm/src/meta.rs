@@ -34,6 +34,9 @@ where
         let args: Vec<Value> = (0..mo.params.len())
             .map(|i| self.regs[at + 1 + i].clone())
             .collect();
+        if self.prog.meta_bodies[m.index()].is_some() {
+            return self.call_meta_body(m, src, args);
+        }
         let meta = &self.prog.ir.meta;
         let class = meta.class(mo.class);
         let ns = meta
@@ -65,6 +68,88 @@ where
             // a Java exception of the implementation: the call is invalid
             Err(msg) => self.swallow(msg),
         })
+    }
+
+    /// An operation with an OCL body (`QvtOperationalEvaluationVisitorImpl.call`): on an
+    /// instance of a dynamic class, the operation that overrides it for the instance's class
+    /// (`OCLAnnotationSupport.resolveDynamic`) if that one has a body, evaluated with `self`
+    /// and the parameters named as the called operation's bound to the first argument (Eclipse
+    /// binds every parameter to `args[0]`); else the called operation's body.
+    fn call_meta_body(&mut self, m: MetaOpId, src: Value, args: Vec<Value>) -> VmResult<Value> {
+        let prog = self.prog;
+        let mut actual = m;
+        if let Value::Obj(r) = &src
+            && let Some(c) = self.class_of(&Value::Obj(*r))
+            && prog.ir.meta.class(c).instance_class_name.is_none()
+            && let Some(a) = self.resolve_meta_dynamic(m, c)
+            && a != m
+            && prog.meta_bodies[a.index()].is_some()
+        {
+            actual = a;
+        }
+        let (code, regs) = prog.meta_bodies[actual.index()].as_ref().expect("body");
+        let bindings: Vec<(u16, Value)> = if actual == m {
+            regs.iter().copied().zip(args).collect()
+        } else {
+            let names = |x: MetaOpId| -> Vec<String> {
+                let b = prog.ir.meta_ops[x.index()].body.as_ref().expect("body");
+                b.params
+                    .iter()
+                    .map(|l| b.code.locals[l.index()].name.clone())
+                    .collect()
+            };
+            let called = names(m);
+            let first = args.first().cloned();
+            names(actual)
+                .iter()
+                .zip(regs.iter())
+                .map(|(n, &r)| {
+                    let v = match &first {
+                        Some(v) if called.contains(n) => v.clone(),
+                        _ => Value::Null,
+                    };
+                    (r, v)
+                })
+                .collect()
+        };
+        self.run_body_with(code, src, &bindings)
+    }
+
+    /// `OCLAnnotationSupport.resolveRecursiveDepthLast`: the operation of the class, else of a
+    /// direct supertype, else (depth last) of their supertypes, that overrides `m`.
+    fn resolve_meta_dynamic(&self, m: MetaOpId, c: qvto_model::ClassId) -> Option<MetaOpId> {
+        if let Some(r) = self.resolve_meta_local(m, c) {
+            return Some(r);
+        }
+        let meta = &self.prog.ir.meta;
+        for &s in &meta.class(c).supers {
+            if let Some(r) = self.resolve_meta_local(m, s) {
+                return Some(r);
+            }
+        }
+        for &s in &meta.class(c).supers {
+            for &ss in &meta.class(s).supers {
+                if let Some(r) = self.resolve_meta_dynamic(m, ss) {
+                    return Some(r);
+                }
+            }
+        }
+        None
+    }
+
+    /// `resolveDynamic(op, type)`: the operation itself for its own class, else the first own
+    /// operation of the class that can override it (same name, parameter and result types).
+    fn resolve_meta_local(&self, m: MetaOpId, c: qvto_model::ClassId) -> Option<MetaOpId> {
+        let ops = &self.prog.ir.meta_ops;
+        let mo = &ops[m.index()];
+        if mo.class == c {
+            return Some(m);
+        }
+        ops.iter()
+            .position(|o| {
+                o.class == c && o.name == mo.name && o.params == mo.params && o.result == mo.result
+            })
+            .map(|i| MetaOpId(i as u32))
     }
 
     /// `coerceValue`: a collection result in the collection kind of the operation's type.

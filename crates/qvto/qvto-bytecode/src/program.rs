@@ -232,6 +232,10 @@ pub struct Program {
     pub interm_inits: Vec<Vec<(FeatureId, BodyCode)>>,
     /// `where` conditions of `ir.model_types`.
     pub model_type_where: Vec<Option<BodyCode>>,
+    /// OCL bodies of `ir.meta_ops` with the registers of their parameters.
+    pub meta_bodies: Vec<Option<(BodyCode, Vec<Reg>)>>,
+    /// OCL derivations of features (`ir.derivations`).
+    pub derivations: std::collections::HashMap<FeatureId, BodyCode>,
 }
 
 impl Program {

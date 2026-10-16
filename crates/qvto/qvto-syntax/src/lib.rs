@@ -47,6 +47,13 @@ impl Parsed {
     }
 }
 
+/// Parses one OCL expression (the body of an OCL annotation of a metamodel): the expression and
+/// the lexer and parser diagnostics.
+pub fn parse_expression(src: &str) -> (ast::Expr, Vec<Diagnostic>) {
+    let lexed = lexer::lex(src);
+    parser::parse_expression(src, lexed)
+}
+
 /// Parses a `.qvto` source text.
 pub fn parse(src: &str) -> Parsed {
     let lexed = lexer::lex(src);

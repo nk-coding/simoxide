@@ -80,6 +80,10 @@ pub(crate) struct Sema<'r> {
     /// Metamodel operations (`EOperation`s) and their parameter names.
     pub meta_ops: Vec<ir::MetaOp>,
     pub meta_op_names: Vec<Vec<String>>,
+    /// The OCL body texts of the metamodel operations (dynamic classes).
+    pub meta_op_bodies: Vec<Option<String>>,
+    pub derivation_texts: Vec<qvto_model::MetaDerivation>,
+    pub derivations: Vec<(qvto_model::FeatureId, ir::CodeBody)>,
     /// Metamodel operations by owning class, in `eOperations` order.
     pub class_ops: HashMap<ClassId, Vec<ir::MetaOpId>>,
     /// The source type for "Cannot find operation" messages of implicit collects.
@@ -127,6 +131,9 @@ impl<'r> Sema<'r> {
             ext_refs: HashMap::new(),
             meta_ops: Vec::new(),
             meta_op_names: Vec::new(),
+            meta_op_bodies: Vec::new(),
+            derivation_texts: Vec::new(),
+            derivations: Vec::new(),
             class_ops: HashMap::new(),
             call_msg_src: None,
             tuple_types: Vec::new(),
@@ -272,6 +279,7 @@ impl<'r> Sema<'r> {
             interm_props: self.interm_props.into_iter().map(|p| p.ir).collect(),
             interm_classes: self.interm_classes,
             meta_ops: self.meta_ops,
+            derivations: self.derivations,
         }
     }
 }

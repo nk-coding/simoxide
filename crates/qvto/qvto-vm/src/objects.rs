@@ -671,6 +671,10 @@ where
                 None => Err(self.runtime_error(format!("Unknown property '{}'", fi.name))),
             };
         }
+        if let Some(code) = self.prog.derivations.get(&f) {
+            // `OCLAnnotationSupport.getDerivedProperty`: the derivation with `self` bound
+            return self.run_body(code, o.clone());
+        }
         if self.interm_info.vm_held.contains(&f) {
             return Ok(match self.interm_vals.get(&(r.index(), f)) {
                 Some(v) => v.clone(),

@@ -1643,6 +1643,9 @@ impl<'r> Sema<'r> {
         let Some(v) = src_var else {
             return;
         };
+        if self.fun.ocl_annotation {
+            return;
+        }
         let vn = self.var_name(v);
         if vn == "self" {
             if self.fun.object_self_depth == 0 {

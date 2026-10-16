@@ -181,7 +181,7 @@ fn run_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str, mode: Mode) -
     rs.ecore_resource();
     let t0 = Instant::now();
     let operations = qvto_emf::operations::meta_operations(&rs.graph);
-    let compiled = qvto::compile_with_operations(main, &resolver, rs.graph.meta().clone(), &operations);
+    let compiled = qvto::compile_with_metamodel(main, &resolver, rs.graph.meta().clone(), &operations, &qvto_emf::operations::meta_derivations(&rs.graph));
     let compile_time = t0.elapsed();
     let mut o = Outcome::with_status(Status::Completed);
     o.compile_time = Some(compile_time);

@@ -121,6 +121,10 @@ pub struct Program {
     pub interm_classes: Vec<IntermClass>,
     /// Metamodel operations the program calls.
     pub meta_ops: Vec<MetaOp>,
+    /// The OCL derivations of features of dynamic classes (the `derive` detail of their
+    /// `http://www.eclipse.org/2007/OCL` annotation): reading the feature evaluates them with
+    /// `self` bound to the object (`OCLAnnotationSupport.getDerivedProperty`).
+    pub derivations: Vec<(FeatureId, CodeBody)>,
 }
 
 /// A source file.
@@ -273,6 +277,19 @@ pub struct MetaOp {
     pub name: String,
     pub params: Vec<TypeId>,
     pub result: TypeId,
+    /// The OCL body of an operation of a dynamic class (the `body` detail of its
+    /// `http://www.eclipse.org/2007/OCL` annotation, `OCLAnnotationSupport`), analysed in the
+    /// class's context; a body that does not parse or analyse is `invalid` (Eclipse logs the
+    /// parser exception and evaluates an `InvalidLiteralExp`).
+    pub body: Option<MetaBody>,
+}
+
+/// The analysed OCL body of a metamodel operation: `self` and the parameters as variables.
+#[derive(Clone, Debug)]
+pub struct MetaBody {
+    pub code: CodeBody,
+    /// The parameters' variables, in parameter order.
+    pub params: Vec<LocalId>,
 }
 
 /// Code outside operations (initialisers, `where` conditions): an expression with its own

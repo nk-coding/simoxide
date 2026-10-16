@@ -453,7 +453,7 @@ fn run_cmd(args: &[String]) {
     let rs = fresh();
     let t0 = std::time::Instant::now();
     let ops = qvto_emf::operations::meta_operations(&rs.graph);
-    let c = qvto::compile_with_operations(main, &resolver, rs.graph.meta().clone(), &ops);
+    let c = qvto::compile_with_metamodel(main, &resolver, rs.graph.meta().clone(), &ops, &qvto_emf::operations::meta_derivations(&rs.graph));
     let tc = t0.elapsed();
     for u in &c.units {
         for p in &u.problems {
@@ -547,7 +547,7 @@ fn disasm(args: &[String]) {
     }
     rs.ecore_resource();
     let ops = qvto_emf::operations::meta_operations(&rs.graph);
-    let c = qvto::compile_with_operations(main, &resolver, rs.graph.meta().clone(), &ops);
+    let c = qvto::compile_with_metamodel(main, &resolver, rs.graph.meta().clone(), &ops, &qvto_emf::operations::meta_derivations(&rs.graph));
     for u in &c.units {
         for p in &u.problems {
             println!(

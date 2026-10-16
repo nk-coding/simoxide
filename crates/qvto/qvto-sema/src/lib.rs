@@ -16,6 +16,7 @@ pub mod irck;
 pub mod messages;
 
 mod analyzer;
+mod annot;
 mod blackbox;
 mod env;
 mod expr;
@@ -37,5 +38,5 @@ pub use blackbox::{
 pub use diag::{Problem, Problems, Severity};
 pub use units::{
     Compilation, MetaMultiplicity, MetaOperation, UnitResolver, UnitResult, UnitSource, compile,
-    compile_with_operations, scan_metamodel_uris,
+    compile_with_metamodel, compile_with_operations, scan_metamodel_uris,
 };

@@ -804,6 +804,16 @@ where
 
     /// Runs a code body (initialiser) on a frame of its own with `self` bound.
     pub(crate) fn run_body(&mut self, code: &BodyCode, self_val: Value) -> VmResult<Value> {
+        self.run_body_with(code, self_val, &[])
+    }
+
+    /// [`run_body`](Self::run_body) with more variables bound (registers and values).
+    pub(crate) fn run_body_with(
+        &mut self,
+        code: &BodyCode,
+        self_val: Value,
+        bindings: &[(u16, Value)],
+    ) -> VmResult<Value> {
         let chunk = self.prog.chunk(code.chunk);
         let base = self.regs.len();
         self.regs.resize(base + chunk.nregs as usize, Value::Null);
@@ -812,6 +822,9 @@ where
             .resize(ibase + chunk.n_iters as usize, IterSlot::Empty);
         if let Some(s) = code.self_reg {
             self.regs[base + s as usize] = self_val;
+        }
+        for (r, v) in bindings {
+            self.regs[base + *r as usize] = v.clone();
         }
         let module = chunk.module;
         self.frames.push(Frame {

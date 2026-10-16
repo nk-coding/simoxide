@@ -19,5 +19,5 @@ pub use meta::{
     ClassInfo, Classifier, DataKind, DataTypeInfo, EnumInfo, EnumLiteral, FeatureInfo, FeatureKind,
     MetaError, MetaRegistry, PackageInfo,
 };
-pub use operation::{MetaMultiplicity, MetaOperation};
+pub use operation::{MetaDerivation, MetaMultiplicity, MetaOperation};
 pub use store::{ModelError, ModelResult, ModelStore};

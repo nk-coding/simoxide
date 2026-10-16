@@ -13,6 +13,18 @@ pub struct MetaOperation {
     pub params: Vec<(String, Classifier, MetaMultiplicity)>,
     /// The result type; `None` for `void`.
     pub result: Option<(Classifier, MetaMultiplicity)>,
+    /// The OCL text of the operation's body, for operations of dynamic classes: the `body`
+    /// detail of the `http://www.eclipse.org/2007/OCL` annotation (Eclipse QVTo's
+    /// `OCLAnnotationSupport`).
+    pub body: Option<String>,
+}
+
+/// The OCL derivation of a structural feature of a dynamic class: the `derive` detail of the
+/// `http://www.eclipse.org/2007/OCL` annotation (`OCLAnnotationSupport.getDerivedProperty`).
+#[derive(Clone, Debug)]
+pub struct MetaDerivation {
+    pub feature: crate::FeatureId,
+    pub expr: String,
 }
 
 #[derive(Copy, Clone, Debug, Default)]

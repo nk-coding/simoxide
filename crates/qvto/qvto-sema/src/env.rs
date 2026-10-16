@@ -141,6 +141,9 @@ pub(crate) struct FnState {
     pub module: Option<ModuleId>,
     /// Nesting depth of `object self : ...` expressions (implicit `self` is allowed inside).
     pub object_self_depth: u32,
+    /// Classic OCL code (an OCL annotation of a metamodel): implicit `self` is no QVTo
+    /// deprecation error.
+    pub ocl_annotation: bool,
 }
 
 impl FnState {
