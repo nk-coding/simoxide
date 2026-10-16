@@ -348,6 +348,73 @@ fn main() {
         ms(max_time.0),
         max_time.1
     );
+    // TestQvtParser's inline annotations (ProblemSourceAnnotationHelper.assertMatchingProblems):
+    // every problem of an annotated case hits an annotation exactly and vice versa
+    {
+        let bundle = h.base.join("reference/eclipse-qvto/tests/org.eclipse.m2m.tests.qvt.oml");
+        let java = std::fs::read_to_string(bundle.join("src/org/eclipse/m2m/tests/qvt/oml/TestQvtParser.java")).unwrap_or_default();
+        let annotated: Vec<String> = java
+            .lines()
+            .filter_map(|l| l.trim().strip_prefix("TestData.createSourceChecked(\"").and_then(|r| r.split_once('"')).map(|(d, _)| d.to_string()))
+            .collect();
+        let (mut cases_n, mut cases_ok, mut ann_total, mut ann_hit, mut probs_total, mut probs_hit) = (0, 0, 0, 0, 0, 0);
+        let mut ora = (0, 0);
+        for (case, run) in cases.iter().zip(&runs) {
+            let Some(dir) = annotated.iter().find(|d| run.key.ends_with(&format!("parserTestData/sources/{d}/{d}.qvto"))) else {
+                continue;
+            };
+            let dirp = bundle.join("parserTestData/sources").join(dir);
+            let Ok(rd) = std::fs::read_dir(&dirp) else {
+                continue;
+            };
+            let mut ann: Vec<(String, i64, i64, char)> = Vec::new();
+            for f in rd.flatten() {
+                let p = f.path();
+                if p.extension().is_some_and(|x| x == "qvto") {
+                    let src = std::fs::read_to_string(&p).unwrap_or_default();
+                    let name = p.file_name().unwrap().to_string_lossy().into_owned();
+                    for (tag, sev) in [("error", 'E'), ("warn", 'W')] {
+                        let open = format!("/*<{tag}>*/");
+                        let close = format!("/*</{tag}>*/");
+                        let mut from = 0;
+                        while let Some(i) = src[from..].find(&open) {
+                            let start = from + i + open.len();
+                            let Some(j) = src[start..].find(&close) else { break };
+                            let end = start + j;
+                            let o = src[..start].encode_utf16().count() as i64;
+                            let l = src[start..end].encode_utf16().count() as i64;
+                            ann.push((name.clone(), o, l, sev));
+                            from = end + close.len();
+                        }
+                    }
+                }
+            }
+            cases_n += 1;
+            let hit = |p: &Prob| ann.iter().any(|(u, o, l, s)| *u == p.unit && *o == p.offset && *l == p.len && *s == p.sev);
+            let covered = |a: &(String, i64, i64, char), ps: &[Prob]| ps.iter().any(|p| p.unit == a.0 && p.offset == a.1 && p.len == a.2 && p.sev == a.3);
+            let ph = run.problems.iter().filter(|p| hit(p)).count();
+            let ah = ann.iter().filter(|a| covered(a, &run.problems)).count();
+            probs_total += run.problems.len();
+            probs_hit += ph;
+            ann_total += ann.len();
+            ann_hit += ah;
+            if ph == run.problems.len() && ah == ann.len() {
+                cases_ok += 1;
+            }
+            if let Some(o) = h.oracle_for(&run.key) {
+                if o.problems.iter().all(|p| hit(p)) && ann.iter().all(|a| covered(a, &o.problems)) {
+                    ora.0 += 1;
+                }
+                ora.1 += 1;
+            }
+            let _ = case;
+        }
+        println!(
+            "TestQvtParser annotations: {cases_n} annotated cases, {cases_ok} fully matching (Eclipse oracle: {}/{}); {ann_hit}/{ann_total} annotations hit by our problems; {probs_hit}/{probs_total} of our problems on an annotation",
+            ora.0, ora.1
+        );
+    }
+
     // IR consistency of the error-free compilations
     let mut ir_cases = 0;
     let mut ir_bad = 0;
