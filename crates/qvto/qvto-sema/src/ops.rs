@@ -75,7 +75,7 @@ impl<'r> Sema<'r> {
         match o {
             OpRef::Std(op, _) => op.name(),
             OpRef::User(id) => &self.ops[id.index()].ir.name,
-            OpRef::Meta(_) => "",
+            OpRef::Meta(m) => &self.meta_ops[m.index()].name,
         }
     }
 
@@ -84,7 +84,7 @@ impl<'r> Sema<'r> {
         match o {
             OpRef::Std(op, _) => self.stdlib.params(op).to_vec(),
             OpRef::User(id) => self.ops[id.index()].params.iter().map(|p| p.1).collect(),
-            OpRef::Meta(_) => Vec::new(),
+            OpRef::Meta(m) => self.meta_ops[m.index()].params.clone(),
         }
     }
 
@@ -92,7 +92,7 @@ impl<'r> Sema<'r> {
         match o {
             OpRef::Std(op, _) => op.desc().params.iter().map(|p| p.0.to_string()).collect(),
             OpRef::User(id) => self.ops[id.index()].params.iter().map(|p| p.0.clone()).collect(),
-            OpRef::Meta(_) => Vec::new(),
+            OpRef::Meta(m) => self.meta_op_names[m.index()].clone(),
         }
     }
 
@@ -101,7 +101,7 @@ impl<'r> Sema<'r> {
         match o {
             OpRef::Std(op, _) => self.stdlib.ret(op),
             OpRef::User(id) => self.ops[id.index()].ret,
-            OpRef::Meta(_) => TypeId::OCL_VOID,
+            OpRef::Meta(m) => self.meta_ops[m.index()].result,
         }
     }
 
@@ -111,7 +111,10 @@ impl<'r> Sema<'r> {
             OpRef::Std(_, StdOwner::Stdlib) => self.modules[crate::analyzer::STDLIB_MODULE.index()].ty,
             OpRef::Std(_, owner) => self.stdlib.owner_type(&mut self.ts.types, owner),
             OpRef::User(id) => self.ops[id.index()].owner,
-            OpRef::Meta(_) => TypeId::OCL_VOID,
+            OpRef::Meta(m) => {
+                let c = self.meta_ops[m.index()].class;
+                self.ts.types.class(c)
+            }
         }
     }
 

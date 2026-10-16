@@ -31,4 +31,4 @@ mod vars;
 
 pub use blackbox::{BlackboxModule, BlackboxOp, BlackboxOpKind, BlackboxParam, BlackboxUnit};
 pub use diag::{Problem, Problems, Severity};
-pub use units::{compile, scan_metamodel_uris, Compilation, UnitResolver, UnitResult, UnitSource};
+pub use units::{compile, compile_with_operations, scan_metamodel_uris, MetaMultiplicity, MetaOperation, Compilation, UnitResolver, UnitResult, UnitSource};

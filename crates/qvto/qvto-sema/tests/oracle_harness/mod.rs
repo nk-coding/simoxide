@@ -701,6 +701,7 @@ pub struct Harness {
     pub setup_time: Duration,
     base_rs: ResourceSet,
     base_meta: MetaRegistry,
+    base_ops: Vec<qvto_sema::MetaOperation>,
     data: Arc<ResolveData>,
     /// Per-case limit; a case over it is reported as a timeout (its thread is left running).
     pub timeout: Duration,
@@ -809,6 +810,7 @@ impl Harness {
             }
         }
         let base_meta = rs.graph.meta().clone();
+        let base_ops = meta_operations(&rs.graph);
 
         // resolvers
         let mut bundles = Vec::new();
@@ -862,6 +864,7 @@ impl Harness {
             setup_time: t0.elapsed(),
             base_rs: rs,
             base_meta,
+            base_ops,
             data,
             timeout: Duration::from_secs(120),
         })
@@ -886,10 +889,10 @@ impl Harness {
 
     /// The package registry for a case: the base one, plus the case's `mmfile`s, plus the
     /// metamodel files its units refer to by location.
-    fn registry_for(&self, case: &Case, main: &Path) -> Result<MetaRegistry, String> {
+    fn registry_for(&self, case: &Case, main: &Path) -> Result<(MetaRegistry, Vec<qvto_sema::MetaOperation>), String> {
         let files = self.metamodel_file_uris(case, main);
         if case.mmfiles.is_empty() && files.is_empty() {
-            return Ok(self.base_meta.clone());
+            return Ok((self.base_meta.clone(), self.base_ops.clone()));
         }
         let mut rs = self.base_rs.clone();
         for (from, to) in &case.urimaps {
@@ -917,7 +920,8 @@ impl Harness {
                 rs.graph.meta_mut().register_alias(&uri, p);
             }
         }
-        Ok(rs.graph.meta().clone())
+        let ops = meta_operations(&rs.graph);
+        Ok((rs.graph.meta().clone(), ops))
     }
 
     /// Runs one case: compiles it on its own thread (large stack, panics caught, time limit).
@@ -944,7 +948,7 @@ impl Harness {
             run.status = RunStatus::Setup(format!("missing {}", main.display()));
             return run;
         }
-        let meta = match self.registry_for(case, &main) {
+        let (meta, ops) = match self.registry_for(case, &main) {
             Ok(m) => m,
             Err(e) => {
                 run.status = RunStatus::Setup(e);
@@ -958,7 +962,7 @@ impl Harness {
             .name(format!("oracle-case {}", case.id))
             .stack_size(512 << 20)
             .spawn(move || {
-                let r = compile_case(&data, &case_c, &main, meta);
+                let r = compile_case(&data, &case_c, &main, meta, &ops);
                 let _ = tx.send(r);
             });
         if let Err(e) = spawned {
@@ -991,12 +995,13 @@ fn compile_case(
     case: &Case,
     main: &Path,
     meta: MetaRegistry,
+    ops: &[qvto_sema::MetaOperation],
 ) -> Result<(Vec<Prob>, Duration), String> {
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         let resolver = data.case_resolver(case, main);
         let source = resolver.main_unit(main).expect("main unit readable");
         let t = Instant::now();
-        let comp = qvto_sema::compile(source, &resolver, meta);
+        let comp = qvto_sema::compile_with_operations(source, &resolver, meta, ops);
         let elapsed = t.elapsed();
         let mut out = Vec::new();
         let mut seen = std::collections::HashSet::new();
@@ -1029,4 +1034,63 @@ fn compile_case(
             .with(|p| p.borrow_mut().take())
             .unwrap_or_else(|| "panic".to_string())
     })
+}
+
+/// The `EOperation`s of every registered class (the registry keeps no operations), read from the
+/// `.ecore` objects of the resource set.
+pub fn meta_operations(g: &qvto_emf::graph::Graph) -> Vec<qvto_sema::MetaOperation> {
+    use qvto_model::Datum;
+    let e = g.ecore().clone();
+    let mut out = Vec::new();
+    let typed = |o, out_ty: &mut Option<(qvto_model::Classifier, qvto_sema::MetaMultiplicity)>| {
+        let ty = match g.get(o, e.typed_type) {
+            Datum::Obj(t) => qvto_emf::register::classifier_of(g, t),
+            _ => None,
+        };
+        let upper = match g.get(o, e.typed_upper) {
+            Datum::Int(i) => i,
+            _ => 1,
+        };
+        let ordered = !matches!(g.get(o, e.typed_ordered), Datum::Bool(false));
+        let unique = !matches!(g.get(o, e.typed_unique), Datum::Bool(false));
+        *out_ty = ty.map(|c| (c, qvto_sema::MetaMultiplicity { many: upper > 1 || upper < 0, ordered, unique }));
+    };
+    let classes: Vec<qvto_model::ClassId> = g.meta().classes().collect();
+    for c in classes {
+        let Some(co) = qvto_emf::register::class_object(g, c) else {
+            continue;
+        };
+        for i in 0..g.len(co, e.class_operations) {
+            let Datum::Obj(op) = g.get_at(co, e.class_operations, i) else {
+                continue;
+            };
+            let name = match g.get(op, e.named_element_name) {
+                Datum::Str(s) => s.to_string(),
+                _ => continue,
+            };
+            let mut result = None;
+            typed(op, &mut result);
+            let mut params = Vec::new();
+            let mut ok = true;
+            for j in 0..g.len(op, e.operation_parameters) {
+                let Datum::Obj(p) = g.get_at(op, e.operation_parameters, j) else {
+                    continue;
+                };
+                let pname = match g.get(p, e.named_element_name) {
+                    Datum::Str(s) => s.to_string(),
+                    _ => String::new(),
+                };
+                let mut pt = None;
+                typed(p, &mut pt);
+                match pt {
+                    Some((c, m)) => params.push((pname, c, m)),
+                    None => ok = false,
+                }
+            }
+            if ok {
+                out.push(qvto_sema::MetaOperation { class: c, name, params, result });
+            }
+        }
+    }
+    out
 }

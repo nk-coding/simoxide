@@ -137,6 +137,9 @@ impl<'r> Sema<'r> {
                     if let Some(owner) = std_class_owner(&std, k) {
                         r.extend(self.std_ops(Section::Class, owner));
                     }
+                    if let Some(ops) = self.class_ops.get(&k) {
+                        r.extend(ops.iter().map(|m| OpRef::Meta(*m)));
+                    }
                 }
                 if self.ts.meta.class(c).package != std.package {
                     r.extend(self.std_ops(Section::Class, StdOwner::Element));

@@ -74,6 +74,11 @@ pub(crate) struct Sema<'r> {
     /// Source references of mapping extensions per mapping: inherits, disjuncts, merges
     /// (`MappingExtensionHelper.bind2SourceElement`).
     pub ext_refs: HashMap<OpId, [Vec<Span>; 3]>,
+    /// Metamodel operations (`EOperation`s) and their parameter names.
+    pub meta_ops: Vec<ir::MetaOp>,
+    pub meta_op_names: Vec<Vec<String>>,
+    /// Metamodel operations by owning class, in `eOperations` order.
+    pub class_ops: HashMap<ClassId, Vec<ir::MetaOpId>>,
 }
 
 pub(crate) const STDLIB_MODULE: ModuleId = ModuleId(0);
@@ -112,6 +117,9 @@ impl<'r> Sema<'r> {
             interm_feature_types: HashMap::new(),
             placeholder_pkg: None,
             ext_refs: HashMap::new(),
+            meta_ops: Vec::new(),
+            meta_op_names: Vec::new(),
+            class_ops: HashMap::new(),
         };
         s.create_stdlib_module();
         s
@@ -206,7 +214,7 @@ impl<'r> Sema<'r> {
             globals: self.globals.into_iter().map(|g| g.ir).collect(),
             interm_props: self.interm_props.into_iter().map(|p| p.ir).collect(),
             interm_classes: self.interm_classes,
-            meta_ops: Vec::new(),
+            meta_ops: self.meta_ops,
         }
     }
 }

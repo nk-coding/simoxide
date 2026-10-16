@@ -85,9 +85,73 @@ impl Compilation {
 /// Compiles a unit and everything it imports. `meta` must hold the metamodels the units refer
 /// to by namespace URI (Eclipse's package registry), Ecore included.
 pub fn compile(main: UnitSource, resolver: &dyn UnitResolver, meta: MetaRegistry) -> Compilation {
+    compile_with_operations(main, resolver, meta, &[])
+}
+
+/// An operation of a metamodel class (`EOperation`), for calls like `cls.getEStructuralFeature(n)`.
+/// The registry has no operations; the host supplies them.
+#[derive(Clone, Debug)]
+pub struct MetaOperation {
+    pub class: qvto_model::ClassId,
+    pub name: String,
+    /// Name, type and multiplicity (`upperBound > 1 || < 0`, ordered, unique) of each parameter.
+    pub params: Vec<(String, qvto_model::Classifier, MetaMultiplicity)>,
+    /// The result type; `None` for `void`.
+    pub result: Option<(qvto_model::Classifier, MetaMultiplicity)>,
+}
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct MetaMultiplicity {
+    pub many: bool,
+    pub ordered: bool,
+    pub unique: bool,
+}
+
+/// [`compile`] with the metamodels' operations, in `eOperations` order per class.
+pub fn compile_with_operations(main: UnitSource, resolver: &dyn UnitResolver, meta: MetaRegistry, ops: &[MetaOperation]) -> Compilation {
     let mut sema = Sema::new(resolver, meta);
+    sema.add_meta_operations(ops);
     let main_idx = sema.compile_unit(main);
     sema.finish(main_idx)
+}
+
+impl<'r> Sema<'r> {
+    fn add_meta_operations(&mut self, ops: &[MetaOperation]) {
+        for o in ops {
+            let mut params = Vec::new();
+            let mut names = Vec::new();
+            for (n, c, m) in &o.params {
+                let t = self.meta_typed(*c, *m);
+                params.push(t);
+                names.push(n.clone());
+            }
+            let result = match &o.result {
+                Some((c, m)) => self.meta_typed(*c, *m),
+                None => qvto_types::TypeId::OCL_VOID,
+            };
+            let id = crate::ir::MetaOpId(self.meta_ops.len() as u32);
+            self.meta_ops.push(crate::ir::MetaOp {
+                class: o.class,
+                name: o.name.clone(),
+                params,
+                result,
+            });
+            self.meta_op_names.push(names);
+            self.class_ops.entry(o.class).or_default().push(id);
+        }
+    }
+
+    /// `UMLReflectionImpl.getOCLType` of a typed element.
+    fn meta_typed(&mut self, c: qvto_model::Classifier, m: MetaMultiplicity) -> qvto_types::TypeId {
+        let t = self.classifier_type(c);
+        let t = self.ts.ck().ocl_type(t);
+        if m.many {
+            let k = qvto_types::CollKind::of_feature(m.ordered, m.unique);
+            self.ts.types.collection(k, t)
+        } else {
+            t
+        }
+    }
 }
 
 /// The namespace URIs of the model types of a unit and everything it imports, for a host that
