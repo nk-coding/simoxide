@@ -179,6 +179,7 @@ impl Irb {
             result_ty: result,
             is_abstract: false,
             is_blackbox: false,
+            blackbox_impl: None,
             is_static: false,
             locals: Vec::new(),
             self_local: None,
