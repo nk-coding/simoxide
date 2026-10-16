@@ -309,13 +309,15 @@ pub fn differential(case: &Case, o: &Outcome, java: &JavaResult) -> Differential
             .as_ref()
             .map(|out| canon::dump(&out.rs.graph, &out.dumped()))
             .unwrap_or_default();
-        let theirs = java.dump().unwrap_or("");
+        let mine = renumber_extent_resources(&mine);
+        let theirs = renumber_extent_resources(java.dump().unwrap_or(""));
+        let (mine, theirs) = (mine.as_str(), theirs.as_str());
         if mine == theirs {
             Aspect::Equal
         } else if unstable.contains(&"dump") {
             Aspect::Unstable
         } else {
-            match canon::first_difference(theirs, &mine) {
+            match canon::first_difference(theirs, mine) {
                 Some((n, a, b)) => Aspect::Differs(format!("line {n}: java {a} | engine {b}")),
                 None => Aspect::Equal,
             }
@@ -371,5 +373,51 @@ pub fn differential(case: &Case, o: &Outcome, java: &JavaResult) -> Differential
         log,
         stack,
         problems,
+    }
+}
+
+/// Renumbers QVTo's in-memory extent resources (`extent:/N`) in order of first appearance.
+/// Eclipse numbers them with a JVM-wide counter (`ModelParameterExtent.ourExtentId`), so the
+/// Java runner's numbers depend on the cases that ran before in the same JVM; the engine counts
+/// per run. Only the relative numbering within a dump is compared.
+pub fn renumber_extent_resources(dump: &str) -> String {
+    const P: &str = "extent:/";
+    let mut seen: Vec<&str> = Vec::new();
+    let mut out = String::with_capacity(dump.len());
+    let mut rest = dump;
+    while let Some(i) = rest.find(P) {
+        let after = &rest[i + P.len()..];
+        let n = after.bytes().take_while(u8::is_ascii_digit).count();
+        out.push_str(&rest[..i + P.len()]);
+        if n == 0 {
+            rest = after;
+            continue;
+        }
+        let num = &after[..n];
+        let k = match seen.iter().position(|x| *x == num) {
+            Some(k) => k,
+            None => {
+                seen.push(num);
+                seen.len() - 1
+            }
+        };
+        out.push_str(&(k + 1).to_string());
+        rest = &after[n..];
+    }
+    out.push_str(rest);
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::renumber_extent_resources as r;
+
+    #[test]
+    fn extent_resources_are_renumbered_by_first_appearance() {
+        assert_eq!(
+            r(r#"{"a":"extent:/7#/0","b":"extent:/3#/1","c":"extent:/7#/2","d":"x.xmi#/0"}"#),
+            r#"{"a":"extent:/1#/0","b":"extent:/2#/1","c":"extent:/1#/2","d":"x.xmi#/0"}"#
+        );
+        assert_eq!(r("extent:/"), "extent:/");
     }
 }
