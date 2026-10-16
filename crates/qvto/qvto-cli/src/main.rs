@@ -56,6 +56,7 @@ fn main() {
     match args.first().map(String::as_str) {
         Some("conform") => conform(&args[1..]),
         Some("disasm") => disasm(&args[1..]),
+        Some("run") => run_cmd(&args[1..]),
         Some("-h" | "--help") | None => {
             println!("{USAGE}");
         }
@@ -257,6 +258,113 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
     if let Some(p) = &o.tsv {
         std::fs::write(p, report::tsv(&all))
             .unwrap_or_else(|e| die(&format!("{}: {e}", p.display())));
+    }
+}
+
+/// `qvto run FILE.qvto [MODEL...] [--repeat N] [--fast]`: compiles and runs a transformation
+/// (models bound positionally to the in/inout parameters; metamodels by namespace URI from
+/// the suite configuration); prints the log, the outcome and the run times.
+fn run_cmd(args: &[String]) {
+    let mut files = Vec::new();
+    let mut repeat = 1usize;
+    let mut mode = qvto_runtime::Mode::Compat;
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--repeat" => {
+                i += 1;
+                repeat = args.get(i).and_then(|r| r.parse().ok()).unwrap_or(1);
+            }
+            "--fast" => mode = qvto_runtime::Mode::Fast,
+            a => files.push(a.to_string()),
+        }
+        i += 1;
+    }
+    let Some(file) = files.first().cloned() else {
+        die("usage: qvto run FILE.qvto [MODEL...] [--repeat N] [--fast]")
+    };
+    let root =
+        find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
+    let models = qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), &root)
+        .unwrap_or_else(|e| die(&format!("{}: {e}", paths::SUITE_CONF)));
+    let path = PathBuf::from(&file);
+    let resolver = qvto::units::FsResolver {
+        bundles: qvto::units::FsResolver::bundles_below(&root.join("reference/eclipse-qvto/tests")),
+        from_folder: false,
+    };
+    let main = resolver
+        .unit_source(&path)
+        .unwrap_or_else(|e| die(&format!("{file}: {e}")));
+    let uris = qvto_sema::scan_metamodel_uris(&main, &resolver);
+    let fresh = || {
+        let mut rs = models.resource_set_for(&path);
+        for uri in &uris {
+            let _ = engine::load_metamodel(&mut rs, uri);
+        }
+        rs
+    };
+    let rs = fresh();
+    let t0 = std::time::Instant::now();
+    let c = qvto::compile(main, &resolver, rs.graph.meta().clone());
+    let tc = t0.elapsed();
+    for u in &c.units {
+        for p in &u.problems {
+            eprintln!(
+                "{} {}:{}: {}",
+                if p.is_error() { "error" } else { "warning" },
+                u.source.file_name,
+                p.line(&u.lines),
+                p.message
+            );
+        }
+    }
+    let Some(p) = c.program else {
+        die(&format!(
+            "no program {}",
+            c.bytecode_error.unwrap_or_default()
+        ))
+    };
+    eprintln!("compile: {:.3} ms", tc.as_secs_f64() * 1e3);
+    for run in 0..repeat {
+        let mut rs = fresh();
+        let main_mod = &p.ir.modules[p.ir.main_module.index()];
+        let mut inputs = files[1..].iter();
+        let mut a = Vec::new();
+        for mp in &main_mod.model_params {
+            if mp.direction == qvto_sema::ir::Direction::Out {
+                a.push(Vec::new());
+                continue;
+            }
+            match inputs.next() {
+                Some(f) => {
+                    let r = rs
+                        .load_file(Path::new(f))
+                        .unwrap_or_else(|e| die(&format!("{f}: {e}")));
+                    a.push(rs.graph.roots(r).to_vec());
+                }
+                None => a.push(Vec::new()),
+            }
+        }
+        rs.resolve_all();
+        let opts = qvto::RunOptions {
+            mode,
+            ..qvto::RunOptions::default()
+        };
+        let t1 = std::time::Instant::now();
+        let mut vm = qvto::Vm::new(&p, &mut rs.graph, opts);
+        let out = vm.run_transformation(a);
+        let dt = t1.elapsed();
+        if run + 1 == repeat {
+            print!("{}", vm.log);
+            for e in &vm.errors {
+                eprintln!("evaluation: {e}");
+            }
+            println!(
+                "severity {} code {} message {} traces {}",
+                out.severity, out.code, out.message, out.trace_records
+            );
+        }
+        eprintln!("run {run}: {:.3} ms", dt.as_secs_f64() * 1e3);
     }
 }
 
