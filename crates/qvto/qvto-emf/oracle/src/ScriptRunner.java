@@ -78,6 +78,7 @@ public final class ScriptRunner {
         if (m.contains("no null")) return "NullNotAllowed";
         if (m.contains("Recursive containment")) return "RecursiveContainment";
         if (m.contains("not a valid classifier")) return "Abstract";
+        if (m.contains("not a valid changeable feature")) return "NotChangeable";
         return e.getClass().getSimpleName();
     }
 

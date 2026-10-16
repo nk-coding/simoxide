@@ -61,6 +61,7 @@ pub struct Roles {
     pub targets: FeatureId,
     pub sources: FeatureId,
     pub only: FeatureId,
+    pub frozen: FeatureId,
     pub extra: FeatureId,
 }
 
@@ -105,6 +106,7 @@ impl Roles {
             targets: f(node, "targets")?,
             sources: f(node, "sources")?,
             only: f(node, "only")?,
+            frozen: f(node, "frozen")?,
             extra: f(sub, "extra")?,
         })
     }
@@ -164,6 +166,8 @@ pub fn build_metamodel(reg: &mut MetaRegistry) -> Roles {
     let targets = rf(reg, node, "targets", node);
     let sources = rf(reg, node, "sources", node);
     let only = rf(reg, node, "only", sub);
+    let frozen = attr(reg, node, "frozen", string);
+    reg.feature_mut(frozen).changeable = false;
     for f in [children, xchildren, links, bag, owned, targets, sources] {
         reg.feature_mut(f).upper = -1;
     }
@@ -212,6 +216,7 @@ pub fn build_metamodel(reg: &mut MetaRegistry) -> Roles {
         targets,
         sources,
         only,
+        frozen,
         extra,
     }
 }
@@ -226,7 +231,7 @@ macro_rules! contract_tests {
             non_unique_data_list, containment_many, containment_single, container_feature,
             opposite_one_to_one, opposite_one_to_many, opposite_many_to_many,
             reference_list_uniqueness, roots_and_resources, cross_resource_containment,
-            delete, set_list, contents_order, unset_many, move_and_index_errors);
+            delete, set_list, contents_order, unset_many, move_and_index_errors, not_changeable);
     };
     (@each $make:expr; $($name:ident),* $(,)?) => {
         $(
@@ -685,4 +690,11 @@ pub fn move_and_index_errors<S: ModelStore>(s: &mut S, r: &Roles) {
     s.add(p, r.tags, Datum::Str("c"), Some(2)).unwrap();
     s.move_to(p, r.tags, 0, 2).unwrap();
     assert_eq!(strs(s, p, r.tags), ["c", "a", "b"]);
+}
+
+pub fn not_changeable<S: ModelStore>(s: &mut S, r: &Roles) {
+    let n = new(s, r);
+    assert!(matches!(s.set(n, r.frozen, Datum::Str("a")), Err(ModelError::NotChangeable(_))));
+    assert!(matches!(s.unset(n, r.frozen), Err(ModelError::NotChangeable(_))));
+    assert_eq!(s.get(n, r.frozen), Datum::Null);
 }

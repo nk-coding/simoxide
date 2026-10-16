@@ -20,6 +20,8 @@ pub struct ResourceSet {
     pub graph: Graph,
     uri_map: Vec<(String, String)>,
     ns_locations: HashMap<String, String>,
+    /// Extra package-registry keys: URI -> nsURI of a registered package.
+    aliases: HashMap<String, String>,
     ecore_resource: Option<ResourceId>,
     /// Resources whose load failed (missing file, XML error), by URI.
     pub failed: HashMap<String, String>,
@@ -37,6 +39,7 @@ impl ResourceSet {
             graph: Graph::new(),
             uri_map: Vec::new(),
             ns_locations: HashMap::new(),
+            aliases: HashMap::new(),
             ecore_resource: None,
             failed: HashMap::new(),
         }
@@ -52,6 +55,12 @@ impl ResourceSet {
     /// registry descriptor); it is loaded and registered when a document uses the namespace.
     pub fn add_ns_location(&mut self, ns_uri: &str, location: &str) {
         self.ns_locations.insert(ns_uri.to_string(), location.to_string());
+    }
+
+    /// Registers a package-registry alias: documents at `key` are the package with `ns_uri`
+    /// (e.g. `platform:/plugin/org.eclipse.emf.ecore/model/Ecore.ecore` for Ecore).
+    pub fn add_alias(&mut self, key: &str, ns_uri: &str) {
+        self.aliases.insert(key.to_string(), ns_uri.to_string());
     }
 
     /// `URIConverter.normalize`: the longest matching prefix mapping.
@@ -99,10 +108,11 @@ impl ResourceSet {
         if let Some(r) = self.graph.resource_ids().find(|r| self.normalize(&self.graph.resource(*r).uri) == norm) {
             return Some(r);
         }
-        if uri == ECORE_NS_URI || uri == ECORE_PLATFORM_URI || norm == ECORE_NS_URI {
+        let key = self.aliases.get(&uri).cloned().unwrap_or_else(|| uri.clone());
+        if key == ECORE_NS_URI {
             return Some(self.ecore_resource());
         }
-        if let Some(p) = self.graph.meta().package_by_ns_uri(&uri)
+        if let Some(p) = self.graph.meta().package_by_ns_uri(&key)
             && let Some(&o) = self.graph.links().package_obj.get(&p)
         {
             return self.graph.resource_of(o);

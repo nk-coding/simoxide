@@ -26,6 +26,9 @@ pub enum ModelError {
     Abstract(ClassId),
     /// `IllegalArgumentException("Recursive containment not allowed for ...")`.
     RecursiveContainment,
+    /// `IllegalArgumentException("The feature '...' is not a valid changeable feature")`: `set`
+    /// or `unset` of a feature that is not changeable (list operations do not check).
+    NotChangeable(FeatureId),
     /// The operation is not supported by this store or on this feature.
     Unsupported(String),
 }
@@ -47,6 +50,7 @@ impl fmt::Display for ModelError {
             ModelError::NullNotAllowed(_) => f.write_str("The 'no null' constraint is violated"),
             ModelError::Abstract(c) => write!(f, "class {c:?} is abstract"),
             ModelError::RecursiveContainment => f.write_str("Recursive containment not allowed"),
+            ModelError::NotChangeable(x) => write!(f, "The feature {x:?} is not a valid changeable feature"),
             ModelError::Unsupported(m) => f.write_str(m),
         }
     }
@@ -83,6 +87,8 @@ pub type ModelResult<T> = Result<T, ModelError>;
 ///   single-valued end that gets a new value drops the old link on both sides.
 /// - **Roots.** [`add_root`](ModelStore::add_root) detaches the object from a container (unless
 ///   that containment resolves proxies) and from another resource.
+/// - **Changeability.** `set` and `unset` of a feature that is not changeable fail (EMF's
+///   reflective `eSet`/`eUnset`); list operations do not check.
 /// - **Delete** follows `EcoreUtil.delete`: remove every changeable reference to the object from
 ///   objects of the resources (or of its containment tree if it has none), then remove it from its
 ///   container and from its resource.

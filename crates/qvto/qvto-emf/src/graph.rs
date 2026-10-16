@@ -715,6 +715,9 @@ impl Graph {
 
     pub(crate) fn op_set(&mut self, o: ObjId, f: FeatureId, v: Datum<'_, ObjId>) -> ModelResult<()> {
         self.slot_index(o, f)?;
+        if !self.meta.feature(f).changeable {
+            return Err(ModelError::NotChangeable(f));
+        }
         let h = self.hook(f);
         if h != Hook::None
             && let Some(r) = ecore_hooks::set(self, o, f, h, v)
@@ -753,6 +756,9 @@ impl Graph {
 
     pub(crate) fn op_unset(&mut self, o: ObjId, f: FeatureId) -> ModelResult<()> {
         self.slot_index(o, f)?;
+        if !self.meta.feature(f).changeable {
+            return Err(ModelError::NotChangeable(f));
+        }
         let h = self.hook(f);
         if h != Hook::None
             && let Some(r) = ecore_hooks::unset(self, o, f, h)

@@ -316,10 +316,9 @@ pub(crate) fn is_set(g: &Graph, o: ObjId, f: FeatureId, h: Hook) -> Option<bool>
     })
 }
 
+/// List operations on Ecore's derived lists (`UnmodifiableEList`).
 fn read_only(f: FeatureId) -> ModelResult<()> {
-    Err(ModelError::Unsupported(format!(
-        "derived feature {f:?} is not changeable"
-    )))
+    Err(ModelError::Unsupported(format!("UnsupportedOperationException: derived feature {f:?}")))
 }
 
 /// `EClassImpl.setInstanceTypeName`'s derivation of the class name.

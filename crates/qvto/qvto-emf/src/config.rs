@@ -58,11 +58,24 @@ impl Config {
         files.sort_by(|a, b| a.to_string_lossy().cmp(&b.to_string_lossy()));
         for f in files {
             let abs = std::path::absolute(&f)?;
+            let loc = c.unmap(&file_uri(&abs));
             for ns in ns_uris_of_file(&f) {
-                c.ns_index.entry(ns).or_insert_with(|| file_uri(&abs));
+                c.ns_index.entry(ns).or_insert_with(|| loc.clone());
             }
         }
         Ok(c)
+    }
+
+    /// The URI under which a file is known: a mapped URI (`platform:/plugin/...`) if a prefix
+    /// mapping leads to it (the first such mapping), else the file URI. Metamodels then refer
+    /// to each other through the mapped URIs, as in Eclipse.
+    pub fn unmap(&self, file_uri: &str) -> String {
+        for (from, to) in &self.maps {
+            if from.ends_with('/') && file_uri.starts_with(to.as_str()) {
+                return format!("{from}{}", &file_uri[to.len()..]);
+            }
+        }
+        file_uri.to_string()
     }
 
     /// A resource set for loading the model at `model`: this configuration, with the
@@ -71,6 +84,9 @@ impl Config {
         let mut rs = ResourceSet::new();
         for (from, to) in &self.maps {
             rs.map_uri(from, to);
+        }
+        for (key, ns) in &self.aliases {
+            rs.add_alias(key, ns);
         }
         for (ns, loc) in &self.ns_index {
             rs.add_ns_location(ns, loc);
@@ -88,7 +104,7 @@ impl Config {
             for f in local {
                 for ns in ns_uris_of_file(&f) {
                     if seen.insert(ns.clone()) {
-                        rs.add_ns_location(&ns, &file_uri(&f));
+                        rs.add_ns_location(&ns, &self.unmap(&file_uri(&f)));
                     }
                 }
             }

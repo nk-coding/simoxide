@@ -37,8 +37,9 @@ impl Rng {
     }
 }
 
-const SINGLE: [&str; 15] = [
+const SINGLE: [&str; 16] = [
     "name", "id", "count", "label", "opt", "kind", "big", "ratio", "flag", "boxed", "parent", "child", "friend", "owner", "only",
+    "frozen",
 ];
 const MANY: [&str; 9] = ["tags", "nums", "children", "xchildren", "links", "bag", "owned", "targets", "sources"];
 
@@ -59,7 +60,7 @@ fn value_for(rng: &mut Rng, feature: &str, vars: &[String]) -> String {
         };
     }
     match feature {
-        "name" | "id" | "label" | "opt" | "tags" | "extra" => {
+        "name" | "id" | "label" | "opt" | "tags" | "extra" | "frozen" => {
             let v = ["a", "b", "c", "x"][rng.below(4)];
             if rng.chance(10) { "null".into() } else { format!("s:{v}") }
         }
@@ -187,6 +188,7 @@ fn err(e: &ModelError) -> String {
         ModelError::NullNotAllowed(_) => "NullNotAllowed",
         ModelError::Abstract(_) => "Abstract",
         ModelError::RecursiveContainment => "RecursiveContainment",
+        ModelError::NotChangeable(_) => "NotChangeable",
         ModelError::Unsupported(m) if m.contains("no duplicates") => "Duplicate",
         ModelError::Unsupported(_) => "Unsupported",
     }

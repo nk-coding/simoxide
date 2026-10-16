@@ -52,6 +52,16 @@ public class EmfOracle {
             case "ecore": saveEcore(args[2]); break;
             case "scripts": ScriptRunner.run(args[2], Paths.get(args[3]), Paths.get(args[4])); break;
             case "pairs": Pairs.run(Paths.get(args[2]), Paths.get(args[3])); break;
+            case "debug": {
+                ResourceSet rs = newResourceSet(args[2]);
+                Resource r;
+                try { r = rs.getResource(fileUri(args[2]), true); } catch (RuntimeException e) { r = rs.getResource(fileUri(args[2]), false); }
+                for (Resource.Diagnostic d : r.getErrors()) {
+                    System.out.println(d.getMessage());
+                    if (d instanceof Exception && ((Exception) d).getCause() != null) ((Exception) d).getCause().printStackTrace(System.out);
+                }
+                break;
+            }
             default: throw new IllegalArgumentException(args[0]);
         }
     }
@@ -72,6 +82,7 @@ public class EmfOracle {
                     if (p[1].endsWith("/")) to += "/";
                     URI target = URI.createFileURI(to);
                     URIConverter.URI_MAP.put(URI.createURI(p[1]), target);
+                    uriMap.put(URI.createURI(p[1]), target);
                     break;
                 }
                 case "mmroot": roots.add(p[1]); break;
@@ -81,13 +92,22 @@ public class EmfOracle {
         List<String> files = new ArrayList<>();
         for (String r : roots) collectEcore(new File(r), files);
         Collections.sort(files);
-        for (String f : files) for (String ns : nsUris(f)) nsIndex.putIfAbsent(ns, f);
+        for (String f : files) for (String ns : nsUris(f)) nsIndex.putIfAbsent(ns, unmap(fileUri(f).toString()));
         for (Map.Entry<String, String> a : aliases.entrySet()) {
             Object p = EPackage.Registry.INSTANCE.get(a.getValue());
             if (p != null) EPackage.Registry.INSTANCE.put(a.getKey(), p);
         }
         mmSet = new ResourceSetImpl();
         offline(mmSet);
+    }
+
+    /** The mapped URI of a file URI (first prefix mapping leading to it), else the file URI. */
+    static String unmap(String fileUri) {
+        for (Map.Entry<URI, URI> e : uriMap.entrySet()) {
+            String from = e.getKey().toString(), to = e.getValue().toString();
+            if (from.endsWith("/") && fileUri.startsWith(to)) return from + fileUri.substring(to.length());
+        }
+        return fileUri;
     }
 
     static void collectEcore(File d, List<String> out) {
@@ -128,7 +148,7 @@ public class EmfOracle {
             public EPackage getEPackage() {
                 if (loaded != null) return loaded;
                 try {
-                    Resource r = mmSet.getResource(fileUri(file), true);
+                    Resource r = mmSet.getResource(file.contains(":") ? URI.createURI(file) : fileUri(file), true);
                     loaded = find(r.getContents(), ns);
                 } catch (RuntimeException e) {
                     loaded = null;
@@ -163,7 +183,7 @@ public class EmfOracle {
             List<String> paths = new ArrayList<>();
             for (File f : local) paths.add(f.getPath());
             Collections.sort(paths);
-            for (String p : paths) for (String u : nsUris(p)) ns.putIfAbsent(u, p);
+            for (String p : paths) for (String u : nsUris(p)) ns.putIfAbsent(u, unmap(fileUri(p).toString()));
         }
         for (Map.Entry<String, String> e : nsIndex.entrySet()) ns.putIfAbsent(e.getKey(), e.getValue());
         for (Map.Entry<String, String> e : ns.entrySet()) {
