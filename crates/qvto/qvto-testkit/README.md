@@ -6,7 +6,7 @@ qvto-rs engine implements to run under the harness, the comparisons and the scor
 (`qvto conform`).
 
 ```sh
-qvto conform                                  # scoreboard of the engine (now the stub) on all cases
+qvto conform                                  # scoreboard of the engine (qvto; --engine qvto-fast|stub) on all cases
 qvto conform --suite eclipse --prefix interpret_ --report report.md --tsv report.tsv -v
 qvto conform record [--suite eclipse|corpus]  # Java runner: refresh the fixtures (5 runs, ~10 s each)
 qvto conform --engine replay:target/qvto-testkit/java   # Java's own results through the Rust side
@@ -162,7 +162,12 @@ parameters, applies configuration properties, blackboxes and session options, ru
 an `Outcome`: load severity and problems, execution severity/code/message, terminating
 exception class, printed QVT stack, log, trace-record count, and `Outputs` (the extents as
 resources `extent<i>.xmi` in a qvto-emf `ResourceSet`, plus the other model resources for
-`dump models`). `StubEngine` answers `NotImplemented` for every case.
+`dump models`). `StubEngine` answers `NotImplemented` for every case; the engine itself is
+`crates/qvto-cli/src/engine.rs` (`qvto`, `qvto-fast`): it resolves imports like the Java
+runner (bundle source containers), loads the metamodels the units name, compiles, binds the
+inputs, replays the Java run's identity hashes when the tape is cached (inputs by key, created
+objects in the recorded thread's draw order), runs, and puts the extents into `extent<i>.xmi`.
+`QVTO_SHOW=1` prints each case's outcome, log and dump.
 
 ## Verdicts
 
