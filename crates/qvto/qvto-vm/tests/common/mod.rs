@@ -356,6 +356,7 @@ impl Irb {
             model_type: ModelTypeId(mt_index),
             ty,
             span: sp(0),
+            generated: false,
         });
         ModelParamRef {
             module: ModuleId(0),

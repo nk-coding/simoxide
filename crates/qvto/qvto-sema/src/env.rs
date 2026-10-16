@@ -60,6 +60,8 @@ pub(crate) struct ModelParamInfo {
     pub model_type: Option<ModelTypeId>,
     pub ty: TypeId,
     pub span: Span,
+    /// Generated for a legacy `main(in x : T)` signature (`DeprecatedSignaturelessTransf`).
+    pub generated: bool,
 }
 
 pub(crate) struct GlobalInfo {

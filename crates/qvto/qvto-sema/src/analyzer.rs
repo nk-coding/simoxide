@@ -252,31 +252,19 @@ impl<'r> Sema<'r> {
             meta: self.ts.meta,
             std_classes: self.ts.std,
             sources: self.sources,
-            // Q3a (temporary, until Q2 fills them): the model parameters into the IR
-            modules: self
-                .modules
+            modules: self.modules.into_iter().map(|m| m.ir).collect(),
+            main_module,
+            model_types: self.model_types.into_iter().map(|m| m.decl).collect(),
+            operations: self
+                .ops
                 .into_iter()
-                .map(|m| {
-                    let mut ir = m.ir;
-                    if ir.model_params.is_empty() {
-                        ir.model_params = m
-                            .model_params
-                            .iter()
-                            .map(|p| ir::ModelParam {
-                                name: p.name.clone(),
-                                direction: p.direction,
-                                model_type: p.model_type.unwrap_or(ir::ModelTypeId(0)),
-                                ty: p.ty,
-                                span: p.span,
-                            })
-                            .collect();
-                    }
+                .map(|o| {
+                    let mut ir = o.ir;
+                    // the virtual table Eclipse assembles in `doFindCollidingOperation`
+                    ir.vtable = o.vtable;
                     ir
                 })
                 .collect(),
-            main_module,
-            model_types: self.model_types.into_iter().map(|m| m.decl).collect(),
-            operations: self.ops.into_iter().map(|o| o.ir).collect(),
             globals: self.globals.into_iter().map(|g| g.ir).collect(),
             interm_props: self.interm_props.into_iter().map(|p| p.ir).collect(),
             interm_classes: self.interm_classes,

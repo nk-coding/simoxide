@@ -181,6 +181,11 @@ pub struct ModelParam {
     /// Type of the parameter as a value (`Type::ModelType`).
     pub ty: TypeId,
     pub span: Span,
+    /// Generated for the parameters and results of a legacy entry `mapping main(in x : T) : U`
+    /// of a transformation without model parameters (Eclipse's `DeprecatedSignaturelessTransf`,
+    /// marked by the `QVT_AUTOGEN_MODELPARAM_EXPRESSION_URI` annotation; named `$x`). Their
+    /// extents are not part of the evaluation result.
+    pub generated: bool,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]

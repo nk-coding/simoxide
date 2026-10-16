@@ -131,7 +131,7 @@ where
 
         let r = self.run_main();
         // `createEvaluationResult`: the contents of the non-`in` extents that are not
-        // generated for a legacy `main(in x : T)` signature (`$x`); none and an object result
+        // generated for a legacy `main(in x : T)` signature; none and an object result
         // of the entry: that object alone (Eclipse's compatibility extent). They fill the
         // non-`in` parameters in order.
         let n_params = main.model_params.len();
@@ -141,7 +141,7 @@ where
             // every extent's contents are taken (purge, detach from the in-memory resource)
             let x = self.param_extents[&(ir.main_module.0, i as u32)];
             let c = self.extents[x].contents(self.store);
-            if mp.direction == Direction::In || generated_param(&mp.name) {
+            if mp.direction == Direction::In || mp.generated {
                 continue;
             }
             results.push(c);
@@ -650,13 +650,6 @@ where
         }
         Ok(())
     }
-}
-
-/// A model parameter the analyser generated for a legacy `main(in x : T)` signature: `$x`
-/// (unnamed declared parameters are `$<index>`). The IR has no flag for it yet.
-fn generated_param(name: &str) -> bool {
-    name.strip_prefix('$')
-        .is_some_and(|r| !r.is_empty() && !r.bytes().all(|b| b.is_ascii_digit()))
 }
 
 /// `isModelParamEqual`'s direction rule: an `in` parameter only binds `in` parameters.

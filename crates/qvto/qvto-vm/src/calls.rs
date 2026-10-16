@@ -70,7 +70,7 @@ where
     /// supertypes depth-first in declaration order, else the formal one.
     pub(crate) fn virtual_target(&self, op: OpId, src: &Value) -> OpId {
         let o = self.prog.op(op);
-        if self.vtable(op).is_empty() || o.context.is_none() {
+        if o.vtable.is_empty() || o.context.is_none() {
             return op;
         }
         let Some(actual) = self.dispatch_type(src) else {
@@ -85,18 +85,15 @@ where
         r
     }
 
-    /// The virtual table of an operation: the analyser's, else (while the analyser does not
-    /// fill it) the contextual operations with the same name, kind and parameter types, in
-    /// program order.
-    fn vtable(&self, op: OpId) -> &[OpId] {
-        let o = self.prog.op(op);
-        if !o.vtable.is_empty() {
-            return &o.vtable;
-        }
-        self.vtables
-            .get(op.index())
-            .map(Vec::as_slice)
-            .unwrap_or(&[])
+    /// The virtual table of an operation (`VirtualTable.getOperations`) without the
+    /// operations that another operation of the table overrides
+    /// (`QvtOperationalUtil.filterOverriddenOperations`).
+    fn vtable(&self, op: OpId) -> impl Iterator<Item = OpId> + '_ {
+        let t = &self.prog.op(op).vtable;
+        t.iter().copied().filter(move |&c| {
+            !t.iter()
+                .any(|&d| self.prog.op(d).overrides == Some(c))
+        })
     }
 
     fn lookup_actual(&self, op: OpId, actual: TypeId) -> Option<OpId> {
@@ -105,7 +102,7 @@ where
         if o.context == Some(actual) {
             return Some(op);
         }
-        for &c in self.vtable(op) {
+        for c in self.vtable(op) {
             if self.prog.op(c).context == Some(actual) {
                 return Some(c);
             }
@@ -213,11 +210,9 @@ where
         if src.is_invalid() {
             return Ok(Value::Invalid);
         }
-        let mut op = if virt {
-            self.virtual_target(op, &src)
-        } else {
-            op
-        };
+        // contextual operations always dispatch on the source's type
+        // (`isOverloadableMapping`); `virt` (`isVirtual`) only enables module overriding
+        let mut op = self.virtual_target(op, &src);
         let o = self.prog.op(op);
         if o.context.is_some() && src.is_null() && o.context != Some(TypeId::OCL_VOID) {
             return Ok(Value::Invalid);
@@ -370,11 +365,9 @@ where
         if src.is_invalid() {
             return Ok(Value::Invalid);
         }
-        let mut op = if virt {
-            self.virtual_target(op, &src)
-        } else {
-            op
-        };
+        // contextual operations always dispatch on the source's type
+        // (`isOverloadableMapping`); `virt` (`isVirtual`) only enables module overriding
+        let mut op = self.virtual_target(op, &src);
         let o = self.prog.op(op);
         if o.context.is_some() && src.is_null() && o.context != Some(TypeId::OCL_VOID) {
             return Ok(Value::Invalid);

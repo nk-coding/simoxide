@@ -894,13 +894,17 @@ impl<'r> Sema<'r> {
                 Some(t) => self.model_types[t.index()].decl.ty,
                 None => TypeId::NULL,
             };
-            self.modules[id.index()].model_params.push(ModelParamInfo {
-                name: name.clone(),
-                direction: dir,
-                model_type: mt,
-                ty,
-                span: p.span,
-            });
+            self.add_model_param(
+                id,
+                ModelParamInfo {
+                    name: name.clone(),
+                    direction: dir,
+                    model_type: mt,
+                    ty,
+                    span: p.span,
+                    generated: false,
+                },
+            );
         }
     }
 
@@ -1509,13 +1513,17 @@ impl<'r> Sema<'r> {
                 span: Span::default(),
             });
             let mp_index = self.modules[id.index()].model_params.len() as u32;
-            self.modules[id.index()].model_params.push(ModelParamInfo {
-                name: format!("${name}"),
-                direction: dir,
-                model_type: Some(ModelTypeId(idx)),
-                ty: mty,
-                span: Span::default(),
-            });
+            self.add_model_param(
+                id,
+                ModelParamInfo {
+                    name: format!("${name}"),
+                    direction: dir,
+                    model_type: Some(ModelTypeId(idx)),
+                    ty: mty,
+                    span: Span::default(),
+                    generated: true,
+                },
+            );
             self.modules[id.index()]
                 .ir
                 .model_types
@@ -1535,6 +1543,21 @@ impl<'r> Sema<'r> {
                 });
             }
         }
+    }
+
+    /// A model parameter of a transformation, in the environment and in the IR.
+    fn add_model_param(&mut self, id: ModuleId, p: ModelParamInfo) {
+        let m = &mut self.modules[id.index()];
+        m.ir.model_params.push(ir::ModelParam {
+            name: p.name.clone(),
+            direction: p.direction,
+            // `None` only after an error (the IR of programs with errors is not run)
+            model_type: p.model_type.unwrap_or(ModelTypeId(u32::MAX)),
+            ty: p.ty,
+            span: p.span,
+            generated: p.generated,
+        });
+        m.model_params.push(p);
     }
 
     pub(crate) fn main_operation(&self, id: ModuleId) -> Option<OpId> {
