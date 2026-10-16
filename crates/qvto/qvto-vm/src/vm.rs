@@ -172,6 +172,8 @@ where
     /// Stderr-like messages of swallowed runtime errors (`Evaluation failed at ...`).
     pub errors: Vec<String>,
     pub(crate) class_local: Vec<bool>,
+    /// Virtual tables computed by the VM where the IR has none (see `calls::vtable`).
+    pub(crate) vtables: Vec<Vec<OpId>>,
     /// Static type of the receiver of the current `CallStdX`.
     pub(crate) std_src_ty: TypeId,
     pub(crate) regexes: RefCell<HashMap<(String, bool), Result<regex::Regex, String>>>,
@@ -235,6 +237,7 @@ where
             steps: 0,
             errors: Vec::new(),
             class_local: Vec::new(),
+            vtables: Vec::new(),
             regexes: RefCell::new(HashMap::new()),
             std_src_ty: TypeId::OCL_VOID,
         };
@@ -243,6 +246,7 @@ where
         }
         vm.consts = prog.consts.iter().map(const_value).collect();
         vm.class_local = crate::objects::local_classes(prog);
+        vm.vtables = computed_vtables(prog);
         vm
     }
 
@@ -1195,4 +1199,40 @@ pub(crate) fn const_value(c: &Const) -> Value {
         }),
         Const::Type(t) => Value::Type(TypeRef(t.0)),
     }
+}
+
+/// Virtual tables by name, kind and parameter types (Eclipse's `VirtualTable` contents) for the
+/// contextual operations whose IR table is empty.
+fn computed_vtables(p: &Program) -> Vec<Vec<OpId>> {
+    let ops = &p.ir.operations;
+    let mut by_key: HashMap<(String, bool, Vec<TypeId>), Vec<OpId>> = HashMap::new();
+    for (i, o) in ops.iter().enumerate() {
+        if o.context.is_none() {
+            continue;
+        }
+        let key = (
+            o.name.clone(),
+            o.kind == qvto_sema::ir::OpKind::Mapping,
+            o.params.iter().map(|p| p.ty).collect(),
+        );
+        by_key.entry(key).or_default().push(OpId(i as u32));
+    }
+    ops.iter()
+        .enumerate()
+        .map(|(i, o)| {
+            if o.context.is_none() || !o.vtable.is_empty() {
+                return Vec::new();
+            }
+            let key = (
+                o.name.clone(),
+                o.kind == qvto_sema::ir::OpKind::Mapping,
+                o.params.iter().map(|p| p.ty).collect::<Vec<_>>(),
+            );
+            by_key[&key]
+                .iter()
+                .copied()
+                .filter(|x| x.index() != i)
+                .collect()
+        })
+        .collect()
 }

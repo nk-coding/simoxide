@@ -68,7 +68,7 @@ where
     /// supertypes depth-first in declaration order, else the formal one.
     pub(crate) fn virtual_target(&self, op: OpId, src: &Value) -> OpId {
         let o = self.prog.op(op);
-        if o.vtable.is_empty() || o.context.is_none() {
+        if self.vtable(op).is_empty() || o.context.is_none() {
             return op;
         }
         let Some(actual) = self.dispatch_type(src) else {
@@ -83,13 +83,24 @@ where
         r
     }
 
+    /// The virtual table of an operation: the analyser's, else (while the analyser does not
+    /// fill it) the contextual operations with the same name, kind and parameter types, in
+    /// program order.
+    fn vtable(&self, op: OpId) -> &[OpId] {
+        let o = self.prog.op(op);
+        if !o.vtable.is_empty() {
+            return &o.vtable;
+        }
+        self.vtables.get(op.index()).map(Vec::as_slice).unwrap_or(&[])
+    }
+
     fn lookup_actual(&self, op: OpId, actual: TypeId) -> Option<OpId> {
         let ir = &self.prog.ir;
         let o = self.prog.op(op);
         if o.context == Some(actual) {
             return Some(op);
         }
-        for &c in &o.vtable {
+        for &c in self.vtable(op) {
             if self.prog.op(c).context == Some(actual) {
                 return Some(c);
             }

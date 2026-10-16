@@ -418,8 +418,8 @@ fn disasm(args: &[String]) {
     }
     for (i, o) in p.ir.operations.iter().enumerate() {
         println!(
-            "op {i} {} module {} source {}",
-            o.name, o.module.0, o.source.0
+            "op {i} {} module {} source {} context {:?} vtable {:?} overrides {:?}",
+            o.name, o.module.0, o.source.0, o.context, o.vtable, o.overrides
         );
     }
     for (i, m) in p.ir.modules.iter().enumerate() {
