@@ -419,7 +419,7 @@ impl<'a> SimStore<'a> {
 
     /// A value for the `qvto_emf` graph: graph objects as their mirrors. `None` when the value is
     /// a graph object without a mirror and `create` is false (it cannot be in any list there).
-    fn to_ext<'d>(&mut self, d: Datum<'d, u32>, create: bool) -> Option<Datum<'d, ObjId>> {
+    fn ext_value<'d>(&mut self, d: Datum<'d, u32>, create: bool) -> Option<Datum<'d, ObjId>> {
         match d {
             Datum::Obj(h) if is_ext(h) => Some(with_obj(d, ext_id(h))),
             Datum::Obj(h) => {
@@ -813,7 +813,7 @@ impl ModelStore for SimStore<'_> {
         }
         self.check_cross(f, &v)?;
         let old = self.recording().then(|| self.get(o, f).to_owned());
-        let d = self.to_ext(v, true).expect("created");
+        let d = self.ext_value(v, true).expect("created");
         self.s.rs.graph.set(ext_id(o), f, d)?;
         self.after_ext(self.contained_by(o, f, &v));
         if let Some(old) = old {
@@ -848,7 +848,7 @@ impl ModelStore for SimStore<'_> {
         }
         self.check_cross(f, &v)?;
         let len = self.len(o, f);
-        let d = self.to_ext(v, true).expect("created");
+        let d = self.ext_value(v, true).expect("created");
         let added = self.s.rs.graph.add(ext_id(o), f, d, at)?;
         self.after_ext(self.contained_by(o, f, &v));
         if added && self.recording() {
@@ -869,7 +869,7 @@ impl ModelStore for SimStore<'_> {
         if !is_ext(o) {
             return self.raw().remove(o, f, v);
         }
-        let Some(d) = self.to_ext(v, false) else {
+        let Some(d) = self.ext_value(v, false) else {
             return Ok(false);
         };
         let index = (0..self.len(o, f)).find(|&i| self.get_at(o, f, i).java_equals(&v));
@@ -902,7 +902,7 @@ impl ModelStore for SimStore<'_> {
         }
         self.check_cross(f, &v)?;
         let old = self.get_at(o, f, i).to_owned();
-        let d = self.to_ext(v, true).expect("created");
+        let d = self.ext_value(v, true).expect("created");
         self.s.rs.graph.set_at(ext_id(o), f, i, d)?;
         self.after_ext(self.contained_by(o, f, &v));
         if self.recording() {
@@ -978,11 +978,8 @@ impl ModelStore for SimStore<'_> {
                     };
                 }
                 // eSetResource: out of the old root list, out of a non-resolving container
-                match self.direct_resource(o) {
-                    Some(old) => {
-                        self.remove_root(old, o);
-                    }
-                    None => {}
+                if let Some(old) = self.direct_resource(o) {
+                    self.remove_root(old, o);
                 }
                 if let Some((p, f)) = self.container(o)
                     && !self.meta().feature(f).resolve_proxies
