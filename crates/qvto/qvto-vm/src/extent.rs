@@ -31,6 +31,8 @@ pub struct Extent {
     pub resource: Option<ResourceId>,
     /// Holds engine-local objects only (intermediate data).
     pub local_only: bool,
+    /// The model type of an extent without parameter (`createEmptyModel`).
+    pub model_type: Option<qvto_sema::ir::ModelTypeId>,
 }
 
 impl Extent {
@@ -46,6 +48,7 @@ impl Extent {
             purge_limit: INITIAL_EXTENT_SIZE,
             resource: None,
             local_only: false,
+            model_type: None,
         }
     }
 

@@ -1389,7 +1389,9 @@ where
                 },
                 _ => Value::Invalid,
             },
-            MCopy | MCreateEmptyModel | Unsupported => {
+            MCopy => return self.model_copy(&s),
+            MCreateEmptyModel => return self.create_empty_model(&s),
+            Unsupported => {
                 return Err(
                     self.runtime_error(format!("operation '{}' is not supported", op.desc().name))
                 );

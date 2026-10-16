@@ -168,16 +168,9 @@ where
                 _ => false,
             },
             Type::ModelType(m) => match v {
-                Value::Model(x) => {
-                    let ext = &self.extents[*x as usize];
-                    match ext.param {
-                        Some((module, idx)) => {
-                            let mp = &ir.modules[module.index()].model_params[idx as usize];
-                            mp.model_type.0 == *m
-                        }
-                        None => false,
-                    }
-                }
+                Value::Model(x) => self
+                    .extent_model_type(*x as usize)
+                    .is_some_and(|t| t.0 == *m),
                 _ => false,
             },
             Type::Module(m) => match v {

@@ -855,9 +855,26 @@ where
             Ok(c) => c,
             Err(e) => return Ok(self.swallow(model_error_text(&e))),
         };
-        // copyReferences
+        self.copy_references(&map);
+        self.clone_interm_props(&map);
+        let cr = ObjRef::host(copy.to_u32());
+        let class = self.store.class_of(copy);
+        let x = self.default_extent(class, None);
+        if !deep {
+            let contents: Vec<S::Obj> = self.store.all_contents(copy);
+            for o in contents {
+                self.put_to_extent(ObjRef::host(o.to_u32()), x)?;
+            }
+        }
+        self.put_to_extent(cr, x)?;
+        Ok(Value::Obj(cr))
+    }
+
+    /// `EcoreUtil.Copier.copyReferences`: non-containment references of the copies, targets
+    /// inside the copied set mapped to their copies (others kept unless bidirectional).
+    pub(crate) fn copy_references(&mut self, map: &[(S::Obj, S::Obj)]) {
         let meta = &self.prog.ir.meta;
-        for &(o, c) in &map {
+        for &(o, c) in map {
             let class = self.store.class_of(o);
             let feats: Vec<FeatureId> = meta.class(class).all_features.to_vec();
             for f in feats {
@@ -891,24 +908,12 @@ where
                 }
             }
         }
-        self.clone_interm_props(&map);
-        let cr = ObjRef::host(copy.to_u32());
-        let class = self.store.class_of(copy);
-        let x = self.default_extent(class, None);
-        if !deep {
-            let contents: Vec<S::Obj> = self.store.all_contents(copy);
-            for o in contents {
-                self.put_to_extent(ObjRef::host(o.to_u32()), x)?;
-            }
-        }
-        self.put_to_extent(cr, x)?;
-        Ok(Value::Obj(cr))
     }
 
     /// `IntermediatePropertyCopier.cloneIntermediateProperties` (bug 254962): the contextual
     /// intermediate properties of every copied object, objects mapped to their copies,
     /// collections and tuples cloned, other values shared.
-    fn clone_interm_props(&mut self, map: &[(S::Obj, S::Obj)]) {
+    pub(crate) fn clone_interm_props(&mut self, map: &[(S::Obj, S::Obj)]) {
         let prog = self.prog;
         for &(o, c) in map {
             let src = Value::Obj(ObjRef::host(o.to_u32()));
@@ -959,7 +964,7 @@ where
         }
     }
 
-    fn copy_rec(
+    pub(crate) fn copy_rec(
         &mut self,
         o: S::Obj,
         deep: bool,

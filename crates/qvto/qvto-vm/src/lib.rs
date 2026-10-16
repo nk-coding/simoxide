@@ -17,6 +17,7 @@ pub mod extent;
 mod jregex;
 mod log;
 mod meta;
+mod model_ops;
 pub mod native;
 mod objects;
 mod run;
