@@ -113,6 +113,13 @@ pub trait ModelStore {
     fn get(&self, o: Self::Obj, f: FeatureId) -> Datum<'_, Self::Obj>;
     fn len(&self, o: Self::Obj, f: FeatureId) -> usize;
     fn get_at(&self, o: Self::Obj, f: FeatureId, i: usize) -> Datum<'_, Self::Obj>;
+    /// The values of a many-valued feature appended to `out`, as `len` and `get_at` give them
+    /// (in one call: a store computes a derived list once).
+    fn get_list<'a>(&'a self, o: Self::Obj, f: FeatureId, out: &mut Vec<Datum<'a, Self::Obj>>) {
+        for i in 0..self.len(o, f) {
+            out.push(self.get_at(o, f, i));
+        }
+    }
     fn is_set(&self, o: Self::Obj, f: FeatureId) -> bool;
     /// Container and containment feature.
     fn container(&self, o: Self::Obj) -> Option<(Self::Obj, FeatureId)>;
@@ -277,11 +284,9 @@ pub trait ModelStore {
         let mut out = Vec::new();
         for &f in meta.class(self.class_of(o)).containments.iter() {
             if meta.feature(f).is_many() {
-                for i in 0..self.len(o, f) {
-                    if let Datum::Obj(c) = self.get_at(o, f, i) {
-                        out.push(c);
-                    }
-                }
+                let mut ds = Vec::new();
+                self.get_list(o, f, &mut ds);
+                out.extend(ds.into_iter().filter_map(|d| d.as_obj()));
             } else if let Datum::Obj(c) = self.get(o, f) {
                 out.push(c);
             }

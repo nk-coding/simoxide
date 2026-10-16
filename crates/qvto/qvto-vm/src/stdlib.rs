@@ -462,6 +462,12 @@ pub fn prim_table() -> Vec<Prim> {
     StdOp::all().iter().map(|&op| prim_of(op)).collect()
 }
 
+/// [`prim_table`], computed once.
+pub(crate) fn prims() -> &'static [Prim] {
+    static PRIMS: std::sync::OnceLock<Vec<Prim>> = std::sync::OnceLock::new();
+    PRIMS.get_or_init(prim_table)
+}
+
 fn int_arg(v: &Value) -> Option<i64> {
     match v {
         Value::Int(i) => Some(*i),
@@ -1487,13 +1493,39 @@ where
     ) -> Value {
         let es = Iter::of(&elems).items;
         let ks = Iter::of(&keys).items;
-        // last key per equal element
+        // last key per equal element (Eclipse keys a HashMap by element); elements of a set
+        // are unique
         let mut eff: Vec<Value> = ks.to_vec();
-        for i in 0..es.len() {
-            for j in (i + 1..es.len()).rev() {
-                if java_equals(&es[i], &es[j], &self.env) {
-                    eff[i] = ks[j].clone();
-                    break;
+        if !matches!(&elems, Value::Coll(c) if c.kind().is_set()) {
+            match es.iter().map(atom_hash).collect::<Option<Vec<u64>>>() {
+                Some(hs) => {
+                    // buckets of equal hashes, the last index of each equal element
+                    let mut last: std::collections::HashMap<u64, Vec<usize>> =
+                        std::collections::HashMap::with_capacity(es.len());
+                    for (j, h) in hs.iter().enumerate() {
+                        let b = last.entry(*h).or_default();
+                        match b.iter_mut().find(|k| java_equals(&es[**k], &es[j], &self.env)) {
+                            Some(k) => *k = j,
+                            None => b.push(j),
+                        }
+                    }
+                    for (i, h) in hs.iter().enumerate() {
+                        if let Some(&j) = last[h].iter().find(|&&k| java_equals(&es[k], &es[i], &self.env))
+                            && j != i
+                        {
+                            eff[i] = ks[j].clone();
+                        }
+                    }
+                }
+                None => {
+                    for i in 0..es.len() {
+                        for j in (i + 1..es.len()).rev() {
+                            if java_equals(&es[i], &es[j], &self.env) {
+                                eff[i] = ks[j].clone();
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1575,6 +1607,28 @@ where
             Value::Coll(Rc::new(Coll::Sequence(v)))
         }
     }
+}
+
+/// A hash consistent with `java_equals` for atoms, without drawing identity hashes (identity-
+/// hashed values hash by their identity key); `None` for collections, tuples, dictionaries.
+fn atom_hash(v: &Value) -> Option<u64> {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    std::mem::discriminant(v).hash(&mut h);
+    match v {
+        Value::Null | Value::Invalid => {}
+        Value::Bool(b) => b.hash(&mut h),
+        Value::Int(i) => i.hash(&mut h),
+        Value::Boxed(_, i) => i.hash(&mut h),
+        Value::Real(d) => qvto_runtime::java::hash::double_to_long_bits(*d).hash(&mut h),
+        Value::Float(f) => qvto_runtime::java::hash::float_to_int_bits(*f).hash(&mut h),
+        Value::Str(s) => s.java_hash().hash(&mut h),
+        Value::Obj(_) | Value::Enum(_) | Value::Type(_) | Value::Model(_) | Value::Instance(_) => {
+            qvto_runtime::eq::identity_key(v)?.hash(&mut h)
+        }
+        _ => return None,
+    }
+    Some(h.finish())
 }
 
 trait OrValue {

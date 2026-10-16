@@ -173,7 +173,7 @@ where
     pub(crate) vcache: RefCell<HashMap<(u32, u32), u32>>,
     pub(crate) interm: HashMap<(crate::objects::IntermOwner, IntermPropId), Value>,
     pub(crate) late: Vec<LateTask>,
-    pub(crate) prims: Vec<Prim>,
+    pub(crate) prims: &'static [Prim],
     pub(crate) str_counters: HashMap<String, i64>,
     pub(crate) steps: u64,
     /// Stderr-like messages of swallowed runtime errors (`Evaluation failed at ...`).
@@ -263,7 +263,7 @@ where
             vcache: RefCell::new(HashMap::new()),
             interm: HashMap::new(),
             late: Vec::new(),
-            prims: crate::stdlib::prim_table(),
+            prims: crate::stdlib::prims(),
             str_counters: HashMap::new(),
             steps: 0,
             errors: Vec::new(),

@@ -692,12 +692,9 @@ where
             let d = self.store.get(h, f);
             return Ok(self.attr_value(f, d));
         }
-        let n = self.store.len(h, f);
-        let mut items = Vec::with_capacity(n);
-        for i in 0..n {
-            let d = self.store.get_at(h, f, i);
-            items.push(self.datum(d));
-        }
+        let mut ds = Vec::new();
+        self.store.get_list(h, f, &mut ds);
+        let items: Vec<Value> = ds.into_iter().map(|d| self.datum(d)).collect();
         let kind = CollKind::of_feature(fi.ordered, fi.unique);
         Ok(match kind {
             CollKind::Sequence => Value::Coll(Rc::new(Coll::Sequence(items))),
@@ -786,6 +783,41 @@ where
             if undefined {
                 if reset {
                     let _ = self.store.clear(h, f);
+                }
+                return Ok(());
+            }
+            if !reset && ft.is_ref {
+                // `+=` of objects: the new list is the current one with the values appended,
+                // which `ECollections.setEList` turns into an `add` per appended value (the
+                // prefix is equal), so add them without copying the list
+                let appended: Vec<Value> = match &v {
+                    Value::Coll(_) | Value::List(_) | Value::Dict(_) => crate::vm::Iter::of(&v)
+                        .items
+                        .iter()
+                        .filter(|x| !x.is_null())
+                        .cloned()
+                        .collect(),
+                    x => vec![x.clone()],
+                };
+                let mut owned: Vec<OwnedDatum<S::Obj>> = Vec::with_capacity(appended.len());
+                for x in appended {
+                    let x = convert_number(x, ft.num);
+                    match self.to_datum(&x) {
+                        Some(d) => owned.push(d),
+                        None => {
+                            self.swallow("ClassCastException: not a feature value");
+                            return Ok(());
+                        }
+                    }
+                }
+                for d in &owned {
+                    // a failing `add` fails `setEList` too; Eclipse then clears the list and
+                    // adds the whole new content up to the failing value again, which gives
+                    // the same list
+                    if let Err(e) = self.store.add(h, f, d.as_datum(), None) {
+                        self.swallow(model_error_text(&e));
+                        break;
+                    }
                 }
                 return Ok(());
             }
@@ -1041,6 +1073,12 @@ where
     pub(crate) fn copy_references(&mut self, map: &[(S::Obj, S::Obj)]) {
         self.copy_engine_attributes(map);
         let meta = &self.prog.ir.meta;
+        // the copier's map (the first copy of an object, as a linear search finds it)
+        let mut index: std::collections::HashMap<S::Obj, S::Obj> =
+            std::collections::HashMap::with_capacity(map.len());
+        for &(x, y) in map {
+            index.entry(x).or_insert(y);
+        }
         for &(o, c) in map {
             let class = self.store.class_of(o);
             let feats: Vec<FeatureId> = meta.class(class).all_features.to_vec();
@@ -1053,8 +1091,8 @@ where
                     continue;
                 }
                 let map_target = |t: S::Obj| -> Option<S::Obj> {
-                    match map.iter().find(|(x, _)| *x == t) {
-                        Some((_, y)) => Some(*y),
+                    match index.get(&t) {
+                        Some(y) => Some(*y),
                         None => fi.opposite.is_none().then_some(t),
                     }
                 };

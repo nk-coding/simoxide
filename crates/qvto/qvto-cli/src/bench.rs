@@ -47,6 +47,8 @@ struct Opts {
     runs: usize,
     budget_ms: f64,
     report: Option<PathBuf>,
+    /// `--profile FILE.svg`: sample the engine's runs (feature `profile`).
+    profile: Option<PathBuf>,
 }
 
 fn die(msg: &str) -> ! {
@@ -138,6 +140,7 @@ pub fn bench(args: &[String]) {
         runs: 30,
         budget_ms: 2000.0,
         report: None,
+        profile: None,
     };
     let mut gen_only = false;
     let mut i = 0;
@@ -169,6 +172,7 @@ pub fn bench(args: &[String]) {
             "--runs" | "--repeat" => o.runs = next(&mut i).parse().unwrap_or(30),
             "--budget-ms" => o.budget_ms = next(&mut i).parse().unwrap_or(2000.0),
             "--report" => o.report = Some(PathBuf::from(next(&mut i))),
+            "--profile" => o.profile = Some(PathBuf::from(next(&mut i))),
             a => die(&format!("unknown argument {a}")),
         }
         i += 1;
@@ -200,6 +204,7 @@ pub fn bench(args: &[String]) {
     let load0 = loadavg();
     let mut rust: Vec<(String, Vec<(Mode, Measured)>)> = Vec::new();
     if o.rust {
+        let prof = o.profile.as_ref().map(|_| profile::start());
         for c in &cases {
             let mut per_mode = Vec::new();
             match measure_rust(&root, c, &o) {
@@ -212,6 +217,9 @@ pub fn bench(args: &[String]) {
                 Err(e) => println!("qvto  {:34} error: {e}", c.id),
             }
             rust.push((c.id.clone(), per_mode));
+        }
+        if let (Some(p), Some(svg)) = (prof, &o.profile) {
+            profile::finish(p, svg);
         }
     }
     let mut java: Vec<(String, Measured)> = Vec::new();
@@ -289,6 +297,7 @@ fn clone_opts(o: &Opts) -> Opts {
         runs: o.runs,
         budget_ms: o.budget_ms,
         report: None,
+        profile: None,
     }
 }
 
@@ -379,6 +388,8 @@ fn measure_rust(root: &Path, c: &Case, o: &Opts) -> Result<Vec<(Mode, Measured)>
                     return Err("compile errors".to_string());
                 }
                 let program = p.compiled.program.as_ref().ok_or("no program")?;
+                // the blackbox implementations, registered once (as a host does)
+                let natives = std::rc::Rc::new(crate::bbox::natives());
                 let mut out = Vec::new();
                 for &mode in &modes {
                     let mut m = Measured {
@@ -411,18 +422,12 @@ fn measure_rust(root: &Path, c: &Case, o: &Opts) -> Result<Vec<(Mode, Measured)>
                                 line_numbers: !c.no_line_numbers,
                                 ..qvto::RunOptions::default()
                             };
-                            let t = Instant::now();
-                            let mut vm = qvto::Vm::new(program, &mut cm.rs.graph, opts);
-                            vm.set_natives(std::rc::Rc::new(crate::bbox::natives()));
-                            let res = vm.run_transformation(args);
-                            let dt = t.elapsed().as_secs_f64() * 1e3;
-                            let log = std::mem::take(&mut vm.log);
-                            drop(vm);
+                            let (res, log, dt) = timed_run(program, &mut cm.rs.graph, opts, args, &natives);
                             m.runs.push(dt);
                             total += dt;
                             m.severity = severity_name(res.severity).into();
                             m.code = res.code;
-                            m.log_lines = log.to_string().lines().count();
+                            m.log_lines = log.lines().count();
                             m.out_objects = res
                                 .extents
                                 .iter()
@@ -443,6 +448,26 @@ fn measure_rust(root: &Path, c: &Case, o: &Opts) -> Result<Vec<(Mode, Measured)>
             .join()
             .unwrap_or_else(|_| Err("panic".into()))
     })
+}
+
+/// One timed run: the VM's creation, the run and its drop (the profile keeps the samples
+/// below this function).
+#[inline(never)]
+fn timed_run(
+    program: &qvto::Program,
+    g: &mut qvto_emf::graph::Graph,
+    opts: qvto::RunOptions,
+    args: Vec<Vec<qvto_emf::ObjId>>,
+    natives: &std::rc::Rc<qvto_vm::Natives<qvto_emf::graph::Graph>>,
+) -> (qvto::RunOutcome, String, f64) {
+    let t = Instant::now();
+    let mut vm = qvto::Vm::new(program, g, opts);
+    vm.set_natives(natives.clone());
+    let res = vm.run_transformation(args);
+    let log = std::mem::take(&mut vm.log);
+    drop(vm);
+    let dt = t.elapsed().as_secs_f64() * 1e3;
+    (res, log.to_string(), dt)
 }
 
 fn severity_name(s: i32) -> &'static str {
@@ -879,4 +904,105 @@ fn copy_dir(src: &Path, dst: &Path) -> Result<(), String> {
         }
     }
     Ok(())
+}
+
+/// Sampling profiles of the engine's runs (`--profile FILE.svg`, feature `profile`): a flame
+/// graph and a text summary (self and inclusive samples per function) of the samples taken
+/// during runs (model loading and compiling are left out).
+#[cfg(feature = "profile")]
+mod profile {
+    use std::collections::HashMap;
+    use std::path::Path;
+
+    pub struct Prof(pprof::ProfilerGuard<'static>);
+
+    pub fn start() -> Prof {
+        Prof(
+            pprof::ProfilerGuardBuilder::default()
+                .frequency(4000)
+                .blocklist(&["libc", "libgcc", "pthread", "vdso"])
+                .build()
+                .expect("profiler"),
+        )
+    }
+
+    fn short(name: &str) -> String {
+        let n = match name.rfind("::h") {
+            Some(i) if name.len() - i == 19 => &name[..i],
+            _ => name,
+        };
+        n.to_string()
+    }
+
+    pub fn finish(p: Prof, svg: &Path) {
+        let report = match p.0.report().build() {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!("profile: {e}");
+                return;
+            }
+        };
+        let skip = ["case_models", "compile_case", "bench::generate", "read_to_string"];
+        let mut data = HashMap::new();
+        let mut selfc: HashMap<String, isize> = HashMap::new();
+        let mut incl: HashMap<String, isize> = HashMap::new();
+        let mut total = 0;
+        for (frames, &count) in &report.data {
+            let names: Vec<String> = frames
+                .frames
+                .iter()
+                .flat_map(|f| f.iter().map(|s| short(&s.name())))
+                .collect();
+            if names.iter().any(|n| skip.iter().any(|k| n.contains(k))) {
+                continue;
+            }
+            if !names.iter().any(|n| n.contains("timed_run")) {
+                continue;
+            }
+            total += count;
+            if let Some(n) = names.first() {
+                *selfc.entry(n.clone()).or_default() += count;
+            }
+            let mut seen = std::collections::HashSet::new();
+            for n in &names {
+                if seen.insert(n.clone()) {
+                    *incl.entry(n.clone()).or_default() += count;
+                }
+            }
+            data.insert(frames.clone(), count);
+        }
+        let filtered = pprof::Report {
+            data,
+            timing: report.timing.clone(),
+        };
+        if let Ok(f) = std::fs::File::create(svg) {
+            let _ = filtered.flamegraph(f);
+        }
+        let pct = |c: isize| 100.0 * c as f64 / total.max(1) as f64;
+        let mut v: Vec<_> = selfc.into_iter().collect();
+        v.sort_by(|a, b| b.1.cmp(&a.1));
+        let mut text = format!("{total} samples in runs\n\nself\n");
+        for (n, c) in v.iter().take(60) {
+            text.push_str(&format!("{:6.2}%  {n}\n", pct(*c)));
+        }
+        let mut v: Vec<_> = incl.into_iter().collect();
+        v.sort_by(|a, b| b.1.cmp(&a.1));
+        text.push_str("\ninclusive\n");
+        for (n, c) in v.iter().take(100) {
+            text.push_str(&format!("{:6.2}%  {n}\n", pct(*c)));
+        }
+        let txt = svg.with_extension("txt");
+        let _ = std::fs::write(&txt, &text);
+        eprintln!("profile: {} and {}", svg.display(), txt.display());
+    }
+}
+
+#[cfg(not(feature = "profile"))]
+mod profile {
+    pub struct Prof;
+    pub fn start() -> Prof {
+        eprintln!("qvto bench: --profile needs the feature `profile` (cargo build --features profile)");
+        Prof
+    }
+    pub fn finish(_: Prof, _: &std::path::Path) {}
 }

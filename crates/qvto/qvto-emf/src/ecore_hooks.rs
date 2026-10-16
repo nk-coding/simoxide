@@ -200,6 +200,11 @@ fn is_containment(g: &Graph, f: ObjId) -> bool {
     )
 }
 
+/// The value of a derived list of Ecore (`eAllStructuralFeatures`, ...), computed.
+pub(crate) fn derived(g: &Graph, o: ObjId, f: FeatureId) -> Option<Vec<ObjId>> {
+    derived_list(g, o, f)
+}
+
 fn derived_list(g: &Graph, o: ObjId, f: FeatureId) -> Option<Vec<ObjId>> {
     let e = &g.ecore;
     Some(if f == e.class_all_super_types {

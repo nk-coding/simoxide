@@ -828,7 +828,30 @@ impl Graph {
 
     /// Index of `v` in the list (`indexOf`: identity for objects, `equals` for data).
     pub(crate) fn index_of(&self, o: ObjId, f: FeatureId, v: &Datum<'_, ObjId>) -> Option<usize> {
+        if self.hook(f) == Hook::None {
+            return match self.slot(o, f) {
+                Some(Slot::Refs(l, _)) => match v {
+                    Datum::Obj(x) => l.iter().position(|y| y == x),
+                    _ => None,
+                },
+                Some(Slot::Datas(l, _)) => l.iter().position(|y| y.as_datum().java_equals(v)),
+                _ => None,
+            };
+        }
         (0..self.op_len(o, f)).find(|&i| self.op_get_at(o, f, i).java_equals(v))
+    }
+
+    /// `contains` of a list (`EObjectContainmentEList.contains`: the object's container and
+    /// containing feature, without a scan).
+    pub(crate) fn list_contains(&self, o: ObjId, f: FeatureId, v: &Datum<'_, ObjId>) -> bool {
+        if let Datum::Obj(x) = v
+            && self.hook(f) == Hook::None
+            && self.meta.feature(f).containment
+            && matches!(self.slot(o, f), Some(Slot::Refs(..)))
+        {
+            return self.objs[x.index()].container == Some((o, f));
+        }
+        self.index_of(o, f, v).is_some()
     }
 
     pub(crate) fn op_add(
@@ -852,7 +875,7 @@ impl Graph {
                 size: len,
             });
         }
-        if unique && self.index_of(o, f, &v).is_some() {
+        if unique && self.list_contains(o, f, &v) {
             return match at {
                 None => Ok(false),
                 Some(_) => Err(ModelError::Duplicate(f)),
@@ -1307,6 +1330,20 @@ impl ModelStore for Graph {
     }
     fn len(&self, o: ObjId, f: FeatureId) -> usize {
         self.op_len(o, f)
+    }
+    fn get_list<'a>(&'a self, o: ObjId, f: FeatureId, out: &mut Vec<Datum<'a, ObjId>>) {
+        match self.hook(f) {
+            Hook::None => match self.slot(o, f) {
+                Some(Slot::Refs(v, _)) => out.extend(v.iter().map(|x| Datum::Obj(*x))),
+                Some(Slot::Datas(v, _)) => out.extend(v.iter().map(|x| x.as_datum())),
+                _ => {}
+            },
+            Hook::Derived => match ecore_hooks::derived(self, o, f) {
+                Some(v) => out.extend(v.into_iter().map(Datum::Obj)),
+                None => out.extend((0..self.op_len(o, f)).map(|i| self.op_get_at(o, f, i))),
+            },
+            _ => out.extend((0..self.op_len(o, f)).map(|i| self.op_get_at(o, f, i))),
+        }
     }
     fn get_at(&self, o: ObjId, f: FeatureId, i: usize) -> Datum<'_, ObjId> {
         self.op_get_at(o, f, i)
