@@ -332,8 +332,14 @@ mod tests {
             kinds("1..2"),
             [K::IntegerLiteral, K::Dotdot, K::IntegerLiteral, K::Eof]
         );
-        assert_eq!(kinds("1...*"), [K::IntegerLiteral, K::Dotdot, K::Dot, K::Multiply, K::Eof]);
-        assert_eq!(kinds("1 ...*"), [K::IntegerLiteral, K::MultiplicityRange, K::Multiply, K::Eof]);
+        assert_eq!(
+            kinds("1...*"),
+            [K::IntegerLiteral, K::Dotdot, K::Dot, K::Multiply, K::Eof]
+        );
+        assert_eq!(
+            kinds("1 ...*"),
+            [K::IntegerLiteral, K::MultiplicityRange, K::Multiply, K::Eof]
+        );
         assert_eq!(
             kinds("1.5e-3 2E7"),
             [K::RealLiteral, K::RealLiteral, K::Eof]
