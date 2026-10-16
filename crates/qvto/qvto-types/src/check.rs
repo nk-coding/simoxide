@@ -235,8 +235,13 @@ impl<'a> Checker<'a> {
         if t1 == t2 {
             return SAME_TYPE;
         }
-        if t1 == TypeId::NULL || t2 == TypeId::NULL {
+        if t1 == TypeId::NULL {
             return UNRELATED_TYPE;
+        }
+        if t2 == TypeId::NULL {
+            // AbstractTypeChecker: OclVoid and OclInvalid conform to anything, even to no type
+            let o1 = self.ocl_type(t1);
+            return if o1 == TypeId::OCL_VOID || o1 == TypeId::OCL_INVALID { STRICT_SUBTYPE } else { UNRELATED_TYPE };
         }
         if self.is_any(t1) {
             return if self.is_any(t2) {
