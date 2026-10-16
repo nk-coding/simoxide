@@ -37,9 +37,12 @@ fn main() {
         model.graph.objs.len(),
         model.containers.len()
     );
+    let t0 = std::time::Instant::now();
     let mut session = Session::new();
     session.set_id_policy(IdPolicy::Uuid { seed: 2026 });
     session.load_metamodel_text(SRM_LOCATION, SRM_ECORE).expect("runtime measurement metamodel");
+    println!("session (registry, metamodel objects, PRM metamodel): {:.1?}", t0.elapsed());
+    let t0 = std::time::Instant::now();
 
     // 2. the rule, compiled once; the clock
     let rule = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/rules/autoscale.qvto");
@@ -62,6 +65,7 @@ fn main() {
         }
     }
     let program = compiled.program.expect("the rule compiles");
+    println!("rule compiled: {:.1?}", t0.elapsed());
     let clock = Rc::new(Cell::new(0.0));
 
     // the PRM model: one measurement of a measuring point of the model's monitors
