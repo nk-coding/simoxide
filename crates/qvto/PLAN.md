@@ -6,7 +6,7 @@ Status values: done, next, open, parked.
 | | Milestone | Status | Can run in parallel with |
 |---|---|---|---|
 | Q0 | Research, resources, design, skeleton | done | — |
-| Q1a | Model API and own Ecore/XMI layer (`qvto-model`, `qvto-emf`) | next | Q1b, Q1c, Q1d |
+| Q1a | Model API and own Ecore/XMI layer (`qvto-model`, `qvto-emf`) | done | Q1b, Q1c, Q1d |
 | Q1b | Lexer and parser (`qvto-syntax`) | done | Q1a, Q1c, Q1d |
 | Q1c | Runtime values and Java-compatible primitives (`qvto-runtime` core) | next | Q1a, Q1b, Q1d |
 | Q1d | Reference harness: runner batch mode, canonical dump, conformance-runner skeleton (`qvto-testkit`) | next | Q1a, Q1b, Q1c |
@@ -24,6 +24,14 @@ Status values: done, next, open, parked.
 - **Q1a**: every `.ecore` and model file of the Eclipse test suite and of the SimuLizar/SPD
   corpora loads; XMI save of a loaded model equals EMF's save byte for byte on the suite's
   models; the canonical dump equals the Java runner's dump; the model-API contract tests pass.
+  Done 2026-10-16 (`crates/qvto-emf/README.md`, "Verification"; EMF 2.41 via
+  `crates/qvto-emf/oracle`): 544 of the suite's 546 model files load with EMF's errors, save
+  byte for byte and dump identically (2 AST models excluded, DESIGN Q1a-10); 640 PCM-side files
+  (SimOxide corpus, default models, Slingshot/SPD examples, SPD and SimuLizar metamodels) the
+  same; 300 random model-API scripts (15 321 operations, 1 200 saves of created models) give
+  EMF's results and states; the lenient comparer gives the Java comparer's verdict on 1 662 of
+  1 663 pairs (1 where Java throws); 20 contract checks pass on both metamodel paths. The Java
+  dump (`CanonDump.java`) is ready for the runner's `--dump` (Q1d).
 - **Q1b**: all 1 046 `.qvto` files of the suite and the 55 corpus files parse; files with
   expected syntax errors report errors; spans are exact; unparse/reparse round trip.
   Done 2026-10-16 (`crates/qvto-syntax/README.md`, "Verification"): on all 1 102 files the
