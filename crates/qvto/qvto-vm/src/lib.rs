@@ -14,6 +14,7 @@ mod calls;
 pub mod env;
 pub mod error;
 pub mod extent;
+mod jregex;
 mod log;
 mod objects;
 mod run;

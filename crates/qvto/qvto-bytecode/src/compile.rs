@@ -1400,7 +1400,7 @@ impl<'a> Builder<'a> {
         }
         if feature.is_some() || interm.is_some() {
             let cond = match (&r.cond, r.cond_var) {
-                (Some(c), Some(v)) => Some((self.sub_chunk_cond(c)?, self.local(v))),
+                (Some(c), Some(v)) => Some((self.out_of_line_cond(c)?, self.local(v))),
                 _ => None,
             };
             let site = self.site(Site::LateResolve {
@@ -1425,10 +1425,20 @@ impl<'a> Builder<'a> {
         Ok(())
     }
 
-    /// A condition compiled into a chunk of its own on this frame layout (late resolve
-    /// conditions run after the entry operation). Not supported yet: compiled inline later.
-    fn sub_chunk_cond(&mut self, _c: &Expr) -> CResult<ChunkId> {
-        err("late resolve with a condition is not supported yet")
+    /// A condition compiled out of line in this chunk (late resolve conditions run after the
+    /// entry operation, from the returned entry point on a fresh frame of the chunk's layout).
+    fn out_of_line_cond(&mut self, c: &Expr) -> CResult<u32> {
+        let j_over = self.jump(Insn::Jump { target: 0 });
+        let entry = self.pc();
+        let saved = std::mem::take(&mut self.ctl);
+        let m = self.mark();
+        let t = self.alloc()?;
+        self.expr(c, t)?;
+        self.emit(Insn::Return { src: t });
+        self.release(m);
+        self.ctl = saved;
+        self.patch(j_over);
+        Ok(entry)
     }
 
     // ---- resolve ----------------------------------------------------------------------------

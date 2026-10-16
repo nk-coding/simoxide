@@ -170,6 +170,7 @@ where
     /// Stderr-like messages of swallowed runtime errors (`Evaluation failed at ...`).
     pub errors: Vec<String>,
     pub(crate) class_local: Vec<bool>,
+    pub(crate) regexes: RefCell<HashMap<(String, bool), Result<regex::Regex, String>>>,
 }
 
 macro_rules! r {
@@ -210,6 +211,7 @@ where
             steps: 0,
             errors: Vec::new(),
             class_local: Vec::new(),
+            regexes: RefCell::new(HashMap::new()),
         };
         if let Some(src) = vm.opts.id_source.take() {
             vm.env = RunEnv::new(vm.opts.mode, Some(src));
@@ -286,18 +288,6 @@ where
 
     // ---- values -----------------------------------------------------------------------------
 
-    pub(crate) fn obj_ref(o: S::Obj) -> ObjRef {
-        ObjRef::host(o.to_u32())
-    }
-
-    pub(crate) fn host(r: ObjRef) -> Option<S::Obj> {
-        if r.is_local() {
-            None
-        } else {
-            Some(S::Obj::from_u32(r.index()))
-        }
-    }
-
     pub(crate) fn new_coll(&self, kind: u8) -> Value {
         use qvto_bytecode::insn::coll_kind as k;
         match kind {
@@ -320,14 +310,49 @@ where
         Ok(())
     }
 
+    /// A compiled `Pattern.matches` pattern (cached).
+    pub(crate) fn regex(&self, p: &Str) -> Result<regex::Regex, String> {
+        self.regex_kind(p, true)
+    }
+
+    /// A compiled pattern for `replaceAll`/`replaceFirst` (cached).
+    pub(crate) fn regex_find(&self, p: &Str) -> Result<regex::Regex, String> {
+        self.regex_kind(p, false)
+    }
+
+    fn regex_kind(&self, p: &Str, full: bool) -> Result<regex::Regex, String> {
+        let key = (p.to_str_lossy().into_owned(), full);
+        if let Some(r) = self.regexes.borrow().get(&key) {
+            return r.clone();
+        }
+        let r = if full {
+            crate::jregex::compile_full(&key.0)
+        } else {
+            crate::jregex::compile_find(&key.0)
+        };
+        self.regexes.borrow_mut().insert(key, r.clone());
+        r
+    }
+
     // ---- execution --------------------------------------------------------------------------
 
     /// Runs a chunk on the frame at `base` (registers) and `ibase` (iteration slots) until it
     /// returns; `try` handlers of the chunk catch QVT exceptions.
     pub(crate) fn exec(&mut self, cid: ChunkId, base: usize, ibase: usize) -> VmResult<Value> {
+        self.exec_at(cid, base, ibase, 0)
+    }
+
+    /// [`Vm::exec`] from an entry point inside the chunk.
+    pub(crate) fn exec_at(
+        &mut self,
+        cid: ChunkId,
+        base: usize,
+        ibase: usize,
+        start: u32,
+    ) -> VmResult<Value> {
         let prog = self.prog;
         let chunk = prog.chunk(cid);
-        let mut pc: u32 = 0;
+        let mut pc: u32 = start;
         loop {
             match self.run(cid, base, ibase, &mut pc) {
                 Ok(v) => return Ok(v),

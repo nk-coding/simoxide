@@ -3,7 +3,9 @@
 #![allow(dead_code)]
 
 use qvto_emf::Graph;
-use qvto_model::{ClassId, Classifier, FeatureId, FeatureKind, MetaRegistry, ModelStore, PackageId};
+use qvto_model::{
+    ClassId, Classifier, FeatureId, FeatureKind, MetaRegistry, ModelStore, PackageId,
+};
 use qvto_sema::ir::*;
 use qvto_syntax::{LineIndex, Span};
 use qvto_types::{CollKind, Section, StdClasses, StdOp, StdOwner, Type, TypeId, TypeTable, stdlib};
@@ -158,7 +160,13 @@ impl Irb {
         self.p.types.collection(k, el)
     }
 
-    pub fn op(&mut self, name: &str, kind: OpKind, context: Option<TypeId>, result: TypeId) -> OpId {
+    pub fn op(
+        &mut self,
+        name: &str,
+        kind: OpKind,
+        context: Option<TypeId>,
+        result: TypeId,
+    ) -> OpId {
         let id = OpId(self.p.operations.len() as u32);
         self.p.operations.push(Operation {
             module: ModuleId(0),
@@ -269,13 +277,19 @@ impl Irb {
 
     pub fn class(&mut self, p: PackageId, name: &str, supers: &[ClassId]) -> ClassId {
         let c = self.graph.meta_mut().add_class(p, name, false, false);
-        self.graph.meta_mut().class_mut(c).supers.extend_from_slice(supers);
+        self.graph
+            .meta_mut()
+            .class_mut(c)
+            .supers
+            .extend_from_slice(supers);
         c
     }
 
     pub fn attr(&mut self, c: ClassId, name: &str, dt: &str, many: bool) -> FeatureId {
         let meta = self.graph.meta();
-        let ecore = meta.package_by_ns_uri("http://www.eclipse.org/emf/2002/Ecore").unwrap();
+        let ecore = meta
+            .package_by_ns_uri("http://www.eclipse.org/emf/2002/Ecore")
+            .unwrap();
         let ty = meta.classifier_by_name(ecore, dt).unwrap();
         let f = self
             .graph
@@ -287,11 +301,20 @@ impl Irb {
         f
     }
 
-    pub fn reference(&mut self, c: ClassId, name: &str, to: ClassId, many: bool, containment: bool) -> FeatureId {
-        let f = self
-            .graph
-            .meta_mut()
-            .add_feature(c, name, FeatureKind::Reference, Classifier::Class(to));
+    pub fn reference(
+        &mut self,
+        c: ClassId,
+        name: &str,
+        to: ClassId,
+        many: bool,
+        containment: bool,
+    ) -> FeatureId {
+        let f = self.graph.meta_mut().add_feature(
+            c,
+            name,
+            FeatureKind::Reference,
+            Classifier::Class(to),
+        );
         let fi = self.graph.meta_mut().feature_mut(f);
         if many {
             fi.upper = -1;
@@ -344,7 +367,11 @@ impl Irb {
         self.run_with(RunOptions::default(), Vec::new())
     }
 
-    pub fn run_with(mut self, opts: RunOptions, args: Vec<Vec<qvto_emf::ObjId>>) -> (RunOutcome, String) {
+    pub fn run_with(
+        mut self,
+        opts: RunOptions,
+        args: Vec<Vec<qvto_emf::ObjId>>,
+    ) -> (RunOutcome, String) {
         let prog = qvto_bytecode::compile(self.p).expect("compile");
         let mut args = args;
         let n = prog.ir.modules[0].model_params.len();
@@ -386,14 +413,31 @@ pub fn var_init(l: LocalId, init: Option<Expr>) -> Expr {
 }
 
 pub fn to_string(x: Expr) -> Expr {
-    std(sop(StdOwner::OclAny, "toString", 0), Some(x), vec![], TypeId::STRING)
+    std(
+        sop(StdOwner::OclAny, "toString", 0),
+        Some(x),
+        vec![],
+        TypeId::STRING,
+    )
 }
 
 pub fn repr(x: Expr) -> Expr {
-    std(sop(StdOwner::OclAny, "repr", 0), Some(x), vec![], TypeId::STRING)
+    std(
+        sop(StdOwner::OclAny, "repr", 0),
+        Some(x),
+        vec![],
+        TypeId::STRING,
+    )
 }
 
-pub fn lp(kind: LoopKind, src: Expr, it: LocalId, body: Option<Expr>, cond: Option<Expr>, ty: TypeId) -> Expr {
+pub fn lp(
+    kind: LoopKind,
+    src: Expr,
+    it: LocalId,
+    body: Option<Expr>,
+    cond: Option<Expr>,
+    ty: TypeId,
+) -> Expr {
     e(
         ExprKind::Loop(Box::new(Loop {
             kind,
@@ -419,7 +463,10 @@ pub fn coll_lit(k: CollKind, items: Vec<Expr>, ty: TypeId) -> Expr {
 pub fn call(op: OpId, src: Option<Expr>, args: Vec<Expr>, ty: TypeId) -> Expr {
     e(
         ExprKind::Call(Box::new(Call {
-            callee: Callee::Op { op, virtual_: false },
+            callee: Callee::Op {
+                op,
+                virtual_: false,
+            },
             source: src,
             args,
         })),

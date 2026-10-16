@@ -93,9 +93,9 @@ pub enum Site {
         source_is_coll: bool,
         mapping: Option<OpId>,
         target_ty: Option<TypeId>,
-        /// The condition, compiled into its own chunk on the operation's frame layout; the
-        /// variable is `cond_var`.
-        cond: Option<(ChunkId, Reg)>,
+        /// The condition: its entry point in the same chunk (run on a fresh frame of the
+        /// chunk's layout) and the register of the condition's variable.
+        cond: Option<(u32, Reg)>,
         /// The assigned property and `+=`.
         feature: Option<FeatureId>,
         interm: Option<IntermPropId>,

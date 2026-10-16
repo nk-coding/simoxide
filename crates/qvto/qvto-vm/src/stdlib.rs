@@ -483,10 +483,6 @@ fn is_coll(v: &Value) -> bool {
     matches!(v, Value::Coll(_) | Value::List(_) | Value::Dict(_))
 }
 
-fn str_of(v: &Value) -> Option<&Str> {
-    v.as_str()
-}
-
 /// Parses a data type literal (`new T('lit')`, configuration properties).
 pub(crate) fn parse_data_value(k: DataKind, s: &str) -> Option<Value> {
     let units: Vec<u16> = s.encode_utf16().collect();
@@ -777,12 +773,35 @@ where
                     },
                 }
             }
-            Matches | ReplaceAll | ReplaceFirst | SMatch => {
-                let m = format!(
-                    "regular expressions ({}) are not supported yet",
-                    op.desc().name
-                );
-                self.swallow(m)
+            Matches | SMatch => match (&s, &a1) {
+                (Value::Str(x), Value::Str(p)) => match self.regex(p) {
+                    Ok(re) => Value::Bool(re.is_match(&x.to_str_lossy())),
+                    Err(m) => self.swallow(m),
+                },
+                _ => Value::Invalid,
+            },
+            ReplaceAll | ReplaceFirst => {
+                let a2 = args.get(2).cloned().unwrap_or(Value::Null);
+                match (&s, &a1, &a2) {
+                    (Value::Str(x), Value::Str(p), Value::Str(r)) => {
+                        match (
+                            self.regex_find(p),
+                            crate::jregex::replacement(&r.to_str_lossy()),
+                        ) {
+                            (Ok(re), Ok(rep)) => {
+                                let text = x.to_str_lossy();
+                                let out = if prim == ReplaceAll {
+                                    re.replace_all(&text, rep.as_str()).into_owned()
+                                } else {
+                                    re.replacen(&text, 1, rep.as_str()).into_owned()
+                                };
+                                Value::str(&out)
+                            }
+                            (Err(m), _) | (_, Err(m)) => self.swallow(m),
+                        }
+                    }
+                    _ => Value::Invalid,
+                }
             }
             AllInstances => match type_arg(&s) {
                 Some(t) => self.all_instances(t),
@@ -1209,11 +1228,10 @@ where
                 }
                 Value::Coll(Rc::new(set))
             }
-            EClone | EDeepclone => {
-                return Err(
-                    self.runtime_error(format!("{}() is not supported yet", op.desc().name))
-                );
-            }
+            EClone | EDeepclone => match &s {
+                Value::Obj(r) => self.copy_object(*r, prim == EDeepclone)?,
+                _ => Value::Invalid,
+            },
             ExGetArgument => match &s {
                 Value::Obj(r) if r.is_local() => match &self.local[r.index() as usize].exception {
                     Some((Some(m), _)) => Value::str(m),

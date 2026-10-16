@@ -250,6 +250,34 @@ where
         })
     }
 
+    /// Evaluates a late resolve's condition for one candidate on a fresh frame.
+    fn late_cond(
+        &mut self,
+        chunk: qvto_bytecode::ChunkId,
+        entry: u32,
+        var: u16,
+        cand: Value,
+    ) -> VmResult<bool> {
+        let c = self.prog.chunk(chunk);
+        let base = self.regs.len();
+        self.regs.resize(base + c.nregs as usize, Value::Null);
+        let ibase = self.iters.len();
+        self.iters
+            .resize(ibase + c.n_iters as usize, crate::vm::IterSlot::Empty);
+        self.regs[base + var as usize] = cand;
+        self.frames.push(crate::vm::Frame {
+            op: None,
+            module: c.module,
+            chunk,
+            pc: entry,
+        });
+        let r = self.exec_at(chunk, base, ibase, entry);
+        self.frames.pop();
+        self.regs.truncate(base);
+        self.iters.truncate(ibase);
+        Ok(r?.is_true())
+    }
+
     /// Late resolve assignments, first in first out, after the entry operation.
     fn process_deferred(&mut self) -> VmResult<()> {
         let mut i = 0;
@@ -263,23 +291,45 @@ where
                 source_is_coll,
                 mapping,
                 target_ty,
+                cond,
                 feature,
                 interm,
                 add,
                 conversion,
-                ..
             } = site
             else {
                 continue;
             };
+            let all_kind = if kind.is_inverse() {
+                qvto_sema::ir::ResolveKind::InvResolve
+            } else {
+                qvto_sema::ir::ResolveKind::Resolve
+            };
             let rs = Site::Resolve {
-                kind,
+                kind: if cond.is_some() { all_kind } else { kind },
                 has_source,
                 source_is_coll,
                 mapping,
                 target_ty,
             };
             let mut v = self.resolve(&rs, t.source.clone());
+            if let Some((entry, var)) = cond {
+                let cands = crate::vm::Iter::of(&v).items;
+                let mut kept = Vec::new();
+                for c in cands.iter() {
+                    if self.late_cond(t.chunk, entry, var, c.clone())? {
+                        kept.push(c.clone());
+                        if kind.is_one() {
+                            break;
+                        }
+                    }
+                }
+                v = if kind.is_one() {
+                    kept.into_iter().next().unwrap_or(Value::Null)
+                } else {
+                    Value::Coll(std::rc::Rc::new(qvto_runtime::coll::Coll::Sequence(kept)))
+                };
+            }
             if let Some(op) = conversion {
                 let base = self.regs.len();
                 self.regs.push(v);

@@ -19,6 +19,7 @@ qvto-sema.workspace = true
 qvto-bytecode.workspace = true
 qvto-runtime.workspace = true
 qvto-emf = { workspace = true, optional = true }
+regex = { version = "1", default-features = false, features = ["std", "unicode"] }
 
 [dev-dependencies]
 qvto-emf.workspace = true

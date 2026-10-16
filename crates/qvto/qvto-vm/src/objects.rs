@@ -760,6 +760,121 @@ where
         self.interm.insert((*r, p), nv);
     }
 
+    // ---- copies ------------------------------------------------------------------------------
+
+    /// `Element::clone()` (no containment copied) and `deepclone()` (`EcoreUtil.Copier`:
+    /// containment copied, references to copied objects redirected, other references kept),
+    /// the copy added to the default extent of its class.
+    pub(crate) fn copy_object(&mut self, r: ObjRef, deep: bool) -> VmResult<Value> {
+        if r.is_local() {
+            let lo = self.local[r.index() as usize].clone();
+            self.local.push(lo);
+            let c = ObjRef::local((self.local.len() - 1) as u32);
+            return Ok(Value::Obj(c));
+        }
+        let mut map: Vec<(S::Obj, S::Obj)> = Vec::new();
+        let src = S::Obj::from_u32(r.index());
+        let copy = match self.copy_rec(src, deep, &mut map) {
+            Ok(c) => c,
+            Err(e) => return Ok(self.swallow(model_error_text(&e))),
+        };
+        // copyReferences
+        let meta = &self.prog.ir.meta;
+        for &(o, c) in &map {
+            let class = self.store.class_of(o);
+            let feats: Vec<FeatureId> = meta.class(class).all_features.to_vec();
+            for f in feats {
+                let fi = meta.feature(f);
+                if !fi.is_reference() || fi.containment || !fi.changeable || fi.derived {
+                    continue;
+                }
+                if meta.is_container(f) || !self.store.is_set(o, f) {
+                    continue;
+                }
+                let map_target = |t: S::Obj| -> Option<S::Obj> {
+                    match map.iter().find(|(x, _)| *x == t) {
+                        Some((_, y)) => Some(*y),
+                        None => fi.opposite.is_none().then_some(t),
+                    }
+                };
+                if fi.is_many() {
+                    let n = self.store.len(o, f);
+                    let targets: Vec<S::Obj> = (0..n)
+                        .filter_map(|i| self.store.get_at(o, f, i).as_obj())
+                        .collect();
+                    for t in targets {
+                        if let Some(ct) = map_target(t) {
+                            let _ = self.store.add(c, f, Datum::Obj(ct), None);
+                        }
+                    }
+                } else if let Some(t) = self.store.get(o, f).as_obj()
+                    && let Some(ct) = map_target(t)
+                {
+                    let _ = self.store.set(c, f, Datum::Obj(ct));
+                }
+            }
+        }
+        let cr = ObjRef::host(copy.to_u32());
+        let class = self.store.class_of(copy);
+        let x = self.default_extent(class, None);
+        if !deep {
+            let contents: Vec<S::Obj> = self.store.all_contents(copy);
+            for o in contents {
+                self.put_to_extent(ObjRef::host(o.to_u32()), x)?;
+            }
+        }
+        self.put_to_extent(cr, x)?;
+        Ok(Value::Obj(cr))
+    }
+
+    fn copy_rec(
+        &mut self,
+        o: S::Obj,
+        deep: bool,
+        map: &mut Vec<(S::Obj, S::Obj)>,
+    ) -> Result<S::Obj, ModelError> {
+        let class = self.store.class_of(o);
+        let c = self.store.create(class)?;
+        map.push((o, c));
+        let meta = &self.prog.ir.meta;
+        let feats: Vec<FeatureId> = meta.class(class).all_features.to_vec();
+        for f in feats {
+            let fi = meta.feature(f);
+            if !fi.changeable || fi.derived || !self.store.is_set(o, f) {
+                continue;
+            }
+            if fi.is_attribute() {
+                if fi.is_many() {
+                    let n = self.store.len(o, f);
+                    let vals: Vec<OwnedDatum<S::Obj>> = (0..n)
+                        .map(|i| self.store.get_at(o, f, i).to_owned())
+                        .collect();
+                    for v in &vals {
+                        self.store.add(c, f, v.as_datum(), None)?;
+                    }
+                } else {
+                    let v = self.store.get(o, f).to_owned();
+                    self.store.set(c, f, v.as_datum())?;
+                }
+            } else if fi.containment && deep {
+                if fi.is_many() {
+                    let n = self.store.len(o, f);
+                    let kids: Vec<S::Obj> = (0..n)
+                        .filter_map(|i| self.store.get_at(o, f, i).as_obj())
+                        .collect();
+                    for k in kids {
+                        let kc = self.copy_rec(k, deep, map)?;
+                        self.store.add(c, f, Datum::Obj(kc), None)?;
+                    }
+                } else if let Some(k) = self.store.get(o, f).as_obj() {
+                    let kc = self.copy_rec(k, deep, map)?;
+                    self.store.set(c, f, Datum::Obj(kc))?;
+                }
+            }
+        }
+        Ok(c)
+    }
+
     // ---- metamodel operations ---------------------------------------------------------------
 
     /// Operations of metamodels the VM knows (Ecore's `EObject` operations).

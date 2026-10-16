@@ -19,11 +19,29 @@ fn arithmetic_and_strings() {
     let mut t = Irb::new("");
     t.main(vec![
         log(to_string(bin(StdOwner::Integer, "+", int(1), int(2), I))),
-        log(to_string(bin(StdOwner::Integer, "/", int(7), int(2), TypeId::REAL))),
+        log(to_string(bin(
+            StdOwner::Integer,
+            "/",
+            int(7),
+            int(2),
+            TypeId::REAL,
+        ))),
         log(bin(StdOwner::String, "+", s("a"), s("b"), S)),
         log(repr(bin(StdOwner::Integer, "div", int(10), int(3), I))),
-        log(to_string(bin(StdOwner::Integer, "*", int(1 << 40), int(1 << 30), I))),
-        log(to_string(bin(StdOwner::Integer, "/", int(1), int(0), TypeId::REAL))),
+        log(to_string(bin(
+            StdOwner::Integer,
+            "*",
+            int(1 << 40),
+            int(1 << 30),
+            I,
+        ))),
+        log(to_string(bin(
+            StdOwner::Integer,
+            "/",
+            int(1),
+            int(0),
+            TypeId::REAL,
+        ))),
     ]);
     let (out, log) = t.run();
     assert_eq!(out.severity, 0, "{out:?}");
@@ -50,15 +68,27 @@ fn variables_if_while_switch() {
         ),
         assign(
             acc,
-            bin(StdOwner::String, "+", local(acc, S), to_string(local(i, I)), S),
+            bin(
+                StdOwner::String,
+                "+",
+                local(acc, S),
+                to_string(local(i, I)),
+                S,
+            ),
             S,
         ),
     ]);
     let sw = e(
         ExprKind::Switch(
             vec![
-                (bin(StdOwner::Integer, "<", local(i, I), int(3), B), s("small")),
-                (bin(StdOwner::Integer, "=", local(i, I), int(5), B), s("five")),
+                (
+                    bin(StdOwner::Integer, "<", local(i, I), int(3), B),
+                    s("small"),
+                ),
+                (
+                    bin(StdOwner::Integer, "=", local(i, I), int(5), B),
+                    s("five"),
+                ),
             ],
             Some(Box::new(s("other"))),
         ),
@@ -72,7 +102,11 @@ fn variables_if_while_switch() {
         log(sw),
         // if with an undefined condition is invalid
         log(e(
-            ExprKind::If(Box::new(e(ExprKind::Null, B)), Box::new(s("x")), Some(Box::new(s("y")))),
+            ExprKind::If(
+                Box::new(e(ExprKind::Null, B)),
+                Box::new(s("x")),
+                Some(Box::new(s("y"))),
+            ),
             S,
         )),
     ]);
@@ -89,7 +123,13 @@ fn boolean_lax_null() {
         log(to_string(bin(StdOwner::Boolean, "and", b(true), nb(), B))),
         log(to_string(bin(StdOwner::Boolean, "and", b(false), nb(), B))),
         log(to_string(bin(StdOwner::Boolean, "or", nb(), b(true), B))),
-        log(to_string(bin(StdOwner::Boolean, "implies", b(true), b(false), B))),
+        log(to_string(bin(
+            StdOwner::Boolean,
+            "implies",
+            b(true),
+            b(false),
+            B,
+        ))),
     ]);
     let (_, log) = t.run();
     assert_eq!(log, "invalid\nfalse\ntrue\nfalse\n");
@@ -143,7 +183,12 @@ fn helper_calls_and_stack_overflow() {
     let f = t.op("fact", OpKind::Helper, None, I);
     let n = t.param(f, "n", I, Direction::In);
     set_pos(5);
-    let rec = call(f, None, vec![bin(StdOwner::Integer, "-", local(n, I), int(1), I)], I);
+    let rec = call(
+        f,
+        None,
+        vec![bin(StdOwner::Integer, "-", local(n, I), int(1), I)],
+        I,
+    );
     t.body(
         f,
         vec![at(
@@ -169,12 +214,18 @@ fn helper_calls_and_stack_overflow() {
     };
     let (out, log) = t.run_with(opts, vec![]);
     let err = out.error.expect("stack overflow");
-    assert_eq!(err.java_class(), "org.eclipse.m2m.internal.qvt.oml.evaluator.QvtStackOverFlowError");
+    assert_eq!(
+        err.java_class(),
+        "org.eclipse.m2m.internal.qvt.oml.evaluator.QvtStackOverFlowError"
+    );
     assert_eq!(out.message, "QVT Stack overflow occured during execution");
     assert_eq!(out.code, 120);
     assert!(log.starts_with("120\nTerminating execution...\norg.eclipse.m2m.internal.qvt.oml.evaluator.QvtStackOverFlowError: Stack depth: 10\n\tat test::fact(test.qvto:2)\n"), "{log}");
     assert_eq!(err.stack.len(), 9);
-    assert_eq!(err.stack.last().unwrap().to_string(), "test::main(test.qvto:1)");
+    assert_eq!(
+        err.stack.last().unwrap().to_string(),
+        "test::main(test.qvto:1)"
+    );
 }
 
 #[test]
@@ -195,7 +246,10 @@ fn raise_and_try() {
         ExprKind::Try(Box::new(Try {
             body: block(vec![
                 log(s("a")),
-                e(ExprKind::Raise(Some(exc_class), Some(Box::new(s("boom")))), V),
+                e(
+                    ExprKind::Raise(Some(exc_class), Some(Box::new(s("boom")))),
+                    V,
+                ),
                 log(s("b")),
             ]),
             catches: vec![Catch {
@@ -323,7 +377,13 @@ fn mappings_objects_traces_resolve() {
         var_init(a, Some(obj_a)),
         var_init(b1, Some(map(mp, Some(local(a, ta)), vec![], tb, false))),
         var_init(b2, Some(map(mp, Some(local(a, ta)), vec![], tb, false))),
-        log(to_string(bin(StdOwner::OclAny, "=", local(b1, tb), local(b2, tb), B))),
+        log(to_string(bin(
+            StdOwner::OclAny,
+            "=",
+            local(b1, tb),
+            local(b2, tb),
+            B,
+        ))),
         log(e(ExprKind::Prop(Box::new(local(b1, tb)), fbn), S)),
         log(e(ExprKind::Prop(Box::new(resolved), fbn), S)),
     ]);
@@ -364,14 +424,24 @@ fn collections_kinds_and_dict_list() {
     let dict = t.ty(Type::Dict(S, I));
     let l = t.var(m, "l", list_i);
     let d = t.var(m, "d", dict);
-    let add = std(sop(StdOwner::List, "add", 1), Some(local(l, list_i)), vec![int(5)], V);
+    let add = std(
+        sop(StdOwner::List, "add", 1),
+        Some(local(l, list_i)),
+        vec![int(5)],
+        V,
+    );
     let put = std(
         sop(StdOwner::Dict, "put", 2),
         Some(local(d, dict)),
         vec![s("k"), int(7)],
         V,
     );
-    let get = std(sop(StdOwner::Dict, "get", 1), Some(local(d, dict)), vec![s("k")], I);
+    let get = std(
+        sop(StdOwner::Dict, "get", 1),
+        Some(local(d, dict)),
+        vec![s("k")],
+        I,
+    );
     t.main(vec![
         log(repr(coll_lit(
             CollKind::Set,
@@ -444,7 +514,7 @@ fn objects_in_out_extent_and_store() {
         var_init(a, Some(obj)),
         log(repr(e(ExprKind::Prop(Box::new(local(a, ta)), fl), seq))),
     ]);
-    let mut graph_check = None;
+    let graph_check;
     let (out, log) = {
         let prog = qvto_bytecode::compile(t.p).unwrap();
         let mut vm = qvto_vm::Vm::new(&prog, &mut t.graph, RunOptions::default());
