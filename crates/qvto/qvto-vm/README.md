@@ -59,27 +59,52 @@ print!("{}", vm.log);                                              // WriterLog'
 ## Coverage (Q3a)
 
 Implemented: all instructions of the bytecode; helpers, queries, constructors, contextual
-operations with virtual dispatch; mappings with `when`, `where`, `init`, population, `end`,
-traces, `inherits`, `merges`, `disjuncts`, `out`/`inout` parameters, `map`/`xmap`, results as
-tuples; `object`, `new` (classes, data types, collections), extents; navigation, assignment
-(`:=`, `+=`, many-valued features with `ECollections.setEList`); `resolve`, `resolveone`,
-`resolveIn`, `invresolve`, `late resolve` (property assignments, conditions); `log`, `assert`,
-`raise`, `try`/`except`; module and configuration properties, model type `where`; the standard
-library except the parts below; `clone`, `deepclone`; Java regular expressions that the `regex`
-crate accepts.
+operations with virtual dispatch (`null` dispatches as OclVoid); mappings with `when`, `where`,
+`init`, population, `end`, traces, `inherits`, `merges`, `disjuncts`, `out`/`inout` parameters,
+`map`/`xmap`, results as tuples; `object`, `new` (classes, data types, collections), extents
+(with Eclipse's purge, the evaluation result of legacy entries, failed runs writing nothing
+back, model parameters of other transformations bound as `ModelParameterHelper` does);
+navigation, assignment (`:=`, `+=`, many-valued features with `ECollections.setEList`);
+`resolve`, `resolveone`, `resolveIn`, `invresolve`, `late resolve` (property assignments,
+conditions); `log`, `assert`, `raise`, `try`/`except`; module and configuration properties,
+model type `where`; nested transformations (`new T(...)`, `transform()`, `Status`); the
+standard library except the parts below; `clone`, `deepclone`; Java regular expressions that
+the `regex` crate accepts.
 
-Not yet (Q4): blackboxes (Java libraries; `No blackbox implementation found`), nested
-transformations (`new T(...)`, `transform()`, `Status`), `Model::copy`/`createEmptyModel`,
-`Collection::product`, metamodel operations other than `eContainer`/`eContents`/`eAllContents`/
-`eIsProxy` (no OCL bodies of EOperations), the identity-hash tape in the conformance adapter,
-`unlink`, incremental update traces.
+Not yet (Q4): blackboxes (Java libraries; `No blackbox implementation found`), blackbox
+transformations, `Model::copy`/`createEmptyModel`, `Collection::product`, metamodel operations
+other than `eContainer`/`eContents`/`eAllContents`/`eIsProxy` (no OCL bodies of EOperations),
+`unlink`, incremental update traces, per-instance properties of nested transformations.
 
 ## Verification
 
-`cargo test -p qvto-vm`: the primitive table covers every operation of the standard library
-table; programs on hand-written IR cover arithmetic and strings, null/invalid logic, iterators
-(including `closure`, `iterate`, `xselect`, `xcollect`, `sortedBy`), calls and stack overflow
-with Eclipse's stack trace text, `raise`/`try`, fatal assertions, mappings with traces and
-`resolveone`, `when` and `xmap`, out parameters, disjuncts, virtual dispatch, collections, `Dict`
-and `List`, objects in out extents. End-to-end conformance runs through `qvto conform --engine
-qvto` once the analyser produces the IR (see `PLAN.md`).
+- `cargo test -p qvto-vm`: the primitive table covers every operation of the standard library
+  table; programs on hand-written IR cover arithmetic and strings, null/invalid logic,
+  iterators (including `closure`, `iterate`, `xselect`, `xcollect`, `sortedBy`), calls and stack
+  overflow with Eclipse's stack trace text, `raise`/`try`, fatal assertions, mappings with
+  traces and `resolveone`, `when` and `xmap`, out parameters, disjuncts, virtual dispatch,
+  collections, `Dict` and `List`, objects in out extents.
+- End to end (`qvto conform --engine qvto`, the analyser of branch `q2` in progress): 338 of
+  the 494 runnable Eclipse cases equal the Java runner strictly (models, log, severity, code,
+  stack, problems), 339 pass Eclipse's checks; `TestQvtInterpreter` 192 of 309. Of the
+  failures, 114 are cases the analyser rejects and 29 parser cases with other diagnostics;
+  most others trace back to the analyser's output (source ids in stack traces, `raise 'msg'`,
+  overloads) or Q4 features. Corpus: 5 of 24 (the others do not compile yet).
+- Performance (`qvto bench --java`, release build, median of 20 runs; Java: the reference
+  runner, same cases repeated in one JVM, median of the second half):
+
+  | Case | qvto-rs run | Java run (warm) |
+  |---|---:|---:|
+  | `interpret_operation_override` | 0.046 ms | 9.0 ms |
+  | `interpret_overload_multipleParams` | 0.033 ms | 8.2 ms |
+  | `interpret_resolve_resolveoneIn` | 0.035 ms | 2.6 ms |
+  | `interpret_iteratetest` | 0.027 ms | 2.6 ms |
+  | `interpret_bug233984` | 0.036 ms | 3.0 ms |
+  | `simulizar_runconfigtest_scaleUp_high` | 0.052 ms | 7.7 ms |
+  | `simulizar_runconfigtest_addNewServer_high` | 0.073 ms | 6.7 ms |
+  | `simulizar_runconfigtest_addClonedServer_low` | 0.042 ms | 4.7 ms |
+
+  Compiling (parse, analysis, bytecode) takes 0.1–0.5 ms per case. Micro benchmarks
+  (`examples/micro.qvto` through `qvto run --repeat`, Java `qvto-run --repeat`, warm):
+  1M-iteration arithmetic loop 15 ms vs 118 ms, `fib(25)` 12.8 ms vs 51 ms, `select`/`collect`/
+  `sum` over 100 000 integers 5.4 ms vs 12 ms, 20 000 `including`s in a loop 1.7 ms vs 5.1 s.
