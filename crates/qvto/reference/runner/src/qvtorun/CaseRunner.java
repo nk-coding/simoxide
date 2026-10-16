@@ -372,7 +372,34 @@ final class CaseRunner {
 		if (saveXmi) {
 			Map<Object, Object> opts = new HashMap<>();
 			opts.put(XMLResource.OPTION_ENCODING, "UTF-8");
-			for (Resource r : outs) r.save(opts);
+			opts.put(XMLResource.OPTION_PROCESS_DANGLING_HREF, XMLResource.OPTION_PROCESS_DANGLING_HREF_RECORD);
+			// the inputs as the run left them (inout changes, cross-resource containment), under their
+			// own file names so that references keep their labels
+			Path inDir = dir.resolve("inputs");
+			Files.createDirectories(inDir);
+			List<Resource> models = new ArrayList<>();
+			List<URI> mmUris = new ArrayList<>();
+			for (String mm : job.mmfiles) mmUris.add(fileUri(job.path(mm)));
+			for (Resource r : new ArrayList<>(resSet.getResources())) {
+				if (r.getURI() != null && r.getURI().isFile() && !mmUris.contains(r.getURI())) models.add(r);
+			}
+			for (Resource r : models) {
+				r.setURI(URI.createFileURI(inDir.resolve(r.getURI().lastSegment()).toAbsolutePath().toString()));
+			}
+			for (Resource r : models) {
+				try {
+					r.save(opts);
+				} catch (IOException e) {
+					diag.append("save\t").append(oneLine(e.toString())).append('\n');
+				}
+			}
+			for (Resource r : outs) {
+				try {
+					r.save(opts);
+				} catch (IOException e) {
+					diag.append("save\t").append(oneLine(e.toString())).append('\n');
+				}
+			}
 		}
 		if (snap != null) Tape.write(dir.resolve("idtape.tsv"), seed, snap);
 		finish(dir, result, diag, logText, stack, o);

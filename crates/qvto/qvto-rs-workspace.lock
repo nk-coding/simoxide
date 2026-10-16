@@ -131,6 +131,7 @@ name = "qvto-cli"
 version = "0.1.0"
 dependencies = [
  "qvto",
+ "qvto-emf",
  "qvto-testkit",
 ]
 
@@ -174,7 +175,6 @@ version = "0.1.0"
 name = "qvto-testkit"
 version = "0.1.0"
 dependencies = [
- "qvto",
  "qvto-emf",
  "qvto-model",
 ]

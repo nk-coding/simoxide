@@ -14,3 +14,4 @@ path = "src/main.rs"
 [dependencies]
 qvto.workspace = true
 qvto-testkit.workspace = true
+qvto-emf.workspace = true
