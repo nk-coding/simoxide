@@ -318,6 +318,9 @@ pub struct Operation {
     /// The declaration (Eclipse's `MappingDeclarationCS`).
     pub decl_span: Span,
     pub span: Span,
+    /// The Java method implementing an operation of a Java blackbox library
+    /// (`pkg.Class#name(java.lang.String, ...)`).
+    pub blackbox_impl: Option<String>,
 }
 
 #[derive(Clone, Debug)]

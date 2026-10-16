@@ -15,6 +15,7 @@ pub mod ir;
 pub mod messages;
 
 mod analyzer;
+mod blackbox;
 mod env;
 mod expr;
 mod lookup;
@@ -28,5 +29,6 @@ mod ocltypes;
 mod validate;
 mod vars;
 
+pub use blackbox::{BlackboxModule, BlackboxOp, BlackboxOpKind, BlackboxParam, BlackboxUnit};
 pub use diag::{Problem, Problems, Severity};
 pub use units::{compile, scan_metamodel_uris, Compilation, UnitResolver, UnitResult, UnitSource};

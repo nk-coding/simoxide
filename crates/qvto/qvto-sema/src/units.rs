@@ -23,6 +23,8 @@ pub struct UnitSource {
     pub file_name: String,
     pub path: Option<PathBuf>,
     pub text: Rc<str>,
+    /// A Java blackbox unit (no text): its modules and signatures.
+    pub blackbox: Option<Rc<crate::blackbox::BlackboxUnit>>,
 }
 
 impl UnitSource {
@@ -309,6 +311,9 @@ impl<'r> Sema<'r> {
         if let Some(&u) = self.unit_index.get(&source.key) {
             return u;
         }
+        if let Some(bb) = source.blackbox.clone() {
+            return self.compile_blackbox_unit(source, &bb);
+        }
         let text = source.text.clone();
         let parsed = qvto_syntax::parse(&text);
         let lines = LineIndex::new(&text);
@@ -384,6 +389,46 @@ impl<'r> Sema<'r> {
             self.analyze_unit(uidx, &modules, &text);
         }
         self.check_dup_imports(uidx, &imports);
+        uidx
+    }
+
+    fn compile_blackbox_unit(&mut self, source: UnitSource, bb: &crate::blackbox::BlackboxUnit) -> usize {
+        let mut problems = Problems::default();
+        if bb.load_error {
+            let msg = bind(crate::messages::validation::FailedToLoadUnit, &[&source.qualified_name]);
+            let msg = bind(crate::messages::validation::QvtOperationalVisitorCS_SeeErrorLogForDetails, &[&msg]);
+            problems.error(Span::new(0, 0), msg);
+        }
+        let uidx = self.units.len();
+        self.units.push(UnitState {
+            source: source.clone(),
+            lines: LineIndex::new(""),
+            problems,
+            imports: Vec::new(),
+            modules: Vec::new(),
+            imported: Vec::new(),
+            registry: Vec::new(),
+        });
+        self.unit_index.insert(source.key.clone(), uidx);
+        while self.sources.len() < uidx + 2 {
+            self.sources.push(crate::ir::Source {
+                name: String::new(),
+                qualified_name: String::new(),
+                path: None,
+                lines: LineIndex::new(""),
+            });
+        }
+        self.sources[uidx + 1] = crate::ir::Source {
+            name: source.file_name.clone(),
+            qualified_name: source.qualified_name.clone(),
+            path: None,
+            lines: LineIndex::new(""),
+        };
+        let saved = (self.cur_unit, self.cur_module);
+        self.cur_unit = uidx;
+        self.load_blackbox_unit(uidx, bb);
+        self.cur_unit = saved.0;
+        self.cur_module = saved.1;
         uidx
     }
 

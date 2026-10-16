@@ -216,6 +216,10 @@ impl<'r> Sema<'r> {
         });
     }
 
+    pub(crate) fn new_module_pub(&mut self, name: &str, library: bool, unit: usize, header: Span) -> ModuleId {
+        self.new_module(name, library, unit, header)
+    }
+
     fn new_module(&mut self, name: &str, library: bool, unit: usize, header: Span) -> ModuleId {
         let id = ModuleId(self.modules.len() as u32);
         let ty = self.ts.types.intern(Type::Module(id.0));
@@ -1322,6 +1326,7 @@ impl<'r> Sema<'r> {
                 source,
                 decl_span: d.decl_span,
                 span: d.span,
+                blackbox_impl: None,
             },
             owner: context.unwrap_or(module_ty),
             contextual: context.is_some(),
