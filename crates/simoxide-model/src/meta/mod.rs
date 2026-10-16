@@ -9,7 +9,9 @@ use crate::fxhash::FxHashMap as HashMap;
 use std::sync::OnceLock;
 
 mod generated;
+mod generated_ext;
 pub use generated::{CLASSES, ENUMS, FEATURES, PACKAGES, class, enums, feat};
+pub use generated_ext::{CLASS_EXT, DATA_TYPES, FEATURE_EXT, OPERATIONS, PACKAGE_EXT};
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
 pub struct PackageId(pub u32);
@@ -91,6 +93,85 @@ pub struct FeatureDef {
     pub volatile: bool,
     pub is_id: bool,
     pub default: Option<&'static str>,
+}
+
+/// Extension tables (`generated_ext.rs`): the EMF facts the loader does not need but a complete
+/// metamodel registry does, e.g. for a QVTo engine running on [`crate::raw::Graph`]. Indexed like
+/// the main tables (`PACKAGE_EXT[p]`, `CLASS_EXT[c]`, `FEATURE_EXT[f]`); data types defined by the
+/// metamodels are in [`DATA_TYPES`], `EOperation` signatures in [`OPERATIONS`].
+pub struct PackageExt {
+    pub super_package: Option<PackageId>,
+    /// `platform:/plugin/<bundle>/<path>` of the `.ecore` file (top-level packages only).
+    pub location: Option<&'static str>,
+    /// `eClassifiers` in declaration order.
+    pub classifiers: &'static [ClassifierRef],
+}
+
+/// A classifier of the tables: a class, an enum, or an index into [`DATA_TYPES`].
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum ClassifierRef {
+    Class(ClassId),
+    Enum(EnumId),
+    DataType(u32),
+}
+
+pub struct ClassExt {
+    /// The `abstract` attribute (`ClassDef::is_abstract` also covers interfaces).
+    pub is_abstract: bool,
+    pub is_interface: bool,
+    pub instance_class_name: Option<&'static str>,
+}
+
+/// The type of a feature, parameter or operation.
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum TypeRef {
+    Class(ClassId),
+    Enum(EnumId),
+    /// Index into [`DATA_TYPES`].
+    DataType(u32),
+    /// A classifier of Ecore itself, by name (`EString`, `EObject`, ...).
+    Ecore(&'static str),
+    /// No classifier (a type parameter).
+    Unknown,
+}
+
+pub struct FeatureExt {
+    /// `upperBound` (`-1` unbounded).
+    pub upper: i32,
+    pub ordered: bool,
+    pub unique: bool,
+    pub changeable: bool,
+    pub unsettable: bool,
+    pub ty: TypeRef,
+}
+
+pub struct DataTypeDef {
+    pub name: &'static str,
+    pub package: PackageId,
+    pub instance_class_name: Option<&'static str>,
+    pub serializable: bool,
+}
+
+/// A typed element (operation result or parameter): type and multiplicity.
+pub struct TypedDef {
+    pub ty: TypeRef,
+    pub upper: i32,
+    pub ordered: bool,
+    pub unique: bool,
+}
+
+pub struct ParamDef {
+    pub name: &'static str,
+    pub ty: TypedDef,
+}
+
+/// An `EOperation` (signature only).
+pub struct OperationDef {
+    pub owner: ClassId,
+    pub name: &'static str,
+    /// `None` for `void`.
+    pub result: Option<TypedDef>,
+    pub params: &'static [ParamDef],
 }
 
 impl PackageId {

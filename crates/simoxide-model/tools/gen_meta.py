@@ -67,19 +67,24 @@ enums = []
 datatypes = {}
 by_path = {}  # (file, 'a/b/Name') -> ('class'|'enum'|'dt', index)
 
-def walk(fname, pkg, qual, pathprefix):
+datatypes_list = []  # data types defined in the metamodels (not Ecore's)
+
+def walk(fname, pkg, qual, pathprefix, parent=None, loc=None):
     name = pkg.get('name')
     q = qual + ('.' if qual else '') + name
     pi = len(packages)
-    packages.append(dict(name=q, short=name, ns=pkg.get('nsURI'), prefix=pkg.get('nsPrefix'), classes=[]))
+    packages.append(dict(name=q, short=name, ns=pkg.get('nsURI'), prefix=pkg.get('nsPrefix'), classes=[],
+                         order=[], sup=parent, loc=loc))
     for c in pkg.findall('eClassifiers'):
         t = c.get(XSI)
         p = pathprefix + c.get('name')
         if t == 'ecore:EClass':
             ci = len(classes)
             classes.append(dict(name=c.get('name'), pkg=pi, abstract=c.get('abstract') == 'true' or c.get('interface') == 'true',
-                                interface=c.get('interface') == 'true', el=c, file=fname, supers=[], feats=[]))
+                                interface=c.get('interface') == 'true', abstract_attr=c.get('abstract') == 'true',
+                                icn=c.get('instanceClassName'), el=c, file=fname, supers=[], feats=[]))
             packages[pi]['classes'].append(ci)
+            packages[pi]['order'].append(('Class', ci))
             by_path[(fname, p)] = ('class', ci)
         elif t == 'ecore:EEnum':
             ei = len(enums)
@@ -91,13 +96,21 @@ def walk(fname, pkg, qual, pathprefix):
                 lits.append((l.get('name'), v, l.get('literal') if l.get('literal') is not None else l.get('name')))
             enums.append(dict(name=c.get('name'), pkg=pi, lits=lits))
             by_path[(fname, p)] = ('enum', ei)
+            packages[pi]['order'].append(('Enum', ei))
         else:
-            by_path[(fname, p)] = ('dt', c.get('name'), c.get('instanceClassName'))
+            di = len(datatypes_list)
+            datatypes_list.append(dict(name=c.get('name'), pkg=pi, icn=c.get('instanceClassName'),
+                                       serializable=c.get('serializable', 'true') == 'true'))
+            by_path[(fname, p)] = ('dt', c.get('name'), c.get('instanceClassName'), di)
+            packages[pi]['order'].append(('DataType', di))
     for sp in pkg.findall('eSubpackages'):
-        walk(fname, sp, q, pathprefix + sp.get('name') + '/')
+        walk(fname, sp, q, pathprefix + sp.get('name') + '/', pi)
 
+locations = {}  # file basename -> platform:/plugin URI of the .ecore
+for bsn, path in ECORES:
+    locations[os.path.basename(path)] = f'platform:/plugin/{bsn}/{path}'
 for fname, root in files.items():
-    walk(fname, root, '', '')
+    walk(fname, root, '', '', None, locations[fname])
 
 def resolve(ref, fname):
     """ref like '#//a/B', '../../x/model/pcm.ecore#//core/Entity', 'http://...#//X',
@@ -116,6 +129,29 @@ def resolve(ref, fname):
     if (f, frag) not in by_path:
         raise KeyError((ref, fname))
     return by_path[(f, frag)]
+
+def type_ref(et, fname):
+    """The classifier an eType/eClassifier reference designates, for the extension tables."""
+    if et is None:
+        return 'TypeRef::Unknown'
+    r = resolve(et, fname)
+    if r[0] == 'ecore':
+        return f'TypeRef::Ecore({rs_str(r[1])})'
+    if r[0] == 'class':
+        return f'TypeRef::Class(ClassId({r[1]}))'
+    if r[0] == 'enum':
+        return f'TypeRef::Enum(EnumId({r[1]}))'
+    return f'TypeRef::DataType({r[3]})'
+
+def generic_type(el):
+    et = el.get('eType')
+    if et is None:
+        g = el.find('eGenericType')
+        et = g.get('eClassifier') if g is not None else None
+    return et
+
+def rs_str(s):
+    return '"' + s.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
 features = []
 for ci, c in enumerate(classes):
@@ -138,7 +174,9 @@ for ci, c in enumerate(classes):
                  volatile=f.get('volatile') == 'true', derived=f.get('derived') == 'true',
                  changeable=f.get('changeable', 'true') == 'true', unsettable=f.get('unsettable') == 'true',
                  resolve_proxies=f.get('resolveProxies', 'true') == 'true', is_id=f.get('iD') == 'true',
-                 default=f.get('defaultValueLiteral'), opp=f.get('eOpposite'), file=c['file'])
+                 default=f.get('defaultValueLiteral'), opp=f.get('eOpposite'), file=c['file'],
+                 ordered=f.get('ordered', 'true') == 'true', unique=f.get('unique', 'true') == 'true',
+                 tref=type_ref(et, c['file']))
         if et is None:
             d['dt'] = ('Other', None)
         else:
@@ -201,9 +239,6 @@ def cls_const(ci):
     if cls_count[c['name']] > 1:
         return packages[c['pkg']]['short'] + '_' + c['name']
     return c['name']
-
-def rs_str(s):
-    return '"' + s.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
 out = []
 w = out.append
@@ -273,6 +308,58 @@ for ei, e in enumerate(enums):
     w(f'    pub const {n}: EnumId = EnumId({ei});')
 w('}')
 open('src/meta/generated.rs', 'w').write('\n'.join(out) + '\n')
+
+# Extension tables: the EMF facts the loader does not need but a full metamodel registry does
+# (multiplicities, ordered/unique/changeable/unsettable, interfaces, data types, classifier
+# order, operations, the location of each top-level package), for hosts such as a QVTo engine.
+def classifier_ref(k, i):
+    return {'Class': f'ClassifierRef::Class(ClassId({i}))', 'Enum': f'ClassifierRef::Enum(EnumId({i}))',
+            'DataType': f'ClassifierRef::DataType({i})'}[k]
+
+ext = []
+w = ext.append
+w('// @generated by tools/gen_meta.py from the SimuLizar 5.2.2 product jars. Do not edit.')
+w('#![allow(clippy::all)]')
+w('use super::*;')
+w('')
+w('pub static PACKAGE_EXT: &[PackageExt] = &[')
+for p in packages:
+    sup = f'Some(PackageId({p["sup"]}))' if p['sup'] is not None else 'None'
+    loc = f'Some({rs_str(p["loc"])})' if p['sup'] is None else 'None'
+    order = ', '.join(classifier_ref(k, i) for k, i in p['order'])
+    w(f'    PackageExt {{ super_package: {sup}, location: {loc}, classifiers: &[{order}] }},')
+w('];')
+w('pub static CLASS_EXT: &[ClassExt] = &[')
+for c in classes:
+    icn = f'Some({rs_str(c["icn"])})' if c['icn'] else 'None'
+    w(f'    ClassExt {{ is_abstract: {str(c["abstract_attr"]).lower()}, is_interface: {str(c["interface"]).lower()}, instance_class_name: {icn} }},')
+w('];')
+w('pub static FEATURE_EXT: &[FeatureExt] = &[')
+for f in features:
+    w(f'    FeatureExt {{ upper: {f["upper"]}, ordered: {str(f["ordered"]).lower()}, unique: {str(f["unique"]).lower()}, '
+      f'changeable: {str(f["changeable"]).lower()}, unsettable: {str(f["unsettable"]).lower()}, ty: {f["tref"]} }},')
+w('];')
+w('pub static DATA_TYPES: &[DataTypeDef] = &[')
+for d in datatypes_list:
+    icn = f'Some({rs_str(d["icn"])})' if d['icn'] else 'None'
+    w(f'    DataTypeDef {{ name: {rs_str(d["name"])}, package: PackageId({d["pkg"]}), instance_class_name: {icn}, '
+      f'serializable: {str(d["serializable"]).lower()} }},')
+w('];')
+
+def typed_def(el, fname):
+    up = int(el.get('upperBound', '1'))
+    return (f'TypedDef {{ ty: {type_ref(generic_type(el), fname)}, upper: {up}, '
+            f'ordered: {str(el.get("ordered", "true") == "true").lower()}, unique: {str(el.get("unique", "true") == "true").lower()} }}')
+
+w('pub static OPERATIONS: &[OperationDef] = &[')
+for ci, c in enumerate(classes):
+    for op in c['el'].findall('eOperations'):
+        res = f'Some({typed_def(op, c["file"])})' if generic_type(op) is not None else 'None'
+        params = ', '.join(f'ParamDef {{ name: {rs_str(pp.get("name"))}, ty: {typed_def(pp, c["file"])} }}'
+                           for pp in op.findall('eParameters'))
+        w(f'    OperationDef {{ owner: ClassId({ci}), name: {rs_str(op.get("name"))}, result: {res}, params: &[{params}] }},')
+w('];')
+open('src/meta/generated_ext.rs', 'w').write('\n'.join(ext) + '\n')
 
 for bsn, path in MODELS:
     z = zipfile.ZipFile(jar_for(bsn))

@@ -414,6 +414,25 @@ impl Graph {
         s
     }
 
+    /// Appends a new object of `class` without values, container or proxy URI and returns its
+    /// id, for hosts that create objects at run time (e.g. a model transformation engine working
+    /// on the graph). `resource` becomes [`Obj::resource`]; the object is not added to that
+    /// resource's `roots`.
+    pub fn add_object(&mut self, class: ClassId, resource: ResId) -> ObjId {
+        let id = ObjId(self.objs.len() as u32);
+        self.objs.push(Obj {
+            class,
+            resource,
+            container: None,
+            proxy: None,
+            xmi_id: None,
+            slots: Vec::new(),
+            line: 0,
+            attached: true,
+        });
+        id
+    }
+
     // ----- mutation with EMF semantics -------------------------------------------------------
 
     pub(crate) fn set_attr(&mut self, o: ObjId, f: FeatureId, v: Value) {
