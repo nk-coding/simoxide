@@ -91,7 +91,18 @@ impl<'s> Parser<'s> {
             K::KwAssert => return self.assert_exp(),
             _ => {}
         }
-        let lhs = self.binary(0, stmt);
+        let mut lhs = self.binary(0, stmt);
+        // A stray token followed by something that continues the expression: LPG deletes it.
+        while stmt && self.is_stray() {
+            let n = self.nth(1);
+            if binary_level(n) == 0 && !matches!(n, K::ResetAssign | K::AddAssign | K::Dot | K::Arrow) {
+                break;
+            }
+            self.unexpected();
+            self.bump();
+            let e = self.postfix(lhs);
+            lhs = self.binary_rest(start, e, 0);
+        }
         if matches!(self.peek(), K::ResetAssign | K::AddAssign) {
             // assignStatementCS ::= primaryExpCS (':=' | '+=') OclExpressionCS
             let add = self.bump().kind == K::AddAssign;
@@ -108,6 +119,39 @@ impl<'s> Parser<'s> {
             return self.mk(start, ExprKind::Assign(Box::new(Assign { lhs, rhs, add })));
         }
         lhs
+    }
+
+    /// Whether the current token cannot follow a complete expression (a candidate for LPG's
+    /// deletion repair).
+    fn is_stray(&self) -> bool {
+        let k = self.peek();
+        !(k == K::Eof
+            || binary_level(k) > 0
+            || matches!(
+                k,
+                K::Semicolon
+                    | K::Comma
+                    | K::Rparen
+                    | K::Rbrace
+                    | K::Rbracket
+                    | K::Bar
+                    | K::Dotdot
+                    | K::ResetAssign
+                    | K::AddAssign
+                    | K::Dot
+                    | K::Arrow
+                    | K::Lbracket
+                    | K::ExclamationMark
+                    | K::KwThen
+                    | K::KwElse
+                    | K::KwElif
+                    | K::KwEndif
+                    | K::KwIn
+                    | K::KwWhen
+                    | K::KwWith
+                    | K::KwEnd
+                    | K::Lbrace
+            ))
     }
 
     /// A statement: `expression_semi_list_element ::= OclExpressionCS | var_init_group_exp |
@@ -127,7 +171,11 @@ impl<'s> Parser<'s> {
     /// left-associative). `let` and unary operators are handled by [`Self::unary`].
     fn binary(&mut self, min: u8, stmt: bool) -> Expr {
         let start = self.span();
-        let mut lhs = self.unary(stmt);
+        let lhs = self.unary(stmt);
+        self.binary_rest(start, lhs, min)
+    }
+
+    fn binary_rest(&mut self, start: Span, mut lhs: Expr, min: u8) -> Expr {
         loop {
             let op = self.peek();
             let lvl = binary_level(op);

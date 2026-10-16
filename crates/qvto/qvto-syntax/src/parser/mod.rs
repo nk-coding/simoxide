@@ -179,6 +179,12 @@ impl<'s> Parser<'s> {
         if let Some(t) = self.eat(k) {
             return Some(t);
         }
+        if self.nth(1) == k && self.peek() != K::Eof {
+            // LPG's repair deletes a single stray token when the next one fits.
+            self.unexpected();
+            self.bump();
+            return Some(self.bump());
+        }
         let what = k.spelling().unwrap_or(k.lpg_name());
         // Missing closers and separators are reported as insertions after the previous token,
         // like LPG does when the current token can continue the input.

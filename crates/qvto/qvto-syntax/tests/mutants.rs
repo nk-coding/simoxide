@@ -19,6 +19,7 @@ fn mutants_agree_with_eclipse() {
         let f: Vec<&str> = line.splitn(6, '\t').collect();
         expected.insert(f[0].to_string(), (f[1].parse().unwrap(), f[3].parse().unwrap(), f[4].parse().unwrap(), f[5].to_string()));
     }
+    let details = std::env::var_os("QVTO_MUTANT_DETAILS").is_some();
     let roots = roots();
     let (mut total, mut verdict_ok, mut rejected, mut first_pos_ok, mut first_full_ok) = (0, 0, 0, 0, 0);
     let mut verdict_mismatches = Vec::new();
@@ -51,6 +52,15 @@ fn mutants_agree_with_eclipse() {
                         if l == *len && first.message == *msg {
                             first_full_ok += 1;
                         }
+                    }
+                    if details && !(o == *off && l == *len && first.message == *msg) {
+                        let ctx = |at: i64| {
+                            let b = qvto_syntax::span::utf16_to_byte(&m.text, at.max(0) as usize);
+                            let a = m.text[..b].char_indices().rev().nth(30).map_or(0, |x| x.0);
+                            let e = m.text[b..].char_indices().nth(30).map_or(m.text.len(), |x| b + x.0);
+                            m.text[a..e].replace('\n', "⏎").replace('\t', " ")
+                        };
+                        eprintln!("DETAIL {}\n  mutation: {}\n  eclipse {off}+{len} {msg}  [{}]\n  ours    {o}+{l} {}  [{}]", m.id, m.what, ctx(*off), first.message, ctx(o));
                     }
                 }
             }
