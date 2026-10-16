@@ -119,11 +119,11 @@ fn tokenize(text: &str) -> Vec<(Option<String>, Tok)> {
             }
             continue;
         }
-        if let Some(name) = w.strip_prefix('%') {
-            if name != "empty" {
-                out.push((Some(name.to_string()), Tok::Bar));
-                continue;
-            }
+        if let Some(name) = w.strip_prefix('%')
+            && name != "empty"
+        {
+            out.push((Some(name.to_string()), Tok::Bar));
+            continue;
         }
         out.push((None, Tok::Word(w.to_string())));
     }
@@ -144,7 +144,10 @@ pub fn parse_sections(text: &str) -> Vec<Section> {
                 if let Some(s) = cur.take() {
                     sections.push(s);
                 }
-                cur = Some(Section { kind: d, toks: Vec::new() });
+                cur = Some(Section {
+                    kind: d,
+                    toks: Vec::new(),
+                });
             }
             None => {
                 if let Some(s) = cur.as_mut() {
@@ -166,9 +169,17 @@ pub fn parse_rules(toks: &[Tok]) -> Vec<Alt> {
     let mut action = String::new();
     let mut started = false;
     let mut i = 0;
-    let flush = |lhs: &Option<String>, syms: &mut Vec<Sym>, action: &mut String, started: &mut bool, alts: &mut Vec<Alt>| {
+    let flush = |lhs: &Option<String>,
+                 syms: &mut Vec<Sym>,
+                 action: &mut String,
+                 started: &mut bool,
+                 alts: &mut Vec<Alt>| {
         if let (Some(l), true) = (lhs, *started) {
-            alts.push(Alt { lhs: l.clone(), syms: std::mem::take(syms), action: std::mem::take(action) });
+            alts.push(Alt {
+                lhs: l.clone(),
+                syms: std::mem::take(syms),
+                action: std::mem::take(action),
+            });
         }
         syms.clear();
         action.clear();
@@ -251,7 +262,8 @@ pub fn load(path: &Path) -> Grammar {
             _ => {}
         }
     }
-    g.rules.retain(|a| !drops.iter().any(|d| d.lhs == a.lhs && d.syms == a.syms));
+    g.rules
+        .retain(|a| !drops.iter().any(|d| d.lhs == a.lhs && d.syms == a.syms));
     for s in &sections {
         match s.kind.as_str() {
             "Rules" => g.rules.extend(parse_rules(&s.toks)),
@@ -279,7 +291,13 @@ pub fn load(path: &Path) -> Grammar {
 
 fn words(toks: &[Tok]) -> Vec<String> {
     toks.iter()
-        .filter_map(|t| if let Tok::Word(w) = t { Some(w.clone()) } else { None })
+        .filter_map(|t| {
+            if let Tok::Word(w) = t {
+                Some(w.clone())
+            } else {
+                None
+            }
+        })
         .collect()
 }
 
@@ -349,7 +367,9 @@ pub struct Paths {
 
 impl Paths {
     pub fn new(eclipse_qvto: &Path) -> Paths {
-        Paths { cst: eclipse_qvto.join("plugins/org.eclipse.m2m.qvt.oml.cst.parser/cst") }
+        Paths {
+            cst: eclipse_qvto.join("plugins/org.eclipse.m2m.qvt.oml.cst.parser/cst"),
+        }
     }
 }
 
@@ -399,7 +419,10 @@ pub fn derive(paths: &Paths) -> Result<Tables, String> {
         }
     }
     for k in &t.keywords {
-        let has_rule = kw.rules.iter().any(|a| extract_dollar_name(&a.action, "$setResult").as_deref() == Some(k));
+        let has_rule = kw
+            .rules
+            .iter()
+            .any(|a| extract_dollar_name(&a.action, "$setResult").as_deref() == Some(k));
         if !has_rule {
             errors.push(format!("keyword {k} exported without a spelling rule"));
         }
@@ -417,25 +440,38 @@ pub fn derive(paths: &Paths) -> Result<Tables, String> {
     // Terminals and punctuation from the lexer.
     t.terminals = dedup(&lexer.exports);
     for a in &lexer.rules {
-        let Some(name) = extract_dollar_name(&a.action, "makeToken") else { continue };
-        if a.syms.is_empty() || !a.syms.iter().all(|s| matches!(s, Sym::Quoted(q) if q.chars().count() == 1)) {
+        let Some(name) = extract_dollar_name(&a.action, "makeToken") else {
+            continue;
+        };
+        if a.syms.is_empty()
+            || !a
+                .syms
+                .iter()
+                .all(|s| matches!(s, Sym::Quoted(q) if q.chars().count() == 1))
+        {
             continue;
         }
         let spelling: String = a.syms.iter().map(|s| s.text()).collect();
         if !t.terminals.contains(&name) {
             errors.push(format!("punctuation {name} is not exported by the lexer"));
         }
-        if let Some(old) = t.punct.insert(name.clone(), spelling.clone()) {
-            if old != spelling {
-                errors.push(format!("punctuation {name} spelled {old:?} and {spelling:?}"));
-            }
+        if let Some(old) = t.punct.insert(name.clone(), spelling.clone())
+            && old != spelling
+        {
+            errors.push(format!(
+                "punctuation {name} spelled {old:?} and {spelling:?}"
+            ));
         }
     }
     for (name, spelling) in &parser.aliases {
         match t.punct.get(name) {
             Some(s) if s == spelling => {}
-            Some(s) => errors.push(format!("parser alias {name} ::= {spelling:?}, lexer spells {s:?}")),
-            None => errors.push(format!("parser alias {name} ::= {spelling:?} has no lexer rule")),
+            Some(s) => errors.push(format!(
+                "parser alias {name} ::= {spelling:?}, lexer spells {s:?}"
+            )),
+            None => errors.push(format!(
+                "parser alias {name} ::= {spelling:?} has no lexer rule"
+            )),
         }
     }
 
@@ -444,19 +480,22 @@ pub fn derive(paths: &Paths) -> Result<Tables, String> {
     let mut table: Vec<String> = Vec::new();
     for line in basic_text.lines() {
         let l = line.trim();
-        if let Some(rest) = l.strip_prefix("$sym_type.$prefix$") {
-            if let Some(end) = rest.find("$suffix$") {
-                if l.contains("// ") && table.len() < 128 {
-                    let comment = &l[l.find("//").unwrap() + 2..].trim();
-                    if comment.starts_with(|c: char| c.is_ascii_digit()) {
-                        table.push(rest[..end].to_string());
-                    }
-                }
+        if let Some(rest) = l.strip_prefix("$sym_type.$prefix$")
+            && let Some(end) = rest.find("$suffix$")
+            && l.contains("// ")
+            && table.len() < 128
+        {
+            let comment = &l[l.find("//").unwrap() + 2..].trim();
+            if comment.starts_with(|c: char| c.is_ascii_digit()) {
+                table.push(rest[..end].to_string());
             }
         }
     }
     if table.len() != 128 {
-        errors.push(format!("LexerBasicMapF.gi: found {} ASCII classes, expected 128", table.len()));
+        errors.push(format!(
+            "LexerBasicMapF.gi: found {} ASCII classes, expected 128",
+            table.len()
+        ));
     }
     let closure = |start: &str| -> BTreeSet<String> {
         let mut set = BTreeSet::new();
@@ -492,7 +531,12 @@ pub fn derive(paths: &Paths) -> Result<Tables, String> {
         }
     }
     let alias_name_of = |c: char| -> Vec<String> {
-        let mut v: Vec<String> = lexer.aliases.iter().filter(|(_, q)| q.chars().eq(std::iter::once(c))).map(|(n, _)| n.clone()).collect();
+        let mut v: Vec<String> = lexer
+            .aliases
+            .iter()
+            .filter(|(_, q)| q.chars().eq(std::iter::once(c)))
+            .map(|(n, _)| n.clone())
+            .collect();
         v.push(c.to_string());
         v
     };
@@ -529,10 +573,10 @@ pub fn derive(paths: &Paths) -> Result<Tables, String> {
         let mut rest = body;
         while let Some(j) = rest.find("c == '\\u") {
             let hex = &rest[j + 8..j + 12];
-            if let Ok(v) = u32::from_str_radix(hex, 16) {
-                if !t.eof_chars.contains(&v) {
-                    t.eof_chars.push(v);
-                }
+            if let Ok(v) = u32::from_str_radix(hex, 16)
+                && !t.eof_chars.contains(&v)
+            {
+                t.eof_chars.push(v);
             }
             rest = &rest[j + 12..];
         }
@@ -542,7 +586,11 @@ pub fn derive(paths: &Paths) -> Result<Tables, String> {
     }
 
     // Keyword groups.
-    let spelled_to_name: BTreeMap<String, String> = t.punct.iter().map(|(n, s)| (s.clone(), n.clone())).collect();
+    let spelled_to_name: BTreeMap<String, String> = t
+        .punct
+        .iter()
+        .map(|(n, s)| (s.clone(), n.clone()))
+        .collect();
     let term_name = |s: &Sym| -> Option<String> {
         match s {
             Sym::Quoted(q) => spelled_to_name.get(q).cloned(),
@@ -623,7 +671,11 @@ pub fn derive(paths: &Paths) -> Result<Tables, String> {
             }
         }
     }
-    if errors.is_empty() { Ok(t) } else { Err(errors.join("\n")) }
+    if errors.is_empty() {
+        Ok(t)
+    } else {
+        Err(errors.join("\n"))
+    }
 }
 
 fn dedup(v: &[String]) -> Vec<String> {
@@ -673,7 +725,9 @@ pub fn render(t: &Tables) -> String {
     o.push_str("/// Token kinds: the terminals exported by Eclipse's lexers and keyword lexers.\n");
     o.push_str("#[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]\n#[repr(u8)]\npub enum TokenKind {\n");
     o.push_str("    /// End of input (LPG `EOF_TOKEN`).\n    Eof,\n");
-    o.push_str("    /// A character or sequence the lexer rejects (LPG `ERROR_TOKEN`).\n    ErrorToken,\n");
+    o.push_str(
+        "    /// A character or sequence the lexer rejects (LPG `ERROR_TOKEN`).\n    ErrorToken,\n",
+    );
     for n in &t.terminals {
         match t.punct.get(n) {
             Some(s) => {
@@ -691,14 +745,21 @@ pub fn render(t: &Tables) -> String {
     }
     o.push_str("}\n\n");
     let first_kw = v(&kws[0]);
-    let _ = writeln!(o, "/// Number of keywords.\npub const KEYWORD_COUNT: usize = {};\n", kws.len());
+    let _ = writeln!(
+        o,
+        "/// Number of keywords.\npub const KEYWORD_COUNT: usize = {};\n",
+        kws.len()
+    );
     o.push_str("impl TokenKind {\n");
     o.push_str("    /// All token kinds in declaration order.\n    pub const ALL: &'static [TokenKind] = &[\n        TokenKind::Eof,\n        TokenKind::ErrorToken,\n");
     for n in t.terminals.iter().chain(kws) {
         let _ = writeln!(o, "        TokenKind::{},", v(n));
     }
     o.push_str("    ];\n\n");
-    let _ = writeln!(o, "    /// Whether this is a keyword (all keywords are reserved by the lexer).\n    #[inline]\n    pub const fn is_keyword(self) -> bool {{\n        self as u8 >= TokenKind::{first_kw} as u8\n    }}\n");
+    let _ = writeln!(
+        o,
+        "    /// Whether this is a keyword (all keywords are reserved by the lexer).\n    #[inline]\n    pub const fn is_keyword(self) -> bool {{\n        self as u8 >= TokenKind::{first_kw} as u8\n    }}\n"
+    );
     o.push_str("    /// The LPG terminal name (`IDENTIFIER`, `ARROW`, `and`, ...).\n    pub const fn lpg_name(self) -> &'static str {\n        match self {\n            TokenKind::Eof => \"EOF_TOKEN\",\n            TokenKind::ErrorToken => \"ERROR_TOKEN\",\n");
     for n in t.terminals.iter().chain(kws) {
         let _ = writeln!(o, "            TokenKind::{} => {},", v(n), rust_str(n));
@@ -707,11 +768,21 @@ pub fn render(t: &Tables) -> String {
     o.push_str("    /// The fixed spelling of a keyword or punctuation token.\n    pub const fn spelling(self) -> Option<&'static str> {\n        match self {\n");
     for n in &t.terminals {
         if let Some(s) = t.punct.get(n) {
-            let _ = writeln!(o, "            TokenKind::{} => Some({}),", v(n), rust_str(s));
+            let _ = writeln!(
+                o,
+                "            TokenKind::{} => Some({}),",
+                v(n),
+                rust_str(s)
+            );
         }
     }
     for k in kws {
-        let _ = writeln!(o, "            TokenKind::{} => Some({}),", v(k), rust_str(k));
+        let _ = writeln!(
+            o,
+            "            TokenKind::{} => Some({}),",
+            v(k),
+            rust_str(k)
+        );
     }
     o.push_str("            _ => None,\n        }\n    }\n}\n\n");
 
@@ -724,7 +795,12 @@ pub fn render(t: &Tables) -> String {
     for (len, ks) in &by_len {
         let _ = writeln!(o, "        {len} => match s {{");
         for k in ks {
-            let _ = writeln!(o, "            b{} => Some(TokenKind::{}),", rust_str(k), v(k));
+            let _ = writeln!(
+                o,
+                "            b{} => Some(TokenKind::{}),",
+                rust_str(k),
+                v(k)
+            );
         }
         o.push_str("            _ => None,\n        },\n");
     }
@@ -743,7 +819,13 @@ pub fn render(t: &Tables) -> String {
             if sp.len() == 1 {
                 let _ = writeln!(o, "            Some((TokenKind::{}, 1))", v(n));
             } else {
-                let _ = writeln!(o, "            if s.starts_with(b{}) {{\n                return Some((TokenKind::{}, {}));\n            }}", rust_str(sp), v(n), sp.len());
+                let _ = writeln!(
+                    o,
+                    "            if s.starts_with(b{}) {{\n                return Some((TokenKind::{}, {}));\n            }}",
+                    rust_str(sp),
+                    v(n),
+                    sp.len()
+                );
             }
         }
         if items.iter().all(|(_, sp)| sp.len() > 1) {
@@ -755,25 +837,52 @@ pub fn render(t: &Tables) -> String {
 
     // char classes
     o.push_str("/// Character class flags (`LexerBasicMapF.gi` table and the lexer's `Letter`, `Digit`,\n/// `WSChar` and `Identifier` rules).\npub mod class {\n");
-    let _ = writeln!(o, "    pub const IDENT_START: u8 = {IDENT_START};\n    pub const IDENT_PART: u8 = {IDENT_PART};\n    pub const DIGIT: u8 = {DIGIT};\n    pub const WHITESPACE: u8 = {WHITESPACE};\n    /// `CtlCharNotWS`: a control character that is not white space.\n    pub const CONTROL: u8 = {CONTROL};");
+    let _ = writeln!(
+        o,
+        "    pub const IDENT_START: u8 = {IDENT_START};\n    pub const IDENT_PART: u8 = {IDENT_PART};\n    pub const DIGIT: u8 = {DIGIT};\n    pub const WHITESPACE: u8 = {WHITESPACE};\n    /// `CtlCharNotWS`: a control character that is not white space.\n    pub const CONTROL: u8 = {CONTROL};"
+    );
     o.push_str("    /// Flags of the ASCII characters.\n    pub const ASCII: [u8; 128] = [\n");
     for row in t.ascii.chunks(16) {
         o.push_str("        ");
-        o.push_str(&row.iter().map(|b| b.to_string()).collect::<Vec<_>>().join(", "));
+        o.push_str(
+            &row.iter()
+                .map(|b| b.to_string())
+                .collect::<Vec<_>>()
+                .join(", "),
+        );
         o.push_str(",\n");
     }
     o.push_str("    ];\n");
-    let _ = writeln!(o, "    /// Whether characters above ASCII (other than the EOF characters) are letters.\n    pub const NON_ASCII_IS_LETTER: bool = {};", t.non_ascii_letter);
-    let chars: Vec<String> = t.eof_chars.iter().map(|c| format!("'\\u{{{c:x}}}'")).collect();
-    let _ = writeln!(o, "    /// Characters the lexer classifies as end of input (`getKind`).\n    pub const EOF_CHARS: &[char] = &[{}];", chars.join(", "));
+    let _ = writeln!(
+        o,
+        "    /// Whether characters above ASCII (other than the EOF characters) are letters.\n    pub const NON_ASCII_IS_LETTER: bool = {};",
+        t.non_ascii_letter
+    );
+    let chars: Vec<String> = t
+        .eof_chars
+        .iter()
+        .map(|c| format!("'\\u{{{c:x}}}'"))
+        .collect();
+    let _ = writeln!(
+        o,
+        "    /// Characters the lexer classifies as end of input (`getKind`).\n    pub const EOF_CHARS: &[char] = &[{}];",
+        chars.join(", ")
+    );
     o.push_str("}\n\n");
 
     // groups
     o.push_str("/// Token sets taken from single-token alternatives of grammar nonterminals.\npub mod groups {\n    use super::TokenKind;\n");
     for (cname, nt, members) in &t.groups {
         let _ = writeln!(o, "    /// `{nt}`");
-        let list: Vec<String> = members.iter().map(|m| format!("TokenKind::{}", v(m))).collect();
-        let _ = writeln!(o, "    pub const {cname}: &[TokenKind] = &[{}];", list.join(", "));
+        let list: Vec<String> = members
+            .iter()
+            .map(|m| format!("TokenKind::{}", v(m)))
+            .collect();
+        let _ = writeln!(
+            o,
+            "    pub const {cname}: &[TokenKind] = &[{}];",
+            list.join(", ")
+        );
     }
     o.push_str("}\n\n");
 
@@ -790,8 +899,16 @@ pub fn render(t: &Tables) -> String {
         let _ = writeln!(o, "        {} => {},", list.join(" | "), i + 1);
     }
     o.push_str("        _ => 0,\n    }\n}\n\n");
-    let list: Vec<String> = t.prefix_ops.iter().map(|m| format!("TokenKind::{}", v(m))).collect();
-    let _ = writeln!(o, "/// Prefix operators (`unaryNotNameNotLetCS`).\npub const PREFIX_OPS: &[TokenKind] = &[{}];", list.join(", "));
+    let list: Vec<String> = t
+        .prefix_ops
+        .iter()
+        .map(|m| format!("TokenKind::{}", v(m)))
+        .collect();
+    let _ = writeln!(
+        o,
+        "/// Prefix operators (`unaryNotNameNotLetCS`).\npub const PREFIX_OPS: &[TokenKind] = &[{}];",
+        list.join(", ")
+    );
     o
 }
 
@@ -810,5 +927,7 @@ pub fn eclipse_dir(manifest_dir: &Path) -> Option<PathBuf> {
         return Some(PathBuf::from(d));
     }
     let p = manifest_dir.join("../../reference/eclipse-qvto");
-    p.join("plugins/org.eclipse.m2m.qvt.oml.cst.parser/cst").exists().then_some(p)
+    p.join("plugins/org.eclipse.m2m.qvt.oml.cst.parser/cst")
+        .exists()
+        .then_some(p)
 }

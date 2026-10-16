@@ -12,7 +12,7 @@
 //! - invalid characters and invalid tokens are reported and dropped, as LPG does.
 
 use crate::diag::{Code, Diagnostic};
-use crate::generated::{class, keyword, punctuation, TokenKind};
+use crate::generated::{TokenKind, class, keyword, punctuation};
 use crate::span::Span;
 
 /// A token: kind and byte span.
@@ -65,7 +65,11 @@ fn effective_end(src: &str) -> usize {
 pub fn lex(src: &str) -> Lexed {
     let end = effective_end(src);
     let b = &src.as_bytes()[..end];
-    let mut out = Lexed { tokens: Vec::with_capacity(end / 5 + 1), end: end as u32, ..Default::default() };
+    let mut out = Lexed {
+        tokens: Vec::with_capacity(end / 5 + 1),
+        end: end as u32,
+        ..Default::default()
+    };
     let mut i = 0usize;
     while i < b.len() {
         let c = b[i];
@@ -161,7 +165,11 @@ pub fn lex(src: &str) -> Lexed {
         // A character no token starts with.
         let ch_len = src[i..].chars().next().map_or(1, char::len_utf8);
         let pos = line_col(src, i);
-        let text = if c < 32 || c == 127 { String::new() } else { src[i..i + ch_len].to_string() };
+        let text = if c < 32 || c == 127 {
+            String::new()
+        } else {
+            src[i..i + ch_len].to_string()
+        };
         out.diagnostics.push(Diagnostic::error(
             Code::InvalidCharacter,
             Span::new(i as u32, (i + ch_len) as u32),
@@ -175,7 +183,10 @@ pub fn lex(src: &str) -> Lexed {
 
 #[inline]
 fn tok(kind: TokenKind, start: usize, end: usize) -> Token {
-    Token { kind, span: Span::new(start as u32, end as u32) }
+    Token {
+        kind,
+        span: Span::new(start as u32, end as u32),
+    }
 }
 
 fn line_comment(b: &[u8], mut i: usize) -> usize {
@@ -239,7 +250,15 @@ fn lex_number(src: &str, b: &[u8], start: usize, out: &mut Lexed) -> usize {
             return j;
         }
     }
-    out.tokens.push(tok(if real { TokenKind::RealLiteral } else { TokenKind::IntegerLiteral }, start, i));
+    out.tokens.push(tok(
+        if real {
+            TokenKind::RealLiteral
+        } else {
+            TokenKind::IntegerLiteral
+        },
+        start,
+        i,
+    ));
     i
 }
 
@@ -255,8 +274,13 @@ fn invalid_token(src: &str, out: &mut Lexed, start: usize, end: usize) {
 /// `line:col` as LPG prints it in lexer messages (1-based line, 1-based column, tab = 1).
 fn line_col(src: &str, offset: usize) -> String {
     let before = &src[..offset];
-    let line = 1 + before.bytes().filter(|&c| c == b'\n').count()
-        + before.as_bytes().windows(2).filter(|w| w[0] == b'\r' && w[1] != b'\n').count()
+    let line = 1
+        + before.bytes().filter(|&c| c == b'\n').count()
+        + before
+            .as_bytes()
+            .windows(2)
+            .filter(|w| w[0] == b'\r' && w[1] != b'\n')
+            .count()
         + usize::from(before.ends_with('\r'));
     let line_start = before.rfind(['\n', '\r']).map_or(0, |p| p + 1);
     let col = crate::span::utf16_len(&before[line_start..]) + 1;
@@ -294,24 +318,79 @@ mod tests {
 
     #[test]
     fn numbers() {
-        assert_eq!(kinds("1.e3"), [K::IntegerLiteral, K::Dot, K::Identifier, K::Eof]);
-        assert_eq!(kinds("1..2"), [K::IntegerLiteral, K::Dotdot, K::IntegerLiteral, K::Eof]);
-        assert_eq!(kinds("1.5e-3 2E7"), [K::RealLiteral, K::RealLiteral, K::Eof]);
-        assert_eq!(kinds("3.toString()"), [K::IntegerLiteral, K::Dot, K::Identifier, K::Lparen, K::Rparen, K::Eof]);
+        assert_eq!(
+            kinds("1.e3"),
+            [K::IntegerLiteral, K::Dot, K::Identifier, K::Eof]
+        );
+        assert_eq!(
+            kinds("1..2"),
+            [K::IntegerLiteral, K::Dotdot, K::IntegerLiteral, K::Eof]
+        );
+        assert_eq!(
+            kinds("1.5e-3 2E7"),
+            [K::RealLiteral, K::RealLiteral, K::Eof]
+        );
+        assert_eq!(
+            kinds("3.toString()"),
+            [
+                K::IntegerLiteral,
+                K::Dot,
+                K::Identifier,
+                K::Lparen,
+                K::Rparen,
+                K::Eof
+            ]
+        );
         let l = lex("1e;");
-        assert_eq!(l.tokens.iter().map(|t| t.kind).collect::<Vec<_>>(), [K::Semicolon, K::Eof]);
+        assert_eq!(
+            l.tokens.iter().map(|t| t.kind).collect::<Vec<_>>(),
+            [K::Semicolon, K::Eof]
+        );
         assert_eq!(l.diagnostics[0].span, Span::new(0, 2));
     }
 
     #[test]
     fn punctuation_longest_match() {
-        assert_eq!(kinds("a>>b<<c"), [K::Identifier, K::StereotypeQualifierClose, K::Identifier, K::StereotypeQualifierOpen, K::Identifier, K::Eof]);
-        assert_eq!(kinds("::= :: := ... != ! ->"), [K::Coloncolonequal, K::Coloncolon, K::ResetAssign, K::MultiplicityRange, K::NotEqualExeq, K::ExclamationMark, K::Arrow, K::Eof]);
+        assert_eq!(
+            kinds("a>>b<<c"),
+            [
+                K::Identifier,
+                K::StereotypeQualifierClose,
+                K::Identifier,
+                K::StereotypeQualifierOpen,
+                K::Identifier,
+                K::Eof
+            ]
+        );
+        assert_eq!(
+            kinds("::= :: := ... != ! ->"),
+            [
+                K::Coloncolonequal,
+                K::Coloncolon,
+                K::ResetAssign,
+                K::MultiplicityRange,
+                K::NotEqualExeq,
+                K::ExclamationMark,
+                K::Arrow,
+                K::Eof
+            ]
+        );
     }
 
     #[test]
     fn keywords_and_names() {
-        assert_eq!(kinds("select xselect _'and' and résumé x$1"), [K::Identifier, K::KwXselect, K::QuotedIdentifier, K::KwAnd, K::Identifier, K::Identifier, K::Eof]);
+        assert_eq!(
+            kinds("select xselect _'and' and résumé x$1"),
+            [
+                K::Identifier,
+                K::KwXselect,
+                K::QuotedIdentifier,
+                K::KwAnd,
+                K::Identifier,
+                K::Identifier,
+                K::Eof
+            ]
+        );
     }
 
     #[test]
@@ -333,9 +412,15 @@ mod tests {
     fn invalid_characters() {
         let l = lex("1 # 2");
         assert_eq!(l.tokens.len(), 3);
-        assert_eq!(l.diagnostics[0].message, "1:3 \"#\" unexpected character ignored");
+        assert_eq!(
+            l.diagnostics[0].message,
+            "1:3 \"#\" unexpected character ignored"
+        );
         let l = lex("x := 'abc;\n}\n");
         assert_eq!(l.diagnostics[0].span, Span::new(5, 13));
-        assert_eq!(l.diagnostics[0].message, "1:6 token \"'abc; } \" is invalid");
+        assert_eq!(
+            l.diagnostics[0].message,
+            "1:6 token \"'abc; } \" is invalid"
+        );
     }
 }

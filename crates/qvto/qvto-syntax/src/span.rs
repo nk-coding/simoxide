@@ -18,13 +18,19 @@ impl Span {
     /// An empty span at `pos`.
     #[inline]
     pub const fn at(pos: u32) -> Span {
-        Span { start: pos, end: pos }
+        Span {
+            start: pos,
+            end: pos,
+        }
     }
 
     /// The smallest span covering both.
     #[inline]
     pub fn to(self, other: Span) -> Span {
-        Span { start: self.start.min(other.start), end: self.end.max(other.end) }
+        Span {
+            start: self.start.min(other.start),
+            end: self.end.max(other.end),
+        }
     }
 
     #[inline]

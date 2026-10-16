@@ -3,16 +3,13 @@
 //! `decodeEscapeSequence`; EPL-2.0).
 
 /// Message of Eclipse's `InvalidEscapeSequence_ERROR`.
-pub const INVALID_ESCAPE: &str = "Invalid escape sequence (valid ones are \\b \\t \\n \\f \\r \\\" \\' \\\\)";
+pub const INVALID_ESCAPE: &str =
+    "Invalid escape sequence (valid ones are \\b \\t \\n \\f \\r \\\" \\' \\\\)";
 
 /// The content of a `'…'`, `"…"` or `_'…'` token without its quotes.
 pub fn strip_quotes(tok: &str) -> &str {
     let t = tok.strip_prefix('_').unwrap_or(tok);
-    if t.len() >= 2 {
-        &t[1..t.len() - 1]
-    } else {
-        ""
-    }
+    if t.len() >= 2 { &t[1..t.len() - 1] } else { "" }
 }
 
 /// Decodes the escape sequences of a token's content. A lone CR becomes LF first (Eclipse
@@ -46,7 +43,9 @@ pub fn decode(content: &str) -> Result<String, String> {
             i += 1;
             continue;
         }
-        let Some(&e) = units.get(i + 1) else { return Err(content.to_string()) };
+        let Some(&e) = units.get(i + 1) else {
+            return Err(content.to_string());
+        };
         let simple = match e {
             0x62 => Some(0x08), // b
             0x66 => Some(0x0c), // f
@@ -151,7 +150,9 @@ pub fn quote(value: &str) -> String {
             '\t' => out.push_str("\\t"),
             '\u{8}' => out.push_str("\\b"),
             '\u{c}' => out.push_str("\\f"),
-            c if (c as u32) < 0x20 || c as u32 == 0x7f => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c if (c as u32) < 0x20 || c as u32 == 0x7f => {
+                out.push_str(&format!("\\u{:04x}", c as u32))
+            }
             // Characters the LPG lexer treats as end of input.
             '\u{b4}' | '\u{ffff}' => out.push_str(&format!("\\u{:04x}", c as u32)),
             c => out.push(c),

@@ -10,12 +10,16 @@
 mod common;
 
 fn main() {
-    let arg = std::env::args().nth(1).expect("output directory or --parse");
+    let arg = std::env::args()
+        .nth(1)
+        .expect("output directory or --parse");
     if arg == "--parse" {
         // Parse every mutant in process, printing each id first (to find hangs and crashes).
         let roots = common::roots();
         for key in common::oracle().keys() {
-            let Some(path) = common::resolve(&roots, key) else { continue };
+            let Some(path) = common::resolve(&roots, key) else {
+                continue;
+            };
             let src = common::read(&path);
             for m in common::mutate::mutants(key, &src) {
                 eprintln!("{}", m.id);
@@ -29,7 +33,9 @@ fn main() {
     let roots = common::roots();
     let mut n = 0;
     for key in common::oracle().keys() {
-        let Some(path) = common::resolve(&roots, key) else { continue };
+        let Some(path) = common::resolve(&roots, key) else {
+            continue;
+        };
         let src = common::read(&path);
         for m in common::mutate::mutants(key, &src) {
             let p = out.join(format!("m{n:05}.qvto"));

@@ -4,7 +4,11 @@ use std::io::Read;
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let path = args.iter().find(|a| !a.starts_with("--")).cloned().unwrap_or_else(|| "-".into());
+    let path = args
+        .iter()
+        .find(|a| !a.starts_with("--"))
+        .cloned()
+        .unwrap_or_else(|| "-".into());
     let mut src = String::new();
     if path == "-" {
         std::io::stdin().read_to_string(&mut src).unwrap();

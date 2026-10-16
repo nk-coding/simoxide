@@ -3,7 +3,7 @@
 use super::Parser;
 use crate::ast::*;
 use crate::diag::Code;
-use crate::generated::{groups, TokenKind as K};
+use crate::generated::{TokenKind as K, groups};
 use crate::span::Span;
 
 /// Where an element appears: at unit level or inside a `transformation { … }` body.
@@ -40,7 +40,10 @@ impl<'s> Parser<'s> {
     pub(super) fn unit(&mut self, end: u32) -> Unit {
         let elements = self.elements(Level::Unit);
         self.validate_top_level(&elements);
-        Unit { elements, span: Span::new(0, end) }
+        Unit {
+            elements,
+            span: Span::new(0, end),
+        }
     }
 
     fn elements(&mut self, level: Level) -> Vec<Element> {
@@ -90,15 +93,21 @@ impl<'s> Parser<'s> {
         }
         let k = self.peek();
         let el = match k {
-            K::KwImport if level == Level::Unit && qualifiers.is_empty() => Element::Import(self.import()),
+            K::KwImport if level == Level::Unit && qualifiers.is_empty() => {
+                Element::Import(self.import())
+            }
             K::KwTransformation | K::KwLibrary if level == Level::Unit => {
                 if k == K::KwLibrary && !qualifiers.is_empty() {
                     return None;
                 }
                 Element::Module(self.module(start, qualifiers))
             }
-            K::KwModeltype if level == Level::Unit && qualifiers.is_empty() => Element::ModelType(self.modeltype()),
-            K::KwIntermediate if qualifiers.is_empty() && self.nth(1) == K::KwClass => Element::Class(self.class_def()),
+            K::KwModeltype if level == Level::Unit && qualifiers.is_empty() => {
+                Element::ModelType(self.modeltype())
+            }
+            K::KwIntermediate if qualifiers.is_empty() && self.nth(1) == K::KwClass => {
+                Element::Class(self.class_def())
+            }
             K::KwException if qualifiers.is_empty() => Element::Class(self.class_def()),
             K::KwIntermediate | K::KwConfiguration | K::KwProperty if qualifiers.is_empty() => {
                 Element::Property(self.property())
@@ -112,7 +121,9 @@ impl<'s> Parser<'s> {
                 self.expect(K::Semicolon);
                 Element::Tag(t)
             }
-            K::KwRename if level == Level::Unit && qualifiers.is_empty() => Element::Rename(self.rename()),
+            K::KwRename if level == Level::Unit && qualifiers.is_empty() => {
+                Element::Rename(self.rename())
+            }
             _ => {
                 if !qualifiers.is_empty() {
                     self.unexpected();
@@ -129,7 +140,11 @@ impl<'s> Parser<'s> {
         let library = self.eat(K::KwLibrary).is_some();
         let unit = self.qualified_name();
         self.expect(K::Semicolon);
-        Import { library, unit, span: start.to(Span::at(self.prev_end())) }
+        Import {
+            library,
+            unit,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `transformation_h`/`library_h` followed by `;` or `{ module_elementList } [;]`.
@@ -149,7 +164,9 @@ impl<'s> Parser<'s> {
         loop {
             match self.peek() {
                 K::KwAccess | K::KwExtends => usages.push(self.module_usage()),
-                K::KwRefines if kind == K::KwTransformation && usages.is_empty() && refines.is_none() => {
+                K::KwRefines
+                    if kind == K::KwTransformation && usages.is_empty() && refines.is_none() =>
+                {
                     self.bump();
                     refines = Some(self.module_ref());
                 }
@@ -167,18 +184,37 @@ impl<'s> Parser<'s> {
             self.expect(K::Semicolon);
             None
         };
-        Module { kind, qualifiers, name, params, usages, refines, body, header_span, span: start.to(Span::at(self.prev_end())) }
+        Module {
+            kind,
+            qualifiers,
+            name,
+            params,
+            usages,
+            refines,
+            body,
+            header_span,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `access_usage ::= access module_kindOpt moduleref_list` (and `extends`)
     fn module_usage(&mut self) -> ModuleUsage {
         let t = self.bump();
-        let module_kind = if self.at_any(groups::MODULE_KIND) { Some(self.bump().kind) } else { None };
+        let module_kind = if self.at_any(groups::MODULE_KIND) {
+            Some(self.bump().kind)
+        } else {
+            None
+        };
         let mut refs = vec![self.module_ref()];
         while self.eat(K::Comma).is_some() {
             refs.push(self.module_ref());
         }
-        ModuleUsage { kind: t.kind, module_kind, refs, span: t.span.to(Span::at(self.prev_end())) }
+        ModuleUsage {
+            kind: t.kind,
+            module_kind,
+            refs,
+            span: t.span.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `moduleref ::= pathNameCS simple_signatureOpt`
@@ -188,11 +224,22 @@ impl<'s> Parser<'s> {
             Some(p) => p,
             None => {
                 self.expected("IDENTIFIER", false);
-                PathName { segments: Vec::new(), span: Span::at(self.prev_end()) }
+                PathName {
+                    segments: Vec::new(),
+                    span: Span::at(self.prev_end()),
+                }
             }
         };
-        let params = if self.at(K::Lparen) { Some(self.simple_signature()) } else { None };
-        ModuleRef { path, params, span: start.to(Span::at(self.prev_end())) }
+        let params = if self.at(K::Lparen) {
+            Some(self.simple_signature())
+        } else {
+            None
+        };
+        ModuleRef {
+            path,
+            params,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `simple_signature ::= '(' param_listOpt ')'`
@@ -230,7 +277,11 @@ impl<'s> Parser<'s> {
     /// `param ::= param_directionOpt IDENTIFIER ':' typespec | param_directionOpt typespec`
     fn param(&mut self) -> Option<Param> {
         let start = self.span();
-        let direction = if self.at_any(groups::PARAM_DIRECTION) { Some(self.bump().kind) } else { None };
+        let direction = if self.at_any(groups::PARAM_DIRECTION) {
+            Some(self.bump().kind)
+        } else {
+            None
+        };
         let mut name = None;
         if self.at(K::Identifier) && self.nth(1) == K::Colon {
             name = self.ident();
@@ -241,13 +292,22 @@ impl<'s> Parser<'s> {
             None if direction.is_some() || name.is_some() => self.expect_type_spec(),
             None => return None,
         };
-        Some(Param { direction, name, ty, span: start.to(Span::at(self.prev_end())) })
+        Some(Param {
+            direction,
+            name,
+            ty,
+            span: start.to(Span::at(self.prev_end())),
+        })
     }
 
     /// `complete_signature ::= simple_signature colon_param_listOpt`
     fn complete_signature(&mut self) -> (Vec<Param>, Vec<Param>) {
         let params = self.simple_signature();
-        let results = if self.eat(K::Colon).is_some() { self.param_list() } else { Vec::new() };
+        let results = if self.eat(K::Colon).is_some() {
+            self.param_list()
+        } else {
+            Vec::new()
+        };
         (params, results)
     }
 
@@ -262,16 +322,30 @@ impl<'s> Parser<'s> {
         while self.eat(K::Comma).is_some() {
             packages.push(self.package_ref());
         }
-        let where_ = if self.eat(K::KwWhere).is_some() { Some(self.block()) } else { None };
+        let where_ = if self.eat(K::KwWhere).is_some() {
+            Some(self.block())
+        } else {
+            None
+        };
         self.expect(K::Semicolon);
-        ModelType { name, compliance, packages, where_, span: start.to(Span::at(self.prev_end())) }
+        ModelType {
+            name,
+            compliance,
+            packages,
+            where_,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `packageref ::= pathNameCS | pathNameCS '(' uri ')' | uri`
     fn package_ref(&mut self) -> PackageRef {
         let start = self.span();
         if let Some(uri) = self.string_lit() {
-            return PackageRef { path: None, span: uri.span, uri: Some(uri) };
+            return PackageRef {
+                path: None,
+                span: uri.span,
+                uri: Some(uri),
+            };
         }
         let path = self.path_name();
         if path.is_none() {
@@ -282,7 +356,11 @@ impl<'s> Parser<'s> {
             uri = Some(self.expect_string_lit());
             self.expect(K::Rparen);
         }
-        PackageRef { path, uri, span: start.to(Span::at(self.prev_end())) }
+        PackageRef {
+            path,
+            uri,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `classifierDefCS ::= intermediate class qvtIdentifierCS classifierExtensionOpt '{'
@@ -297,7 +375,11 @@ impl<'s> Parser<'s> {
             Some(n) => n,
             None => {
                 self.expected("IDENTIFIER", false);
-                Name { text: String::new(), kind: NameKind::Ident, span: Span::at(self.prev_end()) }
+                Name {
+                    text: String::new(),
+                    kind: NameKind::Ident,
+                    span: Span::at(self.prev_end()),
+                }
             }
         };
         let mut extends = Vec::new();
@@ -322,12 +404,10 @@ impl<'s> Parser<'s> {
                         self.skip_to(&[K::Semicolon, K::Rbrace]);
                     }
                 }
-                if self.eat(K::Semicolon).is_none() {
-                    if !self.at(K::Rbrace) {
-                        self.expected(";", true);
-                        self.skip_to(&[K::Semicolon, K::Rbrace]);
-                        self.eat(K::Semicolon);
-                    }
+                if self.eat(K::Semicolon).is_none() && !self.at(K::Rbrace) {
+                    self.expected(";", true);
+                    self.skip_to(&[K::Semicolon, K::Rbrace]);
+                    self.eat(K::Semicolon);
                 }
                 if self.pos == start_pos {
                     // No progress (e.g. a stray closing bracket): drop the token.
@@ -337,7 +417,13 @@ impl<'s> Parser<'s> {
             self.expect(K::Rbrace);
             self.eat(K::Semicolon);
         }
-        ClassDef { exception, name, extends, features, span: start.to(Span::at(self.prev_end())) }
+        ClassDef {
+            exception,
+            name,
+            extends,
+            features,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `classifierFeatureCS ::= stereotype_qualifier_list feature_key_list qvtIdentifierCS ':'
@@ -367,7 +453,11 @@ impl<'s> Parser<'s> {
         let name = self.simple_name()?;
         self.expect(K::Colon);
         let ty = self.expect_type();
-        let multiplicity = if self.at(K::Lbracket) { Some(self.multiplicity()) } else { None };
+        let multiplicity = if self.at(K::Lbracket) {
+            Some(self.multiplicity())
+        } else {
+            None
+        };
         let ordered = self.eat(K::KwOrdered).is_some();
         let opposite = if self.eat(K::KwOpposites).is_some() {
             let navigable = self.eat(K::TildeSign).is_some();
@@ -375,15 +465,31 @@ impl<'s> Parser<'s> {
                 Some(n) => n,
                 None => {
                     self.expected("IDENTIFIER", false);
-                    Name { text: String::new(), kind: NameKind::Ident, span: Span::at(self.prev_end()) }
+                    Name {
+                        text: String::new(),
+                        kind: NameKind::Ident,
+                        span: Span::at(self.prev_end()),
+                    }
                 }
             };
-            let multiplicity = if self.at(K::Lbracket) { Some(self.multiplicity()) } else { None };
-            Some(Opposite { navigable, name, multiplicity })
+            let multiplicity = if self.at(K::Lbracket) {
+                Some(self.multiplicity())
+            } else {
+                None
+            };
+            Some(Opposite {
+                navigable,
+                name,
+                multiplicity,
+            })
         } else {
             None
         };
-        let init = if self.eat(K::Equal).is_some() { Some(self.expr()) } else { None };
+        let init = if self.eat(K::Equal).is_some() {
+            Some(self.expr())
+        } else {
+            None
+        };
         Some(ClassFeature::Property(ClassProperty {
             stereotypes,
             keys,
@@ -413,12 +519,18 @@ impl<'s> Parser<'s> {
         };
         let lower = bound(self, true).unwrap_or(MultBound::Int(0));
         let mut upper = None;
-        if matches!(lower, MultBound::Int(_)) && (self.at(K::Dotdot) || self.at(K::MultiplicityRange)) {
+        if matches!(lower, MultBound::Int(_))
+            && (self.at(K::Dotdot) || self.at(K::MultiplicityRange))
+        {
             self.bump();
             upper = bound(self, true);
         }
         self.expect(K::Rbracket);
-        Multiplicity { lower, upper, span: start.to(Span::at(self.prev_end())) }
+        Multiplicity {
+            lower,
+            upper,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `_property ::= configuration property qvtIdentifierCS ':' typeCS ';' | property … |
@@ -437,10 +549,18 @@ impl<'s> Parser<'s> {
             self.expect_scoped_name()
         } else {
             match self.simple_name() {
-                Some(n) => ScopedName { context_type: None, span: n.span, names: vec![n] },
+                Some(n) => ScopedName {
+                    context_type: None,
+                    span: n.span,
+                    names: vec![n],
+                },
                 None => {
                     self.expected("IDENTIFIER", false);
-                    ScopedName { context_type: None, names: Vec::new(), span: Span::at(self.prev_end()) }
+                    ScopedName {
+                        context_type: None,
+                        names: Vec::new(),
+                        span: Span::at(self.prev_end()),
+                    }
                 }
             }
         };
@@ -460,7 +580,13 @@ impl<'s> Parser<'s> {
             self.skip_to(&[K::Semicolon]);
             self.eat(K::Semicolon);
         }
-        Property { kind, name, ty, init, span: start.to(Span::at(self.prev_end())) }
+        Property {
+            kind,
+            name,
+            ty,
+            init,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `helper_header ::= qualifierList helper_kind scoped_identifier complete_signature`
@@ -470,8 +596,15 @@ impl<'s> Parser<'s> {
         let name = self.expect_scoped_name();
         let (params, results) = self.complete_signature();
         let decl_span = start.to(Span::at(self.prev_end()));
-        if name.names.len() == 1 && name.context_type.is_none() && name.names[0].kind == NameKind::Keyword(K::KwMain) {
-            self.warning(Code::EntryAsHelper, decl_span, "It's disallowed to define entry operation as a query or helper.");
+        if name.names.len() == 1
+            && name.context_type.is_none()
+            && name.names[0].kind == NameKind::Keyword(K::KwMain)
+        {
+            self.warning(
+                Code::EntryAsHelper,
+                decl_span,
+                "It's disallowed to define entry operation as a query or helper.",
+            );
         }
         let body = match self.peek() {
             K::Lbrace => {
@@ -490,7 +623,16 @@ impl<'s> Parser<'s> {
                 OpBody::None
             }
         };
-        Helper { qualifiers, kind, name, params, results, body, decl_span, span: start.to(Span::at(self.prev_end())) }
+        Helper {
+            qualifiers,
+            kind,
+            name,
+            params,
+            results,
+            body,
+            decl_span,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `constructor_header ::= qualifierList constructor scoped_identifier simple_signature`
@@ -500,7 +642,14 @@ impl<'s> Parser<'s> {
         let params = self.simple_signature();
         let decl_span = start.to(Span::at(self.prev_end()));
         let body = self.op_block_or_semi();
-        Constructor { qualifiers, name, params, body, decl_span, span: start.to(Span::at(self.prev_end())) }
+        Constructor {
+            qualifiers,
+            name,
+            params,
+            body,
+            decl_span,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `entry_header ::= main simple_signature`
@@ -509,7 +658,12 @@ impl<'s> Parser<'s> {
         let params = self.simple_signature();
         let decl_span = start.to(Span::at(self.prev_end()));
         let body = self.op_block_or_semi();
-        Entry { params, body, decl_span, span: start.to(Span::at(self.prev_end())) }
+        Entry {
+            params,
+            body,
+            decl_span,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     fn op_block_or_semi(&mut self) -> Option<Block> {
@@ -528,7 +682,11 @@ impl<'s> Parser<'s> {
     /// `'{' mapping_body '}' semicolonOpt`.
     fn mapping(&mut self, start: Span, qualifiers: Vec<K>) -> Mapping {
         self.bump();
-        let direction = if self.at_any(groups::PARAM_DIRECTION) { Some(self.bump().kind) } else { None };
+        let direction = if self.at_any(groups::PARAM_DIRECTION) {
+            Some(self.bump().kind)
+        } else {
+            None
+        };
         let name = self.expect_scoped_name();
         let (params, results) = self.complete_signature();
         let mut extensions = Vec::new();
@@ -538,16 +696,31 @@ impl<'s> Parser<'s> {
             while self.eat(K::Comma).is_some() {
                 names.push(self.expect_scoped_name());
             }
-            extensions.push(MappingExtension { kind: t.kind, names, span: t.span.to(Span::at(self.prev_end())) });
+            extensions.push(MappingExtension {
+                kind: t.kind,
+                names,
+                span: t.span.to(Span::at(self.prev_end())),
+            });
         }
         let decl_span = start.to(Span::at(self.prev_end()));
-        if !matches!(self.peek(), K::KwWhen | K::KwWhere | K::Lbrace | K::Semicolon) {
+        if !matches!(
+            self.peek(),
+            K::KwWhen | K::KwWhere | K::Lbrace | K::Semicolon
+        ) {
             // `scoped_identifier_list qvtErrorToken`: skip what does not belong to the header.
             self.unexpected();
             self.skip_to(&[K::KwWhen, K::KwWhere, K::Lbrace, K::Semicolon]);
         }
-        let when = if self.eat(K::KwWhen).is_some() { Some(self.block()) } else { None };
-        let where_ = if self.eat(K::KwWhere).is_some() { Some(self.block()) } else { None };
+        let when = if self.eat(K::KwWhen).is_some() {
+            Some(self.block())
+        } else {
+            None
+        };
+        let where_ = if self.eat(K::KwWhere).is_some() {
+            Some(self.block())
+        } else {
+            None
+        };
         let body = if self.at(K::Lbrace) {
             let b = self.mapping_body();
             self.eat(K::Semicolon);
@@ -574,23 +747,45 @@ impl<'s> Parser<'s> {
     /// `mapping_body ::= init_sectionOpt population_sectionOpt end_sectionOpt`
     fn mapping_body(&mut self) -> MappingBody {
         let start = self.bump().span;
-        let init = if self.eat(K::KwInit).is_some() { Some(self.block()) } else { None };
+        let init = if self.eat(K::KwInit).is_some() {
+            Some(self.block())
+        } else {
+            None
+        };
         let population = if self.eat(K::KwPopulation).is_some() {
-            Some(Population { explicit: true, body: self.block() })
+            Some(Population {
+                explicit: true,
+                body: self.block(),
+            })
         } else if !self.at(K::KwEnd) && !self.at(K::Rbrace) {
             // population_section ::= expression_list
             let s = self.span();
             let stmts = self.stmt_list(&[K::KwEnd]);
-            Some(Population { explicit: false, body: Block { stmts, span: s.to(Span::at(self.prev_end())) } })
+            Some(Population {
+                explicit: false,
+                body: Block {
+                    stmts,
+                    span: s.to(Span::at(self.prev_end())),
+                },
+            })
         } else {
             None
         };
-        let end = if self.eat(K::KwEnd).is_some() { Some(self.block()) } else { None };
+        let end = if self.eat(K::KwEnd).is_some() {
+            Some(self.block())
+        } else {
+            None
+        };
         if self.expect(K::Rbrace).is_none() {
             self.skip_to(&[K::Rbrace]);
             self.eat(K::Rbrace);
         }
-        MappingBody { init, population, end, span: start.to(Span::at(self.prev_end())) }
+        MappingBody {
+            init,
+            population,
+            end,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `_tag ::= tag StringLiteralExpCS scoped_identifier tag_valueOpt`
@@ -598,8 +793,17 @@ impl<'s> Parser<'s> {
         let start = self.bump().span;
         let id = self.expect_string_lit();
         let element = self.expect_scoped_name();
-        let value = if self.eat(K::Equal).is_some() { Some(self.expr()) } else { None };
-        Tag { id, element, value, span: start.to(Span::at(self.prev_end())) }
+        let value = if self.eat(K::Equal).is_some() {
+            Some(self.expr())
+        } else {
+            None
+        };
+        Tag {
+            id,
+            element,
+            value,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `renaming ::= rename typeCS '.' qvtIdentifierCS '=' StringLiteralExpCS ';'`
@@ -611,13 +815,22 @@ impl<'s> Parser<'s> {
             Some(n) => n,
             None => {
                 self.expected("IDENTIFIER", false);
-                Name { text: String::new(), kind: NameKind::Ident, span: Span::at(self.prev_end()) }
+                Name {
+                    text: String::new(),
+                    kind: NameKind::Ident,
+                    span: Span::at(self.prev_end()),
+                }
             }
         };
         self.expect(K::Equal);
         let new_name = self.expect_string_lit();
         self.expect(K::Semicolon);
-        Rename { ty, property, new_name, span: start.to(Span::at(self.prev_end())) }
+        Rename {
+            ty,
+            property,
+            new_name,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `AbstractQVTParser.validateTopLevelElementOrder` and the module checks of
@@ -669,14 +882,25 @@ impl<'s> Parser<'s> {
                     _ => None,
                 };
                 if let Some(span) = span {
-                    self.warning(Code::ModuleDeclarationMustPrecede, span, "Module declaration must precede this element");
+                    self.warning(
+                        Code::ModuleDeclarationMustPrecede,
+                        span,
+                        "Module declaration must precede this element",
+                    );
                 }
             }
         }
-        let counted = elements.iter().filter(|e| !matches!(e, Element::Error(_))).count();
+        let counted = elements
+            .iter()
+            .filter(|e| !matches!(e, Element::Error(_)))
+            .count();
         if modules == 0 {
             if let Some(f) = first {
-                self.error(Code::NoModule, f.to(last.unwrap()), "No module declared in the compilation unit");
+                self.error(
+                    Code::NoModule,
+                    f.to(last.unwrap()),
+                    "No module declared in the compilation unit",
+                );
             }
         } else if modules > 1 && counted != modules + imports_and_modeltypes {
             self.error(

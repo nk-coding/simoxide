@@ -5,8 +5,9 @@ use qvto_syntax::TokenKind;
 
 /// Replacement tokens for the "replace" mutation.
 const REPLACEMENTS: &[&str] = &[
-    ";", "(", ")", "{", "}", "[", "]", ".", "->", ":=", "=", ",", "|", ":", "::", "if", "then", "else", "endif",
-    "var", "x", "1", "'s'", "not", "-", "*", "and", "in", "let", "return", "object", "map", "when", "end", "init",
+    ";", "(", ")", "{", "}", "[", "]", ".", "->", ":=", "=", ",", "|", ":", "::", "if", "then",
+    "else", "endif", "var", "x", "1", "'s'", "not", "-", "*", "and", "in", "let", "return",
+    "object", "map", "when", "end", "init",
 ];
 
 pub const PER_FILE: u64 = 3;
@@ -37,7 +38,11 @@ pub struct Mutant {
 
 /// The mutants of one file (`key` is the fixture key, which seeds the generator).
 pub fn mutants(key: &str, src: &str) -> Vec<Mutant> {
-    let toks: Vec<_> = qvto_syntax::lexer::lex(src).tokens.into_iter().filter(|t| t.kind != TokenKind::Eof).collect();
+    let toks: Vec<_> = qvto_syntax::lexer::lex(src)
+        .tokens
+        .into_iter()
+        .filter(|t| t.kind != TokenKind::Eof)
+        .collect();
     let mut out = Vec::new();
     if toks.len() < 2 {
         return out;
@@ -50,22 +55,42 @@ pub fn mutants(key: &str, src: &str) -> Vec<Mutant> {
         let (s, e) = (t.span.start as usize, t.span.end as usize);
         let tok = &src[s..e];
         let (what, text) = match r % 4 {
-            0 => (format!("delete {s} {tok:?}"), format!("{} {}", &src[..s], &src[e..])),
-            1 => (format!("duplicate {s} {tok:?}"), format!("{} {} {}", &src[..e], tok, &src[e..])),
+            0 => (
+                format!("delete {s} {tok:?}"),
+                format!("{} {}", &src[..s], &src[e..]),
+            ),
+            1 => (
+                format!("duplicate {s} {tok:?}"),
+                format!("{} {} {}", &src[..e], tok, &src[e..]),
+            ),
             2 => {
                 let u = toks[i + 1];
                 let (s2, e2) = (u.span.start as usize, u.span.end as usize);
                 (
                     format!("swap {s} {tok:?} {:?}", &src[s2..e2]),
-                    format!("{} {} {} {} {}", &src[..s], &src[s2..e2], &src[e..s2], tok, &src[e2..]),
+                    format!(
+                        "{} {} {} {} {}",
+                        &src[..s],
+                        &src[s2..e2],
+                        &src[e..s2],
+                        tok,
+                        &src[e2..]
+                    ),
                 )
             }
             _ => {
                 let rep = REPLACEMENTS[(splitmix(&mut st) % REPLACEMENTS.len() as u64) as usize];
-                (format!("replace {s} {tok:?} {rep:?}"), format!("{} {rep} {}", &src[..s], &src[e..]))
+                (
+                    format!("replace {s} {tok:?} {rep:?}"),
+                    format!("{} {rep} {}", &src[..s], &src[e..]),
+                )
             }
         };
-        out.push(Mutant { id: format!("{key}#{n}"), what, text });
+        out.push(Mutant {
+            id: format!("{key}#{n}"),
+            what,
+            text,
+        });
     }
     out
 }

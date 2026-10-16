@@ -12,8 +12,8 @@ mod module;
 use crate::ast::*;
 use crate::diag::{Code, Diagnostic};
 use crate::escape;
-use crate::generated::{groups, TokenKind as K};
-use crate::lexer::{lpg_text, Lexed, Token};
+use crate::generated::{TokenKind as K, groups};
+use crate::lexer::{Lexed, Token, lpg_text};
 use crate::span::Span;
 
 /// Maximum nesting of expressions and statements before the parser gives up on a construct.
@@ -40,7 +40,14 @@ struct Checkpoint {
 }
 
 pub(crate) fn parse_unit(src: &str, lexed: Lexed) -> (Unit, Vec<Diagnostic>) {
-    let mut p = Parser { src, toks: lexed.tokens, pos: 0, diags: lexed.diagnostics, depth: 0, too_deep: false };
+    let mut p = Parser {
+        src,
+        toks: lexed.tokens,
+        pos: 0,
+        diags: lexed.diagnostics,
+        depth: 0,
+        too_deep: false,
+    };
     let unit = p.unit(lexed.end);
     let mut diags = p.diags;
     diags.sort_by_key(|d| (d.span.start, d.span.end));
@@ -97,7 +104,11 @@ impl<'s> Parser<'s> {
 
     /// Span of the previous token (or an empty span at the start).
     fn prev_span(&self) -> Span {
-        if self.pos == 0 { Span::at(0) } else { self.toks[self.pos - 1].span }
+        if self.pos == 0 {
+            Span::at(0)
+        } else {
+            self.toks[self.pos - 1].span
+        }
     }
 
     /// End of the previous token.
@@ -110,7 +121,10 @@ impl<'s> Parser<'s> {
     }
 
     fn checkpoint(&self) -> Checkpoint {
-        Checkpoint { pos: self.pos, diags: self.diags.len() }
+        Checkpoint {
+            pos: self.pos,
+            diags: self.diags.len(),
+        }
     }
 
     fn rewind(&mut self, cp: Checkpoint) {
@@ -131,7 +145,11 @@ impl<'s> Parser<'s> {
 
     /// Text of a token as LPG quotes it in messages.
     fn quoted(&self, t: Token) -> String {
-        if t.kind == K::Eof { "EOF_TOKEN".to_string() } else { lpg_text(self.text(t)) }
+        if t.kind == K::Eof {
+            "EOF_TOKEN".to_string()
+        } else {
+            lpg_text(self.text(t))
+        }
     }
 
     /// Reports that `what` is missing here. At end of input: `End-of-File reached after this
@@ -155,10 +173,17 @@ impl<'s> Parser<'s> {
         if self.diags.iter().any(|d| d.code == Code::UnexpectedEof) {
             return;
         }
-        let prev = if self.pos > 0 { Some(self.toks[self.pos - 1]) } else { None };
+        let prev = if self.pos > 0 {
+            Some(self.toks[self.pos - 1])
+        } else {
+            None
+        };
         match prev {
             Some(p) => {
-                let msg = format!("End-of-File reached after this token \"{}\"", self.quoted(p));
+                let msg = format!(
+                    "End-of-File reached after this token \"{}\"",
+                    self.quoted(p)
+                );
                 self.error(Code::UnexpectedEof, p.span, msg);
             }
             None => self.error(Code::UnexpectedEof, Span::at(0), "End-of-File reached"),
@@ -190,7 +215,10 @@ impl<'s> Parser<'s> {
         let what = k.spelling().unwrap_or(k.lpg_name());
         // Missing closers and separators are reported as insertions after the previous token,
         // like LPG does when the current token can continue the input.
-        let insert = matches!(k, K::Semicolon | K::Rparen | K::Rbrace | K::Rbracket | K::Comma);
+        let insert = matches!(
+            k,
+            K::Semicolon | K::Rparen | K::Rbrace | K::Rbracket | K::Comma
+        );
         self.expected(what, insert);
         None
     }
@@ -252,7 +280,11 @@ impl<'s> Parser<'s> {
         match t.kind {
             K::Identifier => {
                 self.bump();
-                Some(Name { text: self.text(t).to_string(), kind: NameKind::Ident, span: t.span })
+                Some(Name {
+                    text: self.text(t).to_string(),
+                    kind: NameKind::Ident,
+                    span: t.span,
+                })
             }
             K::QuotedIdentifier => {
                 self.bump();
@@ -263,11 +295,19 @@ impl<'s> Parser<'s> {
                     text.push_str(&self.decode_token(s));
                     span = span.to(s.span);
                 }
-                Some(Name { text, kind: NameKind::Quoted, span })
+                Some(Name {
+                    text,
+                    kind: NameKind::Quoted,
+                    span,
+                })
             }
             k if groups::SIMPLE_NAME.contains(&k) => {
                 self.bump();
-                Some(Name { text: self.text(t).to_string(), kind: NameKind::Keyword(k), span: t.span })
+                Some(Name {
+                    text: self.text(t).to_string(),
+                    kind: NameKind::Keyword(k),
+                    span: t.span,
+                })
             }
             _ => None,
         }
@@ -275,7 +315,11 @@ impl<'s> Parser<'s> {
 
     fn keyword_name(&mut self) -> Name {
         let t = self.bump();
-        Name { text: self.text(t).to_string(), kind: NameKind::Keyword(t.kind), span: t.span }
+        Name {
+            text: self.text(t).to_string(),
+            kind: NameKind::Keyword(t.kind),
+            span: t.span,
+        }
     }
 
     /// `unreservedSimpleNameCS ::= simpleNameCS | restrictedKeywordCS` (after `::`).
@@ -289,7 +333,11 @@ impl<'s> Parser<'s> {
     /// A raw `IDENTIFIER` (declarators, parameter names, scoped identifiers).
     fn ident(&mut self) -> Option<Name> {
         let t = self.eat(K::Identifier)?;
-        Some(Name { text: self.text(t).to_string(), kind: NameKind::Ident, span: t.span })
+        Some(Name {
+            text: self.text(t).to_string(),
+            kind: NameKind::Ident,
+            span: t.span,
+        })
     }
 
     fn expect_ident(&mut self) -> Name {
@@ -297,7 +345,11 @@ impl<'s> Parser<'s> {
             Some(n) => n,
             None => {
                 self.expected("IDENTIFIER", false);
-                Name { text: String::new(), kind: NameKind::Ident, span: Span::at(self.prev_end()) }
+                Name {
+                    text: String::new(),
+                    kind: NameKind::Ident,
+                    span: Span::at(self.prev_end()),
+                }
             }
         }
     }
@@ -341,7 +393,14 @@ impl<'s> Parser<'s> {
                         break;
                     }
                 }
-            } else if !self.at(K::Eof) && !self.at_simple_name() && groups::SIMPLE_NAME.contains(&self.nth(1)) && !self.tok().kind.is_keyword() && self.peek() != K::Lparen && self.peek() != K::Semicolon && self.peek() != K::Lbrace {
+            } else if !self.at(K::Eof)
+                && !self.at_simple_name()
+                && groups::SIMPLE_NAME.contains(&self.nth(1))
+                && !self.tok().kind.is_keyword()
+                && self.peek() != K::Lparen
+                && self.peek() != K::Semicolon
+                && self.peek() != K::Lbrace
+            {
                 // `a-b`: LPG repairs this by substituting the expected `.`.
                 let t = self.bump();
                 let msg = format!("\".\" expected instead of \"{}\"", self.quoted(t));
@@ -394,7 +453,11 @@ impl<'s> Parser<'s> {
             parts.push(t.span);
             prev = t;
         }
-        Some(StringLit { value, span: parts[0].to(*parts.last().unwrap()), parts })
+        Some(StringLit {
+            value,
+            span: parts[0].to(*parts.last().unwrap()),
+            parts,
+        })
     }
 
     fn expect_string_lit(&mut self) -> StringLit {
@@ -402,7 +465,11 @@ impl<'s> Parser<'s> {
             Some(s) => s,
             None => {
                 self.expected("STRING_LITERAL", false);
-                StringLit { value: String::new(), parts: Vec::new(), span: Span::at(self.prev_end()) }
+                StringLit {
+                    value: String::new(),
+                    parts: Vec::new(),
+                    span: Span::at(self.prev_end()),
+                }
             }
         }
     }
@@ -443,7 +510,10 @@ impl<'s> Parser<'s> {
         let k = t.kind;
         if groups::PRIMITIVE_TYPE.contains(&k) {
             self.bump();
-            return Some(TypeExpr { kind: TypeKind::Primitive(k), span: t.span });
+            return Some(TypeExpr {
+                kind: TypeKind::Primitive(k),
+                span: t.span,
+            });
         }
         if groups::COLLECTION_TYPE.contains(&k) {
             self.bump();
@@ -461,7 +531,10 @@ impl<'s> Parser<'s> {
                 self.expect(K::Comma);
                 let b = self.expect_type();
                 self.expect(K::Rparen);
-                Some(TypeExpr { kind: TypeKind::Dict(Box::new(a), Box::new(b)), span: t.span.to(Span::at(self.prev_end())) })
+                Some(TypeExpr {
+                    kind: TypeKind::Dict(Box::new(a), Box::new(b)),
+                    span: t.span.to(Span::at(self.prev_end())),
+                })
             }
             K::KwTuple => {
                 self.bump();
@@ -469,7 +542,10 @@ impl<'s> Parser<'s> {
             }
             _ => {
                 let p = self.path_name()?;
-                Some(TypeExpr { span: p.span, kind: TypeKind::Path(p) })
+                Some(TypeExpr {
+                    span: p.span,
+                    kind: TypeKind::Path(p),
+                })
             }
         }
     }
@@ -478,7 +554,10 @@ impl<'s> Parser<'s> {
         self.expect(K::Lparen);
         let e = self.expect_type();
         self.expect(K::Rparen);
-        TypeExpr { kind: make(e), span: kw.span.to(Span::at(self.prev_end())) }
+        TypeExpr {
+            kind: make(e),
+            span: kw.span.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `tupleTypeCS ::= Tuple '(' tupleTypePartsCSopt ')'`, parts `simpleNameCS ':' typeCS`.
@@ -494,14 +573,22 @@ impl<'s> Parser<'s> {
                 self.expect(K::Colon);
                 let ty = self.expect_type();
                 let span = name.span.to(ty.span);
-                parts.push(VarDecl { name, ty: Some(ty), init: None, span });
+                parts.push(VarDecl {
+                    name,
+                    ty: Some(ty),
+                    init: None,
+                    span,
+                });
                 if self.eat(K::Comma).is_none() {
                     break;
                 }
             }
         }
         self.expect(K::Rparen);
-        TypeExpr { kind: TypeKind::Tuple(parts), span: kw.span.to(Span::at(self.prev_end())) }
+        TypeExpr {
+            kind: TypeKind::Tuple(parts),
+            span: kw.span.to(Span::at(self.prev_end())),
+        }
     }
 
     fn expect_type(&mut self) -> TypeExpr {
@@ -509,7 +596,10 @@ impl<'s> Parser<'s> {
             Some(t) => t,
             None => {
                 self.expected("typeCS", false);
-                TypeExpr { kind: TypeKind::Error, span: Span::at(self.prev_end()) }
+                TypeExpr {
+                    kind: TypeKind::Error,
+                    span: Span::at(self.prev_end()),
+                }
             }
         }
     }
@@ -533,7 +623,14 @@ impl<'s> Parser<'s> {
             None => {
                 self.expected("typespec", false);
                 let span = Span::at(self.prev_end());
-                TypeSpec { ty: TypeExpr { kind: TypeKind::Error, span }, extent: None, span }
+                TypeSpec {
+                    ty: TypeExpr {
+                        kind: TypeKind::Error,
+                        span,
+                    },
+                    extent: None,
+                    span,
+                }
             }
         }
     }
@@ -551,7 +648,11 @@ impl<'s> Parser<'s> {
             self.expect(K::Coloncolon);
             let n = self.expect_ident();
             let span = ty.span.to(n.span);
-            return Some(ScopedName { context_type: Some(ty), names: vec![n], span });
+            return Some(ScopedName {
+                context_type: Some(ty),
+                names: vec![n],
+                span,
+            });
         }
         let first = match k {
             K::Identifier => self.ident().unwrap(),
@@ -566,7 +667,11 @@ impl<'s> Parser<'s> {
             span = span.to(n.span);
             names.push(n);
         }
-        Some(ScopedName { context_type: None, names, span })
+        Some(ScopedName {
+            context_type: None,
+            names,
+            span,
+        })
     }
 
     fn expect_scoped_name(&mut self) -> ScopedName {
@@ -574,7 +679,11 @@ impl<'s> Parser<'s> {
             Some(s) => s,
             None => {
                 self.expected("IDENTIFIER", false);
-                ScopedName { context_type: None, names: Vec::new(), span: Span::at(self.prev_end()) }
+                ScopedName {
+                    context_type: None,
+                    names: Vec::new(),
+                    span: Span::at(self.prev_end()),
+                }
             }
         }
     }

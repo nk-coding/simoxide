@@ -5,7 +5,7 @@
 
 pub mod mutate;
 
-use qvto_syntax::{span, LineIndex, Parsed, Severity};
+use qvto_syntax::{LineIndex, Parsed, Severity, span};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
@@ -26,7 +26,10 @@ pub fn roots() -> BTreeMap<&'static str, PathBuf> {
     if let Some(p) = dir_from_env("QVTO_ECLIPSE_DIR", repo.join("reference/eclipse-qvto")) {
         m.insert("eclipse", p);
     }
-    if let Some(p) = dir_from_env("QVTO_SIMULIZAR_DIR", old.join("Palladio-Analyzer-SimuLizar")) {
+    if let Some(p) = dir_from_env(
+        "QVTO_SIMULIZAR_DIR",
+        old.join("Palladio-Analyzer-SimuLizar"),
+    ) {
         m.insert("simulizar", p);
     }
     if let Some(p) = dir_from_env(
@@ -41,7 +44,8 @@ pub fn roots() -> BTreeMap<&'static str, PathBuf> {
 /// The oracle fixture: file key (`eclipse:tests/…`) to its problem lines (without the key),
 /// empty for files Eclipse parses without problems. Keys in file order.
 pub fn oracle() -> BTreeMap<String, Vec<String>> {
-    let text = std::fs::read_to_string(manifest().join("tests/fixtures/eclipse-parse-oracle.tsv")).unwrap();
+    let text = std::fs::read_to_string(manifest().join("tests/fixtures/eclipse-parse-oracle.tsv"))
+        .unwrap();
     let mut m: BTreeMap<String, Vec<String>> = BTreeMap::new();
     for line in text.lines() {
         let (key, rest) = line.split_once('\t').unwrap();
@@ -73,8 +77,16 @@ pub fn problem_lines(src: &str, parsed: &Parsed) -> Vec<String> {
         .map(|d| {
             let off = span::byte_to_utf16(src, d.span.start as usize);
             let len = span::byte_to_utf16(src, d.span.end as usize) - off;
-            let sev = if d.severity == Severity::Error { "E" } else { "W" };
-            format!("{sev}\t{off}\t{len}\t{}\t{}", lines.line(d.span.start), d.message)
+            let sev = if d.severity == Severity::Error {
+                "E"
+            } else {
+                "W"
+            };
+            format!(
+                "{sev}\t{off}\t{len}\t{}\t{}",
+                lines.line(d.span.start),
+                d.message
+            )
         })
         .collect();
     out.sort();

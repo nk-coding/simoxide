@@ -13,8 +13,12 @@ fn generated_tables_match_grammars() {
         eprintln!("skipped: reference/eclipse-qvto not present");
         return;
     };
-    let tables = lpg::derive(&lpg::Paths::new(&dir)).unwrap_or_else(|e| panic!("grammar check failed:\n{e}"));
+    let tables = lpg::derive(&lpg::Paths::new(&dir))
+        .unwrap_or_else(|e| panic!("grammar check failed:\n{e}"));
     let text = lpg::render(&tables);
     let committed = std::fs::read_to_string(manifest.join("src/generated.rs")).unwrap();
-    assert!(committed == text, "src/generated.rs is out of date: run `cargo run -p qvto-syntax --example gen_tables`");
+    assert!(
+        committed == text,
+        "src/generated.rs is out of date: run `cargo run -p qvto-syntax --example gen_tables`"
+    );
 }

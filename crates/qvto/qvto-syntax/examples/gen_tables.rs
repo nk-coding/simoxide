@@ -16,7 +16,8 @@ use std::path::Path;
 fn main() {
     let manifest = Path::new(env!("CARGO_MANIFEST_DIR"));
     let check = std::env::args().any(|a| a == "--check");
-    let dir = lpg::eclipse_dir(manifest).expect("Eclipse QVTo sources not found: see reference/README.md or set QVTO_ECLIPSE_DIR");
+    let dir = lpg::eclipse_dir(manifest)
+        .expect("Eclipse QVTo sources not found: see reference/README.md or set QVTO_ECLIPSE_DIR");
     let tables = lpg::derive(&lpg::Paths::new(&dir)).unwrap_or_else(|e| {
         eprintln!("grammar check failed:\n{e}");
         std::process::exit(1)

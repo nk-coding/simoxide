@@ -52,5 +52,9 @@ pub fn parse(src: &str) -> Parsed {
     let lexed = lexer::lex(src);
     let comments = lexed.comments.clone();
     let (unit, diagnostics) = parser::parse_unit(src, lexed);
-    Parsed { unit, diagnostics, comments }
+    Parsed {
+        unit,
+        diagnostics,
+        comments,
+    }
 }

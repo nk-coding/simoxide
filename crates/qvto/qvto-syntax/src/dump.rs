@@ -8,7 +8,10 @@ use std::fmt::Write;
 
 /// Dumps a unit.
 pub fn unit(u: &Unit) -> String {
-    let mut d = Dumper { out: String::new(), indent: 0 };
+    let mut d = Dumper {
+        out: String::new(),
+        indent: 0,
+    };
     d.open("unit");
     for e in &u.elements {
         d.element(e);
@@ -19,7 +22,10 @@ pub fn unit(u: &Unit) -> String {
 
 /// Dumps an expression.
 pub fn expr(e: &Expr) -> String {
-    let mut d = Dumper { out: String::new(), indent: 0 };
+    let mut d = Dumper {
+        out: String::new(),
+        indent: 0,
+    };
     d.expr(e);
     d.out
 }
@@ -209,7 +215,11 @@ impl Dumper {
     fn element(&mut self, e: &Element) {
         match e {
             Element::Import(i) => {
-                self.open(if i.library { "import-library" } else { "import" });
+                self.open(if i.library {
+                    "import-library"
+                } else {
+                    "import"
+                });
                 for n in &i.unit {
                     self.name(n);
                 }
@@ -380,7 +390,14 @@ impl Dumper {
                     self.open("body");
                     self.opt_block("init", &b.init);
                     if let Some(p) = &b.population {
-                        self.block(if p.explicit { "population" } else { "implicit-population" }, &p.body);
+                        self.block(
+                            if p.explicit {
+                                "population"
+                            } else {
+                                "implicit-population"
+                            },
+                            &p.body,
+                        );
                     }
                     self.opt_block("end", &b.end);
                     self.close();

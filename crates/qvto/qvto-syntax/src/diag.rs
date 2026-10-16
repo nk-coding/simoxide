@@ -68,11 +68,21 @@ pub struct Diagnostic {
 
 impl Diagnostic {
     pub fn error(code: Code, span: Span, message: impl Into<String>) -> Diagnostic {
-        Diagnostic { severity: Severity::Error, code, span, message: message.into() }
+        Diagnostic {
+            severity: Severity::Error,
+            code,
+            span,
+            message: message.into(),
+        }
     }
 
     pub fn warning(code: Code, span: Span, message: impl Into<String>) -> Diagnostic {
-        Diagnostic { severity: Severity::Warning, code, span, message: message.into() }
+        Diagnostic {
+            severity: Severity::Warning,
+            code,
+            span,
+            message: message.into(),
+        }
     }
 
     pub fn is_error(&self) -> bool {
@@ -92,6 +102,10 @@ impl Diagnostic {
 
 impl fmt::Display for Diagnostic {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?} {:?} at {:?}: {}", self.severity, self.code, self.span, self.message)
+        write!(
+            f,
+            "{:?} {:?} at {:?}: {}",
+            self.severity, self.code, self.span, self.message
+        )
     }
 }

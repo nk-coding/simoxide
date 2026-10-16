@@ -8,7 +8,10 @@ use crate::generated::TokenKind;
 
 /// Prints a unit.
 pub fn unit(u: &Unit) -> String {
-    let mut p = Printer { out: String::new(), indent: 0 };
+    let mut p = Printer {
+        out: String::new(),
+        indent: 0,
+    };
     for e in &u.elements {
         p.element(e);
     }
@@ -17,7 +20,10 @@ pub fn unit(u: &Unit) -> String {
 
 /// Prints an expression.
 pub fn expr(e: &Expr) -> String {
-    let mut p = Printer { out: String::new(), indent: 0 };
+    let mut p = Printer {
+        out: String::new(),
+        indent: 0,
+    };
     p.expr(e);
     p.out
 }
@@ -266,7 +272,11 @@ impl Printer {
                 self.w(";");
             }
             Element::Class(c) => {
-                self.w(if c.exception { "exception " } else { "intermediate class " });
+                self.w(if c.exception {
+                    "exception "
+                } else {
+                    "intermediate class "
+                });
                 self.name(&c.name);
                 if !c.extends.is_empty() {
                     self.w(" extends ");
@@ -645,7 +655,8 @@ impl Printer {
             ExprKind::Unary(op, x) => {
                 self.w(kw(*op));
                 // `--` would start a comment.
-                if *op != TokenKind::Minus || matches!(x.kind, ExprKind::Unary(TokenKind::Minus, _)) {
+                if *op != TokenKind::Minus || matches!(x.kind, ExprKind::Unary(TokenKind::Minus, _))
+                {
                     self.w(" ");
                 }
                 self.expr(x);

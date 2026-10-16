@@ -37,7 +37,9 @@ fn cases(java: &str) -> Vec<Case> {
         } else {
             continue;
         };
-        let Some((dir, nums)) = rest.split_once('"') else { continue };
+        let Some((dir, nums)) = rest.split_once('"') else {
+            continue;
+        };
         let nums: Vec<i64> = nums
             .split(')')
             .next()
@@ -45,7 +47,12 @@ fn cases(java: &str) -> Vec<Case> {
             .split(',')
             .filter_map(|s| s.trim().parse().ok())
             .collect();
-        out.push(Case { dir: dir.to_string(), errors: nums[0], warnings: nums.get(1).copied().unwrap_or(-1), annotated });
+        out.push(Case {
+            dir: dir.to_string(),
+            errors: nums[0],
+            warnings: nums.get(1).copied().unwrap_or(-1),
+            annotated,
+        });
     }
     out
 }
@@ -59,7 +66,9 @@ fn annotations(src: &str) -> Vec<(usize, usize, bool)> {
         let mut from = 0;
         while let Some(i) = src[from..].find(&open) {
             let start = from + i + open.len();
-            let Some(j) = src[start..].find(&close) else { break };
+            let Some(j) = src[start..].find(&close) else {
+                break;
+            };
             let end = start + j;
             let o = qvto_syntax::span::byte_to_utf16(src, start);
             out.push((o, qvto_syntax::span::byte_to_utf16(src, end) - o, err));
@@ -81,7 +90,8 @@ fn parser_cases() {
     let cases = cases(&java);
     assert_eq!(cases.len(), 155, "TestQvtParser.java data list changed");
     let (mut clean_expected, mut clean_ok, mut error_cases, mut syntax_error_cases) = (0, 0, 0, 0);
-    let (mut annotated_cases, mut annotations_total, mut annotations_hit, mut unmatched) = (0, 0, 0, Vec::new());
+    let (mut annotated_cases, mut annotations_total, mut annotations_hit, mut unmatched) =
+        (0, 0, 0, Vec::new());
     for c in &cases {
         let dir = bundle.join("parserTestData/sources").join(&c.dir);
         let mut files: Vec<_> = std::fs::read_dir(&dir)
@@ -101,7 +111,9 @@ fn parser_cases() {
                 for d in &parsed.diagnostics {
                     let o = qvto_syntax::span::byte_to_utf16(&src, d.span.start as usize);
                     let l = qvto_syntax::span::byte_to_utf16(&src, d.span.end as usize) - o;
-                    let hit = ann.iter().any(|&(ao, al, e)| ao == o && al == l && e == (d.severity == Severity::Error));
+                    let hit = ann.iter().any(|&(ao, al, e)| {
+                        ao == o && al == l && e == (d.severity == Severity::Error)
+                    });
                     if hit {
                         annotations_hit += 1;
                     } else {

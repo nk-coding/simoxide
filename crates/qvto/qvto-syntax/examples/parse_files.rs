@@ -7,15 +7,29 @@
 //! find … -name '*.qvto' | cargo run --release -p qvto-syntax --example parse_files
 //! ```
 
-use qvto_syntax::{span, LineIndex, Severity};
+use qvto_syntax::{LineIndex, Severity, span};
 use std::io::BufRead;
 use std::time::Instant;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let repeat: usize = args.iter().position(|a| a == "--time").and_then(|i| args.get(i + 1)).and_then(|s| s.parse().ok()).unwrap_or(0);
-    let paths: Vec<String> = std::io::stdin().lock().lines().map_while(Result::ok).map(|l| l.trim().to_string()).filter(|l| !l.is_empty()).collect();
-    let texts: Vec<String> = paths.iter().map(|p| String::from_utf8_lossy(&std::fs::read(p).expect(p)).into_owned()).collect();
+    let repeat: usize = args
+        .iter()
+        .position(|a| a == "--time")
+        .and_then(|i| args.get(i + 1))
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(0);
+    let paths: Vec<String> = std::io::stdin()
+        .lock()
+        .lines()
+        .map_while(Result::ok)
+        .map(|l| l.trim().to_string())
+        .filter(|l| !l.is_empty())
+        .collect();
+    let texts: Vec<String> = paths
+        .iter()
+        .map(|p| String::from_utf8_lossy(&std::fs::read(p).expect(p)).into_owned())
+        .collect();
     for (p, src) in paths.iter().zip(&texts) {
         let parsed = qvto_syntax::parse(src);
         if parsed.diagnostics.is_empty() {
@@ -26,8 +40,16 @@ fn main() {
         for d in &parsed.diagnostics {
             let off = span::byte_to_utf16(src, d.span.start as usize);
             let len = span::byte_to_utf16(src, d.span.end as usize) - off;
-            let sev = if d.severity == Severity::Error { "E" } else { "W" };
-            println!("{p}\t{sev}\t{off}\t{len}\t{}\t{}", lines.line(d.span.start), d.message);
+            let sev = if d.severity == Severity::Error {
+                "E"
+            } else {
+                "W"
+            };
+            println!(
+                "{p}\t{sev}\t{off}\t{len}\t{}\t{}",
+                lines.line(d.span.start),
+                d.message
+            );
         }
     }
     if repeat > 0 {
@@ -42,6 +64,11 @@ fn main() {
             std::hint::black_box(n);
             best = best.min(t0.elapsed().as_secs_f64());
         }
-        eprintln!("files={} bytes={bytes} best_ms={:.2} MB/s={:.1}", texts.len(), best * 1e3, bytes as f64 / best / 1e6);
+        eprintln!(
+            "files={} bytes={bytes} best_ms={:.2} MB/s={:.1}",
+            texts.len(),
+            best * 1e3,
+            bytes as f64 / best / 1e6
+        );
     }
 }

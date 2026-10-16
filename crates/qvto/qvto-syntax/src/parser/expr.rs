@@ -4,7 +4,7 @@
 use super::Parser;
 use crate::ast::*;
 use crate::diag::Code;
-use crate::generated::{binary_level, groups, TokenKind as K, PREFIX_OPS};
+use crate::generated::{PREFIX_OPS, TokenKind as K, binary_level, groups};
 use crate::lexer::Token;
 use crate::span::Span;
 
@@ -13,11 +13,17 @@ const STMT_SYNC: &[K] = &[K::Semicolon, K::Rbrace];
 
 impl<'s> Parser<'s> {
     fn err_expr(&self) -> Expr {
-        Expr { kind: ExprKind::Error, span: Span::at(self.prev_end()) }
+        Expr {
+            kind: ExprKind::Error,
+            span: Span::at(self.prev_end()),
+        }
     }
 
     fn mk(&self, start: Span, kind: ExprKind) -> Expr {
-        Expr { kind, span: start.to(Span::at(self.prev_end())) }
+        Expr {
+            kind,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// Whether the current token can start an `OclExpressionCS`.
@@ -84,7 +90,11 @@ impl<'s> Parser<'s> {
             K::KwReturn => {
                 // returnExpCS ::= return oclExpressionCSOpt
                 self.bump();
-                let value = if self.at_expr_start() { Some(Box::new(self.expr())) } else { None };
+                let value = if self.at_expr_start() {
+                    Some(Box::new(self.expr()))
+                } else {
+                    None
+                };
                 return self.mk(start, ExprKind::Return(value));
             }
             K::KwVar => return self.var_exp(stmt),
@@ -96,7 +106,9 @@ impl<'s> Parser<'s> {
         // A stray token followed by something that continues the expression: LPG deletes it.
         while stmt && self.is_stray() {
             let n = self.nth(1);
-            if binary_level(n) == 0 && !matches!(n, K::ResetAssign | K::AddAssign | K::Dot | K::Arrow) {
+            if binary_level(n) == 0
+                && !matches!(n, K::ResetAssign | K::AddAssign | K::Dot | K::Arrow)
+            {
                 break;
             }
             self.unexpected();
@@ -233,16 +245,36 @@ impl<'s> Parser<'s> {
                 self.expected("IDENTIFIER", false);
                 break;
             };
-            let ty = if self.eat(K::Colon).is_some() { Some(self.expect_type()) } else { None };
-            let init = if self.expect(K::Equal).is_some() { Some((K::Equal, Box::new(self.expr()))) } else { None };
-            vars.push(VarDecl { name, ty, init, span: vs.to(Span::at(self.prev_end())) });
+            let ty = if self.eat(K::Colon).is_some() {
+                Some(self.expect_type())
+            } else {
+                None
+            };
+            let init = if self.expect(K::Equal).is_some() {
+                Some((K::Equal, Box::new(self.expr())))
+            } else {
+                None
+            };
+            vars.push(VarDecl {
+                name,
+                ty,
+                init,
+                span: vs.to(Span::at(self.prev_end())),
+            });
             if self.eat(K::Comma).is_none() {
                 break;
             }
         }
-        if vars.len() > 1 && vars.iter().any(|v| v.ty.is_some()) && vars.iter().any(|v| v.ty.is_none()) {
+        if vars.len() > 1
+            && vars.iter().any(|v| v.ty.is_some())
+            && vars.iter().any(|v| v.ty.is_none())
+        {
             let s = start.to(Span::at(self.prev_end()));
-            self.error(Code::Misplaced, s, "let variables must be either all typed or all untyped");
+            self.error(
+                Code::Misplaced,
+                s,
+                "let variables must be either all typed or all untyped",
+            );
         }
         let body = if self.expect(K::KwIn).is_some() {
             self.expr()
@@ -285,11 +317,31 @@ impl<'s> Parser<'s> {
             // primaryExpCS '.' conceptualOperationNameCS '(' argumentsCSopt ')'
             let name = self.keyword_name();
             let args = self.args();
-            return self.mk(start, ExprKind::Call(Box::new(Call { source: Some((src, NavOp::Dot)), qualifier: Vec::new(), name, args })));
+            return self.mk(
+                start,
+                ExprKind::Call(Box::new(Call {
+                    source: Some((src, NavOp::Dot)),
+                    qualifier: Vec::new(),
+                    name,
+                    args,
+                })),
+            );
         }
         let Some(first) = self.simple_name() else {
             self.expected("simpleNameCS", false);
-            return self.mk(start, ExprKind::Nav(Box::new(Nav { source: src, op: NavOp::Dot, qualifier: Vec::new(), name: Name { text: String::new(), kind: NameKind::Ident, span: Span::at(self.prev_end()) } })));
+            return self.mk(
+                start,
+                ExprKind::Nav(Box::new(Nav {
+                    source: src,
+                    op: NavOp::Dot,
+                    qualifier: Vec::new(),
+                    name: Name {
+                        text: String::new(),
+                        kind: NameKind::Ident,
+                        span: Span::at(self.prev_end()),
+                    },
+                })),
+            );
         };
         // primaryExpCS '.' pathNameCS '::' unreservedSimpleNameCS ['(' args ')']
         let mut qualifier = Vec::new();
@@ -301,9 +353,25 @@ impl<'s> Parser<'s> {
         }
         if self.at(K::Lparen) {
             let args = self.args();
-            self.mk(start, ExprKind::Call(Box::new(Call { source: Some((src, NavOp::Dot)), qualifier, name, args })))
+            self.mk(
+                start,
+                ExprKind::Call(Box::new(Call {
+                    source: Some((src, NavOp::Dot)),
+                    qualifier,
+                    name,
+                    args,
+                })),
+            )
         } else {
-            self.mk(start, ExprKind::Nav(Box::new(Nav { source: src, op: NavOp::Dot, qualifier, name })))
+            self.mk(
+                start,
+                ExprKind::Nav(Box::new(Nav {
+                    source: src,
+                    op: NavOp::Dot,
+                    qualifier,
+                    name,
+                })),
+            )
         }
     }
 
@@ -315,7 +383,8 @@ impl<'s> Parser<'s> {
         if groups::FOR_OP.contains(&k) {
             return self.for_each(start, src);
         }
-        if groups::IMPERATIVE_ITERATOR_12.contains(&k) || groups::IMPERATIVE_ITERATOR_3.contains(&k) {
+        if groups::IMPERATIVE_ITERATOR_12.contains(&k) || groups::IMPERATIVE_ITERATOR_3.contains(&k)
+        {
             return self.x_iterate(start, src);
         }
         match k {
@@ -334,22 +403,55 @@ impl<'s> Parser<'s> {
         };
         if !self.at(K::Lparen) {
             // IterateExpCS ::= primaryExpCS '->' simpleNameCS (xcollect shorthand)
-            return self.mk(start, ExprKind::Nav(Box::new(Nav { source: src, op: NavOp::Arrow, qualifier: Vec::new(), name })));
+            return self.mk(
+                start,
+                ExprKind::Nav(Box::new(Nav {
+                    source: src,
+                    op: NavOp::Arrow,
+                    qualifier: Vec::new(),
+                    name,
+                })),
+            );
         }
         self.bump();
         if self.eat(K::Rparen).is_some() {
-            return self.mk(start, ExprKind::Call(Box::new(Call { source: Some((src, NavOp::Arrow)), qualifier: Vec::new(), name, args: Vec::new() })));
+            return self.mk(
+                start,
+                ExprKind::Call(Box::new(Call {
+                    source: Some((src, NavOp::Arrow)),
+                    qualifier: Vec::new(),
+                    name,
+                    args: Vec::new(),
+                })),
+            );
         }
         // IteratorExpCS / IterateExpCS: `(v [, w] | body)`, `(v; acc : T = e | body)`,
         // `(acc : T = e | body)`; otherwise OperationCallExpCS arguments.
         if let Some((vars, acc)) = self.try_iterator_decls() {
             let body = self.expr();
             self.close_paren();
-            return self.mk(start, ExprKind::Iterate(Box::new(Iterate { source: src, name, vars, acc, body })));
+            return self.mk(
+                start,
+                ExprKind::Iterate(Box::new(Iterate {
+                    source: src,
+                    name,
+                    vars,
+                    acc,
+                    body,
+                })),
+            );
         }
         let args = self.arg_list();
         self.close_paren();
-        self.mk(start, ExprKind::Call(Box::new(Call { source: Some((src, NavOp::Arrow)), qualifier: Vec::new(), name, args })))
+        self.mk(
+            start,
+            ExprKind::Call(Box::new(Call {
+                source: Some((src, NavOp::Arrow)),
+                qualifier: Vec::new(),
+                name,
+                args,
+            })),
+        )
     }
 
     fn close_paren(&mut self) {
@@ -401,7 +503,12 @@ impl<'s> Parser<'s> {
             acc = vars.pop();
         }
         let ok = match &acc {
-            Some(a) => a.ty.is_some() && a.init.is_some() && vars.len() <= 1 && vars.iter().all(|v| v.init.is_none()),
+            Some(a) => {
+                a.ty.is_some()
+                    && a.init.is_some()
+                    && vars.len() <= 1
+                    && vars.iter().all(|v| v.init.is_none())
+            }
             None => (1..=2).contains(&vars.len()) && vars.iter().all(|v| v.init.is_none()),
         };
         if !ok {
@@ -415,14 +522,23 @@ impl<'s> Parser<'s> {
     fn iter_var_decl(&mut self, allow_init: bool) -> Option<VarDecl> {
         let start = self.span();
         let name = self.simple_name()?;
-        let ty = if self.eat(K::Colon).is_some() { Some(self.type_expr()?) } else { None };
+        let ty = if self.eat(K::Colon).is_some() {
+            Some(self.type_expr()?)
+        } else {
+            None
+        };
         let init = if allow_init && self.at(K::Equal) {
             self.bump();
             Some((K::Equal, Box::new(self.expr())))
         } else {
             None
         };
-        Some(VarDecl { name, ty, init, span: start.to(Span::at(self.prev_end())) })
+        Some(VarDecl {
+            name,
+            ty,
+            init,
+            span: start.to(Span::at(self.prev_end())),
+        })
     }
 
     /// `'(' argumentsCSopt ')'`
@@ -469,7 +585,15 @@ impl<'s> Parser<'s> {
             self.skip_to(&[K::Rbracket, K::Semicolon]);
             self.eat(K::Rbracket);
         }
-        self.mk(start, ExprKind::XSelect(Box::new(XSelect { source: src, one, var, cond })))
+        self.mk(
+            start,
+            ExprKind::XSelect(Box::new(XSelect {
+                source: src,
+                one,
+                var,
+                cond,
+            })),
+        )
     }
 
     /// `forExpCS ::= forOpCode '(' forExpDeclaratorList forExpConditionOpt ')' expression_block`
@@ -480,10 +604,23 @@ impl<'s> Parser<'s> {
         while self.eat(K::Comma).is_some() {
             vars.push(self.expect_ident());
         }
-        let cond = if self.eat(K::Bar).is_some() { Some(self.expr()) } else { None };
+        let cond = if self.eat(K::Bar).is_some() {
+            Some(self.expr())
+        } else {
+            None
+        };
         self.close_paren();
         let body = self.block();
-        self.mk(start, ExprKind::ForEach(Box::new(ForEach { source: src, kind, vars, cond, body })))
+        self.mk(
+            start,
+            ExprKind::ForEach(Box::new(ForEach {
+                source: src,
+                kind,
+                vars,
+                cond,
+                body,
+            })),
+        )
     }
 
     /// `imperativeIterateExpCS ::= imperativeIteratorExpCSToken12 '(' imperativeIterContents12
@@ -512,10 +649,19 @@ impl<'s> Parser<'s> {
             let ts = self.span();
             match self.simple_name() {
                 Some(name) => {
-                    let ty = if self.eat(K::Colon).is_some() { Some(self.expect_type()) } else { None };
+                    let ty = if self.eat(K::Colon).is_some() {
+                        Some(self.expect_type())
+                    } else {
+                        None
+                    };
                     self.expect(K::Equal);
                     let init = Some((K::Equal, Box::new(self.expr())));
-                    target = Some(VarDecl { name, ty, init, span: ts.to(Span::at(self.prev_end())) });
+                    target = Some(VarDecl {
+                        name,
+                        ty,
+                        init,
+                        span: ts.to(Span::at(self.prev_end())),
+                    });
                 }
                 None => self.expected("IDENTIFIER", false),
             }
@@ -548,7 +694,16 @@ impl<'s> Parser<'s> {
         }
         let body = self.expr();
         self.close_paren();
-        self.mk(start, ExprKind::XIterate(Box::new(XIterate { source: src, kind, vars, target, body })))
+        self.mk(
+            start,
+            ExprKind::XIterate(Box::new(XIterate {
+                source: src,
+                kind,
+                vars,
+                target,
+                body,
+            })),
+        )
     }
 
     /// `IterateExpCS ::= primaryExpCS '->' object '(' uninitializedVariableCS ')' objectDeclCS
@@ -560,13 +715,30 @@ impl<'s> Parser<'s> {
             Some(v) => v,
             None => {
                 self.expected("IDENTIFIER", false);
-                VarDecl { name: Name { text: String::new(), kind: NameKind::Ident, span: Span::at(self.prev_end()) }, ty: None, init: None, span: Span::at(self.prev_end()) }
+                VarDecl {
+                    name: Name {
+                        text: String::new(),
+                        kind: NameKind::Ident,
+                        span: Span::at(self.prev_end()),
+                    },
+                    ty: None,
+                    init: None,
+                    span: Span::at(self.prev_end()),
+                }
             }
         };
         self.close_paren();
         let decl = self.object_decl();
         let body = self.block();
-        self.mk(start, ExprKind::ObjectIter(Box::new(ObjectIter { source: src, var, decl, body })))
+        self.mk(
+            start,
+            ExprKind::ObjectIter(Box::new(ObjectIter {
+                source: src,
+                var,
+                decl,
+                body,
+            })),
+        )
     }
 
     /// `IterateExpCS ::= primaryExpCS '->' switch '(' switchDeclaratorCS ')' switchBodyExpCS`
@@ -576,17 +748,33 @@ impl<'s> Parser<'s> {
         // switchDeclaratorCS ::= declarator | IDENTIFIER | IDENTIFIER '=' OclExpressionCS
         let ds = self.span();
         let name = self.expect_ident();
-        let ty = if self.eat(K::Colon).is_some() { Some(self.expect_type()) } else { None };
+        let ty = if self.eat(K::Colon).is_some() {
+            Some(self.expect_type())
+        } else {
+            None
+        };
         let init = if matches!(self.peek(), K::Equal | K::ResetAssign) {
             let op = self.bump().kind;
             Some((op, Box::new(self.expr())))
         } else {
             None
         };
-        let var = VarDecl { name, ty, init, span: ds.to(Span::at(self.prev_end())) };
+        let var = VarDecl {
+            name,
+            ty,
+            init,
+            span: ds.to(Span::at(self.prev_end())),
+        };
         self.close_paren();
         let body = self.switch_body();
-        self.mk(start, ExprKind::SwitchIter(Box::new(SwitchIter { source: src, var, body })))
+        self.mk(
+            start,
+            ExprKind::SwitchIter(Box::new(SwitchIter {
+                source: src,
+                var,
+                body,
+            })),
+        )
     }
 
     // ----------------------------------------------------------------------------------------
@@ -681,10 +869,19 @@ impl<'s> Parser<'s> {
             K::KwList | K::KwDict => self.list_or_dict(t),
             _ if groups::PRIMITIVE_TYPE.contains(&k) => {
                 self.bump();
-                self.mk(start, ExprKind::TypeLit(TypeExpr { kind: TypeKind::Primitive(k), span: t.span }))
+                self.mk(
+                    start,
+                    ExprKind::TypeLit(TypeExpr {
+                        kind: TypeKind::Primitive(k),
+                        span: t.span,
+                    }),
+                )
             }
             _ if groups::COLLECTION_TYPE.contains(&k) => self.collection_exp(t),
-            _ if k == K::KwLate || groups::RESOLVE_OP.contains(&k) || groups::RESOLVE_IN_OP.contains(&k) => {
+            _ if k == K::KwLate
+                || groups::RESOLVE_OP.contains(&k)
+                || groups::RESOLVE_IN_OP.contains(&k) =>
+            {
                 self.resolve(start, None)
             }
             _ => {
@@ -727,8 +924,15 @@ impl<'s> Parser<'s> {
             self.error(Code::Expected, t.span, msg);
             if self.at(K::Lbrace) {
                 let b = self.block();
-                let decl = ObjectDecl { var: None, ty: None, span: Span::at(start.end) };
-                return self.mk(start, ExprKind::Object(Box::new(ObjectExp { decl, body: b })));
+                let decl = ObjectDecl {
+                    var: None,
+                    ty: None,
+                    span: Span::at(start.end),
+                };
+                return self.mk(
+                    start,
+                    ExprKind::Object(Box::new(ObjectExp { decl, body: b })),
+                );
             }
             return self.mk(start, ExprKind::Error);
         }
@@ -754,9 +958,22 @@ impl<'s> Parser<'s> {
                 self.expected("IDENTIFIER", false);
                 break;
             };
-            let ty = if self.eat(K::Colon).is_some() { Some(self.expect_type()) } else { None };
-            let init = if self.expect(K::Equal).is_some() { Some((K::Equal, Box::new(self.expr()))) } else { None };
-            parts.push(VarDecl { name, ty, init, span: ps.to(Span::at(self.prev_end())) });
+            let ty = if self.eat(K::Colon).is_some() {
+                Some(self.expect_type())
+            } else {
+                None
+            };
+            let init = if self.expect(K::Equal).is_some() {
+                Some((K::Equal, Box::new(self.expr())))
+            } else {
+                None
+            };
+            parts.push(VarDecl {
+                name,
+                ty,
+                init,
+                span: ps.to(Span::at(self.prev_end())),
+            });
             if self.eat(K::Comma).is_none() {
                 break;
             }
@@ -825,14 +1042,30 @@ impl<'s> Parser<'s> {
                 if self.at(K::Lparen) {
                     let name = segments.pop().unwrap();
                     let args = self.args();
-                    return self.mk(start, ExprKind::Call(Box::new(Call { source: None, qualifier: segments, name, args })));
+                    return self.mk(
+                        start,
+                        ExprKind::Call(Box::new(Call {
+                            source: None,
+                            qualifier: segments,
+                            name,
+                            args,
+                        })),
+                    );
                 }
                 let span = start.to(Span::at(self.prev_end()));
                 return self.mk(start, ExprKind::Path(PathName { segments, span }));
             }
             if self.at(K::Lparen) {
                 let args = self.args();
-                return self.mk(start, ExprKind::Call(Box::new(Call { source: None, qualifier: Vec::new(), name, args })));
+                return self.mk(
+                    start,
+                    ExprKind::Call(Box::new(Call {
+                        source: None,
+                        qualifier: Vec::new(),
+                        name,
+                        args,
+                    })),
+                );
             }
             self.mk(start, ExprKind::Name(name))
         }
@@ -849,9 +1082,14 @@ impl<'s> Parser<'s> {
     fn dict_key(&mut self) -> Expr {
         let t = self.tok();
         match t.kind {
-            K::IntegerLiteral | K::RealLiteral | K::StringLiteral | K::KwTrue | K::KwFalse | K::KwNull | K::KwInvalid | K::Multiply => {
-                self.primary(false)
-            }
+            K::IntegerLiteral
+            | K::RealLiteral
+            | K::StringLiteral
+            | K::KwTrue
+            | K::KwFalse
+            | K::KwNull
+            | K::KwInvalid
+            | K::Multiply => self.primary(false),
             _ => {
                 self.expected("literalSimpleCS", false);
                 self.skip_to(&[K::Equal, K::Comma, K::Rbrace]);
@@ -888,14 +1126,34 @@ impl<'s> Parser<'s> {
         let mut var = None;
         if groups::OBJECT_IDENTIFIER.contains(&self.peek()) && self.nth(1) == K::Colon {
             let t = self.bump();
-            let kind = if t.kind == K::Identifier { NameKind::Ident } else { NameKind::Keyword(t.kind) };
-            var = Some(Name { text: self.text(t).to_string(), kind, span: t.span });
+            let kind = if t.kind == K::Identifier {
+                NameKind::Ident
+            } else {
+                NameKind::Keyword(t.kind)
+            };
+            var = Some(Name {
+                text: self.text(t).to_string(),
+                kind,
+                span: t.span,
+            });
             self.bump();
-            let ty = if self.at(K::Lbrace) { None } else { Some(self.expect_type_spec()) };
-            return ObjectDecl { var, ty, span: start.to(Span::at(self.prev_end())) };
+            let ty = if self.at(K::Lbrace) {
+                None
+            } else {
+                Some(self.expect_type_spec())
+            };
+            return ObjectDecl {
+                var,
+                ty,
+                span: start.to(Span::at(self.prev_end())),
+            };
         }
         let ty = Some(self.expect_type_spec());
-        ObjectDecl { var, ty, span: start.to(Span::at(self.prev_end())) }
+        ObjectDecl {
+            var,
+            ty,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `featureMappingCallExpCS ::= (map|xmap) simpleNameCS ['::' simpleNameCS] '(' args ')'`
@@ -906,14 +1164,29 @@ impl<'s> Parser<'s> {
             Some(p) => p,
             None => {
                 self.expected("simpleNameCS", false);
-                PathName { segments: Vec::new(), span: Span::at(self.prev_end()) }
+                PathName {
+                    segments: Vec::new(),
+                    span: Span::at(self.prev_end()),
+                }
             }
         };
         if source.is_some() && name.segments.len() > 2 {
-            self.error(Code::Misplaced, name.span, "mapping call name may have at most one qualifier");
+            self.error(
+                Code::Misplaced,
+                name.span,
+                "mapping call name may have at most one qualifier",
+            );
         }
         let args = self.args();
-        self.mk(start, ExprKind::MapCall(Box::new(MapCall { source, xmap, name, args })))
+        self.mk(
+            start,
+            ExprKind::MapCall(Box::new(MapCall {
+                source,
+                xmap,
+                name,
+                args,
+            })),
+        )
     }
 
     /// `resolveExpCS ::= lateOpt resolveOp '(' resolveOpArgsExpCSOpt ')'` and
@@ -945,7 +1218,16 @@ impl<'s> Parser<'s> {
             }
         }
         self.close_paren();
-        self.mk(start, ExprKind::Resolve(Box::new(Resolve { source, late, op, mapping, target })))
+        self.mk(
+            start,
+            ExprKind::Resolve(Box::new(Resolve {
+                source,
+                late,
+                op,
+                mapping,
+                target,
+            })),
+        )
     }
 
     /// `resolveOpArgsExpCS ::= IDENTIFIEROpt typeCS resolveConditionOpt`
@@ -962,7 +1244,11 @@ impl<'s> Parser<'s> {
             None if var.is_some() => self.expect_type(),
             None => return None,
         };
-        let cond = if self.eat(K::Bar).is_some() { Some(self.expr()) } else { None };
+        let cond = if self.eat(K::Bar).is_some() {
+            Some(self.expr())
+        } else {
+            None
+        };
         Some(ResolveTarget { var, ty, cond })
     }
 
@@ -991,7 +1277,17 @@ impl<'s> Parser<'s> {
             self.skip_to(&[K::KwThen, K::KwEndif, K::Semicolon]);
             if self.eat(K::KwThen).is_none() {
                 self.eat(K::KwEndif);
-                return self.mk(start, ExprKind::If(Box::new(IfExp { cond, then: self.err_expr(), elifs: Vec::new(), els: None, c_style: false, endif: true })));
+                return self.mk(
+                    start,
+                    ExprKind::If(Box::new(IfExp {
+                        cond,
+                        then: self.err_expr(),
+                        elifs: Vec::new(),
+                        els: None,
+                        c_style: false,
+                        endif: true,
+                    })),
+                );
             }
         }
         let then = self.if_body();
@@ -1002,9 +1298,23 @@ impl<'s> Parser<'s> {
             let b = self.if_body();
             elifs.push((c, b));
         }
-        let els = if self.eat(K::KwElse).is_some() { Some(self.if_body()) } else { None };
+        let els = if self.eat(K::KwElse).is_some() {
+            Some(self.if_body())
+        } else {
+            None
+        };
         self.expect(K::KwEndif);
-        self.mk(start, ExprKind::If(Box::new(IfExp { cond, then, elifs, els, c_style: false, endif: true })))
+        self.mk(
+            start,
+            ExprKind::If(Box::new(IfExp {
+                cond,
+                then,
+                elifs,
+                els,
+                c_style: false,
+                endif: true,
+            })),
+        )
     }
 
     /// `ifExpBodyCS -> OclExpressionCS | expression_block`
@@ -1033,9 +1343,23 @@ impl<'s> Parser<'s> {
             let b = self.c_if_body();
             elifs.push((c, b));
         }
-        let els = if self.eat(K::KwElse).is_some() { Some(self.c_if_body()) } else { None };
+        let els = if self.eat(K::KwElse).is_some() {
+            Some(self.c_if_body())
+        } else {
+            None
+        };
         let endif = self.eat(K::KwEndif).is_some();
-        self.mk(start, ExprKind::If(Box::new(IfExp { cond, then, elifs, els, c_style: true, endif })))
+        self.mk(
+            start,
+            ExprKind::If(Box::new(IfExp {
+                cond,
+                then,
+                elifs,
+                els,
+                c_style: true,
+                endif,
+            })),
+        )
     }
 
     /// `notUMinus_ifExpBodyCS -> notUMinus_statement | IfExpCS_ext`: a block, a C-style `if`,
@@ -1078,14 +1402,27 @@ impl<'s> Parser<'s> {
                 if let ExprKind::Assign(a) = &e.kind {
                     // AbstractQVTParser.getVariableFromAssignment
                     if a.add {
-                        self.error(Code::InvalidAdditiveAssignment, e.span, "Additive assignment is not allowed in while header");
+                        self.error(
+                            Code::InvalidAdditiveAssignment,
+                            e.span,
+                            "Additive assignment is not allowed in while header",
+                        );
                     }
-                    let plain = matches!(&a.lhs.kind, ExprKind::Name(n) if n.kind == NameKind::Ident);
+                    let plain =
+                        matches!(&a.lhs.kind, ExprKind::Name(n) if n.kind == NameKind::Ident);
                     if !plain {
-                        self.error(Code::IdentifierExpectedOnLeftSide, a.lhs.span, "Left side expression must be an identifier");
+                        self.error(
+                            Code::IdentifierExpectedOnLeftSide,
+                            a.lhs.span,
+                            "Left side expression must be an identifier",
+                        );
                     }
                 } else {
-                    self.error(Code::Misplaced, e.span, "Assignment or variable declaration expected in while header");
+                    self.error(
+                        Code::Misplaced,
+                        e.span,
+                        "Assignment or variable declaration expected in while header",
+                    );
                 }
                 init = Some(WhileInit::Assign(e));
                 cond = self.expr();
@@ -1103,7 +1440,11 @@ impl<'s> Parser<'s> {
     fn declarator(&mut self) -> VarDecl {
         let start = self.span();
         let name = self.expect_ident();
-        let ty = if self.eat(K::Colon).is_some() { Some(self.expect_type()) } else { None };
+        let ty = if self.eat(K::Colon).is_some() {
+            Some(self.expect_type())
+        } else {
+            None
+        };
         let init = if (ty.is_some() && self.at(K::Equal)) || self.at(K::ResetAssign) {
             let op = self.bump().kind;
             Some((op, Box::new(self.expr())))
@@ -1113,7 +1454,12 @@ impl<'s> Parser<'s> {
             }
             None
         };
-        VarDecl { name, ty, init, span: start.to(Span::at(self.prev_end())) }
+        VarDecl {
+            name,
+            ty,
+            init,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `computeExpCS ::= compute '(' declarator ')' expression_block`
@@ -1150,7 +1496,12 @@ impl<'s> Parser<'s> {
             }
             self.close_paren();
             let b = self.block();
-            catches.push(Catch { var, types, body: b, span: cs.to(Span::at(self.prev_end())) });
+            catches.push(Catch {
+                var,
+                types,
+                body: b,
+                span: cs.to(Span::at(self.prev_end())),
+            });
         }
         if catches.is_empty() {
             self.expected("except", false);
@@ -1163,13 +1514,22 @@ impl<'s> Parser<'s> {
         let start = self.bump().span;
         let exception = if self.at(K::StringLiteral) {
             let s = self.string_lit().unwrap();
-            Expr { span: s.span, kind: ExprKind::Str(s) }
+            Expr {
+                span: s.span,
+                kind: ExprKind::Str(s),
+            }
         } else if let Some(p) = self.path_name() {
             let span = p.span;
             if p.segments.len() == 1 {
-                Expr { kind: ExprKind::Name(p.segments.into_iter().next().unwrap()), span }
+                Expr {
+                    kind: ExprKind::Name(p.segments.into_iter().next().unwrap()),
+                    span,
+                }
             } else {
-                Expr { kind: ExprKind::Path(p), span }
+                Expr {
+                    kind: ExprKind::Path(p),
+                    span,
+                }
             }
         } else {
             let t = self.tok();
@@ -1184,7 +1544,11 @@ impl<'s> Parser<'s> {
         };
         let mut arg = None;
         if !matches!(exception.kind, ExprKind::Str(_)) && self.eat(K::Lparen).is_some() {
-            let a = if self.at(K::Rparen) { None } else { Some(self.expr()) };
+            let a = if self.at(K::Rparen) {
+                None
+            } else {
+                Some(self.expr())
+            };
             self.close_paren();
             arg = Some(a);
         }
@@ -1195,14 +1559,22 @@ impl<'s> Parser<'s> {
     fn log_exp(&mut self) -> Expr {
         let start = self.bump().span;
         let args = self.args();
-        let when = if self.eat(K::KwWhen).is_some() { Some(self.expr()) } else { None };
+        let when = if self.eat(K::KwWhen).is_some() {
+            Some(self.expr())
+        } else {
+            None
+        };
         self.mk(start, ExprKind::Log(Box::new(Log { args, when })))
     }
 
     /// `assertExpCS ::= assert severityKindCSOpt '(' OclExpressionCS ')' assertWithLogExpOpt`
     fn assert_exp(&mut self) -> Expr {
         let start = self.bump().span;
-        let severity = if self.at_simple_name() { self.simple_name() } else { None };
+        let severity = if self.at_simple_name() {
+            self.simple_name()
+        } else {
+            None
+        };
         self.expect(K::Lparen);
         let cond = self.expr();
         self.close_paren();
@@ -1216,7 +1588,14 @@ impl<'s> Parser<'s> {
         } else {
             None
         };
-        self.mk(start, ExprKind::Assert(Box::new(Assert { severity, cond, log })))
+        self.mk(
+            start,
+            ExprKind::Assert(Box::new(Assert {
+                severity,
+                cond,
+                log,
+            })),
+        )
     }
 
     /// `var_init_exp ::= var var_init_declarator | var '(' var_init_declarator ')'` and, at
@@ -1235,7 +1614,11 @@ impl<'s> Parser<'s> {
         }
         if decls.len() > 1 && !stmt {
             let s = start.to(Span::at(self.prev_end()));
-            self.error(Code::Misplaced, s, "multiple variable declarations are only allowed as statements");
+            self.error(
+                Code::Misplaced,
+                s,
+                "multiple variable declarations are only allowed as statements",
+            );
         }
         self.mk(start, ExprKind::Var(VarExp { decls, parens }))
     }
@@ -1245,7 +1628,11 @@ impl<'s> Parser<'s> {
     fn var_declarator(&mut self) -> VarDecl {
         let start = self.span();
         let name = self.expect_ident();
-        let ty = if self.eat(K::Colon).is_some() { Some(self.expect_type()) } else { None };
+        let ty = if self.eat(K::Colon).is_some() {
+            Some(self.expect_type())
+        } else {
+            None
+        };
         let init = if self.at_any(groups::VAR_INIT_OP) {
             let op = self.bump().kind;
             let e = if self.at_expr_start() {
@@ -1261,7 +1648,12 @@ impl<'s> Parser<'s> {
             }
             None
         };
-        VarDecl { name, ty, init, span: start.to(Span::at(self.prev_end())) }
+        VarDecl {
+            name,
+            ty,
+            init,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `switchBodyExpCS ::= '{' switchAltExpCSList switchElseExpCSOpt '}'`
@@ -1270,7 +1662,11 @@ impl<'s> Parser<'s> {
         let mut alts = Vec::new();
         let mut els = None;
         if self.expect(K::Lbrace).is_none() {
-            return SwitchBody { alts, els, span: start };
+            return SwitchBody {
+                alts,
+                els,
+                span: start,
+            };
         }
         loop {
             let s = self.span();
@@ -1282,7 +1678,12 @@ impl<'s> Parser<'s> {
                     let cond = self.expr();
                     self.close_paren();
                     let body = self.expression_statement();
-                    alts.push(SwitchAlt { cond, body, deprecated: false, span: s.to(Span::at(self.prev_end())) });
+                    alts.push(SwitchAlt {
+                        cond,
+                        body,
+                        deprecated: false,
+                        span: s.to(Span::at(self.prev_end())),
+                    });
                 }
                 K::Lparen => {
                     // switchAltExpCS ::= '(' OclExpressionCS ')' '?' OclExpressionCS ';'
@@ -1299,7 +1700,12 @@ impl<'s> Parser<'s> {
                         cond.span.to(body.span),
                         "Syntax is deprecated, use \" ''case'' ''('' <expression> '')'' <expression_statement> \" instead",
                     );
-                    alts.push(SwitchAlt { cond, body, deprecated: true, span });
+                    alts.push(SwitchAlt {
+                        cond,
+                        body,
+                        deprecated: true,
+                        span,
+                    });
                 }
                 _ => break,
             }
@@ -1314,15 +1720,31 @@ impl<'s> Parser<'s> {
                 let body = self.expr();
                 self.expect(K::Semicolon);
                 let span = s.to(Span::at(self.prev_end()));
-                self.warning(Code::DeprecatedSwitchElse, span, "Syntax is deprecated, use \" 'else' <expression_statement> \" instead");
-                els = Some(SwitchElse { body, deprecated: true, span });
+                self.warning(
+                    Code::DeprecatedSwitchElse,
+                    span,
+                    "Syntax is deprecated, use \" 'else' <expression_statement> \" instead",
+                );
+                els = Some(SwitchElse {
+                    body,
+                    deprecated: true,
+                    span,
+                });
             } else {
                 let body = self.expression_statement();
-                els = Some(SwitchElse { body, deprecated: false, span: s.to(Span::at(self.prev_end())) });
+                els = Some(SwitchElse {
+                    body,
+                    deprecated: false,
+                    span: s.to(Span::at(self.prev_end())),
+                });
             }
         }
         self.close_brace();
-        SwitchBody { alts, els, span: start.to(Span::at(self.prev_end())) }
+        SwitchBody {
+            alts,
+            els,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `expression_statement -> OclExpressionCS ';' | expression_block semicolonOpt`
@@ -1345,7 +1767,10 @@ impl<'s> Parser<'s> {
     pub(super) fn block(&mut self) -> Block {
         let start = self.span();
         if self.expect(K::Lbrace).is_none() {
-            return Block { stmts: Vec::new(), span: Span::at(self.prev_end()) };
+            return Block {
+                stmts: Vec::new(),
+                span: Span::at(self.prev_end()),
+            };
         }
         let stmts = self.stmt_list(&[]);
         if self.at(K::Rbrace) {
@@ -1356,7 +1781,10 @@ impl<'s> Parser<'s> {
         } else {
             self.expect(K::Rbrace);
         }
-        Block { stmts, span: start.to(Span::at(self.prev_end())) }
+        Block {
+            stmts,
+            span: start.to(Span::at(self.prev_end())),
+        }
     }
 
     /// `expression_list -> expression_semi_list semicolonOpt` up to `}` (or one of `stop`).
