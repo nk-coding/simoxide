@@ -216,7 +216,11 @@ pub enum Insn {
     },
 
     /// `new T(m1, ...)` of a transformation (`Site::NewTransformation`), models at `base ..`.
-    NewTransformation { dst: Reg, base: Reg, site: u16 },
+    NewTransformation {
+        dst: Reg,
+        base: Reg,
+        site: u16,
+    },
 
     // ---- navigation -----------------------------------------------------------------------
     /// `obj.feature`; many-valued features give a copy of the kind of the feature.

@@ -66,6 +66,24 @@ where
     }
 
     fn write_value(&self, v: &Value, out: &mut String) {
+        if let Value::Obj(o) = v
+            && o.is_local()
+        {
+            let lo = &self.local[o.index() as usize];
+            if let Some((ok, exc)) = &lo.status {
+                out.push_str(if *ok { "SUCCESS" } else { "FAILED" });
+                if !exc.is_null() {
+                    out.push_str(" raised: (");
+                    self.write_value(exc, out);
+                    out.push(')');
+                }
+                return;
+            }
+            if lo.exception.is_some() {
+                out.push_str(&self.exception_text(*o));
+                return;
+            }
+        }
         let class_of = |o: ObjRef| self.class_of(&Value::Obj(o));
         let f = Fmt {
             prog: self.prog,
@@ -103,14 +121,19 @@ where
     fn exception_text(&self, o: ObjRef) -> String {
         let lo = &self.local[o.index() as usize];
         let name = &self.prog.ir.meta.class(lo.class).name;
+        // ExceptionClassInstance.toString
         let mut s = name.to_string();
         if let Some((m, stack)) = &lo.exception {
             if let Some(m) = m {
                 s.push_str(" : ");
                 s.push_str(m);
+                s.push('\n');
             }
-            for e in stack {
-                s.push_str("\n\tat ");
+            for (i, e) in stack.iter().enumerate() {
+                if i > 0 {
+                    s.push('\n');
+                }
+                s.push_str("\tat ");
                 s.push_str(&e.to_string());
             }
         }

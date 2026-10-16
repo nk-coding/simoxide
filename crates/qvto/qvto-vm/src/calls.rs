@@ -93,7 +93,10 @@ where
         if !o.vtable.is_empty() {
             return &o.vtable;
         }
-        self.vtables.get(op.index()).map(Vec::as_slice).unwrap_or(&[])
+        self.vtables
+            .get(op.index())
+            .map(Vec::as_slice)
+            .unwrap_or(&[])
     }
 
     fn lookup_actual(&self, op: OpId, actual: TypeId) -> Option<OpId> {

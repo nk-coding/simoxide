@@ -352,20 +352,27 @@ where
         let saved = self.bind_nested(k);
         let saved_transf = std::mem::replace(&mut self.cur_transf, module);
         let saved_late = std::mem::take(&mut self.late);
+        // the nested run has a diagnostic of its own (its log goes to the same log)
+        let saved_diags = std::mem::take(&mut self.diags);
         let r = self.run_transformation_module(module);
+        let nested_error = self.diags.iter().any(|d| d.severity >= 4);
+        self.diags = saved_diags;
         self.late = saved_late;
         self.cur_transf = saved_transf;
         self.unbind_nested(module, saved);
         let status_class = self.prog.ir.std_classes.status;
         let (ok, exc) = match r {
-            Ok(_) => (true, Value::Null),
+            Ok(_) => (!nested_error, Value::Null),
             Err(u) => {
                 let e = u.error().clone();
                 if e.kind == ErrorKind::Interrupted {
                     return Err(u);
                 }
-                let exc = self.exception_value(&e);
-                (false, exc)
+                // an `Exception` with the message and the stack
+                let o = self.new_local(self.prog.ir.std_classes.exception);
+                self.local[o.index() as usize].exception =
+                    Some((e.message.clone(), e.stack.clone()));
+                (false, Value::Obj(o))
             }
         };
         let o = self.new_local(status_class);

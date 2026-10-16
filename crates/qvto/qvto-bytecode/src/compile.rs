@@ -90,7 +90,7 @@ pub fn compile(ir: ir::Program) -> CResult<Program> {
     let mut model_type_where = Vec::with_capacity(ir.model_types.len());
     for mt in &ir.model_types {
         model_type_where.push(match &mt.where_ {
-            Some(b) => Some(compile_body(
+            Some(b) => Some(compile_conditions(
                 &ir,
                 mt.module,
                 b,
@@ -292,6 +292,33 @@ fn mentions_local(e: &Expr, l: LocalId) -> bool {
         }),
         _ => true,
     }
+}
+
+/// A model type's `where` conditions: each statement of the body must be true.
+fn compile_conditions(
+    ir: &ir::Program,
+    module: ModuleId,
+    body: &CodeBody,
+    name: &str,
+    consts: &mut ConstPool,
+    chunks: &mut Vec<Chunk>,
+) -> CResult<BodyCode> {
+    let mut frame = FrameInfo {
+        nregs: body.locals.len() as u32,
+        n_iters: 0,
+    };
+    let mut b = Builder::new(ir, consts, module, body.source, &body.locals, name.into())?;
+    b.ip = body.expr.span.start;
+    match &body.expr.kind {
+        ExprKind::Block(stmts) => b.conditions(stmts)?,
+        _ => b.conditions(std::slice::from_ref(&body.expr))?,
+    }
+    let chunk = b.finish(&mut frame)?;
+    chunks.push(chunk);
+    Ok(BodyCode {
+        chunk: ChunkId((chunks.len() - 1) as u32),
+        self_reg: body.self_local.map(|l| l.0 as Reg),
+    })
 }
 
 pub(crate) fn type_name(ir: &ir::Program, t: TypeId) -> String {
