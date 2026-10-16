@@ -863,6 +863,25 @@ impl Graph {
         (0..self.op_len(o, f)).find(|&i| self.op_get_at(o, f, i).java_equals(v))
     }
 
+    /// Appends `eContents()` of `o` (containment features in order; slots read directly where
+    /// no Ecore hook applies).
+    pub(crate) fn push_contents(&self, o: ObjId, out: &mut Vec<ObjId>) {
+        let class = self.objs[o.index()].class;
+        for &f in self.meta.class(class).containments.iter() {
+            if self.hook(f) == Hook::None {
+                match self.slot(o, f) {
+                    Some(Slot::Refs(v, _)) => out.extend_from_slice(v),
+                    Some(Slot::Ref(Some(x))) => out.push(*x),
+                    _ => {}
+                }
+            } else if self.meta.feature(f).is_many() {
+                out.extend((0..self.op_len(o, f)).filter_map(|i| self.op_get_at(o, f, i).as_obj()));
+            } else if let Datum::Obj(c) = self.op_get(o, f) {
+                out.push(c);
+            }
+        }
+    }
+
     /// `contains` of a list (`EObjectContainmentEList.contains`: the object's container and
     /// containing feature, without a scan).
     pub(crate) fn list_contains(&self, o: ObjId, f: FeatureId, v: &Datum<'_, ObjId>) -> bool {
@@ -1353,6 +1372,27 @@ impl ModelStore for Graph {
     fn len(&self, o: ObjId, f: FeatureId) -> usize {
         self.op_len(o, f)
     }
+    fn contents(&self, o: ObjId) -> Vec<ObjId> {
+        let mut out = Vec::new();
+        self.push_contents(o, &mut out);
+        out
+    }
+
+    fn all_contents(&self, o: ObjId) -> Vec<ObjId> {
+        // pre-order without recursion: each object's contents are pushed in reverse
+        let mut out = Vec::new();
+        let mut stack: Vec<ObjId> = Vec::new();
+        let mut kids = Vec::new();
+        self.push_contents(o, &mut kids);
+        stack.extend(kids.drain(..).rev());
+        while let Some(x) = stack.pop() {
+            out.push(x);
+            self.push_contents(x, &mut kids);
+            stack.extend(kids.drain(..).rev());
+        }
+        out
+    }
+
     fn get_list<'a>(&'a self, o: ObjId, f: FeatureId, out: &mut Vec<Datum<'a, ObjId>>) {
         match self.hook(f) {
             Hook::None => match self.slot(o, f) {
