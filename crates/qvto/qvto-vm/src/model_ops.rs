@@ -5,7 +5,7 @@
 use crate::error::VmResult;
 use crate::extent::Extent;
 use crate::vm::{ObjHandle, Vm};
-use qvto_model::ModelStore;
+use qvto_model::{Classifier, DataKind, Datum, FeatureId, ModelStore, OwnedDatum};
 use qvto_runtime::{ObjRef, TypeRef, Value};
 use qvto_sema::ir::{Direction, ModelTypeId};
 use qvto_types::{Type, TypeId};
@@ -75,5 +75,53 @@ where
         e.model_type = mt;
         self.extents.push(e);
         Ok(Value::Model((self.extents.len() - 1) as u32))
+    }
+}
+
+impl<S: ModelStore> Vm<'_, S>
+where
+    S::Obj: ObjHandle,
+{
+    /// The big-number kind of an attribute (`EBigInteger`, `EBigDecimal`).
+    fn big_kind(&self, f: FeatureId) -> Option<DataKind> {
+        let meta = &self.prog.ir.meta;
+        match meta.feature(f).ty {
+            Classifier::DataType(d) => match meta.data_type(d).kind {
+                k @ (DataKind::BigInteger | DataKind::BigDecimal) => Some(k),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+
+    /// A value read from an attribute: `BigInteger`/`BigDecimal` values (kept lexically by
+    /// the store) as OCL Integer/Real, which is what OCL arithmetic and comparison see.
+    pub(crate) fn attr_value(&self, f: FeatureId, d: Datum<'_, S::Obj>) -> Value {
+        if let Datum::Other(s) = d
+            && let Some(k) = self.big_kind(f)
+        {
+            let t = s.trim();
+            let parsed = match k {
+                DataKind::BigInteger => t.parse::<i64>().ok().map(Value::Int),
+                _ => t.parse::<f64>().ok().map(Value::Real),
+            };
+            if let Some(v) = parsed {
+                return v;
+            }
+        }
+        self.datum(d)
+    }
+
+    /// A number assigned to a `BigInteger`/`BigDecimal` attribute (`NumberConversions
+    /// .convertNumber`: `new BigInteger(String.valueOf(longValue))`, `new
+    /// BigDecimal(String.valueOf(doubleValue))`) in the store's lexical form.
+    pub(crate) fn big_datum(&self, f: FeatureId, v: &Value) -> Option<OwnedDatum<S::Obj>> {
+        let k = self.big_kind(f)?;
+        let n = v.as_jnum()?;
+        let text = match k {
+            DataKind::BigInteger => n.as_i64().to_string(),
+            _ => qvto_runtime::java::fmt::double_to_string(n.as_f64()),
+        };
+        Some(OwnedDatum::Other(text.into()))
     }
 }

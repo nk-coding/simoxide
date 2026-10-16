@@ -556,7 +556,7 @@ where
         }
         if !fi.is_many() {
             let d = self.store.get(h, f);
-            return Ok(self.datum(d));
+            return Ok(self.attr_value(f, d));
         }
         let n = self.store.len(h, f);
         let mut items = Vec::with_capacity(n);
@@ -714,7 +714,7 @@ where
             x => x,
         };
         let nv = convert_number(nv, ft.num);
-        let Some(d) = self.to_datum(&nv) else {
+        let Some(d) = self.big_datum(f, &nv).or_else(|| self.to_datum(&nv)) else {
             self.swallow("ClassCastException: value is not a feature value");
             return Ok(());
         };
