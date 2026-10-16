@@ -23,7 +23,11 @@ pub fn check_outcome(env: &CaseEnv, outcome: &Outcome) -> Vec<CheckResult> {
         .iter()
         .map(|c| {
             let r = check_one(env, c, outcome);
-            CheckResult { check: c.name().into(), pass: r.is_ok(), detail: r.err().unwrap_or_default() }
+            CheckResult {
+                check: c.name().into(),
+                pass: r.is_ok(),
+                detail: r.err().unwrap_or_default(),
+            }
         })
         .collect()
 }
@@ -39,7 +43,10 @@ fn check_one(env: &CaseEnv, c: &Check, o: &Outcome) -> Result<(), String> {
             if got == Some(*severity) && o.code == *code {
                 Ok(())
             } else {
-                Err(format!("expected severity {severity} code {code}, got {got:?} code {}: {}", o.code, o.message))
+                Err(format!(
+                    "expected severity {severity} code {code}, got {got:?} code {}: {}",
+                    o.code, o.message
+                ))
             }
         }
         Check::Model => check_models(env, o),
@@ -69,33 +76,55 @@ fn check_one(env: &CaseEnv, c: &Check, o: &Outcome) -> Result<(), String> {
             if o.trace_records == Some(*n) {
                 Ok(())
             } else {
-                Err(format!("expected {n} trace records, got {:?}", o.trace_records))
+                Err(format!(
+                    "expected {n} trace records, got {:?}",
+                    o.trace_records
+                ))
             }
         }
-        Check::StackFrames { count, operation, module, unit, lines } => {
+        Check::StackFrames {
+            count,
+            operation,
+            module,
+            unit,
+            lines,
+        } => {
             let frames = stack_frames(o.stack.as_deref().ok_or("no stack trace")?);
             if frames.is_empty() {
                 return Err("no stack trace".into());
             }
             for f in frames.iter().take(count.saturating_sub(1)) {
-                if f.operation != *operation || f.module != *module || f.unit != *unit || !lines.contains(&f.line) {
+                if f.operation != *operation
+                    || f.module != *module
+                    || f.unit != *unit
+                    || !lines.contains(&f.line)
+                {
                     return Err(format!("frame {f:?}"));
                 }
             }
             Ok(())
         }
-        Check::Problems { errors, warnings, cst_only } => {
+        Check::Problems {
+            errors,
+            warnings,
+            cst_only,
+        } => {
             if o.load.is_none() {
                 return Err("not compiled".into());
             }
             let counted = |err: bool| {
-                o.problems.iter().filter(|p| p.error == err && (!cst_only || p.unit.ends_with(".qvto"))).count() as i64
+                o.problems
+                    .iter()
+                    .filter(|p| p.error == err && (!cst_only || p.unit.ends_with(".qvto")))
+                    .count() as i64
             };
             let (e, w) = (counted(true), counted(false));
             if e == *errors && (*warnings == -1 || w == *warnings) {
                 Ok(())
             } else {
-                Err(format!("expected {errors} errors, {warnings} warnings, got {e}, {w}"))
+                Err(format!(
+                    "expected {errors} errors, {warnings} warnings, got {e}, {w}"
+                ))
             }
         }
         Check::LoadError => match o.load {
@@ -109,8 +138,16 @@ fn text_equal(what: &str, exp: &str, got: &str) -> Result<(), String> {
     if exp == got {
         return Ok(());
     }
-    let i = exp.bytes().zip(got.bytes()).take_while(|(a, b)| a == b).count();
-    Err(format!("{what} differs at byte {i} of {}/{}", exp.len(), got.len()))
+    let i = exp
+        .bytes()
+        .zip(got.bytes())
+        .take_while(|(a, b)| a == b)
+        .count();
+    Err(format!(
+        "{what} differs at byte {i} of {}/{}",
+        exp.len(),
+        got.len()
+    ))
 }
 
 /// The out/inout extents against the expected models with the suite's comparer
@@ -118,10 +155,16 @@ fn text_equal(what: &str, exp: &str, got: &str) -> Result<(), String> {
 fn check_models(env: &CaseEnv, o: &Outcome) -> Result<(), String> {
     let exp = &env.case.expected;
     let Some(out) = &o.outputs else {
-        return if exp.is_empty() { Ok(()) } else { Err("no outputs".into()) };
+        return if exp.is_empty() {
+            Ok(())
+        } else {
+            Err("no outputs".into())
+        };
     };
     for (i, &r) in out.extents.iter().enumerate() {
-        let f = exp.get(i).ok_or_else(|| format!("no expected model for output {i}"))?;
+        let f = exp
+            .get(i)
+            .ok_or_else(|| format!("no expected model for output {i}"))?;
         let p = env.path(f);
         let mut rs = env.models.resource_set_for(&p);
         let er = rs.load_file(&p).map_err(|e| format!("{f}: {e}"))?;
@@ -129,7 +172,11 @@ fn check_models(env: &CaseEnv, o: &Outcome) -> Result<(), String> {
         let want = rs.graph.roots(er).to_vec();
         let got = out.rs.graph.roots(r).to_vec();
         if want.len() != got.len() {
-            return Err(format!("output {i}: {} roots, expected {} ({f})", got.len(), want.len()));
+            return Err(format!(
+                "output {i}: {} roots, expected {} ({f})",
+                got.len(),
+                want.len()
+            ));
         }
         if !suite_equal(&rs.graph, &want, &out.rs.graph, &got) {
             return Err(format!("output {i} differs from {f}"));
@@ -188,16 +235,30 @@ pub struct Differential {
 impl Differential {
     /// Strictly equal: every comparable aspect equal (unstable aspects do not count).
     pub fn equal(&self) -> bool {
-        [&self.status, &self.dump, &self.log, &self.stack, &self.problems].iter().all(|a| !matches!(a, Aspect::Differs(_)))
+        [
+            &self.status,
+            &self.dump,
+            &self.log,
+            &self.stack,
+            &self.problems,
+        ]
+        .iter()
+        .all(|a| !matches!(a, Aspect::Differs(_)))
     }
 
     pub fn first_difference(&self) -> Option<String> {
-        [("status", &self.status), ("dump", &self.dump), ("log", &self.log), ("stack", &self.stack), ("problems", &self.problems)]
-            .into_iter()
-            .find_map(|(n, a)| match a {
-                Aspect::Differs(d) => Some(format!("{n}: {d}")),
-                _ => None,
-            })
+        [
+            ("status", &self.status),
+            ("dump", &self.dump),
+            ("log", &self.log),
+            ("stack", &self.stack),
+            ("problems", &self.problems),
+        ]
+        .into_iter()
+        .find_map(|(n, a)| match a {
+            Aspect::Differs(d) => Some(format!("{n}: {d}")),
+            _ => None,
+        })
     }
 }
 
@@ -209,25 +270,45 @@ pub fn differential(case: &Case, o: &Outcome, java: &JavaResult) -> Differential
     let status = {
         let mut d = Vec::new();
         if o.load.map(Severity::name) != java.get("load") {
-            d.push(format!("load {:?} vs {:?}", o.load.map(Severity::name), java.get("load")));
+            d.push(format!(
+                "load {:?} vs {:?}",
+                o.load.map(Severity::name),
+                java.get("load")
+            ));
         }
         if !case.compile_only() {
             if o.severity.map(Severity::name) != java.severity() {
-                d.push(format!("severity {:?} vs {:?}", o.severity.map(Severity::name), java.severity()));
+                d.push(format!(
+                    "severity {:?} vs {:?}",
+                    o.severity.map(Severity::name),
+                    java.severity()
+                ));
             }
             if Some(o.code) != java.code() {
                 d.push(format!("code {} vs {:?}", o.code, java.code()));
             }
             if o.exception.as_deref() != java.exception() {
-                d.push(format!("exception {:?} vs {:?}", o.exception, java.exception()));
+                d.push(format!(
+                    "exception {:?} vs {:?}",
+                    o.exception,
+                    java.exception()
+                ));
             }
         }
-        if d.is_empty() { Aspect::Equal } else { Aspect::Differs(d.join("; ")) }
+        if d.is_empty() {
+            Aspect::Equal
+        } else {
+            Aspect::Differs(d.join("; "))
+        }
     };
     let dump = if case.compile_only() {
         Aspect::Equal
     } else {
-        let mine = o.outputs.as_ref().map(|out| canon::dump(&out.rs.graph, &out.dumped())).unwrap_or_default();
+        let mine = o
+            .outputs
+            .as_ref()
+            .map(|out| canon::dump(&out.rs.graph, &out.dumped()))
+            .unwrap_or_default();
         let theirs = java.dump().unwrap_or("");
         if mine == theirs {
             Aspect::Equal
@@ -245,22 +326,38 @@ pub fn differential(case: &Case, o: &Outcome, java: &JavaResult) -> Differential
     } else if unstable.contains(&"log") {
         Aspect::Unstable
     } else {
-        Aspect::Differs(text_equal("log", java.log(), &o.log).err().unwrap_or_default())
+        Aspect::Differs(
+            text_equal("log", java.log(), &o.log)
+                .err()
+                .unwrap_or_default(),
+        )
     };
     let stack = match (o.stack.as_deref(), java.stack()) {
         (a, b) if a == b => Aspect::Equal,
-        (a, b) => Aspect::Differs(text_equal("stack", b.unwrap_or(""), a.unwrap_or("")).err().unwrap_or_default()),
+        (a, b) => Aspect::Differs(
+            text_equal("stack", b.unwrap_or(""), a.unwrap_or(""))
+                .err()
+                .unwrap_or_default(),
+        ),
     };
     let problems = {
         let key = |e: bool, l: i32| (e, l);
         let mut a: Vec<_> = o.problems.iter().map(|p| key(p.error, p.line)).collect();
-        let mut b: Vec<_> = java.problems().iter().map(|p| key(p.error, p.line)).collect();
+        let mut b: Vec<_> = java
+            .problems()
+            .iter()
+            .map(|p| key(p.error, p.line))
+            .collect();
         a.sort();
         b.sort();
         if a == b {
             Aspect::Equal
         } else {
-            Aspect::Differs(format!("{} problems vs {} (severity, line)", a.len(), b.len()))
+            Aspect::Differs(format!(
+                "{} problems vs {} (severity, line)",
+                a.len(),
+                b.len()
+            ))
         }
     };
     let status = if o.status != Status::Completed {
@@ -268,5 +365,11 @@ pub fn differential(case: &Case, o: &Outcome, java: &JavaResult) -> Differential
     } else {
         status
     };
-    Differential { status, dump, log, stack, problems }
+    Differential {
+        status,
+        dump,
+        log,
+        stack,
+        problems,
+    }
 }

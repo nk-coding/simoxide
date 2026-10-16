@@ -31,8 +31,16 @@ struct Suite {
 }
 
 const SUITES: [Suite; 2] = [
-    Suite { name: "eclipse", cases: paths::ECLIPSE_CASES, fixture: paths::ECLIPSE_FIXTURE },
-    Suite { name: "corpus", cases: paths::CORPUS_CASES, fixture: paths::CORPUS_FIXTURE },
+    Suite {
+        name: "eclipse",
+        cases: paths::ECLIPSE_CASES,
+        fixture: paths::ECLIPSE_FIXTURE,
+    },
+    Suite {
+        name: "corpus",
+        cases: paths::CORPUS_CASES,
+        fixture: paths::CORPUS_FIXTURE,
+    },
 ];
 
 fn die(msg: &str) -> ! {
@@ -47,7 +55,9 @@ fn main() {
         Some("-h" | "--help") | None => {
             println!("{USAGE}");
         }
-        Some(c) => die(&format!("unknown command {c} (run, check, bench come with the engine)\n{USAGE}")),
+        Some(c) => die(&format!(
+            "unknown command {c} (run, check, bench come with the engine)\n{USAGE}"
+        )),
     }
 }
 
@@ -69,11 +79,16 @@ struct Opts {
 }
 
 fn parse(args: &[String]) -> Opts {
-    let mut o = Opts { runs: 3, ..Opts::default() };
+    let mut o = Opts {
+        runs: 3,
+        ..Opts::default()
+    };
     let mut i = 0;
     let val = |i: &mut usize| -> String {
         *i += 1;
-        args.get(*i).cloned().unwrap_or_else(|| die(&format!("{} needs a value", args[*i - 1])))
+        args.get(*i)
+            .cloned()
+            .unwrap_or_else(|| die(&format!("{} needs a value", args[*i - 1])))
     };
     while i < args.len() {
         match args[i].as_str() {
@@ -89,7 +104,11 @@ fn parse(args: &[String]) -> Opts {
             "--out" => o.out = Some(val(&mut i).into()),
             "--verbose" | "-v" => o.verbose = true,
             "--save-xmi" => o.save_xmi = true,
-            "--runs" => o.runs = val(&mut i).parse().unwrap_or_else(|_| die("--runs needs a number")),
+            "--runs" => {
+                o.runs = val(&mut i)
+                    .parse()
+                    .unwrap_or_else(|_| die("--runs needs a number"))
+            }
             a => die(&format!("unknown argument {a}\n{USAGE}")),
         }
         i += 1;
@@ -100,7 +119,10 @@ fn parse(args: &[String]) -> Opts {
 /// The (name, case file, fixture) triples selected by the options.
 fn suites(o: &Opts, root: &Path) -> Vec<(String, PathBuf, PathBuf)> {
     if let Some(c) = &o.cases {
-        let f = o.fixture.clone().unwrap_or_else(|| c.with_extension("fixture.txt"));
+        let f = o
+            .fixture
+            .clone()
+            .unwrap_or_else(|| c.with_extension("fixture.txt"));
         return vec![("custom".into(), c.clone(), f)];
     }
     let want = o.suite.as_deref().unwrap_or("all");
@@ -114,7 +136,8 @@ fn suites(o: &Opts, root: &Path) -> Vec<(String, PathBuf, PathBuf)> {
 
 fn conform(args: &[String]) {
     let o = parse(args);
-    let root = find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
+    let root =
+        find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
     let suites = suites(&o, &root);
     if suites.is_empty() {
         die("no case files");
@@ -134,7 +157,14 @@ fn conform(args: &[String]) {
                 };
                 let _ = std::fs::remove_dir_all(&run.out);
                 match record(&run, fixture, o.runs) {
-                    Ok(log) => print!("{}", log.lines().filter(|l| !l.starts_with("pass\t")).collect::<Vec<_>>().join("\n") + "\n"),
+                    Ok(log) => print!(
+                        "{}",
+                        log.lines()
+                            .filter(|l| !l.starts_with("pass\t"))
+                            .collect::<Vec<_>>()
+                            .join("\n")
+                            + "\n"
+                    ),
                     Err(e) => die(&e),
                 }
             }
@@ -144,7 +174,11 @@ fn conform(args: &[String]) {
                 let run = JavaRun {
                     base: root.clone(),
                     cases: cases.clone(),
-                    out: o.out.clone().map(|d| d.join(name)).unwrap_or_else(|| root.join(paths::JAVA_CACHE).join(name)),
+                    out: o
+                        .out
+                        .clone()
+                        .map(|d| d.join(name))
+                        .unwrap_or_else(|| root.join(paths::JAVA_CACHE).join(name)),
                     only: o.only.clone(),
                     prefixes: o.prefixes.clone(),
                     tape: true,
@@ -167,11 +201,16 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
     let mut all = Vec::new();
     let mut engine_name = String::new();
     for (name, cases_file, fixture_file) in suites {
-        let cases: Vec<Case> = read_cases(cases_file).unwrap_or_else(|e| die(&format!("{}: {e}", cases_file.display())));
+        let cases: Vec<Case> = read_cases(cases_file)
+            .unwrap_or_else(|e| die(&format!("{}: {e}", cases_file.display())));
         let java: BTreeMap<String, JavaResult> = match std::fs::read_to_string(fixture_file) {
-            Ok(t) => fixture::read_bundle(&t).unwrap_or_else(|e| die(&format!("{}: {e}", fixture_file.display()))),
+            Ok(t) => fixture::read_bundle(&t)
+                .unwrap_or_else(|e| die(&format!("{}: {e}", fixture_file.display()))),
             Err(_) => {
-                eprintln!("qvto: no fixture {} (run `qvto conform record`); no differential comparison", fixture_file.display());
+                eprintln!(
+                    "qvto: no fixture {} (run `qvto conform record`); no differential comparison",
+                    fixture_file.display()
+                );
                 BTreeMap::new()
             }
         };
@@ -179,15 +218,26 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
             "stub" => Box::new(StubEngine),
             e if e.starts_with("replay:") => {
                 let d = PathBuf::from(&e["replay:".len()..]).join(name);
-                Box::new(JavaReplay::new(&d).unwrap_or_else(|err| die(&format!("{}: {err}", d.display()))))
+                Box::new(
+                    JavaReplay::new(&d)
+                        .unwrap_or_else(|err| die(&format!("{}: {err}", d.display()))),
+                )
             }
             e => die(&format!("unknown engine {e}")),
         };
         engine_name = engine.name().to_string();
         let select = |c: &Case| {
-            (o.only.is_empty() || o.only.contains(&c.id)) && (o.prefixes.is_empty() || o.prefixes.iter().any(|p| c.id.starts_with(p)))
+            (o.only.is_empty() || o.only.contains(&c.id))
+                && (o.prefixes.is_empty() || o.prefixes.iter().any(|p| c.id.starts_with(p)))
         };
-        all.extend(report::run_cases(engine.as_mut(), &cases, root, &models, &java, &select));
+        all.extend(report::run_cases(
+            engine.as_mut(),
+            &cases,
+            root,
+            &models,
+            &java,
+            &select,
+        ));
     }
     let md = report::markdown(&engine_name, &all, o.verbose);
     match &o.report {
@@ -199,6 +249,7 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
         None => print!("{md}"),
     }
     if let Some(p) = &o.tsv {
-        std::fs::write(p, report::tsv(&all)).unwrap_or_else(|e| die(&format!("{}: {e}", p.display())));
+        std::fs::write(p, report::tsv(&all))
+            .unwrap_or_else(|e| die(&format!("{}: {e}", p.display())));
     }
 }

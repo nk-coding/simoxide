@@ -19,7 +19,13 @@ use std::collections::BTreeMap;
 use std::path::Path;
 
 /// The files of a case that go into a fixture bundle (the tape stays in the cache).
-pub const FIXTURE_FILES: [&str; 5] = ["result.txt", "out.jsonl", "log.txt", "stack.txt", "diag.txt"];
+pub const FIXTURE_FILES: [&str; 5] = [
+    "result.txt",
+    "out.jsonl",
+    "log.txt",
+    "stack.txt",
+    "diag.txt",
+];
 
 /// A compile problem as the Java runner reports it.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -83,11 +89,15 @@ impl JavaResult {
 
     /// Outputs that differed between two Java runs (`dump`, `log`): identity-hash order or time.
     pub fn unstable(&self) -> Vec<&str> {
-        self.get("unstable").map(|s| s.split(',').filter(|x| !x.is_empty()).collect()).unwrap_or_default()
+        self.get("unstable")
+            .map(|s| s.split(',').filter(|x| !x.is_empty()).collect())
+            .unwrap_or_default()
     }
 
     pub fn problems(&self) -> Vec<Problem> {
-        let Some(d) = self.file("diag.txt") else { return Vec::new() };
+        let Some(d) = self.file("diag.txt") else {
+            return Vec::new();
+        };
         d.lines()
             .filter_map(|l| {
                 let f: Vec<&str> = l.splitn(7, '\t').collect();
@@ -116,7 +126,10 @@ pub fn read_result_dir(dir: &Path) -> std::io::Result<BTreeMap<String, JavaResul
             continue;
         }
         let id = p.file_name().unwrap().to_string_lossy().to_string();
-        let mut r = JavaResult { id: id.clone(), files: BTreeMap::new() };
+        let mut r = JavaResult {
+            id: id.clone(),
+            files: BTreeMap::new(),
+        };
         for f in FIXTURE_FILES.iter().chain(["idtape.tsv"].iter()) {
             if let Ok(t) = std::fs::read_to_string(p.join(f)) {
                 r.files.insert(f.to_string(), t);
@@ -149,26 +162,37 @@ pub fn write_bundle(results: &BTreeMap<String, JavaResult>) -> String {
 
 /// Reads a fixture bundle.
 pub fn read_bundle(text: &str) -> Result<BTreeMap<String, JavaResult>, String> {
-    let rest = text.strip_prefix(HEADER).ok_or("not a java fixture bundle")?;
+    let rest = text
+        .strip_prefix(HEADER)
+        .ok_or("not a java fixture bundle")?;
     let mut out = BTreeMap::new();
     let mut cur: Option<JavaResult> = None;
     let mut pos = 0;
     let b = rest.as_bytes();
     while pos < b.len() {
-        let eol = rest[pos..].find('\n').map(|i| pos + i).ok_or("truncated bundle")?;
+        let eol = rest[pos..]
+            .find('\n')
+            .map(|i| pos + i)
+            .ok_or("truncated bundle")?;
         let line = &rest[pos..eol];
         pos = eol + 1;
         if let Some(id) = line.strip_prefix("@case ") {
             if let Some(r) = cur.take() {
                 out.insert(r.id.clone(), r);
             }
-            cur = Some(JavaResult { id: id.into(), files: BTreeMap::new() });
+            cur = Some(JavaResult {
+                id: id.into(),
+                files: BTreeMap::new(),
+            });
         } else if let Some(f) = line.strip_prefix("@file ") {
             let (name, len) = f.rsplit_once(' ').ok_or("bad @file line")?;
             let len: usize = len.parse().map_err(|_| "bad @file length")?;
             let content = rest.get(pos..pos + len).ok_or("truncated content")?;
             pos += len + 1;
-            cur.as_mut().ok_or("@file before @case")?.files.insert(name.into(), content.into());
+            cur.as_mut()
+                .ok_or("@file before @case")?
+                .files
+                .insert(name.into(), content.into());
         } else {
             return Err(format!("unexpected line in bundle: {line}"));
         }
@@ -195,7 +219,10 @@ pub fn parse_tape(text: &str) -> Result<Tape, String> {
         let f: Vec<&str> = l.split('\t').collect();
         match f.first() {
             Some(&"seed") if f.len() == 3 => {
-                t.seed = (f[1].parse().map_err(|_| "bad seed")?, f[2].parse().map_err(|_| "bad seed")?)
+                t.seed = (
+                    f[1].parse().map_err(|_| "bad seed")?,
+                    f[2].parse().map_err(|_| "bad seed")?,
+                )
             }
             Some(&"obj") if f.len() == 4 => t.objects.push((
                 f[1].into(),
@@ -220,11 +247,29 @@ mod tests {
     fn bundle_round_trip() {
         let mut m = BTreeMap::new();
         let mut files = BTreeMap::new();
-        files.insert("result.txt".to_string(), "id\ta\nverdict\tpass\n".to_string());
+        files.insert(
+            "result.txt".to_string(),
+            "id\ta\nverdict\tpass\n".to_string(),
+        );
         files.insert("log.txt".to_string(), "@file x 3\nline\n".to_string());
-        files.insert("diag.txt".to_string(), "problem\terror\ta.qvto\t3\t10\t4\tmsg\twith tab\n".to_string());
-        m.insert("a".to_string(), JavaResult { id: "a".into(), files });
-        m.insert("b".to_string(), JavaResult { id: "b".into(), files: BTreeMap::new() });
+        files.insert(
+            "diag.txt".to_string(),
+            "problem\terror\ta.qvto\t3\t10\t4\tmsg\twith tab\n".to_string(),
+        );
+        m.insert(
+            "a".to_string(),
+            JavaResult {
+                id: "a".into(),
+                files,
+            },
+        );
+        m.insert(
+            "b".to_string(),
+            JavaResult {
+                id: "b".into(),
+                files: BTreeMap::new(),
+            },
+        );
         let b = write_bundle(&m);
         let r = read_bundle(&b).unwrap();
         assert_eq!(r.len(), 2);

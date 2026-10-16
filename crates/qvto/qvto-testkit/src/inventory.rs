@@ -26,7 +26,12 @@ pub fn read_inventory(path: &Path) -> Result<Vec<Row>, String> {
 pub fn parse_inventory(text: &str) -> Result<Vec<Row>, String> {
     let mut lines = text.lines();
     let header: Vec<&str> = lines.next().ok_or("empty inventory")?.split('\t').collect();
-    let col = |name: &str| header.iter().position(|h| *h == name).ok_or(format!("no column {name}"));
+    let col = |name: &str| {
+        header
+            .iter()
+            .position(|h| *h == name)
+            .ok_or(format!("no column {name}"))
+    };
     let (id, drv, q, i, e, k, bb, mm, ft, no) = (
         col("test_id")?,
         col("driving_test_class")?,
@@ -39,7 +44,12 @@ pub fn parse_inventory(text: &str) -> Result<Vec<Row>, String> {
         col("feature_tags")?,
         col("notes")?,
     );
-    let list = |s: &str| -> Vec<String> { s.split(',').filter(|x| !x.is_empty()).map(String::from).collect() };
+    let list = |s: &str| -> Vec<String> {
+        s.split(',')
+            .filter(|x| !x.is_empty())
+            .map(String::from)
+            .collect()
+    };
     let mut rows = Vec::new();
     for l in lines {
         if l.is_empty() {

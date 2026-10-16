@@ -24,10 +24,20 @@ pub enum Check {
     /// Number of trace records after the run.
     TraceRecords(usize),
     /// The first `count - 1` stack frames have this operation, module, unit and one of the lines.
-    StackFrames { count: usize, operation: String, module: String, unit: String, lines: Vec<i32> },
+    StackFrames {
+        count: usize,
+        operation: String,
+        module: String,
+        unit: String,
+        lines: Vec<i32>,
+    },
     /// Compile only: error and warning counts over the unit and its imports (`warnings` -1: any;
     /// `cst_only`: only `.qvto` units count).
-    Problems { errors: i64, warnings: i64, cst_only: bool },
+    Problems {
+        errors: i64,
+        warnings: i64,
+        cst_only: bool,
+    },
     /// Compile only: the transformation fails to load.
     LoadError,
 }
@@ -37,7 +47,9 @@ impl Check {
         match self {
             Check::Severity { .. } => "severity",
             Check::Model => "model",
-            Check::Log { nonempty: false, .. } => "log",
+            Check::Log {
+                nonempty: false, ..
+            } => "log",
             Check::Log { nonempty: true, .. } => "log-nonempty-equal",
             Check::Stack { .. } => "stack",
             Check::Exception { .. } => "exception",
@@ -56,18 +68,41 @@ impl Check {
             Check::Severity { severity, code } => format!("severity {severity} {code}"),
             Check::Model => "model".into(),
             Check::Log { file, nonempty } => {
-                format!("{} {file}", if *nonempty { "log-nonempty-equal" } else { "log" })
+                format!(
+                    "{} {file}",
+                    if *nonempty {
+                        "log-nonempty-equal"
+                    } else {
+                        "log"
+                    }
+                )
             }
             Check::Stack { file } => format!("stack {file}"),
             Check::Exception { class } => format!("exception {class}"),
             Check::NoException => "no-exception".into(),
             Check::TraceRecords(n) => format!("trace-records {n}"),
-            Check::StackFrames { count, operation, module, unit, lines } => {
+            Check::StackFrames {
+                count,
+                operation,
+                module,
+                unit,
+                lines,
+            } => {
                 let l: Vec<String> = lines.iter().map(|x| x.to_string()).collect();
-                format!("stack-frames {count} {operation} {module} {unit} {}", l.join("|"))
+                format!(
+                    "stack-frames {count} {operation} {module} {unit} {}",
+                    l.join("|")
+                )
             }
-            Check::Problems { errors, warnings, cst_only } => {
-                format!("problems {errors} {warnings}{}", if *cst_only { " cst" } else { "" })
+            Check::Problems {
+                errors,
+                warnings,
+                cst_only,
+            } => {
+                format!(
+                    "problems {errors} {warnings}{}",
+                    if *cst_only { " cst" } else { "" }
+                )
             }
             Check::LoadError => "load-error".into(),
         }
@@ -209,7 +244,10 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
     let mut cur: Option<Case> = None;
     for (i, raw) in text.lines().enumerate() {
         let n = i + 1;
-        let err = |m: String| CaseError { line: n, message: m };
+        let err = |m: String| CaseError {
+            line: n,
+            message: m,
+        };
         let line = raw.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;
@@ -219,7 +257,10 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
             if cur.is_some() {
                 return Err(err("missing end".into()));
             }
-            cur = Some(Case { id: rest.to_string(), ..Case::default() });
+            cur = Some(Case {
+                id: rest.to_string(),
+                ..Case::default()
+            });
             continue;
         }
         let Some(c) = cur.as_mut() else {
@@ -229,7 +270,13 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
             "end" => out.push(cur.take().unwrap()),
             "driver" => c.driver = rest.into(),
             "kind" => c.kind = rest.into(),
-            "features" => c.features = rest.split(',').filter(|s| !s.is_empty()).map(String::from).collect(),
+            "features" => {
+                c.features = rest
+                    .split(',')
+                    .filter(|s| !s.is_empty())
+                    .map(String::from)
+                    .collect()
+            }
             "dir" => c.dir = Some(rest.into()),
             "qvto" => c.qvto = Some(rest.into()),
             "in" => c.inputs.push(rest.into()),
@@ -237,7 +284,9 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
             "mmfile" => c.mmfiles.push(rest.into()),
             "package" => c.packages.push(rest.into()),
             "config" => {
-                let (k, v) = rest.split_once('=').ok_or_else(|| err(format!("config without '=': {rest}")))?;
+                let (k, v) = rest
+                    .split_once('=')
+                    .ok_or_else(|| err(format!("config without '=': {rest}")))?;
                 c.config.push((k.into(), Some(v.into())));
             }
             "config-null" => c.config.push((rest.into(), None)),
@@ -247,7 +296,10 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
                     class: p[0].into(),
                     unit: p.get(1).map(|s| s.to_string()),
                     module: p.get(2).map(|s| s.to_string()),
-                    ns_uris: p.get(3).map(|s| s.split(',').map(String::from).collect()).unwrap_or_default(),
+                    ns_uris: p
+                        .get(3)
+                        .map(|s| s.split(',').map(String::from).collect())
+                        .unwrap_or_default(),
                 });
             }
             "blackbox-modules" => c.blackbox_modules.push(rest.into()),
@@ -257,8 +309,11 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
                 match p[0] {
                     "readonly-guard" => c.readonly_guard = true,
                     "max-stack-depth" => {
-                        c.max_stack_depth =
-                            Some(p.get(1).and_then(|s| s.parse().ok()).ok_or_else(|| err("bad max-stack-depth".into()))?)
+                        c.max_stack_depth = Some(
+                            p.get(1)
+                                .and_then(|s| s.parse().ok())
+                                .ok_or_else(|| err("bad max-stack-depth".into()))?,
+                        )
                     }
                     o => return Err(err(format!("unknown session option {o}"))),
                 }
@@ -272,7 +327,9 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
             "conf" => c.conf = Some(rest.into()),
             "dump" => c.dump_models = rest == "models",
             "urimap" => {
-                let (a, b) = rest.split_once(' ').ok_or_else(|| err("urimap needs two values".into()))?;
+                let (a, b) = rest
+                    .split_once(' ')
+                    .ok_or_else(|| err("urimap needs two values".into()))?;
                 c.urimaps.push((a.into(), b.into()));
             }
             "check" => c.checks.push(parse_check(rest).map_err(err)?),
@@ -286,7 +343,10 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
         }
     }
     if let Some(c) = cur {
-        return Err(CaseError { line: text.lines().count(), message: format!("missing end after case {}", c.id) });
+        return Err(CaseError {
+            line: text.lines().count(),
+            message: format!("missing end after case {}", c.id),
+        });
     }
     Ok(out)
 }
@@ -294,16 +354,29 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
 fn parse_check(s: &str) -> Result<Check, String> {
     let p: Vec<&str> = s.split(' ').collect();
     let int = |i: usize| -> Result<i64, String> {
-        p.get(i).and_then(|x| x.parse::<i64>().ok()).ok_or_else(|| format!("check {s}: bad number"))
+        p.get(i)
+            .and_then(|x| x.parse::<i64>().ok())
+            .ok_or_else(|| format!("check {s}: bad number"))
     };
     let arg = |i: usize| -> Result<String, String> {
-        p.get(i).map(|x| x.to_string()).ok_or_else(|| format!("check {s}: missing argument"))
+        p.get(i)
+            .map(|x| x.to_string())
+            .ok_or_else(|| format!("check {s}: missing argument"))
     };
     Ok(match p[0] {
-        "severity" => Check::Severity { severity: int(1)? as i32, code: int(2)? as i32 },
+        "severity" => Check::Severity {
+            severity: int(1)? as i32,
+            code: int(2)? as i32,
+        },
         "model" => Check::Model,
-        "log" => Check::Log { file: arg(1)?, nonempty: false },
-        "log-nonempty-equal" => Check::Log { file: arg(1)?, nonempty: true },
+        "log" => Check::Log {
+            file: arg(1)?,
+            nonempty: false,
+        },
+        "log-nonempty-equal" => Check::Log {
+            file: arg(1)?,
+            nonempty: true,
+        },
         "stack" => Check::Stack { file: arg(1)? },
         "exception" => Check::Exception { class: arg(1)? },
         "no-exception" => Check::NoException,
@@ -313,9 +386,16 @@ fn parse_check(s: &str) -> Result<Check, String> {
             operation: arg(2)?,
             module: arg(3)?,
             unit: arg(4)?,
-            lines: arg(5)?.split('|').map(|x| x.parse().map_err(|_| format!("check {s}: bad line"))).collect::<Result<_, _>>()?,
+            lines: arg(5)?
+                .split('|')
+                .map(|x| x.parse().map_err(|_| format!("check {s}: bad line")))
+                .collect::<Result<_, _>>()?,
         },
-        "problems" => Check::Problems { errors: int(1)?, warnings: int(2)?, cst_only: p.get(3) == Some(&"cst") },
+        "problems" => Check::Problems {
+            errors: int(1)?,
+            warnings: int(2)?,
+            cst_only: p.get(3) == Some(&"cst"),
+        },
         "load-error" => Check::LoadError,
         o => return Err(format!("unknown check {o}")),
     })
@@ -451,7 +531,10 @@ end
 ";
         let cases = parse_cases(text).unwrap();
         assert_eq!(cases.len(), 2);
-        assert_eq!(cases[0].config, vec![("k".into(), Some("v=w".into())), ("n".into(), None)]);
+        assert_eq!(
+            cases[0].config,
+            vec![("k".into(), Some("v=w".into())), ("n".into(), None)]
+        );
         assert_eq!(cases[0].rel("in.ecore"), "some/dir/in.ecore");
         assert!(!cases[1].runnable());
         let mut out = String::new();

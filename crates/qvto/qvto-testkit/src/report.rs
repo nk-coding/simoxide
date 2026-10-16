@@ -117,17 +117,18 @@ pub fn run_cases(
             None => models,
         };
         let env = CaseEnv { case, base, models };
-        let outcome = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| engine.run(&env))) {
-            Ok(o) => o,
-            Err(p) => {
-                let msg = p
-                    .downcast_ref::<String>()
-                    .cloned()
-                    .or_else(|| p.downcast_ref::<&str>().map(|s| s.to_string()))
-                    .unwrap_or_default();
-                crate::engine::Outcome::with_status(Status::Crashed(format!("panic: {msg}")))
-            }
-        };
+        let outcome =
+            match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| engine.run(&env))) {
+                Ok(o) => o,
+                Err(p) => {
+                    let msg = p
+                        .downcast_ref::<String>()
+                        .cloned()
+                        .or_else(|| p.downcast_ref::<&str>().map(|s| s.to_string()))
+                        .unwrap_or_default();
+                    crate::engine::Outcome::with_status(Status::Crashed(format!("panic: {msg}")))
+                }
+            };
         match &outcome.status {
             Status::NotImplemented(m) => {
                 rep.verdict = Verdict::NotImplemented;
@@ -202,8 +203,17 @@ impl Tally {
     }
 }
 
+/// Tallies of all cases and by driver group, kind and feature tag.
+#[derive(Clone, Debug, Default)]
+pub struct Tallies {
+    pub all: Tally,
+    pub by_group: BTreeMap<String, Tally>,
+    pub by_kind: BTreeMap<String, Tally>,
+    pub by_feature: BTreeMap<String, Tally>,
+}
+
 /// Tallies by driver group, by kind and by feature tag.
-pub fn tally(reports: &[CaseReport]) -> (Tally, BTreeMap<String, Tally>, BTreeMap<String, Tally>, BTreeMap<String, Tally>) {
+pub fn tally(reports: &[CaseReport]) -> Tallies {
     let mut all = Tally::default();
     let mut by_group: BTreeMap<String, Tally> = BTreeMap::new();
     let mut by_kind: BTreeMap<String, Tally> = BTreeMap::new();
@@ -216,17 +226,31 @@ pub fn tally(reports: &[CaseReport]) -> (Tally, BTreeMap<String, Tally>, BTreeMa
             by_feature.entry(f.clone()).or_default().add(&r.verdict);
         }
     }
-    (all, by_group, by_kind, by_feature)
+    Tallies {
+        all,
+        by_group,
+        by_kind,
+        by_feature,
+    }
 }
 
 fn pct(a: usize, b: usize) -> String {
-    if b == 0 { "-".into() } else { format!("{:.1} %", 100.0 * a as f64 / b as f64) }
+    if b == 0 {
+        "-".into()
+    } else {
+        format!("{:.1} %", 100.0 * a as f64 / b as f64)
+    }
 }
 
 /// The scoreboard as Markdown: totals, tables by driver, kind and feature, then one line per
 /// case that does not pass strictly (with the first failing check or difference).
 pub fn markdown(engine: &str, reports: &[CaseReport], verbose: bool) -> String {
-    let (all, by_group, by_kind, by_feature) = tally(reports);
+    let Tallies {
+        all,
+        by_group,
+        by_kind,
+        by_feature,
+    } = tally(reports);
     let mut s = String::new();
     let _ = writeln!(s, "# Conformance: {engine}\n");
     let _ = writeln!(
@@ -242,10 +266,21 @@ pub fn markdown(engine: &str, reports: &[CaseReport], verbose: bool) -> String {
     let labels: Vec<String> = all.counts.keys().cloned().collect();
     let table = |s: &mut String, title: &str, m: &BTreeMap<String, Tally>| {
         let _ = writeln!(s, "## By {title}\n");
-        let _ = writeln!(s, "| {title} | cases | runnable | Eclipse checks pass | equal to Java | {} |", labels.join(" | "));
-        let _ = writeln!(s, "|---|---:|---:|---:|---:|{}", "---:|".repeat(labels.len()));
+        let _ = writeln!(
+            s,
+            "| {title} | cases | runnable | Eclipse checks pass | equal to Java | {} |",
+            labels.join(" | ")
+        );
+        let _ = writeln!(
+            s,
+            "|---|---:|---:|---:|---:|{}",
+            "---:|".repeat(labels.len())
+        );
         for (k, t) in m {
-            let cols: Vec<String> = labels.iter().map(|l| t.counts.get(l).copied().unwrap_or(0).to_string()).collect();
+            let cols: Vec<String> = labels
+                .iter()
+                .map(|l| t.counts.get(l).copied().unwrap_or(0).to_string())
+                .collect();
             let _ = writeln!(
                 s,
                 "| {k} | {} | {} | {} | {} | {} |",
@@ -265,7 +300,9 @@ pub fn markdown(engine: &str, reports: &[CaseReport], verbose: bool) -> String {
     }
     let _ = writeln!(s, "## Cases not passing strictly\n");
     for r in reports {
-        if r.verdict == Verdict::Pass || (!verbose && matches!(r.verdict, Verdict::Unrunnable(_) | Verdict::NotImplemented)) {
+        if r.verdict == Verdict::Pass
+            || (!verbose && matches!(r.verdict, Verdict::Unrunnable(_) | Verdict::NotImplemented))
+        {
             continue;
         }
         let _ = writeln!(s, "- `{}` {}: {}", r.id, r.verdict.label(), r.detail);
@@ -277,7 +314,13 @@ pub fn markdown(engine: &str, reports: &[CaseReport], verbose: bool) -> String {
 pub fn tsv(reports: &[CaseReport]) -> String {
     let mut s = String::from("id\tverdict\tdetail\n");
     for r in reports {
-        let _ = writeln!(s, "{}\t{}\t{}", r.id, r.verdict.label(), r.detail.replace(['\t', '\n'], " "));
+        let _ = writeln!(
+            s,
+            "{}\t{}\t{}",
+            r.id,
+            r.verdict.label(),
+            r.detail.replace(['\t', '\n'], " ")
+        );
     }
     s
 }

@@ -77,7 +77,10 @@ impl CaseEnv<'_> {
         }
         if !self.case.mmfiles.is_empty() {
             // TestQvtStandaloneExecutor maps the workspace URI of Ecore.ecore to Ecore's resource
-            rs.add_alias("platform:/resource/org.eclipse.emf.ecore/model/Ecore.ecore", "http://www.eclipse.org/emf/2002/Ecore");
+            rs.add_alias(
+                "platform:/resource/org.eclipse.emf.ecore/model/Ecore.ecore",
+                "http://www.eclipse.org/emf/2002/Ecore",
+            );
         }
         for mm in &self.case.mmfiles {
             let p = self.path(mm);
@@ -114,12 +117,20 @@ pub struct Outputs {
 impl Outputs {
     /// The resources the canonical dump covers, in order.
     pub fn dumped(&self) -> Vec<ResourceId> {
-        self.extents.iter().chain(self.models.iter()).copied().collect()
+        self.extents
+            .iter()
+            .chain(self.models.iter())
+            .copied()
+            .collect()
     }
 
     /// The other model resources of `rs` for `dump models`: file resources that are not
     /// extents, `.ecore` files or excluded, sorted by file name (call after `resolve_all`).
-    pub fn collect_models(rs: &ResourceSet, extents: &[ResourceId], exclude: &[String]) -> Vec<ResourceId> {
+    pub fn collect_models(
+        rs: &ResourceSet,
+        extents: &[ResourceId],
+        exclude: &[String],
+    ) -> Vec<ResourceId> {
         let mut v: Vec<(String, ResourceId)> = rs
             .graph
             .resource_ids()
@@ -215,6 +226,8 @@ impl Engine for StubEngine {
     }
 
     fn run(&mut self, _env: &CaseEnv) -> Outcome {
-        Outcome::with_status(Status::NotImplemented("qvto-rs cannot run transformations yet (Q3)".into()))
+        Outcome::with_status(Status::NotImplemented(
+            "qvto-rs cannot run transformations yet (Q3)".into(),
+        ))
     }
 }

@@ -36,6 +36,8 @@ import org.eclipse.m2m.qvt.oml.util.WriterLog;
  *   qvto-run --qvto T.qvto [--mm a.ecore,...] [--register-ecore-files]
  *            --param in:a.xmi --param out:b.xmi --param inout:c.xmi
  *            [--config key=value]... [--log log.txt] [--repeat N] [--blackbox fq.Class]...
+ *            [--dump out.jsonl] [--expect expected.xmi]
+ *   qvto-run --batch CASES --out DIR ...   (see Batch)
  *
  * Model parameters are positional, in the order of the transformation signature.
  * "in" and "inout" load a file; "out" starts empty; "out" and "inout" are saved after the run
@@ -54,6 +56,7 @@ public final class QvtoRun {
 		int repeat = 1;
 		boolean inoutInPlace = false;
 		String expect = null;
+		String dumpPath = null;
 		for (int i = 0; i < args.length; i++) {
 			switch (args[i]) {
 			case "--qvto": qvto = args[++i]; break;
@@ -75,14 +78,14 @@ public final class QvtoRun {
 			case "--repeat": repeat = Integer.parseInt(args[++i]); break;
 			case "--inout-in-place": inoutInPlace = true; break;
 			case "--expect": expect = args[++i]; break;
+			case "--dump": dumpPath = args[++i]; break;
 			default: throw new IllegalArgumentException("unknown argument " + args[i]);
 			}
 		}
 		if (qvto == null) throw new IllegalArgumentException("--qvto is required");
 
-		Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
-		Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("*", new XMIResourceFactoryImpl());
-		EcorePackage.eINSTANCE.eClass();
+		// the same environment as the batch mode (plugin.xml registrations, bundle source containers)
+		Env.init();
 
 		// Metamodels: load and register every (sub)package by nsURI.
 		ResourceSet mmSet = new ResourceSetImpl();
@@ -153,6 +156,7 @@ public final class QvtoRun {
 		opts.put(XMLResource.OPTION_ENCODING, "UTF-8");
 		opts.put(XMLResource.OPTION_SCHEMA_LOCATION, Boolean.TRUE);
 		ResourceSet outSet = new ResourceSetImpl();
+		List<Resource> saved = new ArrayList<>();
 		for (int i = 0; i < params.size(); i++) {
 			String[] p = params.get(i);
 			if (p[0].equals("in")) continue;
@@ -160,7 +164,13 @@ public final class QvtoRun {
 			Resource out = outSet.createResource(URI.createFileURI(new File(path).getAbsolutePath()));
 			out.getContents().addAll(extents.get(i).getContents());
 			out.save(opts);
+			saved.add(out);
 			System.out.println("saved " + p[0] + " -> " + path + " (" + count(out) + " objects)");
+		}
+		if (dumpPath != null) {
+			// canonical dump (crates/qvto-emf/oracle/src/CanonDump.java) of the saved out/inout models
+			String dump = CaseRunner.canonDump(saved);
+			try (PrintWriter w = new PrintWriter(dumpPath, "UTF-8")) { w.print(dump); }
 		}
 		if (expect != null) {
 			// Order-sensitive structural comparison (EcoreUtil.equals) of the first out/inout

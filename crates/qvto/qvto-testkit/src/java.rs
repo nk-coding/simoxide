@@ -30,7 +30,9 @@ impl JavaRun {
     pub fn run(&self) -> Result<String, String> {
         let runner = self.base.join("reference/runner");
         if !runner.join("build/classpath.txt").is_file() {
-            let st = Command::new(runner.join("build.sh")).status().map_err(|e| format!("build.sh: {e}"))?;
+            let st = Command::new(runner.join("build.sh"))
+                .status()
+                .map_err(|e| format!("build.sh: {e}"))?;
             if !st.success() {
                 return Err("reference/runner/build.sh failed".into());
             }
@@ -60,7 +62,8 @@ impl JavaRun {
             cmd.env("JVM_OPTS", o);
         }
         let out = cmd.output().map_err(|e| format!("qvto-run: {e}"))?;
-        let text = String::from_utf8_lossy(&out.stdout).to_string() + &String::from_utf8_lossy(&out.stderr);
+        let text = String::from_utf8_lossy(&out.stdout).to_string()
+            + &String::from_utf8_lossy(&out.stderr);
         if !out.status.success() {
             return Err(format!("qvto-run failed:\n{text}"));
         }
@@ -77,7 +80,11 @@ pub fn unstable_outputs(
     for (id, r) in first {
         let Some(s) = second.get(id) else { continue };
         let mut u = Vec::new();
-        for (f, name) in [("out.jsonl", "dump"), ("log.txt", "log"), ("stack.txt", "stack")] {
+        for (f, name) in [
+            ("out.jsonl", "dump"),
+            ("log.txt", "log"),
+            ("stack.txt", "stack"),
+        ] {
             if r.file(f) != s.file(f) {
                 u.push(name);
             }
@@ -121,7 +128,10 @@ pub fn record(run: &JavaRun, bundle: &Path, runs: usize) -> Result<String, Strin
     }
     for (id, u) in &flagged {
         if let Some(r) = a.get_mut(id) {
-            r.files.entry("result.txt".into()).or_default().push_str(&format!("unstable\t{}\n", u.join(",")));
+            r.files
+                .entry("result.txt".into())
+                .or_default()
+                .push_str(&format!("unstable\t{}\n", u.join(",")));
         }
     }
     if let Some(d) = bundle.parent() {
@@ -147,7 +157,10 @@ pub struct JavaReplay {
 
 impl JavaReplay {
     pub fn new(dir: &Path) -> std::io::Result<JavaReplay> {
-        Ok(JavaReplay { dir: dir.to_path_buf(), results: fixture::read_result_dir(dir)? })
+        Ok(JavaReplay {
+            dir: dir.to_path_buf(),
+            results: fixture::read_result_dir(dir)?,
+        })
     }
 }
 
@@ -175,7 +188,10 @@ fn replay(env: &CaseEnv, r: &JavaResult, dir: &Path) -> Outcome {
     o.stack = r.stack().map(String::from);
     o.log = r.log().to_string();
     o.trace_records = r.get("trace-records").and_then(|t| t.parse().ok());
-    o.run_time = r.get("run-ms").and_then(|t| t.parse::<f64>().ok()).map(|ms| Duration::from_secs_f64(ms / 1000.0));
+    o.run_time = r
+        .get("run-ms")
+        .and_then(|t| t.parse::<f64>().ok())
+        .map(|ms| Duration::from_secs_f64(ms / 1000.0));
     if env.case.compile_only() {
         return o;
     }
@@ -195,7 +211,9 @@ fn replay(env: &CaseEnv, r: &JavaResult, dir: &Path) -> Outcome {
         let p = dir.join(format!("extent{i}.xmi"));
         match rs.load_file(&p) {
             Ok(x) => extents.push(x),
-            Err(e) => return Outcome::with_status(Status::Crashed(format!("{}: {e}", p.display()))),
+            Err(e) => {
+                return Outcome::with_status(Status::Crashed(format!("{}: {e}", p.display())));
+            }
         }
     }
     if env.case.dump_models {
@@ -211,8 +229,16 @@ fn replay(env: &CaseEnv, r: &JavaResult, dir: &Path) -> Outcome {
         }
     }
     rs.resolve_all();
-    let models = if env.case.dump_models { Outputs::collect_models(&rs, &extents, &[]) } else { Vec::new() };
-    o.outputs = Some(Outputs { rs, extents, models });
+    let models = if env.case.dump_models {
+        Outputs::collect_models(&rs, &extents, &[])
+    } else {
+        Vec::new()
+    };
+    o.outputs = Some(Outputs {
+        rs,
+        extents,
+        models,
+    });
     o
 }
 
