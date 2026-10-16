@@ -528,3 +528,236 @@ fn objects_in_out_extent_and_store() {
     assert_eq!(roots.len(), 1);
     assert_eq!(graph_check, Some(1));
 }
+
+#[test]
+fn closure_iterate_xselect_xcollect() {
+    // Sequence{1,2,3}->closure(x | if x < 5 then Sequence{x + 3} else Sequence{} endif)
+    let mut t = Irb::new("");
+    let m = t.entry;
+    let seq = t.coll(CollKind::Sequence, I);
+    let oset = t.coll(CollKind::OrderedSet, I);
+    let x = t.local(m, "x", I, LocalKind::Iterator);
+    let body = e(
+        ExprKind::If(
+            Box::new(bin(StdOwner::Integer, "<", local(x, I), int(5), B)),
+            Box::new(coll_lit(
+                CollKind::Sequence,
+                vec![bin(StdOwner::Integer, "+", local(x, I), int(3), I)],
+                seq,
+            )),
+            Some(Box::new(coll_lit(CollKind::Sequence, vec![], seq))),
+        ),
+        seq,
+    );
+    let clo = lp(
+        LoopKind::Closure,
+        coll_lit(CollKind::Sequence, vec![int(1), int(2), int(3)], seq),
+        x,
+        Some(body),
+        None,
+        oset,
+    );
+    // iterate(y; acc : Integer = 0 | acc + y)
+    let y = t.local(m, "y", I, LocalKind::Iterator);
+    let acc = t.local(m, "acc", I, LocalKind::Accumulator);
+    let it = e(
+        ExprKind::Loop(Box::new(Loop {
+            kind: LoopKind::Iterate,
+            source: coll_lit(CollKind::Sequence, vec![int(1), int(2), int(3)], seq),
+            iterators: vec![y],
+            acc: Some((acc, int(0))),
+            target: None,
+            body: Some(bin(StdOwner::Integer, "+", local(acc, I), local(y, I), I)),
+            cond: None,
+            filter_type: None,
+        })),
+        I,
+    );
+    // Sequence{1, null, 2}->xselect(z | z > 1) ; ->xcollect(w | if w = 1 then null else w endif)
+    let z = t.local(m, "z", I, LocalKind::Iterator);
+    let w = t.local(m, "w", I, LocalKind::Iterator);
+    let src3 = || {
+        coll_lit(
+            CollKind::Sequence,
+            vec![int(1), e(ExprKind::Null, I), int(2)],
+            TypeId(0),
+        )
+    };
+    let mut s3 = src3();
+    s3.ty = seq;
+    let xs = lp(
+        LoopKind::XSelect,
+        s3,
+        z,
+        None,
+        Some(bin(StdOwner::Integer, ">", local(z, I), int(1), B)),
+        seq,
+    );
+    let mut s4 = src3();
+    s4.ty = seq;
+    let xc = lp(
+        LoopKind::XCollect,
+        s4,
+        w,
+        Some(e(
+            ExprKind::If(
+                Box::new(bin(StdOwner::Integer, "=", local(w, I), int(1), B)),
+                Box::new(e(ExprKind::Null, I)),
+                Some(Box::new(local(w, I))),
+            ),
+            I,
+        )),
+        None,
+        seq,
+    );
+    t.main(vec![
+        log(repr(clo)),
+        log(to_string(it)),
+        log(repr(xs)),
+        log(repr(xc)),
+    ]);
+    let (out, log) = t.run();
+    assert!(out.error.is_none(), "{log}");
+    // closure: depth-first: 1 -> 4 -> 7 (sources are not included), 2 -> 5, 3 -> 6
+    assert_eq!(log, "[4, 7, 5, 6]\n6\n[2]\n[2]\n");
+}
+
+#[test]
+fn mapping_out_params_inherits_disjuncts() {
+    // mapping a(in i : Integer, out s : String) : String { init { s := 'out' + i.toString(); result := 'r' } }
+    // mapping b(in i : Integer) : String when { i = 1 } { init { result := 'b' } }
+    // mapping c(in i : Integer) : String when { i = 2 } { init { result := 'c' } }
+    // mapping d(in i : Integer) : String disjuncts b, c;
+    let mut t = Irb::new("");
+    let ma = t.op("a", OpKind::Mapping, None, S);
+    let ai = t.param(ma, "i", I, Direction::In);
+    let as_ = t.param(ma, "s", S, Direction::Out);
+    let ar = t.result(ma, S);
+    t.mapping(ma).init = vec![
+        assign(
+            as_,
+            bin(StdOwner::String, "+", s("out"), to_string(local(ai, I)), S),
+            S,
+        ),
+        assign(ar, s("r"), S),
+    ];
+    let mk = |t: &mut Irb, name: &str, k: i64| {
+        let mb = t.op(name, OpKind::Mapping, None, S);
+        let bi = t.param(mb, "i", I, Direction::In);
+        let br = t.result(mb, S);
+        t.mapping(mb).when = vec![bin(StdOwner::Integer, "=", local(bi, I), int(k), B)];
+        t.mapping(mb).init = vec![assign(br, s(name), S)];
+        mb
+    };
+    let mb = mk(&mut t, "b", 1);
+    let mc = mk(&mut t, "c", 2);
+    let md = t.op("d", OpKind::Mapping, None, S);
+    t.param(md, "i", I, Direction::In);
+    t.result(md, S);
+    t.mapping(md).disjuncts = vec![mb, mc];
+    let m = t.entry;
+    let v = t.var(m, "v", S);
+    t.main(vec![
+        var_init(v, None),
+        log(map(ma, None, vec![int(7), local(v, S)], S, false)),
+        log(local(v, S)),
+        log(map(md, None, vec![int(2)], S, false)),
+        log(map(md, None, vec![int(3)], S, false)),
+        log(map(md, None, vec![int(2)], S, false)),
+    ]);
+    let (out, log) = t.run();
+    assert!(out.error.is_none(), "{log}");
+    assert_eq!(log, "r\nout7\nc\n<null>\nc\n");
+    // a, c, d (for 2) ; the second call d(2) is fetched from the trace
+    assert_eq!(out.trace_records, 3);
+}
+
+#[test]
+fn virtual_dispatch_on_context() {
+    // query A::name() : String { 'A' }  query B::name() : String { 'B' } (B extends A)
+    let mut t = Irb::new("");
+    let pkg = t.package("vd");
+    let ca = t.class(pkg, "A", &[]);
+    let cb = t.class(pkg, "B", &[ca]);
+    t.finish_meta();
+    let _ = t.model_param("out", pkg, Direction::Out);
+    let ta = t.class_ty(ca);
+    let tb = t.class_ty(cb);
+    let qa = t.op("name", OpKind::Query, Some(ta), S);
+    t.body(qa, vec![s("A")]);
+    let qb = t.op("name", OpKind::Query, Some(tb), S);
+    t.body(qb, vec![s("B")]);
+    t.p.operations[qa.index()].vtable = vec![qb];
+    t.p.operations[qb.index()].vtable = vec![qa];
+    let m = t.entry;
+    let o = t.var(m, "o", ta);
+    let obj = e(
+        ExprKind::Object(Box::new(ObjectExp {
+            var: o,
+            class: cb,
+            extent: None,
+            body: vec![],
+        })),
+        ta,
+    );
+    let vcall = e(
+        ExprKind::Call(Box::new(Call {
+            callee: Callee::Op {
+                op: qa,
+                virtual_: true,
+            },
+            source: Some(local(o, ta)),
+            args: vec![],
+        })),
+        S,
+    );
+    t.main(vec![var_init(o, Some(obj)), log(vcall)]);
+    let (out, log) = t.run();
+    assert!(out.error.is_none(), "{log}");
+    assert_eq!(log, "B\n");
+}
+
+#[test]
+fn strings_and_regex() {
+    let mut t = Irb::new("");
+    t.main(vec![
+        log(std(
+            sop(StdOwner::String, "substring", 2),
+            Some(s("hello")),
+            vec![int(2), int(4)],
+            S,
+        )),
+        log(to_string(std(
+            sop(StdOwner::String, "indexOf", 1),
+            Some(s("hello")),
+            vec![s("l")],
+            I,
+        ))),
+        log(std(
+            sop(StdOwner::String, "toUpper", 0),
+            Some(s("abc")),
+            vec![],
+            S,
+        )),
+        log(to_string(std(
+            sop(StdOwner::String, "matches", 1),
+            Some(s("abc123")),
+            vec![s("[a-z]+[0-9]+")],
+            B,
+        ))),
+        log(std(
+            sop(StdOwner::String, "replaceAll", 2),
+            Some(s("a-b-c")),
+            vec![s("-"), s("+")],
+            S,
+        )),
+        log(std(
+            sop(StdOwner::String, "firstToUpper", 0),
+            Some(s("name")),
+            vec![],
+            S,
+        )),
+    ]);
+    let (_, log) = t.run();
+    assert_eq!(log, "ell\n3\nABC\ntrue\na+b+c\nName\n");
+}
