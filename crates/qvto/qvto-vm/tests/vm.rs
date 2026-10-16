@@ -323,6 +323,7 @@ fn mappings_objects_traces_resolve() {
             extent: None,
             body: vec![e(
                 ExprKind::Assign(Box::new(Assign {
+                    target_span: Default::default(),
                     target: LValue::Prop(local(r, tb), fbn),
                     target_ty: S,
                     value: bin(
@@ -351,6 +352,7 @@ fn mappings_objects_traces_resolve() {
             extent: Some(out_param),
             body: vec![e(
                 ExprKind::Assign(Box::new(Assign {
+                    target_span: Default::default(),
                     target: LValue::Prop(local(a, ta), fa),
                     target_ty: S,
                     value: s("x"),
@@ -481,6 +483,7 @@ fn objects_in_out_extent_and_store() {
             body: vec![
                 e(
                     ExprKind::Assign(Box::new(Assign {
+                        target_span: Default::default(),
                         target: LValue::Prop(local(a, ta), fa),
                         target_ty: S,
                         value: s("n"),
@@ -490,6 +493,7 @@ fn objects_in_out_extent_and_store() {
                 ),
                 e(
                     ExprKind::Assign(Box::new(Assign {
+                        target_span: Default::default(),
                         target: LValue::Prop(local(a, ta), fl),
                         target_ty: seq,
                         value: s("t1"),
@@ -499,6 +503,7 @@ fn objects_in_out_extent_and_store() {
                 ),
                 e(
                     ExprKind::Assign(Box::new(Assign {
+                        target_span: Default::default(),
                         target: LValue::Prop(local(a, ta), fl),
                         target_ty: seq,
                         value: s("t2"),

@@ -393,6 +393,7 @@ pub fn local(l: LocalId, ty: TypeId) -> Expr {
 pub fn assign(l: LocalId, v: Expr, ty: TypeId) -> Expr {
     e(
         ExprKind::Assign(Box::new(Assign {
+            target_span: Default::default(),
             target: LValue::Local(l),
             target_ty: ty,
             value: v,
