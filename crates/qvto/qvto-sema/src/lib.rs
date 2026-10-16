@@ -12,6 +12,7 @@
 
 pub mod diag;
 pub mod ir;
+pub mod irck;
 pub mod messages;
 
 mod analyzer;

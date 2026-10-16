@@ -348,6 +348,34 @@ fn main() {
         ms(max_time.0),
         max_time.1
     );
+    // IR consistency of the error-free compilations
+    let mut ir_cases = 0;
+    let mut ir_bad = 0;
+    let mut ir_kinds: HashMap<String, usize> = HashMap::new();
+    for run in &runs {
+        if !run.problems.iter().any(|p| p.sev == 'E') && matches!(run.status, RunStatus::Ok) {
+            ir_cases += 1;
+            if !run.ir_issues.is_empty() {
+                ir_bad += 1;
+                if std::env::var("IR_ISSUES").is_ok() {
+                    for i in run.ir_issues.iter().take(3) {
+                        println!("  ir {}: {i}", run.key);
+                    }
+                }
+            }
+            for i in &run.ir_issues {
+                let k: String = i.split(": ").skip(1).collect::<Vec<_>>().join(": ");
+                let k = k.split(" at ").next().unwrap_or("").to_string();
+                *ir_kinds.entry(k).or_default() += 1;
+            }
+        }
+    }
+    println!("IR checks (irck) on error-free compilations: {ir_cases} cases, {ir_bad} with issues");
+    let mut kv: Vec<_> = ir_kinds.into_iter().collect();
+    kv.sort_by(|a, b| b.1.cmp(&a.1));
+    for (k, n) in kv.iter().take(15) {
+        println!("  {n:6}  {k}");
+    }
     slow.sort_by(|a, b| b.0.cmp(&a.0));
     for (d, k) in slow.iter().skip(1).take(4) {
         println!("  {:.1} ms {k}", ms(*d));

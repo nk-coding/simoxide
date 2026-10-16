@@ -146,6 +146,8 @@ pub struct CaseRun {
     pub problems: Vec<Prob>,
     /// Time of the `compile` call only.
     pub elapsed: Duration,
+    /// IR consistency violations (`irck::check_program`) of an error-free compilation.
+    pub ir_issues: Vec<String>,
 }
 
 impl CaseRun {
@@ -933,6 +935,7 @@ impl Harness {
             status: RunStatus::Ok,
             problems: Vec::new(),
             elapsed: Duration::ZERO,
+            ir_issues: Vec::new(),
         };
         let origin = group(&key);
         if !self.pcm_available && (origin == "simulizar" || origin == "spd") {
@@ -970,7 +973,8 @@ impl Harness {
             return run;
         }
         match rx.recv_timeout(self.timeout) {
-            Ok(Ok((problems, elapsed))) => {
+            Ok(Ok((problems, elapsed, ir_issues))) => {
+                run.ir_issues = ir_issues;
                 run.problems = problems;
                 run.elapsed = elapsed;
             }
@@ -996,13 +1000,14 @@ fn compile_case(
     main: &Path,
     meta: MetaRegistry,
     ops: &[qvto_sema::MetaOperation],
-) -> Result<(Vec<Prob>, Duration), String> {
+) -> Result<(Vec<Prob>, Duration, Vec<String>), String> {
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         let resolver = data.case_resolver(case, main);
         let source = resolver.main_unit(main).expect("main unit readable");
         let t = Instant::now();
         let comp = qvto_sema::compile_with_operations(source, &resolver, meta, ops);
         let elapsed = t.elapsed();
+        let ir_issues = if comp.has_errors() { Vec::new() } else { qvto_sema::irck::check_program(&comp.program) };
         let mut out = Vec::new();
         let mut seen = std::collections::HashSet::new();
         for u in &comp.units {
@@ -1027,7 +1032,7 @@ fn compile_case(
                 });
             }
         }
-        (out, elapsed)
+        (out, elapsed, ir_issues)
     }));
     result.map_err(|_| {
         LAST_PANIC
