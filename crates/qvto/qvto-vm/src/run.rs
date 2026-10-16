@@ -53,6 +53,7 @@ where
             };
         }
         // extents
+        let mut given: Vec<Vec<ObjRef>> = Vec::new();
         for (i, (mp, roots)) in main.model_params.iter().zip(args).enumerate() {
             let mt = &ir.model_types[mp.model_type.index()];
             let label = format!("{} : {}::{}", mp.name, main.name, mt.name);
@@ -66,6 +67,7 @@ where
                     .collect()
             };
             let mut next = self.next_extent_uri;
+            given.push(objs.clone());
             e.bind_initial(self.store, objs, &mut next);
             self.next_extent_uri = next;
             self.extents.push(e);
@@ -123,9 +125,13 @@ where
         }
         let mut results = results.into_iter();
         let mut extents = Vec::with_capacity(n_params);
-        for mp in &main.model_params {
+        for (i, mp) in main.model_params.iter().enumerate() {
             if mp.direction == Direction::In {
                 extents.push(None);
+            } else if r.is_err() {
+                // a failed execution writes no extent back: the caller's extents keep what
+                // they were given
+                extents.push(Some(given[i].clone()));
             } else {
                 extents.push(Some(results.next().unwrap_or_default()));
             }
