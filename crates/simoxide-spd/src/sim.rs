@@ -87,9 +87,16 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for NoAdjustment {
 }
 
 /// The measuring point and metric of each compiled series, as far as SPD reads them.
-pub(crate) fn series_points(cm: &CompiledModel) -> Vec<Option<(PointRef, Metric)>> {
+///
+/// `series`: the run's measurement series (`Measurements::series`: the compiled model's, plus
+/// those a model change appended, e.g. the monitors cloned for a new container); `cm` the run's
+/// current compiled model (whose elements the measuring-point keys name).
+pub(crate) fn series_points(
+    cm: &CompiledModel,
+    series: &[simoxide_sim::ir::SeriesDef],
+) -> Vec<Option<(PointRef, Metric)>> {
     let m = &cm.model;
-    cm.series
+    series
         .iter()
         .map(|s| {
             let metric = match s.metric {
@@ -217,7 +224,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
     pub fn new(mut sim: Simulation<'m, C, F>, spd: &'s Spd) -> Result<Self, SimError> {
         let cm = sim.compiled();
         let membership = Membership::from_graph(&cm.model.graph, spd.model());
-        let series = series_points(cm);
+        let series = series_points(cm, &sim.state().measurements().series);
         let metrics = spd.metrics();
         for (i, s) in series.iter().enumerate() {
             if let Some((_, m)) = s
@@ -323,11 +330,11 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
     /// After a model change: maps the series of the changed model (new containers' monitors
     /// append series) and observes the new ones the triggers read.
     pub(crate) fn observe_new_series(&mut self) {
-        let cm = self.sim.compiled();
-        if cm.series.len() == self.series.len() {
+        let defs = &self.sim.state().measurements().series;
+        if defs.len() == self.series.len() {
             return;
         }
-        let series = series_points(cm);
+        let series = series_points(self.sim.compiled(), defs);
         let metrics = self.spd.metrics();
         for (i, s) in series.iter().enumerate().skip(self.series.len()) {
             if let Some((_, m)) = s
