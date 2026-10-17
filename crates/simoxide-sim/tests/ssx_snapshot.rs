@@ -577,7 +577,12 @@ fn pause_conditions_pause_where_event_counts_pause() {
     let n0 = a.events();
     assert_eq!(a.run_watch(&mut w, None).unwrap(), Status::Paused);
     // every event up to base + 500 s has run, the next one is later
-    assert!(a.events() >= n0 && a.now() <= base + 500.0, "{} {}", base, a.now());
+    assert!(
+        a.events() >= n0 && a.now() <= base + 500.0,
+        "{} {}",
+        base,
+        a.now()
+    );
     assert!(w.fired().unwrap().reason.contains("elapsed"));
     let mut never = simoxide_sim::Watch::new(vec![parse_condition("rt[*] > 1e300").unwrap()]);
     assert_eq!(a.run_watch(&mut never, None).unwrap(), Status::Finished);

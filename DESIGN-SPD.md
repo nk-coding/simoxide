@@ -1236,7 +1236,7 @@ handlers, with Slingshot's side effects up to the throwing statement (SS-X-3.6).
   `--flavour slingshot-exact` with a `.spd` runs `spd::run_exact`, all SPD quirks, `--spd-log`;
   the adjustments with `reconfiguration`, decisions only without; `compare_exact.sh` still
   passes `--no-spd`, unchanged because M8 owns the runner scripts).
-- **What ssx pause and snapshots need (next).** The engine is built and consumed inside
+- **What ssx pause and snapshots need (next; done: 5.7, "ssx snapshots as built").** The engine is built and consumed inside
   `run_impl`; a pausable run needs an owned `SsxRun` (engine plus the event list) with
   `run_until`/`finish`, the hooks passed per call. A snapshot must serialise the event list
   with Slingshot's entities: they are `Rc` graphs shared between events (users with their
@@ -2493,7 +2493,8 @@ together with the immutable `Arc<CompiledModel>`. Then:
   must provide:** serde (or a save/restore) of the graph-resident QVTo state: the id policy's
   generator state, the resources of other metamodels (PRM) with their handles, and the journal
   position, so that the run's session is restored as it was instead of rebuilt.
-- **Slingshot-exact engine (`ssx`, merged from `spd` at 59484b7).** Not snapshotted: it has no
+- **Slingshot-exact engine (`ssx`, merged from `spd` at 59484b7; superseded by 5.7, "ssx
+  snapshots as built").** Not snapshotted: it has no
   pause and resume (only `ssx::run`); the CLI refuses `--pause-at`/`--snapshot` for
   `--flavour slingshot-exact` with an error. It needs: a pause API (the engine as a value with
   `run_until`); its bus FIFO of handler steps and events; the `Rc<RefCell<…>>` graph of users,
@@ -2679,6 +2680,121 @@ resume with changes, change files, exploration). Done except the P2 part (enforc
   (the watch is a separate `PauseWhen`; `run_until` of the drivers delegates to the same loop);
   a quick timing of the MediaStore screencast model (exact, 30 runs) is within noise (timing
   deferred).
+
+**ssx snapshots as built** (2026-10-18, branch `ssx-snapshot`; guide `docs/guide/snapshots.md`
+"The Slingshot-exact engine", `docs/guide/slingshot.md`; format `docs/formats/snapshot.md`,
+sections `ssx`, `spd-ssx`). Pause, resume, fork and snapshots for the third engine; with it the
+snapshot/restore requirement (MENTOR) holds in all three modes.
+
+- **`SsxRun`** (`ssx/run.rs`, new): the engine with its event list as a value. `new` runs
+  `ResourceSimulation`'s constructor and queues the first events (a set-up error is the run's
+  error, outputs written); `run_until(Pause, hooks)`, `run_while(hooks, predicate on SsxView)`,
+  `run_watch(&mut Watch, hooks)` and `finish(hooks)`, the SPD hooks passed per call;
+  `fork(outputs)`, `detach() -> SsxState` (`Send`), `attach(base, state, outputs)`; accessors
+  (time, events, measurements, warnings, generation, model graph). The loop is the old one
+  split in two (`Engine::start`, `Engine::advance<P: SsxPause>`): `P::NEVER` compiles the check
+  away, so `ssx::run` and `run_with_spd` are now `SsxRun::new(..)?.finish(hooks)` without a
+  pause check per event. The pause is checked before each event (`Pause` on the double clock:
+  `After(t)` pauses before the first event later than `t` ns as `F64Secs` converts it), the
+  outputs (projection, tape) are flushed at each return; a traced state continues with a trace
+  (or discards it), an untraced one cannot gain one, a tape can be attached at any pause. An
+  error ends the run and is returned again. N2's `Watch` reads runs through a crate-private
+  trait (`Watched`: time, events, measurements, stored rows), implemented by `RunState` and the
+  engine; `Watch::arm` and `keep_going` are unchanged.
+- **State** (`ssx/state.rs`, new): `SsxState` = the engine's image (`EngineImg`, plain data),
+  the configuration, the run's own model (the last `Arc<CompiledModel>` and its build order) and
+  the graph override. Slingshot's `Rc` objects become one **object arena** (`NodeImg`: immutable
+  frames and proxies, SimuCom frames, users, usage behaviour contexts, user contexts and
+  requests, holders, request processing contexts, SEFF contexts, entry requests, calls over the
+  wire, resource demand requests, jobs, `ModelAdjusted` payloads), written depth first in post
+  order without recursion (identity by kind and address), references are earlier node indices;
+  the roots in a fixed order (events by insertion number, jobs at a resource by id, passive
+  waiting queues), so the same state gives the same arena. The event list as `(time, insertion,
+  event)` by insertion number. Rest as data: schedulers (serde of `simoxide-sched`), MT19937
+  words and position, draws, `java.util.Random`, the tape position, disposed bits, handler
+  exceptions, measurements, monitors (maps in key order), the projection's numbering maps and
+  line count, `res_live`, passives, the linking-resource table, allocation, counters, the SPD
+  side (time events, subscribers, their bits). Aliases and input ids are computed again. A fork
+  and a detached run are a round trip through the image (no bytes): a deep copy that keeps the
+  sharing, `Send` because the image holds no `Rc`.
+- **Format** (v1, compatible; no version bump): header `flavour` = `slingshot-exact` (quirks:
+  all 37; `mode` is the configuration's, not read), section `ssx` (configuration as N1's
+  `ConfigImage` and the engine image) instead of `engine`, `model` and `graph` as N1 writes them
+  (shared helpers `model_section`, `read_model_section`, `graph_section`, `read_graph_section`,
+  factored out of `RunState::serialize`/`deserialize`, whose bytes are unchanged). The other
+  engines refuse an `ssx` snapshot by flavour and vice versa. API: `SsxState::{serialize,
+  deserialize}`, `SsxRun::{snapshot_value, snapshot_to, snapshot_with, restore_from,
+  restore_snapshot}`.
+- **SPD layer** (`simoxide-spd`): `SsxSpd::snapshot_sections` writes `spd` (the same image as
+  `SpdRun`'s: interpreter state, request table by handle, counters; shared `spd_section` and
+  `read_spd_section`) and `spd-ssx` (per series the resolved measuring point and metric: they
+  are resolved on the model of a series' first measurement, so they are kept); `SsxSpd::restore`
+  rebuilds the layer (subscribers from the interpreter); `SsxSpd::model_changed` refreshes the
+  membership after a change the layer did not make. The adjuster's QVTo state is P2's `qvto`
+  section; `QvtoRun::{restore_state, restore_section}` are generic over `ChangeHost` (callers
+  unchanged).
+- **Changes between events**: `SsxRun` is a `ChangeHost`; its `apply_changes` is the engine's
+  (as inside an adjustment) plus what `ModelAdjusted`'s subscribers do for it (`Engine::
+  sync_after_change`: resources of new containers join the table, deleted containers' leave,
+  passive resources of new allocation contexts, calculators of new monitors), without the event.
+  `ChangeFile::apply_to` and `ResumeChanges::apply_to` (`simoxide-reconf`) take any `ChangeHost`;
+  the engine has no change options, so option lines are refused.
+- **CLI**: `run --flavour slingshot-exact` with `--pause-at|--pause-before|--pause-events|
+  --pause-when` and `--snapshot` (plain: `ssxrun::plain`; SPD: `spd::run_exact`, now started or
+  restored), `resume` routes by the header's flavour, `--change`/`--transform` with
+  `reconfiguration` (SPD runs in the adjuster's QVTo state), `--enforce` refused (no request
+  queueing at a resume in this engine).
+- **Tests (exit criterion).** `simoxide-sim/tests/ssx_snapshot.rs` (5): every case of
+  `corpus-ss/` and `corpus-spd/` (95: 90 + 5, the two that fail before t = 0 compared by their
+  error) paused at six points (events 1, n/4, time T/2, n/2, before 3T/4, n-1), a snapshot at
+  each, each hop a fresh run restored from the last one's bytes (hop 3 as JSON, the last hop on
+  another thread with its own interpreter and QVTo core), with SPD the layer and the adjuster's
+  QVTo state restored from the sections: projection, tape with positions, measurements, handler
+  exceptions, counts and decision log equal the uninterrupted run's (558 snapshots); after each
+  snapshot a restore writes the same bytes. Forks: on 93 cases (those that pause at n/2) a fork
+  in memory, a detached state on another thread and the original all continue to the
+  uninterrupted result. Pause conditions (value, time, `before`, events; `elapsed` after a
+  pause; a condition that never holds) pause where `Pause::Events` pauses, same bytes. A change
+  file at a resume equals the change at the pause and has an effect; option lines are refused
+  and leave the run unchanged. Same state, same bytes (two runs, a fork, a detached copy);
+  `SsxState: Send`; an untraced state refuses a trace; another model is refused. A mutation
+  check (a counter restored off by one) fails the suite. CLI: `snapshot_cli.rs` (+2, MediaStore
+  three hops with a JSON hop and a pause within an instant; `spd_scale_in` with its decision log,
+  adjustments before and at a pause), `resume_cli.rs` (+2: `--pause-when` across three
+  processes; `--change` deterministic, effective, option lines refused).
+- **Gates** (after merging `spd` a324c4e, P2/P3). `slingshot_exact` 89 of 90 (KNOWN: h27) and
+  `corpus_spd_is_byte_equal_at_level_e` (5 of 5 with `spd_same_instant`); the new suite 5 of 5;
+  `golden.sh` identical (312 runs, `cargo build-exact`, against 4ba5244's binary); `cargo test
+  --release --workspace --features exact` 612 passed, 0 failed, 39 ignored (605 + 5 `ssx_snapshot`
+  + 1 `snapshot_cli` (+2, the refusal test replaced) + 1 `resume_cli`); the CLI with
+  `reconfiguration`: `resume_cli` 7/7, `snapshot_cli` 7/7; EMF goldens 165/165; `simoxide-fuzz
+  corpus` 132/132, corpus-fuzz 6/6; `test-fdn` 93; `test-qvto` 90; `conform` compat 589/589,
+  fast 584, ordered 583, sema oracle 0 extra (unchanged); fmt and clippy `-D warnings` (default,
+  `exact,hotspot-math`, `compat`; `simoxide-cli` with `reconfiguration`, `exact,reconfiguration`,
+  without default features); release check 0 opt-in crates (`simoxide-cli`, `qvto-cli`). Speed
+  (sanity only, timing deferred): `x_ss_mediastore` 200 000 s, 20 runs, three alternating rounds
+  on one core: 0.94-1.12 ms per run before, 0.97-1.14 ms after (noise); the run without pauses
+  compiles the pause check away.
+- **Side fixes.** `resume_with_a_change_file` (CLI, `--features reconfiguration`): the test was
+  stale since F4 made `drain` the default removal policy (the deleted allocation context is then
+  an invalid model, SimuLizar's abort needs `removal keep`) and F4 applied population changes
+  and Slingshot-flavour changes it still expected to be refused; not mode-dependent. P3 fixed it
+  on `spd` the same way, taken over by the merge. `reference/slingshot/tools/compare_exact.sh`
+  runs SPD cases with their `.spd` (decision log `spd.jsonl`; adjustments need a binary with
+  `reconfiguration`, the line says so otherwise) and takes `-c CORPUS`: with an
+  `exact,hotspot-math,reconfiguration` CLI 87 of 90 (`corpus-ss`: the three SPD cases equal; h27
+  differs, `x_pem_acquire` and `x_sl_runconfigtest` have no reference measurements) and 5 of 5
+  (`corpus-spd`).
+- **Shared files touched**: `simoxide-sim` (`sim.rs`: `pub(crate) mod snapshot`;
+  `sim/snapshot.rs`: section helpers, `ConfigImage` crate-visible; `sim/watch.rs`: `Watched`,
+  `arm_on`; `ssx/*`; `Cargo.toml` dev-dependency features); `simoxide-spd` (`interp.rs`: serde
+  derive on `Metric`; `snapshot.rs`: section helpers, `spd-ssx`; `ssx.rs`); `simoxide-reconf`
+  (`snapshot.rs`: `ChangeHost` generic; `edits.rs`: `apply_to`; `resume.rs`: `apply_to`);
+  `simoxide-cli/src/main.rs`; the CLI tests; `compare_exact.sh`.
+- **Limits.** A change at a resume makes no `ModelAdjusted` event and no projection line;
+  `--enforce` is refused; JSON snapshots cannot hold non-finite doubles (N1); the SPD layer has
+  no in-memory fork (a fork restores it from the sections); snapshots are taken between events
+  only.
 
 **N3a spike** (2026-10-17; Slingshot's `.snapshot`, `.config` and `.state` against SimOxide's
 `RunState`). Sources: the extension `Palladio-Analyzer-Slingshot-Extension-Initialisation`
@@ -2887,7 +3003,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **P2** | *Done 2026-10-17* (findings: 5.4 "P2 as built"; the F4-dependent part finished after F4). SPD adjustment via `MainTransformation`; `ModelAdjusted` diff; corpus `corpus-spd/` with reference outputs | P1, F3, F4 | 2 w | met: minimal example and `spd_time_policies`, `spd_service_group`, `spd_scale_in`, `spd_same_instant`: same scale times, container and assembly names, models as Slingshot's (V3, model summaries of every adjustment equal), in both flavours |
 | **P3** | *Done 2026-10-17* (findings: 5.4 "P3 as built"; V3x with X2d). SPD in the Slingshot flavour end to end; statistical scenarios; exact SPD runs (with X2, Q2) | P2, S2 | 1.5-2.5 w | met: V4 on a utilisation and a response-time scenario (0 of 41 SPD statistics rejected, 30 seeds); V3x: the five `corpus-spd/` cases byte-equal at level E |
 | **Q1** | *Done 2026-10-17* (findings: 5.5 "Q1 as built"). qvto-rs: SPD adjustment corpus for every path (V2) incl. service group, competing consumers, scale-in: 47 cases, 73 of 105 operations (all of `MainTransformation`'s call graph) | — | 3-5 d | met: strict match with the Java runner (47/47, also on identity-hash-dependent outputs); two engine discrepancies and three harness ones fixed |
-| **N1** | *Done 2026-10-17* (findings: 5.7 "N1 as built"). Snapshot serialisation: serde of `RunState`, XMI writer for the overlay, versioned format | F1, F2 | 1.5 w | met: serialize → deserialize → identical continuation, byte for byte, on every model directory in exact and fast mode and both flavours (Slingshot-exact engine: refused, no pause yet), after model changes, with SPD, with SimuLizar rules and a QVTo state; deterministic bytes |
+| **N1** | *Done 2026-10-17* (findings: 5.7 "N1 as built"). Snapshot serialisation: serde of `RunState`, XMI writer for the overlay, versioned format | F1, F2 | 1.5 w | met: serialize → deserialize → identical continuation, byte for byte, on every model directory in exact and fast mode and both flavours (Slingshot-exact engine: refused, no pause yet; done later, 5.7 "ssx snapshots as built"), after model changes, with SPD, with SimuLizar rules and a QVTo state; deterministic bytes |
 | **N2** | *Done 2026-10-17* (findings: 5.7 "N2 as built"; enforced policies built in P2, 5.4 "P2 as built"). Pause/resume API with change sets, enforced policies, snapshot conditions (duration, trigger, threshold) | N1, P2 | 1 w | met: resume-with-change tests (change files, QVTo transformations, rule sets; byte-equal to the in-process change, exact and fast; the Slingshot flavour refuses until F4); pause-condition tests; fork-based exploration example (`explore.rs`, `simoxide explore`), deterministic |
 | **N3** | Slingshot `.snapshot`/`.config`/`.state` interop: a: spike on the format mapping; b: export/import. *a done 2026-10-17: go for the fast flavour, export first, lossy* (5.7 "N3a spike"; real `.snapshot`s written and read back on 8 of 10 models; the MENTOR app is not available locally) | N2, S2 | a: 3 d; b: 2-3 w (export + `.config` + lite `.state`: 2.5-3 w; both directions 4-5 w) | a: met (verdict in 5.7); b: round trip with the MENTOR app on a model (if U7) |
 | **B1** | Benchmarks of §6 (both Slingshot modes) and docs pages | S2, X2, P3, N2 | 1-1.5 w | tables in `docs/performance/` |
