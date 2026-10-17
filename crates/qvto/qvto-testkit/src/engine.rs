@@ -132,6 +132,13 @@ impl CaseEnv<'_> {
         for p in loaded {
             if !keys.contains(&p) {
                 rs.graph.meta_mut().unregister_ns_uri(p);
+                // a namespace of the global registry: found there (the configuration's file),
+                // not as the case's file that happens to declare it too
+                if let Some(u) = rs.graph.meta().package(p).ns_uri.clone()
+                    && let Some(loc) = self.models.ns_index.get(u.as_ref())
+                {
+                    rs.add_ns_location(&u, loc);
+                }
             }
         }
         for k in keys {
