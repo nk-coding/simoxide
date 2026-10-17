@@ -1,6 +1,17 @@
 [workspace]
 resolver = "3"
-members = ["crates/*"]
+# Explicit members: crates/ will also hold directories that are not packages (crates/qvto/,
+# crates/foundation/; see the qvto-rs merge design, step M0).
+members = [
+    "crates/simoxide-cli",
+    "crates/simoxide-hotspot-math",
+    "crates/simoxide-model",
+    "crates/simoxide-random",
+    "crates/simoxide-sched",
+    "crates/simoxide-sim",
+    "crates/simoxide-stoex",
+    "crates/simoxide-testkit",
+]
 
 [workspace.package]
 edition = "2024"
@@ -22,6 +33,12 @@ lto = "fat"
 codegen-units = 1
 panic = "abort"
 debug = "line-tables-only"
+
+# For tools that catch panics per case (QVTo conformance runner, fuzzers): `panic = "abort"`
+# in release would end the whole run. `cargo build --profile release-unwind`.
+[profile.release-unwind]
+inherits = "release"
+panic = "unwind"
 
 [profile.bench]
 inherits = "release"

@@ -28,3 +28,6 @@ mimalloc = ["dep:mimalloc"]
 # Bit-exact HotSpot Math.log/exp, on by default (GPL-2.0-only code; binaries built with it must
 # not be distributed, see simoxide-random's `hotspot-math` feature).
 hotspot-math = ["simoxide-sim/hotspot-math"]
+# Runtime model changes (reconfiguration rules, later SPD; DESIGN-SPD.md F2-F4, R1). Reserved:
+# no effect yet. Whether it joins the defaults is open (DESIGN-SPD.md U2).
+reconfiguration = []
