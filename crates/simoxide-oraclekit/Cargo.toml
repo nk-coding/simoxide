@@ -1,0 +1,13 @@
+[package]
+name = "simoxide-oraclekit"
+description = "Shared driver pieces of SimOxide's Java reference harnesses (refsim, the QVTo runner, the Slingshot runner): warm-JVM batch processes, the seed agent, scratch and result directories, comparisons"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+rust-version.workspace = true
+# test infrastructure; never a dependency of a library build
+publish = false
+
+[dependencies]
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }

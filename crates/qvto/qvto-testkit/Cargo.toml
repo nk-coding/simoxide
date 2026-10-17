@@ -11,6 +11,8 @@ publish = false
 # HotSpot identity-hash sequences for tape replay (feature `compat`; no licence granted)
 simoxide-jcompat-exact = { workspace = true, optional = true }
 qvto-paths.workspace = true
+# the Java runner's batch process, the seed agent, result directories and their comparison
+simoxide-oraclekit.workspace = true
 qvto-emf.workspace = true
 qvto-model.workspace = true
 

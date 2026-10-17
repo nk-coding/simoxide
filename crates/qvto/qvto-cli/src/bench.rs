@@ -560,16 +560,13 @@ fn run_java(
 ) -> Result<Vec<(String, Measured)>, String> {
     let runner = root.join("reference/runner");
     // a runner built before its benchmark mode existed is rebuilt
-    if !runner.join("build/classpath.txt").is_file()
-        || !runner.join("build/classes/qvtorun/Bench.class").is_file()
-    {
-        let st = Command::new(runner.join("build.sh"))
-            .status()
-            .map_err(|e| format!("build.sh: {e}"))?;
-        if !st.success() {
-            return Err("reference/runner/build.sh failed".into());
-        }
-    }
+    simoxide_oraclekit::java::ensure_built(
+        &runner.join("build.sh"),
+        &[
+            &runner.join("build/classpath.txt"),
+            &runner.join("build/classes/qvtorun/Bench.class"),
+        ],
+    )?;
     let _ = std::fs::remove_file(out);
     let mut cmd = Command::new(runner.join("qvto-run"));
     cmd.current_dir(root)

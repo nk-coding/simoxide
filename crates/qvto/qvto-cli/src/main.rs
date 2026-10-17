@@ -13,7 +13,7 @@ use qvto_model::ModelStore;
 use qvto_testkit::case::{Case, read_cases};
 use qvto_testkit::engine::{Engine, StubEngine};
 use qvto_testkit::fixture::{self, JavaResult};
-use qvto_testkit::java::{JavaReplay, JavaRun, record};
+use qvto_testkit::java::{JavaReplay, JavaRun, Write, record};
 use qvto_testkit::{find_root, paths, report};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -46,12 +46,15 @@ usage:
       `--compare-unstable` also compares what varies between Java runs (the engine replays
       the recorded run's identity hashes).
   qvto conform record [--suite eclipse|corpus|fuzz|spd|all] [--det] [--only ID,...] [--prefix P]...
-                      [--runs N]
+                      [--runs N] [--check]
       Runs the Java reference runner N times (default 5, one JVM per run), marks
       outputs that differ between the runs as unstable and writes the fixture
       bundle; the full results (tapes, XMI) stay in target/qvto-testkit/java/<suite>.
-      `--det`: the det runner (the Slingshot reference runner's seed agent with its ordering
-      rule, reference/slingshot/seed-agent.sh), cache target/qvto-testkit/java-det/<suite>.
+      `--det`: the det runner (the shared seed agent with its ordering rule,
+      reference/oraclekit/seed-agent.sh), cache target/qvto-testkit/java-det/<suite>.
+      `--check`: records the same way, compares the bundle with the committed fixture and
+      writes nothing (neither the fixture nor the cache); outputs either side marks unstable
+      (one run's identity hashes or timings) are not compared; exit code 1 if they differ.
   qvto conform java [--suite ...] [--det] [--out DIR] [--only ID,...] [--prefix P]... [--save-xmi]
       Runs the Java reference runner once into DIR.
   qvto spd-replay [MODELDIR SPD.jsonl] [--mode compat|fast|ordered]
@@ -140,6 +143,8 @@ struct Opts {
     det: bool,
     /// Compare the aspects a fixture marks unstable too.
     compare_unstable: bool,
+    /// `record --check`: compare the new recording with the committed fixture, write nothing.
+    check: bool,
 }
 
 impl Opts {
@@ -181,6 +186,7 @@ fn parse(args: &[String]) -> Opts {
             "--save-xmi" => o.save_xmi = true,
             "--det" => o.det = true,
             "--compare-unstable" => o.compare_unstable = true,
+            "--check" => o.check = true,
             "--runs" => {
                 o.runs = val(&mut i)
                     .parse()
@@ -231,14 +237,18 @@ fn conform(args: &[String]) {
     }
     match o.sub.as_deref() {
         Some("record") => {
+            let mut differ = 0;
             for (name, cases, fixture) in &suites {
                 let cache = root.join(o.java_cache()).join(name);
                 let partial = !o.only.is_empty() || !o.prefixes.is_empty();
                 let run = JavaRun {
                     base: root.clone(),
                     cases: cases.clone(),
-                    // a partial recording goes to a side directory merged into the cache
-                    out: if partial {
+                    // a partial recording goes to a side directory merged into the cache; a
+                    // check to one removed afterwards (the cache keeps the tapes it has)
+                    out: if o.check {
+                        cache.with_extension("check")
+                    } else if partial {
                         cache.with_extension("partial")
                     } else {
                         cache.clone()
@@ -256,8 +266,11 @@ fn conform(args: &[String]) {
                 };
                 let _ = std::fs::remove_dir_all(&run.out);
                 let runs = if name == "fuzz" { 1 } else { o.runs };
-                let r = record(&run, fixture, runs, partial);
-                if partial && r.is_ok() {
+                let write = if o.check { Write::Check } else { Write::Write };
+                let r = record(&run, fixture, runs, partial, write);
+                if o.check {
+                    let _ = std::fs::remove_dir_all(&run.out);
+                } else if partial && r.is_ok() {
                     if let Ok(d) = std::fs::read_dir(&run.out) {
                         for e in d.flatten() {
                             if e.path().is_dir() {
@@ -270,16 +283,26 @@ fn conform(args: &[String]) {
                     let _ = std::fs::remove_dir_all(&run.out);
                 }
                 match r {
-                    Ok(log) => print!(
-                        "{}",
-                        log.lines()
-                            .filter(|l| !l.starts_with("pass\t"))
-                            .collect::<Vec<_>>()
-                            .join("\n")
-                            + "\n"
-                    ),
+                    Ok(rec) => {
+                        print!(
+                            "{}",
+                            rec.log
+                                .lines()
+                                .filter(|l| !l.starts_with("pass\t"))
+                                .collect::<Vec<_>>()
+                                .join("\n")
+                                + "\n"
+                        );
+                        for d in rec.differences.iter().take(50) {
+                            println!("  {d}");
+                        }
+                        differ += rec.differences.len();
+                    }
                     Err(e) => die(&e),
                 }
+            }
+            if differ > 0 {
+                exit(1);
             }
         }
         Some("java") => {
