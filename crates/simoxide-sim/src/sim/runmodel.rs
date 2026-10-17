@@ -306,6 +306,40 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     }
 }
 
+impl<C: Compat, F: Flavour> crate::change::ChangeHost for Simulation<'_, C, F> {
+    fn now_s(&self) -> f64 {
+        self.st.now_ns() as f64 / 1e9
+    }
+    fn now_ns(&self) -> i64 {
+        self.st.now_ns()
+    }
+    fn base_compiled(&self) -> &CompiledModel {
+        self.base
+    }
+    fn compiled_now(&self) -> &CompiledModel {
+        self.cm
+    }
+    fn model_generation(&self) -> u32 {
+        self.st.model.generation()
+    }
+    fn model_graph(&self) -> &Graph {
+        Simulation::model_graph(self)
+    }
+    fn set_model_graph(&mut self, graph: Arc<Graph>) -> Result<(), ChangeError> {
+        Simulation::set_model_graph(self, graph)
+    }
+    fn apply_changes(
+        &mut self,
+        graph: Graph,
+        changes: &ChangeSet,
+    ) -> Result<ChangeReport, ChangeError> {
+        Simulation::apply_changes(self, graph, changes)
+    }
+    fn fail_run(&mut self, message: String) -> SimError {
+        Simulation::fail_run(self, message)
+    }
+}
+
 /// Where executions in progress continue after the instructions changed
 /// ([`Simulation::plan_code`]): old program counter -> new one.
 #[derive(Default)]

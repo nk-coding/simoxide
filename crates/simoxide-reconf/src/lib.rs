@@ -156,7 +156,7 @@ pub struct Edit {
 
 impl Edit {
     /// Starts an edit of `sim`'s current model.
-    pub fn new<C: Compat, F: Flavour>(sim: &Simulation<'_, C, F>) -> Edit {
+    pub fn new<H: simoxide_sim::ChangeHost + ?Sized>(sim: &H) -> Edit {
         let mut graph = sim.model_graph().clone();
         graph.start_journal();
         Edit { graph }
@@ -180,9 +180,9 @@ impl Edit {
     }
 
     /// Applies the edits to `sim` ([`Simulation::apply_changes`]).
-    pub fn apply<C: Compat, F: Flavour>(
+    pub fn apply<H: simoxide_sim::ChangeHost + ?Sized>(
         self,
-        sim: &mut Simulation<'_, C, F>,
+        sim: &mut H,
     ) -> Result<ChangeReport, ChangeError> {
         let (g, cs) = self.finish();
         sim.apply_changes(g, &cs)

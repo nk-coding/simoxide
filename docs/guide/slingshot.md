@@ -46,6 +46,16 @@ How close it is: [Slingshot flavour correctness](../correctness/slingshot.md#the
 In the library: `CompiledModel::compile_flavour(model, FlavourConfig::slingshot_exact())` and
 `simoxide_sim::run` (or `simoxide_sim::ssx::run`).
 
+With a `.spd` next to the model the exact mode runs the scaling policies on Slingshot's bus
+(design phase X2d): the time events, one subscriber per policy and stimulus, the adjustment
+(Slingshot's `MainTransformation` in QVTo's ordered mode, built with the CLI feature
+`reconfiguration`; without it the run makes the decisions only) and the `ModelAdjusted`
+subscribers; every SPD quirk is on (`--spd-quirks` must be empty or `slingshot`), `--spd-log`
+writes the decision log. Ids of elements an adjustment creates appear under the reference
+runner's aliases (`~ResourceContainer:AppServer_1`). In the library:
+`simoxide_sim::ssx::run_with_spd` with `simoxide_spd::ssx::SsxSpd` and an adjuster
+(`simoxide_reconf::QvtoAdjuster::spd`).
+
 ## What changes against SimuLizar
 
 The genuine design differences of Slingshot, always on in the flavour:

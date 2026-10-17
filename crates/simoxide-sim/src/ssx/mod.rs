@@ -38,6 +38,7 @@ mod monitor;
 mod pdist;
 mod resource;
 mod rng;
+pub mod spd;
 mod system;
 mod usage;
 
@@ -56,6 +57,10 @@ use std::collections::{BinaryHeap, HashMap};
 use std::rc::Rc;
 
 pub(crate) use rng::SsRng;
+pub use spd::{
+    HandlerError, SpdAdjusted, SpdHooks, SpdMeasurement, SpdRequest, SpdStart, SpdTimeEvent,
+    Stimulus,
+};
 
 // ------------------------------------------------------------------------------------------
 // entities (Slingshot's objects, with Java's reference semantics where Slingshot shares them)
@@ -272,6 +277,12 @@ pub(crate) enum Ev {
     PState(Rc<Rdr>, i64),
     // monitoring
     Meas(SeriesId, f64, f64),
+    // scaling policies (SS-SPD)
+    /// `SimulationTimeReached` (index of the set-up's time event).
+    SpdTime(u32),
+    /// `ModelAdjustmentRequested` (the hook's request, the policy id).
+    SpdReq(u32, Rc<str>),
+    ModelAdjusted(Rc<spd::Adjusted>),
 }
 
 /// A handler's result: events with their delays, in insertion order.
@@ -350,9 +361,15 @@ pub(crate) enum H {
     MonUsageStop,
     MonOpStart,
     MonOpStop,
+    SpdStart,
+    SpdAdjust,
+    NoeResource,
+    RsModelAdjusted,
+    NoeSystem,
+    MonModelAdjusted,
 }
 
-const H_COUNT: usize = H::MonOpStop as usize + 1;
+const H_COUNT: usize = H::MonModelAdjusted as usize + 1;
 
 impl H {
     /// `Class.method` of the subscriber.
@@ -404,6 +421,12 @@ impl H {
             H::MonOpStop => {
                 "OperationCallActionResponseTimeMonitoringBehavior.onOperationCallStopped"
             }
+            H::SpdStart => "SpdBehavior.onPreSimulationConfigurationStarted",
+            H::SpdAdjust => "SpdAdjustmentBehavior.onModelAdjustmentRequested",
+            H::NoeResource => "NumberOfElementsMonitorBehavior.onModelAdjusted",
+            H::RsModelAdjusted => "ResourceSimulation.onModelAdjusted",
+            H::NoeSystem => "NumberOfElementsMonitorBehavior.onModelAdjusted",
+            H::MonModelAdjusted => "MonitorRepositoryInterpreterBehavior.onModelAdjusted",
         }
     }
 }
@@ -457,6 +480,12 @@ pub(crate) struct Monitors {
     pub passive: HashMap<Box<str>, PassiveProbes>,
     /// Start/stop calculators: series and open starts per request context.
     pub calcs: Vec<StartStop>,
+    /// The series by (measuring-point key, metric). Two series of created elements can show the
+    /// same key (equal aliases): the reference's EDP2 measurements are per measuring point, so
+    /// they stay two series, written one after the other (`measurements.csv` sorts stably).
+    pub keys: HashMap<(String, &'static str), SeriesId>,
+    /// The key with the model's ids of a series whose shown key has aliases.
+    pub raw_keys: HashMap<SeriesId, Box<str>>,
 }
 
 #[derive(Default)]
@@ -484,8 +513,18 @@ pub(crate) struct RequestCtx {
 }
 
 pub(crate) struct Engine<'m> {
+    /// The compiled model the run simulates now (the base model, or the last of
+    /// `own.models` after SPD adjustments, `spd.rs`).
     pub cm: &'m CompiledModel,
     pub m: &'m Model,
+    /// The compiled model the run was created on.
+    base: &'m CompiledModel,
+    own: spd::OwnModels,
+    spd: spd::SpdSide,
+    /// Ids of created elements -> the reference runner's aliases (empty without changes).
+    alias: HashMap<Box<str>, Box<str>>,
+    /// A run error raised by an SPD adjustment.
+    failure: Option<SimError>,
     pub now: f64,
     heap: BinaryHeap<Entry>,
     seq: u64,
@@ -505,6 +544,11 @@ pub(crate) struct Engine<'m> {
     jobs: HashMap<u64, u64>,
     // resources
     pub res: Vec<resource::ResRt>,
+    /// Per resource: in the active-resource table (resources of containers an SPD adjustment
+    /// added join it at `ModelAdjusted`, those of deleted containers leave it).
+    pub res_live: Vec<bool>,
+    /// `LinkingResourceTable` (built at the start, never updated).
+    pub links: Vec<LinkingResourceId>,
     pub passives: Vec<resource::Passive>,
     pub passive_idx: HashMap<(PassiveResourceId, AssemblyContextId), usize>,
     /// Jobs at a resource, by id.
@@ -538,22 +582,7 @@ impl<'m> Engine<'m> {
             .or_else(|| m.systems.iter_ids().next().map(|(i, _)| i))
             .ok_or_else(|| fail("no system".into()))?;
         let sys = m.systems[system].structure;
-        let mut alloc = vec![None; m.assembly_contexts.len()];
-        let mut seen = vec![false; m.assembly_contexts.len()];
-        if let Some(a) = m.allocations.iter().next() {
-            for &ctx in &a.contexts {
-                let c = &m.allocation_contexts[ctx];
-                if let Some(ac) = c.assembly {
-                    // Slingshot compares ids: the first context of an equal-id assembly
-                    for (i, x) in m.assembly_contexts.iter_ids() {
-                        if !seen[i.index()] && x.id == m.assembly_contexts[ac].id {
-                            seen[i.index()] = true;
-                            alloc[i.index()] = c.container;
-                        }
-                    }
-                }
-            }
-        }
+        let alloc = spd::first_match(m);
         let rng = SsRng::new(cfg.seed, out.tape.is_some()).map_err(fail)?;
         let mut meas = Measurements {
             series: Vec::new(),
@@ -564,6 +593,11 @@ impl<'m> Engine<'m> {
         Ok(Engine {
             cm,
             m,
+            base: cm,
+            own: spd::OwnModels::default(),
+            spd: spd::SpdSide::default(),
+            alias: HashMap::new(),
+            failure: None,
             now: 0.0,
             heap: BinaryHeap::new(),
             seq: 0,
@@ -580,6 +614,8 @@ impl<'m> Engine<'m> {
             users: HashMap::new(),
             jobs: HashMap::new(),
             res: Vec::new(),
+            res_live: Vec::new(),
+            links: cm.links.clone(),
             passives: Vec::new(),
             passive_idx: HashMap::new(),
             live: HashMap::new(),
@@ -662,7 +698,11 @@ impl<'m> Engine<'m> {
         }
     }
 
-    fn run(&mut self, cfg: &SimConfig) -> Result<(), SimError> {
+    fn run(
+        &mut self,
+        cfg: &SimConfig,
+        mut hooks: Option<&mut dyn SpdHooks>,
+    ) -> Result<(), SimError> {
         self.resources_init()
             .map_err(|t| self.sim_error(format!("{}: {}", t.class, t.message)))?;
         self.schedule(Ev::PreSim, 0.0);
@@ -688,8 +728,11 @@ impl<'m> Engine<'m> {
                 self.same_instant = 0;
             }
             self.events += 1;
-            self.dispatch(e.ev);
+            self.dispatch(e.ev, &mut hooks);
             if self.stopped {
+                if let Some(f) = self.failure.take() {
+                    return Err(f);
+                }
                 break;
             }
             if cfg.limits.max_events > 0 && self.events >= cfg.limits.max_events {
@@ -712,11 +755,16 @@ impl<'m> Engine<'m> {
     }
 
     /// Dispatches one event: its projected line, then its subscribers in subscription order.
-    fn dispatch(&mut self, ev: Ev) {
+    fn dispatch(&mut self, ev: Ev, hooks: &mut Option<&mut dyn SpdHooks>) {
         self.project(&ev);
         self.rng.pos = self.lines - 1;
         match ev {
-            Ev::PreSim => {}
+            Ev::PreSim => {
+                // SpdBehavior is subscribed before the monitor interpreter (SS-SPD-1.2)
+                if let Some(h) = hooks.as_deref_mut() {
+                    self.call(H::SpdStart, |e| e.spd_start(h));
+                }
+            }
             Ev::SimStarted => self.call(H::UsageStart, |e| e.on_simulation_start()),
             Ev::Finished => {
                 // ResourceSimulation.onSimulationFinished clears the queues, CoreBehavior stops
@@ -774,7 +822,32 @@ impl<'m> Engine<'m> {
                 self.call(H::RsPassiveRel, |e| e.on_passive_released(&r));
             }
             Ev::PState(r, a) => self.call(H::MonPassiveState, |e| e.mon_passive_state(&r, a)),
-            Ev::Meas(..) => {}
+            Ev::Meas(s, t, v) => {
+                if self.spd.measured
+                    && let Some(h) = hooks.as_deref_mut()
+                {
+                    self.spd_measurement(h, s, t, v);
+                }
+            }
+            Ev::SpdTime(i) => {
+                if let Some(h) = hooks.as_deref_mut() {
+                    let now = self.now;
+                    self.spd_subscribers(h, spd::Stimulus::Time, |_, h, k| {
+                        h.on_time(k, i as usize, now)
+                    });
+                }
+            }
+            Ev::SpdReq(r, _) => {
+                if let Some(h) = hooks.as_deref_mut() {
+                    self.call(H::SpdAdjust, |e| e.spd_adjust(h, r));
+                }
+            }
+            Ev::ModelAdjusted(a) => {
+                self.call(H::NoeResource, |_| Ok(Out::new()));
+                self.call(H::RsModelAdjusted, |e| e.rs_model_adjusted(&a));
+                self.call(H::NoeSystem, |_| Ok(Out::new()));
+                self.call(H::MonModelAdjusted, |e| e.mon_model_adjusted(&a));
+            }
         }
     }
 
@@ -962,15 +1035,15 @@ impl<'m> Engine<'m> {
                 let u = self.user_no(&c.user);
                 l.int("u", u);
                 l.str("type", uaction_type(&m.user_actions[*a].kind));
-                l.str("el", &m.user_actions[*a].id);
+                l.str("el", self.key(&m.user_actions[*a].id));
             }
             Ev::SPassed(c, a) => {
                 l.head("pass", self.now);
                 let u = self.user_no(&c.rpc.user);
                 l.int("u", u);
-                l.str("ac", &m.assembly_contexts[c.ac].id);
+                l.str("ac", self.key(&m.assembly_contexts[c.ac].id));
                 l.str("type", action_type(&m.actions[*a].kind));
-                l.str("el", &m.actions[*a].id);
+                l.str("el", self.key(&m.actions[*a].id));
             }
             Ev::EntryReq(r, _) | Ev::ReqFinished(r, _) => {
                 l.head(
@@ -984,10 +1057,10 @@ impl<'m> Engine<'m> {
                 let u = self.user_no(&r.user);
                 l.int("u", u);
                 if let Some(x) = r.role {
-                    l.str("role", &m.roles[x].id);
+                    l.str("role", self.key(&m.roles[x].id));
                 }
                 if let Some(x) = r.sig {
-                    l.str("sig", &m.signatures[x].id);
+                    l.str("sig", self.key(&m.signatures[x].id));
                 }
             }
             Ev::ExtCalled(g) | Ev::InfraCalled(g) => {
@@ -1001,28 +1074,28 @@ impl<'m> Engine<'m> {
                 );
                 let u = self.user_no(&g.from.rpc.user);
                 l.int("u", u);
-                l.str("ac", &m.assembly_contexts[g.from.ac].id);
+                l.str("ac", self.key(&m.assembly_contexts[g.from.ac].id));
                 if let Some(x) = g.role {
-                    l.str("role", &m.roles[x].id);
+                    l.str("role", self.key(&m.roles[x].id));
                 }
                 if let Some(x) = g.sig {
-                    l.str("sig", &m.signatures[x].id);
+                    l.str("sig", self.key(&m.signatures[x].id));
                 }
             }
             Ev::RdReq(r) => {
                 l.head("request", self.now);
                 let u = self.user_no(&r.ctx.rpc.user);
                 l.int("u", u);
-                l.str("ac", &m.assembly_contexts[r.ac].id);
+                l.str("ac", self.key(&m.assembly_contexts[r.ac].id));
                 l.str("kind", if r.active { "ACTIVE" } else { "PASSIVE" });
                 if let Some(d) = m.actions[r.action].resource_demands.get(r.demand) {
                     if let Some(t) = d.resource_type {
-                        l.str("res", &m.resource_types[t].id);
+                        l.str("res", self.key(&m.resource_types[t].id));
                     }
-                    l.str("action", &m.actions[r.action].id);
+                    l.str("action", self.key(&m.actions[r.action].id));
                 }
                 if let Some(p) = r.passive {
-                    l.str("passive", &m.passive_resources[p].id);
+                    l.str("passive", self.key(&m.passive_resources[p].id));
                 }
             }
             Ev::JobInit(j) => {
@@ -1038,14 +1111,14 @@ impl<'m> Engine<'m> {
                         let u = self.user_no(&req.ctx.rpc.user);
                         l.int("u", u);
                         if let Some(c) = container {
-                            l.str("rc", &m.containers[*c].id);
+                            l.str("rc", self.key(&m.containers[*c].id));
                         }
                         if let Some(t) = rtype {
-                            l.str("res", &m.resource_types[*t].id);
+                            l.str("res", self.key(&m.resource_types[*t].id));
                         }
                     }
                     JobKind::Link { link, .. } => {
-                        l.str("link", &m.linking_resources[*link].id);
+                        l.str("link", self.key(&m.linking_resources[*link].id));
                     }
                 }
                 l.num("d", j.demand.get());
@@ -1073,9 +1146,9 @@ impl<'m> Engine<'m> {
                 );
                 let u = self.user_no(&r.ctx.rpc.user);
                 l.int("u", u);
-                l.str("ac", &m.assembly_contexts[r.ac].id);
+                l.str("ac", self.key(&m.assembly_contexts[r.ac].id));
                 if let Some(p) = r.passive {
-                    l.str("passive", &m.passive_resources[p].id);
+                    l.str("passive", self.key(&m.passive_resources[p].id));
                 }
             }
             Ev::UserFinished(c) | Ev::UserAborted(c) => {
@@ -1100,6 +1173,18 @@ impl<'m> Engine<'m> {
                 l.s.push(',');
                 push_json_double(&mut l.s, *v);
                 l.s.push(']');
+            }
+            Ev::SpdTime(i) => {
+                l.head("spd_time", self.now);
+                l.str("tg", self.spd_tg(*i));
+            }
+            Ev::SpdReq(_, policy) => {
+                l.head("spd_request", self.now);
+                l.str("policy", policy);
+            }
+            Ev::ModelAdjusted(a) => {
+                l.head("spd_adjusted", self.now);
+                Self::project_adjusted(a, &mut l);
             }
             Ev::Finished => l.head("stop", self.now),
             _ => return,
@@ -1145,6 +1230,9 @@ fn is_projected(ev: &Ev) -> bool {
             | Ev::UserFinished(..)
             | Ev::UserAborted(..)
             | Ev::Meas(..)
+            | Ev::SpdTime(..)
+            | Ev::SpdReq(..)
+            | Ev::ModelAdjusted(..)
             | Ev::Finished
     )
 }
@@ -1209,7 +1297,27 @@ pub fn level_m(projection: &str) -> String {
 /// `cfg.seed` and `cfg.max_sim_time` (Slingshot's `simTime`, whole seconds, required); the
 /// mode, the maximum measurement count (Q32) and the linking-resource options (SS-ACT-7.2) are
 /// not read.
-pub fn run(cm: &CompiledModel, cfg: SimConfig, mut out: Outputs) -> Result<RunResult, SimError> {
+pub fn run(cm: &CompiledModel, cfg: SimConfig, out: Outputs) -> Result<RunResult, SimError> {
+    run_impl(cm, cfg, out, None)
+}
+
+/// [`run`] with an SPD layer (`DESIGN-SPD.md` X2d, [`spd`]): its time events, policy
+/// subscribers and adjustments run on Slingshot's bus.
+pub fn run_with_spd(
+    cm: &CompiledModel,
+    cfg: SimConfig,
+    out: Outputs,
+    hooks: &mut dyn SpdHooks,
+) -> Result<RunResult, SimError> {
+    run_impl(cm, cfg, out, Some(hooks))
+}
+
+fn run_impl(
+    cm: &CompiledModel,
+    cfg: SimConfig,
+    mut out: Outputs,
+    hooks: Option<&mut dyn SpdHooks>,
+) -> Result<RunResult, SimError> {
     if cm.flavour.kind != FlavourKind::SlingshotExact {
         return Err(SimError {
             message: format!(
@@ -1228,7 +1336,7 @@ pub fn run(cm: &CompiledModel, cfg: SimConfig, mut out: Outputs) -> Result<RunRe
         });
     }
     let mut e = Engine::new(cm, &cfg, &out)?;
-    let r = e.run(&cfg);
+    let r = e.run(&cfg, hooks);
     let write = |w: &mut Option<Box<dyn std::io::Write>>, s: Option<String>| {
         if let (Some(w), Some(s)) = (w.as_mut(), s) {
             let _ = w.write_all(s.as_bytes());

@@ -438,6 +438,9 @@ fn run(a: &Args) -> Result<(), String> {
         return report_end(a, r, t0);
     }
     let r = match spd {
+        Some(s) if a.flavour == simoxide_sim::FlavourKind::SlingshotExact => {
+            spd::run_exact(a, &cm, cfg, out, &s)?
+        }
         Some(s) => spd::run(a, &cm, cfg, out, &s, None)?,
         None if a.pause.is_some() || a.snapshot.is_some() || !a.pause_when.is_empty() => {
             snap::plain(a, &cm, Ok(cfg), out)?
@@ -549,11 +552,20 @@ mod spd {
         if a.no_spd {
             return Ok(None);
         }
+        let exact = a.flavour == simoxide_sim::FlavourKind::SlingshotExact;
         let q = match (&a.spd_quirks, q) {
             (Some(s), _) => Quirks::parse(s)?,
             (None, Some(q)) => q,
+            // the Slingshot-exact mode is Slingshot with every quirk
+            (None, None) if exact => Quirks::slingshot(),
             (None, None) => Quirks::fixed(),
         };
+        if exact && q != Quirks::slingshot() {
+            return Err(
+                "--flavour slingshot-exact runs the SPD with all quirks (--spd-quirks slingshot)"
+                    .into(),
+            );
+        }
         let s = spd_of(&cm.model, q).map_err(|e| e.to_string())?;
         if let Some(s) = &s
             && let Some(d) = s.dropped()
@@ -675,6 +687,45 @@ mod spd {
         Ok(End::Finished(res))
     }
 
+    /// The Slingshot-exact engine with the SPD layer (`DESIGN-SPD.md` X2d): Slingshot's
+    /// adjustment in QVTo's ordered mode with `reconfiguration`, decisions only without.
+    pub fn run_exact(
+        a: &Args,
+        cm: &CompiledModel,
+        cfg: SimConfig,
+        out: Outputs,
+        spd: &Spd,
+    ) -> Result<End, String> {
+        #[cfg(feature = "reconfiguration")]
+        let mut adj = super::changes::spd_adjuster(a, &spd.quirks())?;
+        #[cfg(not(feature = "reconfiguration"))]
+        let mut adj = NoAdjustment;
+        let file = a.spd_log.as_deref().map(create).transpose()?;
+        let sink: Box<dyn std::io::Write> = file.unwrap_or_else(|| Box::new(std::io::sink()));
+        let mut log = JsonlLog::new(sink);
+        log.all = a.spd_log_all;
+        let mut hooks = simoxide_spd::ssx::SsxSpd::new(spd, &cm.model, &mut adj, &mut log);
+        let r = simoxide_sim::ssx::run_with_spd(cm, cfg, out, &mut hooks);
+        let (ok, st) = (hooks.adjusted_ok, hooks.state.clone());
+        drop(hooks);
+        if a.spd_log.is_some() {
+            log.finish().map_err(|e| format!("--spd-log: {e}"))?;
+        }
+        let res = r.map_err(|e| e.to_string())?;
+        let executed = if cfg!(feature = "reconfiguration") {
+            format!("adjusted={ok}")
+        } else {
+            "(adjustments are not executed: they need the `reconfiguration` feature)".into()
+        };
+        eprintln!(
+            "spd: policies={} evaluations={} requests={} {executed}",
+            spd.contexts().len(),
+            st.evaluations,
+            st.requests
+        );
+        Ok(End::Finished(res))
+    }
+
     pub fn run(
         a: &Args,
         cm: &CompiledModel,
@@ -700,8 +751,8 @@ mod spd {
                 go::<simoxide_sim::Fast, Slingshot>(a, cm, cfg, out, spd, restore)
             }
             (_, FlavourKind::SlingshotExact) => Err(
-                "scaling policies in the Slingshot-exact engine need DESIGN-SPD.md X2d (use \
-                 --flavour slingshot, or --no-spd)"
+                "the Slingshot-exact engine runs scaling policies without pauses and resumes \
+                 (`run_exact`)"
                     .into(),
             ),
             #[cfg(not(feature = "exact"))]
@@ -737,6 +788,16 @@ mod spd {
         _: Outputs,
         s: &Never,
         _: Option<&Snapshot>,
+    ) -> Result<End, String> {
+        match *s {}
+    }
+
+    pub fn run_exact(
+        _: &Args,
+        _: &CompiledModel,
+        _: SimConfig,
+        _: Outputs,
+        s: &Never,
     ) -> Result<End, String> {
         match *s {}
     }

@@ -1114,8 +1114,8 @@ handlers, with Slingshot's side effects up to the throwing statement (SS-X-3.6).
   | of these, and of the probes, with handler errors | 22 | 21 (21): all but h27 |
   | runs that fail before t = 0 | 2 | 2 (2) |
   | Q37 cases (X2) | 2 | 2 (2) |
-  | SPD examples | 3 | 0: X2d |
-  | **total** | **90** | **86 (85)** |
+  | SPD examples | 3 | 3 (3) after X2d (0 before) |
+  | **total** | **90** | **89 (88)** after X2d (86 (85) before) |
 
   Remaining differences and their causes: h27 (`java.util.HashMap` iteration order of SimuCom's
   frames for two `INNER` keys, defined only by OpenJDK's sources; SS-X-9), h21 in the EPL build
@@ -1146,6 +1146,109 @@ handlers, with Slingshot's side effects up to the throwing statement (SS-X-3.6).
   `build_from_graph_after` keep them), so the engine's model reference becomes an `Arc` swapped
   between events, like `RunModel`. Corpus: the three SPD cases of `corpus-ss/` (1, 2 and 8
   adjustments), then `corpus-spd/` (P2).
+
+**X2d as built** (2026-10-17, branch `x2d`; spec `docs/spec/slingshot/spd.md`, evidence
+`docs/correctness/slingshot.md`):
+
+- **The hook trait** (`simoxide_sim::ssx::SpdHooks`, `ssx/spd.rs`; the engine knows no SPD
+  model): `start(model)` = `SpdBehavior.onPreSimulationConfigurationStarted` (the time events
+  with their delays and target-group ids, the policy subscribers in registration order, each
+  `Stimulus::Time` or `Measurement`); `on_time(subscriber, event, now)` and
+  `on_measurement(subscriber, SpdMeasurement, now)` (one call per subscriber, each returning at
+  most one `SpdRequest`); `adjust(request, &mut dyn ChangeHost)` (the adjustment on the engine's
+  model, returning `ModelAdjusted`'s objects). Entry point `ssx::run_with_spd(cm, cfg, out,
+  hooks)`; `ssx::run` is unchanged. Implemented by `simoxide_spd::ssx::SsxSpd` (interpreter state,
+  decision log, request table, a series → measuring-point cache over `point_of_key`) with an
+  `SsxAdjuster`; the interpreter gained only `Spd::subscribers`, `on_timer_of` and
+  `on_measurement_of` (one policy context; `on_timer`/`on_measurement` are unchanged).
+- **`ChangeHost`** (`simoxide_sim::ChangeHost`, new): what a model-transformation host needs
+  from a running model (time, base and current compiled model, generation, model graph,
+  `set_model_graph`, `apply_changes`, `fail_run`). Implemented by `Simulation` (forwarding) and
+  by the ssx engine. `simoxide-reconf`'s `QvtoRun` (`invoke`, `invoke_with`, `dry_run`,
+  `with_store`, ...) and `Edit::new`/`apply` are generic over it (callers unchanged);
+  `QvtoAdjuster::adjust_on` is the one adjustment for both, `Adjuster<C, F>` and
+  `SsxAdjuster` forward to it. So the adjustment is P2's unchanged: `MainTransformation` in
+  QVTo's ordered mode, seeded ids, `SlingshotHooks` (`Before`, `ModelAdjusted::compute`,
+  summaries, membership), the monitor clones as a second change set.
+- **Bus ordering** (what ssx emulates): `SimulationTimeReached` queued as `PreSim`'s results
+  (before any other set-up result, SS-SPD-1.2; a negative delay throws in `SpdBehavior`, which
+  is disposed); the policy subscribers after every behaviour on `SimulationTimeReached` and
+  `MeasurementMade`, each with its own disposed bit; `ModelAdjustmentRequested` at delay 0 runs
+  `SpdAdjustmentBehavior` (disposal bit `H::SpdAdjust`; an adjuster error ends the run); its
+  result `ModelAdjusted` has the four subscribers of SS-SPD-5.1 (`H::NoeResource`,
+  `H::RsModelAdjusted`, `H::NoeSystem`, `H::MonModelAdjusted`). Projection lines `spd_time`
+  (`tg`), `spd_request` (`policy`), `spd_adjusted` (`ok`, `changes`, and with a resource-
+  environment change `new`/`deleted` container names), counted for the tape positions.
+- **The model change inside the handler.** `ChangeHost::apply_changes` of the engine runs F2's
+  `change::recompile` (stable typed ids, resources and programs appended; the Slingshot
+  flavour's change options) and swaps the engine's `cm`/`m` at once, so the second change set
+  (monitor clones) and the next event see the changed model. Every compiled model of the run
+  is kept (`OwnModels::models`, an `Arc` each) until the engine is dropped: a reference copied
+  before the swap stays valid (the only `unsafe`, documented). Read live from the new model
+  (SS-SPD-5.2): system, connectors, SEFFs, load-balancer branches, the first-match allocation
+  (recomputed at the change), link connections. Kept from the start: the linking-resource table
+  (`LinkingResourceTable` is never updated). Changed at `ModelAdjusted`: the active-resource
+  table (`res_live`: new containers' resources join with fresh schedulers, deleted containers'
+  resources leave it, so their pending completion becomes `JobAborted` and the other jobs are
+  lost: Q5), passive resources of the new allocation contexts (capacities drawn in order), and
+  the cloned monitors' calculators (`Monitors::add`, the start's code made incremental).
+  `NumberOfElementsMonitorBehavior` has no probe in this engine (no corpus model has an
+  elastic-infrastructure measuring point; such a monitor would be ignored).
+- **Aliases.** After each change the engine maps the ids of elements not in the input model
+  to the reference runner's `Keys.alias` (`~EClass:entityName`, else the container's key plus
+  `/feature.index`); projection ids and the measuring-point keys of monitors created during
+  the run use them. Series are kept per measuring point (raw ids): two created elements with
+  equal aliases (`spd_time_policies` creates `AppServer_1` twice) are two series with the same
+  key, written one after the other as the reference's EDP2 measurements (the first diff found).
+- **Simplifications** (no corpus case can observe them): the cloned monitors' calculators are
+  registered at `MonitorRepositoryInterpreterBehavior.onModelAdjusted` instead of a few
+  same-instant generations later (a request reaching a new container's resource within the
+  adjustment's instant would be measured one sample earlier); policy subscribers never throw
+  (the interpreter turns filter exceptions into disregards, SS-SPD-1.4), so their disposed bits
+  are never set in practice.
+- **Result.** `corpus-ss/` **89 of 90** in the test build (88 in the EPL build: h21's `Math.exp`),
+  the three SPD cases byte-equal in projection, tape and measurements on the first run after the
+  series fix; their decision logs equal the reference's `spd.jsonl` with models
+  (`project_with_models`); `corpus-spd/` 4 of 4 (with `spd_service_group`) at level E. Remaining:
+  h27 (licence-bound). Tests: `slingshot_exact.rs` (KNOWN = h27 only;
+  `spd_decision_logs_match_the_reference`, `corpus_spd_is_byte_equal_at_level_e`; `SSX_DUMP=DIR`
+  writes the outputs). The test pulls `simoxide-spd` and `simoxide-reconf` in as
+  dev-dependencies (a dev-dependency cycle; integration tests only).
+- **Gates** (after merging `spd` 6ee7e47 with M8). `slingshot_exact` 89 of 90 (KNOWN: h27),
+  plus the two new SPD tests; the CLI's EPL build (`--features reconfiguration`, no `exact`, no
+  `hotspot-math`) on all of `corpus-ss/` with the `.spd`: the 3 SPD cases equal, 88 of 90 in all
+  (h21, h27); `golden.sh` identical (312 runs, `cargo build-exact`); `cargo test --release
+  --workspace --features exact` 601 passed, 0 failed, 39 ignored (599 + 2); EMF goldens 165/165;
+  `simoxide-fuzz corpus` 132/132, corpus-fuzz 6/6; `test-fdn` 93; `test-qvto` 90; `conform`
+  compat 589/589, fast 584, ordered 583 (unchanged), sema oracle unchanged; fmt and clippy
+  `-D warnings` (default, `exact,hotspot-math`, `compat`; `simoxide-cli` with `reconfiguration`
+  and `exact,reconfiguration`); release check 0 opt-in crates (`simoxide-cli`, `qvto-cli`).
+  Speed (sanity only): `x_ss_mediastore` 200 000 s in 0.93 ms per run (X2e: 0.83 ms, other load),
+  `spd_scale_in` through the CLI with both adjustments 14 ms wall including the QVTo set-up.
+  Found and left alone: `simoxide-cli`'s `resume_with_a_change_file` fails with only
+  `--features reconfiguration` (fast mode) on `spd` 6ee7e47 too ("assembly context
+  MediaManagement is not allocated"); the gate builds do not run it.
+- **Shared files touched**: `simoxide-sim` (`change.rs`: `ChangeHost`; `lib.rs`;
+  `sim/runmodel.rs`: its `Simulation` impl; `ssx/mod.rs`, `ssx/monitor.rs`, `ssx/resource.rs`,
+  new `ssx/spd.rs`; `Cargo.toml` dev-dependencies; `tests/slingshot_exact.rs`); `simoxide-spd`
+  (`interp.rs`: three methods; new `ssx.rs`); `simoxide-reconf` (`host.rs`, `lib.rs`: generic
+  over `ChangeHost`; `adjust.rs`: `adjust_on`, `SsxAdjuster`); `simoxide-cli` (`main.rs`:
+  `--flavour slingshot-exact` with a `.spd` runs `spd::run_exact`, all SPD quirks, `--spd-log`;
+  the adjustments with `reconfiguration`, decisions only without; `compare_exact.sh` still
+  passes `--no-spd`, unchanged because M8 owns the runner scripts).
+- **What ssx pause and snapshots need (next).** The engine is built and consumed inside
+  `run_impl`; a pausable run needs an owned `SsxRun` (engine plus the event list) with
+  `run_until`/`finish`, the hooks passed per call. A snapshot must serialise the event list
+  with Slingshot's entities: they are `Rc` graphs shared between events (users with their
+  SimuCom stacks of shared mutable frames, interpretation contexts, behaviour holders with their
+  iterators, requests, jobs), so it needs an id-per-object writer that keeps the sharing; plus
+  the schedulers (serde in `simoxide-sched`), both random streams with their positions, the
+  projection's numbering maps and line count, the monitors' open start-stop calculators and key
+  maps, the disposed bits (handlers and policy subscribers), passives and `res_live`, the
+  linking-resource table; with SPD the hooks' state (`SpdState` and the request table, serde
+  already) and the run's own model (the last `Arc`, its build order, the generation, the graph
+  override with the QVTo state: P2's `qvto` section); aliases and input ids are recomputable. A
+  fork needs a deep copy of the `Rc` graph (not `Send`), so detached runs too.
 
 ### 5.3 The runtime-model-change foundation (shared)
 
@@ -2770,7 +2873,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **S1** | *Done 2026-10-17.* Slingshot semantics spec `docs/spec/slingshot/` (10 pages, rules `SS-*`, quirks Q17–Q37 added to Q1–Q16): event core and bus, usage, SEFF, resources, monitoring, random streams, SPD, quirks, exact comparison (projection, tape mapping); 20 probe models with `det` outputs (`models/probes/`, `probes.sh`); draw sites on the tape; `det` verified on 88 models (`verify-det.sh`, `results/det-verify.csv`) | S0 helps | 1.5-2 w | met: every difference has a rule with a source citation; 20 probes and the corpus runs demonstrate them (§2.1) |
 | **S2** | *Done 2026-10-17* (findings: 5.2 "S2 as built"). Slingshot flavour, fast mode: `Flavour` trait, hooks of 5.2, Slingshot monitors and windows, stop, branch stream, quirk compat flags (U5) | F1, S1 | 4-6 w (a: trait and SimuLizar impl, golden unchanged; b: usage, stop, RNG; c: resources; d: monitoring) | met as sharpened in 5.2 "S2 as built": `x_ss_*` byte-identical to `det` (exact RNG, compat flags; 5 models x 3 seeds), also 16/20 probes and 38/45 corpus models; `x_ss_mediastore` statistically equal to stock (30 seeds, 0/26 tests rejected, both RNG modes); `x_espresso` equal on every order-independent series, its event-sampled state series is order-dependent (Slingshot's own `det` order fails the same test) and left to X2 |
 | **X1** | *Done 2026-10-17* (findings: 4.1 "X1 as built"). Slingshot-exact oracle hardening. Done in S1: trace projection (`tools/project.py`), draw sites on the tape (agent hooks, no patch), `det` verification on probes and corpus. Remaining: corpus `corpus-ss/` with `det` reference outputs (probes, SPD examples, the 38 corpus models without failures, chosen failure models), a static audit that no class subscribes twice to one event type without disjoint reification, SPD corpus runs in `det` (P2 models) | S0, S1 | 0.5-1 w | met: all 88 `corpus-ss/` cases byte-reproducible in fresh JVMs; projection documented (SS-X-2, SS-X-8); audit clean |
-| **X2** | *a-c and e done 2026-10-17, d open* (findings: 5.2 "X2 as built"; d needs P2 and F4's Slingshot syncers). Slingshot-exact mode, **level E directly** (U14): the per-handler cascade as a FIFO queue of handler steps (insertion-ordered results, FIFO after queued events, direct `MeasurementMade`), double time, PS stale-event samples and zero-demand jiffy, `java.util.Random` branch stream, `SimulationFinished` order, all 37 quirk flags on, **handler disposal** (Q18: a disposed bit per handler, Slingshot's partial side effects up to each throw: Q17, Q19, Q21-Q24, Q30, Q31, Q37), level-E projection writer | S2, X1 | 7-10 w (a: handler-step queue, event order and time, 2-3 w; b: resources and monitoring, 1.5-2 w; c: handler disposal and the throwing quirks, 1.5-2.5 w; d: SPD events, 1 w; e: level-E projection and corpus debugging, 1-1.5 w) | V3x: level-E projection, tape (with positions) and measurements byte-equal with `det` on the Slingshot corpus, including the 22 models with handler errors. *Status:* 86 of 90 `corpus-ss/` cases (85 in the EPL build), 21 of the 22 handler-error cases; h27 (`HashMap` order) and h21 in the EPL build are licence-bound, the 3 SPD cases wait for X2d |
+| **X2** | *done 2026-10-17* (findings: 5.2 "X2 as built", "X2d as built"). Slingshot-exact mode, **level E directly** (U14): the per-handler cascade as a FIFO queue of handler steps (insertion-ordered results, FIFO after queued events, direct `MeasurementMade`), double time, PS stale-event samples and zero-demand jiffy, `java.util.Random` branch stream, `SimulationFinished` order, all 37 quirk flags on, **handler disposal** (Q18: a disposed bit per handler, Slingshot's partial side effects up to each throw: Q17, Q19, Q21-Q24, Q30, Q31, Q37), level-E projection writer | S2, X1 | 7-10 w (a: handler-step queue, event order and time, 2-3 w; b: resources and monitoring, 1.5-2 w; c: handler disposal and the throwing quirks, 1.5-2.5 w; d: SPD events, 1 w; e: level-E projection and corpus debugging, 1-1.5 w) | V3x: level-E projection, tape (with positions) and measurements byte-equal with `det` on the Slingshot corpus, including the 22 models with handler errors. *Status:* 89 of 90 `corpus-ss/` cases (88 in the EPL build), 21 of the 22 handler-error cases, the 3 SPD cases (and `corpus-spd/` 4 of 4) with their decision logs; h27 (`HashMap` order) and h21 in the EPL build are licence-bound |
 | **Q2** | *Done 2026-10-17* (findings: 5.5 "Q2 as built"). qvto-rs insertion-order policy for `Set`s (the `det` oracle's QVTo/OCL rule), opt-in for the Slingshot-exact mode: `Mode::Ordered` (EPL) | Q1 | 3-5 d | met: SPD corpus adjustments equal the `det` Java runner's byte for byte, including container and link order (Q16); also the whole suite (589/589) and the 13 adjustments of the S0 Slingshot `det` runs |
 | **P1** | *Done 2026-10-17* (findings: 5.4 "P1 as built"). SPD interpreter: model view, filters, aggregators, state, stimulus observers, time events | F0 (F1 for state) | 1.5-2 w | met: V1 unit tests; decision log equals the reference runner's on the time-triggered models (5 SPD models, 83 records, compat flags on) |
 | **P2** | *Done 2026-10-17* (findings: 5.4 "P2 as built"; the F4-dependent part finished after F4). SPD adjustment via `MainTransformation`; `ModelAdjusted` diff; corpus `corpus-spd/` with reference outputs | P1, F3, F4 | 2 w | met: minimal example and `spd_time_policies`, `spd_service_group`, `spd_scale_in`, `spd_same_instant`: same scale times, container and assembly names, models as Slingshot's (V3, model summaries of every adjustment equal), in both flavours |
