@@ -2,7 +2,7 @@
 //! driver's checks and against the Java runner, and summarises by driver, kind and feature.
 
 use crate::case::Case;
-use crate::compare::{CheckResult, Differential, check_outcome, differential};
+use crate::compare::{CheckResult, Differential, check_outcome, differential_with};
 use crate::engine::{CaseEnv, Engine, Status};
 use crate::fixture::JavaResult;
 use qvto_emf::config::Config;
@@ -78,6 +78,19 @@ pub fn run_cases(
     java: &BTreeMap<String, JavaResult>,
     select: &dyn Fn(&Case) -> bool,
 ) -> Vec<CaseReport> {
+    run_cases_with(engine, cases, base, models, java, select, false)
+}
+
+/// [`run_cases`]; `compare_unstable`: see [`crate::compare::differential_with`].
+pub fn run_cases_with(
+    engine: &mut dyn Engine,
+    cases: &[Case],
+    base: &Path,
+    models: &Config,
+    java: &BTreeMap<String, JavaResult>,
+    select: &dyn Fn(&Case) -> bool,
+    compare_unstable: bool,
+) -> Vec<CaseReport> {
     let mut out = Vec::new();
     for case in cases.iter().filter(|c| select(c)) {
         let mut rep = CaseReport {
@@ -150,7 +163,7 @@ pub fn run_cases(
             Status::Completed => {
                 rep.checks = check_outcome(&env, &outcome);
                 let failed = rep.checks.iter().find(|c| !c.pass);
-                let diff = jr.map(|j| differential(case, &outcome, j));
+                let diff = jr.map(|j| differential_with(case, &outcome, j, compare_unstable));
                 rep.verdict = match (failed, &diff) {
                     _ if java_fails => match &diff {
                         Some(d) if d.equal() => Verdict::JavaFailsEqual,

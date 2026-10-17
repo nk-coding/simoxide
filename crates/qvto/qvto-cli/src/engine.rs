@@ -524,8 +524,23 @@ fn execute(
         // creates: the hashes the Java run assigned to the other objects of the tape, in the
         // order the thread drew them (both runs ask for the hashes in program order)
         let keys = object_keys(&rs);
+        if std::env::var_os("QVTO_TAPE_DEBUG").is_some() {
+            PRE_KEYS.with(|p| {
+                *p.borrow_mut() = keys
+                    .iter()
+                    .filter(|(k, _)| !k.starts_with("mm:"))
+                    .map(|(k, o)| (*o, k.clone()))
+                    .collect()
+            });
+        }
         let mut by_obj: HashMap<u32, i32> = HashMap::new();
         let mut others: Vec<i32> = Vec::new();
+        // the input objects by their keys before the run
+        for (k, h, _) in &t.pre {
+            if let Some(&o) = keys.get(k) {
+                by_obj.insert(o, *h);
+            }
+        }
         for (k, h, assigned) in &t.objects {
             match keys.get(k) {
                 Some(&o) => {
@@ -538,7 +553,7 @@ fn execute(
                 }
             }
         }
-        let idx = qvto_testkit::idhash::sequence_index(t.seed, &others, 20_000)
+        let idx = qvto_testkit::idhash::sequence_index(t.seed, &others, SEQUENCE_SEARCH)
             .unwrap_or_else(|| vec![None; others.len()]);
         let mut ordered: Vec<(usize, i32)> = others
             .iter()
@@ -554,19 +569,43 @@ fn execute(
             x.next();
             x.next();
         }
-        if std::env::var("QVTO_TAPE_DEBUG").is_ok() {
-            let mut ks: Vec<_> = keys.iter().filter(|(k, _)| k.starts_with("mm:")).collect();
-            ks.sort();
-            for (k, o) in ks.iter().take(400) {
-                eprintln!("key {k} -> {o} {:?}", by_obj.get(o));
-            }
+        if let Some(f) = std::env::var_os("QVTO_TAPE_DEBUG") {
+            // the Java run's draws in the thread's order (tape objects only)
+            let all: Vec<(String, i32)> = t
+                .pre
+                .iter()
+                .chain(&t.objects)
+                .filter(|e| e.2 != Some(false))
+                .map(|e| (e.0.clone(), e.1))
+                .collect();
+            let hs: Vec<i32> = all.iter().map(|e| e.1).collect();
+            let pos = qvto_testkit::idhash::sequence_index(t.seed, &hs, SEQUENCE_SEARCH)
+                .unwrap_or_else(|| vec![None; hs.len()]);
+            let mut j: Vec<(usize, &String, i32)> = all
+                .iter()
+                .zip(pos)
+                .map(|((k, h), p)| (p.unwrap_or(usize::MAX), k, *h))
+                .collect();
+            j.sort();
+            let text: String = j
+                .iter()
+                .map(|(p, k, h)| format!("java\t{p}\t{k}\t{h}\n"))
+                .collect();
+            let _ = std::fs::write(&f, text);
         }
-        let lookup = Box::new(move |k: IdentityKey| match k {
-            IdentityKey::Obj(r) if !r.is_local() && r.index() < first_created => {
-                by_obj.get(&r.index()).copied()
+        let debug = std::env::var_os("QVTO_TAPE_DEBUG").is_some();
+        let lookup = Box::new(move |k: IdentityKey| {
+            let (src, h) = match k {
+                IdentityKey::Obj(r) if !r.is_local() && r.index() < first_created => {
+                    ("input", by_obj.get(&r.index()).copied())
+                }
+                IdentityKey::Obj(_) => ("created", queue.pop_front()),
+                _ => ("other", None),
+            };
+            if debug {
+                TAPE_DRAWS.with(|d| d.borrow_mut().push((k, src, h)));
             }
-            IdentityKey::Obj(_) => queue.pop_front(),
-            _ => None,
+            h
         });
         let fb: Box<dyn IdentityHashSource> = match fallback {
             Some(x) => Box::new(Recovered(x)),
@@ -589,6 +628,7 @@ fn execute(
         line_numbers: !case.no_line_numbers,
         // the case runs on a thread with a 512 MB stack: Eclipse's depth limit applies first
         max_native_stack: Some(256 << 20),
+        coverage: std::env::var_os("QVTO_COVERAGE").is_some(),
         ..qvto::RunOptions::default()
     };
     let t1 = Instant::now();
@@ -599,6 +639,9 @@ fn execute(
             vm.set_incremental_trace(t);
         }
         let out = vm.run_transformation(args);
+        if let Some(dir) = std::env::var_os("QVTO_COVERAGE") {
+            write_coverage(Path::new(&dir), &case.id, &vm.coverage());
+        }
         (out, std::mem::take(&mut vm.log))
     };
     let mut o = Outcome::with_status(Status::Completed);
@@ -613,6 +656,30 @@ fn execute(
     }
     o.trace_records = Some(out.trace_records);
     let outputs = outputs(rs, &out, case.dump_models);
+    #[cfg(feature = "compat")]
+    if let Some(f) = std::env::var_os("QVTO_TAPE_DEBUG") {
+        // this run's draws in its order, keyed like the tape (after the run)
+        let mut keys: HashMap<u32, String> = object_keys(&outputs.rs)
+            .into_iter()
+            .map(|(k, o)| (o, k))
+            .collect();
+        // input objects by their keys before the run (as the tape's `pre` lines)
+        PRE_KEYS.with(|p| keys.extend(p.borrow_mut().drain()));
+        let mut text = std::fs::read_to_string(&f).unwrap_or_default();
+        TAPE_DRAWS.with(|d| {
+            for (k, src, h) in d.borrow_mut().drain(..) {
+                let key = match k {
+                    IdentityKey::Obj(r) if !r.is_local() => keys
+                        .get(&r.index())
+                        .cloned()
+                        .unwrap_or_else(|| format!("#obj{}", r.index())),
+                    other => format!("{other:?}"),
+                };
+                text.push_str(&format!("rust\t{src}\t{key}\t{h:?}\n"));
+            }
+        });
+        let _ = std::fs::write(&f, text);
+    }
     if std::env::var_os("QVTO_SHOW").is_some() {
         eprintln!(
             "-- dump\n{}",
@@ -621,6 +688,40 @@ fn execute(
     }
     o.outputs = Some(outputs);
     Ok(o)
+}
+
+/// `QVTO_COVERAGE=DIR`: the operations a case's run entered, `DIR/<case>.tsv` (kind, key as
+/// [`qvto::CoveredOp::key`], entries, entries whose guard failed).
+fn write_coverage(dir: &Path, case: &str, ops: &[qvto::CoveredOp]) {
+    let mut s = String::from("kind\toperation\tentries\trejected\n");
+    for o in ops {
+        s.push_str(&format!(
+            "{:?}\t{}\t{}\t{}\n",
+            o.kind,
+            o.key(),
+            o.entries,
+            o.rejected
+        ));
+    }
+    let _ = std::fs::create_dir_all(dir);
+    if let Err(e) = std::fs::write(dir.join(format!("{case}.tsv")), s) {
+        eprintln!("QVTO_COVERAGE: {e}");
+    }
+}
+
+/// How far into the Java thread's identity-hash sequence the tape's hashes are looked for: the
+/// compilation draws thousands before the run (the SPD transformations about 10 000, then the
+/// run's own), and the search stops when all are found.
+#[cfg(feature = "compat")]
+const SEQUENCE_SEARCH: usize = 2_000_000;
+
+#[cfg(feature = "compat")]
+thread_local! {
+    /// `QVTO_TAPE_DEBUG=FILE`: the identity-hash draws of the run (key, source, tape value).
+    static TAPE_DRAWS: std::cell::RefCell<Vec<(IdentityKey, &'static str, Option<i32>)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
+    static PRE_KEYS: std::cell::RefCell<HashMap<u32, String>> =
+        std::cell::RefCell::new(HashMap::new());
 }
 
 /// The Java thread's identity-hash sequence, continued after the tape's seed.

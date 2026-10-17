@@ -43,6 +43,10 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
  * metamodels these objects are instances of. Objects that the run created but that end up in no
  * output extent (intermediate data, discarded objects, Status, exceptions, tuples) are not on the
  * tape.
+ *
+ * <p>The objects of the input resources come first, as {@code pre} lines keyed by their path
+ * before the run ({@link #pre}): a run that reorders an inout model moves them, and the engine
+ * replaying the tape knows only where they were. The {@code obj} lines are the other objects.
  */
 final class Tape {
 	private Tape() {}
@@ -76,6 +80,54 @@ final class Tape {
 		return new int[] { System.identityHashCode(new Object()), System.identityHashCode(new Object()) };
 	}
 
+	/** The objects of the input resources and their keys before the run (no identity hash is requested). */
+	static final class Pre {
+		final List<EObject> objs = new ArrayList<>();
+		final List<String> keys = new ArrayList<>();
+	}
+
+	static Pre pre(List<Resource> inputs) {
+		Pre p = new Pre();
+		for (Resource r : inputs) {
+			String l = label(r);
+			for (EObject root : r.getContents()) {
+				p.objs.add(root);
+				p.keys.add(l + "#" + path(root));
+				for (TreeIterator<EObject> it = root.eAllContents(); it.hasNext();) {
+					EObject o = it.next();
+					p.objs.add(o);
+					p.keys.add(l + "#" + path(o));
+				}
+			}
+		}
+		return p;
+	}
+
+	/** CanonDump.label, without reflection (no identity hash may be requested before the run). */
+	private static String label(Resource r) {
+		org.eclipse.emf.common.util.URI u = r.getURI();
+		if (u.isFile() && u.lastSegment() != null) return org.eclipse.emf.common.util.URI.decode(u.lastSegment());
+		return u.toString();
+	}
+
+	/** CanonDump.path, likewise. */
+	private static String path(EObject o) {
+		List<String> segs = new ArrayList<>();
+		EObject cur = o;
+		while (cur.eContainer() != null && ((org.eclipse.emf.ecore.InternalEObject) cur).eDirectResource() == null) {
+			org.eclipse.emf.ecore.EReference f = cur.eContainmentFeature();
+			EObject p = cur.eContainer();
+			if (f.isMany()) segs.add("@" + f.getName() + "." + ((List<?>) p.eGet(f, false)).indexOf(cur));
+			else segs.add("@" + f.getName());
+			cur = p;
+		}
+		Resource r = ((org.eclipse.emf.ecore.InternalEObject) cur).eDirectResource();
+		StringBuilder sb = new StringBuilder("/");
+		sb.append(r == null ? "" : String.valueOf(r.getContents().indexOf(cur)));
+		for (int i = segs.size() - 1; i >= 0; i--) sb.append('/').append(segs.get(i));
+		return sb.toString();
+	}
+
 	/** Objects of a run and whether their identity hash was assigned, read right after the run. */
 	static final class Snapshot {
 		final List<EObject> objs = new ArrayList<>();
@@ -84,10 +136,32 @@ final class Tape {
 
 		final Map<Object, Boolean> index = new IdentityHashMap<>();
 		int firstMeta;
+		/** The first {@code nPre} objects are those of {@link Pre}, with these keys. */
+		int nPre;
+		List<String> preKeys = List.of();
 	}
 
-	static Snapshot snapshot(List<Resource> inputs, List<? extends List<EObject>> outputs) {
+	static Snapshot snapshot(Pre pre, List<Resource> inputs, List<? extends List<EObject>> outputs) {
 		Snapshot s = new Snapshot();
+		if (pre != null) {
+			// in the order of the walk before the run (which the snapshot's walk repeats when the
+			// run moves nothing); mark words read before any hash is requested here
+			for (EObject o : pre.objs) {
+				s.objs.add(o);
+				s.assigned.add(assigned(o));
+			}
+			for (EObject o : pre.objs) s.index.put(o, Boolean.TRUE);
+			s.nPre = pre.objs.size();
+			s.preKeys = pre.keys;
+			for (EObject o : pre.objs) {
+				EPackage p = o.eClass().getEPackage();
+				if (p != null) {
+					boolean known = false;
+					for (EPackage q : s.packages) known |= q == p;
+					if (!known) s.packages.add(p);
+				}
+			}
+		}
 		List<EObject> roots = new ArrayList<>();
 		for (Resource r : inputs) roots.addAll(r.getContents());
 		for (List<EObject> l : outputs) roots.addAll(l);
@@ -127,6 +201,10 @@ final class Tape {
 		for (int i = 0; i < s.objs.size(); i++) {
 			EObject o = s.objs.get(i);
 			String key;
+			if (i < s.nPre) {
+				sb.append("pre\t").append(s.preKeys.get(i)).append('\t').append(System.identityHashCode(o)).append('\t').append(s.assigned.get(i)).append('\n');
+				continue;
+			}
 			if (i >= s.firstMeta) {
 				EPackage p = packageOf(o);
 				String frag = o.eResource() != null ? o.eResource().getURIFragment(o) : EcoreUtil.getURI(o).fragment();

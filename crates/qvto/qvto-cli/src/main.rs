@@ -35,13 +35,15 @@ usage:
       compat and fast mode, with --java against the warm reference runner (one JVM), with
       --java-cold a fresh JVM per workload. Run it pinned: taskset -c 2,3 qvto bench --java.
   qvto conform [--suite eclipse|corpus|fuzz|spd|all] [--cases FILE] [--fixture FILE]
-               [--engine qvto|qvto-fast|qvto-ordered|stub|replay:DIR] [--det] [--only ID,...]
-               [--prefix P]... [--report FILE.md] [--tsv FILE] [--verbose]
+               [--engine qvto|qvto-fast|qvto-ordered|stub|replay:DIR] [--det] [--compare-unstable]
+               [--only ID,...] [--prefix P]... [--report FILE.md] [--tsv FILE] [--verbose]
       Runs the engine on the cases and prints the scoreboard: per case the Eclipse
       driver's checks and the strict comparison with the Java runner's fixture.
       `qvto` (the default) is compat mode and needs a build with `--features compat`;
       `qvto-fast` and `qvto-ordered` run in every build. `--det` (implied by
       `qvto-ordered`) compares with the det runner's fixtures (fixtures/java-<suite>-det.txt).
+      `--compare-unstable` also compares what varies between Java runs (the engine replays
+      the recorded run's identity hashes).
   qvto conform record [--suite eclipse|corpus|fuzz|spd|all] [--det] [--only ID,...] [--prefix P]...
                       [--runs N]
       Runs the Java reference runner N times (default 5, one JVM per run), marks
@@ -129,6 +131,8 @@ struct Opts {
     runs: usize,
     /// The `det` Java runner's fixtures and caches (implied by `--engine qvto-ordered`).
     det: bool,
+    /// Compare the aspects a fixture marks unstable too.
+    compare_unstable: bool,
 }
 
 impl Opts {
@@ -169,6 +173,7 @@ fn parse(args: &[String]) -> Opts {
             "--verbose" | "-v" => o.verbose = true,
             "--save-xmi" => o.save_xmi = true,
             "--det" => o.det = true,
+            "--compare-unstable" => o.compare_unstable = true,
             "--runs" => {
                 o.runs = val(&mut i)
                     .parse()
@@ -355,13 +360,14 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
             (o.only.is_empty() || o.only.contains(&c.id))
                 && (o.prefixes.is_empty() || o.prefixes.iter().any(|p| c.id.starts_with(p)))
         };
-        all.extend(report::run_cases(
+        all.extend(report::run_cases_with(
             engine.as_mut(),
             &cases,
             root,
             &models,
             &java,
             &select,
+            o.compare_unstable,
         ));
     }
     let md = report::markdown(&engine_name, &all, o.verbose);
