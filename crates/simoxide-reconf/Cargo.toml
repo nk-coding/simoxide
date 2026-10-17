@@ -11,8 +11,8 @@ publish = false
 simoxide-model = { workspace = true }
 simoxide-sim = { workspace = true }
 simoxide-spd = { workspace = true, optional = true, features = ["sim"] }
-qvto-simoxide.workspace = true
 qvto-model.workspace = true
+qvto-emf.workspace = true
 qvto.workspace = true
 qvto-vm.workspace = true
 qvto-runtime.workspace = true
@@ -26,10 +26,9 @@ simoxide-sim = { workspace = true, features = ["fast", "exact", "snapshot"] }
 simoxide-reconf = { path = ".", features = ["snapshot"] }
 serde_json = "1"
 # the corpus test compares with the Java runner's results: compat mode and identity-hash tapes
-qvto-simoxide = { workspace = true, features = ["compat"] }
+qvto = { workspace = true, features = ["compat"] }
 qvto-testkit = { workspace = true, features = ["compat"] }
 qvto-runtime = { workspace = true, features = ["compat"] }
-qvto-emf.workspace = true
 qvto-paths.workspace = true
 # the reference's expected outputs (gzip'ed traces)
 simoxide-testkit = { path = "../simoxide-testkit" }
@@ -38,7 +37,7 @@ simoxide-testkit = { path = "../simoxide-testkit" }
 default = ["spd"]
 # QVTo's compat mode (Eclipse's Java `HashMap` orders) for the transformations. No licence covers
 # builds with it (LICENSES, section 7).
-compat = ["qvto-simoxide/compat"]
+compat = ["qvto/compat", "qvto-vm/compat", "qvto-runtime/compat"]
 # The exact modes: SimuLizar-exact in simoxide-sim, and QVTo's compat mode for the
 # transformations (Java orders of unordered features). No licence covers builds with it
 # (LICENSES, section 7).

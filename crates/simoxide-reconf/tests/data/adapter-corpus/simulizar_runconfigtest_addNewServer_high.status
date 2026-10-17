@@ -1,0 +1,18 @@
+0 0
+Transformation execution completed
+--log--
+SimuLizar addServer Rule Transformation started
+addNewServer: Iterating over the allocation contexts
+addNewServer: Examining AssemblyContext: Server_1
+addNewServer: Examining AssemblyContext: Client
+addNewServer: Found AssemblyContext: Client
+addNewServer: Found the Client's required role: Required_process_client2
+addNewServer: Found repository component for Server2: server2
+addNewServer: Created AssemblyContext for Server2
+addNewServer: Found the Server2's provided role: Provided_process_server_2
+addNewServer: requiringAssemblyContext
+addNewServer: requiredRole
+addNewServer: providingAssemblyContext
+addNewServer: providedRole
+addNewServer: Connecting the newly created AssemblyContext for Server2
+Start of assemblyConnector creation

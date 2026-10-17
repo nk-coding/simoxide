@@ -3,10 +3,11 @@
 //! `QvtoAdjuster`) and runs with SimuLizar's reconfiguration rules ([`RulesRun::snapshot_to`],
 //! section `rules`).
 //!
-//! The QVTo state is not written as it is: the run's model graph is the simulation's (written as
-//! XMI by the engine's snapshot), the session's models of other metamodels are rebuilt by their
-//! owners (the PRM mirror of the rules host, with the same objects in the same order), and the
-//! id generator continues where it was (`qvt::SessionState`). The transformations, rule sets and
+//! The QVTo state is not written as it is: it lives in the run's model graph, whose objects of
+//! SimOxide's metamodels the engine's snapshot writes (XMI, placeholders for the others); the
+//! core's metamodel objects are attached again, the models of other metamodels are rebuilt by
+//! their owners (the PRM mirror of the rules host, with the same objects in the same order), and
+//! the id generator continues where it was (`qvt::SessionState`). The transformations, rule sets and
 //! the QVTo core are not part of a snapshot either: the caller passes them again, like the
 //! compiled model.
 
@@ -25,7 +26,7 @@ pub const QVTO: &str = "qvto";
 pub const RULES: &str = "rules";
 
 /// A run's QVTo state as a snapshot keeps it ([`QvtoRun::save_state`]).
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct QvtoState {
     /// The per-run state existed (a transformation ran or a model was created).
     started: bool,
@@ -42,14 +43,11 @@ impl QvtoRun {
                 invocations: 0,
                 session: None,
             },
-            Some(st) => {
-                let session = crate::host::lock_session(st).save();
-                QvtoState {
-                    started: true,
-                    invocations: st.invocations,
-                    session: Some(session),
-                }
-            }
+            Some(st) => QvtoState {
+                started: true,
+                invocations: st.invocations,
+                session: self.session_state(),
+            },
         }
     }
 
@@ -60,15 +58,12 @@ impl QvtoRun {
         &mut self,
         sim: &Simulation<'_, C, F>,
         s: &QvtoState,
-    ) {
+    ) -> Result<(), ReconfError> {
         if !s.started {
-            return;
+            return Ok(());
         }
-        let st = self.prepare(sim);
-        st.invocations = s.invocations;
-        if let Some(ss) = &s.session {
-            st.session().restore(ss);
-        }
+        self.restore_session(sim, s.invocations, s.session.as_ref())
+            .map_err(ReconfError::Load)
     }
 
     /// [`QvtoRun::save_state`] as the section `qvto`.
@@ -84,7 +79,8 @@ impl QvtoRun {
     ) -> Result<(), SnapshotError> {
         if let Some(sec) = s.section(QVTO) {
             let st: QvtoState = sec.decode(s.header.encoding)?;
-            self.restore_state(sim, &st);
+            self.restore_state(sim, &st)
+                .map_err(|e| SnapshotError::Restore(e.to_string()))?;
         }
         Ok(())
     }
@@ -96,8 +92,9 @@ struct RulesImage {
     /// The rules' names (checked on restore).
     rules: Vec<String>,
     qvto: QvtoState,
-    /// Runtime measurements of the PRM mirror (`None`: not created yet).
-    prm: Option<u32>,
+    /// The PRM mirror (`None`: not created yet): the model's resource and root, and its
+    /// runtime measurements (objects of the run's model graph).
+    prm: Option<(u32, u32, Vec<u32>)>,
     stats: RulesStats,
     records: Option<Vec<ReconfRecord>>,
 }
@@ -114,7 +111,13 @@ impl<'m, C: Compat, F: Flavour> RulesRun<'m, C, F> {
                 .map(|r| r.name().to_string())
                 .collect(),
             qvto: host.run.save_state(),
-            prm: host.prm.model.as_ref().map(|_| host.prm.meas.len() as u32),
+            prm: host.prm.model.as_ref().map(|(m, root)| {
+                let r = match m {
+                    crate::host::ModelRef::Loaded(r) | crate::host::ModelRef::Graph(r) => r.0,
+                    crate::host::ModelRef::Uri(_) => u32::MAX,
+                };
+                (r, root.0, host.prm.meas.iter().map(|o| o.0).collect())
+            }),
             stats: host.stats.clone(),
             records: host.records.clone(),
         };
@@ -212,12 +215,17 @@ impl<'m, C: Compat, F: Flavour> RulesRun<'m, C, F> {
                 img.rules, names
             )));
         }
-        let mut sim = Simulation::<C, F>::restore_snapshot(s, base, out)?;
+        let sim = Simulation::<C, F>::restore_snapshot(s, base, out)?;
         let err = |e: ReconfError| SnapshotError::Restore(e.to_string());
-        if let Some(n) = img.prm {
-            host.rebuild_prm(&mut sim, n as usize).map_err(err)?;
+        // the QVTo state with every id (the PRM mirror's objects included)
+        host.run.restore_state(&sim, &img.qvto).map_err(err)?;
+        if let Some((r, root, meas)) = img.prm {
+            host.prm.model = Some((
+                crate::host::ModelRef::Loaded(qvto_model::ResourceId(r)),
+                qvto_emf::ObjId(root),
+            ));
+            host.prm.meas = meas.into_iter().map(qvto_emf::ObjId).collect();
         }
-        host.run.restore_state(&sim, &img.qvto);
         host.stats = img.stats;
         if img.records.is_some() {
             host.records = img.records;

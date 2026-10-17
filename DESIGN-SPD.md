@@ -1624,6 +1624,20 @@ on a run"):
   `QvtoRun`, `Invocation`, `Bind`, `Outcome`, `RuleSet`, `QvtoAdjuster`) does not change except
   the store type in the closures of `with_store`, `with_scratch_store`, `dry_run` and the hooks
   (the adapter's `SimStore` → the graph). `Edit` changes the same way.
+- **Switched in merge step M6** (2026-10-17, branch `qvto-merge`): `qvt.rs` has a `Template`
+  (a `ResourceSet` whose graph is the prototype: SimOxide's registry, Ecore, the metamodel objects
+  and the embedded metamodels) and runs on `&mut simoxide_emf::Graph`; `Template::attach` appends
+  the prototype to a run's graph once (`Graph::append_graph`) and sets its id policy, so the
+  graph carries the QVTo state (journal, UUID generator, PRM and other models as graph
+  resources). `PerRun` keeps the working graph behind an `Arc` (copy on write, shared with forks,
+  fingerprint: generation, compiled model and model graph); when a run or `with_store` changes
+  only objects of other metamodels, the working graph is handed to the simulation
+  (`Simulation::set_model_graph`, no recompilation), so such models live with the run's model.
+  API changes: closures take `&mut Graph` (and `IdSourceFn` `&Graph`); `Outcome::extents` and
+  `Outcome::journal` use `ObjId`; `ModelRef::Loaded(ResId)`; `QvtoRun::load_model` and
+  `create_model` take `&mut Simulation`; `Edit::new(&sim)` (no session; `Edit::store()` is the
+  graph); `change_set(&graph, &journal)` (objects of other metamodels are left out by class);
+  `QvtoCore::attach`, `load_model`, `operations`, `derivations` for use outside a simulation.
 
 **Q1 as built** (2026-10-17, branch `q12`; `crates/qvto/qvto-testkit/README.md`, "SPD corpus"):
 
@@ -1904,8 +1918,10 @@ reference: patch P10 in `docs/reference-simulator/patches.md`; guide: `docs/guid
   N1's `Session::id_state`/`set_id_state`: no draw, no id), `RulesHost::new` maps `Auto` to the
   ordered mode; `simoxide-cli`: `--qvto-mode ordered`. No new run state: the id generator is N1's
   `SessionState::ids`, and the mirror no longer draws, so a restored host's rebuilt mirror does not
-  disturb it. The adapter, `qvt.rs`, `host.rs` and `simoxide-model` are unchanged. After M6 the
-  mirror needs the same pause on the shared graph's id policy.
+  disturb it. The adapter, `qvt.rs`, `host.rs` and `simoxide-model` are unchanged. On the shared
+  graph (M6, merged into `qvto-merge`): `without_ids` pauses the run graph's id policy
+  (`Graph::id_state`/`set_id_state`), and a restored host keeps the mirror's objects (the
+  snapshot's QVTo state) instead of rebuilding them.
 - **New cases** (`reference/rules-examples/`, `reference/import-rules-examples.sh`):
   `lb_scaleout_noid` and `lb_add_branch_noid` (R1's rules without ids), `lb_scaleout_each` (every
   server to a new node in the order of a `Set` of allocation contexts), `lb_wire_new_server`

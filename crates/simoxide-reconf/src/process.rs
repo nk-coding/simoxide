@@ -22,8 +22,9 @@
 use crate::host::{Invocation, ModelRef, QvtMode, QvtoCore, QvtoRun, ReconfError, RunConfig};
 use crate::qvt::PRM_NS;
 use crate::rules::{RuleSet, RulesOutcome};
-use qvto_model::{Datum, ModelStore, ResourceId};
-use qvto_simoxide::SimStore;
+use qvto_emf::{IdPolicy, ObjId};
+use qvto_model::{Datum, ModelStore};
+use simoxide_model::raw::Graph;
 use simoxide_sim::{
     Compat, DefaultCompat, Flavour, Outputs, Pause, RunResult, RunState, SimError, SimuLizar,
     Simulation, Status,
@@ -70,11 +71,11 @@ pub struct RulesStats {
 }
 
 /// The PRM mirror in the run's QVTo state: the model's root and its measurements, in PRM
-/// order (handles of the QVTo store).
+/// order (objects of the run's model graph).
 #[derive(Clone, Debug, Default)]
 pub(crate) struct PrmMirror {
-    pub(crate) model: Option<(ModelRef, u32)>,
-    pub(crate) meas: Vec<u32>,
+    pub(crate) model: Option<(ModelRef, ObjId)>,
+    pub(crate) meas: Vec<ObjId>,
 }
 
 /// The host of a run's reconfiguration process: the run's QVTo state, the rules and the PRM
@@ -171,10 +172,10 @@ impl RulesHost {
         &mut self,
         sim: &mut Simulation<'_, C, F>,
     ) -> Result<(), ReconfError> {
-        let ms: Vec<(Option<u32>, u32, f64)> = sim
+        let ms: Vec<(Option<ObjId>, ObjId, f64)> = sim
             .prm_measurements()
             .iter()
-            .map(|m| (m.def.mp.map(|o| o.0), m.def.spec.0, m.value))
+            .map(|m| (m.def.mp, m.def.spec, m.value))
             .collect();
         self.mirror_prm(sim, &ms)
     }
@@ -184,7 +185,7 @@ impl RulesHost {
     pub(crate) fn mirror_prm<C: Compat, F: Flavour>(
         &mut self,
         sim: &mut Simulation<'_, C, F>,
-        ms: &[(Option<u32>, u32, f64)],
+        ms: &[(Option<ObjId>, ObjId, f64)],
     ) -> Result<(), ReconfError> {
         if self.prm.model.is_none() {
             let r = self.run.create_model(sim, PRM_URI);
@@ -194,7 +195,7 @@ impl RulesHost {
             let ((), _) = self.run.with_store(sim, |st| {
                 let (model, _) = prm_classes(st);
                 let root = without_ids(st, |st| st.create(model)).expect("RuntimeMeasurementModel");
-                st.add_root(ResourceId(i), root, None).expect("root");
+                st.add_root(i, root, None).expect("root");
                 self.prm.model = Some((r, root));
             })?;
         }
@@ -224,7 +225,7 @@ impl RulesHost {
                     .expect("measurements");
                 created.push(m);
             }
-            let handles: Vec<u32> = self.prm.meas.iter().chain(&created).copied().collect();
+            let handles: Vec<ObjId> = self.prm.meas.iter().chain(&created).copied().collect();
             for (&h, &(_, _, v)) in handles.iter().zip(ms) {
                 st.set(h, f_value, Datum::Double(v))
                     .expect("measuringValue");
@@ -310,40 +311,16 @@ fn applied(o: &crate::host::Outcome) -> bool {
     o.code == 0 && o.severity != 8
 }
 
-impl RulesHost {
-    /// The mirror's runtime measurements, rebuilt for the first `n` PRM measurements of `sim`
-    /// (a restored run's host: the same objects in the same order; the values are written before
-    /// every rule run anyway).
-    pub(crate) fn rebuild_prm<C: Compat, F: Flavour>(
-        &mut self,
-        sim: &mut Simulation<'_, C, F>,
-        n: usize,
-    ) -> Result<(), ReconfError> {
-        let ms: Vec<(Option<u32>, u32, f64)> = sim
-            .prm_measurements()
-            .iter()
-            .take(n)
-            .map(|m| (m.def.mp.map(|o| o.0), m.def.spec.0, m.value))
-            .collect();
-        if ms.len() != n {
-            return Err(ReconfError::Load(format!(
-                "the snapshot's PRM mirror has {n} measurements, the run {}",
-                ms.len()
-            )));
-        }
-        self.mirror_prm(sim, &ms)
-    }
-}
-
 /// Runs `f` with the run's id generator paused: the PRM mirror's objects get no id and draw
 /// none (`DESIGN-SPD.md` R2). The reference draws seeded ids only while a rule runs (refsim patch
 /// P10); SimuLizar's own runtime measurements, created outside rules, keep EMF's UUIDs there, so
-/// the ids of the objects the rules create continue the same sequence in both.
-fn without_ids<T>(st: &mut SimStore<'_>, f: impl FnOnce(&mut SimStore<'_>) -> T) -> T {
-    let ids = st.session().id_state();
-    st.session().set_id_state(None);
-    let t = f(st);
-    st.session().set_id_state(ids);
+/// the ids of the objects the rules create continue the same sequence in both. The id policy is
+/// the run graph's (`Graph::id_state`), the generator's state is kept as it was.
+fn without_ids<T>(g: &mut Graph, f: impl FnOnce(&mut Graph) -> T) -> T {
+    let (policy, uuid) = g.id_state();
+    g.set_id_state(IdPolicy::None, None);
+    let t = f(g);
+    g.set_id_state(policy, uuid);
     t
 }
 

@@ -3,9 +3,10 @@
 //! that leave detached objects, new objects and unresolved proxies; the typed model built from
 //! it in the saved build order is the same; the fingerprint ignores where the files were read.
 
+use simoxide_emf::load_ops::OwnedSlot;
 use simoxide_model::meta::{class as mc, feat as mf};
 use simoxide_model::persist::{GraphXmi, fingerprint, same_graph};
-use simoxide_model::raw::{Graph, ObjId, Slot, Value};
+use simoxide_model::raw::{Graph, ObjId, ResId, to_stored};
 use simoxide_model::{Diagnostics, Loader, build_from_graph_after, build_order, canon};
 use std::path::{Path, PathBuf};
 
@@ -63,7 +64,7 @@ fn every_model_directory_round_trips() {
     let mut n = 0;
     for d in model_dirs() {
         let g = load(&d);
-        if g.objs.is_empty() {
+        if g.object_count() == 0 {
             continue;
         }
         check(&d.display().to_string(), &g);
@@ -79,7 +80,8 @@ fn changed_graphs_round_trip() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     for m in ["corpus/h19_linking_resource", "corpus/x_sl_mediastore"] {
         let mut g = load(&root.join(m));
-        let n0 = g.objs.len();
+        let n0 = g.object_count();
+        let str_value = |f, s: &str| to_stored(f, simoxide_model::raw::Value::Str(s.into()));
         // a container removed from the environment (with its resources: a detached subtree)
         let env = (0..n0)
             .map(|i| ObjId(i as u32))
@@ -95,68 +97,45 @@ fn changed_graphs_round_trip() {
             .expect("environment");
         let f = mf::ResourceEnvironment_resourceContainer_ResourceEnvironment;
         let removed = g.get_refs(env, f)[0];
-        if let Some((_, Slot::Refs(v))) = g.objs[env.0 as usize]
-            .slots
-            .iter_mut()
-            .find(|(x, _)| *x == f)
-        {
-            v.retain(|&c| c != removed);
-        }
-        g.objs[removed.0 as usize].container = None;
+        g.load_refs_mut(env, f).retain(|&c| c != removed);
+        g.set_container_raw(removed, None);
         // a new container, attached to the environment, and one never attached
-        let res = g[env].resource;
-        let new = g.add_object(mc::ResourceContainer, res);
+        let new = g.load_object(mc::ResourceContainer);
         let fid = mf::identifier_Identifier_id;
         let fname = mf::NamedElement_entityName;
-        g.objs[new.0 as usize].slots.push((
-            fid,
-            Slot::One(Value::Str("_new\ncontainer \"x\" & <y>".into())),
-        ));
-        g.objs[new.0 as usize]
-            .slots
-            .push((fname, Slot::One(Value::Str("tab\there\r\n".into()))));
-        if let Some((_, Slot::Refs(v))) = g.objs[env.0 as usize]
-            .slots
-            .iter_mut()
-            .find(|(x, _)| *x == f)
-        {
-            v.push(new);
-        }
-        g.objs[new.0 as usize].container = Some((env, f));
-        let loose = g.add_object(mc::ResourceContainer, res);
-        g.objs[loose.0 as usize]
-            .slots
-            .push((fname, Slot::One(Value::Null)));
+        g.load_set_attr(new, fid, str_value(fid, "_new\ncontainer \"x\" & <y>"));
+        g.load_set_attr(new, fname, str_value(fname, "tab\there\r\n"));
+        g.load_refs_mut(env, f).push(new);
+        g.set_container_raw(new, Some((env, f)));
+        let loose = g.load_object(mc::ResourceContainer);
+        g.load_set_attr(loose, fname, simoxide_emf::Value::Null);
         // an unresolved proxy referenced from a link, and an empty set list
         let link = (0..n0)
             .map(|i| ObjId(i as u32))
             .find(|&o| g[o].class == mc::LinkingResource);
-        let proxy = g.add_object(mc::ResourceContainer, res);
-        g.objs[proxy.0 as usize].proxy =
-            Some("file:/elsewhere/missing.resourceenvironment#_gone".into());
+        let proxy = g.load_object(mc::ResourceContainer);
+        g.set_proxy_uri(
+            proxy,
+            Some("file:/elsewhere/missing.resourceenvironment#_gone"),
+        );
         if let Some(link) = link {
             let cf = mf::LinkingResource_connectedResourceContainers_LinkingResource;
-            if let Some((_, Slot::Refs(v))) = g.objs[link.0 as usize]
-                .slots
-                .iter_mut()
-                .find(|(x, _)| *x == cf)
-            {
-                v.insert(1, proxy);
+            if !g.get_refs(link, cf).is_empty() {
+                g.load_refs_mut(link, cf).insert(1, proxy);
             }
         }
-        g.objs[loose.0 as usize].slots.push((
+        g.set_stored_slot(
+            loose,
             mf::ResourceContainer_activeResourceSpecifications_ResourceContainer,
-            Slot::Refs(Vec::new()),
-        ));
+            OwnedSlot::Refs(Vec::new(), true),
+        );
         // an integer in a double attribute (not what the loader makes of its lexical form)
         if let Some(o) = (0..n0)
             .map(|i| ObjId(i as u32))
             .find(|&o| g[o].class == mc::ProcessingResourceSpecification)
         {
             let f = mf::ProcessingResourceSpecification_MTTR;
-            let slots = &mut g.objs[o.0 as usize].slots;
-            slots.retain(|(x, _)| *x != f);
-            slots.push((f, Slot::One(Value::Int(7))));
+            g.load_set_attr(o, f, simoxide_emf::Value::Int(7));
         }
         check(m, &g);
     }
@@ -180,15 +159,14 @@ fn the_fingerprint_ignores_the_directory_and_sees_changes() {
     std::fs::remove_dir_all(&tmp).unwrap();
     assert_eq!(fingerprint(&a), fingerprint(&b));
     let mut c = a.clone();
-    let o = c
-        .objs
-        .iter()
-        .position(|o| o.class == mc::PCMRandomVariable)
-        .expect("a random variable");
-    for (_, s) in &mut c.objs[o].slots {
-        if let Slot::One(Value::Str(x)) = s {
-            *x = format!("{x}+1").into();
-        }
+    let o = ObjId(
+        c.objects()
+            .position(|o| o.class == mc::PCMRandomVariable)
+            .expect("a random variable") as u32,
+    );
+    let f = mf::RandomVariable_specification;
+    if let Some(simoxide_emf::Value::Str(x)) = c.stored(o, f).cloned() {
+        c.load_set_attr(o, f, simoxide_emf::Value::Str(format!("{x}+1").into()));
     }
     assert_ne!(fingerprint(&a), fingerprint(&c));
 }
@@ -198,14 +176,14 @@ fn a_resource_writes_as_a_loadable_document() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let g = load(&root.join("corpus/x_sl_mediastore"));
     let files: Vec<(String, String)> = g
-        .resources
+        .resources()
         .iter()
         .enumerate()
         .filter(|(_, r)| r.uri.starts_with("file:"))
         .map(|(i, r)| {
             (
                 r.name.rsplit('/').next().unwrap().to_string(),
-                simoxide_model::persist::write_xmi(&g, simoxide_model::raw::ResId(i as u32)),
+                simoxide_model::persist::write_xmi(&g, ResId(i as u32)),
             )
         })
         .collect();

@@ -3,7 +3,7 @@
 //!
 //! A running simulation reads only its [`CompiledModel`]. To change the model of a run between
 //! two events (`Simulation::apply_changes`), the run's model graph is edited (by a QVTo
-//! transformation through the `qvto-simoxide` adapter, or by direct edits through the same
+//! transformation on the model graph (the shared EMF graph), or by direct edits through the same
 //! adapter), the edits are described by a [`ChangeSet`] (the adapter's change journal), and
 //! [`recompile`] turns the changed graph into the run's next compiled model:
 //!
@@ -24,14 +24,15 @@
 
 use crate::fxhash::FxMap;
 use crate::ir::*;
+use simoxide_model::meta::prelude::*;
 use simoxide_model::meta::{ClassId, FeatureId, class as mc, feat as mf};
-use simoxide_model::raw::{Graph, ObjId};
+use simoxide_model::raw::{Graph, ObjId, PcmGraph};
 use simoxide_model::*;
 use std::collections::HashSet;
 use std::fmt;
 
 /// The changes of a change set, in the order they were made (the change journal of the
-/// `qvto-simoxide` adapter, or of direct edits through it). Objects are graph objects; changes
+/// model graph's journal, or of direct edits). Objects are graph objects; changes
 /// of objects outside the graph (the adapter's other home: runtime measurements, SPD models)
 /// are not part of it.
 ///
@@ -869,13 +870,14 @@ pub(crate) fn recompile(
 /// The new graph must be the run's graph with changes: objects are only ever appended and keep
 /// their class.
 fn check_graph(old: &Graph, new: &Graph) -> Result<(), ChangeError> {
-    let bad = new.objs.len() < old.objs.len()
-        || new.resources.len() < old.resources.len()
-        || old
-            .objs
-            .iter()
-            .zip(&new.objs)
-            .any(|(a, b)| a.class != b.class);
+    let bad = new.object_count() < old.object_count()
+        || new.resources().len() < old.resources().len()
+        || old.objects().zip(new.objects()).any(|(a, b)| {
+            // objects of other metamodels (a QVTo host's state) may be placeholders on one side
+            a.class != b.class
+                && (simoxide_model::raw::is_pcm_class(a.class)
+                    || simoxide_model::raw::is_pcm_class(b.class))
+        });
     if bad {
         return Err(ChangeError::Invalid(vec![
             "the graph is not a changed copy of the run's model graph".into(),
@@ -887,7 +889,7 @@ fn check_graph(old: &Graph, new: &Graph) -> Result<(), ChangeError> {
 /// The aborts that only the notifications show.
 fn journal_checks(g: &Graph, changes: &ChangeSet) -> Result<(), ChangeError> {
     for c in &changes.changes {
-        let Some(obj) = g.objs.get(c.obj.0 as usize) else {
+        let Some(obj) = (c.obj.index() < g.object_count()).then(|| &g[c.obj]) else {
             return Err(ChangeError::Invalid(vec![format!(
                 "change of object {} which is not in the graph",
                 c.obj.0

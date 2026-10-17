@@ -1,0 +1,5 @@
+iaas.resourceenvironment#/0/@resourceContainer_ResourceEnvironment.2/@activeResourceSpecifications_ResourceContainer.1/@processingRate_ProcessingResourceSpecification set stoex::RandomVariable.specification Str("300") -> Str("250.0")
+iaas.resourceenvironment#/0/@resourceContainer_ResourceEnvironment.2/@activeResourceSpecifications_ResourceContainer.0/@processingRate_ProcessingResourceSpecification set stoex::RandomVariable.specification Str("1000") -> Str("950.0")
+iaas.resourceenvironment#/0/@resourceContainer_ResourceEnvironment.0/@activeResourceSpecifications_ResourceContainer.0/@processingRate_ProcessingResourceSpecification set stoex::RandomVariable.specification Str("1000") -> Str("950.0")
+iaas.resourceenvironment#/0/@resourceContainer_ResourceEnvironment.1/@activeResourceSpecifications_ResourceContainer.0/@processingRate_ProcessingResourceSpecification set stoex::RandomVariable.specification Str("1000") -> Str("950.0")
+iaas.resourceenvironment#/0/@resourceContainer_ResourceEnvironment.1/@activeResourceSpecifications_ResourceContainer.1/@processingRate_ProcessingResourceSpecification set stoex::RandomVariable.specification Str("300") -> Str("250.0")

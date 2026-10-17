@@ -46,7 +46,7 @@ pub mod paths {
     /// Committed Java results of the SPD cases.
     pub const SPD_FIXTURE: &str = "qvto-testkit/fixtures/java-spd.txt";
     /// Metamodel configuration of the Eclipse suite (shared with qvto-emf and its oracle).
-    pub const SUITE_CONF: &str = "qvto-emf/tests/data/suite.conf";
+    pub const SUITE_CONF: &str = "../foundation/simoxide-emf/tests/data/suite.conf";
     /// The inventory.
     pub const INVENTORY: &str = "reference/inventory/eclipse-tests.tsv";
     /// Metamodels of the EMF jars registered in the Eclipse environment (copies of their

@@ -76,6 +76,9 @@ pub fn build_from_graph_after(
     d: Diagnostics,
     prev: &[raw::ObjId],
 ) -> (Model, Vec<raw::ObjId>) {
+    let mut g = g;
+    // the run's graph is copied for later changes and forks
+    g.freeze();
     let order = builder::build_order_after(&g, prev);
     let mut m = builder::build_in_order(g, d, &order);
     validate::validate(&mut m);

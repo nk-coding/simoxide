@@ -1,0 +1,679 @@
+//! Loader-level writes and plain reads of a [`Graph`], for readers with their own XMI loading
+//! rules (SimOxide's PCM loader, `simoxide-model`, which reproduces EMF 2.33's `XMIResourceImpl`
+//! and has its own goldens) and for hosts that read models without the `ModelStore` protocol.
+//!
+//! The writes are what `XMLHelperImpl` does while a document is read: they keep containment and
+//! opposites consistent (as SimOxide's former `raw::Graph` did) but check nothing, never touch
+//! root lists of other resources, and are not recorded in the journal. A feature written by them
+//! counts as *stored* ([`Graph::is_stored`]), also when the value equals the default or a list is
+//! empty (EMF's `eIsSet` is [`ModelStore::is_set`]).
+
+use crate::graph::{Graph, ObjId, Slot, Value};
+use crate::ids::{IdPolicy, UuidGen};
+use qvto_model::{ClassId, FeatureId, ResourceId};
+use std::sync::Arc;
+
+impl Graph {
+    // ---- reading ------------------------------------------------------------------------------
+
+    /// The objects in id order.
+    pub fn objects(
+        &self,
+    ) -> impl ExactSizeIterator<Item = &crate::graph::Object> + DoubleEndedIterator + '_ {
+        self.objs.iter()
+    }
+
+    /// The resources (index = `ResourceId`).
+    pub fn resources(&self) -> &[crate::graph::Resource] {
+        &self.resources
+    }
+
+    /// Whether `f` holds a written value or list (not unset); see the module documentation.
+    #[inline]
+    pub fn is_stored(&self, o: ObjId, f: FeatureId) -> bool {
+        !matches!(self.slot(o, f), None | Some(Slot::Unset))
+    }
+
+    /// What `f` holds as stored (snapshots, comparisons): see [`StoredSlot`].
+    pub fn stored_slot(&self, o: ObjId, f: FeatureId) -> StoredSlot<'_> {
+        match self.slot(o, f) {
+            None | Some(Slot::Unset) => StoredSlot::Unset,
+            Some(Slot::Data(v)) => StoredSlot::Data(v),
+            Some(Slot::Ref(r)) => StoredSlot::Ref(*r),
+            Some(Slot::Datas(v, set)) => StoredSlot::Datas(v, *set),
+            Some(Slot::Refs(v, set)) => StoredSlot::Refs(v, *set),
+        }
+    }
+
+    /// Writes what [`Graph::stored_slot`] reads, as it is: no inverse update, no journal (for
+    /// restoring a saved graph).
+    pub fn set_stored_slot(&mut self, o: ObjId, f: FeatureId, s: OwnedSlot) {
+        let s = match s {
+            OwnedSlot::Unset => Slot::Unset,
+            OwnedSlot::Data(v) => Slot::Data(v),
+            OwnedSlot::Ref(r) => Slot::Ref(r),
+            OwnedSlot::Datas(v, set) => Slot::Datas(v, set),
+            OwnedSlot::Refs(v, set) => Slot::Refs(v, set),
+        };
+        self.load_slot(o, f, s);
+    }
+
+    /// Sets the container field as it is (no list changes, no journal; restoring a saved graph).
+    pub fn set_container_raw(&mut self, o: ObjId, c: Option<(ObjId, FeatureId)>) {
+        self.objs[o.index()].container = c;
+    }
+
+    /// The stored value of a single-valued attribute (`None`: unset, the default applies).
+    #[inline]
+    pub fn stored(&self, o: ObjId, f: FeatureId) -> Option<&Value> {
+        match self.slot(o, f) {
+            Some(Slot::Data(v)) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// The values of a many-valued attribute.
+    #[inline]
+    pub fn stored_list(&self, o: ObjId, f: FeatureId) -> &[Value] {
+        match self.slot(o, f) {
+            Some(Slot::Datas(v, _)) => v,
+            _ => &[],
+        }
+    }
+
+    /// The target of a single-valued reference (container references come from the tree; the
+    /// first element of a many-valued one).
+    #[inline]
+    pub fn get_ref(&self, o: ObjId, f: FeatureId) -> Option<ObjId> {
+        if self.meta.is_container(f) {
+            let opp = self.meta.feature(f).opposite;
+            return self.objs[o.index()]
+                .container
+                .filter(|(_, cf)| Some(*cf) == opp)
+                .map(|(c, _)| c);
+        }
+        match self.slot(o, f) {
+            Some(Slot::Ref(r)) => *r,
+            Some(Slot::Refs(v, _)) => v.first().copied(),
+            _ => None,
+        }
+    }
+
+    /// The targets of a many-valued reference in list order (a single-valued one as a slice of
+    /// at most one).
+    #[inline]
+    pub fn get_refs(&self, o: ObjId, f: FeatureId) -> &[ObjId] {
+        match self.slot(o, f) {
+            Some(Slot::Refs(v, _)) => v,
+            Some(Slot::Ref(Some(r))) => std::slice::from_ref(r),
+            _ => &[],
+        }
+    }
+
+    /// The children of `o` in `eContents` order, with their containment feature.
+    pub fn children(&self, o: ObjId) -> impl Iterator<Item = (FeatureId, ObjId)> + '_ {
+        self.meta
+            .class(self.objs[o.index()].class)
+            .containments
+            .iter()
+            .flat_map(move |&f| self.get_refs(o, f).iter().map(move |&c| (f, c)))
+    }
+
+    /// All objects of resource `r` in tree order (`getAllContents`) appended to `out`, with a
+    /// caller-provided stack.
+    pub fn resource_contents_into(
+        &self,
+        r: ResourceId,
+        out: &mut Vec<ObjId>,
+        stack: &mut Vec<ObjId>,
+    ) {
+        stack.clear();
+        stack.extend(self.resources[r.index()].roots.iter().rev().copied());
+        while let Some(o) = stack.pop() {
+            out.push(o);
+            let class = self.objs[o.index()].class;
+            for &f in self.meta.class(class).containments.iter().rev() {
+                stack.extend(self.get_refs(o, f).iter().rev().copied());
+            }
+        }
+    }
+
+    /// All objects of resource `r` in tree order (`getAllContents`; plain containment lists,
+    /// for models: Ecore's own objects go through `ModelStore::resource_contents`).
+    pub fn tree_contents(&self, r: ResourceId) -> Vec<ObjId> {
+        let mut out = Vec::new();
+        self.resource_contents_into(r, &mut out, &mut Vec::new());
+        out
+    }
+
+    /// The value of the object's ID attribute (`eIDAttribute`), if it is set: a string, or an
+    /// enumeration literal's literal (e.g. a unit).
+    pub fn id(&self, o: ObjId) -> Option<&str> {
+        let f = self.meta.class(self.objs[o.index()].class).id_attribute?;
+        match self.stored(o, f)? {
+            Value::Str(s) | Value::Other(s) => Some(s),
+            Value::Enum(e, i) => Some(&self.meta.enumeration(*e).literals[*i as usize].literal),
+            _ => None,
+        }
+    }
+
+    /// The EMF path fragment of `o` (`//@feature.i/@other`, `/i` for the `i`-th root).
+    pub fn path_fragment(&self, o: ObjId) -> String {
+        let mut segs = Vec::new();
+        let mut cur = o;
+        while let Some((p, f)) = self.objs[cur.index()].container {
+            let fi = self.meta.feature(f);
+            if fi.is_many() {
+                let idx = self
+                    .get_refs(p, f)
+                    .iter()
+                    .position(|c| *c == cur)
+                    .unwrap_or(0);
+                segs.push(format!("@{}.{}", fi.name, idx));
+            } else {
+                segs.push(format!("@{}", fi.name));
+            }
+            cur = p;
+            if segs.len() > 1_000_000 {
+                break;
+            }
+        }
+        let ri = self.objs[cur.index()]
+            .resource
+            .and_then(|r| {
+                self.resources[r.index()]
+                    .roots
+                    .iter()
+                    .position(|x| *x == cur)
+            })
+            .unwrap_or(0);
+        let mut s = String::from("/");
+        if ri != 0 {
+            s.push_str(&ri.to_string());
+        }
+        for seg in segs.iter().rev() {
+            s.push('/');
+            s.push_str(seg);
+        }
+        s
+    }
+
+    // ---- loader-level writes --------------------------------------------------------------------
+
+    /// A new object of class `c` (abstract classes too: a proxy may have any class), without
+    /// values, container or resource; not recorded.
+    pub fn load_object(&mut self, c: ClassId) -> ObjId {
+        self.new_object(c)
+    }
+
+    /// Reserves room for `n` more objects (a loader's estimate).
+    pub fn reserve_objects(&mut self, n: usize) {
+        self.objs.reserve(n);
+    }
+
+    /// Sets the source line of an object.
+    pub fn set_line(&mut self, o: ObjId, line: u32) {
+        self.objs[o.index()].line = line;
+    }
+
+    /// Appends `o` to the roots of `r` (a document's top-level element).
+    pub fn load_add_root(&mut self, r: ResourceId, o: ObjId) {
+        self.resources[r.index()].roots.push(o);
+        self.objs[o.index()].resource = Some(r);
+    }
+
+    /// Stores the value of a single-valued attribute.
+    pub fn load_set_attr(&mut self, o: ObjId, f: FeatureId, v: Value) {
+        self.load_slot(o, f, Slot::Data(v));
+    }
+
+    /// Appends a value to a many-valued attribute.
+    pub fn load_add_attr(&mut self, o: ObjId, f: FeatureId, v: Value) {
+        match self.load_slot_mut(o, f) {
+            Slot::Datas(l, _) => l.push(v),
+            s => *s = Slot::Datas(vec![v], true),
+        }
+    }
+
+    /// Stores an empty list in a many-valued attribute.
+    pub fn load_clear_attrs(&mut self, o: ObjId, f: FeatureId) {
+        self.load_slot(o, f, Slot::Datas(Vec::new(), true));
+    }
+
+    /// The list of a many-valued reference, stored (empty) if it was not (no inverse updates).
+    pub fn load_refs_mut(&mut self, o: ObjId, f: FeatureId) -> &mut Vec<ObjId> {
+        let s = self.load_slot_mut(o, f);
+        if !matches!(s, Slot::Refs(..)) {
+            *s = Slot::Refs(Vec::new(), true);
+        }
+        match s {
+            Slot::Refs(v, _) => v,
+            _ => unreachable!(),
+        }
+    }
+
+    /// `eSet` of a single-valued reference while loading, maintaining the opposite (or the
+    /// container of a contained object). Container references are not written.
+    pub fn load_set_ref(&mut self, o: ObjId, f: FeatureId, v: Option<ObjId>) {
+        let old = self.get_ref(o, f);
+        if self.meta.is_container(f) {
+            return;
+        }
+        if old == v && self.is_stored(o, f) {
+            return;
+        }
+        let fi = self.meta.feature(f);
+        if let Some(opp) = fi.opposite {
+            if old != v {
+                if let Some(old) = old {
+                    self.load_inverse_remove(old, opp, o);
+                }
+                if let Some(nv) = v {
+                    self.load_inverse_add(nv, opp, o);
+                }
+            }
+        } else if fi.containment {
+            if let Some(old) = old
+                && Some(old) != v
+            {
+                self.objs[old.index()].container = None;
+            }
+            if let Some(nv) = v {
+                self.load_detach(nv);
+                self.objs[nv.index()].container = Some((o, f));
+            }
+        }
+        self.load_slot(o, f, Slot::Ref(v));
+    }
+
+    /// `InternalEList.addUnique(index, v)` on a many-valued reference while loading, maintaining
+    /// the opposite. `None` appends; `false` if the index is out of bounds.
+    pub fn load_add_ref(&mut self, o: ObjId, f: FeatureId, v: ObjId, index: Option<usize>) -> bool {
+        let len = self.get_refs(o, f).len();
+        let idx = index.unwrap_or(len);
+        if idx > len {
+            return false;
+        }
+        let fi = self.meta.feature(f);
+        if fi.containment {
+            self.load_detach(v);
+            self.objs[v.index()].container = Some((o, f));
+        } else if let Some(opp) = fi.opposite {
+            self.load_inverse_add(v, opp, o);
+        }
+        self.load_refs_mut(o, f).insert(idx, v);
+        true
+    }
+
+    /// `EList.move(to, from)` of a reference list while loading.
+    pub fn load_move_ref(&mut self, o: ObjId, f: FeatureId, to: usize, from: usize) -> bool {
+        let l = self.load_refs_mut(o, f);
+        if to >= l.len() || from >= l.len() {
+            return false;
+        }
+        let x = l.remove(from);
+        l.insert(to, x);
+        true
+    }
+
+    /// `list.clear()` of a reference list while loading, maintaining opposites.
+    pub fn load_clear_refs(&mut self, o: ObjId, f: FeatureId) {
+        let old = std::mem::take(self.load_refs_mut(o, f));
+        let fi = self.meta.feature(f);
+        let (containment, opp) = (fi.containment, fi.opposite);
+        for x in old {
+            if containment {
+                self.objs[x.index()].container = None;
+            } else if let Some(opp) = opp {
+                self.load_inverse_remove(x, opp, o);
+            }
+        }
+    }
+
+    /// Replaces proxy `p` by `t` wherever `holder.f` refers to it (proxy resolution: no inverse
+    /// update, like EMF's resolving lists).
+    pub fn replace_target(&mut self, holder: ObjId, f: FeatureId, p: ObjId, t: ObjId) {
+        let Some(i) = self.meta.slot(self.objs[holder.index()].class, f) else {
+            return;
+        };
+        match &mut self.objs[holder.index()].slots[i] {
+            Slot::Ref(r) if *r == Some(p) => *r = Some(t),
+            Slot::Refs(v, _) => {
+                for x in v.iter_mut() {
+                    if *x == p {
+                        *x = t;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    // ---- helpers --------------------------------------------------------------------------------
+
+    fn load_slot(&mut self, o: ObjId, f: FeatureId, s: Slot) {
+        *self.load_slot_mut(o, f) = s;
+    }
+
+    fn load_slot_mut(&mut self, o: ObjId, f: FeatureId) -> &mut Slot {
+        let i = self
+            .meta
+            .slot(self.objs[o.index()].class, f)
+            .expect("feature of the object's class");
+        &mut self.objs[o.index()].slots[i]
+    }
+
+    /// `eInverseRemove` while loading: `o.f` drops `other`.
+    fn load_inverse_remove(&mut self, o: ObjId, f: FeatureId, other: ObjId) {
+        if self.meta.is_container(f) {
+            if self.objs[o.index()].container.map(|c| c.0) == Some(other) {
+                self.objs[o.index()].container = None;
+            }
+            return;
+        }
+        if self.meta.feature(f).is_many() {
+            let l = self.load_refs_mut(o, f);
+            if let Some(i) = l.iter().position(|x| *x == other) {
+                l.remove(i);
+            }
+        } else if let Some(i) = self.meta.slot(self.objs[o.index()].class, f)
+            && let Slot::Ref(r) = &mut self.objs[o.index()].slots[i]
+            && *r == Some(other)
+        {
+            *r = None;
+        }
+    }
+
+    /// `eInverseAdd` while loading: `o.f` now points back to `other` (displacing a previous
+    /// single value).
+    fn load_inverse_add(&mut self, o: ObjId, f: FeatureId, other: ObjId) {
+        let back = self
+            .meta
+            .feature(f)
+            .opposite
+            .expect("inverse add on a reference without opposite");
+        if self.meta.is_container(f) {
+            // containment: `o` becomes a child of `other`
+            if let Some((old, of)) = self.objs[o.index()].container
+                && (old != other || of != back)
+            {
+                self.load_inverse_remove(old, of, o);
+            }
+            self.objs[o.index()].container = Some((other, back));
+            return;
+        }
+        if self.meta.feature(f).is_many() {
+            self.load_refs_mut(o, f).push(other);
+        } else {
+            if let Some(old) = self.get_ref(o, f)
+                && old != other
+            {
+                self.load_inverse_remove(old, back, o);
+            }
+            self.load_slot(o, f, Slot::Ref(Some(other)));
+        }
+    }
+
+    /// Takes `c` out of its container's feature (the loader's `detach`).
+    fn load_detach(&mut self, c: ObjId) {
+        if let Some((p, pf)) = self.objs[c.index()].container.take() {
+            if self.meta.feature(pf).is_many() {
+                let l = self.load_refs_mut(p, pf);
+                if let Some(i) = l.iter().position(|x| *x == c) {
+                    l.remove(i);
+                }
+            } else {
+                self.load_slot(p, pf, Slot::Ref(None));
+            }
+        }
+    }
+}
+
+/// Objects detached from a graph, with ids from 0: a parsed resource kept for copying into
+/// other graphs instead of parsing it again (SimOxide's parse cache, bundled models). Holds the
+/// objects of one resource (created contiguously, referring only to each other), its roots and
+/// `xmi:id`s.
+#[derive(Clone, Debug)]
+pub struct ObjectBlock {
+    objs: Vec<crate::graph::Object>,
+    roots: Vec<ObjId>,
+    ids: Option<crate::graph::IdMaps>,
+}
+
+impl ObjectBlock {
+    pub fn len(&self) -> usize {
+        self.objs.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.objs.is_empty()
+    }
+}
+
+fn shift_object(o: &mut crate::graph::Object, f: impl Fn(ObjId) -> ObjId) {
+    o.container = o.container.map(|(c, feat)| (f(c), feat));
+    for s in &mut o.slots {
+        match s {
+            Slot::Ref(Some(x)) => *x = f(*x),
+            Slot::Refs(v, _) => v.iter_mut().for_each(|x| *x = f(*x)),
+            _ => {}
+        }
+    }
+}
+
+impl Graph {
+    /// The objects from `first` on (all of resource `r`'s, nothing else) with `r`'s roots and
+    /// `xmi:id`s, as a block with ids from 0.
+    pub fn block_of(&self, r: ResourceId, first: usize) -> ObjectBlock {
+        let off = first as u32;
+        let shift = |o: ObjId| ObjId(o.0 - off);
+        let objs = self
+            .objs
+            .iter_from(first)
+            .map(|o| {
+                let mut o = o.clone();
+                shift_object(&mut o, shift);
+                o
+            })
+            .collect();
+        let res = &self.resources[r.index()];
+        let ids = res.ids.as_ref().map(|m| crate::graph::IdMaps {
+            to_id: m
+                .to_id
+                .iter()
+                .filter(|(o, _)| o.0 >= off)
+                .map(|(o, s)| (shift(*o), s.clone()))
+                .collect(),
+            to_obj: m
+                .to_obj
+                .iter()
+                .filter(|(_, o)| o.0 >= off)
+                .map(|(s, o)| (s.clone(), shift(*o)))
+                .collect(),
+        });
+        ObjectBlock {
+            objs,
+            roots: res.roots.iter().map(|o| shift(*o)).collect(),
+            ids,
+        }
+    }
+
+    /// Appends a block as the contents of resource `r` (empty so far); returns the id of its
+    /// first object.
+    pub fn splice_block(&mut self, r: ResourceId, b: &ObjectBlock) -> ObjId {
+        let off = self.objs.len() as u32;
+        let shift = |o: ObjId| ObjId(o.0 + off);
+        self.objs.reserve(b.objs.len());
+        for o in &b.objs {
+            let mut o = o.clone();
+            shift_object(&mut o, shift);
+            if o.resource.is_some() {
+                o.resource = Some(r);
+            }
+            self.objs.push(o);
+        }
+        let res = &mut self.resources[r.index()];
+        res.roots = b.roots.iter().map(|o| shift(*o)).collect();
+        if let Some(m) = &b.ids {
+            let maps = res.ids.get_or_insert_with(Default::default);
+            for (o, s) in &m.to_id {
+                maps.to_id.insert(shift(*o), s.clone());
+            }
+            for (s, o) in &m.to_obj {
+                maps.to_obj.insert(s.clone(), shift(*o));
+            }
+        }
+        ObjId(off)
+    }
+}
+
+impl Graph {
+    /// Appends every object, resource and metamodel link of `other` (whose registry must hold
+    /// this graph's, e.g. a prototype with metamodel objects and further metamodels): ids are
+    /// shifted, this graph adopts `other`'s registry. Returns the offsets of the appended
+    /// objects and resources. Not recorded in the journal.
+    pub fn append_graph(&mut self, other: &Graph) -> (u32, u32) {
+        assert!(
+            self.adopt_meta(other.meta.clone()),
+            "the appended graph's registry must extend this graph's"
+        );
+        let off = self.objs.len() as u32;
+        let roff = self.resources.len() as u32;
+        let shift = |o: ObjId| ObjId(o.0 + off);
+        let rshift = |r: ResourceId| ResourceId(r.0 + roff);
+        self.objs.reserve(other.objs.len());
+        for o in other.objs.iter() {
+            let mut o = o.clone();
+            shift_object(&mut o, shift);
+            o.resource = o.resource.map(rshift);
+            self.objs.push(o);
+        }
+        for r in &other.resources {
+            let mut r = r.clone();
+            r.roots.iter_mut().for_each(|o| *o = shift(*o));
+            if let Some(m) = r.ids.as_mut() {
+                m.to_id = m.to_id.drain().map(|(o, s)| (shift(o), s)).collect();
+                m.to_obj.values_mut().for_each(|o| *o = shift(*o));
+            }
+            self.resources.push(r);
+        }
+        let l = &other.links;
+        let t = Arc::make_mut(&mut self.links);
+        t.classifier_obj
+            .extend(l.classifier_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_classifier
+            .extend(l.obj_classifier.iter().map(|(o, k)| (shift(*o), *k)));
+        t.feature_obj
+            .extend(l.feature_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_feature
+            .extend(l.obj_feature.iter().map(|(o, k)| (shift(*o), *k)));
+        t.package_obj
+            .extend(l.package_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_package
+            .extend(l.obj_package.iter().map(|(o, k)| (shift(*o), *k)));
+        self.ecore_gen += 1;
+        (off, roff)
+    }
+
+    /// The id policy and the state of its generator (to carry them from graph to graph).
+    pub fn id_state(&self) -> (IdPolicy, Option<UuidGen>) {
+        (self.ids.policy, self.ids.uuid.clone())
+    }
+
+    /// Restores what [`Graph::id_state`] returned (the id class is looked up as by
+    /// [`Graph::set_id_policy`]).
+    pub fn set_id_state(&mut self, policy: IdPolicy, uuid: Option<UuidGen>) {
+        self.set_id_policy(policy);
+        self.ids.uuid = uuid;
+    }
+}
+
+/// A feature's stored state (see [`Graph::stored_slot`]); lists carry the "set" flag of
+/// unsettable features.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum StoredSlot<'a> {
+    Unset,
+    Data(&'a Value),
+    Ref(Option<ObjId>),
+    Datas(&'a [Value], bool),
+    Refs(&'a [ObjId], bool),
+}
+
+/// An owned [`StoredSlot`] ([`Graph::set_stored_slot`]).
+#[derive(Clone, Debug, PartialEq)]
+pub enum OwnedSlot {
+    Unset,
+    Data(Value),
+    Ref(Option<ObjId>),
+    Datas(Vec<Value>, bool),
+    Refs(Vec<ObjId>, bool),
+}
+
+impl Graph {
+    /// Writes every object, resource and metamodel link of `other` over objects
+    /// `obj_off..obj_off + n` and resources `res_off..res_off + r` of this graph (placeholders a
+    /// restored snapshot left where `other` was appended before, [`Graph::append_graph`]), so
+    /// that they get the ids they had. `other`'s registry must extend this graph's.
+    pub fn overlay_graph(
+        &mut self,
+        other: &Graph,
+        obj_off: u32,
+        res_off: u32,
+    ) -> Result<(), String> {
+        let (n, r) = (other.objs.len(), other.resources.len());
+        if obj_off as usize + n > self.objs.len() || res_off as usize + r > self.resources.len() {
+            return Err("the graph has no room for the metamodel objects".into());
+        }
+        if !self.adopt_meta(other.meta.clone()) {
+            return Err("the metamodels differ".into());
+        }
+        let shift = |o: ObjId| ObjId(o.0 + obj_off);
+        let rshift = |x: ResourceId| ResourceId(x.0 + res_off);
+        for (i, o) in other.objs.iter().enumerate() {
+            let mut o = o.clone();
+            shift_object(&mut o, shift);
+            o.resource = o.resource.map(rshift);
+            self.objs[obj_off as usize + i] = o;
+        }
+        for (j, x) in other.resources.iter().enumerate() {
+            let mut x = x.clone();
+            x.roots.iter_mut().for_each(|o| *o = shift(*o));
+            if let Some(m) = x.ids.as_mut() {
+                m.to_id = m.to_id.drain().map(|(o, s)| (shift(o), s)).collect();
+                m.to_obj.values_mut().for_each(|o| *o = shift(*o));
+            }
+            self.resources[res_off as usize + j] = x;
+        }
+        let l = &other.links;
+        let t = Arc::make_mut(&mut self.links);
+        t.classifier_obj
+            .extend(l.classifier_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_classifier
+            .extend(l.obj_classifier.iter().map(|(o, k)| (shift(*o), *k)));
+        t.feature_obj
+            .extend(l.feature_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_feature
+            .extend(l.obj_feature.iter().map(|(o, k)| (shift(*o), *k)));
+        t.package_obj
+            .extend(l.package_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_package
+            .extend(l.obj_package.iter().map(|(o, k)| (shift(*o), *k)));
+        self.ecore_gen += 1;
+        Ok(())
+    }
+
+    /// Makes object `o` a fresh object of class `c` (no values, container, resource or proxy),
+    /// keeping its id and line (restoring a saved graph).
+    pub fn reset_object(&mut self, o: ObjId, c: ClassId) {
+        let n = self.meta.class(c).all_features.len();
+        let line = self.objs[o.index()].line;
+        self.objs[o.index()] = crate::graph::Object {
+            class: c,
+            container: None,
+            resource: None,
+            proxy: None,
+            line,
+            slots: vec![Slot::Unset; n],
+        };
+    }
+}

@@ -14,7 +14,8 @@ use simoxide_jcompat::hash::str_hash as string_hash;
 use simoxide_jcompat::order::{InsertionOrder, MapOrder};
 #[cfg(feature = "exact")]
 use simoxide_jcompat_exact::order::JdkHashOrder;
-use simoxide_model::raw::ObjId;
+use simoxide_model::meta::prelude::*;
+use simoxide_model::raw::{ObjId, PcmGraph};
 use simoxide_model::*;
 use simoxide_sched::SchedulingPolicy;
 use simoxide_stoex::Program;
@@ -579,6 +580,17 @@ pub struct CompiledModel {
     /// The Slingshot flavour's tables (empty for SimuLizar).
     pub ss: SsTables,
 }
+
+// A `CompiledModel` is shared between threads (`run_batch`, runs resumed on other threads) and
+// its model, graph included, is copied as plain data (change sets, forks): no `Rc`/`RefCell`
+// anywhere in it ("Clone = value", the qvto merge design).
+const _: () = {
+    const fn shared<T: Send + Sync>() {}
+    const fn value<T: Clone + Send + Sync>() {}
+    shared::<CompiledModel>();
+    value::<simoxide_model::Model>();
+    value::<simoxide_model::raw::Graph>();
+};
 
 impl fmt::Debug for CompiledModel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

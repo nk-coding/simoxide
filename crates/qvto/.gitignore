@@ -8,4 +8,3 @@
 /reference/external/
 
 # Java build outputs of the crate oracles (rebuilt by their build.sh)
-/qvto-emf/oracle/build/

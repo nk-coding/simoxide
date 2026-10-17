@@ -33,6 +33,9 @@ use std::sync::Arc;
 pub const ENGINE: &str = "engine";
 /// Name of the section with the run's own model.
 pub const MODEL: &str = "model";
+/// Name of the section with the run's model graph when it differs from its compiled model's
+/// outside SimOxide's metamodels only (`Simulation::set_model_graph`: a QVTo host's state).
+pub const GRAPH: &str = "graph";
 
 /// A StoEx value in a frame.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -535,6 +538,9 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
                 fingerprint: model_fingerprint(cm),
             });
         }
+        if let Some(g) = self.model.graph_override() {
+            sections.push(Section::encode(GRAPH, &GraphXmi::save(g), enc)?);
+        }
         let header = Header {
             format: FORMAT,
             simoxide: env!("CARGO_PKG_VERSION").to_string(),
@@ -646,6 +652,11 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             }
             RunModel::changed(Arc::new(cm), order.into(), Shape::of(base), m.generation)
         };
+        let mut model = model;
+        if let Some(sec) = s.section(GRAPH) {
+            let x: GraphXmi = sec.decode(enc)?;
+            model.set_graph_override(Arc::new(x.restore().map_err(restore)?));
+        }
         let cm: &CompiledModel = match model.compiled() {
             Some(a) => a,
             None => base,

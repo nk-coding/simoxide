@@ -185,7 +185,7 @@ fn bench(args: &[String]) {
             let m = simoxide_model::build_from_graph(g, diags);
             let t2 = Instant::now();
             allocs = alloc_count() - a0;
-            objs = m.graph.objs.len();
+            objs = m.graph.object_count();
             best_fin = best_fin.min((t1 - t0).as_secs_f64());
             best_build = best_build.min((t2 - t1).as_secs_f64());
             best = best.min((t2 - t0).as_secs_f64());

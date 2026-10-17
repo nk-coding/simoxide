@@ -15,7 +15,8 @@
 
 | Path | Contents |
 |---|---|
-| `crates/simoxide-model` | XMI loader with EMF semantics, typed PCM subset, validation |
+| `crates/foundation/` | shared by SimOxide and the QVTo engine: `simoxide-jcompat` (Java behaviour the javadoc specifies), `simoxide-emf-core` (EMF ids, metamodel registry seeded from the PCM tables, `ModelStore`), opt-in `simoxide-jcompat-exact` and `simoxide-hotspot-math` |
+| `crates/simoxide-model` | XMI loader with EMF semantics, typed PCM subset, validation; the generated PCM tables (`src/meta`, the registry's static seed) |
 | `crates/simoxide-stoex` | StoEx parser, types, evaluator, PMF/PDF, compiler, Java math |
 | `crates/simoxide-random` | the reference's random numbers and distributions; fast-mode samplers |
 | `crates/simoxide-sched` | processor sharing, FCFS, delay and passive resources |

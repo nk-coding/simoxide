@@ -11,7 +11,6 @@
 //! transformation's success, refreshing the SPD membership from the changed model.
 
 use crate::host::{Invocation, InvokeHooks, Outcome, QvtoRun, ReconfError, Transformation};
-use qvto_simoxide::SimStore;
 use simoxide_model::raw::Graph;
 use simoxide_sim::{Compat, Flavour, SimError, SimErrorKind, Simulation};
 use simoxide_spd::sim::{AdjustOutcome, Adjuster};
@@ -20,7 +19,7 @@ use simoxide_spd::{AdjustmentRequest, Membership, Spd, SpdState};
 /// The parts of an adjustment that depend on the transformation (P2).
 pub trait AdjustHooks {
     /// Edits before the transformation runs, in its journal (P2: `enactedPolicy`).
-    fn before(&mut self, _store: &mut SimStore<'_>, _spd: &Spd, _req: &AdjustmentRequest) {}
+    fn before(&mut self, _store: &mut Graph, _spd: &Spd, _req: &AdjustmentRequest) {}
 
     /// The adjustment's outcome, given the transformation's (`Err`: it was not applied, the run
     /// is unchanged, or the run failed). `graph` is the run's model graph afterwards. The
@@ -108,7 +107,7 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for QvtoAdjuster {
         req: &AdjustmentRequest,
     ) -> Result<AdjustOutcome, SimError> {
         let hooks = &mut self.hooks;
-        let mut before = |s: &mut SimStore<'_>| hooks.before(s, spd, req);
+        let mut before = |s: &mut Graph| hooks.before(s, spd, req);
         let r = self.run.invoke_with(
             sim,
             &self.transformation,

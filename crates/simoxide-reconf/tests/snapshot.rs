@@ -8,10 +8,10 @@
 mod common;
 
 use common::*;
-use qvto_simoxide::ChangeKind;
+use qvto_emf::ChangeKind;
 use simoxide_model::meta::feat as mf;
 use simoxide_reconf::{
-    Edit, Imports, Invocation, QvtMode, QvtoRun, RuleSet, RulesHost, RulesRun, RunConfig, Session,
+    Edit, Imports, Invocation, QvtMode, QvtoRun, RuleSet, RulesHost, RulesRun, RunConfig,
     Transformation,
 };
 use simoxide_sim::snapshot::{Encoding, Snapshot, SnapshotOptions};
@@ -122,8 +122,7 @@ fn cycle<'m, C: Compat>(
 
 /// The `k`-th edit of [`direct_edits_survive_snapshots`]; the new generation.
 fn edit<C: Compat>(sim: &mut Simulation<'_, C>, k: u32) -> u32 {
-    let mut session = Session::new();
-    let mut e = Edit::new(sim, &mut session);
+    let mut e = Edit::new(sim);
     match k {
         0 => {
             let server = e.find("_h19_linking_resource_rc2").unwrap();
@@ -215,7 +214,7 @@ fn rule(name: &str) -> Transformation {
 }
 
 /// The ids of the objects a journal gave ids to.
-fn new_ids(j: &qvto_simoxide::Journal) -> Vec<String> {
+fn new_ids(j: &qvto_emf::Journal) -> Vec<String> {
     j.changes
         .iter()
         .filter_map(|c| match &c.kind {

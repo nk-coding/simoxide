@@ -4,6 +4,8 @@ resolver = "3"
 # crates/foundation/; see the qvto-rs merge design, step M0).
 members = [
     # shared by SimOxide and the QVTo engine (crates/foundation/README.md)
+    "crates/foundation/simoxide-emf",
+    "crates/foundation/simoxide-emf-core",
     "crates/foundation/simoxide-hotspot-math",
     "crates/foundation/simoxide-jcompat",
     "crates/foundation/simoxide-jcompat-exact",
@@ -20,12 +22,9 @@ members = [
     "crates/qvto/qvto",
     "crates/qvto/qvto-bytecode",
     "crates/qvto/qvto-cli",
-    "crates/qvto/qvto-emf",
-    "crates/qvto/qvto-model",
     "crates/qvto/qvto-paths",
     "crates/qvto/qvto-runtime",
     "crates/qvto/qvto-sema",
-    "crates/qvto/qvto-simoxide",
     "crates/qvto/qvto-syntax",
     "crates/qvto/qvto-testkit",
     "crates/qvto/qvto-types",
@@ -41,6 +40,8 @@ rust-version = "1.88"
 
 # Internal crates: a path for the workspace, a version for packaging (crates.io resolves by version).
 [workspace.dependencies]
+simoxide-emf = { path = "crates/foundation/simoxide-emf", version = "0.1.0" }
+simoxide-emf-core = { path = "crates/foundation/simoxide-emf-core", version = "0.1.0" }
 simoxide-hotspot-math = { path = "crates/foundation/simoxide-hotspot-math", version = "0.1.0" }
 simoxide-jcompat = { path = "crates/foundation/simoxide-jcompat", version = "0.1.0" }
 # no licence granted, never published (its LICENSE-NOTICE): only behind opt-in features
@@ -55,12 +56,12 @@ simoxide-stoex = { path = "crates/simoxide-stoex", version = "0.1.0", default-fe
 # QVTo (not published: `publish = false`)
 qvto = { path = "crates/qvto/qvto" }
 qvto-bytecode = { path = "crates/qvto/qvto-bytecode" }
-qvto-emf = { path = "crates/qvto/qvto-emf" }
-qvto-model = { path = "crates/qvto/qvto-model" }
+# the QVTo crates keep their names for the EMF core and graph (merge steps M4, M5)
+qvto-model = { path = "crates/foundation/simoxide-emf-core", package = "simoxide-emf-core" }
+qvto-emf = { path = "crates/foundation/simoxide-emf", package = "simoxide-emf" }
 qvto-paths = { path = "crates/qvto/qvto-paths" }
 qvto-runtime = { path = "crates/qvto/qvto-runtime" }
 qvto-sema = { path = "crates/qvto/qvto-sema" }
-qvto-simoxide = { path = "crates/qvto/qvto-simoxide" }
 qvto-syntax = { path = "crates/qvto/qvto-syntax" }
 qvto-testkit = { path = "crates/qvto/qvto-testkit" }
 qvto-types = { path = "crates/qvto/qvto-types" }

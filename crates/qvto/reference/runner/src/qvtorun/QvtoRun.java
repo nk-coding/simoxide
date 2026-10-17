@@ -168,7 +168,7 @@ public final class QvtoRun {
 			System.out.println("saved " + p[0] + " -> " + path + " (" + count(out) + " objects)");
 		}
 		if (dumpPath != null) {
-			// canonical dump (qvto-emf/oracle/src/CanonDump.java) of the saved out/inout models
+			// canonical dump (simoxide-emf/oracle/src/CanonDump.java) of the saved out/inout models
 			String dump = CaseRunner.canonDump(saved);
 			try (PrintWriter w = new PrintWriter(dumpPath, "UTF-8")) { w.print(dump); }
 		}

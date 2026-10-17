@@ -1,0 +1,17 @@
+[package]
+name = "simoxide-emf"
+description = "The EMF graph shared by SimOxide and its QVTo engine: dynamic metamodels from .ecore, resources, proxies, XMI load and save with EMF's semantics, the change journal and id policy, canonical dump"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+simoxide-jcompat.workspace = true
+qvto-model.workspace = true
+quick-xml = "0.38"
+memchr = "2"
+
+[dev-dependencies]
+qvto-paths.workspace = true

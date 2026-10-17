@@ -17,14 +17,21 @@
 //! * [`fingerprint`]: a content hash of a graph, independent of where the files were loaded
 //!   from, to recognise the model a snapshot belongs to.
 //!
-//! The merge's step M5 replaces the graph with the shared EMF graph (`simoxide-emf`, which has
-//! EMF's own XMI writer); the document form stays, the object table then maps to that graph's
-//! object ids.
+//! The graph is the shared EMF graph (`simoxide-emf`). Objects of other metamodels than
+//! SimOxide's (a QVTo host's metamodel objects, runtime measurement models) and the resources
+//! that hold only such objects are not written: a restored graph has inert placeholders in their
+//! place (objects of Ecore's `EObject` without values, resources without roots), so that every
+//! id stays; their owners rebuild them (`simoxide-reconf`). The fingerprint and the build order
+//! ignore them.
 
 use crate::diag::Level;
 use crate::load::{LoadOptions, Loader};
+use crate::meta::prelude::*;
 use crate::meta::{ClassId, DataKind, FeatureId, FeatureKind, PackageId};
-use crate::raw::{Graph, Obj, ObjId, ResId, Resource, Slot, Value};
+use crate::raw::{Graph, ObjId, PcmGraph, ResId, Value, from_stored, is_pcm_class};
+use simoxide_emf::ResourceKind;
+use simoxide_emf::load_ops::{OwnedSlot, StoredSlot};
+use simoxide_emf_core::ModelStore;
 use std::collections::HashMap;
 use std::fmt::Write as _;
 
@@ -48,22 +55,24 @@ impl Layout {
     /// objects reached from no resource root that are no proxy (or a contained proxy) and whose
     /// container does not hold them.
     fn new(g: &Graph) -> Layout {
-        let n = g.objs.len();
+        let n = g.object_count();
         let mut l = Layout {
             roots: Vec::new(),
             elements: Vec::new(),
             doc: vec![u32::MAX; n],
             frag: vec![String::new(); n],
         };
-        for r in &g.resources {
-            l.add_doc(g, r.roots.clone());
+        for r in g.resources() {
+            l.add_doc(g, r.roots.iter().copied().filter(|&o| pcm(g, o)).collect());
         }
         // detached objects: tops are those whose container does not hold them or is not
         // detached itself; what a cycle leaves over becomes a top as well
-        let cand = |l: &Layout, o: usize| l.doc[o] == u32::MAX && g.objs[o].proxy.is_none();
+        let cand = |l: &Layout, o: usize| {
+            l.doc[o] == u32::MAX && g[ObjId(o as u32)].proxy.is_none() && pcm(g, ObjId(o as u32))
+        };
         let mut tops: Vec<ObjId> = (0..n)
             .filter(|&o| cand(&l, o))
-            .filter(|&o| match g.objs[o].container {
+            .filter(|&o| match g[ObjId(o as u32)].container {
                 None => true,
                 Some((p, f)) => {
                     !g.get_refs(p, f).contains(&ObjId(o as u32)) || !cand(&l, p.0 as usize)
@@ -134,7 +143,7 @@ impl Layout {
 fn tokens(g: &Graph, l: &Layout, d: usize) -> HashMap<ObjId, String> {
     let mut count: HashMap<&str, u32> = HashMap::new();
     for &o in &l.elements[d] {
-        if let Some(x) = g[o].xmi_id.as_deref() {
+        if let Some(x) = g.xmi_id(o) {
             *count.entry(x).or_default() += 1;
         }
         if g[o].proxy.is_none()
@@ -151,7 +160,7 @@ fn tokens(g: &Graph, l: &Layout, d: usize) -> HashMap<ObjId, String> {
     };
     let mut out = HashMap::new();
     for &o in &l.elements[d] {
-        let t = match (g[o].xmi_id.as_deref(), g.id(o)) {
+        let t = match (g.xmi_id(o), g.id(o)) {
             (Some(x), _) if usable(x) => x.to_string(),
             (None, Some(id)) if g[o].proxy.is_none() && usable(id) => id.to_string(),
             _ => l.frag[o.0 as usize].clone(),
@@ -358,7 +367,7 @@ fn write_obj(
             out.push('"');
         }
     }
-    if let Some(x) = &obj.xmi_id {
+    if let Some(x) = g.xmi_id(o) {
         out.push_str(" xmi:id=\"");
         escape_attr(x, out);
         out.push('"');
@@ -376,9 +385,13 @@ fn write_obj(
         if !f.is_persistent() {
             continue;
         }
-        let Some(slot) = g.slot(o, f) else { continue };
+        let slot = g.stored_slot(o, f);
+        if slot == StoredSlot::Unset {
+            continue;
+        }
         match (f.def().kind, slot) {
-            (FeatureKind::Attribute { .. }, Slot::One(v)) if !f.def().many => {
+            (FeatureKind::Attribute { .. }, StoredSlot::Data(v)) if !f.def().many => {
+                let v = &from_stored(v);
                 if round_trips(f, v)
                     && let Some(s) = lexical(f, v)
                 {
@@ -387,9 +400,10 @@ fn write_obj(
                     out.push('"');
                 }
             }
-            (FeatureKind::Attribute { .. }, Slot::Many(vs)) => {
+            (FeatureKind::Attribute { .. }, StoredSlot::Datas(vs, _)) => {
+                let vs: Vec<Value> = vs.iter().map(from_stored).collect();
                 if vs.iter().all(|v| round_trips(f, v)) {
-                    for v in vs {
+                    for v in &vs {
                         let mut e = format!("{indent}  <{}>", f.name());
                         escape_text(&lexical(f, v).unwrap_or_default(), &mut e);
                         let _ = writeln!(e, "</{}>", f.name());
@@ -416,7 +430,7 @@ fn write_obj(
                     .get_refs(o, f)
                     .iter()
                     .copied()
-                    .filter(|&t| g[t].proxy.is_none() && cx.is_element(t))
+                    .filter(|&t| g[t].proxy.is_none() && pcm(g, t) && cx.is_element(t))
                     .collect();
                 if targets.is_empty() {
                     continue;
@@ -463,7 +477,7 @@ fn write_obj(
 /// File name of a resource's document: the last segment of its name, made unique.
 fn doc_names(g: &Graph) -> Vec<String> {
     let mut names: Vec<String> = Vec::new();
-    for (i, r) in g.resources.iter().enumerate() {
+    for (i, r) in g.resources().iter().enumerate() {
         let base = r
             .name
             .rsplit(['/', '\\'])
@@ -491,7 +505,7 @@ pub fn write_xmi(g: &Graph, r: ResId) -> String {
     // other files by their names, bundled models by their URIs
     let locs = doc_names(g)
         .into_iter()
-        .zip(&g.resources)
+        .zip(g.resources())
         .map(|(n, r)| {
             if r.uri.starts_with("file:") {
                 n
@@ -509,6 +523,11 @@ pub fn write_xmi(g: &Graph, r: ResId) -> String {
     write_doc(&cx, r.0 as usize)
 }
 
+/// Whether `o` is an object of SimOxide's metamodels (the others are not written).
+fn pcm(g: &Graph, o: ObjId) -> bool {
+    is_pcm_class(g[o].class)
+}
+
 /// A value of the object table that XMI does not carry.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -516,51 +535,70 @@ pub enum TableSlot {
     /// A single-valued attribute whose value XMI does not carry (`null`, a value of another type
     /// than the feature's, ...).
     One(TableValue),
-    /// A many-valued attribute (empty but set, or values XMI does not carry).
-    Many(Vec<TableValue>),
+    /// A many-valued attribute (empty but set, or values XMI does not carry), with the "set"
+    /// flag of unsettable features.
+    Many(Vec<TableValue>, bool),
     /// A single-valued reference (set to `None`, or to an unresolved proxy).
     Ref(Option<u32>),
-    /// A many-valued reference (empty but set, or holding unresolved proxies).
-    Refs(Vec<u32>),
+    /// A many-valued reference (empty but set, or holding unresolved proxies), with the flag.
+    Refs(Vec<u32>, bool),
 }
 
-/// An attribute value of the object table (a copy of [`Value`]; doubles by their bits).
+/// An attribute value of the object table: a value of the graph (its Java box kept), doubles
+/// and floats by their bits.
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum TableValue {
     Null,
-    Str(String),
-    Int(i64),
-    Double(u64),
     Bool(bool),
-    Enum(u32),
+    Int(i32),
+    Long(i64),
+    Short(i16),
+    Byte(i8),
+    Char(u16),
+    Double(u64),
+    Float(u32),
+    Str(String),
+    Enum(u32, u32),
     Other(String),
 }
 
-impl From<&Value> for TableValue {
-    fn from(v: &Value) -> TableValue {
+impl From<&simoxide_emf::Value> for TableValue {
+    fn from(v: &simoxide_emf::Value) -> TableValue {
+        use simoxide_emf::Value as V;
         match v {
-            Value::Null => TableValue::Null,
-            Value::Str(s) => TableValue::Str(s.to_string()),
-            Value::Int(i) => TableValue::Int(*i),
-            Value::Double(d) => TableValue::Double(d.to_bits()),
-            Value::Bool(b) => TableValue::Bool(*b),
-            Value::Enum(e) => TableValue::Enum(*e),
-            Value::Other(s) => TableValue::Other(s.to_string()),
+            V::Null | V::Obj(_) => TableValue::Null,
+            V::Bool(b) => TableValue::Bool(*b),
+            V::Int(i) => TableValue::Int(*i),
+            V::Long(i) => TableValue::Long(*i),
+            V::Short(i) => TableValue::Short(*i),
+            V::Byte(i) => TableValue::Byte(*i),
+            V::Char(c) => TableValue::Char(*c),
+            V::Double(d) => TableValue::Double(d.to_bits()),
+            V::Float(f) => TableValue::Float(f.to_bits()),
+            V::Str(s) => TableValue::Str(s.to_string()),
+            V::Enum(e, i) => TableValue::Enum(e.0, *i),
+            V::Other(s) => TableValue::Other(s.to_string()),
         }
     }
 }
 
-impl From<&TableValue> for Value {
-    fn from(v: &TableValue) -> Value {
+impl From<&TableValue> for simoxide_emf::Value {
+    fn from(v: &TableValue) -> simoxide_emf::Value {
+        use simoxide_emf::Value as V;
         match v {
-            TableValue::Null => Value::Null,
-            TableValue::Str(s) => Value::Str(s.as_str().into()),
-            TableValue::Int(i) => Value::Int(*i),
-            TableValue::Double(d) => Value::Double(f64::from_bits(*d)),
-            TableValue::Bool(b) => Value::Bool(*b),
-            TableValue::Enum(e) => Value::Enum(*e),
-            TableValue::Other(s) => Value::Other(s.as_str().into()),
+            TableValue::Null => V::Null,
+            TableValue::Bool(b) => V::Bool(*b),
+            TableValue::Int(i) => V::Int(*i),
+            TableValue::Long(i) => V::Long(*i),
+            TableValue::Short(i) => V::Short(*i),
+            TableValue::Byte(i) => V::Byte(*i),
+            TableValue::Char(c) => V::Char(*c),
+            TableValue::Double(d) => V::Double(f64::from_bits(*d)),
+            TableValue::Float(f) => V::Float(f32::from_bits(*f)),
+            TableValue::Str(s) => V::Str(s.as_str().into()),
+            TableValue::Enum(e, i) => V::Enum(simoxide_emf_core::EnumId(*e), *i),
+            TableValue::Other(s) => V::Other(s.as_str().into()),
         }
     }
 }
@@ -572,7 +610,6 @@ pub struct TableProxy {
     pub id: u32,
     pub class: u32,
     pub uri: String,
-    pub xmi_id: Option<String>,
     /// Container and containment feature.
     pub container: Option<(u32, u32)>,
 }
@@ -589,6 +626,9 @@ pub struct XmiResource {
     /// Document file name (unique within the graph; `href`s between the documents use it).
     pub file: String,
     pub xmi: String,
+    /// The resource holds only objects of other metamodels: restored as an empty placeholder
+    /// (with another URI, so that it is not found in place of the rebuilt model).
+    pub foreign: bool,
 }
 
 /// A graph as XMI documents plus the object table (see the module documentation).
@@ -606,8 +646,7 @@ pub struct GraphXmi {
     /// Per detached root: its container and containment feature, if it has one that does not
     /// hold it.
     pub detached_containers: Vec<Option<(u32, u32)>>,
-    /// Per object: its resource (`Obj::resource`) and source line.
-    pub homes: Vec<u32>,
+    /// Per object: its source line.
     pub lines: Vec<u32>,
     /// Proxy URIs of the elements that are proxies (contained proxies).
     pub proxy_uris: Vec<(u32, String)>,
@@ -615,6 +654,19 @@ pub struct GraphXmi {
     pub proxies: Vec<TableProxy>,
     /// Values XMI does not carry: (object, feature, value).
     pub slots: Vec<(u32, u32, TableSlot)>,
+    /// Objects of other metamodels (restored as placeholders).
+    pub foreign: Vec<u32>,
+}
+
+/// The table form of a stored slot (lists with their flag; `None` when unset).
+pub fn table_slot_of(s: StoredSlot<'_>) -> Option<TableSlot> {
+    Some(match s {
+        StoredSlot::Unset => return None,
+        StoredSlot::Data(v) => TableSlot::One(v.into()),
+        StoredSlot::Datas(vs, set) => TableSlot::Many(vs.iter().map(Into::into).collect(), set),
+        StoredSlot::Ref(r) => TableSlot::Ref(r.map(|o| o.0)),
+        StoredSlot::Refs(v, set) => TableSlot::Refs(v.iter().map(|o| o.0).collect(), set),
+    })
 }
 
 impl GraphXmi {
@@ -631,7 +683,7 @@ impl GraphXmi {
         };
         let docs: Vec<String> = (0..l.elements.len()).map(|d| write_doc(&cx, d)).collect();
         let resources = g
-            .resources
+            .resources()
             .iter()
             .enumerate()
             .map(|(i, r)| XmiResource {
@@ -642,6 +694,7 @@ impl GraphXmi {
                 failed: r.failed,
                 file: cx.locs[i].clone(),
                 xmi: docs[i].clone(),
+                foreign: !r.roots.is_empty() && r.roots.iter().all(|&o| !pcm(g, o)),
             })
             .collect();
         let detached = l.elements.len() - 1;
@@ -651,7 +704,12 @@ impl GraphXmi {
             .collect();
         let mut proxy_uris = Vec::new();
         let mut proxies = Vec::new();
-        for (i, o) in g.objs.iter().enumerate() {
+        let mut foreign = Vec::new();
+        for (i, o) in g.objects().enumerate() {
+            if !is_pcm_class(o.class) {
+                foreign.push(i as u32);
+                continue;
+            }
             let Some(uri) = &o.proxy else { continue };
             if l.doc[i] != u32::MAX {
                 proxy_uris.push((i as u32, uri.to_string()));
@@ -660,18 +718,21 @@ impl GraphXmi {
                     id: i as u32,
                     class: o.class.0,
                     uri: uri.to_string(),
-                    xmi_id: o.xmi_id.as_deref().map(str::to_string),
                     container: o.container.map(|(p, f)| (p.0, f.0)),
                 });
             }
         }
         let mut slots = Vec::new();
-        for (i, o) in g.objs.iter().enumerate() {
+        for (i, o) in g.objects().enumerate() {
+            if !is_pcm_class(o.class) {
+                continue;
+            }
+            let id = ObjId(i as u32);
             if o.proxy.is_some() {
                 // a proxy's values (the opposite ends the loader set on it): all in the table
-                for (f, s) in &o.slots {
-                    if let Some(t) = table_slot_of(s) {
-                        slots.push((i as u32, f.0, t));
+                for f in o.class.features() {
+                    if let Some(t) = table_slot_of(g.stored_slot(id, f)) {
+                        slots.push((id.0, f.0, t));
                     }
                 }
                 continue;
@@ -679,38 +740,48 @@ impl GraphXmi {
             if l.doc[i] == u32::MAX {
                 continue;
             }
-            let id = ObjId(i as u32);
-            for (f, s) in &o.slots {
+            for f in o.class.features() {
+                let s = g.stored_slot(id, f);
+                if s == StoredSlot::Unset {
+                    continue;
+                }
                 if !f.is_persistent() {
                     // the loader never sets these; a host may have
                     if let Some(t) = table_slot_of(s) {
-                        slots.push((i as u32, f.0, t));
+                        slots.push((id.0, f.0, t));
                     }
                     continue;
                 }
+                let refs_kept = |v: &[ObjId]| v.iter().all(|t| written_target(g, &l, *t));
                 let table = match s {
-                    Slot::One(v) if !round_trips(*f, v) => Some(TableSlot::One(v.into())),
-                    Slot::Many(vs) if vs.is_empty() || !vs.iter().all(|v| round_trips(*f, v)) => {
-                        Some(TableSlot::Many(vs.iter().map(Into::into).collect()))
-                    }
-                    Slot::Ref(None) => Some(TableSlot::Ref(None)),
-                    Slot::Refs(v) if v.is_empty() => Some(TableSlot::Refs(Vec::new())),
-                    Slot::Ref(Some(t)) if !f.is_containment() && !written_target(g, &l, *t) => {
-                        Some(TableSlot::Ref(Some(t.0)))
-                    }
-                    Slot::Refs(v)
-                        if !f.is_containment() && v.iter().any(|t| !written_target(g, &l, *t)) =>
+                    StoredSlot::Data(v) if !round_trips(f, &from_stored(v)) => table_slot_of(s),
+                    StoredSlot::Datas(vs, set)
+                        if vs.is_empty()
+                            || !set
+                            || !vs.iter().all(|v| round_trips(f, &from_stored(v))) =>
                     {
-                        Some(TableSlot::Refs(v.iter().map(|t| t.0).collect()))
+                        table_slot_of(s)
                     }
-                    Slot::Refs(v)
+                    StoredSlot::Ref(None) => table_slot_of(s),
+                    StoredSlot::Refs(v, set) if v.is_empty() || !set => table_slot_of(s),
+                    StoredSlot::Ref(Some(t))
+                        if !f.is_containment() && !written_target(g, &l, t) =>
+                    {
+                        table_slot_of(s)
+                    }
+                    StoredSlot::Refs(v, _) if !f.is_containment() && !refs_kept(v) => {
+                        table_slot_of(s)
+                    }
+                    StoredSlot::Refs(v, _)
                         if f.is_containment()
                             && v.iter().any(|t| l.doc[t.0 as usize] != l.doc[i]) =>
                     {
-                        Some(TableSlot::Refs(v.iter().map(|t| t.0).collect()))
+                        table_slot_of(s)
                     }
-                    Slot::Ref(Some(t)) if f.is_containment() && l.doc[t.0 as usize] != l.doc[i] => {
-                        Some(TableSlot::Ref(Some(t.0)))
+                    StoredSlot::Ref(Some(t))
+                        if f.is_containment() && l.doc[t.0 as usize] != l.doc[i] =>
+                    {
+                        table_slot_of(s)
                     }
                     _ => None,
                 };
@@ -722,23 +793,24 @@ impl GraphXmi {
         GraphXmi {
             resources,
             detached_xmi: docs[detached].clone(),
-            objects: g.objs.len() as u32,
+            objects: g.object_count() as u32,
             elements: l
                 .elements
                 .iter()
                 .map(|e| e.iter().map(|o| o.0).collect())
                 .collect(),
             detached_containers,
-            homes: g.objs.iter().map(|o| o.resource.0).collect(),
-            lines: g.objs.iter().map(|o| o.line).collect(),
+            lines: g.objects().map(|o| o.line).collect(),
             proxy_uris,
             proxies,
             slots,
+            foreign,
         }
     }
 
     /// The graph saved by [`GraphXmi::save`]: the documents loaded with SimOxide's loader and
-    /// renumbered to the saved object ids, with the object table applied.
+    /// renumbered to the saved object ids, with the object table applied; placeholders for the
+    /// objects of other metamodels.
     pub fn restore(&self) -> Result<Graph, String> {
         let n = self.objects as usize;
         let dir = std::path::Path::new(crate::load::MEMORY_DIR).join("snapshot");
@@ -769,9 +841,10 @@ impl GraphXmi {
             return Err("the snapshot's object table does not match its documents".into());
         }
         // loaded object -> saved id
-        let mut map: Vec<u32> = vec![u32::MAX; g2.objs.len()];
+        let mut map: Vec<u32> = vec![u32::MAX; g2.object_count()];
+        let mut class: Vec<Option<ClassId>> = vec![None; n];
         for (d, &r) in docs.iter().enumerate() {
-            let got = g2.all_contents(r);
+            let got = g2.tree_contents(r);
             if got.len() != self.elements[d].len() {
                 return Err(format!(
                     "document {} has {} objects, the object table {}",
@@ -785,7 +858,14 @@ impl GraphXmi {
                     return Err("object id out of range in the object table".into());
                 }
                 map[o2.0 as usize] = o;
+                class[o as usize] = Some(g2[*o2].class);
             }
+        }
+        for p in &self.proxies {
+            if p.id as usize >= n {
+                return Err("proxy id out of range in the object table".into());
+            }
+            class[p.id as usize] = Some(ClassId(p.class));
         }
         let m = |o2: ObjId| -> Result<ObjId, String> {
             match map[o2.0 as usize] {
@@ -796,120 +876,119 @@ impl GraphXmi {
                 o => Ok(ObjId(o)),
             }
         };
-        let home = |o: u32| ResId(self.homes.get(o as usize).copied().unwrap_or(0));
-        let line = |o: u32| self.lines.get(o as usize).copied().unwrap_or(0);
-        let mut objs: Vec<Option<Obj>> = vec![None; n];
-        for (d, &r) in docs.iter().enumerate() {
-            for o2 in g2.all_contents(r) {
-                let id = map[o2.0 as usize];
-                let src = &g2[o2];
-                let mut slots = Vec::with_capacity(src.slots.len());
-                for (f, s) in &src.slots {
-                    let s = match s {
-                        Slot::Ref(t) => Slot::Ref(t.map(m).transpose()?),
-                        Slot::Refs(v) => {
-                            Slot::Refs(v.iter().map(|&t| m(t)).collect::<Result<_, _>>()?)
+        let mut out = crate::raw::pcm_graph();
+        let placeholder = out.ecore().eobject;
+        for &i in &self.foreign {
+            if i as usize >= n {
+                return Err("object id out of range in the object table".into());
+            }
+            class[i as usize] = Some(placeholder);
+        }
+        for (i, c) in class.iter().enumerate() {
+            let c = c.ok_or_else(|| format!("object #{i} is missing from the snapshot's model"))?;
+            out.load_object(c);
+            out.set_line(ObjId(i as u32), self.lines.get(i).copied().unwrap_or(0));
+        }
+        // the documents' objects: values, references, containers
+        for &r in &docs {
+            for o2 in g2.tree_contents(r) {
+                let id = ObjId(map[o2.0 as usize]);
+                for f in g2[o2].class.features() {
+                    let s = match g2.stored_slot(o2, f) {
+                        StoredSlot::Unset => continue,
+                        StoredSlot::Data(v) => OwnedSlot::Data(v.clone()),
+                        StoredSlot::Datas(v, set) => OwnedSlot::Datas(v.to_vec(), set),
+                        StoredSlot::Ref(t) => OwnedSlot::Ref(t.map(m).transpose()?),
+                        StoredSlot::Refs(v, set) => {
+                            OwnedSlot::Refs(v.iter().map(|&t| m(t)).collect::<Result<_, _>>()?, set)
                         }
-                        s => s.clone(),
                     };
-                    slots.push((*f, s));
+                    out.set_stored_slot(id, f, s);
                 }
-                let mut obj = src.clone();
-                obj.slots = slots;
-                obj.container = src
+                let c = g2[o2]
                     .container
                     .map(|(p, f)| m(p).map(|p| (p, f)))
                     .transpose()?;
-                obj.resource = home(id);
-                obj.line = line(id);
-                objs[id as usize] = Some(obj);
-                let _ = d;
+                out.set_container_raw(id, c);
             }
         }
         // detached roots keep the container that does not hold them
         let det = docs.len() - 1;
-        let det_roots = &g2.resources[docs[det].0 as usize].roots;
-        for (i, r2) in det_roots.iter().enumerate() {
-            let id = map[r2.0 as usize] as usize;
-            if let Some(o) = objs[id].as_mut() {
-                o.container = self
-                    .detached_containers
+        for (i, r2) in g2.resource(docs[det]).roots.iter().enumerate() {
+            let id = ObjId(map[r2.0 as usize]);
+            out.set_container_raw(
+                id,
+                self.detached_containers
                     .get(i)
                     .copied()
                     .flatten()
-                    .map(|(p, f)| (ObjId(p), FeatureId(f)));
-            }
+                    .map(|(p, f)| (ObjId(p), FeatureId(f))),
+            );
         }
         for (id, uri) in &self.proxy_uris {
-            if let Some(o) = objs.get_mut(*id as usize).and_then(Option::as_mut) {
-                o.proxy = Some(uri.as_str().into());
-                o.slots.clear();
+            let o = ObjId(*id);
+            out.set_proxy_uri(o, Some(uri));
+            for f in out[o].class.features() {
+                out.set_stored_slot(o, f, OwnedSlot::Unset);
             }
         }
         for p in &self.proxies {
-            let i = p.id as usize;
-            if i >= n {
-                return Err("proxy id out of range in the object table".into());
-            }
-            objs[i] = Some(Obj {
-                class: ClassId(p.class),
-                resource: home(p.id),
-                container: p.container.map(|(c, f)| (ObjId(c), FeatureId(f))),
-                proxy: Some(p.uri.as_str().into()),
-                xmi_id: p.xmi_id.as_deref().map(Into::into),
-                slots: Vec::new(),
-                line: line(p.id),
-                attached: false,
-            });
+            let o = ObjId(p.id);
+            out.set_proxy_uri(o, Some(&p.uri));
+            out.set_container_raw(o, p.container.map(|(c, f)| (ObjId(c), FeatureId(f))));
         }
         for (o, f, t) in &self.slots {
-            let Some(obj) = objs.get_mut(*o as usize).and_then(Option::as_mut) else {
+            if *o as usize >= n {
                 return Err("object table slot of a missing object".into());
-            };
-            let f = FeatureId(*f);
-            let s = match t {
-                TableSlot::One(v) => Slot::One(v.into()),
-                TableSlot::Many(v) => Slot::Many(v.iter().map(Into::into).collect()),
-                TableSlot::Ref(r) => Slot::Ref(r.map(ObjId)),
-                TableSlot::Refs(v) => Slot::Refs(v.iter().map(|&x| ObjId(x)).collect()),
-            };
-            match obj.slots.iter_mut().find(|(g, _)| *g == f) {
-                Some((_, x)) => *x = s,
-                None => obj.slots.push((f, s)),
             }
-        }
-        let mut out = Graph {
-            objs: Vec::with_capacity(n),
-            resources: Vec::with_capacity(self.resources.len()),
-        };
-        for (i, o) in objs.into_iter().enumerate() {
-            out.objs.push(
-                o.ok_or_else(|| format!("object #{i} is missing from the snapshot's model"))?,
-            );
+            let (o, f) = (ObjId(*o), FeatureId(*f));
+            let s = match t {
+                TableSlot::One(v) => OwnedSlot::Data(v.into()),
+                TableSlot::Many(v, set) => {
+                    OwnedSlot::Datas(v.iter().map(Into::into).collect(), *set)
+                }
+                TableSlot::Ref(r) => OwnedSlot::Ref(r.map(ObjId)),
+                TableSlot::Refs(v, set) => {
+                    OwnedSlot::Refs(v.iter().map(|&x| ObjId(x)).collect(), *set)
+                }
+            };
+            out.set_stored_slot(o, f, s);
         }
         for (i, r) in self.resources.iter().enumerate() {
-            let r2 = &g2.resources[docs[i].0 as usize];
-            out.resources.push(Resource {
-                uri: r.uri.clone(),
-                name: r.name.clone(),
-                path: r.path.as_ref().map(Into::into),
-                roots: r2.roots.iter().map(|&o| m(o)).collect::<Result<_, _>>()?,
-                errors: r.errors.clone(),
-                failed: r.failed,
-            });
+            let uri = if r.foreign {
+                format!("simoxide:/snapshot-placeholder/{i}")
+            } else {
+                r.uri.clone()
+            };
+            let nr = out.create_resource_kind(&uri, ResourceKind::Xmi);
+            let res = out.resource_mut(nr);
+            res.name = r.name.clone();
+            res.path = r.path.as_ref().map(Into::into);
+            res.errors = r.errors.clone();
+            res.failed = r.failed;
+            let r2 = docs[i];
+            for &o2 in &g2.resource(r2).roots {
+                out.load_add_root(nr, m(o2)?);
+            }
+            for o2 in g2.tree_contents(r2) {
+                if let Some(x) = g2.xmi_id(o2) {
+                    let x = x.to_string();
+                    out.set_xmi_id(nr, m(o2)?, Some(&x));
+                }
+            }
         }
         Ok(out)
     }
 }
 
-/// A slot of a non-persistent feature as a table entry.
-fn table_slot_of(s: &Slot) -> Option<TableSlot> {
-    Some(match s {
-        Slot::One(v) => TableSlot::One(v.into()),
-        Slot::Many(vs) => TableSlot::Many(vs.iter().map(Into::into).collect()),
-        Slot::Ref(r) => TableSlot::Ref(r.map(|o| o.0)),
-        Slot::Refs(v) => TableSlot::Refs(v.iter().map(|o| o.0).collect()),
-    })
+/// The stored slot of a table entry (see [`table_slot_of`]).
+pub fn owned_slot(t: &TableSlot) -> OwnedSlot {
+    match t {
+        TableSlot::One(v) => OwnedSlot::Data(v.into()),
+        TableSlot::Many(v, set) => OwnedSlot::Datas(v.iter().map(Into::into).collect(), *set),
+        TableSlot::Ref(r) => OwnedSlot::Ref(r.map(ObjId)),
+        TableSlot::Refs(v, set) => OwnedSlot::Refs(v.iter().map(|&x| ObjId(x)).collect(), *set),
+    }
 }
 
 /// A reference target the documents carry (an element that is no proxy).
@@ -917,53 +996,66 @@ fn written_target(g: &Graph, l: &Layout, t: ObjId) -> bool {
     g[t].proxy.is_none() && l.doc[t.0 as usize] != u32::MAX
 }
 
-/// Compares two graphs object for object (class, home, container, proxy, `xmi:id`, slots in any
-/// order, line) and resource for resource: `Err` names the first difference.
+/// Compares two graphs object for object (class, root resource, container, proxy, `xmi:id`,
+/// stored features, line) and resource for resource: `Err` names the first difference. Objects
+/// of other metamodels are compared by their number only.
 pub fn same_graph(a: &Graph, b: &Graph) -> Result<(), String> {
-    if a.objs.len() != b.objs.len() {
-        return Err(format!("{} vs {} objects", a.objs.len(), b.objs.len()));
-    }
-    if a.resources.len() != b.resources.len() {
+    if a.object_count() != b.object_count() {
         return Err(format!(
-            "{} vs {} resources",
-            a.resources.len(),
-            b.resources.len()
+            "{} vs {} objects",
+            a.object_count(),
+            b.object_count()
         ));
     }
-    for (i, (x, y)) in a.resources.iter().zip(&b.resources).enumerate() {
-        if x.uri != y.uri
+    if a.resources().len() != b.resources().len() {
+        return Err(format!(
+            "{} vs {} resources",
+            a.resources().len(),
+            b.resources().len()
+        ));
+    }
+    let pcm_roots = |g: &Graph, r: &simoxide_emf::Resource| -> Vec<ObjId> {
+        r.roots.iter().copied().filter(|&o| pcm(g, o)).collect()
+    };
+    for (i, (x, y)) in a.resources().iter().zip(b.resources()).enumerate() {
+        let foreign = |g: &Graph, r: &simoxide_emf::Resource| {
+            !r.roots.is_empty() && r.roots.iter().all(|&o| !pcm(g, o))
+        };
+        if (x.uri != y.uri && !foreign(a, x))
             || x.name != y.name
             || x.path != y.path
-            || x.roots != y.roots
+            || pcm_roots(a, x) != pcm_roots(b, y)
             || x.errors != y.errors
             || x.failed != y.failed
         {
             return Err(format!("resource {i} ({}) differs", x.name));
         }
     }
-    for (i, (x, y)) in a.objs.iter().zip(&b.objs).enumerate() {
+    for i in 0..a.object_count() {
+        let o = ObjId(i as u32);
+        let (x, y) = (&a[o], &b[o]);
+        if !is_pcm_class(x.class) {
+            if is_pcm_class(y.class) {
+                return Err(format!("object #{i}: class differs"));
+            }
+            continue;
+        }
         let what = if x.class != y.class {
             "class"
-        } else if x.resource != y.resource {
+        } else if a.direct_resource(o) != b.direct_resource(o) {
             "resource"
         } else if x.container != y.container {
             "container"
         } else if x.proxy != y.proxy {
             "proxy"
-        } else if x.xmi_id != y.xmi_id {
+        } else if a.xmi_id(o) != b.xmi_id(o) {
             "xmi:id"
         } else if x.line != y.line {
             "line"
-        } else if x.slots.len() != y.slots.len() {
-            "set features"
         } else {
             let mut d = "";
-            for (f, s) in &x.slots {
-                let Some((_, t)) = y.slots.iter().find(|(g, _)| g == f) else {
-                    d = "set features";
-                    break;
-                };
-                if !same_slot(s, t) {
+            for f in x.class.features() {
+                if !same_slot(a.stored_slot(o, f), b.stored_slot(o, f)) {
                     d = f.name();
                     break;
                 }
@@ -971,50 +1063,54 @@ pub fn same_graph(a: &Graph, b: &Graph) -> Result<(), String> {
             d
         };
         if !what.is_empty() {
-            return Err(format!(
-                "object #{i} ({}): {what} differs",
-                a.describe(ObjId(i as u32))
-            ));
+            return Err(format!("object #{i} ({}): {what} differs", a.describe(o)));
         }
     }
     Ok(())
 }
 
-fn same_slot(a: &Slot, b: &Slot) -> bool {
-    let same = |x: &Value, y: &Value| match (x, y) {
-        (Value::Double(p), Value::Double(q)) => p.to_bits() == q.to_bits(),
-        _ => x == y,
-    };
+fn same_slot(a: StoredSlot<'_>, b: StoredSlot<'_>) -> bool {
+    let same =
+        |x: &simoxide_emf::Value, y: &simoxide_emf::Value| x.as_datum().java_equals(&y.as_datum());
     match (a, b) {
-        (Slot::One(x), Slot::One(y)) => same(x, y),
-        (Slot::Many(x), Slot::Many(y)) => {
-            x.len() == y.len() && x.iter().zip(y).all(|(p, q)| same(p, q))
+        (StoredSlot::Unset, StoredSlot::Unset) => true,
+        (StoredSlot::Data(x), StoredSlot::Data(y)) => same(x, y),
+        (StoredSlot::Datas(x, p), StoredSlot::Datas(y, q)) => {
+            p == q && x.len() == y.len() && x.iter().zip(y).all(|(u, v)| same(u, v))
         }
-        (Slot::Ref(x), Slot::Ref(y)) => x == y,
-        (Slot::Refs(x), Slot::Refs(y)) => x == y,
+        (StoredSlot::Ref(x), StoredSlot::Ref(y)) => x == y,
+        (StoredSlot::Refs(x, p), StoredSlot::Refs(y, q)) => p == q && x == y,
         _ => false,
     }
 }
 
 /// A content hash of `g` (two 64-bit FNV-1a lanes): classes, ids, values and references of
-/// every object in id order and the resources' names and roots, not the places the files were
-/// read from (absolute paths, source lines). Equal models loaded from different directories
-/// have equal fingerprints.
+/// every object of SimOxide's metamodels in id order and the names and roots of the resources
+/// that hold any, not the places the files were read from (absolute paths, source lines).
+/// Equal models loaded from different directories have equal fingerprints.
 pub fn fingerprint(g: &Graph) -> [u64; 2] {
     let mut h = Fnv::new();
-    h.u64(g.resources.len() as u64);
-    for r in &g.resources {
+    for r in g.resources() {
+        let roots: Vec<ObjId> = r.roots.iter().copied().filter(|&o| pcm(g, o)).collect();
+        if roots.is_empty() && !r.failed {
+            continue;
+        }
         h.str(&r.name);
         h.u64(r.failed as u64);
-        h.u64(r.roots.len() as u64);
-        for o in &r.roots {
+        h.u64(roots.len() as u64);
+        for o in &roots {
             h.u64(o.0 as u64);
         }
     }
-    h.u64(g.objs.len() as u64);
-    for o in &g.objs {
+    h.u64(g.object_count() as u64);
+    for (i, o) in g.objects().enumerate() {
+        let id = ObjId(i as u32);
+        if !is_pcm_class(o.class) {
+            continue;
+        }
+        h.u64(i as u64);
         h.u64(o.class.0 as u64);
-        h.u64(o.resource.0 as u64);
+        h.u64(g.direct_resource(id).map_or(0, |r| 1 + r.0 as u64));
         match o.container {
             Some((p, f)) => {
                 h.u64(1 + p.0 as u64);
@@ -1031,21 +1127,23 @@ pub fn fingerprint(g: &Graph) -> [u64; 2] {
             }
             None => h.u64(0),
         }
-        h.str(o.xmi_id.as_deref().unwrap_or(""));
-        let mut slots: Vec<&(FeatureId, Slot)> = o.slots.iter().collect();
-        slots.sort_by_key(|(f, _)| *f);
-        h.u64(slots.len() as u64);
-        for (f, s) in slots {
+        h.str(g.xmi_id(id).unwrap_or(""));
+        for f in o.class.features() {
+            let s = g.stored_slot(id, f);
+            if s == StoredSlot::Unset {
+                continue;
+            }
             h.u64(f.0 as u64);
             match s {
-                Slot::One(v) => h.value(v),
-                Slot::Many(vs) => {
-                    h.u64(vs.len() as u64);
-                    vs.iter().for_each(|v| h.value(v));
+                StoredSlot::Unset => {}
+                StoredSlot::Data(v) => h.value(&from_stored(v)),
+                StoredSlot::Datas(vs, set) => {
+                    h.u64(vs.len() as u64 + ((set as u64) << 40));
+                    vs.iter().for_each(|v| h.value(&from_stored(v)));
                 }
-                Slot::Ref(r) => h.u64(r.map_or(0, |o| 1 + o.0 as u64)),
-                Slot::Refs(v) => {
-                    h.u64(v.len() as u64);
+                StoredSlot::Ref(r) => h.u64(r.map_or(0, |o| 1 + o.0 as u64)),
+                StoredSlot::Refs(v, set) => {
+                    h.u64(v.len() as u64 + ((set as u64) << 40));
                     v.iter().for_each(|o| h.u64(o.0 as u64));
                 }
             }

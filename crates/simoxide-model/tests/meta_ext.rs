@@ -1,22 +1,18 @@
-//! The extension tables (`meta::PACKAGE_EXT` etc.) agree with the main tables.
+//! The static tables (`meta::PACKAGES` etc., the EMF registry's seed) are consistent: the
+//! fields derived for static readers agree with the EMF facts.
 
+use simoxide_model::meta::prelude::*;
 use simoxide_model::meta::{
-    CLASS_EXT, CLASSES, ClassId, ClassifierRef, DATA_TYPES, ENUMS, FEATURE_EXT, FEATURES,
-    FeatureKind, OPERATIONS, PACKAGE_EXT, PACKAGES, PackageId, TypeRef, class, enums, feat,
-    package_by_ns,
+    CLASSES, ClassId, Classifier, DATA_TYPES, ENUMS, FEATURES, FeatureKind, OPERATIONS, PACKAGES,
+    PackageId, TypeRef, class, enums, feat, package_by_ns,
 };
-use simoxide_model::raw::{Graph, ResId};
 
 #[test]
-fn extension_tables_agree_with_main_tables() {
-    assert_eq!(PACKAGE_EXT.len(), PACKAGES.len());
-    assert_eq!(CLASS_EXT.len(), CLASSES.len());
-    assert_eq!(FEATURE_EXT.len(), FEATURES.len());
-    for (c, x) in CLASSES.iter().zip(CLASS_EXT) {
-        assert_eq!(c.is_abstract, x.is_abstract || x.is_interface, "{}", c.name);
-        // the main tables' supertypes are the complete ones without the Ecore classes, in order
-        let classes: Vec<_> = x
-            .supers
+fn derived_fields_agree_with_the_emf_facts() {
+    for c in CLASSES {
+        // `supers` are the complete supertypes without the Ecore classes, in order
+        let classes: Vec<_> = c
+            .super_types
             .iter()
             .filter_map(|t| match t {
                 TypeRef::Class(s) => Some(*s),
@@ -24,10 +20,11 @@ fn extension_tables_agree_with_main_tables() {
             })
             .collect();
         assert_eq!(c.supers, classes, "{}", c.name);
+        assert!(!c.is_interface || c.is_abstract, "{}", c.name);
     }
-    for (f, x) in FEATURES.iter().zip(FEATURE_EXT) {
-        assert_eq!(f.many, x.upper != 1, "{}", f.name);
-        match (f.kind, x.ty) {
+    for f in FEATURES {
+        assert_eq!(f.many, f.upper != 1, "{}", f.name);
+        match (f.kind, f.ty) {
             (FeatureKind::Reference { target, .. }, TypeRef::Class(t)) => assert_eq!(target, t),
             (FeatureKind::Reference { .. }, t) => panic!("{}: reference typed {t:?}", f.name),
             (FeatureKind::Attribute { .. }, TypeRef::Class(_)) => panic!("{}", f.name),
@@ -36,17 +33,17 @@ fn extension_tables_agree_with_main_tables() {
     }
     // every classifier is listed once, in its own package
     let mut seen_classes = vec![0; CLASSES.len()];
-    for (i, p) in PACKAGE_EXT.iter().enumerate() {
+    for (i, p) in PACKAGES.iter().enumerate() {
         assert_eq!(p.location.is_some(), p.super_package.is_none());
         for k in p.classifiers {
             match *k {
-                ClassifierRef::Class(c) => {
+                Classifier::Class(c) => {
                     assert_eq!(c.def().package, PackageId(i as u32));
                     seen_classes[c.0 as usize] += 1;
                 }
-                ClassifierRef::Enum(e) => assert_eq!(e.def().package, PackageId(i as u32)),
-                ClassifierRef::DataType(d) => {
-                    assert_eq!(DATA_TYPES[d as usize].package, PackageId(i as u32))
+                Classifier::Enum(e) => assert_eq!(e.def().package, PackageId(i as u32)),
+                Classifier::DataType(d) => {
+                    assert_eq!(DATA_TYPES[d.index()].package, PackageId(i as u32))
                 }
             }
         }
@@ -60,14 +57,17 @@ fn extension_tables_agree_with_main_tables() {
 }
 
 #[test]
-fn add_object_appends_a_detached_object() {
-    let mut g = Graph::default();
-    g.resources.push(Default::default());
-    let c = simoxide_model::meta::class::ResourceContainer;
-    let o = g.add_object(c, ResId(0));
-    assert_eq!(g[o].class, c);
-    assert!(g[o].container.is_none() && g[o].slots.is_empty());
-    assert!(g.resources[0].roots.is_empty());
+fn the_graph_registry_has_the_tables_ids() {
+    use simoxide_emf_core::ModelStore;
+    let g = simoxide_model::raw::pcm_graph();
+    let m = g.meta();
+    for (i, c) in CLASSES.iter().enumerate() {
+        assert_eq!(&*m.class(ClassId(i as u32)).name, c.name);
+    }
+    for (i, f) in FEATURES.iter().enumerate() {
+        let fi = m.feature(simoxide_model::meta::FeatureId(i as u32));
+        assert_eq!((&*fi.name, fi.owner), (f.name, f.owner));
+    }
 }
 
 #[test]
@@ -96,11 +96,10 @@ fn generic_supertypes_are_in_the_main_tables() {
 }
 
 #[test]
-fn ecore_supertypes_are_in_the_extension_tables() {
+fn ecore_supertypes_are_in_the_tables() {
     // PCMBaseClass: eSuperTypes="#//PCMClass ...Ecore.ecore#//EObject"; Ecore classes have no ClassId
-    let x = &CLASS_EXT[class::PCMBaseClass.0 as usize];
     assert_eq!(
-        x.supers,
+        class::PCMBaseClass.def().super_types,
         [TypeRef::Class(class::PCMClass), TypeRef::Ecore("EObject")]
     );
     assert_eq!(class::PCMBaseClass.def().supers, [class::PCMClass]);
@@ -170,7 +169,7 @@ fn spd_packages_are_appended() {
     );
     assert_eq!(class::SPD.0 as usize, c + 1);
     assert_eq!(
-        PACKAGE_EXT[p].location,
+        PACKAGES[p].location,
         Some("platform:/plugin/org.palladiosimulator.spd/model/SPD.ecore")
     );
     // cross-metamodel references and supertypes resolve into the base tables

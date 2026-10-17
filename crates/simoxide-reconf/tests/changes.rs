@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use simoxide_model::meta::feat as mf;
-use simoxide_reconf::{Edit, Session};
+use simoxide_reconf::Edit;
 use simoxide_sim::{
     ChangeError, ChangeReport, CompiledModel, Fast, Mode, Outputs, Pause, RunResult, RunSpec,
     SimConfig, Simulation,
@@ -168,7 +168,7 @@ fn run(cm: &CompiledModel, cfg: &SimConfig) -> Out {
 }
 
 /// An edit of a run.
-type EditFn = dyn Fn(&mut Edit<'_>);
+type EditFn = dyn Fn(&mut Edit);
 
 /// Runs to `pause`, applies `edit` (unless `None`), finishes: the output and the report.
 fn run_with(
@@ -181,8 +181,7 @@ fn run_with(
     let mut sim = Simulation::new(cm, cfg.clone(), w.outputs()).unwrap();
     sim.run_until(pause).unwrap();
     let report = edit.map(|f| {
-        let mut session = Session::new();
-        let mut e = Edit::new(&sim, &mut session);
+        let mut e = Edit::new(&sim);
         f(&mut e);
         e.apply(&mut sim)
     });
@@ -217,7 +216,7 @@ fn demands(trace: &str) -> Vec<(f64, String, f64, f64)> {
 }
 
 /// h19: a copy of the server's container, connected to the LAN, and the server allocated to it.
-fn scale_out(e: &mut Edit<'_>) {
+fn scale_out(e: &mut Edit) {
     let server = e.find("_h19_linking_resource_rc2").unwrap();
     let copy = e.clone_container(server, "_rc3", "ServerNode2").unwrap();
     for link in e.links_of(server) {
@@ -267,7 +266,7 @@ fn added_container_and_allocation_receive_the_load() {
 #[test]
 fn rate_change_before_the_start_equals_the_changed_model() {
     let (cm, cfg) = corpus(H19);
-    let set = |e: &mut Edit<'_>| {
+    let set = |e: &mut Edit| {
         let prs = e.find("_h19_linking_resource_prs2").unwrap();
         e.set_rate(prs, "2.5").unwrap();
     };
@@ -292,7 +291,7 @@ fn rate_change_mid_run_applies_to_later_demands() {
         max_measurements: 300,
         ..cfg
     };
-    let set = |e: &mut Edit<'_>| {
+    let set = |e: &mut Edit| {
         let prs = e.find("_h19_linking_resource_prs2").unwrap();
         e.set_rate(prs, "4.0").unwrap();
     };
@@ -313,7 +312,7 @@ fn rate_change_mid_run_applies_to_later_demands() {
 #[test]
 fn link_latency_and_seff_demand_changes_before_the_start_equal_the_changed_model() {
     let (cm, cfg) = corpus(H19);
-    let lat = |e: &mut Edit<'_>| {
+    let lat = |e: &mut Edit| {
         let spec = e.find("_h19_linking_resource_clrs1").unwrap();
         e.set_spec(
             spec,
@@ -329,7 +328,7 @@ fn link_latency_and_seff_demand_changes_before_the_start_equal_the_changed_model
     });
     assert_same("latency 0.05 from the start", &run(&cm2, &cfg2), &got);
 
-    let demand = |e: &mut Edit<'_>| {
+    let demand = |e: &mut Edit| {
         let g = e.graph();
         // the demand of the server's internal action
         let act = e.find("_h19_linking_resource_act5").unwrap();
@@ -359,7 +358,7 @@ fn link_latency_and_seff_demand_changes_before_the_start_equal_the_changed_model
 #[test]
 fn seff_demand_change_mid_run_applies_to_new_executions() {
     let (cm, cfg) = corpus(H19);
-    let demand = |e: &mut Edit<'_>| {
+    let demand = |e: &mut Edit| {
         let act = e.find("_h19_linking_resource_act5").unwrap();
         let d = e.graph().get_refs(
             act,
@@ -391,7 +390,7 @@ fn removed_container_keeps_simulating() {
         ..cfg
     };
     let want = run(&cm, &cfg);
-    let remove = |e: &mut Edit<'_>| {
+    let remove = |e: &mut Edit| {
         let server = e.find("_h19_linking_resource_rc2").unwrap();
         e.remove_from_environment(server).unwrap();
     };
@@ -402,7 +401,7 @@ fn removed_container_keeps_simulating() {
     // SimuLizar's syncers ignore the removal: the run is the uninterrupted one
     assert_same("container removed", &want, &got);
     // deleting it unsets the allocation context's container: SimuLizar's syncer aborts
-    let delete = |e: &mut Edit<'_>| {
+    let delete = |e: &mut Edit| {
         let server = e.find("_h19_linking_resource_rc2").unwrap();
         e.delete(server);
     };
@@ -418,7 +417,7 @@ fn removed_container_keeps_simulating() {
 fn removed_allocation_context_aborts_and_leaves_the_run_unchanged() {
     let (cm, cfg) = corpus(H19);
     let want = run(&cm, &cfg);
-    let remove = |e: &mut Edit<'_>| {
+    let remove = |e: &mut Edit| {
         let a = e.find("_h19_linking_resource_alc2").unwrap();
         e.delete(a);
     };
@@ -434,19 +433,15 @@ fn removed_allocation_context_aborts_and_leaves_the_run_unchanged() {
 fn population_change_is_not_supported_yet() {
     let (cm, cfg) = corpus("h06_closed_think");
     let want = run(&cm, &cfg);
-    let set = |e: &mut Edit<'_>| {
+    let set = |e: &mut Edit| {
         let g = e.graph();
-        let w = (0..g.objs.len() as u32)
+        let w = (0..g.object_count() as u32)
             .map(simoxide_model::raw::ObjId)
             .find(|&o| g[o].class == simoxide_model::meta::class::ClosedWorkload)
             .unwrap();
         use qvto_model::ModelStore;
         e.store()
-            .set(
-                w.0,
-                qvto_model::FeatureId(mf::ClosedWorkload_population.0),
-                qvto_model::Datum::Int(8),
-            )
+            .set(w, mf::ClosedWorkload_population, qvto_model::Datum::Int(8))
             .unwrap();
     };
     let (got, report) = run_with(&cm, &cfg, Pause::After(2 * S), Some(&set));
@@ -473,8 +468,7 @@ fn fork_with_a_change_equals_the_change_then_continue() {
     let wf = W::default();
     let mut fork = sim.fork(wf.outputs()).unwrap();
     let prefix = (w.trace.take(), w.tape.take());
-    let mut session = Session::new();
-    let mut e = Edit::new(&fork, &mut session);
+    let mut e = Edit::new(&fork);
     scale_out(&mut e);
     e.apply(&mut fork).unwrap();
     let got = Out {
@@ -501,8 +495,7 @@ fn fork_resume_and_detach_after_changes_equal_the_continuation() {
     };
     // two generations: scale out, then the new container gets a faster CPU
     let edits = |sim: &mut Simulation<'_>, k: u32| {
-        let mut session = Session::new();
-        let mut e = Edit::new(sim, &mut session);
+        let mut e = Edit::new(sim);
         if k == 0 {
             scale_out(&mut e);
         } else {
@@ -577,8 +570,7 @@ fn changes_are_deterministic_also_in_fast_mode() {
         let w = W::default();
         let mut sim = Simulation::<Fast>::create(&cm, fast.clone(), w.fast_outputs()).unwrap();
         sim.run_until(Pause::After(7 * S)).unwrap();
-        let mut session = Session::new();
-        let mut e = Edit::new(&sim, &mut session);
+        let mut e = Edit::new(&sim);
         scale_out(&mut e);
         e.apply(&mut sim).unwrap();
         (fingerprint(&sim.finish()), w.trace.take())
@@ -598,17 +590,16 @@ fn successive_change_sets_add_change_and_remove_a_container() {
     let w = W::default();
     let mut sim = Simulation::new(&cm, cfg, w.outputs()).unwrap();
     sim.run_until(Pause::After(5 * S)).unwrap();
-    let mut session = Session::new();
-    let mut e = Edit::new(&sim, &mut session);
+    let mut e = Edit::new(&sim);
     scale_out(&mut e);
     assert_eq!(e.apply(&mut sim).unwrap().generation, 1);
     sim.run_until(Pause::After(10 * S)).unwrap();
-    let mut e = Edit::new(&sim, &mut session);
+    let mut e = Edit::new(&sim);
     let p = e.find("_rc3_0").unwrap();
     e.set_rate(p, "0.5").unwrap();
     assert_eq!(e.apply(&mut sim).unwrap().generation, 2);
     sim.run_until(Pause::After(15 * S)).unwrap();
-    let mut e = Edit::new(&sim, &mut session);
+    let mut e = Edit::new(&sim);
     let c = e.find("_rc3").unwrap();
     e.remove_from_environment(c).unwrap();
     let r = e.apply(&mut sim).unwrap();
@@ -635,8 +626,7 @@ fn a_new_link_gives_a_route() {
     let w = W::default();
     let mut sim = Simulation::new(&cm, cfg, w.outputs()).unwrap();
     sim.run_until(Pause::After(5 * S)).unwrap();
-    let mut session = Session::new();
-    let mut e = Edit::new(&sim, &mut session);
+    let mut e = Edit::new(&sim);
     let server = e.find("_h19_linking_resource_rc2").unwrap();
     let copy = e.clone_container(server, "_rc3", "ServerNode2").unwrap();
     let ac = e.find("_h19_linking_resource_ac2").unwrap();
@@ -646,7 +636,7 @@ fn a_new_link_gives_a_route() {
     let err = probe.run_until(Pause::After(20 * S)).unwrap_err();
     assert!(err.message.contains("Could not determine route"), "{err}");
     // now connect it
-    let mut e = Edit::new(&sim, &mut session);
+    let mut e = Edit::new(&sim);
     let link = e.find("_h19_linking_resource_link1").unwrap();
     let c = e.find("_rc3").unwrap();
     e.connect(link, c).unwrap();
@@ -659,7 +649,7 @@ fn a_new_link_gives_a_route() {
 fn branch_probabilities_before_the_start_equal_the_changed_model() {
     let name = "h07_prob_branch";
     let (cm, cfg) = corpus(name);
-    let set = |e: &mut Edit<'_>| {
+    let set = |e: &mut Edit| {
         for (id, p) in [("_h07_prob_branch_bt1", 0.6), ("_h07_prob_branch_bt2", 0.1)] {
             let t = e.find(id).unwrap();
             e.set_double(t, mf::ProbabilisticBranchTransition_branchProbability, p)
@@ -687,7 +677,7 @@ fn composite_allocated_to_a_new_container_moves_its_inner_assemblies() {
         max_measurements: 300,
         ..cfg
     };
-    let edit = |e: &mut Edit<'_>| {
+    let edit = |e: &mut Edit| {
         let node = e.find("_h15_composite_rc1").unwrap();
         let copy = e.clone_container(node, "_rc2", "Node2").unwrap();
         let ac = e.find("_h15_composite_ac3").unwrap();
@@ -719,7 +709,7 @@ fn rewired_connector_calls_a_new_assembly_context() {
         max_measurements: 300,
         ..cfg
     };
-    let edit = |e: &mut Edit<'_>| {
+    let edit = |e: &mut Edit| {
         let c = e.find("_h14_call_chain_3_ac3").unwrap();
         let c2 = e.clone_assembly(c, "_ac4", "Assembly_C2").unwrap();
         let node = e.find("_h14_call_chain_3_rc3").unwrap();

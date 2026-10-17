@@ -8,8 +8,9 @@
 //! Metamodel: `SPD.ecore` and `semantic.ecore` of Palladio-Addons-SPD-Metamodel
 //! (`DESIGN-SPD.md` §1.1), in the generated tables of `simoxide-model`.
 
+use simoxide_model::meta::prelude::*;
 use simoxide_model::meta::{ClassId, FeatureId, class, feat};
-use simoxide_model::raw::{Graph, ObjId, Value};
+use simoxide_model::raw::{Graph, ObjId, PcmGraph, Value};
 
 /// A configuration error of the SPD model (fixed behaviour of Q11; with the compat flag,
 /// Slingshot drops the whole SPD instead, see [`crate::Quirks::q11_setup_error_drops_spd`]).
@@ -321,10 +322,10 @@ fn is(g: &Graph, o: ObjId, c: ClassId) -> bool {
 impl SpdModel {
     /// The SPD of `g`: `None` when the graph has no `SPD` object.
     pub fn from_graph(g: &Graph) -> Option<SpdModel> {
-        let spd = (0..g.objs.len() as u32)
+        let spd = (0..g.object_count() as u32)
             .map(ObjId)
             .find(|&o| g[o].proxy.is_none() && g[o].class == class::SPD)?;
-        let configuration = (0..g.objs.len() as u32)
+        let configuration = (0..g.object_count() as u32)
             .map(ObjId)
             .find(|&o| g[o].proxy.is_none() && g[o].class == class::Configuration);
         let groups: Vec<TargetGroup> = g
@@ -616,7 +617,7 @@ impl Membership {
             .and_then(|c| g.get_ref(c, feat::Configuration_allocation))
             .filter(|&a| g[a].proxy.is_none())
             .or_else(|| {
-                (0..g.objs.len() as u32)
+                (0..g.object_count() as u32)
                     .map(ObjId)
                     .find(|&o| g[o].proxy.is_none() && g[o].class == class::Allocation)
             });

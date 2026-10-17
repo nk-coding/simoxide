@@ -18,8 +18,13 @@ use std::sync::Arc;
 ///
 /// A run without model changes never reads or writes this (one `None` per state); its clone is
 /// a reference count.
+///
+/// The run's model graph can also differ from its compiled model's outside SimOxide's
+/// metamodels only ([`Simulation::set_model_graph`]: models of other metamodels such as a
+/// runtime measurement model, a QVTo host's metamodel objects and id generator); the compiled
+/// model is the same then.
 #[derive(Clone, Default)]
-pub struct RunModel(Option<Box<Changed>>);
+pub struct RunModel(Option<Box<Changed>>, Option<Arc<Graph>>);
 
 /// A run's own model (behind one pointer, so that runs without changes carry 8 bytes).
 #[derive(Clone)]
@@ -54,6 +59,18 @@ impl RunModel {
         self.0.as_ref().map(|c| &c.order)
     }
 
+    /// The run's model graph when it differs from the compiled model's (see
+    /// [`Simulation::set_model_graph`]).
+    #[cfg(feature = "snapshot")]
+    pub(super) fn graph_override(&self) -> Option<&Graph> {
+        self.1.as_deref()
+    }
+
+    #[cfg(feature = "snapshot")]
+    pub(super) fn set_graph_override(&mut self, g: Arc<Graph>) {
+        self.1 = Some(g);
+    }
+
     /// A run's own model (restored from a snapshot).
     #[cfg(feature = "snapshot")]
     pub(super) fn changed(
@@ -62,12 +79,15 @@ impl RunModel {
         base_shape: Shape,
         generation: u32,
     ) -> RunModel {
-        RunModel(Some(Box::new(Changed {
-            cm,
-            order,
-            base_shape,
-            generation,
-        })))
+        RunModel(
+            Some(Box::new(Changed {
+                cm,
+                order,
+                base_shape,
+                generation,
+            })),
+            None,
+        )
     }
 
     /// The compiled model in `a` with the simulation's lifetime.
@@ -108,7 +128,30 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// The model graph the run simulates now (to copy, change and pass to
     /// [`Simulation::apply_changes`]).
     pub fn model_graph(&self) -> &Graph {
-        &self.cm.model.graph
+        self.st.model.1.as_deref().unwrap_or(&self.cm.model.graph)
+    }
+
+    /// Replaces the run's model graph by `graph`, a copy of [`Simulation::model_graph`] whose
+    /// objects of SimOxide's metamodels are unchanged: only objects and resources of other
+    /// metamodels (a runtime measurement model, metamodel objects, ...) changed or were added.
+    /// The compiled model and the simulation do not change; later copies of the model graph
+    /// (model changes, forks) carry the new content. For hosts that keep such models with the
+    /// run's model (`simoxide-reconf`). Nothing is checked beyond the object classes.
+    pub fn set_model_graph(&mut self, graph: Arc<Graph>) -> Result<(), ChangeError> {
+        let old = self.model_graph();
+        let same = graph.object_count() >= old.object_count()
+            && old.objects().zip(graph.objects()).all(|(a, b)| {
+                a.class == b.class
+                    || !(simoxide_model::raw::is_pcm_class(a.class)
+                        || simoxide_model::raw::is_pcm_class(b.class))
+            });
+        if !same {
+            return Err(ChangeError::Invalid(vec![
+                "the graph is not a changed copy of the run's model graph".into(),
+            ]));
+        }
+        self.st.model.1 = Some(graph);
+        Ok(())
     }
 
     /// Applies a model change between two events (paused, or not started): `graph` is a copy of
@@ -160,7 +203,8 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         };
         self.st.shape = Shape::of(&changed.cm);
         report.generation = changed.generation;
-        self.st.model = RunModel(Some(Box::new(changed)));
+        // the changed graph is the compiled model's now
+        self.st.model = RunModel(Some(Box::new(changed)), None);
         // SAFETY: the `Arc` just stored in the state (see `RunModel::compiled_ref`); the
         // previous run model's `Arc` may be dropped here, and no reference into it is live
         // (this runs between events, outside the interpreter).

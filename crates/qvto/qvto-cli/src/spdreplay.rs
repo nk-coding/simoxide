@@ -395,7 +395,9 @@ mod tests {
     fn ordered_mode_equals_the_det_slingshot_runs() {
         let root = qvto_paths::root();
         if !root.join("target/pcm/pcm.conf").is_file() {
-            eprintln!("skipped: no target/pcm (qvto-emf/tools/pcm-setup.sh target/pcm)");
+            eprintln!(
+                "skipped: no target/pcm (../foundation/simoxide-emf/tools/pcm-setup.sh target/pcm)"
+            );
             return;
         }
         let repo = repository(&root);

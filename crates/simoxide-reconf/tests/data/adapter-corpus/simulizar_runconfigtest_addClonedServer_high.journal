@@ -1,0 +1,15 @@
+new0 created pcm.core.composition::AssemblyContext
+new0 root-added extent:/1 [0]
+new0 set pcm.core.entity::NamedElement.entityName Str("aName") -> Str("Assembly_server1")
+new0 set pcm.core.composition::AssemblyContext.encapsulatedComponent__AssemblyContext Null -> server.repository#/0/@components__Repository.0
+server.system#/0 added pcm.core.composition::ComposedStructure.assemblyContexts__ComposedStructure [2] new0
+new0 container - -> server.system#/0 pcm.core.composition::ComposedStructure.assemblyContexts__ComposedStructure
+new1 created pcm.core.composition::AssemblyConnector
+new1 root-added extent:/1 [1]
+new1 set pcm.core.entity::NamedElement.entityName Str("aName") -> Str("Client_Assembly_server1")
+new1 set pcm.core.composition::AssemblyConnector.providingAssemblyContext_AssemblyConnector Null -> new0
+new1 set pcm.core.composition::AssemblyConnector.requiringAssemblyContext_AssemblyConnector Null -> server.system#/0/@assemblyContexts__ComposedStructure.1
+new1 set pcm.core.composition::AssemblyConnector.providedRole_AssemblyConnector Null -> server.repository#/0/@components__Repository.0/@providedRoles_InterfaceProvidingEntity.0
+new1 set pcm.core.composition::AssemblyConnector.requiredRole_AssemblyConnector Null -> server.repository#/0/@components__Repository.2/@requiredRoles_InterfaceRequiringEntity.1
+server.system#/0 added pcm.core.composition::ComposedStructure.connectors__ComposedStructure [2] new1
+new1 container - -> server.system#/0 pcm.core.composition::ComposedStructure.connectors__ComposedStructure

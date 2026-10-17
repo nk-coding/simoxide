@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Generates src/meta/generated.rs and generated_ext.rs (metamodel tables) and extracts the
-bundled pathmap models.
+"""Generates src/meta/generated.rs (the metamodel tables: the static seed of the EMF registry,
+`simoxide_emf_core::seed`) and extracts the bundled pathmap models.
 
 Reads the .ecore files and default models straight from the SimuLizar 5.2.2 product jars, so the
 tables are exactly the metamodels the reference runs with. The SPD metamodels (scaling policy
@@ -9,7 +9,7 @@ Slingshot product jars and are appended after the 5.2.2 packages, so every id of
 stays the same.
 
 Usage: tools/gen_meta.py [PLUGINS_DIR [SPD_PLUGINS_DIR]]   (run from crates/simoxide-model),
-then `rustfmt --edition 2024 src/meta/generated.rs src/meta/generated_ext.rs`.
+then `rustfmt --edition 2024 src/meta/generated.rs`.
 """
 import os, re, subprocess, sys, zipfile, glob
 import xml.etree.ElementTree as ET
@@ -154,9 +154,9 @@ def resolve(ref, fname):
     return by_path[(f, frag)]
 
 def type_ref(et, fname):
-    """The classifier an eType/eClassifier reference designates, for the extension tables."""
+    """The classifier an eType/eClassifier reference designates."""
     if et is None:
-        return 'TypeRef::Unknown'
+        return 'TypeRef::TypeParameter'
     r = resolve(et, fname)
     if r[0] == 'ecore':
         return f'TypeRef::Ecore({rs_str(r[1])})'
@@ -164,7 +164,7 @@ def type_ref(et, fname):
         return f'TypeRef::Class(ClassId({r[1]}))'
     if r[0] == 'enum':
         return f'TypeRef::Enum(EnumId({r[1]}))'
-    return f'TypeRef::DataType({r[3]})'
+    return f'TypeRef::DataType(DataTypeId({r[3]}))'
 
 def generic_type(el):
     et = el.get('eType')
@@ -181,7 +181,7 @@ for ci, c in enumerate(classes):
     el = c['el']
     # eSuperTypes, then the classes of generic supertypes (`IntSample extends Sample<Integer>`;
     # EMF's eSuperTypes lists both). Ecore classes (PCMBaseClass's explicit EObject) have no
-    # ClassId; they are in CLASS_EXT.
+    # ClassId; they are only in `super_types`.
     sups = (el.get('eSuperTypes') or '').split() + [g.get('eClassifier') for g in el.findall('eGenericSuperTypes')]
     for s in sups:
         r = resolve(s, c['file'])
@@ -281,6 +281,18 @@ cls_base, cls_all = counts(classes, True), counts(classes, False)
 def cls_const(ci):
     return const_name(classes[ci], cls_base, cls_all)
 
+def classifier_ref(k, i):
+    return {'Class': f'Classifier::Class(ClassId({i}))', 'Enum': f'Classifier::Enum(EnumId({i}))',
+            'DataType': f'Classifier::DataType(DataTypeId({i}))'}[k]
+
+def typed_def(el, fname):
+    up = int(el.get('upperBound', '1'))
+    return (f'TypedDef {{ ty: {type_ref(generic_type(el), fname)}, upper: {up}, '
+            f'ordered: {str(el.get("ordered", "true") == "true").lower()}, unique: {str(el.get("unique", "true") == "true").lower()} }}')
+
+def b(x):
+    return str(bool(x)).lower()
+
 out = []
 w = out.append
 spd_jars = [j for j in jars if '.spd' in j]
@@ -293,9 +305,17 @@ for h in HEADER:
 w('#![allow(non_upper_case_globals, clippy::all)]')
 w('use super::*;')
 w('')
+w('/// The tables as the registry seed (`MetaRegistry::from_static`).')
+w('pub static SEED: StaticPackages = StaticPackages { packages: PACKAGES, classes: CLASSES, features: FEATURES, '
+  'enums: ENUMS, data_types: DATA_TYPES, operations: OPERATIONS };')
+w('')
 w('pub static PACKAGES: &[PackageDef] = &[')
 for p in packages:
-    w(f'    PackageDef {{ name: {rs_str(p["name"])}, ns_uri: {rs_str(p["ns"])}, prefix: {rs_str(p["prefix"])} }},')
+    sup = f'Some(PackageId({p["sup"]}))' if p['sup'] is not None else 'None'
+    loc = f'Some({rs_str(p["loc"])})' if p['sup'] is None else 'None'
+    order = ', '.join(classifier_ref(k, i) for k, i in p['order'])
+    w(f'    PackageDef {{ name: {rs_str(p["name"])}, ns_uri: {rs_str(p["ns"])}, prefix: {rs_str(p["prefix"])}, '
+      f'super_package: {sup}, location: {loc}, classifiers: &[{order}] }},')
 w('];')
 w('pub static ENUMS: &[EnumDef] = &[')
 for e in enums:
@@ -304,12 +324,17 @@ for e in enums:
 w('];')
 w('pub static CLASSES: &[ClassDef] = &[')
 for ci, c in enumerate(classes):
+    icn = f'Some({rs_str(c["icn"])})' if c['icn'] else 'None'
+    # eSuperTypes as EMF reports them: explicit Ecore supertypes and generic supertypes included
+    sts = [type_ref(x, c['file']) for x in (c['el'].get('eSuperTypes') or '').split()]
+    sts += [type_ref(g.get('eClassifier'), c['file']) for g in c['el'].findall('eGenericSuperTypes')]
     sup = ', '.join(f'ClassId({x})' for x in c['supers'])
     asup = ', '.join(f'ClassId({x})' for x in all_supers(ci))
     af = ', '.join(f'FeatureId({x})' for x in all_feats(ci))
     idattr = next((x for x in all_feats(ci) if features[x]['attr'] and features[x]['is_id']), None)
     ida = f'Some(FeatureId({idattr}))' if idattr is not None else 'None'
-    w(f'    ClassDef {{ name: {rs_str(c["name"])}, package: PackageId({c["pkg"]}), is_abstract: {str(c["abstract"]).lower()}, '
+    w(f'    ClassDef {{ name: {rs_str(c["name"])}, package: PackageId({c["pkg"]}), is_abstract: {b(c["abstract_attr"])}, '
+      f'is_interface: {b(c["interface"])}, instance_class_name: {icn}, super_types: &[{", ".join(sts)}], '
       f'supers: &[{sup}], all_supers: &[{asup}], all_features: &[{af}], id_attribute: {ida} }},')
 w('];')
 w('pub static FEATURES: &[FeatureDef] = &[')
@@ -322,12 +347,28 @@ for fi, f in enumerate(features):
         tgt = f'ClassId({f["target"]})' if f['target'] is not None else 'ClassId(u32::MAX)'
         opp = f'Some(FeatureId({f["opp_idx"]}))' if f['opp_idx'] is not None else 'None'
         container = (f['opp_idx'] is not None and features[f['opp_idx']]['containment'])
-        kind = (f'FeatureKind::Reference {{ target: {tgt}, containment: {str(f["containment"]).lower()}, '
-                f'container: {str(container).lower()}, opposite: {opp}, resolve_proxies: {str(f["resolve_proxies"]).lower()} }}')
+        kind = (f'FeatureKind::Reference {{ target: {tgt}, containment: {b(f["containment"])}, '
+                f'container: {b(container)}, opposite: {opp}, resolve_proxies: {b(f["resolve_proxies"])} }}')
     dflt = f'Some({rs_str(f["default"])})' if f['default'] is not None else 'None'
-    w(f'    FeatureDef {{ name: {rs_str(f["name"])}, owner: ClassId({f["owner"]}), kind: {kind}, many: {str(f["upper"] != 1).lower()}, '
-      f'lower: {f["lower"]}, transient: {str(f["transient"]).lower()}, derived: {str(f["derived"]).lower()}, '
-      f'volatile: {str(f["volatile"]).lower()}, is_id: {str(f["is_id"]).lower()}, default: {dflt} }},')
+    w(f'    FeatureDef {{ name: {rs_str(f["name"])}, owner: ClassId({f["owner"]}), kind: {kind}, ty: {f["tref"]}, '
+      f'many: {b(f["upper"] != 1)}, lower: {f["lower"]}, upper: {f["upper"]}, ordered: {b(f["ordered"])}, '
+      f'unique: {b(f["unique"])}, changeable: {b(f["changeable"])}, unsettable: {b(f["unsettable"])}, '
+      f'transient: {b(f["transient"])}, derived: {b(f["derived"])}, volatile: {b(f["volatile"])}, '
+      f'is_id: {b(f["is_id"])}, default: {dflt} }},')
+w('];')
+w('pub static DATA_TYPES: &[DataTypeDef] = &[')
+for d in datatypes_list:
+    icn = f'Some({rs_str(d["icn"])})' if d['icn'] else 'None'
+    w(f'    DataTypeDef {{ name: {rs_str(d["name"])}, package: PackageId({d["pkg"]}), instance_class_name: {icn}, '
+      f'serializable: {b(d["serializable"])} }},')
+w('];')
+w('pub static OPERATIONS: &[OperationDef] = &[')
+for ci, c in enumerate(classes):
+    for op in c['el'].findall('eOperations'):
+        res = f'Some({typed_def(op, c["file"])})' if generic_type(op) is not None else 'None'
+        params = ', '.join(f'ParamDef {{ name: {rs_str(pp.get("name"))}, ty: {typed_def(pp, c["file"])} }}'
+                           for pp in op.findall('eParameters'))
+        w(f'    OperationDef {{ owner: ClassId({ci}), name: {rs_str(op.get("name"))}, result: {res}, params: &[{params}] }},')
 w('];')
 w('')
 w('/// Class constants (`package_Name` where the class name is ambiguous).')
@@ -353,64 +394,6 @@ for ei, e in enumerate(enums):
     w(f'    pub const {n}: EnumId = EnumId({ei});')
 w('}')
 open('src/meta/generated.rs', 'w').write('\n'.join(out) + '\n')
-
-# Extension tables: the EMF facts the loader does not need but a full metamodel registry does
-# (multiplicities, ordered/unique/changeable/unsettable, interfaces, data types, classifier
-# order, operations, the location of each top-level package), for hosts such as a QVTo engine.
-def classifier_ref(k, i):
-    return {'Class': f'ClassifierRef::Class(ClassId({i}))', 'Enum': f'ClassifierRef::Enum(EnumId({i}))',
-            'DataType': f'ClassifierRef::DataType({i})'}[k]
-
-ext = []
-w = ext.append
-for h in HEADER:
-    w(h)
-w('#![allow(clippy::all)]')
-w('use super::*;')
-w('')
-w('pub static PACKAGE_EXT: &[PackageExt] = &[')
-for p in packages:
-    sup = f'Some(PackageId({p["sup"]}))' if p['sup'] is not None else 'None'
-    loc = f'Some({rs_str(p["loc"])})' if p['sup'] is None else 'None'
-    order = ', '.join(classifier_ref(k, i) for k, i in p['order'])
-    w(f'    PackageExt {{ super_package: {sup}, location: {loc}, classifiers: &[{order}] }},')
-w('];')
-w('pub static CLASS_EXT: &[ClassExt] = &[')
-for c in classes:
-    icn = f'Some({rs_str(c["icn"])})' if c['icn'] else 'None'
-    # eSuperTypes as EMF reports them: explicit Ecore supertypes and generic supertypes included
-    # (the main tables skip Ecore classes)
-    sups = [type_ref(x, c['file']) for x in (c['el'].get('eSuperTypes') or '').split()]
-    sups += [type_ref(g.get('eClassifier'), c['file']) for g in c['el'].findall('eGenericSuperTypes')]
-    w(f'    ClassExt {{ is_abstract: {str(c["abstract_attr"]).lower()}, is_interface: {str(c["interface"]).lower()}, '
-      f'instance_class_name: {icn}, supers: &[{", ".join(sups)}] }},')
-w('];')
-w('pub static FEATURE_EXT: &[FeatureExt] = &[')
-for f in features:
-    w(f'    FeatureExt {{ upper: {f["upper"]}, ordered: {str(f["ordered"]).lower()}, unique: {str(f["unique"]).lower()}, '
-      f'changeable: {str(f["changeable"]).lower()}, unsettable: {str(f["unsettable"]).lower()}, ty: {f["tref"]} }},')
-w('];')
-w('pub static DATA_TYPES: &[DataTypeDef] = &[')
-for d in datatypes_list:
-    icn = f'Some({rs_str(d["icn"])})' if d['icn'] else 'None'
-    w(f'    DataTypeDef {{ name: {rs_str(d["name"])}, package: PackageId({d["pkg"]}), instance_class_name: {icn}, '
-      f'serializable: {str(d["serializable"]).lower()} }},')
-w('];')
-
-def typed_def(el, fname):
-    up = int(el.get('upperBound', '1'))
-    return (f'TypedDef {{ ty: {type_ref(generic_type(el), fname)}, upper: {up}, '
-            f'ordered: {str(el.get("ordered", "true") == "true").lower()}, unique: {str(el.get("unique", "true") == "true").lower()} }}')
-
-w('pub static OPERATIONS: &[OperationDef] = &[')
-for ci, c in enumerate(classes):
-    for op in c['el'].findall('eOperations'):
-        res = f'Some({typed_def(op, c["file"])})' if generic_type(op) is not None else 'None'
-        params = ', '.join(f'ParamDef {{ name: {rs_str(pp.get("name"))}, ty: {typed_def(pp, c["file"])} }}'
-                           for pp in op.findall('eParameters'))
-        w(f'    OperationDef {{ owner: ClassId({ci}), name: {rs_str(op.get("name"))}, result: {res}, params: &[{params}] }},')
-w('];')
-open('src/meta/generated_ext.rs', 'w').write('\n'.join(ext) + '\n')
 
 for bsn, path in MODELS:
     z = zipfile.ZipFile(jar_for(bsn))

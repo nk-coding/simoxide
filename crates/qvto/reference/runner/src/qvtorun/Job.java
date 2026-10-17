@@ -32,7 +32,7 @@ import java.util.Map;
  * no-line-numbers              compile without source line numbers
  * urimap &lt;from&gt; &lt;to&gt;          URIConverter.URI_MAP entry for the case (to: a directory relative to the base)
  * conf &lt;path&gt;                 a qvto-emf resource-set configuration (map, mmroot, alias lines; see
- *                              qvto-emf/src/config.rs): URI maps and the indexed metamodels
+ *                              simoxide-emf/src/config.rs): URI maps and the indexed metamodels
  *                              registered globally as lazily loaded dynamic packages (as OSGi
  *                              registers generated ones)
  * dump models                  also dump every other model resource of the resource set after the run

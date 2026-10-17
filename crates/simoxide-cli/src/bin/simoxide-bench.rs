@@ -523,24 +523,26 @@ fn fork(a: &Args) -> Result<(), String> {
 /// A copy of `g` with the processing rate of the first processing resource specification
 /// multiplied by 1 (a new StoEx string, the same value), and its change set.
 fn rate_edit(g: &simoxide_model::raw::Graph) -> Option<(simoxide_model::raw::Graph, ChangeSet)> {
+    use simoxide_model::meta::prelude::*;
     use simoxide_model::meta::{class, feat};
-    use simoxide_model::raw::{ObjId, Slot, Value};
+    use simoxide_model::raw::ObjId;
     let mut g = g.clone();
-    let pr = (0..g.objs.len() as u32).map(ObjId).find(|&o| {
+    let pr = (0..g.object_count() as u32).map(ObjId).find(|&o| {
         g[o].class.is_a(class::ProcessingResourceSpecification) && g[o].proxy.is_none()
     })?;
     let rv = g.get_ref(
         pr,
         feat::ProcessingResourceSpecification_processingRate_ProcessingResourceSpecification,
     )?;
-    let slot = g[rv]
-        .slots
-        .iter_mut()
-        .find(|s| s.0 == feat::RandomVariable_specification)?;
-    let Slot::One(Value::Str(spec)) = &slot.1 else {
-        return None;
+    let spec = match g.stored(rv, feat::RandomVariable_specification)? {
+        simoxide_emf::Value::Str(spec) => format!("({spec}) * 1"),
+        _ => return None,
     };
-    slot.1 = Slot::One(Value::Str(format!("({spec}) * 1").into()));
+    g.load_set_attr(
+        rv,
+        feat::RandomVariable_specification,
+        simoxide_emf::Value::Str(spec.into()),
+    );
     let mut cs = ChangeSet::new();
     cs.push(
         rv,
@@ -565,7 +567,7 @@ fn change_costs<C: Compat>(
     sim.run_until(Pause::Events(total / 2))
         .map_err(|e| e.to_string())?;
     let g0 = sim.model_graph().clone();
-    let objs = g0.objs.len();
+    let objs = g0.object_count();
     let copy = time_us(reps, || drop(std::hint::black_box(g0.clone())));
     let mut touch = ChangeSet::new();
     touch.push(

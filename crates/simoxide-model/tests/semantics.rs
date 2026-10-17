@@ -2,6 +2,8 @@
 //! loading is also compared with EMF by `golden.rs`). These document EMF behaviours the
 //! simulator inherits.
 
+use simoxide_model::meta::prelude::*;
+use simoxide_model::raw::PcmGraph;
 use simoxide_model::*;
 use std::path::PathBuf;
 
@@ -253,8 +255,7 @@ fn samples_have_the_features_of_their_generic_supertype() {
     l.load_dir(dir).unwrap();
     let (g, diags) = l.finish();
     let samples: Vec<_> = g
-        .objs
-        .iter()
+        .objects()
         .enumerate()
         .filter(|(_, o)| o.class.is_a(meta::class::Sample))
         .map(|(i, _)| raw::ObjId(i as u32))
@@ -279,7 +280,7 @@ fn samples_have_the_features_of_their_generic_supertype() {
     assert!(
         samples
             .iter()
-            .all(|&o| !g.is_set(o, meta::feat::Sample_value))
+            .all(|&o| !g.is_stored(o, meta::feat::Sample_value))
     );
     let bad: Vec<_> = diags
         .0
@@ -301,9 +302,9 @@ fn derived_features_without_setter_are_errors() {
     let errors: Vec<_> = diags.0.iter().filter(|d| d.level == Level::Error).collect();
     assert_eq!(errors.len(), 1, "{errors:?}");
     assert!(errors[0].message.contains("expression is not changeable"));
-    let rv = (0..g.objs.len() as u32)
+    let rv = (0..g.object_count() as u32)
         .map(raw::ObjId)
         .find(|&o| g[o].class == meta::class::PCMRandomVariable)
         .unwrap();
-    assert!(!g.is_set(rv, meta::feat::RandomVariable_expression));
+    assert!(!g.is_stored(rv, meta::feat::RandomVariable_expression));
 }

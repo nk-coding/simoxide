@@ -14,13 +14,12 @@
 
 use crate::diag::{Diagnostics, Level};
 use crate::fxhash::{FxHashMap, StrMap};
+use crate::meta::prelude::*;
 use crate::meta::{self, ClassId, DataKind, FeatureId, FeatureKind};
-use crate::raw::{Graph, Obj, ObjId, ResId, Slot, parse_value};
+use crate::raw::{Graph, ObjId, ResId, parse_value, to_stored};
 use quick_xml::events::{BytesStart, Event};
 use std::borrow::Cow;
 use std::ops::Range;
-use std::sync::OnceLock;
-use std::sync::atomic::{AtomicU8, Ordering::Relaxed};
 
 pub(crate) const XSI_NS: &str = "http://www.w3.org/2001/XMLSchema-instance";
 
@@ -102,9 +101,11 @@ pub(crate) struct Parser<'a> {
     same_doc_proxies: Vec<ObjId>,
     /// Byte position of the current event (its line is computed only when needed).
     pos: usize,
-    /// First object created by this parse, and the byte positions of the created objects.
+    /// First object created by this parse, the byte positions of the created objects and
+    /// whether each is attached to the tree yet.
     first_obj: usize,
     obj_pos: Vec<usize>,
+    attached: Vec<bool>,
     /// Line number cache: `line` is the 1-based line of byte position `line_pos`.
     line: u32,
     line_pos: usize,
@@ -147,6 +148,7 @@ impl<'a> Parser<'a> {
             pos: 0,
             first_obj: 0,
             obj_pos: Vec::new(),
+            attached: Vec::new(),
             line: 1,
             line_pos: 0,
             warned_ns: Vec::new(),
@@ -168,7 +170,7 @@ impl<'a> Parser<'a> {
 
     fn loc(&mut self) -> String {
         let line = self.line();
-        format!("{}:{}", self.g.resources[self.res.0 as usize].name, line)
+        format!("{}:{}", self.g.resource(self.res).name, line)
     }
 
     /// The text of `b` if it is a slice of the document (O(1), no copy), else a lossy copy.
@@ -186,7 +188,8 @@ impl<'a> Parser<'a> {
     /// An EMF load error (the reference would reject the resource).
     fn emf_error(&mut self, kind: &'static str, msg: String) {
         let loc = self.loc();
-        self.g.resources[self.res.0 as usize]
+        self.g
+            .resource_mut(self.res)
             .errors
             .push(format!("{loc}: {msg}"));
         self.diags.push(Level::Error, kind, loc, msg);
@@ -194,10 +197,11 @@ impl<'a> Parser<'a> {
 
     pub(crate) fn parse(mut self, text: &'a str) -> Result<Parsed, String> {
         self.text = text;
-        self.first_obj = self.g.objs.len();
+        self.first_obj = self.g.object_count();
         // about one object per 100 bytes of XMI
-        self.g.objs.reserve(text.len() / 100);
+        self.g.reserve_objects(text.len() / 100);
         self.obj_pos.reserve(text.len() / 100);
+        self.attached.reserve(text.len() / 100);
         let r = self.read_all();
         self.set_lines();
         r?;
@@ -212,19 +216,21 @@ impl<'a> Parser<'a> {
     fn set_lines(&mut self) {
         let mut nl = memchr::memchr_iter(b'\n', self.text.as_bytes()).peekable();
         let mut line = 1;
-        let objs = &mut self.g.objs[self.first_obj..];
-        debug_assert_eq!(objs.len(), self.obj_pos.len());
-        let hints = slot_hints();
-        for (o, &p) in objs.iter_mut().zip(&self.obj_pos) {
+        debug_assert_eq!(self.g.object_count() - self.first_obj, self.obj_pos.len());
+        for (i, &p) in self.obj_pos.iter().enumerate() {
             while nl.next_if(|&x| x < p).is_some() {
                 line += 1;
             }
-            o.line = line;
-            let h = &hints[o.class.0 as usize];
-            if o.proxy.is_none() && o.slots.len() > h.load(Relaxed) as usize {
-                h.store(o.slots.len().min(255) as u8, Relaxed);
-            }
+            self.g.set_line(ObjId((self.first_obj + i) as u32), line);
         }
+    }
+
+    fn set_attached(&mut self, o: ObjId) {
+        self.attached[o.index() - self.first_obj] = true;
+    }
+
+    fn is_attached(&self, o: ObjId) -> bool {
+        self.attached[o.index() - self.first_obj]
     }
 
     fn read_all(&mut self) -> Result<(), String> {
@@ -389,10 +395,10 @@ impl<'a> Parser<'a> {
                         None => Err(format!("package with uri '{uri}' not found")),
                     };
                     match class {
-                        Ok(c) if !c.def().is_abstract => {
+                        Ok(c) if c.def().instantiable() => {
                             let o = self.create(c, attrs);
-                            self.g[o].attached = true;
-                            self.g.resources[self.res.0 as usize].roots.push(o);
+                            self.set_attached(o);
+                            self.g.load_add_root(self.res, o);
                             Frame::Object(o)
                         }
                         Ok(c) => {
@@ -483,7 +489,7 @@ impl<'a> Parser<'a> {
                         return Frame::Skip;
                     }
                 };
-                if class.def().is_abstract {
+                if !class.def().instantiable() {
                     let msg = format!(
                         "cannot instantiate abstract class {} (missing xsi:type?)",
                         class.name()
@@ -493,7 +499,7 @@ impl<'a> Parser<'a> {
                 }
                 let o = self.create(class, attrs);
                 self.set_feature_value(parent, f, Some(o), -1);
-                self.g[o].attached = true;
+                self.set_attached(o);
                 Frame::Object(o)
             }
         }
@@ -506,38 +512,20 @@ impl<'a> Parser<'a> {
         }
     }
 
-    /// A new object; `presize`: reserve the usual number of slots of the class (not for proxies).
-    fn new_obj(&mut self, class: ClassId, presize: bool) -> ObjId {
-        let id = ObjId(self.g.objs.len() as u32);
-        // the line is set at the end (`set_lines`)
+    /// A new object (its line is set at the end, `set_lines`).
+    fn new_obj(&mut self, class: ClassId) -> ObjId {
         self.obj_pos.push(self.pos);
-        let line = 0;
-        let cap = if presize {
-            slot_hints()[class.0 as usize].load(Relaxed) as usize
-        } else {
-            0
-        };
-        self.g.objs.push(Obj {
-            class,
-            resource: self.res,
-            container: None,
-            proxy: None,
-            xmi_id: None,
-            slots: Vec::with_capacity(cap),
-            line,
-            attached: false,
-        });
-        id
+        self.attached.push(false);
+        self.g.load_object(class)
     }
 
     /// Creates an object and processes its XML attributes (before it is attached, like EMF).
     fn create(&mut self, class: ClassId, attrs: &[Attr<'a>]) -> ObjId {
-        let proxy = attrs.iter().any(|(k, _)| k == "href");
-        let o = self.new_obj(class, !proxy);
+        let o = self.new_obj(class);
         for (k, v) in attrs {
             let k = &**k;
             if k == "xmi:id" {
-                self.g[o].xmi_id = Some((**v).into());
+                self.g.set_xmi_id(self.res, o, Some(v));
                 self.xmi_ids.insert(v.clone(), o);
                 continue;
             }
@@ -573,12 +561,12 @@ impl<'a> Parser<'a> {
             // XMLHelperImpl: space separated tokens, each added
             for tok in v.split(' ').filter(|t| !t.is_empty()) {
                 match parse_value(data, tok) {
-                    Some(val) => self.g.add_attr(o, f, val),
+                    Some(val) => self.g.load_add_attr(o, f, to_stored(f, val)),
                     None => self.bad_value(f, tok),
                 }
             }
-            if self.g.attrs(o, f).is_empty() {
-                self.g.clear_attrs(o, f);
+            if self.g.stored_list(o, f).is_empty() {
+                self.g.load_clear_attrs(o, f);
             }
         } else {
             match parse_value(data, &v) {
@@ -597,7 +585,7 @@ impl<'a> Parser<'a> {
                             }
                         }
                     }
-                    self.g.set_attr(o, f, val)
+                    self.g.load_set_attr(o, f, to_stored(f, val))
                 }
                 None => self.bad_value(f, &v),
             }
@@ -638,13 +626,13 @@ impl<'a> Parser<'a> {
         if same_doc {
             self.same_doc_proxies.push(o);
         }
-        self.g[o].proxy = Some(uri.into());
+        self.g.set_proxy_uri(o, Some(&uri));
     }
 
     /// `XMLResource.getEObject(fragment)` against the tree as built so far.
     pub(crate) fn lookup(&self, frag: &str) -> Option<ObjId> {
         if frag.starts_with('/') {
-            return navigate_path(self.g, &self.g.resources[self.res.0 as usize].roots, frag);
+            return navigate_path(self.g, &self.g.resource(self.res).roots, frag);
         }
         if let Some(o) = self.xmi_ids.get(frag) {
             return Some(*o);
@@ -653,14 +641,14 @@ impl<'a> Parser<'a> {
         let mut live = cands
             .iter()
             .copied()
-            .filter(|o| self.g[*o].attached && self.g.id(*o) == Some(frag));
+            .filter(|o| self.is_attached(*o) && self.g.id(*o) == Some(frag));
         let first = live.next()?;
         let rest: Vec<ObjId> = live.collect();
         if rest.is_empty() {
             return Some(first);
         }
         // duplicate ids: first in tree order
-        let order = self.g.all_contents(self.res);
+        let order = self.g.tree_contents(self.res);
         order.into_iter().find(|o| *o == first || rest.contains(o))
     }
 
@@ -682,9 +670,9 @@ impl<'a> Parser<'a> {
                         Some(q) => self.class_for_qname(&q).ok(),
                         None => f.target(),
                     };
-                    match class.filter(|c| !c.def().is_abstract) {
+                    match class.filter(|c| c.def().instantiable()) {
                         Some(c) => {
-                            let p = self.new_obj(c, false);
+                            let p = self.new_obj(c);
                             self.handle_proxy(p, tok);
                             self.set_feature_value(o, f, Some(p), -1);
                         }
@@ -761,7 +749,7 @@ impl<'a> Parser<'a> {
         v: Option<ObjId>,
         position: i32,
     ) -> bool {
-        if !meta::FEATURE_EXT[f.0 as usize].changeable {
+        if !f.def().changeable {
             // derived features without a setter (`RandomVariable.expression`,
             // `ElasticInfrastructure.PCM_ResourceEnvironment`): the reflective eSet throws
             let msg = format!("feature {} is not changeable", f.name());
@@ -781,7 +769,7 @@ impl<'a> Parser<'a> {
             return true;
         }
         if !f.def().many {
-            self.g.set_ref(o, f, v);
+            self.g.load_set_ref(o, f, v);
             return true;
         }
         let move_kind = f
@@ -789,7 +777,7 @@ impl<'a> Parser<'a> {
             .is_some_and(|opp| !opp.def().transient && opp.def().many);
         match (position, v) {
             (-2, _) => {
-                self.g.clear_refs(o, f);
+                self.g.load_clear_refs(o, f);
                 true
             }
             (_, None) => true,
@@ -797,18 +785,18 @@ impl<'a> Parser<'a> {
                 if o == v && self.g.get_refs(o, f).contains(&v) {
                     return true;
                 }
-                self.g.add_ref_unique(o, f, v, None)
+                self.g.load_add_ref(o, f, v, None)
             }
             (p, Some(v)) => {
                 let p = p as usize;
                 if o == v || move_kind {
                     match self.g.get_refs(o, f).iter().position(|x| *x == v) {
-                        Some(i) => self.g.move_ref(o, f, p, i),
-                        None if o == v => self.g.add_ref_unique(o, f, v, Some(p)),
+                        Some(i) => self.g.load_move_ref(o, f, p, i),
+                        None if o == v => self.g.load_add_ref(o, f, v, Some(p)),
                         None => false,
                     }
                 } else {
-                    self.g.add_ref_unique(o, f, v, Some(p))
+                    self.g.load_add_ref(o, f, v, Some(p))
                 }
             }
         }
@@ -822,7 +810,7 @@ impl<'a> Parser<'a> {
             let data = feature.data_kind().unwrap_or(DataKind::Other);
             if feature.def().many {
                 match parse_value(data, &text) {
-                    Some(v) => self.g.add_attr(obj, feature, v),
+                    Some(v) => self.g.load_add_attr(obj, feature, to_stored(feature, v)),
                     None => self.bad_value(feature, &text),
                 }
             } else {
@@ -849,7 +837,7 @@ impl<'a> Parser<'a> {
             let class = self.g[p].class;
             for r in class.features() {
                 let Some(opp) = r.opposite() else { continue };
-                if r.is_attribute() || !self.g.is_set(p, r) {
+                if r.is_attribute() || !self.g.is_stored(p, r) {
                     continue;
                 }
                 let Some(holder) = self.g.get_ref(p, r) else {
@@ -857,13 +845,8 @@ impl<'a> Parser<'a> {
                 };
                 if opp.def().many {
                     let l = self.g.get_refs(holder, opp);
-                    if let Some(pi) = l.iter().position(|x| *x == p)
-                        && let Some(Slot::Refs(v)) = self.g[holder]
-                            .slots
-                            .iter_mut()
-                            .find(|(g, _)| *g == opp)
-                            .map(|(_, s)| s)
-                    {
+                    if let Some(pi) = l.iter().position(|x| *x == p) {
+                        let v = self.g.load_refs_mut(holder, opp);
                         if v.contains(&t) {
                             v.remove(pi);
                         } else {
@@ -871,7 +854,7 @@ impl<'a> Parser<'a> {
                         }
                     }
                 } else {
-                    self.g.set_ref(holder, opp, Some(t));
+                    self.g.load_set_ref(holder, opp, Some(t));
                 }
                 break;
             }
@@ -922,9 +905,9 @@ impl<'a> Parser<'a> {
                     .position(|x| *x == t)
                 {
                     Some(i) if r.obj == t || r.feature.opposite().is_some_and(|o| o.def().many) => {
-                        self.g.move_ref(r.obj, r.feature, p, i)
+                        self.g.load_move_ref(r.obj, r.feature, p, i)
                     }
-                    _ => self.g.add_ref_unique(r.obj, r.feature, t, Some(p)),
+                    _ => self.g.load_add_ref(r.obj, r.feature, t, Some(p)),
                 };
                 if !ok {
                     self.emf_error(
@@ -949,12 +932,12 @@ impl<'a> Parser<'a> {
         if !dup {
             for (k, v) in &self.ids {
                 let IdObjs::One(o) = *v else { unreachable!() };
-                if self.g[o].attached && self.g.id(o) == Some(&**k) {
+                if self.is_attached(o) && self.g.id(o) == Some(&**k) {
                     idx.insert(k, o);
                 }
             }
         } else {
-            for o in self.g.all_contents(self.res) {
+            for o in self.g.tree_contents(self.res) {
                 if let Some(id) = self.g.id(o) {
                     idx.insert_first(id, o);
                 }
@@ -1032,13 +1015,6 @@ fn scan_attributes(raw: &[u8], out: &mut Vec<(Range<usize>, Range<usize>)>) -> b
         out.push((ks..ke, i..i + len));
         i += len + 1;
     }
-}
-
-/// Per class, the largest number of slots an object of the class has had after parsing (in
-/// this process): the initial capacity of `Obj::slots`, which saves reallocations.
-fn slot_hints() -> &'static [AtomicU8] {
-    static H: OnceLock<Vec<AtomicU8>> = OnceLock::new();
-    H.get_or_init(|| (0..meta::CLASSES.len()).map(|_| AtomicU8::new(0)).collect())
 }
 
 fn count_newlines(b: &[u8]) -> u32 {

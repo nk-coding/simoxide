@@ -7,8 +7,12 @@
 
 use crate::diag::{Diagnostics, Level};
 use crate::fxhash::{FxHashMap, StrMap};
-use crate::raw::{Graph, Obj, ObjId, ResId, Resource, Slot};
+use crate::meta::prelude::*;
+use crate::raw::{Graph, ObjId, PcmGraph, ResId};
 use crate::xmi::{ParseOptions, Parser, navigate_path};
+use simoxide_emf::ResourceKind;
+use simoxide_emf::load_ops::ObjectBlock;
+use simoxide_emf_core::ModelStore;
 use std::collections::HashMap;
 use std::path::{Component, Path, PathBuf};
 use std::sync::{Arc, OnceLock};
@@ -241,8 +245,7 @@ impl IdIndex {
 /// (contiguous in `objs`), and depends only on its text, URI key, display name and the
 /// `tolerant_namespaces` option, so the copy with shifted ids is exactly what parsing would give.
 struct Template {
-    objs: Vec<Obj>,
-    roots: Vec<ObjId>,
+    block: ObjectBlock,
     errors: Vec<String>,
     failed: bool,
     diags: Vec<crate::diag::Diagnostic>,
@@ -454,7 +457,7 @@ impl Default for Loader {
 impl Loader {
     pub fn new(opts: LoadOptions) -> Self {
         Loader {
-            g: Graph::default(),
+            g: crate::raw::pcm_graph(),
             diags: Diagnostics::default(),
             opts,
             by_key: FxHashMap::default(),
@@ -600,14 +603,11 @@ impl Loader {
     }
 
     fn new_resource(&mut self, key: &str, path: Option<PathBuf>) -> ResId {
-        let r = ResId(self.g.resources.len() as u32);
         let name = self.display_name(key);
-        self.g.resources.push(Resource {
-            uri: key.to_string(),
-            name,
-            path,
-            ..Default::default()
-        });
+        let r = self.g.create_resource_kind(key, ResourceKind::Xmi);
+        let res = self.g.resource_mut(r);
+        res.name = name;
+        res.path = path;
         self.id_index.push(IdIndex::default());
         self.by_key.insert(key.to_string(), r);
         r
@@ -649,7 +649,7 @@ impl Loader {
         match text {
             Ok(t) => self.parse_into(r, &t),
             Err(e) => {
-                let res = &mut self.g.resources[r.0 as usize];
+                let res = self.g.resource_mut(r);
                 res.failed = true;
                 res.errors.push(format!("cannot read: {e}"));
             }
@@ -668,24 +668,8 @@ impl Loader {
 
     /// Copies a template in as (the just created, empty) resource `r`.
     fn splice(&mut self, r: ResId, t: &Template) {
-        let off = self.g.objs.len() as u32;
-        let shift = |o: ObjId| ObjId(o.0 + off);
-        self.g.objs.reserve(t.objs.len());
-        for o in &t.objs {
-            let mut o = o.clone();
-            o.resource = r;
-            o.container = o.container.map(|(c, f)| (shift(c), f));
-            for (_, s) in &mut o.slots {
-                match s {
-                    Slot::Ref(Some(x)) => *x = shift(*x),
-                    Slot::Refs(v) => v.iter_mut().for_each(|x| *x = shift(*x)),
-                    _ => {}
-                }
-            }
-            self.g.objs.push(o);
-        }
-        let res = &mut self.g.resources[r.0 as usize];
-        res.roots = t.roots.iter().map(|o| shift(*o)).collect();
+        let off = self.g.splice_block(r, &t.block).0;
+        let res = self.g.resource_mut(r);
         res.errors = t.errors.clone();
         res.failed = t.failed;
         self.diags.0.extend(t.diags.iter().cloned());
@@ -698,24 +682,8 @@ impl Loader {
     /// Resource `r` (objects from `first_obj`, diagnostics from `first_diag`) as a template.
     fn template_of(&self, r: ResId, first_obj: usize, first_diag: usize) -> Template {
         let off = first_obj as u32;
-        let shift = |o: ObjId| ObjId(o.0 - off);
-        let objs = self.g.objs[first_obj..]
-            .iter()
-            .map(|o| {
-                let mut o = o.clone();
-                o.resource = ResId(0);
-                o.container = o.container.map(|(c, f)| (shift(c), f));
-                for (_, s) in &mut o.slots {
-                    match s {
-                        Slot::Ref(Some(x)) => *x = shift(*x),
-                        Slot::Refs(v) => v.iter_mut().for_each(|x| *x = shift(*x)),
-                        _ => {}
-                    }
-                }
-                o
-            })
-            .collect();
-        let res = &self.g.resources[r.0 as usize];
+        let block = self.g.block_of(r, first_obj);
+        let res = self.g.resource(r);
         let idx = &self.id_index[r.0 as usize];
         debug_assert_eq!(idx.offset, 0);
         // ids in the index are absolute: rebase them by re-inserting
@@ -725,8 +693,7 @@ impl Loader {
             Arc::new(idx.map.rebased(off))
         };
         Template {
-            objs,
-            roots: res.roots.iter().map(|o| shift(*o)).collect(),
+            block,
             errors: res.errors.clone(),
             failed: res.failed,
             diags: self.diags.0[first_diag..].to_vec(),
@@ -743,16 +710,16 @@ impl Loader {
         let Some(cache) = self.cache.clone() else {
             return self.parse_text(r, text);
         };
-        let res = &self.g.resources[r.0 as usize];
+        let res = self.g.resource(r);
         let tolerant = self.opts.tolerant_namespaces;
         let again = match cache.get(&res.uri, &res.name, tolerant, text) {
             Lookup::Hit(t) => return self.splice(r, &t),
             Lookup::Again => true,
             Lookup::New => false,
         };
-        let (first_obj, first_diag) = (self.g.objs.len(), self.diags.0.len());
+        let (first_obj, first_diag) = (self.g.object_count(), self.diags.0.len());
         self.parse_text(r, text);
-        let res = &self.g.resources[r.0 as usize];
+        let res = self.g.resource(r);
         if again && !res.failed {
             let t = Arc::new(self.template_of(r, first_obj, first_diag));
             cache.put(&res.uri, &res.name, tolerant, text, t);
@@ -760,7 +727,7 @@ impl Loader {
     }
 
     fn parse_text(&mut self, r: ResId, text: &str) {
-        let key = self.g.resources[r.0 as usize].uri.clone();
+        let key = self.g.resource(r).uri.clone();
         let resolver = |href: &str| resolve_uri(&key, href);
         let opts = ParseOptions {
             tolerant_namespaces: self.opts.tolerant_namespaces,
@@ -774,7 +741,7 @@ impl Loader {
                 }
             }
             Err(e) => {
-                let res = &mut self.g.resources[r.0 as usize];
+                let res = self.g.resource_mut(r);
                 res.failed = true;
                 res.errors.push(e.clone());
                 let name = res.name.clone();
@@ -786,7 +753,7 @@ impl Loader {
     /// `Resource.getEObject(fragment)` on a fully loaded resource.
     fn get_object(&self, r: ResId, frag: &str) -> Option<ObjId> {
         if frag.starts_with('/') {
-            return navigate_path(&self.g, &self.g.resources[r.0 as usize].roots, frag);
+            return navigate_path(&self.g, &self.g.resource(r).roots, frag);
         }
         self.id_index[r.0 as usize].get(frag)
     }
@@ -798,24 +765,21 @@ impl Loader {
         // scratch buffers
         let (mut order, mut stack) = (Vec::new(), Vec::new());
         let (mut slots, mut targets) = (Vec::new(), Vec::new());
-        while ri < self.g.resources.len() {
+        while ri < self.g.resource_count() {
             let r = ResId(ri as u32);
             ri += 1;
             order.clear();
-            self.g.all_contents_into(r, &mut order, &mut stack);
+            self.g.resource_contents_into(r, &mut order, &mut stack);
             for &o in &order {
                 slots.clear();
-                slots.extend(
-                    self.g[o]
-                        .slots
-                        .iter()
-                        .filter(|(f, s)| {
-                            matches!(s, Slot::Ref(Some(_)) | Slot::Refs(_))
-                                && !f.is_containment()
-                                && !f.is_container()
-                        })
-                        .map(|(f, _)| *f),
-                );
+                // the references that hold something, in feature order
+                let g = &self.g;
+                slots.extend(g[o].class.features().filter(|&f| {
+                    !f.is_attribute()
+                        && !f.is_containment()
+                        && !f.is_container()
+                        && !g.get_refs(o, f).is_empty()
+                }));
                 for &f in &slots {
                     targets.clear();
                     targets.extend(
@@ -894,7 +858,7 @@ impl Loader {
 
     fn tolerant_lookup(&mut self, holder: ObjId, key: &str, frag: &str) -> Option<ObjId> {
         // 1. same file name next to the referencing resource
-        let hres = &self.g.resources[self.g[holder].resource.0 as usize];
+        let hres = self.g.resource(self.g.resource_of(holder)?);
         let fname = key.rsplit(['/', '\\']).next().unwrap_or(key).to_string();
         if let Some(hp) = hres.uri.strip_prefix("file:") {
             let cand = Path::new(hp).parent().map(|d| d.join(&fname));
@@ -922,7 +886,7 @@ impl Loader {
         self.resolve_all();
         // the same file reached through different URIs is loaded twice (EMF semantics)
         let mut by_path: HashMap<PathBuf, Vec<&str>> = HashMap::new();
-        for r in &self.g.resources {
+        for r in self.g.resources() {
             if let (Some(p), false) = (&r.path, r.roots.is_empty()) {
                 by_path.entry(normalize_path(p)).or_default().push(&r.uri);
             }
