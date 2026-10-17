@@ -1151,10 +1151,15 @@ This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these
     target-group check (logged as `exception`);
   - a nested OR inside an AND makes the AND return `null` too: the outer chain parks (Q12,
     derived from the code, no reference run).
-- **Gates.** `golden.sh` identical (312 runs); `cargo test --release --workspace` WS_RESULT;
-  `simoxide-fuzz corpus` FUZZ_RESULT; fmt, clippy `-D warnings` clean (workspace, all targets;
+- **Gates.** `golden.sh` identical (312 runs); `cargo test --release --workspace` 292 passed, 0 failed (F2: 257; +35 in `simoxide-spd`);
+  `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; fmt, clippy `-D warnings` clean (workspace, all targets;
   also `simoxide-spd` without `sim`, `simoxide-cli` without defaults with `fast` and with `spd`).
-  Speed: BENCH_RESULT
+  Speed (`simoxide-bench suite --reps 3`, 20 alternating rounds base 7e343ce / p1, pinned to one
+  core, shared machine at load 5-7): geomean of the long runs +0.7 % (counted) and +3.0 %
+  (stored), short runs -1.0 %; single models -2 % to +8 %, except `nested subsystem` -20 % in
+  that series, which did not reproduce (12 further runs on another core: equal, 24.2 vs 24.3
+  Mev/s): within noise. The hot path gains one predictable branch per emitted tuple
+  (`hooks.observing`) and a dispatch arm.
 - **What P2 needs.** An `Adjuster` that runs `MainTransformation.qvto` on the run's graph
   (F3/F4): set `Configuration.enactedPolicy`, bind the models, apply the journal with
   `Simulation::apply_changes`, refresh `SpdState::membership` (`Membership::from_graph` on the
