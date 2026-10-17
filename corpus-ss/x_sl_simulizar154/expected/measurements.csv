@@ -1,0 +1,4 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_ssJ0QYr-EeG0c6Q1F-wA1Q|replicaID=0],Resource Demand Tuple,0.0,0.5
+ActiveResourceMeasuringPoint[_ssJ0QYr-EeG0c6Q1F-wA1Q|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ssJ0QYr-EeG0c6Q1F-wA1Q|replicaID=0],State of Active Resource Tuple,0.5,0.0

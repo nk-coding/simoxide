@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h22_usage_behaviour",
+ "sim_time": 24,
+ "seed": 21,
+ "group": "corpus"
+}

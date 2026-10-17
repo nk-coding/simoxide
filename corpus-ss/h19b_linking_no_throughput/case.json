@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h19b_linking_no_throughput",
+ "sim_time": 12,
+ "seed": 18,
+ "group": "corpus"
+}

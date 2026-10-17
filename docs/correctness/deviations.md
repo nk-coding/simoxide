@@ -150,7 +150,7 @@ deviates as follows:
   several users meet at one instant, samples of one series can come in another order and
   processor-sharing arrivals can fall before or after other completions of that instant
   (`x_espresso`: equal response times, different state samples; stock Slingshot's own order is
-  random per run). The exact mode (phase X2) will emulate the cascade.
+  random per run). The exact mode (`--flavour slingshot-exact`) emulates the cascade.
 - **Draw order within an instant.** The demand's processing rate is drawn with the demand, not one
   event later; an internal action's demands are drawn one after the other (the fixed Q17);
   infrastructure-call counts are drawn per call; the think time of a user replacing an aborted one
@@ -173,6 +173,27 @@ deviates as follows:
   `SimError::at_ns` convert to nanoseconds). Event counts are SimOxide's notes, not bus events.
 - **Tape**: the `Math.random()` draws of the exact RNG mode are `{"k":"m","i":n,"u":x,"o":"branch:<id>"}`
   records next to the StoEx records; replaying a tape replays the StoEx stream only.
+
+### Slingshot-exact mode
+
+`--flavour slingshot-exact` ([Slingshot flavour](../guide/slingshot.md#the-exact-mode)) reproduces
+Slingshot's event cascade, random draws and measurements byte for byte against the reference
+runner's `det` mode ([correctness](./slingshot.md#the-exact-mode)), with these deviations:
+
+- **`java.util.HashMap` order** of SimuCom's stack frames is replaced by first-insertion order
+  (only OpenJDK's sources define it; the EPL build may not use them): models whose collection
+  iterator evaluates two or more `INNER` characterisations, or whose transfer sums two or more
+  non-integral BYTESIZE values, can draw in another order (corpus `h27`).
+- **`Math.log`/`Math.exp`** of Palladio's lognormal distributions and of StoEx `Log` are correctly
+  rounded in the default build, HotSpot's intrinsics only with the opt-in `hotspot-math` (GPL):
+  rare last-bit differences (one sample of `h21`).
+- **SPD** is not supported yet (design phase X2d; the CLI refuses a `.spd` next to the model, use
+  `--no-spd`).
+- **Bookkeeping events** without a subscriber or a projected line (`ProbeTaken`, `UserSlept`,
+  `MeasurementUpdated`, …) are not created; the event count is the count of the remaining
+  Slingshot events. Processing types (FeedThrough, aggregators) do not change measurements.
+- **No livelock** guard in Slingshot; SimOxide keeps its guard (`--max-events-per-instant`).
+- **Usage evolution** (DLIM) is not loaded, as in the reference runner (decision U9).
 
 ### Reconfiguration rules
 

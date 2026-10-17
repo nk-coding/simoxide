@@ -430,10 +430,7 @@ struct ModelIn {
     compiled: CompiledModel,
 }
 
-fn sorted<K: Ord + Clone, V: Clone>(m: &FxMap<K, V>) -> Vec<(K, V)>
-where
-    K: std::hash::Hash + Eq,
-{
+fn sorted<K: Ord + Clone + std::hash::Hash, V: Clone>(m: &FxMap<K, V>) -> Vec<(K, V)> {
     let mut v: Vec<(K, V)> = m.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
     v.sort_by(|a, b| a.0.cmp(&b.0));
     v

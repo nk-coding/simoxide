@@ -1,0 +1,6 @@
+{
+ "model": "corpus/x_pem_subsystem_nested",
+ "sim_time": 9,
+ "seed": 1,
+ "group": "failure"
+}

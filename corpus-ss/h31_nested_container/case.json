@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h31_nested_container",
+ "sim_time": 30,
+ "seed": 30,
+ "group": "corpus"
+}

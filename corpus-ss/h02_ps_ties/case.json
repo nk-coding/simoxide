@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h02_ps_ties",
+ "sim_time": 25,
+ "seed": 1,
+ "group": "corpus"
+}

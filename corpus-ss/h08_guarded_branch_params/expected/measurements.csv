@@ -1,0 +1,339 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,0.0,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,0.35267369629136236,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,0.6419849142662599,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,1.2594722119495785,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,1.610897477907689,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,2.9279122992658064,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,3.026596159536051,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,3.134981349463769,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,3.5754678560073394,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,3.7067519018687456,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,3.819835681795733,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,4.278481663771445,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,4.530856376322158,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,5.051111172242043,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,5.176894895527552,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,5.814371718552281,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,5.83691009846802,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,5.844335668180712,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,6.456440435677655,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,6.458681333591866,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,7.061582351002045,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,7.55410241516694,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,7.683183296492761,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,8.86434154674237,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,9.052365802439171,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,9.924119360361926,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,10.644246641971538,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,11.0949258654741,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,11.161987340877593,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,11.415050532079949,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,12.796639336674025,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,13.926565820107516,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,14.577842659252843,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,14.66736235297884,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,14.66924065329087,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,14.884127664380783,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,15.870486057627103,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,16.244730515546976,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,16.266724499929698,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,16.481158843273615,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,17.583548850243094,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,17.953260908766612,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,18.0714003260393,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,18.280668876685095,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,18.878756964631656,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,19.028207963954767,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,19.127395223218286,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,19.544819098412013,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,20.087203105860958,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,20.19579031932333,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,20.302445908193906,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,20.37226138255055,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,20.476705956994845,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,20.924283585362936,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,20.967991158348426,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,21.307850655928657,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,21.71093805098409,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,21.939493192096137,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,22.14969470297692,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,22.699481945722376,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,23.623528055568606,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,24.34226129423925,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,25.09226539304162,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,26.604106153673897,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,26.969037485239955,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,28.07356882795708,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,28.50719308233071,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,29.141709277360405,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,29.72007449176544,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,29.899099971039732,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,30.17826539098564,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,30.52272307507497,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,31.634163925145547,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,31.67012750679217,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,31.69243837695077,0.01
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,31.910459915703786,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,31.98973204749435,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,32.16121931588801,0.3
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,32.61138337045902,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],Resource Demand Tuple,32.85000393696682,0.1
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,0.1,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,0.35267369629136236,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,0.36267369629136237,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,0.6419849142662599,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,0.94198491426626,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,1.2594722119495785,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,1.3594722119495786,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,1.610897477907689,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,1.710897477907689,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,2.9279122992658064,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,2.937912299265806,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,3.026596159536051,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,3.036596159536051,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,3.134981349463769,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,3.234981349463769,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,3.5754678560073394,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,3.6754678560073395,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,3.7067519018687456,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,3.819835681795733,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,3.839835681795733,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,4.006751901868745,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,4.016751901868745,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,4.278481663771445,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,4.378481663771445,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,4.530856376322158,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,4.540856376322158,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,5.051111172242043,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,5.061111172242043,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,5.176894895527552,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,5.476894895527552,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,5.814371718552281,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,5.83691009846802,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,5.844335668180712,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,6.03691009846802,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,6.114371718552281,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,6.133197313611674,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,6.140622883324366,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,6.314371718552281,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,6.456440435677655,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,6.458681333591866,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,6.478681333591865,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,6.556440435677654,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,6.566440435677654,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,7.061582351002045,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,7.161582351002044,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,7.55410241516694,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,7.683183296492761,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,7.85410241516694,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,8.02502153384112,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,8.15410241516694,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,8.86434154674237,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,8.96434154674237,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,9.052365802439171,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,9.062365802439171,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,9.924119360361926,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,10.024119360361926,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,10.644246641971538,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,10.654246641971538,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,11.0949258654741,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,11.1049258654741,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,11.161987340877593,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,11.261987340877592,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,11.415050532079949,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,11.425050532079949,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,12.796639336674025,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,12.806639336674024,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,13.926565820107516,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,14.226565820107517,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,14.577842659252843,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,14.587842659252843,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,14.66736235297884,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,14.66924065329087,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,14.67736235297884,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,14.685484052666808,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,14.884127664380783,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,14.97736235297884,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,15.070597041576896,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,15.27736235297884,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,15.870486057627103,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,15.880486057627103,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,16.244730515546976,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,16.266724499929698,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,16.344730515546978,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,16.422736531164254,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,16.444730515546976,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,16.481158843273615,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,16.581158843273617,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,17.583548850243094,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,17.683548850243096,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,17.953260908766612,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,17.963260908766614,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,18.0714003260393,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,18.280668876685095,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,18.3714003260393,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,18.462131775393505,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,18.4714003260393,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,18.878756964631656,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,18.978756964631657,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,19.028207963954767,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,19.03820796395477,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,19.127395223218286,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,19.227395223218288,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,19.544819098412013,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,19.644819098412015,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.087203105860958,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.09720310586096,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.19579031932333,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.29579031932333,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.302445908193906,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.37226138255055,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.476705956994845,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.57226138255055,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.602445908193907,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.620039095328405,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.7244836697727,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.802445908193906,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.924283585362936,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,20.967991158348426,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,21.024283585362937,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,21.080576012377445,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,21.124283585362935,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,21.307850655928657,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,21.40785065592866,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,21.71093805098409,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,21.81093805098409,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,21.939493192096137,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,22.03949319209614,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,22.14969470297692,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,22.24969470297692,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,22.699481945722376,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,22.799481945722377,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,23.623528055568606,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,23.633528055568608,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,24.34226129423925,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,24.442261294239252,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,25.09226539304162,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,25.102265393041623,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,26.604106153673897,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,26.704106153673898,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,26.969037485239955,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,27.269037485239956,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,28.07356882795708,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,28.17356882795708,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,28.50719308233071,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,28.60719308233071,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,29.141709277360405,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,29.441709277360406,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,29.72007449176544,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,29.820074491765443,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,29.899099971039732,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,29.909099971039733,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,30.17826539098564,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,30.47826539098564,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,30.52272307507497,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,30.822723075074972,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,31.634163925145547,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,31.67012750679217,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,31.69243837695077,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,31.72243837695077,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,31.87012750679217,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,31.88012750679217,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,31.910459915703786,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,31.934163925145548,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,31.98973204749435,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.04416392514555,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.16121931588801,4.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.17786793458731,4.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.27193587813379,4.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.30884139888238,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.326637568242944,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.61138337045902,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.647365436452375,3.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.66535646944906,2.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.8293744034557,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.84416392514555,0.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.85000393696682,1.0
+ActiveResourceMeasuringPoint[_h08_guarded_branch_params_prs1|replicaID=0],State of Active Resource Tuple,32.95000393696682,0.0
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,0.1,0.1
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,0.36267369629136237,0.010000000000000009
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,0.94198491426626,0.30000000000000004
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,1.3594722119495786,0.10000000000000009
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,1.710897477907689,0.10000000000000009
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,2.937912299265806,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,3.036596159536051,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,3.234981349463769,0.10000000000000009
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,3.6754678560073395,0.10000000000000009
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,3.839835681795733,0.020000000000000018
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,4.016751901868745,0.3099999999999996
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,4.378481663771445,0.09999999999999964
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,4.540856376322158,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,5.061111172242043,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,5.476894895527552,0.2999999999999998
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,6.133197313611674,0.2962872151436544
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,6.140622883324366,0.2962872151436544
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,6.314371718552281,0.5
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,6.478681333591865,0.019999999999999574
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,6.566440435677654,0.10999999999999943
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,7.161582351002044,0.09999999999999964
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,8.02502153384112,0.47091911867417924
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,8.15410241516694,0.4709191186741801
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,8.96434154674237,0.09999999999999964
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,9.062365802439171,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,10.024119360361926,0.09999999999999964
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,10.654246641971538,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,11.1049258654741,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,11.261987340877592,0.09999999999999964
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,11.425050532079949,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,12.806639336674024,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,14.226565820107517,0.3000000000000007
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,14.587842659252843,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,14.685484052666808,0.01812169968796873
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,15.070597041576896,0.4013563882860254
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,15.27736235297884,0.39323468859805644
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,15.880486057627103,0.009999999999999787
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,16.422736531164254,0.17800601561727802
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,16.444730515546976,0.17800601561727802
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,16.581158843273617,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,17.683548850243096,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,17.963260908766614,0.010000000000001563
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,18.462131775393505,0.390731449354206
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,18.4714003260393,0.19073144935420672
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,18.978756964631657,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,19.03820796395477,0.010000000000001563
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,19.227395223218288,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,19.644819098412015,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,20.09720310586096,0.010000000000001563
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,20.29579031932333,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,20.620039095328405,0.24777771277785376
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,20.7244836697727,0.24777771277785376
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,20.802445908193906,0.5
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,21.080576012377445,0.15629242701450963
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,21.124283585362935,0.15629242701450963
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,21.40785065592866,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,21.81093805098409,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,22.03949319209614,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,22.24969470297692,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,22.799481945722377,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,23.633528055568608,0.010000000000001563
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,24.442261294239252,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,25.102265393041623,0.010000000000001563
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,26.704106153673898,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,27.269037485239956,0.3000000000000007
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,28.17356882795708,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,28.60719308233071,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,29.441709277360406,0.3000000000000007
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,29.820074491765443,0.10000000000000142
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,29.909099971039733,0.010000000000001563
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,30.47826539098564,0.3000000000000007
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,30.822723075074972,0.3000000000000007
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,31.72243837695077,0.030000000000001137
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,31.88012750679217,0.21000000000000085
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,32.30884139888238,0.674677473736832
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,32.326637568242944,0.33690552074859426
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,32.66535646944906,0.7548965537452723
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,32.8293744034557,0.21799103299667877
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,32.84416392514555,0.6829446092575395
+UsageScenarioMeasuringPoint[_h08_guarded_branch_params_us1],Response Time Tuple,32.95000393696682,0.10000000000000142

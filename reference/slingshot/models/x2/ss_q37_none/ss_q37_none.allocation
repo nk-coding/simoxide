@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_ss_link_allocation" entityName="ss_link">
+  <targetResourceEnvironment_Allocation href="ss_q37_none.resourceenvironment#/"/>
+  <system_Allocation href="ss_q37_none.system#_ss_link_system"/>
+  <allocationContexts_Allocation id="_ss_link_alc1" entityName="alc1">
+    <resourceContainer_AllocationContext href="ss_q37_none.resourceenvironment#_ss_link_rc1"/>
+    <assemblyContext_AllocationContext href="ss_q37_none.system#_ss_link_ac1"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_ss_link_alc2" entityName="alc2">
+    <resourceContainer_AllocationContext href="ss_q37_none.resourceenvironment#_ss_link_rc2"/>
+    <assemblyContext_AllocationContext href="ss_q37_none.system#_ss_link_ac2"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

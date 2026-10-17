@@ -1,0 +1,6 @@
+{
+ "model": "corpus/x_pem_simple_heuristics_qb",
+ "sim_time": 101,
+ "seed": 1,
+ "group": "corpus"
+}

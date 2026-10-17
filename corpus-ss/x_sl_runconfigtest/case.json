@@ -1,0 +1,6 @@
+{
+ "model": "corpus/x_sl_runconfigtest",
+ "sim_time": 98,
+ "seed": 1,
+ "group": "setup-error"
+}

@@ -1,0 +1,11 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_LPwS4SHdEd6lJo4DCALHMw"}
+{"ev":"pass","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_NC8HwCHdEd6lJo4DCALHMw"}
+{"ev":"call","t":0.0,"u":1,"role":"_-r1fUCHcEd6lJo4DCALHMw","sig":"_KjhikgzkEeCFg86gxKwVPw"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_9c3KwCHcEd6lJo4DCALHMw","type":"StartAction","el":"_qZUd0CHbEd62GabW1zGSBw"}
+{"ev":"request","t":0.0,"u":1,"ac":"_9c3KwCHcEd6lJo4DCALHMw","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_NvQO8GvhEeu7a9uULPbaMg"}
+{"ev":"job","t":0.0,"job":1,"u":1,"rc":"_B0aZ0CHdEd6lJo4DCALHMw","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":1.0}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ssJ0QYr-EeG0c6Q1F-wA1Q|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ssJ0QYr-EeG0c6Q1F-wA1Q|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.5]}
+{"ev":"job_end","t":0.5,"job":1}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ssJ0QYr-EeG0c6Q1F-wA1Q|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.5,0.0]}
+{"ev":"stop","t":50.0}

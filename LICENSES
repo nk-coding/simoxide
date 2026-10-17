@@ -40,6 +40,14 @@ Used in:
   and type inference visitors and the function library.
 - crates/simoxide-random/src/probfn.rs, dist.rs: ports of the probability-function sampling and
   the distribution wrappers (parameter checks, error messages).
+- crates/simoxide-random/src/p6/mod.rs: the distribution functions and wrappers of Palladio 6.0
+  (SimuCom's *DistFunction and Core-Commons' de.uka.ipd.sdq.probfunction.math.apache, EPL-2.0;
+  commit 2fd5f42 of Palladio-Core-Commons, 6.0 nightly) for the Slingshot-exact mode.
+- crates/simoxide-sim/src/ssx/: the Slingshot-exact mode reproduces the behaviour of Slingshot's
+  handlers statement by statement (Palladio-Analyzer-Slingshot, commit 8bf9adc). The code is
+  written anew, no Slingshot source is copied; the Slingshot repository declares no licence, so
+  its terms are pending confirmation with the Palladio maintainers like section 6 (design
+  decision U3 of DESIGN-SPD.md).
 - crates/simoxide-model/models/: Palladio.resourcetype, PrimitiveTypes.repository,
   FailureTypes.repository, Glassfish.repository, default_event_middleware.repository and
   commonMetrics.metricspec, copied verbatim from the 5.2.2 product.
@@ -81,6 +89,13 @@ Used in:
   Java operation order.
 - crates/simoxide-random/src/dist.rs: ports of the Commons Math distribution classes that StoEx
   uses (inverse CDFs by bracketing and Brent's method, integer bisection).
+- crates/simoxide-random/src/p6/: Commons Math 3.6.1 (the version Palladio 6.0 and the
+  Slingshot nightly use; Apache License 2.0): FastMath.log, log1p and exp with their tables
+  (fastmath_tables.rs, generated from the constants of the 3.6.1 classes), Gamma (logGamma,
+  logGamma1p, invGamma1pm1, regularized gamma functions), Erf.erfInv, ContinuedFraction,
+  Precision.equals, BrentSolver and the inverse CDFs of AbstractRealDistribution and
+  AbstractIntegerDistribution, with the Java operation order; together with Palladio 6.0's
+  distribution wrappers (section 1, Core-Commons) for the Slingshot-exact mode.
 
 Commons Math NOTICE (the parts that pertain to SimOxide):
 

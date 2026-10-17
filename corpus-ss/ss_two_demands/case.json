@@ -1,0 +1,6 @@
+{
+ "model": "reference/slingshot/models/probes/ss_two_demands",
+ "sim_time": 12,
+ "seed": 1,
+ "group": "probe"
+}

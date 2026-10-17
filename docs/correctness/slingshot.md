@@ -79,6 +79,29 @@ sample per arrival, Q26). Slingshot's own deterministic order (`det`) is outside
 well, so this statistic depends on the order of simultaneous events, not on the model: it is the
 exact mode's domain (X2), not a fast-mode criterion (see `DESIGN-SPD.md`, S2 as built).
 
+## The exact mode
+
+The Slingshot-exact mode (`--flavour slingshot-exact`, design phase X2) is compared with the
+Slingshot-exact corpus `corpus-ss/` ([SS-X-8](../spec/slingshot/exact.md#ss-x-8-the-slingshot-exact-corpus)):
+90 cases (the 20 probes, the 3 SPD examples, the 38 clean corpus models, 25 failure models, 2
+runs that end before t = 0, and 2 cases for quirk Q37), each with the `det` runner's outputs. A
+case counts as equal when the level-E projection, the tape projection (every draw with stream,
+index, value, site and position) and `measurements.csv` are byte-identical
+(`crates/simoxide-sim/tests/slingshot_exact.rs`; `reference/slingshot/tools/compare_exact.sh`
+from the shell).
+
+| Result | Cases |
+|---|---|
+| byte-equal (86) | all 20 probes, all 38 clean corpus models, 24 of the 25 failure models (so 21 of the 22 handler-error cases, with their disposed handlers and partial side effects: Q17, Q19, Q21-Q24, Q30, Q31), x_pem_acquire and x_sl_runconfigtest (the run fails before t = 0, as in Slingshot), the two Q37 cases |
+| `java.util.HashMap` order (1) | h27: two `INNER` characterisations are evaluated in the iteration order of SimuCom's `HashMap` frame, which only OpenJDK's sources define; the EPL build iterates in insertion order (a licence-bound deviation) |
+| SPD (3) | spd_minimal, spd_scale_in, spd_time_policies: SPD in the exact mode is design phase X2d |
+
+These counts hold for builds with `hotspot-math` (the tests). The default EPL build computes
+`java.lang.Math.log`/`exp` correctly rounded instead of with HotSpot's intrinsics (the
+`hotspot-math` code is GPL); there `h21_stoex_distributions` differs in the last digit of one of
+its 406 samples (Palladio's lognormal uses `Math.exp`), so 85 of 90. Palladio 6.0's own
+`FastMath` (Commons Math 3) is ported exactly and needs no opt-in.
+
 ## Reproducing
 
 ```sh

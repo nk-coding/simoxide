@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h25_deterministic_closed",
+ "sim_time": 12,
+ "seed": 24,
+ "group": "failure"
+}

@@ -1,0 +1,83 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_h13_passive_contention_ua2"}
+{"ev":"pass","t":0.0,"u":2,"type":"Start","el":"_h13_passive_contention_ua2"}
+{"ev":"pass","t":0.0,"u":3,"type":"Start","el":"_h13_passive_contention_ua2"}
+{"ev":"pass","t":0.0,"u":4,"type":"Start","el":"_h13_passive_contention_ua2"}
+{"ev":"pass","t":0.0,"u":5,"type":"Start","el":"_h13_passive_contention_ua2"}
+{"ev":"pass","t":0.0,"u":6,"type":"Start","el":"_h13_passive_contention_ua2"}
+{"ev":"pass","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_h13_passive_contention_ua1"}
+{"ev":"call","t":0.0,"u":1,"role":"_h13_passive_contention_prov2","sig":"_h13_passive_contention_sig1"}
+{"ev":"pass","t":0.0,"u":2,"type":"EntryLevelSystemCall","el":"_h13_passive_contention_ua1"}
+{"ev":"call","t":0.0,"u":2,"role":"_h13_passive_contention_prov2","sig":"_h13_passive_contention_sig1"}
+{"ev":"pass","t":0.0,"u":3,"type":"EntryLevelSystemCall","el":"_h13_passive_contention_ua1"}
+{"ev":"call","t":0.0,"u":3,"role":"_h13_passive_contention_prov2","sig":"_h13_passive_contention_sig1"}
+{"ev":"pass","t":0.0,"u":4,"type":"EntryLevelSystemCall","el":"_h13_passive_contention_ua1"}
+{"ev":"call","t":0.0,"u":4,"role":"_h13_passive_contention_prov2","sig":"_h13_passive_contention_sig1"}
+{"ev":"pass","t":0.0,"u":5,"type":"EntryLevelSystemCall","el":"_h13_passive_contention_ua1"}
+{"ev":"call","t":0.0,"u":5,"role":"_h13_passive_contention_prov2","sig":"_h13_passive_contention_sig1"}
+{"ev":"pass","t":0.0,"u":6,"type":"EntryLevelSystemCall","el":"_h13_passive_contention_ua1"}
+{"ev":"call","t":0.0,"u":6,"role":"_h13_passive_contention_prov2","sig":"_h13_passive_contention_sig1"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_h13_passive_contention_ac1","type":"StartAction","el":"_h13_passive_contention_act5"}
+{"ev":"pass","t":0.0,"u":2,"ac":"_h13_passive_contention_ac1","type":"StartAction","el":"_h13_passive_contention_act5"}
+{"ev":"pass","t":0.0,"u":3,"ac":"_h13_passive_contention_ac1","type":"StartAction","el":"_h13_passive_contention_act5"}
+{"ev":"pass","t":0.0,"u":4,"ac":"_h13_passive_contention_ac1","type":"StartAction","el":"_h13_passive_contention_act5"}
+{"ev":"pass","t":0.0,"u":5,"ac":"_h13_passive_contention_ac1","type":"StartAction","el":"_h13_passive_contention_act5"}
+{"ev":"pass","t":0.0,"u":6,"ac":"_h13_passive_contention_ac1","type":"StartAction","el":"_h13_passive_contention_act5"}
+{"ev":"request","t":0.0,"u":1,"ac":"_h13_passive_contention_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h13_passive_contention_act1"}
+{"ev":"request","t":0.0,"u":2,"ac":"_h13_passive_contention_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h13_passive_contention_act1"}
+{"ev":"request","t":0.0,"u":3,"ac":"_h13_passive_contention_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h13_passive_contention_act1"}
+{"ev":"request","t":0.0,"u":4,"ac":"_h13_passive_contention_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h13_passive_contention_act1"}
+{"ev":"request","t":0.0,"u":5,"ac":"_h13_passive_contention_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h13_passive_contention_act1"}
+{"ev":"request","t":0.0,"u":6,"ac":"_h13_passive_contention_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h13_passive_contention_act1"}
+{"ev":"job","t":0.0,"job":1,"u":1,"rc":"_h13_passive_contention_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.01}
+{"ev":"job","t":0.0,"job":2,"u":2,"rc":"_h13_passive_contention_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.01}
+{"ev":"job","t":0.0,"job":3,"u":3,"rc":"_h13_passive_contention_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.01}
+{"ev":"job","t":0.0,"job":4,"u":4,"rc":"_h13_passive_contention_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.01}
+{"ev":"job","t":0.0,"job":5,"u":5,"rc":"_h13_passive_contention_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.01}
+{"ev":"job","t":0.0,"job":6,"u":6,"rc":"_h13_passive_contention_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.01}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.01]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,2.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.0,2.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.01]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,3.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.0,3.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.01]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,4.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.0,4.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.01]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,5.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.0,5.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.01]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,6.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.0,6.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.01]}
+{"ev":"meas","t":0.01,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.01,6.0]}
+{"ev":"meas","t":0.01,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.01,6.0]}
+{"ev":"meas","t":0.01,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.01,6.0]}
+{"ev":"meas","t":0.01,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.01,6.0]}
+{"ev":"meas","t":0.015,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.015,6.0]}
+{"ev":"meas","t":0.015,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.015,6.0]}
+{"ev":"meas","t":0.02,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.02,6.0]}
+{"ev":"meas","t":0.02,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.02,6.0]}
+{"ev":"meas","t":0.025,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.025,6.0]}
+{"ev":"meas","t":0.025,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.025,6.0]}
+{"ev":"job_end","t":0.03,"job":1}
+{"ev":"job_end","t":0.03,"job":2}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.03,5.0]}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.03,5.0]}
+{"ev":"job_end","t":0.03,"job":3}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.03,4.0]}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.03,4.0]}
+{"ev":"job_end","t":0.03,"job":4}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.03,3.0]}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.03,3.0]}
+{"ev":"job_end","t":0.03,"job":5}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.03,2.0]}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.03,2.0]}
+{"ev":"job_end","t":0.03,"job":6}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.03,1.0]}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.03,1.0]}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.03,0.0]}
+{"ev":"meas","t":0.03,"mp":"ActiveResourceMeasuringPoint[_h13_passive_contention_prs1|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.03,0.0]}
+{"ev":"stop","t":21.0}

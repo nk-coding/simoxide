@@ -78,7 +78,15 @@ reacts to one event and returns the events that follow, and these are put on the
     round. Within every Slingshot class, methods that subscribe to the same event type are reified to
     disjoint types, so this never changes which handler runs or in which order handlers of one event
     run. The runner records the observed order per event type in `bus.jsonl` (in the probes'
-    `expected/`, not compared by `probes.sh --check`). Where more than one Slingshot subscriber
+    `expected/`, not compared by `probes.sh --check`). The disjointness is checked statically
+    (X1, `reference/slingshot/tools/audit_subscribers.py`, on the pinned sources): of the 73
+    `@Subscribe` methods in 25 classes, no two of one class can receive the same event; the only
+    classes with two subscribers whose parameter types overlap are
+    `UsageScenarioResponseTimeMonitoringBehavior` (`<Start>`/`<Stop>`),
+    `OperationCallActionResponseTimeMonitoringBehavior` (`<StartAction>`/`<StopAction>`) and
+    `MeasurementsAggregatorBehavior` (`<FixedSizeAggregation>`/`<VariableSizeAggregation>`), all
+    reified to disjoint types. (The bus itself refuses two methods with the same parameter type and
+    reified types in one class, `BusImplementation.java:172-175`.) Where more than one Slingshot subscriber
     handles an event, the order is:
 
     | Event | Subscribers, in order |
@@ -143,7 +151,8 @@ reacts to one event and returns the events that follow, and these are put on the
     reaches `simTime` and reports no error. Quirk [SS-Q18](./quirks.md#ss-q18).
   - Probes: `ss_loop_zero`, `ss_usage_loop_zero`, `ss_guard_none`, `ss_two_demands`; corpus `h10`,
     `h11`, `h12`, `h13`, `h18`, `h26`, `h27`, `h28` (`expected/errors.txt`,
-    `results/det-verify.csv` column `handler_errors`).
+    `results/det-verify.csv` column `handler_errors`). SimOxide's exact mode keeps a disposed bit
+    per subscriber method and reproduces each of them ([Quirks](./quirks.md#exact-mode)).
   - A pre- or post-interceptor that throws returns `InterceptionResult.error` instead
     (`[ED]entity/interceptors/PreInterceptor.java:48-60`, `PostInterceptor.java:45-52`); a failed
     pre-interception skips the handler for that event only.

@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h19_linking_resource",
+ "sim_time": 12,
+ "seed": 18,
+ "group": "corpus"
+}

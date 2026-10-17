@@ -1,0 +1,6 @@
+{
+ "model": "reference/slingshot/models/probes/ss_ps_multicore",
+ "sim_time": 6,
+ "seed": 1,
+ "group": "probe"
+}

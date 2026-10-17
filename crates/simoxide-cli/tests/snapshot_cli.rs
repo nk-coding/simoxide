@@ -219,3 +219,23 @@ fn resume_refuses_another_model() {
     assert!(err.contains("another model"), "{err}");
     std::fs::remove_dir_all(&d).unwrap();
 }
+
+#[test]
+fn the_slingshot_exact_engine_refuses_snapshots() {
+    let a = root().join("corpus/h01_ps_single");
+    let out = Command::new(env!("CARGO_BIN_EXE_simoxide"))
+        .args([
+            "run",
+            "--model",
+            &a.to_string_lossy(),
+            "--flavour",
+            "slingshot-exact",
+            "--pause-at",
+            "1",
+        ])
+        .output()
+        .unwrap();
+    assert!(!out.status.success());
+    let err = String::from_utf8_lossy(&out.stderr);
+    assert!(err.contains("Slingshot-exact"), "{err}");
+}
