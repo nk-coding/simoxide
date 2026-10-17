@@ -9,7 +9,10 @@
 //! A [`CompiledModel`] is immutable and `Sync`; many simulations can run on it in parallel.
 
 use crate::fxhash::FxMap;
-use crate::javahash::string_hash;
+use simoxide_jcompat::hash::str_hash as string_hash;
+use simoxide_jcompat::order::{InsertionOrder, MapOrder};
+#[cfg(feature = "exact")]
+use simoxide_jcompat_exact::order::JdkHashOrder;
 use simoxide_model::*;
 use simoxide_sched::SchedulingPolicy;
 use simoxide_stoex::Program;
@@ -403,8 +406,12 @@ pub struct CompiledModel {
     /// Route table `[src * containers + dst]`: resource of the first linking resource (in
     /// `links` order) connecting both, `u32::MAX` = none. Empty for very large environments.
     pub route_res: Vec<ResIdx>,
-    /// `deactivateAllActiveResources` order (ResourceRegistry / container HashMap order).
+    /// `deactivateAllActiveResources` order (ResourceRegistry / container HashMap order; the
+    /// exact mode).
+    #[cfg(feature = "exact")]
     pub finalise_order: Vec<ResIdx>,
+    /// The same in the registry's insertion order (the fast mode).
+    pub finalise_order_fast: Vec<ResIdx>,
     /// Linking resources in resource-environment order (routing; after model changes the
     /// router's order, and the typed model's `connected` lists are the router's view,
     /// `crate::change`).
@@ -1403,7 +1410,9 @@ impl CompiledModel {
                 )
             })
             .collect();
-        let finalise_order = finalise_order(&registry);
+        let finalise_order_fast = finalise_order::<InsertionOrder>(&registry);
+        #[cfg(feature = "exact")]
+        let finalise_order = finalise_order::<JdkHashOrder>(&registry);
 
         // sliding windows (probe-framework decorators in extension-registry order:
         // slidingwindow = TimeDrivenAggregation, then utilization = TimeDriven utilisation)
@@ -1802,7 +1811,9 @@ impl CompiledModel {
             container_res,
             link_res,
             route_res,
+            #[cfg(feature = "exact")]
             finalise_order,
+            finalise_order_fast,
             links,
             registry,
             series,
@@ -1904,15 +1915,15 @@ pub(crate) fn dense_container_res(
     dense
 }
 
-/// `deactivateAllActiveResources` order: the Java `HashMap` order of the registry's container
-/// ids, then of each container's resource type ids.
-pub(crate) fn finalise_order(registry: &[RegistryEntry]) -> Vec<ResIdx> {
+/// `deactivateAllActiveResources` order: the `HashMap` order `O` (Java's in the exact mode) of
+/// the registry's container ids, then of each container's resource type ids.
+pub(crate) fn finalise_order<O: MapOrder>(registry: &[RegistryEntry]) -> Vec<ResIdx> {
     let mut order = Vec::new();
     let hashes: Vec<i32> = registry.iter().map(|(k, _)| string_hash(k)).collect();
-    for i in crate::javahash::iteration_order(&hashes) {
+    for i in O::order(&hashes) {
         let types = &registry[i].1;
         let th: Vec<i32> = types.iter().map(|(k, _)| string_hash(k)).collect();
-        for j in crate::javahash::iteration_order(&th) {
+        for j in O::order(&th) {
             order.push(types[j].1);
         }
     }

@@ -20,9 +20,11 @@ use std::process::exit;
 
 const USAGE: &str = "\
 usage:
-  qvto run FILE.qvto [MODEL...] [--repeat N] [--fast]
+  qvto run FILE.qvto [MODEL...] [--repeat N] [--fast | --compat]
       Compiles and runs a transformation (models bound to the in/inout parameters in order,
       metamodels by namespace URI from the suite configuration); prints the log and outcome.
+      Default mode: compat in builds with `--features compat` (Eclipse's orders; such builds
+      must not be distributed, see LICENSES), else fast.
   qvto disasm FILE.qvto
       Prints the problems, modules, operations and the bytecode of a transformation.
   qvto bench [gen] [--file F | --suite eclipse|corpus] [--only ID,...] [--group G,...]
@@ -36,6 +38,8 @@ usage:
                [--report FILE.md] [--tsv FILE] [--verbose]
       Runs the engine on the cases and prints the scoreboard: per case the Eclipse
       driver's checks and the strict comparison with the Java runner's fixture.
+      `qvto` (the default) is compat mode and needs a build with `--features compat`;
+      `qvto-fast` runs in every build.
   qvto conform record [--suite eclipse|corpus|fuzz|all] [--only ID,...] [--prefix P]... [--runs N]
       Runs the Java reference runner N times (default 5, one JVM per run), marks
       outputs that differ between the runs as unstable and writes the fixture
@@ -285,6 +289,11 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
                 } else {
                     qvto_runtime::Mode::Fast
                 };
+                if let Some(why) = mode.unavailable_reason() {
+                    die(&format!(
+                        "--engine qvto (strict, compat mode): {why}; `--engine qvto-fast` runs in every build"
+                    ));
+                }
                 let mut q = engine::QvtoEngine::new(root, mode);
                 if name == "fuzz" {
                     q.constant_identity = Some(1);
@@ -335,7 +344,7 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
 fn run_cmd(args: &[String]) {
     let mut files = Vec::new();
     let mut repeat = 1usize;
-    let mut mode = qvto_runtime::Mode::Compat;
+    let mut mode = qvto_runtime::Mode::default();
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -344,6 +353,7 @@ fn run_cmd(args: &[String]) {
                 repeat = args.get(i).and_then(|r| r.parse().ok()).unwrap_or(1);
             }
             "--fast" => mode = qvto_runtime::Mode::Fast,
+            "--compat" => mode = qvto_runtime::Mode::Compat,
             a => files.push(a.to_string()),
         }
         i += 1;

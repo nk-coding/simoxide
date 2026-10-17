@@ -18,16 +18,46 @@
 //! Fast mode does not depend on these values for order; [`FastEnv`] derives them from the key.
 
 use crate::value::{EnumLit, ObjRef, TypeRef};
+#[cfg(feature = "compat")]
 use std::cell::RefCell;
 use std::collections::HashMap;
 
 /// Compat or fast mode (`DESIGN.md` §6).
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Mode {
-    /// Java's observable behaviour: hash-based collections iterate in `HashMap` bucket order.
+    /// Java's observable behaviour: hash-based collections iterate in `HashMap` bucket order
+    /// (needs the cargo feature `compat`; the default with it).
     Compat,
-    /// Same values, insertion-ordered hash-based collections.
+    /// Same values, insertion-ordered hash-based collections (always available; the default
+    /// without `compat`).
     Fast,
+}
+
+impl Default for Mode {
+    /// [`Mode::Compat`] in builds with the feature `compat`, else [`Mode::Fast`].
+    fn default() -> Self {
+        if cfg!(feature = "compat") {
+            Mode::Compat
+        } else {
+            Mode::Fast
+        }
+    }
+}
+
+impl Mode {
+    /// Whether this build can run the mode (compat mode needs the cargo feature `compat`).
+    pub fn available(self) -> bool {
+        self == Mode::Fast || cfg!(feature = "compat")
+    }
+
+    /// Why this build cannot run the mode (`None` if it can).
+    pub fn unavailable_reason(self) -> Option<String> {
+        (!self.available()).then(|| {
+            "compat mode is not compiled in: build with the cargo feature `compat` \
+             (qvto-cli: `--features compat`; see LICENSES)"
+                .to_string()
+        })
+    }
 }
 
 /// Something Java hashes by identity.
@@ -59,8 +89,10 @@ pub trait IdentityHashSource {
 }
 
 /// HotSpot's identity hash generator (`-XX:hashCode=5`), from `simoxide-jcompat-exact`.
+#[cfg(feature = "compat")]
 pub use simoxide_jcompat_exact::hotspot::HotSpotXorShift;
 
+#[cfg(feature = "compat")]
 impl IdentityHashSource for HotSpotXorShift {
     fn draw(&mut self, _key: IdentityKey) -> i32 {
         self.next_hash()
@@ -183,6 +215,7 @@ impl IdentityHashes {
     }
 }
 
+#[cfg(feature = "compat")]
 impl Default for IdentityHashes {
     fn default() -> Self {
         Self::new(Box::new(HotSpotXorShift::default()))
@@ -199,9 +232,10 @@ pub trait HashEnv {
     fn class_name(&self, key: IdentityKey) -> &str {
         default_class_name(key)
     }
+    /// Java-ordered storage: compat mode, in builds with the feature `compat` (never otherwise).
     #[inline]
     fn compat(&self) -> bool {
-        self.mode() == Mode::Compat
+        cfg!(feature = "compat") && self.mode() == Mode::Compat
     }
 }
 
@@ -221,11 +255,13 @@ pub fn default_class_name(key: IdentityKey) -> &'static str {
     }
 }
 
-/// Compat-mode environment with memoised identity hashes.
+/// Compat-mode environment with memoised identity hashes (feature `compat`).
+#[cfg(feature = "compat")]
 pub struct CompatEnv {
     pub ids: RefCell<IdentityHashes>,
 }
 
+#[cfg(feature = "compat")]
 impl CompatEnv {
     pub fn new(source: Box<dyn IdentityHashSource>) -> Self {
         CompatEnv {
@@ -234,6 +270,7 @@ impl CompatEnv {
     }
 }
 
+#[cfg(feature = "compat")]
 impl Default for CompatEnv {
     fn default() -> Self {
         CompatEnv {
@@ -242,6 +279,7 @@ impl Default for CompatEnv {
     }
 }
 
+#[cfg(feature = "compat")]
 impl HashEnv for CompatEnv {
     fn mode(&self) -> Mode {
         Mode::Compat

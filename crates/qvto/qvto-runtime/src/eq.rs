@@ -14,6 +14,7 @@ use crate::identity::{HashEnv, IdentityKey};
 use crate::java::hash::{
     bool_hash, double_hash, double_to_long_bits, float_hash, float_to_int_bits, long_hash,
 };
+#[cfg(feature = "compat")]
 use crate::java::hashmap::JavaKey;
 use crate::str::Str;
 use crate::value::{IntBox, JNum, Value};
@@ -221,14 +222,23 @@ pub fn ocl_hash(v: &Value, env: &dyn HashEnv) -> i32 {
 }
 
 // Comparable class ids for HashMap tree bins.
+#[cfg(feature = "compat")]
 const CC_STRING: u8 = 1;
+#[cfg(feature = "compat")]
 const CC_INTEGER: u8 = 2;
+#[cfg(feature = "compat")]
 const CC_LONG: u8 = 3;
+#[cfg(feature = "compat")]
 const CC_SHORT: u8 = 4;
+#[cfg(feature = "compat")]
 const CC_BYTE: u8 = 5;
+#[cfg(feature = "compat")]
 const CC_CHAR: u8 = 6;
+#[cfg(feature = "compat")]
 const CC_DOUBLE: u8 = 7;
+#[cfg(feature = "compat")]
 const CC_FLOAT: u8 = 8;
+#[cfg(feature = "compat")]
 const CC_BOOLEAN: u8 = 9;
 
 /// Java class name of a value (`getClass().getName()`), `None` for `null`.
@@ -258,6 +268,7 @@ pub fn java_class_name<'a>(v: &'a Value, env: &'a dyn HashEnv) -> Option<&'a str
     })
 }
 
+#[cfg(feature = "compat")]
 impl<'e> JavaKey<dyn HashEnv + 'e> for Value {
     #[inline]
     fn java_hash(&self, env: &(dyn HashEnv + 'e)) -> i32 {

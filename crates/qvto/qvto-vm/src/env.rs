@@ -7,7 +7,7 @@
 //! ([`TapeHook`]) that maps keys of the run to the hashes the Java run recorded. Fast mode
 //! derives the hash from the key.
 
-use qvto_runtime::identity::{HotSpotXorShift, IdentityHashSource, IdentityHashes};
+use qvto_runtime::identity::{IdentityHashSource, IdentityHashes};
 use qvto_runtime::{FastEnv, HashEnv, IdentityKey, Mode};
 use std::cell::RefCell;
 
@@ -24,9 +24,7 @@ impl RunEnv {
     pub fn new(mode: Mode, source: Option<Box<dyn IdentityHashSource>>) -> RunEnv {
         RunEnv {
             mode,
-            ids: RefCell::new(IdentityHashes::new(
-                source.unwrap_or_else(|| Box::new(HotSpotXorShift::default())),
-            )),
+            ids: RefCell::new(IdentityHashes::new(source.unwrap_or_else(default_source))),
             aliases: std::collections::HashMap::new(),
         }
     }
@@ -53,6 +51,18 @@ impl HashEnv for RunEnv {
             Mode::Fast => FastEnv.identity_hash(key),
         }
     }
+}
+
+/// Compat mode's default identity-hash source: HotSpot's xor-shift surrogate.
+#[cfg(feature = "compat")]
+fn default_source() -> Box<dyn IdentityHashSource> {
+    Box::new(qvto_runtime::identity::HotSpotXorShift::default())
+}
+
+/// Without compat mode the memo is never asked (fast mode derives hashes from the keys).
+#[cfg(not(feature = "compat"))]
+fn default_source() -> Box<dyn IdentityHashSource> {
+    Box::new(qvto_runtime::identity::Sequential::default())
 }
 
 /// An identity-hash source that answers keys a hook knows (a Java run's tape, mapped to this

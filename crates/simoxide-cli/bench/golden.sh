@@ -3,10 +3,12 @@
 # larger stop conditions (own RNG) and prints a hash of trace + tape + measurements per run.
 #   bench/golden.sh [simoxide binary] > new.txt ; diff old.txt new.txt
 # GOLDEN_EXTRA=/dir adds every model directory below /dir (e.g. from `simoxide-fuzz gen`);
-# GOLDEN_JOBS sets the parallelism (default 8).
+# GOLDEN_JOBS sets the parallelism (default 8). GOLDEN_MODE the simulator mode (default exact: the
+# binary must be the exact build, `cargo build --release -p simoxide-cli --features exact,hotspot-math`).
 set -u
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 export BIN="${1:-$ROOT/target/release/simoxide}"
+export MODE="${GOLDEN_MODE:-exact}"
 TMP="$(mktemp -d)"
 export TMP
 trap 'rm -rf "$TMP"' EXIT
@@ -14,7 +16,7 @@ one() {
   d="$1"; cfg="$2"
   w="$(mktemp -d -p "$TMP")"
   # shellcheck disable=SC2086
-  if "$BIN" run --model "$d" $cfg --name golden --trace "$w/t" --tape "$w/u" \
+  if "$BIN" run --mode "$MODE" --model "$d" $cfg --name golden --trace "$w/t" --tape "$w/u" \
       --measurements "$w/m" >"$w/log" 2>&1; then
     h=$(cat "$w/t" "$w/u" "$w/m" | sha256sum | cut -c1-16)
     n=$(grep -o 'events=[0-9]*' "$w/log")

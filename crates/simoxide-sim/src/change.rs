@@ -751,7 +751,9 @@ pub(crate) fn recompile(
         }
     }
     let container_res_dense = dense_container_res(&container_res, n_cont, m2.resource_types.len());
-    let finalise_order = finalise_order(&registry);
+    let finalise_order_fast = finalise_order::<simoxide_jcompat::order::InsertionOrder>(&registry);
+    #[cfg(feature = "exact")]
+    let finalise_order = finalise_order::<simoxide_jcompat_exact::order::JdkHashOrder>(&registry);
     // the router's view goes into the typed model (`transmit` without a route table reads it)
     let mut fresh = fresh;
     for (&l, c) in links.iter().zip(&route_links) {
@@ -813,7 +815,9 @@ pub(crate) fn recompile(
         container_simulated,
         link_res,
         route_res,
+        #[cfg(feature = "exact")]
         finalise_order,
+        finalise_order_fast,
         links,
         registry,
         series,

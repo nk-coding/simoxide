@@ -8,7 +8,7 @@
 //! ([`crate::RunState`]).
 
 use crate::ir::{CompiledModel, KeyId, Keys, ProgId};
-use crate::javahash::{iteration_order, spread};
+use simoxide_jcompat::order::MapOrder;
 use simoxide_random::UniformSource;
 use simoxide_stoex::{Env, EvalError, Value};
 use std::rc::Rc;
@@ -64,9 +64,9 @@ impl Frame {
         }
     }
 
-    /// `getContents()`: own entries in `HashMap` order, then the parent's entries whose key was
-    /// not seen yet, recursively.
-    pub fn contents(&self, keys: &Keys) -> Vec<(KeyId, Binding)> {
+    /// `getContents()`: own entries in `HashMap` order `O` (Java's in the exact mode), then the
+    /// parent's entries whose key was not seen yet, recursively.
+    pub fn contents<O: MapOrder>(&self, keys: &Keys) -> Vec<(KeyId, Binding)> {
         let mut seen: Vec<KeyId> = Vec::new();
         let mut out = Vec::new();
         let mut f = Some(self);
@@ -76,7 +76,7 @@ impl Frame {
                 .iter()
                 .map(|(k, _)| keys.hash[*k as usize])
                 .collect();
-            for i in iteration_order(&hashes) {
+            for i in O::order(&hashes) {
                 let (k, b) = &fr.entries[i];
                 if !seen.contains(k) {
                     seen.push(*k);
@@ -90,7 +90,7 @@ impl Frame {
 
     /// Calls `f` for every entry of [`Frame::contents`], in the same order, without allocating
     /// for small frames.
-    pub fn visit_contents<E>(
+    pub fn visit_contents<O: MapOrder, E>(
         &self,
         keys: &Keys,
         mut f: impl FnMut(KeyId, &Binding) -> Result<(), E>,
@@ -120,7 +120,7 @@ impl Frame {
                 let mut idx = [0u8; 12];
                 let mut bucket = [0u32; 12];
                 for i in 0..n {
-                    let bk = spread(keys.hash[frame.entries[i].0 as usize]) & 15;
+                    let bk = O::bucket(keys.hash[frame.entries[i].0 as usize], 15);
                     let mut j = i;
                     while j > 0 && bucket[j - 1] > bk {
                         bucket[j] = bucket[j - 1];
@@ -139,7 +139,7 @@ impl Frame {
                     .iter()
                     .map(|(k, _)| keys.hash[*k as usize])
                     .collect();
-                for i in iteration_order(&hashes) {
+                for i in O::order(&hashes) {
                     visit(i)?;
                 }
             }
@@ -463,6 +463,21 @@ mod tests {
         }
     }
 
+    fn check_visit<O: MapOrder>(top: &Frame, keys: &Keys, sizes: [usize; 3]) {
+        let want: Vec<KeyId> = top
+            .contents::<O>(keys)
+            .into_iter()
+            .map(|(k, _)| k)
+            .collect();
+        let mut got = Vec::new();
+        top.visit_contents::<O, ()>(keys, |k, _| {
+            got.push(k);
+            Ok(())
+        })
+        .unwrap();
+        assert_eq!(got, want, "sizes {sizes:?}");
+    }
+
     #[test]
     fn visit_contents_matches_contents() {
         let mut keys = Keys::default();
@@ -488,19 +503,16 @@ mod tests {
                 parent = Some(FrameRef::new(f));
             }
             let top = parent.expect("frame");
-            let want: Vec<KeyId> = top.contents(&keys).into_iter().map(|(k, _)| k).collect();
-            let mut got = Vec::new();
-            top.visit_contents::<()>(&keys, |k, _| {
-                got.push(k);
-                Ok(())
-            })
-            .unwrap();
-            assert_eq!(got, want, "sizes {sizes:?}");
+            check_visit::<simoxide_jcompat::order::InsertionOrder>(&top, &keys, sizes);
+            #[cfg(feature = "exact")]
+            check_visit::<simoxide_jcompat_exact::order::JdkHashOrder>(&top, &keys, sizes);
         }
     }
 
+    #[cfg(feature = "exact")]
     #[test]
     fn key_order_follows_java_hashmap() {
+        use crate::javahash::iteration_order;
         let mut keys = Keys::default();
         // "Aa.VALUE" and "BB.VALUE" have equal String hash codes
         let ids: Vec<KeyId> = ["x.VALUE", "BB.VALUE", "Aa.VALUE", "y.BYTESIZE"]

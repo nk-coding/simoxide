@@ -17,6 +17,7 @@ pub mod compare;
 pub mod engine;
 pub mod fixture;
 pub mod fuzz;
+#[cfg(feature = "compat")]
 pub mod idhash;
 pub mod inventory;
 pub mod java;

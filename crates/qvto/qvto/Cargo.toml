@@ -16,3 +16,12 @@ qvto-sema.workspace = true
 qvto-bytecode.workspace = true
 qvto-runtime.workspace = true
 qvto-vm.workspace = true
+
+[features]
+# Compat mode: Eclipse QVTo's collection orders and identity hashes (simoxide-jcompat-exact; no
+# licence granted, builds with it must not be distributed: LICENSES, section 7).
+compat = ["qvto-vm/compat", "qvto-runtime/compat"]
+
+[dev-dependencies]
+# the tests check compat mode
+qvto-runtime = { workspace = true, features = ["compat"] }

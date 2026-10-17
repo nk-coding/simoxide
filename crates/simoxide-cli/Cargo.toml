@@ -18,17 +18,19 @@ mimalloc = { version = "0.1", optional = true, default-features = false }
 pprof = { version = "0.15", optional = true, default-features = false, features = ["flamegraph"] }
 
 [features]
-# Compile the fast mode (`--mode fast`); the default mode stays exact.
-# `--no-default-features --features hotspot-math` builds an exact-only binary;
-# `--no-default-features --features fast` a distributable one (no GPL code).
-default = ["fast", "hotspot-math"]
+# The default build is the distributable EPL build: fast mode only (`--mode fast`, the default).
+# `--features exact,hotspot-math` is the local exact build (byte-identical to the reference); its
+# binaries must not be distributed (LICENSES, sections 4 and 7).
+default = ["fast"]
 fast = ["simoxide-sim/fast"]
+# SimuLizar-exact mode (`--mode exact`).
+exact = ["simoxide-sim/exact", "simoxide-reconf?/exact"]
 # `simoxide bench --profile out.svg`: in-process sampling profiler (SIGPROF), flame graph output.
 profile = ["dep:pprof"]
 # Use mimalloc as the global allocator of `simoxide` and `simoxide-bench`.
 mimalloc = ["dep:mimalloc"]
-# Bit-exact HotSpot Math.log/exp, on by default (GPL-2.0-only code; binaries built with it must
-# not be distributed, see simoxide-random's `hotspot-math` feature).
+# Bit-exact HotSpot Math.log/exp (GPL-2.0-only code; binaries built with it must not be
+# distributed, see simoxide-random's `hotspot-math` feature).
 hotspot-math = ["simoxide-sim/hotspot-math"]
 # Runtime model changes (reconfiguration rules, later SPD; DESIGN-SPD.md F2-F4, R1): builds
 # `simoxide-reconf` (and through it the QVTo engine and its adapter, crates/qvto). No command uses it yet. Whether it joins the defaults is open (DESIGN-SPD.md U2).

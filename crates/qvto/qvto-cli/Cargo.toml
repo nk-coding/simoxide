@@ -25,4 +25,11 @@ qvto-syntax.workspace = true
 pprof = { version = "0.15", optional = true, default-features = false, features = ["flamegraph"] }
 
 [features]
+# Compat mode: Eclipse QVTo's collection orders and identity hashes (simoxide-jcompat-exact; no
+# licence granted, builds with it must not be distributed: LICENSES, section 7).
+compat = ["qvto/compat", "qvto-vm/compat", "qvto-runtime/compat", "qvto-testkit/compat"]
 profile = ["dep:pprof"]
+
+[dev-dependencies]
+qvto-testkit = { workspace = true, features = ["compat"] }
+qvto = { workspace = true, features = ["compat"] }

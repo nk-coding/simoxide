@@ -18,12 +18,15 @@ libm = "0.2"
 [dev-dependencies]
 # the harness tests compare with reference outputs bit for bit
 simoxide-random = { path = "../simoxide-random", features = ["hotspot-math"] }
+simoxide-sim = { workspace = true, features = ["exact"] }
 proptest = { version = "1", default-features = false, features = ["std"] }
 
 [features]
-default = ["hotspot-math"]
-# Bit-exact HotSpot Math.log/exp, on by default (GPL-2.0-only code; binaries built with it must
-# not be distributed, see simoxide-random's `hotspot-math` feature).
+default = []
+# The exact mode in process (`equiv` with `Mode::Exact`); see simoxide-sim's `exact`.
+exact = ["simoxide-sim/exact"]
+# Bit-exact HotSpot Math.log/exp (GPL-2.0-only code; binaries built with it must not be
+# distributed, see simoxide-random's `hotspot-math` feature).
 hotspot-math = ["simoxide-sim/hotspot-math"]
 
 [[bin]]

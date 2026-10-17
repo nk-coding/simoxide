@@ -31,6 +31,7 @@ mod frames;
 pub mod fxhash;
 pub mod ir;
 pub mod javafmt;
+#[cfg(feature = "exact")]
 pub mod javahash;
 pub mod meas;
 pub mod rng;
@@ -39,9 +40,9 @@ mod trace;
 pub mod windows;
 
 pub use change::{Change, ChangeError, ChangeKind, ChangeReport, ChangeSet};
-#[cfg(feature = "fast")]
-pub use compat::Fast;
-pub use compat::{Compat, Exact, Literal, Mode};
+#[cfg(feature = "exact")]
+pub use compat::Exact;
+pub use compat::{Compat, DefaultCompat, Fast, Literal, Mode};
 pub use config::RunSpec;
 pub use ir::{CompileError, CompiledModel};
 pub use meas::{Measurements, SeriesSummary};
@@ -52,18 +53,20 @@ pub use sim::{
 };
 pub use simoxide_sched::PsAlgorithm;
 
-/// Runs one simulation in the mode `cfg.mode` ([`Mode::Exact`] by default): the policy is
-/// chosen here, once per run; the simulation itself is monomorphized per mode.
+/// Runs one simulation in the mode `cfg.mode` ([`Mode::default`]: exact with the feature
+/// `exact`, else fast): the policy is chosen here, once per run; the simulation itself is
+/// monomorphized per mode. A mode this build does not compile is a
+/// [`SimErrorKind::ModeUnavailable`] error.
 pub fn run(cm: &CompiledModel, cfg: SimConfig, out: Outputs) -> Result<RunResult, SimError> {
     match cfg.mode {
+        #[cfg(feature = "exact")]
         Mode::Exact => Simulation::<Exact>::create(cm, cfg, out)?.run(),
-        #[cfg(feature = "fast")]
         Mode::Fast => Simulation::<compat::Fast>::create(cm, cfg, out)?.run(),
-        #[cfg(not(feature = "fast"))]
+        #[cfg(not(feature = "exact"))]
         m => Err(SimError {
-            message: format!("mode {m} needs the cargo feature `fast` of simoxide-sim"),
+            message: m.unavailable_reason().unwrap_or_default(),
             at_ns: 0,
-            kind: SimErrorKind::Model,
+            kind: SimErrorKind::ModeUnavailable,
         }),
     }
 }
@@ -93,8 +96,8 @@ impl std::error::Error for RunError {}
 
 /// One-call entry point for embedding: loads the model from memory (`files`: file name and XMI
 /// content, see [`RunSpec::load_model_memory`]; the file system is never read), compiles it and
-/// runs it once with `spec`'s seed and stop conditions under `limits`, in exact mode ([`simulate_memory_mode`]
-/// chooses the mode). Measurements are stored
+/// runs it once with `spec`'s seed and stop conditions under `limits`, in the default mode
+/// ([`Mode::default`]; [`simulate_memory_mode`] chooses the mode). Measurements are stored
 /// (`result.measurements.summaries()` gives per-series statistics, `rows` the raw series).
 ///
 /// To run one model many times (seeds, replications), compile it once and use [`run_batch`]
@@ -104,7 +107,7 @@ pub fn simulate_memory<N: AsRef<str>, C: AsRef<[u8]>>(
     spec: &RunSpec,
     limits: Limits,
 ) -> Result<RunResult, RunError> {
-    simulate_memory_mode(files, spec, limits, Mode::Exact)
+    simulate_memory_mode(files, spec, limits, Mode::default())
 }
 
 /// [`simulate_memory`] in `mode`.

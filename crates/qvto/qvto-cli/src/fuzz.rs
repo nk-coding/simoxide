@@ -394,6 +394,11 @@ pub fn run_batch_opts(
     let cases: Vec<Case> = read_cases(case_file).map_err(|e| e.to_string())?;
     let models = qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), root)
         .map_err(|e| e.to_string())?;
+    if let Some(why) = Mode::Compat.unavailable_reason() {
+        return Err(format!(
+            "differential fuzzing compares compat mode with Java: {why}"
+        ));
+    }
     let mut engine = QvtoEngine::new(root, Mode::Compat);
     engine.tape_dirs.push(jdir.clone());
     if !tape {

@@ -12,6 +12,10 @@ use qvto_sema::ir::{Direction, GlobalKind, ModuleId};
 use qvto_types::CollKind;
 use qvto_types::Type;
 
+/// [`RunOutcome::code`] of a run in a mode this build does not compile
+/// ([`qvto_runtime::Mode::available`]).
+pub const MODE_UNAVAILABLE: i32 = -2;
+
 /// The result of a run, in the terms of Eclipse's `ExecutionDiagnostic`.
 #[derive(Debug)]
 pub struct RunOutcome {
@@ -48,6 +52,18 @@ where
     }
 
     fn run_transformation_inner(&mut self, args: Vec<Vec<S::Obj>>) -> RunOutcome {
+        if let Some(why) = self.opts.mode.unavailable_reason() {
+            // no silent fallback to fast mode: Eclipse's orders cannot be reproduced here
+            return RunOutcome {
+                severity: 4,
+                code: MODE_UNAVAILABLE,
+                message: why,
+                error: None,
+                diags: Vec::new(),
+                extents: Vec::new(),
+                trace_records: 0,
+            };
+        }
         let ir = &self.prog.ir;
         let main = &ir.modules[ir.main_module.index()];
         if args.len() != main.model_params.len() {

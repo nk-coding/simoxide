@@ -14,8 +14,9 @@ const USAGE: &str = "usage:
              [--max-events-per-instant N]   (livelock guard, default 20000000, 0 = off)
              [--max-steps N] [--max-events N] [--timeout SECONDS] [--max-stack-depth N]
              [--max-processes N]   (resource limits, see simoxide_sim::Limits; 0 = off)
-             [--mode exact|fast]   (default exact; fast: same semantics and statistics,
-             other random numbers, no tape; needs the `fast` feature)
+             [--mode exact|fast]   (default fast: same semantics and statistics as the
+             reference, other random numbers, no tape; exact: byte-identical to the
+             reference, needs a build with `--features exact`, see LICENSES)
              [--ps-algorithm exact|virtual-time]   (virtual-time: O(log n) processor sharing,
              other float rounding; opt-in in every mode, see docs/correctness/deviations.md)
   simoxide bench --model <dir> [--run-json run.json] [--runs N] [--threads T] [same run flags]
@@ -69,7 +70,7 @@ fn parse_args() -> Result<Args, String> {
         runs: 20,
         threads: 1,
         profile: None,
-        mode: Mode::Exact,
+        mode: Mode::Fast,
         ps_virtual_time: false,
     };
     while let Some(f) = it.next() {
@@ -136,10 +137,8 @@ fn parse_args() -> Result<Args, String> {
                 let v = val()?;
                 a.mode =
                     Mode::parse(&v).ok_or(format!("--mode: expected exact or fast, got {v}"))?;
-                if !a.mode.available() {
-                    return Err(format!(
-                        "--mode {v}: this build has no fast mode (build simoxide-cli with the `fast` feature)"
-                    ));
+                if let Some(why) = a.mode.unavailable_reason() {
+                    return Err(format!("--mode {v}: {why}"));
                 }
             }
             "-h" | "--help" => return Err(USAGE.into()),

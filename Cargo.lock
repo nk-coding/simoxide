@@ -604,6 +604,7 @@ dependencies = [
  "hashbrown",
  "proptest",
  "qvto-model",
+ "qvto-runtime",
  "qvto-types",
  "simoxide-jcompat",
  "simoxide-jcompat-exact",
@@ -650,6 +651,7 @@ dependencies = [
  "qvto-emf",
  "qvto-model",
  "qvto-paths",
+ "qvto-testkit",
  "simoxide-jcompat-exact",
 ]
 
@@ -924,6 +926,7 @@ dependencies = [
  "simoxide-model",
  "simoxide-random",
  "simoxide-sched",
+ "simoxide-sim",
  "simoxide-stoex",
  "simoxide-testkit",
 ]

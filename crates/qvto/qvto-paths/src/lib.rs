@@ -51,13 +51,9 @@ pub fn find_root(start: &Path) -> Option<PathBuf> {
     }
 }
 
-/// The workspace's target directory: `$CARGO_TARGET_DIR` at run time, else at build time, else
-/// `<repository>/target`.
+/// The workspace's target directory: `$CARGO_TARGET_DIR`, else `<repository>/target`.
 pub fn target_dir() -> PathBuf {
     if let Some(d) = std::env::var_os("CARGO_TARGET_DIR").filter(|d| !d.is_empty()) {
-        return PathBuf::from(d);
-    }
-    if let Some(d) = option_env!("CARGO_TARGET_DIR").filter(|d| !d.is_empty()) {
         return PathBuf::from(d);
     }
     workspace_root(

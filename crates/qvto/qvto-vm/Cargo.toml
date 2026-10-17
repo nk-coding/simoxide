@@ -8,6 +8,9 @@ rust-version.workspace = true
 publish = false
 
 [features]
+# Compat mode: Eclipse QVTo's collection orders and identity hashes (simoxide-jcompat-exact; no
+# licence granted, builds with it must not be distributed: LICENSES, section 7).
+compat = ["qvto-runtime/compat"]
 default = ["emf"]
 # `ObjHandle` for qvto-emf's object ids
 emf = ["dep:qvto-emf"]
@@ -22,5 +25,7 @@ qvto-emf = { workspace = true, optional = true }
 regex = { version = "1", default-features = false, features = ["std", "unicode"] }
 
 [dev-dependencies]
+# the tests check compat mode
+qvto-runtime = { workspace = true, features = ["compat"] }
 qvto-emf.workspace = true
 qvto-syntax.workspace = true

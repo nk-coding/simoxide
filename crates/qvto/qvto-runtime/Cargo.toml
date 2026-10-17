@@ -9,11 +9,22 @@ publish = false
 
 [dependencies]
 simoxide-jcompat.workspace = true
-simoxide-jcompat-exact.workspace = true
+# no licence granted (LICENSES, section 7): only with the feature `compat`
+simoxide-jcompat-exact = { workspace = true, optional = true }
 qvto-model.workspace = true
 qvto-types.workspace = true
 # insertion-ordered hash maps (`coll::LinkedMap`)
 hashbrown = { version = "0.17", default-features = false, features = ["inline-more"] }
 
 [dev-dependencies]
+# the tests check compat mode against Java
+qvto-runtime = { path = ".", features = ["compat"] }
 proptest = { version = "1.11.0", default-features = false, features = ["std"] }
+
+[features]
+# Compat mode (`Mode::Compat`, the default mode with this feature): Java `HashMap`/`HashSet`
+# iteration order and HotSpot identity hashes from `simoxide-jcompat-exact`, for which no licence
+# is granted; builds with it must not be distributed (LICENSES, section 7). Without it only the
+# fast mode exists.
+compat = ["jdk-order"]
+jdk-order = ["dep:simoxide-jcompat-exact"]

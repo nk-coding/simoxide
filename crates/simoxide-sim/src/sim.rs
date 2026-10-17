@@ -14,7 +14,9 @@
 //!   deactivated (final state tuples) and the remaining processes are drained synchronously in
 //!   resource-table order (SIM-6.5, patch P3).
 
-use crate::compat::{Compat, Exact, Mode, SimRng};
+#[cfg(feature = "exact")]
+use crate::compat::Exact;
+use crate::compat::{Compat, DefaultCompat, Mode, SimRng};
 use crate::events::{Ev, EventList};
 use crate::frames::{
     Binding, Frame, FrameEnv, FramePool, FrameRef, Proxy, ProxyRef, eval_proxy, frame_mut,
@@ -158,7 +160,7 @@ impl Default for SimConfig {
             ps_algorithm: PsAlgorithm::Exact,
             max_events_per_instant: DEFAULT_MAX_EVENTS_PER_INSTANT,
             limits: Limits::default(),
-            mode: Mode::Exact,
+            mode: Mode::default(),
         }
     }
 }
@@ -190,6 +192,9 @@ pub enum SimErrorKind {
     Limit,
     /// [`Limits::cancel`] was set or [`Limits::deadline`] passed.
     Cancelled,
+    /// The run asks for a mode this build does not compile ([`Mode::available`]): the exact mode
+    /// needs the cargo feature `exact`.
+    ModeUnavailable,
 }
 
 impl fmt::Display for SimError {
@@ -781,10 +786,11 @@ fn busy_fraction(shadow: &[u64], instances: u32, per_core: bool) -> f64 {
 
 // ------------------------------------------------------------------------------------------
 
-/// One simulation run over a [`CompiledModel`], with the simulator policy `C` ([`Exact`] by
-/// default; see [`crate::compat`]): the engine, which borrows the compiled model, holds the
+/// One simulation run over a [`CompiledModel`], with the simulator policy `C`
+/// ([`DefaultCompat`] by default: `Exact` with the feature `exact`, else `Fast`; see
+/// [`crate::compat`]): the engine, which borrows the compiled model, holds the
 /// output writers and runs one [`RunState`] (which explains pausing, forking and resuming).
-pub struct Simulation<'m, C: Compat = Exact> {
+pub struct Simulation<'m, C: Compat = DefaultCompat> {
     /// The compiled model the run simulates: the one it was created on, or after model changes
     /// the one in `st.model` (see `RunModel`; the reference then lives as long as that `Arc`,
     /// which only `Simulation::apply_changes` replaces).
@@ -814,6 +820,7 @@ const RT_SAME_CONTEXT: &str = "IllegalStateException: First measurement to the s
 /// Internal result: the error is boxed so that the hot paths pass small `Result`s around.
 type R<T> = Result<T, Box<SimError>>;
 
+#[cfg(feature = "exact")]
 impl<'m> Simulation<'m, Exact> {
     /// An exact-mode simulation (`cfg.mode` must be [`Mode::Exact`]; [`crate::run`] dispatches on
     /// the mode, [`Simulation::create`] builds any policy).
@@ -826,6 +833,13 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// A simulation with policy `C`, e.g. `Simulation::<Fast>::create(..)`; `cfg.mode` must be
     /// `C::MODE`.
     pub fn create(cm: &'m CompiledModel, cfg: SimConfig, out: Outputs) -> Result<Self, SimError> {
+        if let Some(why) = cfg.mode.unavailable_reason() {
+            return Err(SimError {
+                message: why,
+                at_ns: 0,
+                kind: SimErrorKind::ModeUnavailable,
+            });
+        }
         if cfg.mode != C::MODE {
             return Err(SimError {
                 message: format!(
@@ -1222,7 +1236,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             }
         }
         // deactivateAllActiveResources: current queue lengths, then overall utilisation
-        for &ri in &cm.finalise_order {
+        for &ri in C::finalise_order(cm) {
             let def = &cm.resources[ri as usize];
             let rt = &mut self.st.res[ri as usize];
             let per_core = def.policy == SchedulingPolicy::ProcessorSharing;
@@ -2092,7 +2106,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             if let Some(f) = payload
                 && f.any_key(|k| cm.keys.bytesize[k as usize])
             {
-                f.visit_contents(&cm.keys, |k, b| {
+                f.visit_contents::<C::Order, _>(&cm.keys, |k, b| {
                     if cm.keys.bytesize[k as usize] {
                         d += self.binding_to_f64(b)?;
                     }
@@ -2800,7 +2814,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         let mut rc = self.st.pool.frame(cur);
         let fi = frame_mut(&mut rc);
         if C::LITERAL_ENGINE {
-            for (k, b) in fi.contents(&cm.keys) {
+            for (k, b) in fi.contents::<C::Order>(&cm.keys) {
                 if cm.keys.names[k as usize].starts_with(prefix)
                     && let Binding::Proxy(p) = &b
                 {
@@ -2809,7 +2823,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 }
             }
         } else if let Some(c) = fi.parent.clone() {
-            c.visit_contents(&cm.keys, |k, b| {
+            c.visit_contents::<C::Order, _>(&cm.keys, |k, b| {
                 if let Binding::Proxy(p) = b
                     && cm.keys.names[k as usize].starts_with(prefix)
                 {

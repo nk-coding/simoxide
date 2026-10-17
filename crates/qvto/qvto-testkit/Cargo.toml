@@ -8,7 +8,16 @@ rust-version.workspace = true
 publish = false
 
 [dependencies]
-simoxide-jcompat-exact.workspace = true
+# HotSpot identity-hash sequences for tape replay (feature `compat`; no licence granted)
+simoxide-jcompat-exact = { workspace = true, optional = true }
 qvto-paths.workspace = true
 qvto-emf.workspace = true
 qvto-model.workspace = true
+
+[features]
+# Compat mode: Eclipse QVTo's collection orders and identity hashes (simoxide-jcompat-exact; no
+# licence granted, builds with it must not be distributed: LICENSES, section 7).
+compat = ["dep:simoxide-jcompat-exact"]
+
+[dev-dependencies]
+qvto-testkit = { path = ".", features = ["compat"] }

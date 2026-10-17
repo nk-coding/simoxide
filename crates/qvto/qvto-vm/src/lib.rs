@@ -31,7 +31,7 @@ pub use env::{RunEnv, TapeHook};
 pub use error::{ErrorKind, QvtError, StackElem, Unwind};
 pub use inctrace::{IncrementalTrace, TraceParam, TraceRecordIn, TraceValue};
 pub use native::{NativeCall, NativeError, NativeFn, NativeResult, Natives, java_method_key};
-pub use run::RunOutcome;
+pub use run::{MODE_UNAVAILABLE, RunOutcome};
 pub use stdlib::Prim;
 pub use trace::{TraceRecord, Traces};
 pub use vm::{Diag, ObjHandle, RunOptions, Vm};

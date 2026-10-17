@@ -27,7 +27,7 @@
 //! allocator (or mimalloc with the `mimalloc` feature).
 
 use simoxide_sim::{
-    ChangeKind, ChangeSet, Compat, CompiledModel, Exact, Mode, Outputs, Pause, RunSpec, SimConfig,
+    ChangeKind, ChangeSet, Compat, CompiledModel, Mode, Outputs, Pause, RunSpec, SimConfig,
     Simulation,
 };
 use std::alloc::{GlobalAlloc, Layout};
@@ -234,7 +234,7 @@ fn parse() -> Result<Args, String> {
         max_meas: 20_000,
         runs: 64,
         threads: vec![1, 2, 4, 8, 16],
-        mode: Mode::Exact,
+        mode: Mode::default(),
     };
     while let Some(f) = it.next() {
         let mut val = || it.next().ok_or(format!("{f} needs a value"));
@@ -254,8 +254,8 @@ fn parse() -> Result<Args, String> {
             "--mode" => {
                 let v = val()?;
                 a.mode = Mode::parse(&v).ok_or(format!("--mode: unknown mode {v}"))?;
-                if !a.mode.available() {
-                    return Err(format!("--mode {v}: built without the `fast` feature"));
+                if let Some(why) = a.mode.unavailable_reason() {
+                    return Err(format!("--mode {v}: {why}"));
                 }
             }
             o => return Err(format!("unknown flag {o}")),
@@ -486,11 +486,11 @@ fn fork(a: &Args) -> Result<(), String> {
             ..spec.sim_config(b.name)
         };
         let row = match a.mode {
-            Mode::Exact => fork_costs::<Exact>(&cm, &cfg, a.reps)?,
-            #[cfg(feature = "fast")]
+            #[cfg(feature = "exact")]
+            Mode::Exact => fork_costs::<simoxide_sim::Exact>(&cm, &cfg, a.reps)?,
             Mode::Fast => fork_costs::<simoxide_sim::Fast>(&cm, &cfg, a.reps)?,
-            #[cfg(not(feature = "fast"))]
-            Mode::Fast => return Err("built without the `fast` feature".into()),
+            #[cfg(not(feature = "exact"))]
+            m => return Err(m.unavailable_reason().unwrap_or_default()),
         };
         println!("| {} | {row} |", b.name);
     }
@@ -592,11 +592,11 @@ fn change(a: &Args) -> Result<(), String> {
             ..spec.sim_config(b.name)
         };
         let row = match a.mode {
-            Mode::Exact => change_costs::<Exact>(&cm, &cfg, a.reps)?,
-            #[cfg(feature = "fast")]
+            #[cfg(feature = "exact")]
+            Mode::Exact => change_costs::<simoxide_sim::Exact>(&cm, &cfg, a.reps)?,
             Mode::Fast => change_costs::<simoxide_sim::Fast>(&cm, &cfg, a.reps)?,
-            #[cfg(not(feature = "fast"))]
-            Mode::Fast => return Err("built without the `fast` feature".into()),
+            #[cfg(not(feature = "exact"))]
+            m => return Err(m.unavailable_reason().unwrap_or_default()),
         };
         println!("| {} | {row} |", b.name);
     }

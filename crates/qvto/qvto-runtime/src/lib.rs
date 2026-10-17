@@ -28,6 +28,8 @@ pub mod tuple;
 pub mod value;
 
 pub use coll::{Coll, CollKind};
-pub use identity::{CompatEnv, FastEnv, HashEnv, IdentityKey, Mode};
+#[cfg(feature = "compat")]
+pub use identity::CompatEnv;
+pub use identity::{FastEnv, HashEnv, IdentityKey, Mode};
 pub use str::Str;
 pub use value::{EnumLit, IntBox, ObjRef, TypeRef, Value};

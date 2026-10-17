@@ -81,7 +81,7 @@ pub const DEFAULT_MAX_STRING_LENGTH: usize = 1 << 27;
 impl Default for RunOptions {
     fn default() -> Self {
         RunOptions {
-            mode: Mode::Compat,
+            mode: Mode::default(),
             id_source: None,
             max_stack_depth: 1000,
             readonly_guard: false,

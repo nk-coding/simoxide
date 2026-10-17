@@ -9,21 +9,32 @@ license.workspace = true
 [dependencies]
 simoxide-model = { workspace = true }
 simoxide-stoex = { workspace = true }
-simoxide-random = { workspace = true }
+simoxide-random = { workspace = true, features = ["fast"] }
 simoxide-sched = { workspace = true }
 simoxide-jcompat = { workspace = true }
-simoxide-jcompat-exact = { workspace = true }
+# no licence granted (LICENSES, section 7): only with the feature `exact`
+simoxide-jcompat-exact = { workspace = true, optional = true }
 serde_json = "1"
 
 [features]
-# Fast mode (`compat::Fast`, `Mode::Fast`): same semantics and statistics as the reference,
-# not its bits. Additive: the exact mode stays the default and is unchanged.
-fast = ["simoxide-random/fast"]
+default = []
+# The fast mode (`compat::Fast`, `Mode::Fast`) is always compiled (EPL); kept for compatibility.
+fast = []
+# SimuLizar-exact mode (`compat::Exact`, `Mode::Exact`, the default mode with this feature):
+# byte-identical to the reference. Needs Java `HashMap` iteration order from
+# `simoxide-jcompat-exact`, for which no licence is granted: builds with `exact` are for local
+# use and must not be distributed (LICENSES, section 7). Bit-exact log/exp also need
+# `hotspot-math`. (A Slingshot-exact mode will not need this feature.)
+exact = ["jdk-order"]
+# Java `HashMap` order (`simoxide-jcompat-exact`); on through `exact`.
+jdk-order = ["dep:simoxide-jcompat-exact"]
 # Bit-exact HotSpot Math.log/exp (GPL-2.0-only code; binaries built with it must not be
 # distributed, see simoxide-random's `hotspot-math` feature). Off by default in the libraries.
 hotspot-math = ["simoxide-random/hotspot-math", "simoxide-stoex/hotspot-math"]
 
 [dev-dependencies]
 simoxide-testkit = { path = "../simoxide-testkit" }
+# the tests check the exact mode (byte-identical to the reference)
+simoxide-sim = { path = ".", features = ["exact"] }
 # the corpus and replay tests compare with the reference bit for bit
 simoxide-random = { path = "../simoxide-random", features = ["hotspot-math"] }

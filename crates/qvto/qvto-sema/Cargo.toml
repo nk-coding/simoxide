@@ -15,4 +15,4 @@ qvto-types.workspace = true
 [dev-dependencies]
 qvto-paths.workspace = true
 qvto-emf.workspace = true
-qvto-testkit.workspace = true
+qvto-testkit = { workspace = true, features = ["compat"] }

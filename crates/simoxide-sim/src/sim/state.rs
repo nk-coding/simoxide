@@ -103,7 +103,7 @@ impl Shape {
 /// let (a, b) = (sim.finish().unwrap(), fork.finish().unwrap());
 /// assert_eq!(a.measurements.to_csv(), b.measurements.to_csv());
 /// ```
-pub struct RunState<C: Compat = Exact> {
+pub struct RunState<C: Compat = crate::compat::DefaultCompat> {
     /// The run configuration (stop conditions, seed, limits).
     pub(super) cfg: SimConfig,
     pub(super) phase: Phase,
@@ -373,7 +373,7 @@ impl<C: Compat> RunState<C> {
 
 /// A [`RunState`] that shares no frame with any other value ([`RunState::detach`]), so it can
 /// be sent to another thread.
-pub struct Detached<C: Compat = Exact>(RunState<C>);
+pub struct Detached<C: Compat = crate::compat::DefaultCompat>(RunState<C>);
 
 // SAFETY: a `RunState` is not `Send` only because of the `Rc`s of its frames and proxies (every
 // other field is `Send`: the random source by the `SimRng` bound, the rest plain data and

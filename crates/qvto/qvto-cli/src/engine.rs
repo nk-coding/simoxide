@@ -5,12 +5,14 @@ use qvto::blackbox::{BlackboxResolver, Catalog, CatalogUnit};
 use qvto::units::{Bundle, FsResolver};
 use qvto_emf::ResourceSet;
 use qvto_model::{ModelStore, ResourceId};
+#[cfg(feature = "compat")]
 use qvto_runtime::IdentityKey;
 use qvto_runtime::Mode;
 use qvto_runtime::identity::IdentityHashSource;
 use qvto_sema::ir::Direction;
 use qvto_testkit::engine::{CaseEnv, Engine, Outcome, Outputs, Severity, Status};
 use qvto_testkit::fixture::{Problem, Tape, parse_tape};
+#[cfg(feature = "compat")]
 use std::collections::HashMap;
 use std::panic::AssertUnwindSafe;
 use std::path::Path;
@@ -368,6 +370,7 @@ fn load_tape(env: &CaseEnv, tape_dirs: &[std::path::PathBuf]) -> Option<Tape> {
 
 /// Keys of the store's objects as the tape names them: `<label>#<path>` for model objects,
 /// `mm:<nsURI>#<fragment>` for objects of metamodel resources.
+#[cfg(feature = "compat")]
 fn object_keys(rs: &ResourceSet) -> HashMap<String, u32> {
     let g = &rs.graph;
     let mut out = HashMap::new();
@@ -512,6 +515,13 @@ fn execute(
     let inc_trace =
         trace_res.map(|r| qvto::trace::read_incremental_trace(&rs.graph, rs.graph.roots(r)));
     let first_created = rs.graph.object_count() as u32;
+    #[cfg(not(feature = "compat"))]
+    let id_source: Option<Box<dyn IdentityHashSource>> = {
+        // identity hashes only order compat mode's collections
+        let _ = (tape, first_created);
+        None
+    };
+    #[cfg(feature = "compat")]
     let id_source: Option<Box<dyn IdentityHashSource>> = tape.map(|t| {
         // objects that exist before the run: their recorded hashes by key; objects the run
         // creates: the hashes the Java run assigned to the other objects of the tape, in the
@@ -617,8 +627,10 @@ fn execute(
 }
 
 /// The Java thread's identity-hash sequence, continued after the tape's seed.
+#[cfg(feature = "compat")]
 struct Recovered(qvto_testkit::idhash::XorShift);
 
+#[cfg(feature = "compat")]
 impl IdentityHashSource for Recovered {
     fn draw(&mut self, _key: IdentityKey) -> i32 {
         self.0.next()

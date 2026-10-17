@@ -5,13 +5,18 @@
 //! what changes values, the random numbers; everything that is result-neutral (merged hand-off
 //! events, `INNER` without copies, see below) is done in every mode.
 //!
-//! * [`Exact`] (the default, always compiled): the reference's random stream (MT19937), its
-//!   numerical inverse CDFs and HotSpot's `Math.log`, with the random tape. Traces, tapes and
-//!   measurements are byte-identical to the reference.
-//! * [`Fast`] (cargo feature `fast`): xoshiro256++ and standard samplers (ziggurat,
-//!   Marsaglia–Tsang, PTRS, `a + u·(b − a)`) instead of MT19937 and numerical inversion
-//!   ([`simoxide_random::fast`]); parameter checks and errors are the reference's; no random
-//!   tape, no tape replay, no per-draw bookkeeping (see `docs/correctness/deviations.md`, "Fast mode").
+//! * `Exact` (SimuLizar-exact; cargo feature `exact`): the reference's random stream (MT19937),
+//!   its numerical inverse CDFs and HotSpot's `Math.log` (bit-exact with `hotspot-math`), with
+//!   the random tape, and Java `HashMap` iteration order where the reference iterates one
+//!   (`INNER` characterisations, resource finalisation). Traces, tapes and measurements are
+//!   byte-identical to the reference. The `HashMap` order comes from `simoxide-jcompat-exact`,
+//!   for which no licence is granted (`LICENSES`): builds with `exact` must not be distributed.
+//! * [`Fast`] (always compiled; the default without `exact`): xoshiro256++ and standard samplers
+//!   (ziggurat, Marsaglia–Tsang, PTRS, `a + u·(b − a)`) instead of MT19937 and numerical
+//!   inversion ([`simoxide_random::fast`]); parameter checks and errors are the reference's; no
+//!   random tape, no tape replay, no per-draw bookkeeping; maps the reference iterates in
+//!   `HashMap` order are iterated in insertion order (see `docs/correctness/deviations.md`,
+//!   "Fast mode").
 //!
 //! The engine is the same in both modes. It deviates from DESMO-J's literal event sequence in
 //! two places, without changing any output (trace, tape, measurements, event count):
@@ -23,7 +28,7 @@
 //!   an event and passes the per-event checks (livelock guard, `Limits`); the trace has no line
 //!   for it;
 //! - `INNER` characterisations are evaluated while visiting the frame chain (no
-//!   `getContents()` copy), in the same Java `HashMap` order and with the same tape origin.
+//!   `getContents()` copy), in the same order ([`Compat::Order`]) and with the same tape origin.
 //!
 //! [`Literal`] runs a policy on the literal engine (separate `Resume` notes, copied frame
 //! contents). It exists to test that both engines give the same outputs (`tests/fast_mode.rs`,
@@ -32,19 +37,31 @@
 //! [`Mode`] names the policy at run time; [`crate::run`] and [`crate::run_batch`] dispatch on
 //! [`SimConfig::mode`](crate::SimConfig::mode) once per run.
 
+use crate::ir::{CompiledModel, ResIdx};
 use crate::rng::{Origin, RngMode};
+use simoxide_jcompat::order::{InsertionOrder, MapOrder};
 use simoxide_random::UniformSource;
 use simoxide_stoex::Value;
 
 /// Which simulator variant a run uses (see the module docs).
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Mode {
-    /// Byte-identical to the reference (default).
-    #[default]
+    /// Byte-identical to the reference (needs the cargo feature `exact`; the default with it).
     Exact,
-    /// Same semantics and statistics, not the reference's random numbers (needs the `fast`
-    /// feature).
+    /// Same semantics and statistics, not the reference's random numbers (always compiled; the
+    /// default without `exact`).
     Fast,
+}
+
+impl Default for Mode {
+    /// [`Mode::Exact`] in builds with the feature `exact`, else [`Mode::Fast`].
+    fn default() -> Self {
+        if cfg!(feature = "exact") {
+            Mode::Exact
+        } else {
+            Mode::Fast
+        }
+    }
 }
 
 impl Mode {
@@ -65,9 +82,19 @@ impl Mode {
         }
     }
 
-    /// Whether this build can run the mode (the fast mode needs the cargo feature `fast`).
+    /// Whether this build can run the mode (the exact mode needs the cargo feature `exact`).
     pub fn available(self) -> bool {
-        self == Mode::Exact || cfg!(feature = "fast")
+        self == Mode::Fast || cfg!(feature = "exact")
+    }
+
+    /// Why this build cannot run the mode (`None` if it can).
+    pub fn unavailable_reason(self) -> Option<String> {
+        (!self.available()).then(|| {
+            format!(
+                "mode {self} is not compiled in: build with the cargo feature `exact` \
+                 (simoxide-cli: `--features exact`, with `hotspot-math` for bit-exact log/exp)"
+            )
+        })
     }
 }
 
@@ -77,49 +104,77 @@ impl std::fmt::Display for Mode {
     }
 }
 
-/// A compile-time simulator policy (implemented by [`Exact`], [`Fast`] and [`Literal`]).
+/// A compile-time simulator policy (implemented by `Exact`, [`Fast`] and [`Literal`]).
 pub trait Compat: 'static {
     /// The run's uniform source and distribution samplers.
     #[doc(hidden)]
     type Rng: SimRng;
+    /// The iteration order of the maps the reference keeps in a Java `HashMap` (`INNER`
+    /// characterisations, ND-12/13): Java's (`exact`) or insertion order (fast).
+    #[doc(hidden)]
+    type Order: MapOrder;
     /// The run-time name of this policy.
     const MODE: Mode;
     /// Run DESMO-J's event sequence literally: a separate `Resume` note for every hand-off and
     /// a copy of the frame contents for `INNER` (only [`Literal`], for equivalence tests).
     #[doc(hidden)]
     const LITERAL_ENGINE: bool = false;
+    /// `deactivateAllActiveResources` order of the model's resources ([`Self::Order`] over the
+    /// resource registry).
+    #[doc(hidden)]
+    fn finalise_order(cm: &CompiledModel) -> &[ResIdx] {
+        &cm.finalise_order_fast
+    }
 }
 
-/// Byte-identical to the reference (the default policy).
+/// Byte-identical to the reference (SimuLizar-exact; cargo feature `exact`).
+#[cfg(feature = "exact")]
 #[derive(Debug, Clone, Copy)]
 pub struct Exact;
 
+#[cfg(feature = "exact")]
 impl Compat for Exact {
     type Rng = crate::rng::Rng;
+    type Order = simoxide_jcompat_exact::order::JdkHashOrder;
     const MODE: Mode = Mode::Exact;
+    #[inline]
+    fn finalise_order(cm: &CompiledModel) -> &[ResIdx] {
+        &cm.finalise_order
+    }
 }
 
 /// Fast mode: same semantics and statistics, not the reference's random numbers.
-#[cfg(feature = "fast")]
 #[derive(Debug, Clone, Copy)]
 pub struct Fast;
 
-#[cfg(feature = "fast")]
 impl Compat for Fast {
     type Rng = FastSourceRng;
+    type Order = InsertionOrder;
     const MODE: Mode = Mode::Fast;
 }
 
+/// The policy that type parameters default to: `Exact` with the feature `exact`, else [`Fast`].
+#[cfg(feature = "exact")]
+pub type DefaultCompat = Exact;
+/// The policy that type parameters default to: `Exact` with the feature `exact`, else [`Fast`].
+#[cfg(not(feature = "exact"))]
+pub type DefaultCompat = Fast;
+
 /// Policy `P` on the literal engine (see the module docs): the same outputs as `P`, more
-/// notes processed. For tests: `Simulation::<Literal<Exact>>::create(..)` with
+/// notes processed. For tests: `Simulation::<Literal<Fast>>::create(..)` with
 /// `cfg.mode = P::MODE`.
 #[derive(Debug, Clone, Copy)]
 pub struct Literal<P>(std::marker::PhantomData<P>);
 
 impl<P: Compat> Compat for Literal<P> {
     type Rng = P::Rng;
+    type Order = P::Order;
     const MODE: Mode = P::MODE;
     const LITERAL_ENGINE: bool = true;
+    #[inline]
+    fn finalise_order(cm: &CompiledModel) -> &[ResIdx] {
+        P::finalise_order(cm)
+    }
 }
 
 /// What the simulator needs from its random source besides uniforms and samples: the exact
@@ -211,7 +266,6 @@ impl SimRng for crate::rng::Rng {
 }
 
 /// The fast mode's source: [`simoxide_random::fast::FastSource`] plus a sample counter.
-#[cfg(feature = "fast")]
 #[doc(hidden)]
 #[derive(Clone)]
 pub struct FastSourceRng {
@@ -219,7 +273,6 @@ pub struct FastSourceRng {
     count: u64,
 }
 
-#[cfg(feature = "fast")]
 macro_rules! counted {
     ($($name:ident($($a:ident: $t:ty),*) -> $r:ty;)*) => {
         $(
@@ -232,7 +285,6 @@ macro_rules! counted {
     };
 }
 
-#[cfg(feature = "fast")]
 impl UniformSource for FastSourceRng {
     #[inline]
     fn next_uniform(&mut self) -> f64 {
@@ -252,7 +304,6 @@ impl UniformSource for FastSourceRng {
     }
 }
 
-#[cfg(feature = "fast")]
 impl SimRng for FastSourceRng {
     fn create(
         mode: &RngMode,

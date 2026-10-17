@@ -147,7 +147,11 @@ pub fn bench(args: &[String]) {
         suite: None,
         only: Vec::new(),
         groups: Vec::new(),
-        modes: vec![Mode::Compat, Mode::Fast],
+        // compat only in builds with the feature `compat`
+        modes: [Mode::Compat, Mode::Fast]
+            .into_iter()
+            .filter(|m| m.available())
+            .collect(),
         java: false,
         java_cold: false,
         rust: true,
@@ -179,7 +183,10 @@ pub fn bench(args: &[String]) {
                 o.modes = next(&mut i)
                     .split(',')
                     .map(|m| match m {
-                        "compat" => Mode::Compat,
+                        "compat" => match Mode::Compat.unavailable_reason() {
+                            Some(why) => die(&format!("--modes compat: {why}")),
+                            None => Mode::Compat,
+                        },
                         "fast" => Mode::Fast,
                         _ => die("modes: compat,fast"),
                     })

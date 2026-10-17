@@ -42,6 +42,11 @@ impl MapOrder for JdkHashOrder {
     fn order(hashes: &[i32]) -> Vec<usize> {
         iteration_order(hashes)
     }
+    #[inline(always)]
+    fn bucket(hash: i32, mask: u32) -> u32 {
+        let h = hash as u32;
+        (h ^ (h >> 16)) & mask
+    }
 }
 
 #[cfg(test)]
