@@ -283,7 +283,15 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         for r in &cm.resources[st.res.len()..] {
             st.res.push(ResRt::new(r, ps, F::SLINGSHOT));
         }
-        debug_assert_eq!(cm.series.len(), st.meas.m.series.len());
+        // new series (their tuples start now; the run's own series are a prefix of `cm`'s)
+        debug_assert!(cm.series.len() >= st.meas.m.series.len());
+        for d in &cm.series[st.meas.m.series.len()..] {
+            st.meas.m.series.push(d.clone());
+            st.meas.m.rows.push(Vec::new());
+        }
+        if !st.meas.series_windows.is_empty() {
+            st.meas.series_windows.resize(cm.series.len(), Vec::new());
+        }
         st.dyn_paths.clear();
         st.dyn_path_child.clear();
         st.dyn_path_child.extend(path_extra.iter().copied());

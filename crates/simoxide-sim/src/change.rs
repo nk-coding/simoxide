@@ -788,20 +788,23 @@ pub(crate) fn recompile(
     for &o in &transient {
         let what = m2.describe(o);
         if opts.removal == Removal::Keep && !ss {
-            let created = transient_resources(
-                old,
-                &fresh,
-                o,
-                &mut resources,
-                &mut fresh_of,
-                &mut new_entries,
-                &reg_index,
-            );
-            match created {
-                Ok(n) => report.applied.push(format!(
-                    "{what} was added and removed again in one change set: its {n} resources keep simulating (MC-1.5)"
+            // SimuLizar's syncer created and registered its resources at the addition; they
+            // are unreachable and have no monitors (`attachMonitors` found none for new
+            // specifications), so what remains observable is the registered id: a later
+            // container with that id is not created (MC-1.1)
+            match m2.graph.id(o) {
+                Some(id) if reg_index.contains_key(id) => unsupported.push(format!(
+                    "{what} (added and removed again) has the id of a registered container or link"
                 )),
-                Err(e) => unsupported.push(e),
+                Some(id) => {
+                    new_entries.push((id.into(), Vec::new()));
+                    report.applied.push(format!(
+                        "{what} was added and removed again in one change set: registered, its resources keep simulating unreachable (MC-1.5)"
+                    ));
+                }
+                None => report.ignored.push(format!(
+                    "{what} was added and removed again in one change set (no id)"
+                )),
             }
         } else {
             report.ignored.push(format!(
@@ -1383,12 +1386,13 @@ pub(crate) fn recompile(
             warnings.push(w.clone());
         }
     }
-    let container_res_dense = dense_container_res(&container_res, n_cont, m2.resource_types.len());
+    let n_types = m2.resource_types.len();
+    let mut fresh = fresh;
+    let container_res_dense = dense_container_res(&container_res, n_cont, n_types);
     let finalise_order_fast = finalise_order::<simoxide_jcompat::order::InsertionOrder>(&registry);
     #[cfg(feature = "exact")]
     let finalise_order = finalise_order::<simoxide_jcompat_exact::order::JdkHashOrder>(&registry);
     // the router's view goes into the typed model (`transmit` without a route table reads it)
-    let mut fresh = fresh;
     for (&l, c) in links.iter().zip(&route_links) {
         fresh.model.linking_resources[l].connected = c.to_vec();
     }
@@ -1484,25 +1488,6 @@ pub(crate) fn recompile(
         report,
         ops,
     })
-}
-
-/// The resources SimuLizar's syncer created for `o`, a container or link added to the resource
-/// environment and removed again in one change set (they keep simulating under
-/// [`Removal::Keep`], MC-1.5): built by compiling the model with `o` put back into the
-/// environment. Returns the number of resources.
-fn transient_resources(
-    _old: &CompiledModel,
-    _fresh: &CompiledModel,
-    o: ObjId,
-    _resources: &mut Vec<CRes>,
-    _fresh_of: &mut Vec<Option<usize>>,
-    _new_entries: &mut Vec<RegistryEntry>,
-    _reg_index: &FxMap<&str, usize>,
-) -> Result<usize, String> {
-    Err(format!(
-        "object {} was added to the resource environment and removed again in one change set (Removal::Keep: not supported yet)",
-        o.0
-    ))
 }
 
 /// The new graph must be the run's graph with changes: objects are only ever appended and keep
