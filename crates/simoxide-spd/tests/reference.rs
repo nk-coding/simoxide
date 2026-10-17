@@ -206,6 +206,12 @@ fn cases() -> Vec<(String, PathBuf, PathBuf, i64)> {
             100,
         ),
         (
+            "spd_time_policies".to_string(),
+            root().join("reference/slingshot/models/spd_time_policies"),
+            root().join("reference/slingshot/models/spd_time_policies/expected/spd.jsonl"),
+            100,
+        ),
+        (
             "spd_or_trigger".to_string(),
             r.join("spd_or_trigger"),
             r.join("spd_or_trigger/observed/spd.jsonl"),
@@ -254,7 +260,7 @@ fn decision_log_equals_reference_with_compat_flags() {
         }
         eprintln!("{name}: {} records equal", want.len());
     }
-    assert_eq!(with_spd, 4);
+    assert_eq!(with_spd, 5);
 }
 
 fn lines(v: &[&str]) -> Vec<Value> {
@@ -347,4 +353,61 @@ fn fixed_behaviour_composed_triggers() {
         ),
     ]);
     compare("spd_and_trigger (fixed)", &want, &got);
+}
+
+/// The fixed behaviour on `spd_time_policies`: each policy sees only its own time event (Q15),
+/// the group-size constraint is checked in the chain (Q9) and the constraint state changes at
+/// the (successful) adjustment (Q2). Hand-derived: Out20 fires at 20 (group of 1, cooldown
+/// from 20 to 45); In30 is stopped by thrashing (20 + 15 >= 30); In40 by its interval
+/// (35-45); InLe50 fires at 50 (no reference adjustment there: the double reports success);
+/// Abs60 fires (absolute passes thrashing; 3 - 2 = +1 within 1-3); In77 fires (the last
+/// enactment was absolute); Rel never (0 > 0 on its own event at 0).
+#[test]
+fn fixed_behaviour_time_policies() {
+    let dir = root().join("reference/slingshot/models/spd_time_policies");
+    let refl = std::fs::read_to_string(dir.join("expected/spd.jsonl")).unwrap();
+    let got = project(&run(&dir, 100, Quirks::fixed(), &refl)).unwrap();
+    let fired: Vec<(f64, String)> = got
+        .iter()
+        .filter(|v| v["k"] == "eval" && v["request"] == true)
+        .map(|v| {
+            (
+                v["t"].as_f64().unwrap(),
+                v["policy"].as_str().unwrap().to_string(),
+            )
+        })
+        .collect();
+    let want: Vec<(f64, String)> = [
+        (20.0, "_tpOut20"),
+        (50.0, "_tpInLe50"),
+        (60.0, "_tpAbs60"),
+        (77.0, "_tpIn77"),
+    ]
+    .iter()
+    .map(|(t, p)| (*t, p.to_string()))
+    .collect();
+    assert_eq!(fired, want);
+    let chain = got
+        .iter()
+        .find(|v| v["k"] == "policy" && v["id"] == "_tpIn40")
+        .unwrap();
+    assert_eq!(
+        chain["chain"],
+        serde_json::json!([
+            "TargetGroupChecker",
+            "SimulationTimeChecker",
+            "ThrashingConstraintFilter",
+            "TargetGroupSizeConstraintFilter",
+            "IntervalConstraintFilter",
+            "Adjustor"
+        ])
+    );
+    let reason = |p: &str| {
+        got.iter()
+            .find(|v| v["k"] == "eval" && v["policy"] == p)
+            .map(|v| v["filters"].as_array().unwrap().last().unwrap()[0].clone())
+            .unwrap()
+    };
+    assert_eq!(reason("_tpIn30"), "ThrashingConstraintFilter");
+    assert_eq!(reason("_tpIn40"), "IntervalConstraintFilter");
 }
