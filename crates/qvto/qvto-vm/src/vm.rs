@@ -103,6 +103,9 @@ pub enum IterSlot {
     #[default]
     Empty,
     Iter(Iter),
+    /// A loop over a Sequence or OrderedSet value, read in place (the slot keeps the value;
+    /// a change of the variable copies it first, as values are immutable).
+    Coll(Rc<Coll>, usize),
     /// `closure`: a stack of levels; elements below the first are added to the result.
     Closure(Vec<Iter>),
 }
@@ -970,8 +973,12 @@ where
                     w!(self, base, dst) = Value::Bool(added);
                 }
                 Insn::IterInit { slot, src } => {
-                    let it = Iter::of(&r!(self, base, src));
-                    self.iters[ibase + slot as usize] = IterSlot::Iter(it);
+                    self.iters[ibase + slot as usize] = match &r!(self, base, src) {
+                        Value::Coll(c) if matches!(&**c, Coll::Sequence(_) | Coll::OrderedSet(_)) => {
+                            IterSlot::Coll(c.clone(), 0)
+                        }
+                        v => IterSlot::Iter(Iter::of(v)),
+                    };
                 }
                 Insn::IterNext { lp, target } => {
                     let info = chunk.loops[lp as usize];
@@ -984,6 +991,18 @@ where
                                 None
                             }
                         }
+                        IterSlot::Coll(c, pos) => match &**c {
+                            Coll::Sequence(v) => {
+                                let x = v.get(*pos).cloned();
+                                *pos += 1;
+                                x
+                            }
+                            Coll::OrderedSet(m) => {
+                                let x = m.next_from(pos).cloned();
+                                x
+                            }
+                            _ => None,
+                        },
                         _ => None,
                     };
                     match next {

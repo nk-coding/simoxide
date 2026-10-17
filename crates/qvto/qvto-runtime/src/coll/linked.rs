@@ -161,6 +161,19 @@ impl<V> LinkedMap<V> {
         }
     }
 
+    /// The next key in insertion order from the raw position `pos` (holes skipped), advancing
+    /// `pos` past it: iteration without borrowing an iterator.
+    #[inline]
+    pub fn next_from(&self, pos: &mut usize) -> Option<&Value> {
+        while let Some(e) = self.entries.get(*pos) {
+            *pos += 1;
+            if let Some(e) = e {
+                return Some(&e.key);
+            }
+        }
+        None
+    }
+
     /// Removes every entry for which `f` is false.
     pub fn retain(&mut self, mut f: impl FnMut(&Value, &V) -> bool, _env: &dyn HashEnv) -> bool {
         let mut gone = Vec::new();
