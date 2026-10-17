@@ -63,6 +63,17 @@ pub struct Xoshiro256pp {
 }
 
 impl Xoshiro256pp {
+    /// The 256-bit state (snapshots of a run).
+    pub fn state(&self) -> [u64; 4] {
+        self.s
+    }
+
+    /// A generator in the state `s` of [`Xoshiro256pp::state`] (`None` for the all-zero state,
+    /// which no seeded generator reaches).
+    pub fn from_state(s: [u64; 4]) -> Option<Self> {
+        (s != [0; 4]).then_some(Xoshiro256pp { s })
+    }
+
     /// Seeds the state with four SplitMix64 outputs of `seed` (the authors' recommendation);
     /// the state is never all zero.
     pub fn seed_from_u64(seed: u64) -> Self {
@@ -198,6 +209,19 @@ impl std::fmt::Debug for FastSource {
 const TWO_POW_M53: f64 = 1.0 / (1u64 << 53) as f64;
 
 impl FastSource {
+    /// The generator state (snapshots of a run; the samplers keep no state of their own).
+    pub fn state(&self) -> [u64; 4] {
+        self.rng.state()
+    }
+
+    /// A source in the state `s` of [`FastSource::state`].
+    pub fn from_state(s: [u64; 4]) -> Option<Self> {
+        Some(FastSource {
+            rng: Xoshiro256pp::from_state(s)?,
+            t: Tables::get(),
+        })
+    }
+
     /// A stream for `seed` (different seeds give independent-looking streams).
     pub fn new(seed: u64) -> Self {
         FastSource {

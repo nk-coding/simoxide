@@ -89,6 +89,9 @@ let (a, b) = (sim.finish()?, resumed.finish()?);
   `simoxide-bench fork` measures both.
 - A fork has the `Limits` of its origin, including the same cancellation flag;
   `Simulation::set_limits` gives it its own.
+- The same state can be written to a file and continued in another process:
+  `Simulation::snapshot_to` and `Simulation::restore_from` (feature `snapshot`), see
+  [Snapshots](./snapshots.md).
 
 ## Changing the model of a run
 

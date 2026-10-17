@@ -20,6 +20,7 @@ pub const NO_TYPE: u32 = u32::MAX;
 
 /// An instruction of a SEFF behaviour.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum SOp {
     /// The `StartAction`: its `BEGIN` and `END` trace lines.
     Start(ActionId),
@@ -59,6 +60,7 @@ pub enum SOp {
 
 /// An instruction of a usage-scenario behaviour.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum UOp {
     /// The `Start` action: its `BEGIN` and `END` trace lines.
     Start(UserActionId),
@@ -89,6 +91,7 @@ pub enum UOp {
 /// The compiled instruction streams of a model, in two variants: with the trace instructions
 /// and without them (a run without a trace skips the `BEGIN`/`END` lines entirely).
 #[derive(Debug, Clone, Default, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct Code {
     pub traced: Flat,
     pub plain: Flat,
@@ -111,6 +114,7 @@ impl Code {
 
 /// One variant of the instruction streams.
 #[derive(Debug, Clone, Default, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct Flat {
     /// Instructions of all SEFF behaviours.
     pub sops: Vec<SOp>,

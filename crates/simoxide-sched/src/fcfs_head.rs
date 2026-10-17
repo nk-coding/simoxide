@@ -15,6 +15,14 @@ use crate::common::{Completion, ResourceListener, Wakeup};
 use crate::time::{Clock, Nanos, SimTime};
 
 /// Slingshot's FCFS resource (single server).
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    serde(bound(
+        serialize = "J: serde::Serialize",
+        deserialize = "J: serde::Deserialize<'de>"
+    ))
+)]
 #[derive(Clone, Debug)]
 pub struct FcfsHead<J, K: Clock = Nanos> {
     /// Jobs in arrival order with their demands (seconds); the head is in service.

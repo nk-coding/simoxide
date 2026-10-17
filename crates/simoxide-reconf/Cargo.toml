@@ -17,9 +17,13 @@ qvto.workspace = true
 qvto-vm.workspace = true
 qvto-runtime.workspace = true
 qvto-sema.workspace = true
+# snapshots (feature `snapshot`; MIT/Apache-2.0)
+serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
-simoxide-sim = { workspace = true, features = ["fast", "exact"] }
+simoxide-sim = { workspace = true, features = ["fast", "exact", "snapshot"] }
+# the snapshot tests
+simoxide-reconf = { path = ".", features = ["snapshot"] }
 serde_json = "1"
 # the corpus test compares with the Java runner's results: compat mode and identity-hash tapes
 qvto = { workspace = true, features = ["compat"] }
@@ -40,3 +44,6 @@ compat = ["qvto/compat", "qvto-vm/compat", "qvto-runtime/compat"]
 exact = ["simoxide-sim/exact", "compat"]
 # The SPD adjuster (`QvtoAdjuster`, an implementation of `simoxide_spd::Adjuster`).
 spd = ["dep:simoxide-spd"]
+# Snapshots of runs with reconfiguration rules (`RulesRun::snapshot_to`, `RulesRun::restore_from`)
+# and of a run's QVTo state (`QvtoRun::save_state`); DESIGN-SPD.md N1.
+snapshot = ["dep:serde", "simoxide-sim/snapshot", "simoxide-spd?/snapshot"]

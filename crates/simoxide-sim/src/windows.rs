@@ -251,6 +251,7 @@ pub fn utilization(data: &VecDeque<(f64, f64)>, lower: f64, length: f64) -> (f64
 
 /// A `SimulizarSlidingWindow` (lower bound starts at 0).
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct Window {
     pub len: f64,
     pub inc: f64,

@@ -17,6 +17,7 @@ macro_rules! ids {
     ($($(#[$m:meta])* $name:ident),* $(,)?) => {$(
         $(#[$m])*
         #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(transparent))]
         pub struct $name(pub u32);
         impl $name {
             #[inline]

@@ -47,6 +47,7 @@ pub struct ReconfDue {
 
 /// `Reconfigurator` / `ReconfigurationProcess` state (MEAS-7.2).
 #[derive(Default, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub(super) struct Reconf {
     pub(super) created: bool,
     /// Its `Resume` note is pending (`isScheduled()`).
@@ -61,7 +62,11 @@ pub(super) struct Reconf {
     /// A synchronous run (after the stop) is in progress.
     pub(super) running: bool,
     /// The process died: a PRM write during its own synchronous run scheduled it again.
-    pub(super) error: Option<&'static str>,
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::opt_interned")
+    )]
+    pub(super) error: Option<StaticStr>,
     /// A host runs reconfiguration rules ([`Simulation::attach_reconfiguration`]).
     pub(super) host: bool,
     /// The run waiting for the host.
@@ -75,6 +80,7 @@ pub(super) struct Reconf {
 }
 
 #[derive(Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub(super) struct Due {
     at: i64,
     post_stop: bool,
@@ -86,6 +92,7 @@ pub(super) struct Due {
 
 /// A step of the finalisation (SIM-6.5, MEAS-10.1); a host pauses between steps.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub(super) enum FinStep {
     /// Final partial window `i`.
     Windows(usize),
@@ -99,6 +106,7 @@ pub(super) enum FinStep {
 /// PRM recorders (`triggersSelfAdaptations`, MEAS-7.2) and the values of the runtime
 /// measurements (MEAS-7.5).
 #[derive(Default, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub(super) struct Prm {
     /// Series id -> indices into `recs`.
     pub(super) series: Vec<Vec<u32>>,
@@ -114,6 +122,7 @@ pub(super) struct Prm {
 pub(super) const PASSIVE: u32 = 1 << 31;
 
 #[derive(Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub(super) struct PrmState {
     rec: PrmRec,
     /// Its runtime measurement (index into [`Prm::values`]).

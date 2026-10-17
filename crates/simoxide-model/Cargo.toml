@@ -12,6 +12,8 @@ simoxide-emf-core = { workspace = true }
 simoxide-jcompat = { workspace = true }
 quick-xml = "0.38"
 memchr = "2"
+# `serde` feature: Serialize/Deserialize for the typed ids (run-state snapshots; MIT/Apache-2.0)
+serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
 serde_json = "1"
@@ -26,5 +28,8 @@ optional = true
 default-features = false
 
 [features]
+# Serialize/Deserialize for the typed ids (`ContainerId`, ...), for snapshots of runs
+# (DESIGN-SPD.md N1). The graph (`raw`) has none: its XMI is the snapshot form.
+serde = ["dep:serde"]
 # `load-bench bench --profile out.folded`: sampling profiler for the loading benchmark.
 profile = ["dep:pprof"]

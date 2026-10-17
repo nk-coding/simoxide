@@ -38,6 +38,7 @@ pub trait PassiveListener<J> {
 impl<J> PassiveListener<J> for () {}
 
 /// A FIFO passive resource (semaphore with `capacity` units).
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug)]
 pub struct PassiveResource<J> {
     capacity: u64,

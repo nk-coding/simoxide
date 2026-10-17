@@ -5,6 +5,7 @@ use super::*;
 
 /// Where a run is.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum Phase {
     /// Created; the initialisation (workload drivers, initial tuples, sliding windows) runs with
     /// the first [`Simulation::run_until`] or [`Simulation::finish`].
@@ -530,6 +531,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         };
         state.rng.attach_tape(out.tape.is_some()).map_err(fail)?;
         Ok(Simulation {
+            base,
             cm,
             code: cm.code.get(state.traced),
             trace: trace.map(|w| TraceOut::new(w, F::Clock::secs)),

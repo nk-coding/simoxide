@@ -147,6 +147,145 @@ pub(crate) fn with_journal<T>(g: &mut Graph, f: impl FnOnce(&mut Graph) -> T) ->
     (t, j)
 }
 
+/// An object of another metamodel in [`SessionState`]: id, class, proxy URI, container.
+#[cfg(feature = "snapshot")]
+pub(crate) type SavedObject = (u32, u32, Option<String>, Option<(u32, u32)>);
+
+/// What a snapshot keeps of a run's QVTo state (`DESIGN-SPD.md` N1). The QVTo state lives in
+/// the run's model graph. The simulation's snapshot writes the graph's objects of SimOxide's
+/// metamodels (XMI) and leaves placeholders for the others; this carries the rest, so that every
+/// object gets its id back: where the core's prototype (metamodel objects) was attached, the
+/// objects and resources of other metamodels outside it (the PRM, ...: classes, containers,
+/// stored features), and the id generator. The journal is off between events. Objects of a
+/// program's intermediate classes (not in the core's registry) stay placeholders.
+#[cfg(feature = "snapshot")]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+pub(crate) struct SessionState {
+    pub(crate) ids: Option<u64>,
+    /// First object and resource of the core's prototype in the graph.
+    pub(crate) attach: Option<(u32, u32)>,
+    /// Objects of other metamodels outside the prototype: id, class, proxy URI, container.
+    pub(crate) objects: Vec<SavedObject>,
+    /// Their stored features: (object, feature, slot).
+    pub(crate) slots: Vec<(u32, u32, simoxide_model::persist::TableSlot)>,
+    /// Resources outside the prototype that hold only such objects: index, URI, roots.
+    pub(crate) resources: Vec<(u32, String, Vec<u32>)>,
+}
+
+#[cfg(feature = "snapshot")]
+impl Template {
+    /// The state a snapshot keeps of `g`'s QVTo state (see [`SessionState`]).
+    pub(crate) fn save_state(&self, g: &Graph) -> SessionState {
+        use simoxide_model::raw::is_pcm_class;
+        let ids = g.id_state().1.map(|u| u.state());
+        let proto = &self.rs.graph;
+        let attach = g
+            .links()
+            .package_obj
+            .values()
+            .min()
+            .map(|&o| (o.0, g.direct_resource(o).map_or(u32::MAX, |r| r.0)));
+        let (k, n) = attach.map_or((u32::MAX, 0), |(k, _)| (k, proto.object_count() as u32));
+        let (rk, rn) = attach.map_or((u32::MAX, 0), |(_, r)| (r, proto.resource_count() as u32));
+        let in_proto = |o: u32| o >= k && o - k < n;
+        let classes = proto.meta().class_count() as u32;
+        let mut objects = Vec::new();
+        let mut slots = Vec::new();
+        for (i, o) in g.objects().enumerate() {
+            let i = i as u32;
+            if is_pcm_class(o.class) || in_proto(i) || o.class.0 >= classes {
+                continue;
+            }
+            objects.push((
+                i,
+                o.class.0,
+                o.proxy.as_deref().map(String::from),
+                o.container.map(|(p, f)| (p.0, f.0)),
+            ));
+            for &f in g.meta().class(o.class).all_features.iter() {
+                if let Some(t) = simoxide_model::persist::table_slot_of(g.stored_slot(ObjId(i), f))
+                {
+                    slots.push((i, f.0, t));
+                }
+            }
+        }
+        let resources = g
+            .resources()
+            .iter()
+            .enumerate()
+            .filter(|&(j, r)| {
+                let j = j as u32;
+                !(j >= rk && j - rk < rn)
+                    && !r.roots.is_empty()
+                    && r.roots.iter().all(|&o| !is_pcm_class(g[o].class))
+            })
+            .map(|(j, r)| {
+                (
+                    j as u32,
+                    r.uri.clone(),
+                    r.roots.iter().map(|o| o.0).collect(),
+                )
+            })
+            .collect();
+        SessionState {
+            ids,
+            attach,
+            objects,
+            slots,
+            resources,
+        }
+    }
+
+    /// Gives `g` (a restored run's graph, placeholders where the QVTo state was) the state
+    /// [`Template::save_state`] kept.
+    pub(crate) fn restore_state(
+        &self,
+        g: &mut Graph,
+        s: &SessionState,
+        ids: IdPolicy,
+    ) -> Result<(), String> {
+        match s.attach {
+            Some((k, rk)) => g.overlay_graph(&self.rs.graph, k, rk)?,
+            None => self.attach(g, ids),
+        }
+        g.set_id_policy(ids);
+        for (i, c, proxy, _) in &s.objects {
+            if *i as usize >= g.object_count() || *c as usize >= g.meta().class_count() {
+                return Err("an object of the QVTo state is out of range".into());
+            }
+            g.reset_object(ObjId(*i), qvto_model::ClassId(*c));
+            g.set_proxy_uri(ObjId(*i), proxy.as_deref());
+        }
+        for (i, _, _, container) in &s.objects {
+            g.set_container_raw(
+                ObjId(*i),
+                container.map(|(p, f)| (ObjId(p), qvto_model::FeatureId(f))),
+            );
+        }
+        for (o, f, t) in &s.slots {
+            g.set_stored_slot(
+                ObjId(*o),
+                qvto_model::FeatureId(*f),
+                simoxide_model::persist::owned_slot(t),
+            );
+        }
+        for (j, uri, roots) in &s.resources {
+            let r = ResourceId(*j);
+            if *j as usize >= g.resource_count() {
+                return Err("a resource of the QVTo state is out of range".into());
+            }
+            g.resource_mut(r).uri = uri.clone();
+            for &o in roots {
+                g.load_add_root(r, ObjId(o));
+            }
+        }
+        let (policy, _) = g.id_state();
+        g.set_id_state(policy, s.ids.map(qvto_emf::ids::UuidGen::new));
+        g.freeze();
+        Ok(())
+    }
+}
+
 /// Runs `program` on `g`: binds the model parameters, registers the natives, runs with the
 /// journal on. A binding error stops before the run (nothing changed but the hook's edits).
 pub(crate) fn run(

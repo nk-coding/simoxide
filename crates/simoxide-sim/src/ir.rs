@@ -22,6 +22,10 @@ use simoxide_stoex::Program;
 use std::collections::HashMap;
 use std::fmt;
 
+/// A name or message the engine holds as a constant (metric names, action kinds, errors).
+/// (A type alias: snapshots write the text and intern it when they read it back.)
+pub type StaticStr = &'static str;
+
 /// Index of a compiled StoEx program.
 pub type ProgId = u32;
 /// Index of a stack-frame key (`a.VALUE`, ...).
@@ -121,6 +125,7 @@ pub struct Prog {
 /// One characterisation of a variable usage, flattened (usage order, then characterisation
 /// order).
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct CChar {
     pub key: KeyId,
     pub prog: ProgId,
@@ -129,6 +134,7 @@ pub struct CChar {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct CInfraCall {
     pub id: Box<str>,
     pub count: ProgId,
@@ -138,6 +144,7 @@ pub struct CInfraCall {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct CResCall {
     pub id: Box<str>,
     pub count: ProgId,
@@ -148,6 +155,7 @@ pub struct CResCall {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum CAct {
     Start,
     Stop,
@@ -200,6 +208,7 @@ pub enum CAct {
 
 /// A `ResourceDemandingBehaviour` as the interpreter walks it.
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct CBeh {
     /// First `StartAction` of the steps.
     pub start: Option<ActionId>,
@@ -210,6 +219,7 @@ pub struct CBeh {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum CUAct {
     Start,
     Stop,
@@ -234,6 +244,7 @@ pub enum CUAct {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct CUBeh {
     pub start: Option<UserActionId>,
     pub chain: Vec<UserActionId>,
@@ -241,12 +252,14 @@ pub struct CUBeh {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum CWorkload {
     Open { inter_arrival: ProgId },
     Closed { population: i64, think_time: ProgId },
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct CScenario {
     pub id: UsageScenarioId,
     pub behaviour: Option<ScenarioBehaviourId>,
@@ -255,6 +268,7 @@ pub struct CScenario {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum ResKind {
     Processing(ProcessingResourceId),
     Link(LinkingResourceId),
@@ -262,6 +276,7 @@ pub enum ResKind {
 
 /// An active resource of the simulation (`ScheduledResource` / `SimulatedLinkingResource`).
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct CRes {
     pub kind: ResKind,
     pub policy: SchedulingPolicy,
@@ -293,6 +308,7 @@ pub struct CRes {
 /// A node of the assembly-context path trie: the FQ path (without the system AC) that ends with
 /// `ac` below the path `parent`. Node 0 is the empty path (the system level).
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct AcPath {
     pub parent: u32,
     pub ac: AcRef,
@@ -309,13 +325,19 @@ pub type RegistryEntry = (Box<str>, Vec<(Box<str>, ResIdx)>);
 
 /// Measurement series: measuring point key and tuple metric name.
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct SeriesDef {
     pub mp: Box<str>,
-    pub metric: &'static str,
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::interned")
+    )]
+    pub metric: StaticStr,
 }
 
 /// A sliding window (utilisation or time-driven aggregation, MEAS-6/MEAS-7.1), in creation order.
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct CWindow {
     pub len: f64,
     pub inc: f64,
@@ -338,10 +360,19 @@ pub struct CWindow {
 /// `RuntimeMeasurement`, D2): one per PRM recorder, in the order SimuLizar creates them
 /// (MEAS-7.5). The run state holds its value.
 #[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrmMeas {
     /// The measuring point of the specification's monitor (graph object).
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::opt_objid")
+    )]
     pub mp: Option<ObjId>,
     /// The measurement specification (graph object).
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::objid")
+    )]
     pub spec: ObjId,
     /// The measuring point's series key and the metric (informational).
     pub key: Box<str>,
@@ -351,6 +382,7 @@ pub struct PrmMeas {
 /// with `triggersSelfAdaptations = true` (MEAS-7.2). Its writes only matter for the
 /// `Reconfigurator`, which creates the reconfiguration process at the first write after t = 0.
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum PrmRec {
     /// `FeedThroughRecorder`: every tuple.
     FeedThrough,
@@ -371,11 +403,16 @@ pub enum PrmRec {
 /// PRM recorders of lazily created passive-resource calculators, matched by the measuring
 /// point's string representation (`DeferredMeasurementInitialization`).
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct PassivePrm {
     /// `Passive Resource: <assembly context name>.<passive resource name>`.
     pub rep: Box<str>,
     /// Tuple metric name (state, waiting or holding time).
-    pub metric: &'static str,
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::interned")
+    )]
+    pub metric: StaticStr,
     pub rec: PrmRec,
     /// The aggregator's constructor fails with this error when the calculator appears.
     pub invalid: Option<Box<str>>,
@@ -389,6 +426,7 @@ pub const LONG_AGGREGATION_ERROR: &str =
 
 /// Passive-resource monitoring flags (lazily created calculators, MEAS-5.1).
 #[derive(Debug, Clone, Copy, Default)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct PassiveMon {
     pub state: bool,
     pub waiting: bool,
@@ -396,7 +434,10 @@ pub struct PassiveMon {
 }
 
 /// The compiled, immutable model.
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct CompiledModel {
+    /// (A snapshot rebuilds it from the model graph and the build order.)
+    #[cfg_attr(feature = "snapshot", serde(skip))]
     pub model: Model,
     pub keys: Keys,
     pub progs: Vec<Prog>,
@@ -407,14 +448,30 @@ pub struct CompiledModel {
     pub scenarios: Vec<CScenario>,
     pub system: SystemId,
     /// `(structure, outer provided role)` -> first ProvidedDelegationConnector.
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub prov_deleg: FxMap<(StructureId, RoleId), ConnectorId>,
     /// `(assembly context, required role)` -> first matching connector of its parent structure.
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub req_conn: FxMap<(AssemblyContextId, RoleId), ConnectorId>,
     /// `(component, signature id key)` -> SEFFs describing that signature (by id string).
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub seff_for: FxMap<(ComponentId, u32), Vec<SeffId>>,
     /// Signature -> key of its id string (signatures are matched by id).
     pub sig_key: Vec<u32>,
     /// FQ assembly-context path (without the system AC) -> container.
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub alloc: FxMap<Box<[u32]>, ContainerId>,
     /// Every FQ assembly-context path reachable from the system (nesting of composite
     /// structures), as a trie; see [`CompiledModel::path_child`].
@@ -422,12 +479,20 @@ pub struct CompiledModel {
     /// Per assembly context: `(parent path, child path)` pairs of the trie.
     pub ac_path_children: Vec<Vec<(u32, u32)>>,
     pub resources: Vec<CRes>,
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub container_res: FxMap<(ContainerId, ResourceTypeId), ResIdx>,
     /// Dense form of `container_res`: `[container * resource_types + type]`, `u32::MAX` = none.
     pub container_res_dense: Vec<ResIdx>,
     /// Per container: simulated (a top-level container of the resource environment). SimuLizar
     /// 5.2.2 creates no simulated container for nested resource containers.
     pub container_simulated: Vec<bool>,
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub link_res: FxMap<LinkingResourceId, ResIdx>,
     /// Route table `[src * containers + dst]`: resource of the first linking resource (in
     /// `links` order) connecting both, `u32::MAX` = none. Empty for very large environments.
@@ -435,8 +500,11 @@ pub struct CompiledModel {
     /// `deactivateAllActiveResources` order (ResourceRegistry / container HashMap order; the
     /// exact mode).
     #[cfg(feature = "exact")]
+    #[cfg_attr(feature = "snapshot", serde(skip))]
     pub finalise_order: Vec<ResIdx>,
     /// The same in the registry's insertion order (the fast mode).
+    /// (Both orders are functions of `registry`; a snapshot recomputes them.)
+    #[cfg_attr(feature = "snapshot", serde(skip))]
     pub finalise_order_fast: Vec<ResIdx>,
     /// Linking resources in resource-environment order (routing; after model changes the
     /// router's order, and the typed model's `connected` lists are the router's view,
@@ -448,9 +516,17 @@ pub struct CompiledModel {
     pub registry: Vec<RegistryEntry>,
     pub series: Vec<SeriesDef>,
     /// The series by measuring-point key: `(metric, series)` pairs.
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::series_map")
+    )]
     pub series_by_mp: HashMap<Box<str>, Vec<(&'static str, SeriesId)>>,
     pub windows: Vec<CWindow>,
     /// Assembly-operation response-time series by `op_key(assembly id, role id, signature id)`.
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub asmop_series: HashMap<String, SeriesId>,
     pub passive_mon: Vec<PassiveMon>,
     /// PRM recorders on series created at initialisation, in creation order, with the index
@@ -485,8 +561,16 @@ pub struct CompiledModel {
     pub sig_ids: Vec<Box<str>>,
     pub scenario_ids: Vec<Box<str>>,
     pub pr_ids: Vec<Box<str>>,
-    pub action_type: Vec<&'static str>,
-    pub uaction_type: Vec<&'static str>,
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::interned_vec")
+    )]
+    pub action_type: Vec<StaticStr>,
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::interned_vec")
+    )]
+    pub uaction_type: Vec<StaticStr>,
     /// The behaviours as flat instruction streams (what the interpreter executes).
     pub code: crate::code::Code,
     /// Warnings (unsupported features that only matter if reached).
@@ -531,6 +615,22 @@ fn trace_id(m: &Model, id: &str, obj: simoxide_model::raw::ObjId) -> Box<str> {
     }
 }
 
+/// Compiles a StoEx specification, interning its variables' frame keys in `keys`.
+pub(crate) fn compile_prog(spec: &str, keys: &mut Keys) -> Prog {
+    let prog = match simoxide_stoex::prepare(spec) {
+        Ok(prep) => Ok(Program::compile(&prep, |v| keys.intern(&v.id()))),
+        Err(e) => Err(format!("{e:?}")),
+    };
+    let konst = prog.as_ref().ok().and_then(|p| p.constant().cloned());
+    let konst_f64 = konst.as_ref().and_then(|v| v.to_f64().ok());
+    Prog {
+        spec: spec.into(),
+        prog,
+        konst,
+        konst_f64,
+    }
+}
+
 struct Builder {
     keys: Keys,
     progs: Vec<Prog>,
@@ -542,20 +642,8 @@ impl Builder {
         if let Some(&p) = self.prog_map.get(spec) {
             return p;
         }
-        let keys = &mut self.keys;
-        let prog = match simoxide_stoex::prepare(spec) {
-            Ok(prep) => Ok(Program::compile(&prep, |v| keys.intern(&v.id()))),
-            Err(e) => Err(format!("{e:?}")),
-        };
         let id = self.progs.len() as ProgId;
-        let konst = prog.as_ref().ok().and_then(|p| p.constant().cloned());
-        let konst_f64 = konst.as_ref().and_then(|v| v.to_f64().ok());
-        self.progs.push(Prog {
-            spec: spec.into(),
-            prog,
-            konst,
-            konst_f64,
-        });
+        self.progs.push(compile_prog(spec, &mut self.keys));
         self.prog_map.insert(spec.into(), id);
         id
     }
@@ -2337,6 +2425,7 @@ fn check_composition(m: &Model, sys: StructureId) -> Result<(), CompileError> {
 
 /// What a Slingshot active-resource monitor samples at every resource event (SS-MEAS-3).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum SsProbe {
     /// `requestsAtResource`: all jobs at the resource (SS-MEAS-3.2).
     State,
@@ -2350,6 +2439,7 @@ pub enum SsProbe {
 
 /// A passive-resource metric of Slingshot's monitor (SS-MEAS-4.2).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum SsPassiveMetric {
     Waiting,
     Holding,
@@ -2358,6 +2448,7 @@ pub enum SsPassiveMetric {
 
 /// A Slingshot passive-resource monitor.
 #[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct SsPassiveMon {
     pub pr: PassiveResourceId,
     /// The assembly context of the measuring point; `None`: every instance of the passive
@@ -2369,6 +2460,7 @@ pub struct SsPassiveMon {
 
 /// The tables of the Slingshot flavour (empty for SimuLizar).
 #[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct SsTables {
     /// Per resource (`ResIdx`): the active-resource monitors, in registration order.
     pub res_mon: Vec<Vec<(SeriesId, SsProbe)>>,
@@ -2382,6 +2474,10 @@ pub struct SsTables {
     /// Passive-resource monitors.
     pub passive_mon: Vec<SsPassiveMon>,
     /// Q20: the first assembly connector of the system per required-role id.
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub sys_req_conn: HashMap<Box<str>, ConnectorId>,
     /// An `AssemblyOperationMeasuringPoint` response-time monitor exists (Q31).
     pub asmop_monitored: bool,

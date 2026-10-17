@@ -648,11 +648,11 @@ pub struct QvtoRun {
     core: QvtoCore,
     cfg: RunConfig,
     mode: Mode,
-    state: Option<Box<PerRun>>,
+    pub(crate) state: Option<Box<PerRun>>,
 }
 
 #[derive(Clone)]
-struct PerRun {
+pub(crate) struct PerRun {
     /// The graph the transformations run on: the simulation's model graph with the QVTo state
     /// (metamodel objects, models of other metamodels such as the PRM, the id generator), and
     /// the simulation state it belongs to. Shared copy on write between the clones of a run's
@@ -660,7 +660,42 @@ struct PerRun {
     /// metamodels changed, the simulation gets it too (`Simulation::set_model_graph`), so that
     /// they live with the run's model (forks, resumed runs, model changes).
     work: Option<(Arc<Graph>, Fp)>,
-    invocations: u64,
+    pub(crate) invocations: u64,
+}
+
+impl QvtoRun {
+    /// The state a snapshot keeps of the run's QVTo state in its working graph.
+    #[cfg(feature = "snapshot")]
+    pub(crate) fn session_state(&self) -> Option<crate::qvt::SessionState> {
+        let st = self.state.as_ref()?;
+        let g = st.work.as_ref().map(|(g, _)| &**g)?;
+        Some(self.core.0.template.save_state(g))
+    }
+
+    /// Continues from a saved state on the restored simulation `sim`: its graph gets the QVTo
+    /// state back with every id (see `qvt::SessionState`).
+    #[cfg(feature = "snapshot")]
+    pub(crate) fn restore_session<C: Compat, F: Flavour>(
+        &mut self,
+        sim: &Simulation<'_, C, F>,
+        invocations: u64,
+        s: Option<&crate::qvt::SessionState>,
+    ) -> Result<(), String> {
+        let mut g = sim.model_graph().clone();
+        match s {
+            Some(s) => self
+                .core
+                .0
+                .template
+                .restore_state(&mut g, s, self.cfg.ids)?,
+            None => self.core.0.template.attach(&mut g, self.cfg.ids),
+        }
+        self.state = Some(Box::new(PerRun {
+            work: Some((Arc::new(g), fingerprint(sim))),
+            invocations,
+        }));
+        Ok(())
+    }
 }
 
 /// Which simulation model a working graph belongs to: the model's generation, the compiled
@@ -712,7 +747,10 @@ impl QvtoRun {
     }
 
     /// The per-run state with a working graph equal to `sim`'s model graph.
-    fn prepare<C: Compat, F: Flavour>(&mut self, sim: &Simulation<'_, C, F>) -> &mut PerRun {
+    pub(crate) fn prepare<C: Compat, F: Flavour>(
+        &mut self,
+        sim: &Simulation<'_, C, F>,
+    ) -> &mut PerRun {
         let core = &self.core;
         let ids = self.cfg.ids;
         let st = self.state.get_or_insert_with(|| {

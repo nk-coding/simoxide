@@ -49,6 +49,8 @@ mod host;
 mod process;
 mod qvt;
 mod rules;
+#[cfg(feature = "snapshot")]
+mod snapshot;
 
 #[cfg(feature = "spd")]
 pub use adjust::{AdjustHooks, DefaultAdjustHooks, QvtoAdjuster};
@@ -59,6 +61,8 @@ pub use host::{
 };
 pub use process::{PRM_URI, ReconfRecord, RuleRecord, RulesHost, RulesRun, RulesStats};
 pub use rules::{RuleSet, RulesOutcome};
+#[cfg(feature = "snapshot")]
+pub use snapshot::{QVTO, QvtoState, RULES};
 
 /// The simulator's change set of a journal recorded on `g`: the changes of objects of
 /// SimOxide's metamodels, in order, with the object values of list changes (objects of other

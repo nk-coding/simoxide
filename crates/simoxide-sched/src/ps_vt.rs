@@ -23,6 +23,7 @@ use crate::common::{Completion, JIFFY, ResourceListener, Wakeup, mathtools_less}
 use crate::time::{Clock, Nanos, SimTime};
 use std::marker::PhantomData;
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug)]
 struct Tagged<J> {
     finish: f64,
@@ -52,6 +53,14 @@ impl<J> Ord for Tagged<J> {
 }
 
 /// Virtual-time processor sharing (see the module docs).
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    serde(bound(
+        serialize = "J: serde::Serialize",
+        deserialize = "J: serde::Deserialize<'de>"
+    ))
+)]
 #[derive(Clone, Debug)]
 pub struct VirtualTimeProcessorSharing<J, K: Clock = Nanos> {
     cores: u32,

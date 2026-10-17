@@ -35,10 +35,21 @@ const USAGE: &str = "usage:
              (SimuLizar's reconfiguration rules: the .qvto files of DIR in file-name order, or
              run.json's reconfiguration_rules; `reconfiguration` feature; QVTo's compat mode
              needs a build with `exact` or `compat`)
+             [--pause-at T | --pause-before T | --pause-events N] [--snapshot FILE]
+             [--snapshot-format postcard|json]   (pause between events and write a snapshot
+             of the run: `snapshot` feature, docs/guide/snapshots.md)
+  simoxide resume FILE --model <dir> [--run-json run.json] [--trace out.jsonl] [--tape out.jsonl]
+             [--measurements out.csv] [--pause-at T ... --snapshot FILE2] [--until T]
+             [--spd-log ...] [--spd-quirks ...] [--rules DIR] [--rules-log ...] [--qvto-mode ...]
+             [--timeout SECONDS]   (continue a snapshot on the model it was taken of: mode,
+             flavour and quirks come from the snapshot; outputs get the continuation only;
+             --until T = --pause-at T)
+  simoxide snapshot-info FILE   (the snapshot's header)
   simoxide bench --model <dir> [--run-json run.json] [--runs N] [--threads T] [same run flags]
   simoxide load-bench --model <dir> [--run-json run.json] [--runs N]   (load + compile only)
   (with the `profile` feature, bench and load-bench take --profile out.svg|out.folded)";
 
+#[derive(Clone)]
 struct Args {
     cmd: String,
     model: Option<PathBuf>,
@@ -70,6 +81,12 @@ struct Args {
     rules: Option<PathBuf>,
     rules_log: Option<PathBuf>,
     qvto_mode: Option<String>,
+    /// Where to pause (`--pause-at`, `--pause-before`, `--pause-events`, `--until`).
+    pause: Option<simoxide_sim::Pause>,
+    snapshot: Option<PathBuf>,
+    snapshot_json: bool,
+    /// The snapshot to continue (`resume FILE`, `snapshot-info FILE`).
+    file: Option<PathBuf>,
 }
 
 fn parse_args() -> Result<Args, String> {
@@ -106,8 +123,26 @@ fn parse_args() -> Result<Args, String> {
         rules: None,
         rules_log: None,
         qvto_mode: None,
+        pause: None,
+        snapshot: None,
+        snapshot_json: false,
+        file: None,
+    };
+    let secs = |f: &str, v: String| -> Result<i64, String> {
+        let t: f64 = v.parse().map_err(|e| format!("{f}: {e}"))?;
+        if !t.is_finite() || t < 0.0 {
+            return Err(format!("{f}: expected a time in seconds, got {v}"));
+        }
+        Ok((t * 1e9).round() as i64)
     };
     while let Some(f) = it.next() {
+        if a.file.is_none()
+            && matches!(a.cmd.as_str(), "resume" | "snapshot-info")
+            && !f.starts_with('-')
+        {
+            a.file = Some(f.into());
+            continue;
+        }
         let mut val = || it.next().ok_or(format!("{f} needs a value"));
         match f.as_str() {
             "--model" => a.model = Some(val()?.into()),
@@ -203,6 +238,23 @@ fn parse_args() -> Result<Args, String> {
             "--rules" => a.rules = Some(val()?.into()),
             "--rules-log" => a.rules_log = Some(val()?.into()),
             "--qvto-mode" => a.qvto_mode = Some(val()?),
+            "--pause-at" | "--until" => {
+                a.pause = Some(simoxide_sim::Pause::After(secs(&f, val()?)?))
+            }
+            "--pause-before" => a.pause = Some(simoxide_sim::Pause::Before(secs(&f, val()?)?)),
+            "--pause-events" => {
+                a.pause = Some(simoxide_sim::Pause::Events(
+                    val()?.parse().map_err(|e| format!("{f}: {e}"))?,
+                ))
+            }
+            "--snapshot" => a.snapshot = Some(val()?.into()),
+            "--snapshot-format" => {
+                a.snapshot_json = match val()?.as_str() {
+                    "postcard" => false,
+                    "json" => true,
+                    v => return Err(format!("{f}: expected postcard or json, got {v}")),
+                }
+            }
             "-h" | "--help" => return Err(USAGE.into()),
             o => return Err(format!("unknown flag {o}\n{USAGE}")),
         }
@@ -292,6 +344,9 @@ fn create(p: &Path) -> Result<Box<dyn std::io::Write>, String> {
 }
 
 fn run(a: &Args) -> Result<(), String> {
+    if a.snapshot.is_some() && a.pause.is_none() {
+        return Err("--snapshot needs a pause (--pause-at, --pause-before, --pause-events)".into());
+    }
     let (cm, cfg, rules_dir) = setup_with_rules(a)?;
     for w in &cm.warnings {
         eprintln!("warning: {w}");
@@ -310,8 +365,8 @@ fn run(a: &Args) -> Result<(), String> {
             return Err("reconfiguration rules run in the SimuLizar flavour".into());
         }
         let t0 = Instant::now();
-        let r = rules::run(a, &cm, cfg, out, &dir)?;
-        return report(a, r, t0);
+        let r = rules::run(a, &cm, cfg, out, &dir, None)?;
+        return report_end(a, r, t0);
     }
     let r = match spd {
         Some(_) if a.flavour.is_slingshot() => {
@@ -320,10 +375,54 @@ fn run(a: &Args) -> Result<(), String> {
                     .into(),
             );
         }
-        Some(s) => spd::run(a, &cm, cfg, out, &s)?,
-        None => simoxide_sim::run(&cm, cfg, out).map_err(|e| e.to_string())?,
+        Some(s) => spd::run(a, &cm, cfg, out, &s, None)?,
+        None if a.pause.is_some() || a.snapshot.is_some() => snap::plain(a, &cm, Ok(cfg), out)?,
+        None => End::Finished(simoxide_sim::run(&cm, cfg, out).map_err(|e| e.to_string())?),
     };
-    report(a, r, t0)
+    report_end(a, r, t0)
+}
+
+/// How a run (or a resumed one) ended: at its end, or paused with a snapshot written.
+enum End {
+    Finished(RunResult),
+    Paused {
+        now_ns: i64,
+        events: u64,
+        measurements: simoxide_sim::Measurements,
+        snapshot: Option<(PathBuf, u64)>,
+    },
+}
+
+/// Reports a run that ended or paused.
+fn report_end(a: &Args, r: End, t0: Instant) -> Result<(), String> {
+    match r {
+        End::Finished(r) => report(a, r, t0),
+        End::Paused {
+            now_ns,
+            events,
+            measurements,
+            snapshot,
+        } => {
+            if let Some(p) = &a.measurements {
+                let mut f = create(p)?;
+                measurements
+                    .write_csv(&mut f)
+                    .map_err(|e| format!("{}: {e}", p.display()))?;
+            }
+            let snap = match snapshot {
+                Some((p, n)) => format!(" snapshot={} ({n} bytes)", p.display()),
+                None => String::new(),
+            };
+            eprintln!(
+                "paused t={} events={} measurements={}{snap} wall={:.3}ms",
+                now_ns as f64 / 1e9,
+                events,
+                measurements.count,
+                t0.elapsed().as_secs_f64() * 1e3
+            );
+            Ok(())
+        }
+    }
 }
 
 /// Writes the measurements and the summary line of a run.
@@ -354,20 +453,33 @@ fn report(a: &Args, r: RunResult, t0: Instant) -> Result<(), String> {
 /// directory has a `.spd` file.
 #[cfg(feature = "spd")]
 mod spd {
-    use super::{Args, create};
+    use super::{Args, End, create};
     use simoxide_sim::compat::Compat;
-    use simoxide_sim::{CompiledModel, Mode, Outputs, RunResult, SimConfig, Simulation};
+    use simoxide_sim::snapshot::Snapshot;
+    use simoxide_sim::{CompiledModel, Mode, Outputs, SimConfig, Simulation, Status};
     use simoxide_spd::log::JsonlLog;
     use simoxide_spd::sim::{NoAdjustment, SpdRun, spd_of};
     use simoxide_spd::{Quirks, Spd};
 
     pub fn of(a: &Args, cm: &CompiledModel) -> Result<Option<Spd>, String> {
+        of_with(a, cm, None)
+    }
+
+    /// The interpreter of a resumed run: built with the snapshot's compat flags (unless
+    /// `--spd-quirks` says otherwise; restoring then checks they agree).
+    pub fn of_snapshot(a: &Args, cm: &CompiledModel, s: &Snapshot) -> Result<Option<Spd>, String> {
+        let q = simoxide_spd::snapshot::quirks_of(s).map_err(|e| e.to_string())?;
+        of_with(a, cm, q)
+    }
+
+    fn of_with(a: &Args, cm: &CompiledModel, q: Option<Quirks>) -> Result<Option<Spd>, String> {
         if a.no_spd {
             return Ok(None);
         }
-        let q = match &a.spd_quirks {
-            Some(s) => Quirks::parse(s)?,
-            None => Quirks::fixed(),
+        let q = match (&a.spd_quirks, q) {
+            (Some(s), _) => Quirks::parse(s)?,
+            (None, Some(q)) => q,
+            (None, None) => Quirks::fixed(),
         };
         let s = spd_of(&cm.model, q).map_err(|e| e.to_string())?;
         if let Some(s) = &s
@@ -384,17 +496,47 @@ mod spd {
         cfg: SimConfig,
         out: Outputs,
         spd: &Spd,
-    ) -> Result<RunResult, String> {
-        let sim = Simulation::<C>::create(cm, cfg, out).map_err(|e| e.to_string())?;
-        let mut r = SpdRun::new(sim, spd).map_err(|e| e.to_string())?;
+        restore: Option<&Snapshot>,
+    ) -> Result<End, String> {
+        let mut r = match restore {
+            Some(snap) => {
+                SpdRun::<C>::restore_snapshot(snap, cm, spd, out).map_err(|e| e.to_string())?
+            }
+            None => {
+                let sim = Simulation::<C>::create(cm, cfg, out).map_err(|e| e.to_string())?;
+                SpdRun::new(sim, spd).map_err(|e| e.to_string())?
+            }
+        };
         let file = a.spd_log.as_deref().map(create).transpose()?;
         let sink: Box<dyn std::io::Write> = file.unwrap_or_else(|| Box::new(std::io::sink()));
         let mut log = JsonlLog::new(sink);
         log.all = a.spd_log_all;
-        r.run(&mut NoAdjustment, &mut log)
+        let before = super::snap::before_ns(a)?;
+        let status = r
+            .run_until(&mut NoAdjustment, &mut log, before)
             .map_err(|e| e.to_string())?;
         if a.spd_log.is_some() {
             log.finish().map_err(|e| format!("--spd-log: {e}"))?;
+        }
+        if status == Status::Paused && before.is_some() {
+            let snapshot = match &a.snapshot {
+                Some(p) => {
+                    let f =
+                        std::fs::File::create(p).map_err(|e| format!("{}: {e}", p.display()))?;
+                    let info = r
+                        .snapshot_with(std::io::BufWriter::new(f), &super::snap::options(a))
+                        .map_err(|e| e.to_string())?;
+                    Some((p.clone(), info.bytes))
+                }
+                None => None,
+            };
+            let st = r.sim.state();
+            return Ok(End::Paused {
+                now_ns: st.now_ns(),
+                events: st.events(),
+                measurements: st.measurements().clone(),
+                snapshot,
+            });
         }
         let (res, _, s) = r.finish().map_err(|e| e.to_string())?;
         eprintln!(
@@ -403,7 +545,7 @@ mod spd {
             s.evaluations,
             s.requests
         );
-        Ok(res)
+        Ok(End::Finished(res))
     }
 
     pub fn run(
@@ -412,11 +554,12 @@ mod spd {
         cfg: SimConfig,
         out: Outputs,
         spd: &Spd,
-    ) -> Result<RunResult, String> {
+        restore: Option<&Snapshot>,
+    ) -> Result<End, String> {
         match cfg.mode {
             #[cfg(feature = "exact")]
-            Mode::Exact => go::<simoxide_sim::Exact>(a, cm, cfg, out, spd),
-            Mode::Fast => go::<simoxide_sim::Fast>(a, cm, cfg, out, spd),
+            Mode::Exact => go::<simoxide_sim::Exact>(a, cm, cfg, out, spd, restore),
+            Mode::Fast => go::<simoxide_sim::Fast>(a, cm, cfg, out, spd, restore),
             #[cfg(not(feature = "exact"))]
             m => Err(m.unavailable_reason().unwrap_or_default()),
         }
@@ -426,10 +569,15 @@ mod spd {
 /// Without the `spd` feature, `.spd` files are ignored.
 #[cfg(not(feature = "spd"))]
 mod spd {
-    use super::Args;
-    use simoxide_sim::{CompiledModel, Outputs, RunResult, SimConfig};
+    use super::{Args, End};
+    use simoxide_sim::snapshot::Snapshot;
+    use simoxide_sim::{CompiledModel, Outputs, SimConfig};
 
     pub enum Never {}
+
+    pub fn of_snapshot(_: &Args, _: &CompiledModel, _: &Snapshot) -> Result<Option<Never>, String> {
+        Err("the snapshot is of a run with scaling policies: they need the `spd` feature".into())
+    }
 
     pub fn of(a: &Args, _: &CompiledModel) -> Result<Option<Never>, String> {
         if a.spd_log.is_some() || a.spd_quirks.is_some() {
@@ -444,7 +592,8 @@ mod spd {
         _: SimConfig,
         _: Outputs,
         s: &Never,
-    ) -> Result<RunResult, String> {
+        _: Option<&Snapshot>,
+    ) -> Result<End, String> {
         match *s {}
     }
 }
@@ -453,10 +602,11 @@ mod spd {
 /// process runs the rules of the folder (DESIGN-SPD R1).
 #[cfg(feature = "reconfiguration")]
 mod rules {
-    use super::{Args, create};
+    use super::{Args, End, create};
     use simoxide_reconf::{QvtMode, QvtoCore, RuleSet, RulesHost, RulesRun, RunConfig};
     use simoxide_sim::compat::Compat;
-    use simoxide_sim::{CompiledModel, Mode, Outputs, RunResult, SimConfig, Simulation};
+    use simoxide_sim::snapshot::Snapshot;
+    use simoxide_sim::{CompiledModel, Mode, Outputs, Pause, SimConfig, Simulation, Status};
     use std::io::Write;
     use std::path::Path;
 
@@ -466,7 +616,8 @@ mod rules {
         cfg: SimConfig,
         out: Outputs,
         dir: &Path,
-    ) -> Result<RunResult, String> {
+        restore: Option<&Snapshot>,
+    ) -> Result<End, String> {
         let core = QvtoCore::new().map_err(|e| e.to_string())?;
         let rules = RuleSet::load_dir(&core, dir).map_err(|e| e.to_string())?;
         let mode = match a.qvto_mode.as_deref() {
@@ -487,10 +638,48 @@ mod rules {
         if a.rules_log.is_some() {
             host = host.keep_records();
         }
-        let sim = Simulation::<C>::create(cm, cfg, out).map_err(|e| e.to_string())?;
-        let (res, mut host) = RulesRun::new(sim, host)
-            .finish()
-            .map_err(|e| e.to_string())?;
+        let mut run = match restore {
+            Some(snap) => {
+                RulesRun::<C>::restore_snapshot(snap, cm, host, out).map_err(|e| e.to_string())?
+            }
+            None => {
+                let sim = Simulation::<C>::create(cm, cfg, out).map_err(|e| e.to_string())?;
+                RulesRun::new(sim, host)
+            }
+        };
+        let pause = a.pause.unwrap_or(Pause::Never);
+        let status = run.run_until(pause).map_err(|e| e.to_string())?;
+        let paused = status == Status::Paused && a.pause.is_some();
+        let (end, mut host) = if paused {
+            // the records so far go to this run's log; the snapshot holds none
+            let records = run.host_mut().take_records();
+            let snapshot = match &a.snapshot {
+                Some(p) => {
+                    let f =
+                        std::fs::File::create(p).map_err(|e| format!("{}: {e}", p.display()))?;
+                    let info = run
+                        .snapshot_with(std::io::BufWriter::new(f), &super::snap::options(a))
+                        .map_err(|e| e.to_string())?;
+                    Some((p.clone(), info.bytes))
+                }
+                None => None,
+            };
+            let st = run.sim().state();
+            let end = End::Paused {
+                now_ns: st.now_ns(),
+                events: st.events(),
+                measurements: st.measurements().clone(),
+                snapshot,
+            };
+            let (_, mut host) = run.into_parts();
+            if let Some(r) = host_records(&mut host) {
+                r.extend(records);
+            }
+            (end, host)
+        } else {
+            let (res, host) = run.finish().map_err(|e| e.to_string())?;
+            (End::Finished(res), host)
+        };
         if let Some(p) = &a.rules_log {
             let mut f = create(p)?;
             for r in host.take_records() {
@@ -528,7 +717,12 @@ mod rules {
             s.micros as f64 / 1e3,
             s.prm_micros as f64 / 1e3
         );
-        Ok(res)
+        Ok(end)
+    }
+
+    /// Keeps the records taken before a snapshot for this run's log.
+    fn host_records(host: &mut RulesHost) -> Option<&mut Vec<simoxide_reconf::ReconfRecord>> {
+        host.records_mut()
     }
 
     fn json_str(s: &str) -> String {
@@ -552,11 +746,12 @@ mod rules {
         cfg: SimConfig,
         out: Outputs,
         dir: &Path,
-    ) -> Result<RunResult, String> {
+        restore: Option<&Snapshot>,
+    ) -> Result<End, String> {
         match cfg.mode {
             #[cfg(feature = "exact")]
-            Mode::Exact => go::<simoxide_sim::Exact>(a, cm, cfg, out, dir),
-            Mode::Fast => go::<simoxide_sim::Fast>(a, cm, cfg, out, dir),
+            Mode::Exact => go::<simoxide_sim::Exact>(a, cm, cfg, out, dir, restore),
+            Mode::Fast => go::<simoxide_sim::Fast>(a, cm, cfg, out, dir, restore),
             #[cfg(not(feature = "exact"))]
             m => Err(m.unavailable_reason().unwrap_or_default()),
         }
@@ -566,8 +761,9 @@ mod rules {
 /// Without the `reconfiguration` feature, rules cannot run.
 #[cfg(not(feature = "reconfiguration"))]
 mod rules {
-    use super::Args;
-    use simoxide_sim::{CompiledModel, Outputs, RunResult, SimConfig};
+    use super::{Args, End};
+    use simoxide_sim::snapshot::Snapshot;
+    use simoxide_sim::{CompiledModel, Outputs, SimConfig};
     use std::path::Path;
 
     pub fn run(
@@ -576,11 +772,185 @@ mod rules {
         _: SimConfig,
         _: Outputs,
         dir: &Path,
-    ) -> Result<RunResult, String> {
+        _: Option<&Snapshot>,
+    ) -> Result<End, String> {
         Err(format!(
             "reconfiguration rules ({}) need a build with the `reconfiguration` feature",
             dir.display()
         ))
+    }
+}
+
+/// Pausing, snapshots and `simoxide resume` (docs/guide/snapshots.md).
+mod snap {
+    use super::{Args, End, create, report_end, setup_with_rules};
+    use simoxide_sim::compat::Compat;
+    use simoxide_sim::snapshot::{Encoding, Snapshot, SnapshotOptions};
+    use simoxide_sim::{
+        CompiledModel, Flavour, FlavourKind, Mode, Outputs, Pause, Quirks, SimConfig, SimuLizar,
+        Simulation, Slingshot, Status,
+    };
+    use std::time::Instant;
+
+    pub fn options(a: &Args) -> SnapshotOptions {
+        SnapshotOptions {
+            encoding: if a.snapshot_json {
+                Encoding::Json
+            } else {
+                Encoding::Postcard
+            },
+        }
+    }
+
+    /// The pause as the SPD driver's bound: before the first event at or after it (ns).
+    #[cfg_attr(not(feature = "spd"), allow(dead_code))]
+    pub fn before_ns(a: &Args) -> Result<Option<i64>, String> {
+        Ok(match a.pause {
+            None => None,
+            Some(Pause::After(t)) => Some(t.saturating_add(1)),
+            Some(Pause::Before(t)) => Some(t),
+            Some(Pause::Events(_)) => {
+                return Err(
+                    "--pause-events is not supported with scaling policies (use --pause-at)".into(),
+                );
+            }
+            Some(Pause::Never) => None,
+        })
+    }
+
+    fn go<C: Compat, F: Flavour>(
+        a: &Args,
+        cm: &CompiledModel,
+        start: Result<SimConfig, &Snapshot>,
+        out: Outputs,
+    ) -> Result<End, String> {
+        let mut sim = match start {
+            Ok(cfg) => Simulation::<C, F>::create(cm, cfg, out).map_err(|e| e.to_string())?,
+            Err(s) => {
+                Simulation::<C, F>::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?
+            }
+        };
+        let status = match a.pause {
+            Some(p) => sim.run_until(p).map_err(|e| e.to_string())?,
+            None => Status::Finished,
+        };
+        if status == Status::Finished {
+            return sim.finish().map(End::Finished).map_err(|e| e.to_string());
+        }
+        let snapshot = match &a.snapshot {
+            Some(p) => {
+                let f = std::fs::File::create(p).map_err(|e| format!("{}: {e}", p.display()))?;
+                let info = sim
+                    .snapshot_with(std::io::BufWriter::new(f), &options(a), Vec::new())
+                    .map_err(|e| e.to_string())?;
+                Some((p.clone(), info.bytes))
+            }
+            None => None,
+        };
+        let st = sim.state();
+        Ok(End::Paused {
+            now_ns: st.now_ns(),
+            events: st.events(),
+            measurements: st.measurements().clone(),
+            snapshot,
+        })
+    }
+
+    /// A run without scaling policies or rules: started (`Ok(cfg)`) or restored, to the pause or
+    /// the end.
+    pub fn plain(
+        a: &Args,
+        cm: &CompiledModel,
+        start: Result<SimConfig, &Snapshot>,
+        out: Outputs,
+    ) -> Result<End, String> {
+        let mode = match &start {
+            Ok(c) => c.mode,
+            Err(s) => Mode::parse(&s.header.mode).ok_or("unknown mode in the snapshot")?,
+        };
+        match (mode, cm.flavour.kind) {
+            #[cfg(feature = "exact")]
+            (Mode::Exact, FlavourKind::SimuLizar) => {
+                go::<simoxide_sim::Exact, SimuLizar>(a, cm, start, out)
+            }
+            #[cfg(feature = "exact")]
+            (Mode::Exact, FlavourKind::Slingshot) => {
+                go::<simoxide_sim::Exact, Slingshot>(a, cm, start, out)
+            }
+            (Mode::Fast, FlavourKind::SimuLizar) => {
+                go::<simoxide_sim::Fast, SimuLizar>(a, cm, start, out)
+            }
+            (Mode::Fast, FlavourKind::Slingshot) => {
+                go::<simoxide_sim::Fast, Slingshot>(a, cm, start, out)
+            }
+            (_, FlavourKind::SlingshotExact) => Err(
+                "snapshots of the Slingshot-exact engine are not supported yet (it has no pause and \
+                 resume; DESIGN-SPD.md 5.7, \"N1 as built\")"
+                    .into(),
+            ),
+            #[cfg(not(feature = "exact"))]
+            (m, _) => Err(m.unavailable_reason().unwrap_or_default()),
+        }
+    }
+
+    fn read(a: &Args) -> Result<Snapshot, String> {
+        let p = a
+            .file
+            .as_ref()
+            .ok_or("which snapshot? (resume FILE --model DIR)")?;
+        let f = std::fs::File::open(p).map_err(|e| format!("{}: {e}", p.display()))?;
+        Snapshot::read(std::io::BufReader::new(f)).map_err(|e| format!("{}: {e}", p.display()))
+    }
+
+    /// `simoxide snapshot-info FILE`.
+    pub fn info(a: &Args) -> Result<(), String> {
+        let s = read(a)?;
+        print!("{}", simoxide_sim::snapshot::describe(&s));
+        Ok(())
+    }
+
+    /// `simoxide resume FILE --model DIR ...`: the model compiled as the snapshot says (flavour,
+    /// quirks), the run restored and continued to the next pause or the end.
+    pub fn resume(a: &Args) -> Result<(), String> {
+        if a.snapshot.is_some() && a.pause.is_none() {
+            return Err("--snapshot needs a pause (--pause-at, --until, ...)".into());
+        }
+        let s = read(a)?;
+        let mut a2 = a.clone();
+        a2.flavour =
+            FlavourKind::parse(&s.header.flavour).ok_or("unknown flavour in the snapshot")?;
+        a2.quirks = if s.header.quirks.is_empty() {
+            Quirks::NONE
+        } else {
+            Quirks::parse(&s.header.quirks)?
+        };
+        a2.mode = Mode::parse(&s.header.mode).ok_or("unknown mode in the snapshot")?;
+        if let Some(why) = a2.mode.unavailable_reason() {
+            return Err(why);
+        }
+        let a = &a2;
+        let (cm, _, rules_dir) = setup_with_rules(a)?;
+        let out = Outputs {
+            trace: a.trace.as_deref().map(create).transpose()?,
+            tape: a.tape.as_deref().map(create).transpose()?,
+        };
+        let t0 = Instant::now();
+        let cfg = SimConfig {
+            mode: a.mode,
+            ..SimConfig::default()
+        };
+        // N2: a change set applied here, between the restore and the continuation
+        let r = if s.section("rules").is_some() {
+            let dir = rules_dir.ok_or("the snapshot is of a run with reconfiguration rules: give --rules DIR (or a run.json naming them)")?;
+            super::rules::run(a, &cm, cfg, out, &dir, Some(&s))?
+        } else if s.section("spd").is_some() {
+            let spd = super::spd::of_snapshot(a, &cm, &s)?
+                .ok_or("the snapshot is of a run with scaling policies, the model has none")?;
+            super::spd::run(a, &cm, cfg, out, &spd, Some(&s))?
+        } else {
+            plain(a, &cm, Err(&s), out)?
+        };
+        report_end(a, r, t0)
     }
 }
 
@@ -716,6 +1086,8 @@ fn main() -> ExitCode {
         "run" => run(&a),
         "bench" => bench(&a),
         "load-bench" => load_bench(&a),
+        "resume" => snap::resume(&a),
+        "snapshot-info" => snap::info(&a),
         _ => Err(USAGE.to_string()),
     };
     match r {

@@ -34,6 +34,35 @@ impl Graph {
         !matches!(self.slot(o, f), None | Some(Slot::Unset))
     }
 
+    /// What `f` holds as stored (snapshots, comparisons): see [`StoredSlot`].
+    pub fn stored_slot(&self, o: ObjId, f: FeatureId) -> StoredSlot<'_> {
+        match self.slot(o, f) {
+            None | Some(Slot::Unset) => StoredSlot::Unset,
+            Some(Slot::Data(v)) => StoredSlot::Data(v),
+            Some(Slot::Ref(r)) => StoredSlot::Ref(*r),
+            Some(Slot::Datas(v, set)) => StoredSlot::Datas(v, *set),
+            Some(Slot::Refs(v, set)) => StoredSlot::Refs(v, *set),
+        }
+    }
+
+    /// Writes what [`Graph::stored_slot`] reads, as it is: no inverse update, no journal (for
+    /// restoring a saved graph).
+    pub fn set_stored_slot(&mut self, o: ObjId, f: FeatureId, s: OwnedSlot) {
+        let s = match s {
+            OwnedSlot::Unset => Slot::Unset,
+            OwnedSlot::Data(v) => Slot::Data(v),
+            OwnedSlot::Ref(r) => Slot::Ref(r),
+            OwnedSlot::Datas(v, set) => Slot::Datas(v, set),
+            OwnedSlot::Refs(v, set) => Slot::Refs(v, set),
+        };
+        self.load_slot(o, f, s);
+    }
+
+    /// Sets the container field as it is (no list changes, no journal; restoring a saved graph).
+    pub fn set_container_raw(&mut self, o: ObjId, c: Option<(ObjId, FeatureId)>) {
+        self.objs[o.index()].container = c;
+    }
+
     /// The stored value of a single-valued attribute (`None`: unset, the default applies).
     #[inline]
     pub fn stored(&self, o: ObjId, f: FeatureId) -> Option<&Value> {
@@ -556,5 +585,95 @@ impl Graph {
     pub fn set_id_state(&mut self, policy: IdPolicy, uuid: Option<UuidGen>) {
         self.set_id_policy(policy);
         self.ids.uuid = uuid;
+    }
+}
+
+/// A feature's stored state (see [`Graph::stored_slot`]); lists carry the "set" flag of
+/// unsettable features.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum StoredSlot<'a> {
+    Unset,
+    Data(&'a Value),
+    Ref(Option<ObjId>),
+    Datas(&'a [Value], bool),
+    Refs(&'a [ObjId], bool),
+}
+
+/// An owned [`StoredSlot`] ([`Graph::set_stored_slot`]).
+#[derive(Clone, Debug, PartialEq)]
+pub enum OwnedSlot {
+    Unset,
+    Data(Value),
+    Ref(Option<ObjId>),
+    Datas(Vec<Value>, bool),
+    Refs(Vec<ObjId>, bool),
+}
+
+impl Graph {
+    /// Writes every object, resource and metamodel link of `other` over objects
+    /// `obj_off..obj_off + n` and resources `res_off..res_off + r` of this graph (placeholders a
+    /// restored snapshot left where `other` was appended before, [`Graph::append_graph`]), so
+    /// that they get the ids they had. `other`'s registry must extend this graph's.
+    pub fn overlay_graph(
+        &mut self,
+        other: &Graph,
+        obj_off: u32,
+        res_off: u32,
+    ) -> Result<(), String> {
+        let (n, r) = (other.objs.len(), other.resources.len());
+        if obj_off as usize + n > self.objs.len() || res_off as usize + r > self.resources.len() {
+            return Err("the graph has no room for the metamodel objects".into());
+        }
+        if !self.adopt_meta(other.meta.clone()) {
+            return Err("the metamodels differ".into());
+        }
+        let shift = |o: ObjId| ObjId(o.0 + obj_off);
+        let rshift = |x: ResourceId| ResourceId(x.0 + res_off);
+        for (i, o) in other.objs.iter().enumerate() {
+            let mut o = o.clone();
+            shift_object(&mut o, shift);
+            o.resource = o.resource.map(rshift);
+            self.objs[obj_off as usize + i] = o;
+        }
+        for (j, x) in other.resources.iter().enumerate() {
+            let mut x = x.clone();
+            x.roots.iter_mut().for_each(|o| *o = shift(*o));
+            if let Some(m) = x.ids.as_mut() {
+                m.to_id = m.to_id.drain().map(|(o, s)| (shift(o), s)).collect();
+                m.to_obj.values_mut().for_each(|o| *o = shift(*o));
+            }
+            self.resources[res_off as usize + j] = x;
+        }
+        let l = &other.links;
+        let t = Arc::make_mut(&mut self.links);
+        t.classifier_obj
+            .extend(l.classifier_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_classifier
+            .extend(l.obj_classifier.iter().map(|(o, k)| (shift(*o), *k)));
+        t.feature_obj
+            .extend(l.feature_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_feature
+            .extend(l.obj_feature.iter().map(|(o, k)| (shift(*o), *k)));
+        t.package_obj
+            .extend(l.package_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_package
+            .extend(l.obj_package.iter().map(|(o, k)| (shift(*o), *k)));
+        self.ecore_gen += 1;
+        Ok(())
+    }
+
+    /// Makes object `o` a fresh object of class `c` (no values, container, resource or proxy),
+    /// keeping its id and line (restoring a saved graph).
+    pub fn reset_object(&mut self, o: ObjId, c: ClassId) {
+        let n = self.meta.class(c).all_features.len();
+        let line = self.objs[o.index()].line;
+        self.objs[o.index()] = crate::graph::Object {
+            class: c,
+            container: None,
+            resource: None,
+            proxy: None,
+            line,
+            slots: vec![Slot::Unset; n],
+        };
     }
 }

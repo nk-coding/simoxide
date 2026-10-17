@@ -53,6 +53,43 @@ impl RunModel {
         self.0.as_ref().map(|c| c.base_shape)
     }
 
+    /// The build order of the run's own model (its typed ids).
+    #[cfg(feature = "snapshot")]
+    pub(super) fn order(&self) -> Option<&Arc<[ObjId]>> {
+        self.0.as_ref().map(|c| &c.order)
+    }
+
+    /// The run's model graph when it differs from the compiled model's (see
+    /// [`Simulation::set_model_graph`]).
+    #[cfg(feature = "snapshot")]
+    pub(super) fn graph_override(&self) -> Option<&Graph> {
+        self.1.as_deref()
+    }
+
+    #[cfg(feature = "snapshot")]
+    pub(super) fn set_graph_override(&mut self, g: Arc<Graph>) {
+        self.1 = Some(g);
+    }
+
+    /// A run's own model (restored from a snapshot).
+    #[cfg(feature = "snapshot")]
+    pub(super) fn changed(
+        cm: Arc<CompiledModel>,
+        order: Arc<[ObjId]>,
+        base_shape: Shape,
+        generation: u32,
+    ) -> RunModel {
+        RunModel(
+            Some(Box::new(Changed {
+                cm,
+                order,
+                base_shape,
+                generation,
+            })),
+            None,
+        )
+    }
+
     /// The compiled model in `a` with the simulation's lifetime.
     ///
     /// # Safety
@@ -77,6 +114,11 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
 }
 
 impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
+    /// The compiled model the run was created on (before any model change).
+    pub fn base_model(&self) -> &'m CompiledModel {
+        self.base
+    }
+
     /// The compiled model the run simulates now: the one it was created on, or its own after
     /// model changes ([`Simulation::apply_changes`]).
     pub fn compiled(&self) -> &CompiledModel {
@@ -98,10 +140,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     pub fn set_model_graph(&mut self, graph: Arc<Graph>) -> Result<(), ChangeError> {
         let old = self.model_graph();
         let same = graph.object_count() >= old.object_count()
-            && old
-                .objects()
-                .zip(graph.objects())
-                .all(|(a, b)| a.class == b.class);
+            && old.objects().zip(graph.objects()).all(|(a, b)| {
+                a.class == b.class
+                    || !(simoxide_model::raw::is_pcm_class(a.class)
+                        || simoxide_model::raw::is_pcm_class(b.class))
+            });
         if !same {
             return Err(ChangeError::Invalid(vec![
                 "the graph is not a changed copy of the run's model graph".into(),

@@ -79,6 +79,7 @@ pub enum LogicalOp {
 
 /// `AGGREGATIONMETHOD` of a managed-element stimulus (`aggregationOverElements`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum Aggregation {
     Average,
     Max,
@@ -191,6 +192,7 @@ pub enum TriggerKind {
 
 /// The adjustment of a policy.
 #[derive(Clone, Copy, Debug, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum Adjustment {
     Step { step: i64 },
     Relative { percentage: i64, min: i64 },

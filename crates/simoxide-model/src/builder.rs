@@ -1748,6 +1748,9 @@ pub fn build_order(g: &Graph) -> Vec<ObjId> {
     for r in 0..g.resources().len() {
         g.resource_contents_into(ResId(r as u32), &mut order, &mut stack);
     }
+    // objects of other metamodels in the same graph (a QVTo host's metamodel objects, runtime
+    // measurement models) are no part of the typed model
+    order.retain(|&o| crate::raw::is_pcm_class(g[o].class));
     order
 }
 

@@ -182,6 +182,48 @@ fn run(dir: &Path, sim_time: i64, quirks: Quirks, reference: &str) -> String {
     log.to_jsonl()
 }
 
+/// [`run`] with snapshots: written at several times, restored into a fresh run each time (the
+/// adjustment double stays the test's).
+fn run_snapshotted(dir: &Path, sim_time: i64, quirks: Quirks, reference: &str) -> String {
+    let spec = RunSpec::default();
+    let model = load(dir);
+    let spd = spd_of(&model, quirks).unwrap().expect("an SPD");
+    let cm = CompiledModel::compile(model).unwrap();
+    let mut cfg = spec.sim_config("p1");
+    cfg.seed = 1;
+    cfg.max_sim_time = sim_time;
+    let sim = Simulation::<Exact>::new(&cm, cfg, Outputs::default()).unwrap();
+    let mut log = VecLog::default();
+    let mut r = SpdRun::new(sim, &spd).unwrap();
+    let mut adj = ReferenceAdjuster {
+        adjustments: reference_adjustments(reference),
+    };
+    for t in (1..8).map(|k| k * sim_time * 1_000_000_000 / 8) {
+        r.run_until(&mut adj, &mut log, Some(t)).unwrap();
+        let mut bytes = Vec::new();
+        r.snapshot_to(&mut bytes).unwrap();
+        drop(r);
+        r = SpdRun::restore_from(&bytes[..], &cm, &spd, Outputs::default()).unwrap();
+    }
+    r.run(&mut adj, &mut log).unwrap();
+    let (_, _, summary) = r.finish().unwrap();
+    assert_eq!(summary.pending, 0, "{}", dir.display());
+    log.to_jsonl()
+}
+
+/// The SPD models of the comparison with snapshots on the way: the same decision logs.
+#[test]
+fn snapshots_keep_the_decision_log() {
+    for (name, dir, reference, t) in cases().into_iter().take(5) {
+        let refs = std::fs::read_to_string(&reference).unwrap();
+        for q in [Quirks::slingshot(), Quirks::fixed()] {
+            let want = run(&dir, t, q, &refs);
+            let got = run_snapshotted(&dir, t, q, &refs);
+            assert_eq!(got, want, "{name} {q:?}");
+        }
+    }
+}
+
 fn compare(name: &str, want: &[Value], got: &str) {
     let got = project(got).unwrap();
     if let Some(d) = first_difference(want, &got) {

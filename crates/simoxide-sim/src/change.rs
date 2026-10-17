@@ -872,10 +872,12 @@ pub(crate) fn recompile(
 fn check_graph(old: &Graph, new: &Graph) -> Result<(), ChangeError> {
     let bad = new.object_count() < old.object_count()
         || new.resources().len() < old.resources().len()
-        || old
-            .objects()
-            .zip(new.objects())
-            .any(|(a, b)| a.class != b.class);
+        || old.objects().zip(new.objects()).any(|(a, b)| {
+            // objects of other metamodels (a QVTo host's state) may be placeholders on one side
+            a.class != b.class
+                && (simoxide_model::raw::is_pcm_class(a.class)
+                    || simoxide_model::raw::is_pcm_class(b.class))
+        });
     if bad {
         return Err(ChangeError::Invalid(vec![
             "the graph is not a changed copy of the run's model graph".into(),

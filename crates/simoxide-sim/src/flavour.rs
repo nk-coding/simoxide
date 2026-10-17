@@ -49,6 +49,7 @@ impl Flavour for Slingshot {
 
 /// A flavour at run time.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum FlavourKind {
     #[default]
     SimuLizar,
@@ -96,6 +97,7 @@ impl std::fmt::Display for FlavourKind {
 
 /// The flavour a model is compiled for, with the Slingshot compat flags.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct FlavourConfig {
     pub kind: FlavourKind,
     /// Slingshot quirks to reproduce (ignored by the SimuLizar flavour; must be empty there).
@@ -247,6 +249,7 @@ impl std::fmt::Display for Quirk {
 
 /// A set of [`Quirk`]s.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct Quirks(u64);
 
 impl Quirks {

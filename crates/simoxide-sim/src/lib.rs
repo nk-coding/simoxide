@@ -38,6 +38,8 @@ mod javarand;
 pub mod meas;
 pub mod rng;
 pub mod sim;
+#[cfg(feature = "snapshot")]
+pub mod snapshot;
 pub mod ssx;
 pub mod stats;
 mod trace;
