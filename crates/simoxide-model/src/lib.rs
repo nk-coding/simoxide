@@ -57,6 +57,30 @@ pub fn build_from_graph(g: raw::Graph, d: Diagnostics) -> Model {
     m
 }
 
+/// The build order of a graph's typed model (see [`build_from_graph_after`]).
+pub fn build_order(g: &raw::Graph) -> Vec<raw::ObjId> {
+    builder::build_order(g)
+}
+
+/// Builds and validates the typed model of a changed graph so that every element keeps the
+/// typed id it had in the model built with the order `prev` (for the base model
+/// [`build_order`] of its graph; for a model built by this function the order it returned):
+/// new elements get the next ids of their kind, and elements no longer contained in any
+/// resource (removed or deleted) stay as *tombstones*, built from the graph as they are now
+/// (`EcoreUtil.delete` detaches an object and removes the references to it; its own values
+/// stay). Runs that continue on a changed model rely on this (`simoxide-sim`'s change path).
+/// Returns the model and its build order.
+pub fn build_from_graph_after(
+    g: raw::Graph,
+    d: Diagnostics,
+    prev: &[raw::ObjId],
+) -> (Model, Vec<raw::ObjId>) {
+    let order = builder::build_order_after(&g, prev);
+    let mut m = builder::build_in_order(g, d, &order);
+    validate::validate(&mut m);
+    (m, order)
+}
+
 /// Loads all model files of a directory (see [`load::MODEL_EXTENSIONS`]) with default options.
 pub fn load_dir(dir: impl AsRef<std::path::Path>) -> std::io::Result<Model> {
     let mut l = Loader::default();

@@ -1,0 +1,1 @@
+InternalAction with an InfrastructureCall (2 calls) to a middleware component via AssemblyInfrastructureConnector

@@ -1,0 +1,28 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Resource Demand Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Resource Demand Tuple,1.0,0.5
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Resource Demand Tuple,1.5,0.25
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Resource Demand Tuple,2.75,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],State of Active Resource Tuple,1.0,0.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],State of Active Resource Tuple,1.0,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],State of Active Resource Tuple,1.5,0.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],State of Active Resource Tuple,1.5,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],State of Active Resource Tuple,1.75,0.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],State of Active Resource Tuple,2.75,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],State of Active Resource Tuple,3.75,0.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Utilization of Active Resource Tuple,1.0,0.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Utilization of Active Resource Tuple,1.0,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Utilization of Active Resource Tuple,1.5,0.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Utilization of Active Resource Tuple,1.5,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Utilization of Active Resource Tuple,1.75,0.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Utilization of Active Resource Tuple,2.75,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_cpu|replicaID=0],Utilization of Active Resource Tuple,3.75,0.0
+ActiveResourceMeasuringPoint[_ss_two_demands_hdd|replicaID=0],Resource Demand Tuple,0.0,2.0
+ActiveResourceMeasuringPoint[_ss_two_demands_hdd|replicaID=0],Resource Demand Tuple,2.75,2.0
+ActiveResourceMeasuringPoint[_ss_two_demands_hdd|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_hdd|replicaID=0],State of Active Resource Tuple,2.0,0.0
+ActiveResourceMeasuringPoint[_ss_two_demands_hdd|replicaID=0],State of Active Resource Tuple,2.75,1.0
+ActiveResourceMeasuringPoint[_ss_two_demands_hdd|replicaID=0],State of Active Resource Tuple,4.75,0.0
+UsageScenarioMeasuringPoint[_ss_two_demands_us1],Response Time Tuple,1.75,1.75

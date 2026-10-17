@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2"
+    id="_h23_resource_call_repository1" entityName="h23_resource_call">
+  <components__Repository xsi:type="repository:BasicComponent" id="_h23_resource_call_comp1" entityName="Server">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_h23_resource_call_prov1" entityName="Provided_IService"
+        providedInterface__OperationProvidedRole="_h23_resource_call_if1"/>
+    <resourceRequiredRoles__ResourceInterfaceRequiringEntity id="_h23_resource_call_rreq1" entityName="CpuRequired">
+      <requiredResourceInterface__ResourceRequiredRole href="pathmap://PCM_MODELS/Palladio.resourcetype#_tw_Q8E5CEeCUKeckjJ_n-w"/>
+    </resourceRequiredRoles__ResourceInterfaceRequiringEntity>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_h23_resource_call_seff1" describedService__SEFF="_h23_resource_call_sig1">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_h23_resource_call_act2" entityName="start" successor_AbstractAction="_h23_resource_call_act1"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_h23_resource_call_act1" entityName="resourceCall" predecessor_AbstractAction="_h23_resource_call_act2"
+          successor_AbstractAction="_h23_resource_call_act3">
+        <resourceCall__Action id="_h23_resource_call_rcall1" resourceRequiredRole__ResourceCall="_h23_resource_call_rreq1">
+          <signature__ResourceCall href="pathmap://PCM_MODELS/Palladio.resourcetype#_wF22kE5CEeCUKeckjJ_n-w"/>
+          <numberOfCalls__ResourceCall specification="Exp(8.0)"/>
+        </resourceCall__Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_h23_resource_call_act3" entityName="stop" predecessor_AbstractAction="_h23_resource_call_act1"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_h23_resource_call_if1" entityName="IService">
+    <signatures__OperationInterface id="_h23_resource_call_sig1" entityName="op"/>
+  </interfaces__Repository>
+</repository:Repository>

@@ -7,6 +7,7 @@ members = [
     "crates/simoxide-hotspot-math",
     "crates/simoxide-model",
     "crates/simoxide-random",
+    "crates/simoxide-reconf",
     "crates/simoxide-sched",
     "crates/simoxide-sim",
     "crates/simoxide-stoex",
@@ -41,6 +42,7 @@ simoxide-model = { path = "crates/simoxide-model", version = "0.1.0" }
 simoxide-random = { path = "crates/simoxide-random", version = "0.1.0", default-features = false }
 simoxide-sched = { path = "crates/simoxide-sched", version = "0.1.0" }
 simoxide-sim = { path = "crates/simoxide-sim", version = "0.1.0", default-features = false }
+simoxide-reconf = { path = "crates/simoxide-reconf", version = "0.1.0" }
 simoxide-stoex = { path = "crates/simoxide-stoex", version = "0.1.0", default-features = false }
 # QVTo (not published: `publish = false`)
 qvto = { path = "crates/qvto/qvto" }
@@ -50,6 +52,7 @@ qvto-model = { path = "crates/qvto/qvto-model" }
 qvto-paths = { path = "crates/qvto/qvto-paths" }
 qvto-runtime = { path = "crates/qvto/qvto-runtime" }
 qvto-sema = { path = "crates/qvto/qvto-sema" }
+qvto-simoxide = { path = "crates/qvto/qvto-simoxide" }
 qvto-syntax = { path = "crates/qvto/qvto-syntax" }
 qvto-testkit = { path = "crates/qvto/qvto-testkit" }
 qvto-types = { path = "crates/qvto/qvto-types" }

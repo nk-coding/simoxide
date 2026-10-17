@@ -1,0 +1,11 @@
+{
+  "name": "ss_loop_zero",
+  "seed": 1,
+  "sim_time": 8,
+  "rules": [
+    "SS-ACT-6.2",
+    "SS-Q19",
+    "SS-BUS-7"
+  ],
+  "description": "a SEFF LoopAction whose count is 0 runs the body once and then throws (NoSuchElementException); the run loses SEFF progress. Iteration counts 1 and 2 behave."
+}

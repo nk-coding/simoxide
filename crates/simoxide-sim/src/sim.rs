@@ -39,8 +39,10 @@ use std::io::Write;
 
 mod calls;
 mod flat;
+mod runmodel;
 mod state;
 
+pub use runmodel::RunModel;
 pub use state::{Detached, Pause, Phase, RunState, Status};
 use state::{NoPause, PauseWhen};
 
@@ -420,6 +422,23 @@ struct ResRt {
     shadow: Vec<u64>,
 }
 
+impl ResRt {
+    /// An idle resource.
+    fn new(r: &CRes, ps: PsAlgorithm) -> ResRt {
+        ResRt {
+            sched: match r.policy {
+                SchedulingPolicy::Delay => None,
+                SchedulingPolicy::ProcessorSharing => {
+                    Some(ActiveResource::new(r.policy, r.instances, ps))
+                }
+                SchedulingPolicy::Fcfs => Some(ActiveResource::new(r.policy, 1, ps)),
+            },
+            delay_set: Vec::new(),
+            shadow: vec![0; r.instances.max(1) as usize],
+        }
+    }
+}
+
 #[derive(Clone)]
 struct PassiveInst {
     pr: PassiveResourceId,
@@ -766,9 +785,12 @@ fn busy_fraction(shadow: &[u64], instances: u32, per_core: bool) -> f64 {
 /// default; see [`crate::compat`]): the engine, which borrows the compiled model, holds the
 /// output writers and runs one [`RunState`] (which explains pausing, forking and resuming).
 pub struct Simulation<'m, C: Compat = Exact> {
+    /// The compiled model the run simulates: the one it was created on, or after model changes
+    /// the one in `st.model` (see `RunModel`; the reference then lives as long as that `Arc`,
+    /// which only `Simulation::apply_changes` replaces).
     cm: &'m CompiledModel,
     /// The behaviours' instructions for this run (with or without the trace instructions,
-    /// `RunState::traced`).
+    /// `RunState::traced`), of `cm`.
     code: &'m crate::code::Flat,
     trace: Option<TraceOut>,
     /// Where the buffered tape records go (`SimRng::tape_buf`).

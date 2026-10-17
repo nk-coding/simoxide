@@ -90,6 +90,42 @@ let (a, b) = (sim.finish()?, resumed.finish()?);
 - A fork has the `Limits` of its origin, including the same cancellation flag;
   `Simulation::set_limits` gives it its own.
 
+## Changing the model of a run
+
+A paused run (or one not started yet) can continue on a changed model. The run's model graph is
+edited, and `Simulation::apply_changes` takes the changed graph with a `ChangeSet` that lists the
+changes (the change journal of the edits):
+
+```rust
+use simoxide_reconf::{Edit, Session};
+
+sim.run_until(Pause::After(60_000_000_000))?;
+let mut session = Session::new();               // the QVTo adapter's session: store + journal
+let mut e = Edit::new(&sim, &mut session);      // a copy of the run's graph, journal on
+let server = e.find("_rc2").unwrap();
+let copy = e.clone_container(server, "_rc3", "Server 2")?;
+for link in e.links_of(server) {
+    e.connect(link, copy)?;
+}
+e.allocate(e.find("_ac2").unwrap(), copy, "_alc3")?;
+let report = e.apply(&mut sim)?;                // ChangeReport: applied, ignored, new resources
+let result = sim.finish()?;
+```
+
+- Edits go through the `qvto-simoxide` adapter's store (`simoxide-reconf`; `Edit::store()` gives
+  the full `ModelStore` API). A QVTo transformation run on the same store produces the same kind of
+  journal; `simoxide_reconf::apply_journal` applies it.
+- The run continues as SimuLizar 5.2.2 continues after such a change: its syncers' rules, gaps
+  included, are on [Model changes](../spec/model-changes.md). Requests in progress keep their
+  state. Changes SimuLizar aborts on, and changes not supported yet, return an error and leave the
+  run unchanged.
+- The changed model belongs to the run (`RunState::model()`): forks share it, and a fork that
+  applies a change equals a run that applies it at the same point. `Simulation::resume` takes the
+  compiled model the run was created on, also after changes.
+- A run without changes does not pay for this: its state holds one empty field.
+  `simoxide-bench change` measures the cost of a change: a copy of the graph, a rebuild of the
+  typed model, a recompilation and a merge, about 0.3 ms for MediaStore (1 220 objects).
+
 ## Outputs
 
 `Outputs` takes optional writers for the trace and the random tape; the measurements are always

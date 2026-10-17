@@ -1,0 +1,1 @@
+IllegalStateException: No branch transition was active. This is not allowed. | org.palladiosimulator.analyzer.slingshot.behavior.systemsimulation.interpreters.SeffInterpreter.caseBranchAction(SeffInterpreter.java:116)

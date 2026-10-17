@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h15_composite_allocation1" entityName="h15_composite">
+  <targetResourceEnvironment_Allocation href="h15_composite.resourceenvironment#/"/>
+  <system_Allocation href="h15_composite.system#_h15_composite_system1"/>
+  <allocationContexts_Allocation id="_h15_composite_alc1" entityName="Allocation_Assembly_Composite">
+    <resourceContainer_AllocationContext href="h15_composite.resourceenvironment#_h15_composite_rc1"/>
+    <assemblyContext_AllocationContext href="h15_composite.system#_h15_composite_ac3"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

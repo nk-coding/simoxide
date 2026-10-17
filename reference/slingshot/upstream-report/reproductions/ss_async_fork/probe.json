@@ -1,0 +1,9 @@
+{
+  "name": "ss_async_fork",
+  "seed": 1,
+  "sim_time": 4,
+  "rules": [
+    "SS-ACT-10.1"
+  ],
+  "description": "a ForkAction with only asynchronous behaviours has no synchronisation point and throws IllegalStateException; with a synchronisation point, asynchronous behaviours are ignored."
+}

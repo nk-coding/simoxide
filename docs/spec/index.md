@@ -15,6 +15,7 @@ code comments cite the rule identifiers.
 | [Stochastic expressions](./stoex.md) | | parser, types, evaluation, Java arithmetic |
 | [Random numbers](./random.md) | `RND-*` | the random stream, distribution sampling, PMF and PDF literals, branches |
 | [Schedulers](./scheduler.md) | | processor sharing, FCFS, delay and passive resources |
+| [Model changes](./model-changes.md) | `MC-*` | what a change of the models at run time does (SimuLizar's syncers and their gaps) |
 
 Deliberate differences are on [Deviations](../correctness/deviations.md); SimuLizar's bugs, which
 SimOxide reproduces, on [Reference bugs](../correctness/reference-bugs.md).

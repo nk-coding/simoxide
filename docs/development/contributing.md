@@ -21,6 +21,7 @@
 | `crates/simoxide-sched` | processor sharing, FCFS, delay and passive resources |
 | `crates/simoxide-sim` | IR compiler, event core, interpreter, measurements, batch and embedding API |
 | `crates/simoxide-cli` | `simoxide`, `simoxide-bench`, `bench/golden.sh` |
+| `crates/simoxide-reconf` | runtime model changes from the QVTo side: journal to change set, direct edits |
 | `crates/simoxide-testkit` | differential testing, model generator, `simoxide-fuzz` |
 | `crates/qvto/` | the QVTo engine (`qvto-*` crates, its reference runner and oracles; `crates/qvto/README.md`) |
 | `reference/` | [refsim](../reference-simulator/refsim.md), patches, component oracles |

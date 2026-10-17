@@ -1,0 +1,1 @@
+IllegalStateException: ForkAction must have a synchronisation point! | org.palladiosimulator.analyzer.slingshot.behavior.systemsimulation.interpreters.SeffInterpreter.caseForkAction(SeffInterpreter.java:175)

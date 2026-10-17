@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_ss_loop_zero_repository" entityName="ss_loop_zero">
+  <components__Repository xsi:type="repository:BasicComponent" id="_ss_loop_zero_comp1" entityName="Server">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_loop_zero_prov1" entityName="prov1" providedInterface__OperationProvidedRole="_ss_loop_zero_if1"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_ss_loop_zero_seff1" describedService__SEFF="_ss_loop_zero_op">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_ss_loop_zero_act1" entityName="start" successor_AbstractAction="_ss_loop_zero_act2"/>
+      <steps_Behaviour xsi:type="seff:LoopAction" id="_ss_loop_zero_act2" entityName="loop" predecessor_AbstractAction="_ss_loop_zero_act1" successor_AbstractAction="_ss_loop_zero_act3">
+        <bodyBehaviour_Loop id="_ss_loop_zero_rdb1">
+          <steps_Behaviour xsi:type="seff:StartAction" id="_ss_loop_zero_act4" entityName="start" successor_AbstractAction="_ss_loop_zero_act5"/>
+          <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_loop_zero_act5" entityName="body" predecessor_AbstractAction="_ss_loop_zero_act4" successor_AbstractAction="_ss_loop_zero_act6">
+            <resourceDemand_Action>
+              <specification_ParametericResourceDemand specification="0.1"/>
+              <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+            </resourceDemand_Action>
+          </steps_Behaviour>
+          <steps_Behaviour xsi:type="seff:StopAction" id="_ss_loop_zero_act6" entityName="stop" predecessor_AbstractAction="_ss_loop_zero_act5"/>
+        </bodyBehaviour_Loop>
+        <iterationCount_LoopAction specification="IntPMF[(0;0.5)(2;0.5)]"/>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_ss_loop_zero_act3" entityName="stop" predecessor_AbstractAction="_ss_loop_zero_act2"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_ss_loop_zero_if1" entityName="IService">
+    <signatures__OperationInterface id="_ss_loop_zero_op" entityName="op"/>
+  </interfaces__Repository>
+</repository:Repository>

@@ -1,0 +1,5 @@
+measuring_point,metric,time,value
+UsageScenarioMeasuringPoint[_ss_monitors_us1],Response Time Tuple,0.5,0.5
+UsageScenarioMeasuringPoint[_ss_monitors_us1],Response Time Tuple,1.5,0.5
+UsageScenarioMeasuringPoint[_ss_monitors_us1],Response Time Tuple,2.5,0.5
+UsageScenarioMeasuringPoint[_ss_monitors_us1],Response Time Tuple,3.5,0.5

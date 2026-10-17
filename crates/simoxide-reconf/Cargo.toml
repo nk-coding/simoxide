@@ -1,0 +1,18 @@
+[package]
+name = "simoxide-reconf"
+description = "Runtime model changes for SimOxide: change sets from the QVTo adapter's journal and direct edits, applied to a running simulation"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+simoxide-model = { workspace = true }
+simoxide-sim = { workspace = true }
+qvto-simoxide.workspace = true
+qvto-model.workspace = true
+
+[dev-dependencies]
+simoxide-sim = { workspace = true, features = ["fast"] }
+serde_json = "1"

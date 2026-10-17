@@ -5,6 +5,7 @@
 //! simoxide-bench batch  [--model DIR] [--max-measurements M] [--runs N] [--threads 1,2,4,8,16]
 //!                       [--mode exact|fast]
 //! simoxide-bench fork   [--filter a,b] [--reps N] [--mode exact|fast]
+//! simoxide-bench change [--filter a,b] [--reps N] [--mode exact|fast]
 //! ```
 //!
 //! The modes draw different random numbers, so their runs do different amounts of work: compare
@@ -17,13 +18,17 @@
 //! and with measurements stored. `batch` measures scaling of `run_batch` over threads. `fork`
 //! pauses the long run halfway and measures the cost of a fork (`Simulation::snapshot`, a
 //! `RunState` clone), of a deep copy for another thread (`RunState::detach`), with measurements
-//! counted and stored, and of `into_state` plus `resume`.
+//! counted and stored, and of `into_state` plus `resume`. `change` pauses the long run halfway
+//! and measures runtime model changes (`Simulation::apply_changes`, rebuild and diff): a copy of
+//! the model graph, a change set that changes nothing in the graph (the whole recompilation and
+//! merge), and a changed processing rate.
 //!
 //! The binary counts allocations with a thread-local counting wrapper around the system
 //! allocator (or mimalloc with the `mimalloc` feature).
 
 use simoxide_sim::{
-    Compat, CompiledModel, Exact, Mode, Outputs, Pause, RunSpec, SimConfig, Simulation,
+    ChangeKind, ChangeSet, Compat, CompiledModel, Exact, Mode, Outputs, Pause, RunSpec, SimConfig,
+    Simulation,
 };
 use std::alloc::{GlobalAlloc, Layout};
 use std::cell::Cell;
@@ -492,12 +497,121 @@ fn fork(a: &Args) -> Result<(), String> {
     Ok(())
 }
 
+/// A copy of `g` with the processing rate of the first processing resource specification
+/// multiplied by 1 (a new StoEx string, the same value), and its change set.
+fn rate_edit(g: &simoxide_model::raw::Graph) -> Option<(simoxide_model::raw::Graph, ChangeSet)> {
+    use simoxide_model::meta::{class, feat};
+    use simoxide_model::raw::{ObjId, Slot, Value};
+    let mut g = g.clone();
+    let pr = (0..g.objs.len() as u32).map(ObjId).find(|&o| {
+        g[o].class.is_a(class::ProcessingResourceSpecification) && g[o].proxy.is_none()
+    })?;
+    let rv = g.get_ref(
+        pr,
+        feat::ProcessingResourceSpecification_processingRate_ProcessingResourceSpecification,
+    )?;
+    let slot = g[rv]
+        .slots
+        .iter_mut()
+        .find(|s| s.0 == feat::RandomVariable_specification)?;
+    let Slot::One(Value::Str(spec)) = &slot.1 else {
+        return None;
+    };
+    slot.1 = Slot::One(Value::Str(format!("({spec}) * 1").into()));
+    let mut cs = ChangeSet::new();
+    cs.push(
+        rv,
+        ChangeKind::Set {
+            feature: feat::RandomVariable_specification,
+        },
+    );
+    Some((g, cs))
+}
+
+/// The change costs of one model halfway through its long run, with policy `C`.
+fn change_costs<C: Compat>(
+    cm: &CompiledModel,
+    cfg: &SimConfig,
+    reps: usize,
+) -> Result<String, String> {
+    let total = simoxide_sim::run(cm, cfg.clone(), Outputs::default())
+        .map_err(|e| e.to_string())?
+        .events;
+    let mut sim =
+        Simulation::<C>::create(cm, cfg.clone(), Outputs::default()).map_err(|e| e.to_string())?;
+    sim.run_until(Pause::Events(total / 2))
+        .map_err(|e| e.to_string())?;
+    let g0 = sim.model_graph().clone();
+    let objs = g0.objs.len();
+    let copy = time_us(reps, || drop(std::hint::black_box(g0.clone())));
+    let mut touch = ChangeSet::new();
+    touch.push(
+        simoxide_model::raw::ObjId(0),
+        ChangeKind::Set {
+            feature: simoxide_model::meta::feat::NamedElement_entityName,
+        },
+    );
+    let mut apply = |g: &simoxide_model::raw::Graph, cs: &ChangeSet| -> Result<f64, String> {
+        let mut v = Vec::new();
+        for _ in 0..reps.max(1) {
+            let mut f = sim.fork(Outputs::default()).map_err(|e| e.to_string())?;
+            let g = g.clone();
+            let t = Instant::now();
+            f.apply_changes(g, cs).map_err(|e| e.to_string())?;
+            v.push(t.elapsed().as_secs_f64() * 1e6);
+        }
+        Ok(best(&mut v))
+    };
+    let rebuild = apply(&g0, &touch)?;
+    let rate = match rate_edit(&g0) {
+        Some((g, cs)) => format!("{:.1}", apply(&g, &cs)?),
+        None => "-".into(),
+    };
+    Ok(format!("{objs} | {copy:.1} | {rebuild:.1} | {rate}"))
+}
+
+fn change(a: &Args) -> Result<(), String> {
+    println!("mode {}", a.mode);
+    println!(
+        "| benchmark | graph objects | graph copy µs | unchanged-graph change set µs | rate change µs |"
+    );
+    println!("|---|---|---|---|---|");
+    for b in SUITE {
+        if let Some(f) = &a.filter
+            && !f
+                .iter()
+                .any(|x| b.name.contains(x.as_str()) || b.dir.contains(x.as_str()))
+        {
+            continue;
+        }
+        let (spec, cm, _, _) = load(&root().join(b.dir))?;
+        let cfg = SimConfig {
+            max_sim_time: -1,
+            max_measurements: b.long_meas,
+            mode: a.mode,
+            ..spec.sim_config(b.name)
+        };
+        let row = match a.mode {
+            Mode::Exact => change_costs::<Exact>(&cm, &cfg, a.reps)?,
+            #[cfg(feature = "fast")]
+            Mode::Fast => change_costs::<simoxide_sim::Fast>(&cm, &cfg, a.reps)?,
+            #[cfg(not(feature = "fast"))]
+            Mode::Fast => return Err("built without the `fast` feature".into()),
+        };
+        println!("| {} | {row} |", b.name);
+    }
+    Ok(())
+}
+
 fn main() -> std::process::ExitCode {
     let r = parse().and_then(|a| match a.cmd.as_str() {
         "suite" => suite(&a),
         "batch" => batch(&a),
         "fork" => fork(&a),
-        _ => Err("usage: simoxide-bench suite|batch|fork [flags] (see the source header)".into()),
+        "change" => change(&a),
+        _ => Err(
+            "usage: simoxide-bench suite|batch|fork|change [flags] (see the source header)".into(),
+        ),
     });
     match r {
         Ok(()) => std::process::ExitCode::SUCCESS,

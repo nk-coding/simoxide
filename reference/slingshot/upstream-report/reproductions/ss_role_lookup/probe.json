@@ -1,0 +1,13 @@
+{
+  "name": "ss_role_lookup",
+  "seed": 1,
+  "sim_time": 2,
+  "rules": [
+    "SS-ACT-1.2",
+    "SS-ACT-2.2",
+    "SS-MEAS-2.3",
+    "SS-Q20",
+    "SS-Q33"
+  ],
+  "description": "one component (Front) assembled twice, FrontA wired to Fast, FrontB to Slow (connector A listed first). Call 1 enters a Client that calls FrontB through an assembly connector; FrontB's external call takes the first connector with that required role, which is A's: it reaches Fast, not Slow. Call 2 enters through a system role delegated to FrontB, but Slingshot takes the first assembly whose component provides the inner role: FrontA. Assembly-operation monitors: (FrontB, prov_front) records call 1; an entry-level SEFF is keyed by the system's outer role, so (FrontA, sysprov2) records call 2 and (FrontA, prov_front) records nothing."
+}

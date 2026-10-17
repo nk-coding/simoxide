@@ -1,0 +1,13 @@
+{
+  "name": "ss_fifo_ties",
+  "seed": 1,
+  "sim_time": 7,
+  "rules": [
+    "SS-ENG-3",
+    "SS-BUS-6",
+    "SS-RES-2.4",
+    "SS-RES-2.6",
+    "SS-MEAS-3.2"
+  ],
+  "description": "3 closed users, no think time, constant demand on a 1-core PS: every arrival and completion is a tie. Results are FIFO in handler order; PS ties go to the earliest job (det patch S0-P2); stale ProcessorSharingJobProgressed events still sample state and utilisation."
+}
