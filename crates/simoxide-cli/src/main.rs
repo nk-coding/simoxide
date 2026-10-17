@@ -32,6 +32,10 @@ const USAGE: &str = "usage:
              [--no-spd]   (scaling policies of a .spd next to the model; `spd` feature; the
              adjustments run Slingshot's MainTransformation with the `reconfiguration`
              feature, QVTo ordered by default (--qvto-mode), else decisions only)
+             [--hpa FILE.hpa.json] [--no-hpa]   (Kubernetes-style HPA autoscalers of SPD target
+             groups: the *.hpa / *.hpa.json files next to the model, or FILE; their decisions
+             go to --spd-log; `spd` feature, adjustments with `reconfiguration`;
+             docs/guide/hpa.md)
              [--rules DIR] [--rules-log rules.jsonl] [--qvto-mode auto|ordered|fast|compat]
              (SimuLizar's reconfiguration rules: the .qvto files of DIR in file-name order, or
              run.json's reconfiguration_rules; `reconfiguration` feature; QVTo's compat mode
@@ -54,6 +58,10 @@ const USAGE: &str = "usage:
              them, on a snapshot without rules adds them)
              [--enforce POLICY,...]   (adjust by these scaling policies at the resume, past
              their triggers and constraints: Slingshot's incoming policies)
+             [--hpa-set NAME.PARAMETER=VALUE]...   (change an HPA autoscaler's parameter at the
+             resume: minReplicas, maxReplicas, averageUtilization, tolerance, startupDelay,
+             scaleUpStabilization, scaleDownStabilization, downscaleStabilization; also `hpa
+             NAME PARAMETER VALUE` lines of change files)
   simoxide explore FILE --model <dir> --variant NAME=FILE.changes|NAME=X.qvto|NAME ...
              [--until T] [--threads N] [--metrics rt,util,...]   (fork the snapshot into one
              run per variant, each with its changes, to the end or T; compare their measurements;
@@ -93,6 +101,10 @@ struct Args {
     spd_log_all: bool,
     spd_quirks: Option<String>,
     no_spd: bool,
+    /// `--hpa FILE`, `--no-hpa`, `--hpa-set NAME.KEY=VALUE`.
+    hpa: Option<PathBuf>,
+    no_hpa: bool,
+    hpa_set: Vec<String>,
     rules: Option<PathBuf>,
     rules_log: Option<PathBuf>,
     qvto_mode: Option<String>,
@@ -153,6 +165,9 @@ fn parse_args() -> Result<Args, String> {
         spd_log_all: false,
         spd_quirks: None,
         no_spd: false,
+        hpa: None,
+        no_hpa: false,
+        hpa_set: Vec::new(),
         rules: None,
         rules_log: None,
         qvto_mode: None,
@@ -276,6 +291,9 @@ fn parse_args() -> Result<Args, String> {
             "--spd-log-all" => a.spd_log_all = true,
             "--spd-quirks" => a.spd_quirks = Some(val()?),
             "--no-spd" => a.no_spd = true,
+            "--hpa" => a.hpa = Some(val()?.into()),
+            "--no-hpa" => a.no_hpa = true,
+            "--hpa-set" => a.hpa_set.push(val()?),
             "--rules" => a.rules = Some(val()?.into()),
             "--rules-log" => a.rules_log = Some(val()?.into()),
             "--qvto-mode" => a.qvto_mode = Some(val()?),
@@ -329,22 +347,41 @@ fn setup(a: &Args) -> Result<(CompiledModel, SimConfig), String> {
     setup_with_rules(a).map(|(cm, cfg, _)| (cm, cfg))
 }
 
+/// The model directory (`--model`, else the folder of `--run-json`).
+fn model_dir(a: &Args) -> Result<PathBuf, String> {
+    let run_json = a.run_json.clone().or_else(|| {
+        let p = a.model.as_ref()?.join("run.json");
+        p.exists().then_some(p)
+    });
+    match (&a.model, &run_json) {
+        (Some(m), _) => Ok(m.clone()),
+        (None, Some(r)) => Ok(r.parent().unwrap_or(Path::new(".")).to_path_buf()),
+        _ => Err(USAGE.into()),
+    }
+}
+
 /// [`setup`] and the reconfiguration rules folder (`--rules`, else run.json's).
 fn setup_with_rules(a: &Args) -> Result<(CompiledModel, SimConfig, Option<PathBuf>), String> {
     let run_json = a.run_json.clone().or_else(|| {
         let p = a.model.as_ref()?.join("run.json");
         p.exists().then_some(p)
     });
-    let dir: PathBuf = match (&a.model, &run_json) {
-        (Some(m), _) => m.clone(),
-        (None, Some(r)) => r.parent().unwrap_or(Path::new(".")).to_path_buf(),
-        _ => return Err(USAGE.into()),
-    };
+    let dir = model_dir(a)?;
     let spec = match &run_json {
         Some(p) => RunSpec::load(p)?,
         None => RunSpec::default(),
     };
-    let model = spec.load_model(&dir)?;
+    #[allow(unused_mut)]
+    let mut model = spec.load_model(&dir)?;
+    // the HPA autoscalers' policies join the SPD before the model is compiled
+    #[cfg(feature = "spd")]
+    if let Some(c) = spd::hpa_config(a, &dir)? {
+        simoxide_spd::hpa::attach(&mut model, &c)?;
+    }
+    #[cfg(not(feature = "spd"))]
+    if a.hpa.is_some() {
+        return Err("--hpa needs the `spd` feature".into());
+    }
     let rules = a
         .rules
         .clone()
@@ -413,8 +450,10 @@ fn run(a: &Args) -> Result<(), String> {
                 .into(),
         );
     }
-    if !a.changes.is_empty() || !a.enforce.is_empty() {
-        return Err("--change, --transform and --enforce are options of `resume`".into());
+    if !a.changes.is_empty() || !a.enforce.is_empty() || !a.hpa_set.is_empty() {
+        return Err(
+            "--change, --transform, --enforce and --hpa-set are options of `resume`".into(),
+        );
     }
     let (cm, cfg, rules_dir) = setup_with_rules(a)?;
     for w in &cm.warnings {
@@ -536,6 +575,7 @@ mod spd {
     use simoxide_sim::compat::Compat;
     use simoxide_sim::snapshot::Snapshot;
     use simoxide_sim::{CompiledModel, Flavour, Mode, Outputs, SimConfig, Simulation, Status};
+    use simoxide_spd::hpa::{Hpa, HpaConfig};
     use simoxide_spd::log::JsonlLog;
     #[cfg(not(feature = "reconfiguration"))]
     use simoxide_spd::sim::NoAdjustment;
@@ -544,6 +584,57 @@ mod spd {
 
     pub fn of(a: &Args, cm: &CompiledModel) -> Result<Option<Spd>, String> {
         of_with(a, cm, None)
+    }
+
+    /// The HPA configuration of the run: `--hpa FILE`, else the model directory's `*.hpa` and
+    /// `*.hpa.json` files (none with `--no-hpa`).
+    pub fn hpa_config(a: &Args, dir: &std::path::Path) -> Result<Option<HpaConfig>, String> {
+        if a.no_hpa {
+            return Ok(None);
+        }
+        let c = match &a.hpa {
+            Some(f) => Some(HpaConfig::load_file(f)?),
+            None => HpaConfig::load_dir(dir)?,
+        };
+        match c {
+            Some(c) if !c.autoscalers.is_empty() => {
+                if a.no_spd {
+                    return Err(
+                        "the HPA autoscalers scale SPD target groups: --no-spd needs --no-hpa"
+                            .into(),
+                    );
+                }
+                Ok(Some(c))
+            }
+            _ => Ok(None),
+        }
+    }
+
+    /// The run's autoscalers, resolved against its SPD interpreter.
+    fn hpa_of(a: &Args, spd: &Spd) -> Result<Option<Hpa>, String> {
+        let dir = super::model_dir(a)?;
+        hpa_config(a, &dir)?.map(|c| Hpa::new(&c, spd)).transpose()
+    }
+
+    /// `--hpa-set NAME.KEY=VALUE`.
+    fn hpa_sets(a: &Args) -> Result<Vec<(String, String, f64)>, String> {
+        a.hpa_set
+            .iter()
+            .map(|s| {
+                let bad = || format!("--hpa-set {s}: expected NAME.PARAMETER=VALUE");
+                let (lhs, v) = s.split_once('=').ok_or_else(bad)?;
+                let (n, k) = lhs.rsplit_once('.').ok_or_else(bad)?;
+                let v: f64 = v.trim().parse().map_err(|_| bad())?;
+                Ok((n.to_string(), k.to_string(), v))
+            })
+            .collect()
+    }
+
+    /// Prints the autoscalers' summaries.
+    fn hpa_report<C: Compat, F: Flavour>(r: &SpdRun<'_, '_, C, F>) {
+        for s in r.hpa_summary() {
+            eprintln!("{}", s.line());
+        }
     }
 
     /// The interpreter of a resumed run: built with the snapshot's compat flags (unless
@@ -594,10 +685,15 @@ mod spd {
         let mut adj = super::changes::spd_adjuster(a, &spd.quirks())?;
         #[cfg(not(feature = "reconfiguration"))]
         let mut adj = NoAdjustment;
+        let hpa = hpa_of(a, spd)?;
+        let mut sets = Vec::new();
         let mut r = match restore {
             Some(snap) => {
-                let mut r = SpdRun::<C, F>::restore_snapshot(snap, cm, spd, out)
+                let mut r = SpdRun::<C, F>::restore_snapshot_hpa(snap, cm, spd, hpa.as_ref(), out)
                     .map_err(|e| e.to_string())?;
+                #[cfg(feature = "reconfiguration")]
+                sets.extend(super::changes::hpa_settings(a)?);
+                sets.extend(hpa_sets(a)?);
                 #[cfg(feature = "reconfiguration")]
                 {
                     adj.run
@@ -618,11 +714,23 @@ mod spd {
                     let names: Vec<&str> = a.enforce.iter().map(String::as_str).collect();
                     r.enforce_policies(&names).map_err(|e| e.to_string())?;
                 }
+                if !sets.is_empty() && hpa.is_none() {
+                    return Err("HPA parameters (--hpa-set, `hpa` change lines): the run has no HPA autoscaler".into());
+                }
+                for (n, k, v) in &sets {
+                    r.hpa_set(n, k, *v)
+                        .map_err(|e| format!("HPA {n}.{k}: {e}"))?;
+                    eprintln!("hpa {n}: {k} = {v}");
+                }
                 r
             }
             None => {
                 let sim = Simulation::<C, F>::create(cm, cfg, out).map_err(|e| e.to_string())?;
-                SpdRun::new(sim, spd).map_err(|e| e.to_string())?
+                let r = SpdRun::new(sim, spd).map_err(|e| e.to_string())?;
+                match &hpa {
+                    Some(h) => r.with_hpa(h).map_err(|e| e.to_string())?,
+                    None => r,
+                }
             }
         };
         let file = a.spd_log.as_deref().map(create).transpose()?;
@@ -649,6 +757,7 @@ mod spd {
         if a.spd_log.is_some() {
             log.finish().map_err(|e| format!("--spd-log: {e}"))?;
         }
+        hpa_report(&r);
         if status == Status::Paused && (before.is_some() || watch.is_some()) {
             let snapshot = match &a.snapshot {
                 Some(p) => {
@@ -705,6 +814,12 @@ mod spd {
     ) -> Result<End, String> {
         use simoxide_sim::ssx::{SpdHooks, SsxRun};
         use simoxide_spd::ssx::SsxSpd;
+        if hpa_of(a, spd)?.is_some() || !a.hpa_set.is_empty() {
+            return Err(
+                "HPA autoscalers run in the SimuLizar and Slingshot flavours, not in the Slingshot-exact engine (--flavour slingshot, or --no-hpa)"
+                    .into(),
+            );
+        }
         if !a.enforce.is_empty() {
             return Err(
                 "--enforce is not supported by the Slingshot-exact engine (use --flavour slingshot)"
@@ -1255,6 +1370,21 @@ mod changes {
         Ok(!steps.is_empty())
     }
 
+    /// The `hpa` lines of the change files (`--change`), in order.
+    pub fn hpa_settings(a: &Args) -> Result<Vec<(String, String, f64)>, String> {
+        let mut v = Vec::new();
+        for ch in &a.changes {
+            if let ChangeArg::File(p) = ch {
+                v.extend(
+                    ChangeFile::load(p)
+                        .map_err(|e| format!("{}: {e}", p.display()))?
+                        .hpa_settings(),
+                );
+            }
+        }
+        Ok(v)
+    }
+
     /// The SPD adjuster of a run (Slingshot's `MainTransformation`, `simoxide-reconf`): QVTo's
     /// ordered mode unless `--qvto-mode` says otherwise, the transformations of the
     /// interpreter's compat flags (Q4, Q6, Q7).
@@ -1769,6 +1899,13 @@ mod snap {
         // below, between the restore and the continuation (DESIGN-SPD.md N2)
         let has_rules = s.section("rules").is_some();
         let has_spd = s.section("spd").is_some();
+        #[cfg(feature = "reconfiguration")]
+        let hpa_lines = !super::changes::hpa_settings(a)?.is_empty();
+        #[cfg(not(feature = "reconfiguration"))]
+        let hpa_lines = false;
+        if !has_spd && (hpa_lines || !a.hpa_set.is_empty()) {
+            return Err("HPA parameters (--hpa-set, `hpa` change lines): the snapshot is of a run without HPA autoscalers".into());
+        }
         let r = if has_rules || (a.rules.is_some() && !has_spd) {
             let dir = rules_dir.ok_or("the snapshot is of a run with reconfiguration rules: give --rules DIR (or a run.json naming them)")?;
             if !a.enforce.is_empty() {

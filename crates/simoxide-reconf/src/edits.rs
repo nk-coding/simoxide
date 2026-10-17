@@ -149,6 +149,14 @@ pub enum EditOp {
     /// `reallocation ignore|apply`, `monitors reference|full`: the run's change options
     /// ([`simoxide_sim::ChangeOptions`]) from this change set on (they stay with the run).
     Options(OptionOp),
+    /// `hpa AUTOSCALER PARAMETER VALUE`: a parameter of an HPA autoscaler
+    /// (`simoxide_spd::hpa`; `SpdRun::hpa_set`): no model change; the run that holds the
+    /// autoscaler applies it ([`ChangeFile::hpa_settings`]).
+    Hpa {
+        autoscaler: String,
+        parameter: String,
+        value: f64,
+    },
 }
 
 /// A change-option line of a [`ChangeFile`].
@@ -427,11 +435,46 @@ impl ChangeFile {
                             .ok_or_else(|| e(format!("{op}: unknown value `{v}`")))?,
                     )
                 }
+                "hpa" => {
+                    at_most(4)?;
+                    let v = arg(3, "value")?;
+                    EditOp::Hpa {
+                        autoscaler: arg(1, "autoscaler")?,
+                        parameter: arg(2, "parameter")?,
+                        value: v
+                            .parse()
+                            .map_err(|_| e(format!("hpa: `{v}` is not a number")))?,
+                    }
+                }
                 o => return Err(e(format!("unknown change `{o}`"))),
             };
             ops.push((line_no, o));
         }
         Ok(ChangeFile { ops })
+    }
+
+    /// The file's `hpa` lines: (autoscaler, parameter, value), in file order.
+    pub fn hpa_settings(&self) -> Vec<(String, String, f64)> {
+        self.ops
+            .iter()
+            .filter_map(|(_, op)| match op {
+                EditOp::Hpa {
+                    autoscaler,
+                    parameter,
+                    value,
+                } => Some((autoscaler.clone(), parameter.clone(), *value)),
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// Only `hpa` lines (no model change).
+    pub fn hpa_only(&self) -> bool {
+        !self.ops.is_empty()
+            && self
+                .ops
+                .iter()
+                .all(|(_, op)| matches!(op, EditOp::Hpa { .. }))
     }
 
     /// Reads and parses a change file.
@@ -460,6 +503,9 @@ impl ChangeFile {
         for (line, op) in &self.ops {
             if let EditOp::Options(o) = op {
                 o.set(&mut opts);
+                continue;
+            }
+            if let EditOp::Hpa { .. } = op {
                 continue;
             }
             let mut cx = Cx {
@@ -693,7 +739,7 @@ impl Cx<'_> {
 
     fn op(&mut self, op: &EditOp) -> R<()> {
         match op {
-            EditOp::Options(_) => Ok(()),
+            EditOp::Options(_) | EditOp::Hpa { .. } => Ok(()),
             EditOp::CloneMonitors {
                 template,
                 container,

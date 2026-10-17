@@ -109,6 +109,19 @@ impl ResumeChanges {
         self.steps.is_empty()
     }
 
+    /// The change files' `hpa` lines (`ChangeFile::hpa_settings`), in step order: parameters of
+    /// the run's HPA autoscalers, applied by the run after the model changes
+    /// (`simoxide_spd::sim::SpdRun::hpa_set`).
+    pub fn hpa_settings(&self) -> Vec<(String, String, f64)> {
+        self.steps
+            .iter()
+            .flat_map(|s| match s {
+                ChangeStep::File(f) => f.hpa_settings(),
+                ChangeStep::Transform(..) => Vec::new(),
+            })
+            .collect()
+    }
+
     /// Applies the steps to `sim` (paused, restored, or not started); transformations run in
     /// `qvto`, the run's QVTo state (for a run with rules, its host's: [`crate::RulesHost::qvto`]).
     pub fn apply<C: Compat, F: Flavour>(
@@ -119,6 +132,8 @@ impl ResumeChanges {
         let mut out = Vec::new();
         for s in &self.steps {
             out.push(match s {
+                // only HPA parameters: for the run's autoscalers (`hpa_settings`)
+                ChangeStep::File(f) if f.hpa_only() => continue,
                 ChangeStep::File(f) => {
                     let r = f.apply(sim).map_err(ResumeError::File)?;
                     StepReport {
@@ -158,6 +173,7 @@ impl ResumeChanges {
         let mut out = Vec::new();
         for s in &self.steps {
             out.push(match s {
+                ChangeStep::File(f) if f.hpa_only() => continue,
                 ChangeStep::File(f) => StepReport {
                     step: "file".into(),
                     change: Some(f.apply_to(host).map_err(ResumeError::File)?),
