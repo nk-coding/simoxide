@@ -25,6 +25,7 @@ use crate::quirks::Quirks;
 use simoxide_model::Model;
 use simoxide_model::raw::ObjId;
 use simoxide_sim::compat::Compat;
+use simoxide_sim::flavour::{Flavour, SimuLizar};
 use simoxide_sim::ir::metric_names;
 use simoxide_sim::{CompiledModel, Outputs, RunResult, SimError, SimErrorKind, Simulation, Status};
 
@@ -55,11 +56,12 @@ pub struct AdjustOutcome {
 
 /// Executes adjustment requests (P2: Slingshot's `MainTransformation.qvto` on the run's
 /// model, then the syncers). It may change the simulation's model and must then refresh
-/// `state.membership`.
-pub trait Adjuster<C: Compat> {
+/// `state.membership`. Generic over the flavour (`F`); [`SpdRun`] drives the SimuLizar
+/// flavour. `simoxide-reconf`'s `QvtoAdjuster` (feature `spd`) runs a QVTo transformation.
+pub trait Adjuster<C: Compat, F: Flavour = SimuLizar> {
     fn adjust(
         &mut self,
-        sim: &mut Simulation<'_, C>,
+        sim: &mut Simulation<'_, C, F>,
         spd: &Spd,
         state: &mut SpdState,
         req: &AdjustmentRequest,
@@ -70,10 +72,10 @@ pub trait Adjuster<C: Compat> {
 /// fixed Q2 commits no constraint state.
 pub struct NoAdjustment;
 
-impl<C: Compat> Adjuster<C> for NoAdjustment {
+impl<C: Compat, F: Flavour> Adjuster<C, F> for NoAdjustment {
     fn adjust(
         &mut self,
-        _: &mut Simulation<'_, C>,
+        _: &mut Simulation<'_, C, F>,
         spd: &Spd,
         state: &mut SpdState,
         req: &AdjustmentRequest,
