@@ -19,9 +19,13 @@
 //!
 //! Nodes live in an arena; links are `u32` indices.
 
-use super::hash::spread;
-use crate::identity::HashEnv;
 use std::cmp::Ordering;
+
+/// `HashMap.hash`: `h ^ (h >>> 16)`.
+#[inline]
+pub fn spread(h: i32) -> i32 {
+    h ^ ((h as u32) >> 16) as i32
+}
 
 const NIL: u32 = u32::MAX;
 const DEFAULT_CAPACITY: usize = 16;
@@ -33,18 +37,18 @@ const INT_MAX: usize = i32::MAX as usize;
 
 /// A key with Java `hashCode`/`equals` semantics and the class information `HashMap`'s tree
 /// bins use to order keys with equal hashes.
-pub trait JavaKey {
-    fn java_hash(&self, env: &dyn HashEnv) -> i32;
-    fn java_equals(&self, other: &Self, env: &dyn HashEnv) -> bool;
+pub trait JavaKey<E: ?Sized> {
+    fn java_hash(&self, env: &E) -> i32;
+    fn java_equals(&self, other: &Self, env: &E) -> bool;
     /// `HashMap.comparableClassFor`: an id of the key's class if that class is `C implements
     /// Comparable<C>` (String and the boxed primitives), else `None` (also for `null`).
     fn comparable_class(&self) -> Option<u8>;
     /// `compareTo` between two keys of the same comparable class.
     fn compare_to(&self, other: &Self) -> Ordering;
     /// `getClass().getName()`; `None` for the `null` key.
-    fn class_name<'a>(&'a self, env: &'a dyn HashEnv) -> Option<&'a str>;
+    fn class_name<'a>(&'a self, env: &'a E) -> Option<&'a str>;
     /// `System.identityHashCode` (0 for `null`).
-    fn identity_hash(&self, env: &dyn HashEnv) -> i32;
+    fn identity_hash(&self, env: &E) -> i32;
 }
 
 #[derive(Clone)]
@@ -537,9 +541,12 @@ impl<K, V> JavaHashMap<K, V> {
     }
 }
 
-impl<K: JavaKey, V> JavaHashMap<K, V> {
+impl<K, V> JavaHashMap<K, V> {
     /// `HashMap.tieBreakOrder`.
-    fn tie_break_order(&self, a: &K, b: &K, env: &dyn HashEnv) -> Ordering {
+    fn tie_break_order<E: ?Sized>(&self, a: &K, b: &K, env: &E) -> Ordering
+    where
+        K: JavaKey<E>,
+    {
         let d = match (a.class_name(env), b.class_name(env)) {
             (Some(x), Some(y)) => x.cmp(y),
             _ => Ordering::Equal,
@@ -555,7 +562,10 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
     }
 
     /// `compareComparables(kc, k, x)`: 0 unless `x` has class `kc`.
-    fn compare_comparables(kc: u8, k: &K, x: &K) -> Ordering {
+    fn compare_comparables<E: ?Sized>(kc: u8, k: &K, x: &K) -> Ordering
+    where
+        K: JavaKey<E>,
+    {
         if x.comparable_class() != Some(kc) {
             Ordering::Equal
         } else {
@@ -565,7 +575,10 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
 
     // ------------------------------------------------------------------ resize
 
-    fn resize(&mut self, env: &dyn HashEnv) {
+    fn resize<E: ?Sized>(&mut self, env: &E)
+    where
+        K: JavaKey<E>,
+    {
         let old_cap = self.table.len();
         let old_thr = self.threshold;
         let new_cap;
@@ -641,7 +654,10 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
         }
     }
 
-    fn treeify(&mut self, head: u32, env: &dyn HashEnv) {
+    fn treeify<E: ?Sized>(&mut self, head: u32, env: &E)
+    where
+        K: JavaKey<E>,
+    {
         let mut root = NIL;
         let mut x = head;
         while x != NIL {
@@ -701,7 +717,10 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
         self.move_root_to_front(root);
     }
 
-    fn treeify_bin(&mut self, hash: i32, env: &dyn HashEnv) {
+    fn treeify_bin<E: ?Sized>(&mut self, hash: i32, env: &E)
+    where
+        K: JavaKey<E>,
+    {
         let n = self.table.len();
         if n < MIN_TREEIFY_CAPACITY {
             self.resize(env);
@@ -728,7 +747,10 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
         self.treeify(hd, env);
     }
 
-    fn split_tree(&mut self, b: u32, index: usize, bit: usize, env: &dyn HashEnv) {
+    fn split_tree<E: ?Sized>(&mut self, b: u32, index: usize, bit: usize, env: &E)
+    where
+        K: JavaKey<E>,
+    {
         let (mut lo_h, mut lo_t, mut hi_h, mut hi_t) = (NIL, NIL, NIL, NIL);
         let (mut lc, mut hc) = (0usize, 0usize);
         let mut e = b;
@@ -790,15 +812,21 @@ pub enum Inserted {
     Existing(u32),
 }
 
-impl<K: JavaKey, V> JavaHashMap<K, V> {
+impl<K, V> JavaHashMap<K, V> {
     /// `HashMap.hash(key)`.
     #[inline]
-    pub fn hash_of(key: &K, env: &dyn HashEnv) -> i32 {
+    pub fn hash_of<E: ?Sized>(key: &K, env: &E) -> i32
+    where
+        K: JavaKey<E>,
+    {
         spread(key.java_hash(env))
     }
 
     /// `put(key, val)`: returns the previous value; an existing entry keeps its key.
-    pub fn put(&mut self, key: K, val: V, env: &dyn HashEnv) -> Option<V> {
+    pub fn put<E: ?Sized>(&mut self, key: K, val: V, env: &E) -> Option<V>
+    where
+        K: JavaKey<E>,
+    {
         let hash = Self::hash_of(&key, env);
         match self.put_hashed(hash, key, val, env) {
             (Inserted::New(_), _) => None,
@@ -808,13 +836,16 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
 
     /// `putVal` with a precomputed spread hash; returns the node and, for an existing key, the
     /// replaced value.
-    pub fn put_hashed(
+    pub fn put_hashed<E: ?Sized>(
         &mut self,
         hash: i32,
         key: K,
         val: V,
-        env: &dyn HashEnv,
-    ) -> (Inserted, Option<V>) {
+        env: &E,
+    ) -> (Inserted, Option<V>)
+    where
+        K: JavaKey<E>,
+    {
         match self.insert_node(hash, key, val, env) {
             Ok(id) => (Inserted::New(id), None),
             Err((id, val)) => {
@@ -826,13 +857,16 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
 
     /// `putIfAbsent`-like insertion that never touches an existing entry: `Ok(new node)` or
     /// `Err((existing node, val))`.
-    pub fn insert_node(
+    pub fn insert_node<E: ?Sized>(
         &mut self,
         hash: i32,
         key: K,
         val: V,
-        env: &dyn HashEnv,
-    ) -> Result<u32, (u32, V)> {
+        env: &E,
+    ) -> Result<u32, (u32, V)>
+    where
+        K: JavaKey<E>,
+    {
         if self.table.is_empty() {
             self.resize(env);
         }
@@ -878,14 +912,17 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
         Ok(new_id)
     }
 
-    fn put_tree_val(
+    fn put_tree_val<E: ?Sized>(
         &mut self,
         bin_head: u32,
         h: i32,
         k: K,
         v: V,
-        env: &dyn HashEnv,
-    ) -> Result<u32, (u32, V)> {
+        env: &E,
+    ) -> Result<u32, (u32, V)>
+    where
+        K: JavaKey<E>,
+    {
         let mut kc: Option<Option<u8>> = None;
         let mut searched = false;
         let root = if self.n(bin_head).parent != NIL {
@@ -962,14 +999,10 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
     }
 
     /// `TreeNode.find(h, k, kc)` starting at `p`.
-    fn find(
-        &self,
-        start: u32,
-        h: i32,
-        k: &K,
-        mut kc: Option<u8>,
-        env: &dyn HashEnv,
-    ) -> Option<u32> {
+    fn find<E: ?Sized>(&self, start: u32, h: i32, k: &K, mut kc: Option<u8>, env: &E) -> Option<u32>
+    where
+        K: JavaKey<E>,
+    {
         let mut p = start;
         let mut kc_known = kc.is_some();
         while p != NIL {
@@ -1008,12 +1041,18 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
     }
 
     /// Node id of `key`, if present.
-    pub fn find_node(&self, key: &K, env: &dyn HashEnv) -> Option<u32> {
+    pub fn find_node<E: ?Sized>(&self, key: &K, env: &E) -> Option<u32>
+    where
+        K: JavaKey<E>,
+    {
         self.find_node_hashed(Self::hash_of(key, env), key, env)
     }
 
     /// `getNode(hash, key)`.
-    pub fn find_node_hashed(&self, hash: i32, key: &K, env: &dyn HashEnv) -> Option<u32> {
+    pub fn find_node_hashed<E: ?Sized>(&self, hash: i32, key: &K, env: &E) -> Option<u32>
+    where
+        K: JavaKey<E>,
+    {
         let n = self.table.len();
         if n == 0 {
             return None;
@@ -1043,28 +1082,43 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
         None
     }
 
-    pub fn get(&self, key: &K, env: &dyn HashEnv) -> Option<&V> {
+    pub fn get<E: ?Sized>(&self, key: &K, env: &E) -> Option<&V>
+    where
+        K: JavaKey<E>,
+    {
         self.find_node(key, env).map(|i| &self.n(i).val)
     }
-    pub fn get_mut(&mut self, key: &K, env: &dyn HashEnv) -> Option<&mut V> {
+    pub fn get_mut<E: ?Sized>(&mut self, key: &K, env: &E) -> Option<&mut V>
+    where
+        K: JavaKey<E>,
+    {
         match self.find_node(key, env) {
             Some(i) => Some(&mut self.m(i).val),
             None => None,
         }
     }
-    pub fn contains_key(&self, key: &K, env: &dyn HashEnv) -> bool {
+    pub fn contains_key<E: ?Sized>(&self, key: &K, env: &E) -> bool
+    where
+        K: JavaKey<E>,
+    {
         self.find_node(key, env).is_some()
     }
 
     /// `remove(key)` (`removeNode(..., movable = true)`).
-    pub fn remove(&mut self, key: &K, env: &dyn HashEnv) -> Option<(K, V)> {
+    pub fn remove<E: ?Sized>(&mut self, key: &K, env: &E) -> Option<(K, V)>
+    where
+        K: JavaKey<E>,
+    {
         let id = self.find_node(key, env)?;
         Some(self.remove_node(id, true, env))
     }
 
     /// Removes an entry by node id. `movable = false` is removal through an iterator, which
     /// neither moves a tree root to the front nor turns a small tree back into a list.
-    pub fn remove_node(&mut self, node: u32, movable: bool, env: &dyn HashEnv) -> (K, V) {
+    pub fn remove_node<E: ?Sized>(&mut self, node: u32, movable: bool, env: &E) -> (K, V)
+    where
+        K: JavaKey<E>,
+    {
         let n = self.table.len();
         let hash = self.n(node).hash;
         let index = (n - 1) & (hash as u32 as usize);
@@ -1085,7 +1139,10 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
         self.release(node)
     }
 
-    fn remove_tree_node(&mut self, this: u32, index: usize, movable: bool) {
+    fn remove_tree_node<E: ?Sized>(&mut self, this: u32, index: usize, movable: bool)
+    where
+        K: JavaKey<E>,
+    {
         let mut first = self.table[index];
         let mut root = first;
         let succ = self.n(this).next;
@@ -1216,7 +1273,10 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
     }
 
     /// Removes, in iteration order, every entry for which `f` is false (`Iterator.remove`).
-    pub fn retain(&mut self, mut f: impl FnMut(&K, &V) -> bool, env: &dyn HashEnv) -> bool {
+    pub fn retain<E: ?Sized>(&mut self, mut f: impl FnMut(&K, &V) -> bool, env: &E) -> bool
+    where
+        K: JavaKey<E>,
+    {
         let ids: Vec<u32> = self.node_ids().collect();
         let mut changed = false;
         for id in ids {
@@ -1233,8 +1293,9 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
     }
 
     /// `putMapEntries(m)` as used by `new HashMap(Map)` and `putAll` (JDK 19+ sizing).
-    pub fn put_all<I>(&mut self, entries: I, count: usize, env: &dyn HashEnv)
+    pub fn put_all<E: ?Sized, I>(&mut self, entries: I, count: usize, env: &E)
     where
+        K: JavaKey<E>,
         I: IntoIterator<Item = (K, V)>,
     {
         if count > 0 {
@@ -1260,7 +1321,10 @@ impl<K: JavaKey, V> JavaHashMap<K, V> {
     }
 
     /// Checks the red-black and list invariants of every tree bin (tests).
-    pub fn check_invariants(&self) -> Result<(), String> {
+    pub fn check_invariants<E: ?Sized>(&self) -> Result<(), String>
+    where
+        K: JavaKey<E>,
+    {
         let mut count = 0;
         for (b, &head) in self.table.iter().enumerate() {
             let mut p = head;

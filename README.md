@@ -78,7 +78,7 @@ cd docs && npm install && npm run dev
 
 ## Licence
 
-Eclipse Public License 2.0 (`LICENSE`), except `crates/simoxide-hotspot-math`, which is
+Eclipse Public License 2.0 (`LICENSE`), except `crates/foundation/simoxide-hotspot-math`, which is
 GPL-2.0-only and linked only through the feature `hotspot-math` (the exact build, see Quick
 start). SimOxide contains code and data derived from Palladio, Apache Commons Math, JScience and
 OpenJDK; `LICENSES` lists them with their licences and the open licensing issues.

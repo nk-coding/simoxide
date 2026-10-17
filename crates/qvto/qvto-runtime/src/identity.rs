@@ -58,58 +58,8 @@ pub trait IdentityHashSource {
     fn draw(&mut self, key: IdentityKey) -> i32;
 }
 
-/// HotSpot's identity hash generator (`-XX:hashCode=5`, the default since JDK 8): Marsaglia's
-/// xor-shift with thread-local state `(X, Y, Z, W)`, initialised to `(os::random(), 842502087,
-/// 0x8767, 273326509)`; each draw is masked to 31 bits, and 0 is replaced by `0xBAD`.
-#[derive(Clone, Debug)]
-pub struct HotSpotXorShift {
-    x: u32,
-    y: u32,
-    z: u32,
-    w: u32,
-}
-
-impl HotSpotXorShift {
-    /// Thread state with the given `X` seed.
-    pub fn new(seed: u32) -> Self {
-        HotSpotXorShift {
-            x: seed,
-            y: 842_502_087,
-            z: 0x8767,
-            w: 273_326_509,
-        }
-    }
-
-    /// Seed of the thread that received the `n`-th (1-based) value of HotSpot's `os::random()`
-    /// (Park–Miller, `seed' = 16807 * seed mod (2^31 - 1)`, initial seed 1234567).
-    pub fn nth_os_random_thread(n: u32) -> Self {
-        let mut s: u64 = 1_234_567;
-        for _ in 0..n.max(1) {
-            s = (16807 * s) % 2_147_483_647;
-        }
-        Self::new(s as u32)
-    }
-
-    /// The next identity hash.
-    pub fn next_hash(&mut self) -> i32 {
-        let mut t = self.x;
-        t ^= t << 11;
-        self.x = self.y;
-        self.y = self.z;
-        self.z = self.w;
-        let mut v = self.w;
-        v = (v ^ (v >> 19)) ^ (t ^ (t >> 8));
-        self.w = v;
-        let v = v & 0x7fff_ffff;
-        if v == 0 { 0xBAD } else { v as i32 }
-    }
-}
-
-impl Default for HotSpotXorShift {
-    fn default() -> Self {
-        Self::nth_os_random_thread(1)
-    }
-}
+/// HotSpot's identity hash generator (`-XX:hashCode=5`), from `simoxide-jcompat-exact`.
+pub use simoxide_jcompat_exact::hotspot::HotSpotXorShift;
 
 impl IdentityHashSource for HotSpotXorShift {
     fn draw(&mut self, _key: IdentityKey) -> i32 {
@@ -332,18 +282,6 @@ impl HashEnv for FastEnv {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn xorshift_is_31_bit_and_deterministic() {
-        let mut a = HotSpotXorShift::default();
-        let mut b = HotSpotXorShift::default();
-        for _ in 0..1000 {
-            let h = a.next_hash();
-            assert!(h > 0);
-            assert_eq!(h, b.next_hash());
-        }
-        assert_eq!(HotSpotXorShift::nth_os_random_thread(1).x, 1_422_014_746);
-    }
 
     #[test]
     fn memo_draws_once() {

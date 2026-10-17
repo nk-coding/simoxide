@@ -258,13 +258,13 @@ pub fn java_class_name<'a>(v: &'a Value, env: &'a dyn HashEnv) -> Option<&'a str
     })
 }
 
-impl JavaKey for Value {
+impl<'e> JavaKey<dyn HashEnv + 'e> for Value {
     #[inline]
-    fn java_hash(&self, env: &dyn HashEnv) -> i32 {
+    fn java_hash(&self, env: &(dyn HashEnv + 'e)) -> i32 {
         java_hash(self, env)
     }
     #[inline]
-    fn java_equals(&self, other: &Self, env: &dyn HashEnv) -> bool {
+    fn java_equals(&self, other: &Self, env: &(dyn HashEnv + 'e)) -> bool {
         java_equals(self, other, env)
     }
     fn comparable_class(&self) -> Option<u8> {
@@ -300,10 +300,10 @@ impl JavaKey for Value {
             _ => Ordering::Equal,
         }
     }
-    fn class_name<'a>(&'a self, env: &'a dyn HashEnv) -> Option<&'a str> {
+    fn class_name<'a>(&'a self, env: &'a (dyn HashEnv + 'e)) -> Option<&'a str> {
         java_class_name(self, env)
     }
-    fn identity_hash(&self, env: &dyn HashEnv) -> i32 {
+    fn identity_hash(&self, env: &(dyn HashEnv + 'e)) -> i32 {
         match identity_key(self) {
             Some(k) => env.identity_hash(k),
             None if self.is_null() => 0,

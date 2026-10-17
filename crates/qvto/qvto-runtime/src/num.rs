@@ -26,42 +26,8 @@ pub enum NumOp {
     Ge,
 }
 
-/// Java's `Math.max(double, double)`: NaN if either is NaN, `max(-0.0, 0.0) = 0.0`.
-pub fn java_max(a: f64, b: f64) -> f64 {
-    if a.is_nan() || b.is_nan() {
-        f64::NAN
-    } else if a == 0.0 && b == 0.0 {
-        if a.is_sign_negative() { b } else { a }
-    } else if a >= b {
-        a
-    } else {
-        b
-    }
-}
-
-/// Java's `Math.min(double, double)`: NaN if either is NaN, `min(-0.0, 0.0) = -0.0`.
-pub fn java_min(a: f64, b: f64) -> f64 {
-    if a.is_nan() || b.is_nan() {
-        f64::NAN
-    } else if a == 0.0 && b == 0.0 {
-        if a.is_sign_negative() { a } else { b }
-    } else if a <= b {
-        a
-    } else {
-        b
-    }
-}
-
-/// `Math.round(double)`: the closest `long`, ties toward positive infinity; NaN gives 0,
-/// out-of-range values saturate.
-pub fn java_round(x: f64) -> i64 {
-    if x.is_nan() {
-        return 0;
-    }
-    let f = x.floor();
-    let r = if x - f >= 0.5 { f + 1.0 } else { f };
-    r as i64
-}
+/// Java's `Math.max`, `Math.min` and `Math.round` (`simoxide-jcompat`).
+pub use simoxide_jcompat::math::{max as java_max, min as java_min, round as java_round};
 
 fn int(v: i64) -> Value {
     Value::Int(v)

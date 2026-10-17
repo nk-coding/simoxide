@@ -1,59 +1,10 @@
-//! A small, fast, deterministic hasher for the loader's internal maps (the `FxHasher` of rustc).
+//! The loader's internal maps on the Fx hasher (rustc's, `simoxide-jcompat`), and [`StrMap`].
 //! Keys are IDs, URIs and metamodel names from model files; hash flooding is not a concern here.
 
 use std::collections::HashMap;
 use std::hash::{BuildHasherDefault, Hasher};
 
-#[derive(Default, Clone, Copy)]
-pub(crate) struct FxHasher {
-    hash: u64,
-}
-
-const SEED: u64 = 0x51_7c_c1_b7_27_22_0a_95;
-
-impl FxHasher {
-    #[inline]
-    fn add(&mut self, w: u64) {
-        self.hash = (self.hash.rotate_left(5) ^ w).wrapping_mul(SEED);
-    }
-}
-
-impl Hasher for FxHasher {
-    #[inline]
-    fn write(&mut self, mut b: &[u8]) {
-        while b.len() >= 8 {
-            self.add(u64::from_le_bytes(b[..8].try_into().unwrap()));
-            b = &b[8..];
-        }
-        if b.len() >= 4 {
-            self.add(u32::from_le_bytes(b[..4].try_into().unwrap()) as u64);
-            b = &b[4..];
-        }
-        for &x in b {
-            self.add(x as u64);
-        }
-    }
-    #[inline]
-    fn write_u8(&mut self, i: u8) {
-        self.add(i as u64);
-    }
-    #[inline]
-    fn write_u32(&mut self, i: u32) {
-        self.add(i as u64);
-    }
-    #[inline]
-    fn write_u64(&mut self, i: u64) {
-        self.add(i);
-    }
-    #[inline]
-    fn write_usize(&mut self, i: usize) {
-        self.add(i as u64);
-    }
-    #[inline]
-    fn finish(&self) -> u64 {
-        self.hash
-    }
-}
+pub(crate) use simoxide_jcompat::fx::FxHasher;
 
 pub(crate) type FxBuild = BuildHasherDefault<FxHasher>;
 pub(crate) type FxHashMap<K, V> = HashMap<K, V, FxBuild>;

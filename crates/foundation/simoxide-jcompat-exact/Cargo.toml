@@ -1,0 +1,12 @@
+[package]
+name = "simoxide-jcompat-exact"
+description = "Java behaviour only OpenJDK/HotSpot sources define (HashMap order, HotSpot identity hashes) for SimOxide's exact and QVTo's compat modes; no licence granted, builds not for redistribution"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+# No `license`: no licence is granted (LICENSE-NOTICE). Never published, never in release builds.
+publish = false
+
+[dependencies]
+simoxide-jcompat.workspace = true

@@ -40,6 +40,63 @@ fn parse_integral(units: &[u16], min: i64, max: i64) -> Option<i64> {
     Some(v as i64)
 }
 
+/// [`parse_int`] of a Rust string (ASCII without converting to UTF-16).
+pub fn parse_int_str(s: &str) -> Option<i32> {
+    parse_integral_str(s, i32::MIN as i64, i32::MAX as i64).map(|v| v as i32)
+}
+
+/// [`parse_long`] of a Rust string.
+pub fn parse_long_str(s: &str) -> Option<i64> {
+    parse_integral_str(s, i64::MIN, i64::MAX)
+}
+
+/// `Integer.valueOf`-style parsing into the range `min..=max` (`Short.valueOf`, `Byte.valueOf`
+/// with their ranges).
+pub fn parse_integral_str(s: &str, min: i64, max: i64) -> Option<i64> {
+    if !s.is_ascii() {
+        let units: Vec<u16> = s.encode_utf16().collect();
+        return parse_integral(&units, min, max);
+    }
+    let b = s.as_bytes();
+    let (neg, digits) = match b.first()? {
+        b'-' => (true, &b[1..]),
+        b'+' => (false, &b[1..]),
+        _ => (false, b),
+    };
+    if digits.is_empty() {
+        return None;
+    }
+    let mut acc: i128 = 0;
+    for &c in digits {
+        if !c.is_ascii_digit() {
+            return None;
+        }
+        acc = acc * 10 + (c - b'0') as i128;
+        if acc > (max as i128) + 1 {
+            return None;
+        }
+    }
+    let v = if neg { -acc } else { acc };
+    (v >= min as i128 && v <= max as i128).then_some(v as i64)
+}
+
+/// [`parse_double`] of a Rust string. Plain decimal literals (sign, digits, `.`, exponent) go
+/// through Rust's parser, which accepts the same strings there and also rounds correctly;
+/// everything else (whitespace, `NaN`, `Infinity`, hexadecimal, type suffixes) through
+/// [`parse_double`].
+pub fn parse_double_str(s: &str) -> Option<f64> {
+    let b = s.as_bytes();
+    if !b.is_empty()
+        && b.iter()
+            .all(|c| c.is_ascii_digit() || matches!(c, b'.' | b'e' | b'E' | b'+' | b'-'))
+        && let Ok(v) = s.parse::<f64>()
+    {
+        return Some(v);
+    }
+    let units: Vec<u16> = s.encode_utf16().collect();
+    parse_double(&units)
+}
+
 /// `Double.valueOf(s)` / `Double.parseDouble(s)`: `None` where Java throws
 /// `NumberFormatException`.
 ///
@@ -315,5 +372,47 @@ mod tests {
         assert_eq!(p("0x1.fffffffffffff8p1023"), Some(f64::INFINITY));
         assert_eq!(p("0x1"), None);
         assert_eq!(p("1ee"), None);
+    }
+
+    #[test]
+    fn str_entry_points_agree() {
+        for s in [
+            "123",
+            "-0",
+            "+7",
+            " 7",
+            "",
+            "-",
+            "2147483648",
+            "-2147483648",
+            "\u{0663}\u{0664}",
+            "1.5",
+            " 1e3 ",
+            "1.5f",
+            ".5",
+            "5.",
+            ".",
+            "1e",
+            "1.e5",
+            "+.5e-3",
+            "NaN",
+            "-Infinity",
+            "0x1.8p1",
+            "1e400",
+            "4.9e-324",
+            "--1",
+            "1-2",
+            "e5",
+            "1e+5",
+            "0.1",
+        ] {
+            assert_eq!(parse_int_str(s), parse_int(&u(s)), "{s:?}");
+            assert_eq!(parse_long_str(s), parse_long(&u(s)), "{s:?}");
+            assert_eq!(
+                parse_double_str(s).map(f64::to_bits),
+                parse_double(&u(s)).map(f64::to_bits),
+                "{s:?}"
+            );
+        }
     }
 }

@@ -17,67 +17,14 @@
 
 use std::cmp::Ordering;
 
-/// `Math.round(double)` (Java 7+): closest long, ties towards positive infinity, NaN -> 0,
-/// saturating.
-pub fn java_round(x: f64) -> i64 {
-    if x.is_nan() {
-        return 0;
-    }
-    let f = x.floor();
-    // x - floor(x) is exact for |x| < 2^52; for larger |x|, x is an integer.
-    let r = if x - f >= 0.5 { f + 1.0 } else { f };
-    r as i64
-}
-
-/// `Double.compare(a, b)`.
-pub fn double_compare(a: f64, b: f64) -> Ordering {
-    // Same as Java: compare as numbers, then by the raw bits of doubleToLongBits
-    // (canonical NaN).
-    if a < b {
-        return Ordering::Less;
-    }
-    if a > b {
-        return Ordering::Greater;
-    }
-    let ab = if a.is_nan() {
-        0x7ff8_0000_0000_0000u64 as i64
-    } else {
-        a.to_bits() as i64
-    };
-    let bb = if b.is_nan() {
-        0x7ff8_0000_0000_0000u64 as i64
-    } else {
-        b.to_bits() as i64
-    };
-    ab.cmp(&bb)
-}
+pub use simoxide_jcompat::math::{double_compare, round as java_round};
 
 /// `String.compareTo` (UTF-16 code unit order).
 pub fn string_compare(a: &str, b: &str) -> Ordering {
     a.encode_utf16().cmp(b.encode_utf16())
 }
 
-/// `Math.max(double, double)`.
-pub fn max_f64(a: f64, b: f64) -> f64 {
-    if a.is_nan() {
-        return a;
-    }
-    if a == 0.0 && b == 0.0 && a.is_sign_negative() && !b.is_nan() {
-        return b;
-    }
-    if a >= b { a } else { b }
-}
-
-/// `Math.min(double, double)`.
-pub fn min_f64(a: f64, b: f64) -> f64 {
-    if a.is_nan() {
-        return a;
-    }
-    if a == 0.0 && b == 0.0 && b.is_sign_negative() {
-        return b;
-    }
-    if a <= b { a } else { b }
-}
+pub use simoxide_jcompat::math::{max as max_f64, min as min_f64};
 
 // ---------------------------------------------------------------------------------------------
 // double-double arithmetic

@@ -586,6 +586,7 @@ dependencies = [
  "qvto-model",
  "qvto-paths",
  "qvto-runtime",
+ "simoxide-jcompat",
 ]
 
 [[package]]
@@ -604,7 +605,8 @@ dependencies = [
  "proptest",
  "qvto-model",
  "qvto-types",
- "ryu",
+ "simoxide-jcompat",
+ "simoxide-jcompat-exact",
 ]
 
 [[package]]
@@ -648,6 +650,7 @@ dependencies = [
  "qvto-emf",
  "qvto-model",
  "qvto-paths",
+ "simoxide-jcompat-exact",
 ]
 
 [[package]]
@@ -860,6 +863,20 @@ name = "simoxide-hotspot-math"
 version = "0.1.0"
 
 [[package]]
+name = "simoxide-jcompat"
+version = "0.1.0"
+dependencies = [
+ "ryu",
+]
+
+[[package]]
+name = "simoxide-jcompat-exact"
+version = "0.1.0"
+dependencies = [
+ "simoxide-jcompat",
+]
+
+[[package]]
 name = "simoxide-model"
 version = "0.1.0"
 dependencies = [
@@ -867,6 +884,7 @@ dependencies = [
  "pprof",
  "quick-xml 0.38.4",
  "serde_json",
+ "simoxide-jcompat",
 ]
 
 [[package]]
@@ -874,6 +892,7 @@ name = "simoxide-random"
 version = "0.1.0"
 dependencies = [
  "simoxide-hotspot-math",
+ "simoxide-jcompat",
  "simoxide-random",
 ]
 
@@ -899,8 +918,9 @@ dependencies = [
 name = "simoxide-sim"
 version = "0.1.0"
 dependencies = [
- "ryu",
  "serde_json",
+ "simoxide-jcompat",
+ "simoxide-jcompat-exact",
  "simoxide-model",
  "simoxide-random",
  "simoxide-sched",
@@ -914,6 +934,7 @@ version = "0.1.0"
 dependencies = [
  "proptest",
  "serde_json",
+ "simoxide-jcompat",
  "simoxide-random",
 ]
 
@@ -924,8 +945,8 @@ dependencies = [
  "flate2",
  "libm",
  "proptest",
- "ryu",
  "serde_json",
+ "simoxide-jcompat",
  "simoxide-model",
  "simoxide-random",
  "simoxide-sim",

@@ -176,47 +176,16 @@ pub fn parse_value(data: DataKind, s: &str) -> Option<Value> {
     })
 }
 
-/// `Integer.valueOf` / `Long.valueOf`: optional sign, ASCII digits, no whitespace.
+/// `Integer.valueOf` / `Long.valueOf`: optional sign, decimal digits, no whitespace
+/// (`simoxide-jcompat`).
 fn parse_java_int(s: &str, min: i64, max: i64) -> Option<i64> {
-    let b = s.as_bytes();
-    let (neg, digits) = match b.first()? {
-        b'-' => (true, &s[1..]),
-        b'+' => (false, &s[1..]),
-        _ => (false, s),
-    };
-    if digits.is_empty() || !digits.bytes().all(|c| c.is_ascii_digit()) {
-        return None;
-    }
-    let v: i128 = digits.parse().ok()?;
-    let v = if neg { -v } else { v };
-    (v >= min as i128 && v <= max as i128).then_some(v as i64)
+    simoxide_jcompat::parse::parse_integral_str(s, min, max)
 }
 
-/// `Double.valueOf`: trims ASCII whitespace/control chars, accepts a trailing `d`/`f` type suffix,
-/// `NaN`, `Infinity` and hexadecimal is not supported (never seen in PCM files).
+/// `Double.valueOf`: trims characters `<= ' '`, accepts a trailing `d`/`f` type suffix, `NaN`,
+/// `Infinity` and hexadecimal literals (`simoxide-jcompat`).
 pub fn parse_java_double(s: &str) -> Option<f64> {
-    let t = s.trim_matches(|c: char| c <= ' ');
-    let t = t.strip_suffix(['d', 'D', 'f', 'F']).unwrap_or(t);
-    let (sign, body) = match t.as_bytes().first()? {
-        b'-' => (-1.0, &t[1..]),
-        b'+' => (1.0, &t[1..]),
-        _ => (1.0, t),
-    };
-    match body {
-        "NaN" => return Some(f64::NAN),
-        "Infinity" => return Some(sign * f64::INFINITY),
-        _ => {}
-    }
-    // Rust's grammar is a superset for the remaining forms except for words like "inf"
-    if body.is_empty()
-        || !body
-            .bytes()
-            .all(|c| c.is_ascii_digit() || matches!(c, b'.' | b'e' | b'E' | b'+' | b'-'))
-    {
-        return None;
-    }
-    let v: f64 = body.parse().ok()?;
-    Some(sign * v)
+    simoxide_jcompat::parse::parse_double_str(s)
 }
 
 impl Graph {

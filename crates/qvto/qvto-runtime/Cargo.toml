@@ -8,9 +8,10 @@ rust-version.workspace = true
 publish = false
 
 [dependencies]
+simoxide-jcompat.workspace = true
+simoxide-jcompat-exact.workspace = true
 qvto-model.workspace = true
 qvto-types.workspace = true
-ryu = "1.0.23"
 # insertion-ordered hash maps (`coll::LinkedMap`)
 hashbrown = { version = "0.17", default-features = false, features = ["inline-more"] }
 

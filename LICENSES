@@ -2,7 +2,7 @@ THIRD-PARTY LICENCES
 ====================
 
 SimOxide is licensed under the Eclipse Public License 2.0 (see LICENSE), except the crate
-crates/simoxide-hotspot-math, which is licensed under GPL-2.0-only (section 4). It is a port of the
+crates/foundation/simoxide-hotspot-math, which is licensed under GPL-2.0-only (section 4). It is a port of the
 Palladio performance simulator SimuLizar 5.2.2, and parts of it are derived from third-party code
 and data. This file lists every third-party work from which SimOxide takes significant code or
 data, where it is used, and its licence. The full licence texts follow at the end.
@@ -102,9 +102,9 @@ Licence:   GNU General Public License version 2 only (text below), without the C
            Exception
 
 Used in:
-- crates/simoxide-hotspot-math/src/lib.rs: an instruction-by-instruction port of the two stubs,
+- crates/foundation/simoxide-hotspot-math/src/lib.rs: an instruction-by-instruction port of the two stubs,
   so that Math.log and Math.exp are bit-identical to HotSpot.
-- crates/simoxide-hotspot-math/src/tables.rs: the constant tables of the two stubs.
+- crates/foundation/simoxide-hotspot-math/src/tables.rs: the constant tables of the two stubs.
 
 The crate simoxide-hotspot-math is therefore licensed under GPL-2.0-only (its own LICENSE file),
 not EPL-2.0. The rest of SimOxide links it only through the cargo feature "hotspot-math"

@@ -15,50 +15,9 @@ use crate::meta::{DataKind, FeatureId};
 use crate::raw::{Graph, ObjId, ResId, Value};
 use std::fmt::Write;
 
-/// Java `Double.toString` (JDK 19+, shortest repr).
+/// Java `Double.toString` (JDK 19+, shortest repr; `simoxide-jcompat`).
 pub fn java_double_to_string(d: f64) -> String {
-    if d.is_nan() {
-        return "NaN".into();
-    }
-    if d.is_infinite() {
-        return if d > 0.0 {
-            "Infinity".into()
-        } else {
-            "-Infinity".into()
-        };
-    }
-    if d == 0.0 {
-        return if d.is_sign_negative() {
-            "-0.0".into()
-        } else {
-            "0.0".into()
-        };
-    }
-    let e = format!("{:e}", d.abs());
-    let (mant, exp) = e.split_once('e').unwrap();
-    let exp: i32 = exp.parse().unwrap();
-    let digits: String = mant.chars().filter(|c| *c != '.').collect();
-    let sign = if d < 0.0 { "-" } else { "" };
-    let a = d.abs();
-    if (1e-3..1e7).contains(&a) {
-        // plain notation
-        let point = exp + 1; // digits before the decimal point
-        let s = if point <= 0 {
-            format!("0.{}{}", "0".repeat((-point) as usize), digits)
-        } else if point as usize >= digits.len() {
-            format!("{}{}.0", digits, "0".repeat(point as usize - digits.len()))
-        } else {
-            format!(
-                "{}.{}",
-                &digits[..point as usize],
-                &digits[point as usize..]
-            )
-        };
-        format!("{sign}{s}")
-    } else {
-        let frac = if digits.len() > 1 { &digits[1..] } else { "0" };
-        format!("{sign}{}.{}E{}", &digits[..1], frac, exp)
-    }
+    simoxide_jcompat::fmt::double_to_string(d)
 }
 
 pub(crate) fn json_str(out: &mut String, s: &str) {
@@ -1753,5 +1712,7 @@ mod tests {
         assert_eq!(j(1.5e300), "1.5E300");
         assert_eq!(j(0.1), "0.1");
         assert_eq!(j(100.0), "100.0");
+        // two digits for one-digit subnormals, as Java
+        assert_eq!(j(f64::from_bits(1)), "4.9E-324");
     }
 }

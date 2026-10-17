@@ -1,0 +1,11 @@
+[package]
+name = "simoxide-jcompat"
+description = "Java behaviour the Java SE documentation specifies (hash codes, Double.toString, number parsing, Character data, Math basics) for SimOxide and its QVTo engine"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+ryu = "1"

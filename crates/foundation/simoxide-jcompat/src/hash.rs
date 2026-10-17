@@ -1,4 +1,5 @@
-//! Java `hashCode` of the boxed primitive classes and `String`, and `HashMap`'s hash spreading.
+//! Java `hashCode` of the boxed primitive classes and `String` (the javadoc formulas), and
+//! `Double.compare`/`Float.compare`. `HashMap`'s hash spreading is in `simoxide-jcompat-exact`.
 
 /// `String.hashCode()` over UTF-16 code units: `s[0]*31^(n-1) + ... + s[n-1]`, wrapping.
 #[inline]
@@ -68,12 +69,6 @@ pub fn bool_hash(b: bool) -> i32 {
     if b { 1231 } else { 1237 }
 }
 
-/// `HashMap.hash`: `h ^ (h >>> 16)`.
-#[inline]
-pub fn spread(h: i32) -> i32 {
-    h ^ ((h as u32) >> 16) as i32
-}
-
 /// `Double.compare(a, b)`: numeric order, `-0.0 < 0.0`, NaN above everything and equal to itself.
 pub fn double_compare(a: f64, b: f64) -> std::cmp::Ordering {
     use std::cmp::Ordering::*;
@@ -117,7 +112,5 @@ mod tests {
         assert_eq!(double_hash(1.0), 1072693248);
         assert_eq!(double_hash(f64::NAN), 2146959360);
         assert_eq!(bool_hash(true), 1231);
-        assert_eq!(spread(0x12345678), 0x12345678 ^ 0x1234);
-        assert_eq!(spread(-1), (-1i32) ^ 0xffff);
     }
 }

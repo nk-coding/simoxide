@@ -139,33 +139,16 @@ pub fn intrinsic_default(meta: &MetaRegistry, ty: Classifier) -> Value {
     }
 }
 
-/// `Integer.valueOf` / `Long.valueOf` (`parseInt`): optional sign, ASCII digits, in range.
+/// `Integer.valueOf` / `Long.valueOf` (`parseInt`): optional sign, decimal digits (Unicode
+/// digits as `Character.digit`), in range (`simoxide-jcompat`).
 pub fn parse_java_int(s: &str, min: i64, max: i64) -> Option<i64> {
-    let b = s.as_bytes();
-    let (neg, digits) = match b.first()? {
-        b'-' => (true, &s[1..]),
-        b'+' => (false, &s[1..]),
-        _ => (false, s),
-    };
-    if digits.is_empty() || !digits.bytes().all(|c| c.is_ascii_digit()) {
-        return None;
-    }
-    let v: i128 = digits.parse().ok()?;
-    let v = if neg { -v } else { v };
-    (v >= min as i128 && v <= max as i128).then_some(v as i64)
+    simoxide_jcompat::parse::parse_integral_str(s, min, max)
 }
 
-/// `Double.valueOf`: trims characters `<= ' '`, accepts a `d`/`D`/`f`/`F` suffix, `NaN`,
-/// `Infinity` with a sign, and the usual decimal forms. Hexadecimal floats are not supported.
+/// `Double.valueOf` (`simoxide-jcompat`): trims characters `<= ' '`, accepts a `d`/`D`/`f`/`F`
+/// suffix, `NaN`, `Infinity` with a sign, decimal and hexadecimal forms.
 pub fn parse_java_double(s: &str) -> Option<f64> {
-    let (sign, body) = java_float_body(s)?;
-    match body {
-        "NaN" => return Some(f64::NAN),
-        "Infinity" => return Some(sign * f64::INFINITY),
-        _ => {}
-    }
-    let v: f64 = body.parse().ok()?;
-    Some(sign * v)
+    simoxide_jcompat::parse::parse_double_str(s)
 }
 
 /// `Float.valueOf` (correctly rounded to `float`).

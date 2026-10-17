@@ -1,0 +1,26 @@
+simoxide-jcompat-exact: NO LICENCE GRANTED
+==========================================
+
+This crate reproduces behaviour of Java that only the sources of OpenJDK and HotSpot define:
+the iteration order of java.util.HashMap / HashSet (hash spreading, power-of-two tables, resize
+split, constructor sizing, tree bins, removal) and HotSpot's identity-hash generator
+(-XX:hashCode=5). It is an independent reimplementation, written from the documented algorithm,
+from black-box tests and from differential tests against JDK 21, not a copy of that source.
+But its details come only from OpenJDK and HotSpot, which are licensed under the GPL-2.0 (with
+the Classpath Exception for the class library, without it for HotSpot), while every crate that
+uses it (SimOxide, the QVTo engine) is EPL-2.0. The source is therefore partly EPL- and partly
+GPL-derived, and there is no licence that covers artefacts built from it.
+
+Consequently:
+
+- No licence is granted for this crate. Its Cargo manifest has no `license` field and
+  `publish = false`.
+- Build it for your own, local use only. Binaries, libraries, container images and other
+  artefacts that include it must not be distributed.
+- Release builds never include it. The default features of every SimOxide and QVTo crate leave
+  it out; it is pulled in only by the opt-in cargo features `jdk-order`, `exact` (SimOxide's
+  SimuLizar-exact mode) and `compat` (QVTo's compat mode). Check a release build with
+  `cargo tree -e normal -p simoxide-cli` and `-p qvto-cli` (default features): neither may list
+  `simoxide-jcompat-exact`.
+
+See the repository's LICENSES, section "Opt-in exactness crates".

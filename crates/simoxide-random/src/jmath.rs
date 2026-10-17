@@ -25,30 +25,4 @@ pub fn exp(x: f64) -> f64 {
     return crate::crmath::exp(x);
 }
 
-/// `Math.max(a, b)`: NaN if either is NaN; `max(-0.0, 0.0) = 0.0`.
-#[inline]
-pub fn max(a: f64, b: f64) -> f64 {
-    if a.is_nan() || b.is_nan() {
-        f64::NAN
-    } else if a == 0.0 && b == 0.0 {
-        if a.is_sign_negative() { b } else { a }
-    } else if a >= b {
-        a
-    } else {
-        b
-    }
-}
-
-/// `Math.min(a, b)`: NaN if either is NaN; `min(-0.0, 0.0) = -0.0`.
-#[inline]
-pub fn min(a: f64, b: f64) -> f64 {
-    if a.is_nan() || b.is_nan() {
-        f64::NAN
-    } else if a == 0.0 && b == 0.0 {
-        if a.is_sign_negative() { a } else { b }
-    } else if a <= b {
-        a
-    } else {
-        b
-    }
-}
+pub use simoxide_jcompat::math::{max, min};

@@ -1,18 +1,21 @@
 //! Java's `Double.toString`, `Float.toString` (JDK 19 and later: Raffaello Giulietti's
 //! shortest-decimal specification) and integer formatting.
 //!
-//! Adapted from SimOxide's `simoxide-testkit/src/javafmt.rs` (EPL-2.0, same author). The fast
-//! path takes the shortest round-tripping digits from `ryu`; Java's rule only differs from
-//! "shortest, closest, ties to even" when the shortest decimal has one digit (Java then also
+//! The fast path takes the shortest round-tripping digits from `ryu`; Java's rule only differs
+//! from "shortest, closest, ties to even" when the shortest decimal has one digit (Java then also
 //! admits two-digit decimals, e.g. `Double.MIN_VALUE` is `4.9E-324`), which only happens for
 //! subnormals and is delegated to [`exact`], a literal implementation of the javadoc with
-//! big-integer arithmetic that also serves as the property-test oracle.
+//! big-integer arithmetic that also serves as the property-test oracle. Formatting allocates
+//! nothing besides the output's growth.
 //!
 //! JDK 18 and earlier printed some values with more digits than needed (JDK-4511638, e.g.
 //! `2.0E23` as `1.9999999999999998E23`). That formatter is not reproduced (its only
-//! specification is OpenJDK's GPL source); see `DESIGN.md` §12.
+//! specification is OpenJDK's GPL source).
 
 use std::cmp::Ordering;
+
+/// Maximum length of a formatted `double` or `float` (`-2.2250738585072014E-308` has 24 bytes).
+pub const MAX_LEN: usize = 32;
 
 /// Shortest decimal `digits * 10^(sci_exp - ndigits + 1)`, i.e. `d.ddd * 10^sci_exp`, `digits`
 /// without trailing zeros.
@@ -23,6 +26,47 @@ pub struct Decimal {
     pub sci_exp: i32,
 }
 
+/// A formatted number on the stack.
+struct Buf {
+    b: [u8; MAX_LEN],
+    n: usize,
+}
+
+impl Buf {
+    #[inline]
+    fn new() -> Buf {
+        Buf {
+            b: [0; MAX_LEN],
+            n: 0,
+        }
+    }
+    #[inline]
+    fn push(&mut self, c: u8) {
+        self.b[self.n] = c;
+        self.n += 1;
+    }
+    #[inline]
+    fn extend(&mut self, s: &[u8]) {
+        self.b[self.n..self.n + s.len()].copy_from_slice(s);
+        self.n += s.len();
+    }
+    #[inline]
+    fn zeros(&mut self, k: usize) {
+        for _ in 0..k {
+            self.push(b'0');
+        }
+    }
+    #[inline]
+    fn bytes(&self) -> &[u8] {
+        &self.b[..self.n]
+    }
+    #[inline]
+    fn as_str(&self) -> &str {
+        // only ASCII is written
+        std::str::from_utf8(self.bytes()).expect("ascii")
+    }
+}
+
 /// `Double.toString(x)`.
 pub fn double_to_string(x: f64) -> String {
     let mut s = String::with_capacity(24);
@@ -31,29 +75,53 @@ pub fn double_to_string(x: f64) -> String {
 }
 
 /// Appends `Double.toString(x)`.
+#[inline]
 pub fn push_double(out: &mut String, x: f64) {
+    let mut b = Buf::new();
+    double_into(&mut b, x);
+    out.push_str(b.as_str());
+}
+
+/// Appends `Double.toString(x)` to a byte buffer.
+#[inline]
+pub fn write_double(out: &mut Vec<u8>, x: f64) {
+    let mut b = Buf::new();
+    double_into(&mut b, x);
+    out.extend_from_slice(b.bytes());
+}
+
+fn double_into(out: &mut Buf, x: f64) {
     if x.is_nan() {
-        out.push_str("NaN");
+        out.extend(b"NaN");
         return;
     }
     if x.is_infinite() {
-        out.push_str(if x > 0.0 { "Infinity" } else { "-Infinity" });
+        out.extend(if x > 0.0 { b"Infinity" } else { b"-Infinity" });
         return;
     }
     if x == 0.0 {
-        out.push_str(if x.is_sign_negative() { "-0.0" } else { "0.0" });
+        out.extend(if x.is_sign_negative() {
+            b"-0.0"
+        } else {
+            b"0.0"
+        });
         return;
     }
     if x < 0.0 {
-        out.push('-');
+        out.push(b'-');
     }
-    let ax = x.abs();
+    layout(out, shortest(x.abs()));
+}
+
+/// Java's decimal for a finite positive `x`.
+pub fn shortest(x: f64) -> Decimal {
+    debug_assert!(x.is_finite() && x > 0.0);
     let mut buf = ryu::Buffer::new();
-    let mut d = parse_ryu(buf.format_finite(ax));
-    if d.ndigits == 1 && ax < f64::MIN_POSITIVE {
-        d = exact::shortest(ax);
+    let d = parse_ryu(buf.format_finite(x));
+    if d.ndigits == 1 && x < f64::MIN_POSITIVE {
+        return exact::shortest(x);
     }
-    format_decimal(out, d);
+    d
 }
 
 /// `Float.toString(x)`.
@@ -65,34 +133,55 @@ pub fn float_to_string(x: f32) -> String {
 
 /// Appends `Float.toString(x)`.
 pub fn push_float(out: &mut String, x: f32) {
+    let mut b = Buf::new();
     if x.is_nan() {
-        out.push_str("NaN");
-        return;
+        b.extend(b"NaN");
+    } else if x.is_infinite() {
+        b.extend(if x > 0.0 { b"Infinity" } else { b"-Infinity" });
+    } else if x == 0.0 {
+        b.extend(if x.is_sign_negative() {
+            b"-0.0"
+        } else {
+            b"0.0"
+        });
+    } else {
+        if x < 0.0 {
+            b.push(b'-');
+        }
+        let ax = x.abs();
+        let mut buf = ryu::Buffer::new();
+        let mut d = parse_ryu(buf.format_finite(ax));
+        if d.ndigits == 1 && ax < f32::MIN_POSITIVE {
+            d = exact::shortest_f32(ax);
+        }
+        layout(&mut b, d);
     }
-    if x.is_infinite() {
-        out.push_str(if x > 0.0 { "Infinity" } else { "-Infinity" });
-        return;
-    }
-    if x == 0.0 {
-        out.push_str(if x.is_sign_negative() { "-0.0" } else { "0.0" });
-        return;
-    }
-    if x < 0.0 {
-        out.push('-');
-    }
-    let ax = x.abs();
-    let mut buf = ryu::Buffer::new();
-    let mut d = parse_ryu(buf.format_finite(ax));
-    if d.ndigits == 1 && ax < f32::MIN_POSITIVE {
-        d = exact::shortest_f32(ax);
-    }
-    format_decimal(out, d);
+    out.push_str(b.as_str());
 }
 
 /// `Integer.toString` / `Long.toString`.
 pub fn push_long(out: &mut String, v: i64) {
-    use std::fmt::Write;
-    let _ = write!(out, "{v}");
+    let mut b = Buf::new();
+    long_into(&mut b, v);
+    out.push_str(b.as_str());
+}
+
+fn long_into(out: &mut Buf, v: i64) {
+    let mut tmp = [0u8; 20];
+    let mut u = v.unsigned_abs();
+    let mut i = tmp.len();
+    loop {
+        i -= 1;
+        tmp[i] = b'0' + (u % 10) as u8;
+        u /= 10;
+        if u == 0 {
+            break;
+        }
+    }
+    if v < 0 {
+        out.push(b'-');
+    }
+    out.extend(&tmp[i..]);
 }
 
 /// Parses ryu's output (`1.5e-7`, `1e16`, `0.001`, `123.0`) into a normalized [`Decimal`].
@@ -151,8 +240,22 @@ fn ndigits(mut v: u64) -> u32 {
     n
 }
 
-/// Java's layout: plain for `1e-3 <= d < 1e7`, else computerized scientific notation.
+/// Appends a decimal in Java's layout: plain for `1e-3 <= d < 1e7`, else computerized
+/// scientific notation.
 pub fn format_decimal(out: &mut String, d: Decimal) {
+    let mut b = Buf::new();
+    layout(&mut b, d);
+    out.push_str(b.as_str());
+}
+
+/// [`format_decimal`] into a byte buffer.
+pub fn write_decimal(out: &mut Vec<u8>, d: Decimal) {
+    let mut b = Buf::new();
+    layout(&mut b, d);
+    out.extend_from_slice(b.bytes());
+}
+
+fn layout(out: &mut Buf, d: Decimal) {
     let mut tmp = [0u8; 20];
     let n = d.ndigits as usize;
     let mut v = d.digits;
@@ -160,35 +263,35 @@ pub fn format_decimal(out: &mut String, d: Decimal) {
         tmp[i] = b'0' + (v % 10) as u8;
         v /= 10;
     }
-    let s = std::str::from_utf8(&tmp[..n]).expect("digits");
+    let s = &tmp[..n];
     let k = d.sci_exp;
     if (-3..7).contains(&k) {
         if k >= 0 {
             let int_len = k as usize + 1;
             if n <= int_len {
-                out.push_str(s);
-                out.extend(std::iter::repeat_n('0', int_len - n));
-                out.push_str(".0");
+                out.extend(s);
+                out.zeros(int_len - n);
+                out.extend(b".0");
             } else {
-                out.push_str(&s[..int_len]);
-                out.push('.');
-                out.push_str(&s[int_len..]);
+                out.extend(&s[..int_len]);
+                out.push(b'.');
+                out.extend(&s[int_len..]);
             }
         } else {
-            out.push_str("0.");
-            out.extend(std::iter::repeat_n('0', (-k - 1) as usize));
-            out.push_str(s);
+            out.extend(b"0.");
+            out.zeros((-k - 1) as usize);
+            out.extend(s);
         }
     } else {
-        out.push_str(&s[..1]);
-        out.push('.');
+        out.push(s[0]);
+        out.push(b'.');
         if n > 1 {
-            out.push_str(&s[1..]);
+            out.extend(&s[1..]);
         } else {
-            out.push('0');
+            out.push(b'0');
         }
-        out.push('E');
-        push_long(out, k as i64);
+        out.push(b'E');
+        long_into(out, k as i64);
     }
 }
 
@@ -484,10 +587,24 @@ mod tests {
             (f64::INFINITY, "Infinity"),
             (-1.5, "-1.5"),
             (123456789.0, "1.23456789E8"),
+            (3.0, "3.0"),
+            (0.018428198, "0.018428198"),
+            (1493559.946308255, "1493559.946308255"),
+            (7.212694342041994E-4, "7.212694342041994E-4"),
+            (f64::NEG_INFINITY, "-Infinity"),
+            (-f64::MIN_POSITIVE / 3.0, "-7.41691286169067E-309"),
         ];
         for &(x, s) in cases {
             assert_eq!(double_to_string(x), s, "{x:e}");
             assert_eq!(exact::to_string(x), s, "exact {x:e}");
+            let mut b = b"x".to_vec();
+            write_double(&mut b, x);
+            assert_eq!(&b[1..], s.as_bytes());
+        }
+        for v in [0, 7, -7, 1234567890123, i64::MIN, i64::MAX] {
+            let mut o = String::new();
+            push_long(&mut o, v);
+            assert_eq!(o, v.to_string());
         }
         assert_eq!(float_to_string(1.0), "1.0");
         assert_eq!(float_to_string(0.1), "0.1");
