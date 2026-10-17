@@ -16,9 +16,11 @@ reference runner in `det` mode with `-seed N` (StoEx `mt`):
 3. `tape-projection.jsonl`, the draws with their sites and positions (SS-X-4);
 4. for SPD runs, the decision records of `spd.jsonl` and the adjusted models (SS-SPD-6).
 
-Milestones: level M first (measurements, aborts, SPD events, the stop, and the tape without
-positions), then level E. The full bus trace (`trace.jsonl`) is not compared: SimOxide does not emulate
-bookkeeping events (design §5.2).
+Target: **level E directly** (design decision U14), on every model the `det` runner reproduces,
+including the models with handler errors (SS-X-3.6). Level M (measurements, aborts, SPD events, the
+stop, and the tape without positions) is not a separate milestone; it is the subset to look at first
+when a level-E comparison fails. The full bus trace (`trace.jsonl`) is not compared: SimOxide does not
+emulate bookkeeping events (design §5.2).
 
 ## SS-X-2 The projection
 

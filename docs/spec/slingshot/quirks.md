@@ -3,8 +3,15 @@
 Every known Slingshot bug or oddity that changes results, with its observable effect. Decision U5:
 the Slingshot flavour **fixes** each one by default; a compat flag per quirk reproduces it; the
 Slingshot-exact mode turns all flags on, because its oracle (the `det` runner) is Slingshot with all
-of them. "Fixed behaviour" says what the flavour does without the flag; *defined* means this page
-fixes it, *open* means the phase in brackets decides it.
+of them.
+
+"Fixed behaviour" says what the flavour does without the flag. It follows decision U13: where
+Slingshot's behaviour is a bug, the fixed behaviour is **SimuLizar's (SimOxide's) semantics**
+(asynchronous forks run, delay resources work, no handler is disposed, demands are served one after
+the other, monitors are honoured, …). For SPD quirks, which have no SimuLizar counterpart, it is the
+evident intent of Slingshot's code or of the SPD metamodel. *defined* means this page fixes it;
+*proposed (phase)* gives the direction and leaves the details to that phase; *kept* means the quirk
+is Slingshot's design and the fixed behaviour equals it (the flag exists for completeness).
 
 Behaviour that is Slingshot's design rather than a bug is not listed here and has no flag: double
 time and FIFO cascades (SS-ENG, SS-BUS), the stop at `simTime` without drain (SS-RUN-3/4), zero
@@ -16,25 +23,25 @@ always simulated (SS-ACT-7.2), the release that does not wait (SS-ACT-8.3).
 
 | # | Quirk | Effect | Fixed behaviour | Evidence |
 |---|---|---|---|---|
-| Q1–Q16 | SPD interpreter and adjustment | [below](#spd-quirks-q1-q16) | mostly open (P1, P2) | `DESIGN-SPD.md` §1 |
-| Q17 | several demands of one InternalAction | concurrent demands, cursor advanced per demand, skipped/overlapping actions, then a disposed handler | defined: concurrent demands, the action completes when all have completed | `ss_two_demands` |
-| Q18 | a throwing handler is disposed, the run goes on | one bad request freezes a stage for every user; the run "succeeds" | defined: the run aborts with the error at that event | SS-BUS-7; 5 probes, 8 corpus models |
-| Q19 | loop count 0 | SEFF: body once, then exception; usage: exception | defined: count ≤ 0 skips the body | `ss_loop_zero`, `ss_usage_loop_zero` |
+| Q1–Q16 | SPD interpreter and adjustment | [below](#spd-quirks-q1-q16) | evident intent of the SPD code (below) | `DESIGN-SPD.md` §1 |
+| Q17 | several demands of one InternalAction | concurrent demands, cursor advanced per demand, skipped/overlapping actions, then a disposed handler | defined: the demands are served one after the other, in list order, as SimuLizar (ACT-3.1); the action completes after the last | `ss_two_demands` |
+| Q18 | a throwing handler is disposed, the run goes on | one bad request freezes a stage for every user; the run "succeeds" | defined: the run aborts with the error at that event (as SimuLizar) | SS-BUS-7; 5 probes, 8 corpus models |
+| Q19 | loop count 0 | SEFF: body once, then exception; usage: exception | defined: count ≤ 0 skips the body (ACT-7.1, WL-4.4) | `ss_loop_zero`, `ss_usage_loop_zero` |
 | Q20 | roles resolved by role id alone | entry calls go to the first assembly of the component; external calls use the first connector with that required role | defined: the delegation connector's assembly; the requiring assembly's connector (ACT-2.1, ACT-2.6) | `ss_role_lookup` |
 | Q21 | guarded branch without a true guard | exception, disposed handler | defined: run error (as SimuLizar ACT-6.2) | `ss_guard_none` |
-| Q22 | CollectionIteratorAction | INNER drawn once; frame never popped; `UserRequestFinished` precondition fails | defined: ACT-7.2/7.3 (frame per iteration, popped) | corpus `h10`, `h27` |
-| Q23 | ForkAction | async ignored; sync children share a rotating cursor and throw | defined: one cursor (and frame chain) per sync child, join; async: open (S2) | `ss_async_fork`; corpus `h11`, `h12`, `h26`, `x_pem_fork` |
-| Q24 | Acquire/Release need a ParametricResourceDemand | exception, disposed handler | defined: one unit when there is none (ACT-8.2) | corpus `h13`, `h28` |
+| Q22 | CollectionIteratorAction | INNER drawn once; frame never popped; `UserRequestFinished` precondition fails | defined: ACT-7.2/7.3 (frame per iteration, INNER per iteration, popped) | corpus `h10`, `h27` |
+| Q23 | ForkAction | async ignored; sync children share a rotating cursor and throw; no synchronisation point throws | defined: as SimuLizar: asynchronous behaviours run detached (ACT-9); one cursor (and frame chain) per synchronous child, join | `ss_async_fork`; corpus `h11`, `h12`, `h26`, `x_pem_fork` |
+| Q24 | Acquire/Release need a ParametricResourceDemand | exception, disposed handler | defined: one unit when there is none (ACT-8.2); with a demand, its amount (Slingshot design) | corpus `h13`, `h28` |
 | Q25 | no delay resources | every demand on a Delay resource aborts the user | defined: SimuLizar's delay scheduler | `ss_delay_resource`; corpus `h04`, `h25`, `x_pem_fork` |
-| Q26 | stale PS completions sample the state | extra state and utilisation tuples | defined: stale events record nothing | `ss_fifo_ties`, `ss_ps_multicore` |
+| Q26 | stale PS completions sample the state | extra state and utilisation tuples | defined: stale events record nothing (as SimuLizar, which cancels them) | `ss_fifo_ties`, `ss_ps_multicore` |
 | Q27 | passive capacity without a frame | a capacity that uses a component parameter aborts the run before t = 0 | defined: evaluated in the component instance's frame (ACT-8.1) | corpus `x_pem_acquire` |
 | Q28 | link failure check | a `Math.random()` draw per transfer even at probability 0; an aborted transfer stalls the link | defined: draw only if probability > 0; the next queued transfer starts | `ss_link` (draws) |
-| Q29 | response-time monitors ignored | ELSC, system-operation and external-call points record nothing | defined: as SimuLizar (MEAS-2 to MEAS-4) | `ss_monitors`; `x_ss_minimal` |
+| Q29 | response-time monitors ignored | ELSC, system-operation and external-call points record nothing | defined: honoured as SimuLizar (MEAS-2 to MEAS-4) | `ss_monitors`; `x_ss_minimal` |
 | Q30 | composite components and subsystems | entry into one stops the user silently; entered through a connector, its inner assemblies have no allocation and every demand aborts (abort handler disposed) | defined: ACT-2.2, inner assemblies allocated with the composite (ACT-2.8) | corpus `h15`, `x_pem_subsystem`, `x_pem_replicated_composite`, `x_pem_simple_optimisation_composites` |
 | Q31 | infrastructure calls break the assembly-operation monitor | no assembly-operation response time after the first infrastructure call | defined: infrastructure SEFFs are not measured, nothing is disposed | corpus `h18` |
-| Q32 | `simTime` the only stop condition, no livelock guard | zero-time loops never end; maximum measurement count ignored | defined: SimOxide's livelock guard (always on); the measurement limit stays ignored in the flavour | corpus `x_pem_fork` |
+| Q32 | `simTime` the only stop condition, no livelock guard | zero-time loops never end; maximum measurement count ignored | defined: the maximum measurement count is honoured as in SimuLizar (SIM-6); SimOxide's livelock guard (always on, also with the flag) | corpus `x_pem_fork` |
 | Q33 | entry-level assembly-operation key uses the system role | a measuring point with the component's provided role never matches the entry call | defined: the inner (component) role | `ss_role_lookup` |
-| Q34 | probes per specification / per passive resource | a monitor for replica *k* gets replica-independent values; passive instances of several assemblies share series | open (S2d): per-instance passive series; per-replica active series undefined in Slingshot | `ss_ps_multicore` |
+| Q34 | probes per specification / per passive resource | a monitor for replica *k* gets replica-independent values; passive instances of several assemblies share series | defined: passive series per (passive resource, assembly context) as SimuLizar; an active-resource point with replica *k* gets SimuLizar's per-core series where SimuLizar has one (details S2d) | `ss_ps_multicore` |
 | Q35 | silent stalls | unsupported actions, `ResourceCall`s, missing connectors or SEFFs end a request without an error | defined: run error; `ResourceCall` as ACT-3.6 | corpus `h23`, `x_pem_reliability` (RecoveryAction: no request completes) |
 | Q36 | infrastructure-call inputs ignored | no input frame for the callee | defined: ACT-3.5 | corpus `h18` |
 | Q37 | calls between unconnected containers | `IllegalArgumentException` disposes `onCallOverWireRequested`: no further transfer anywhere | defined: run error (as SimuLizar ACT-11.2) | – |
@@ -47,8 +54,9 @@ always simulated (SS-ACT-7.2), the release that does not wait (SS-ACT-8.3).
 every completion advances the shared cursor. Probe `ss_two_demands` (CPU 1.0 and HDD 2.0, then 0.5 and
 0.25 on CPU): the request ends at 1.75 while the HDD still serves; the HDD completion at 2.0 throws a
 `NullPointerException` in `onActiveResourceFinished`; afterwards no demand completion advances any SEFF.
-Fixed: the demands still run concurrently (Slingshot's evident intent) and the cursor advances once,
-after the last completion. Open alternative for S2: sequential demands as SimuLizar (ACT-3.1).
+Fixed (U13): the demands are served one after the other, as SimuLizar (ACT-3.1): each demand is
+requested when the previous one has completed, and the cursor advances once, after the last. Under the
+flag all demands start at once and every completion advances the cursor.
 
 ### SS-Q18 A throwing handler is disposed {#ss-q18}
 
@@ -84,9 +92,10 @@ afterwards (corpus `h10`: one error, then only resource rows).
 ### SS-Q23 ForkAction {#ss-q23}
 
 [SS-ACT-10](./seff.md#ss-act-10-forkaction). Slingshot's fork works only with exactly one synchronous
-behaviour. Fixed: each synchronous behaviour gets its own cursor (and, as in SimuLizar, its own frame
-chain on a copied stack), the parent continues once when all have finished. Whether asynchronous
-behaviours should run (detached, as SimuLizar ACT-9) or stay ignored is open (S2).
+behaviour. Fixed (U13): as SimuLizar: each synchronous behaviour gets its own cursor (and its own frame
+chain on a copied stack), the parent continues once when all have finished; asynchronous behaviours
+run detached (ACT-9); a fork without a synchronisation point is a fork of asynchronous behaviours
+only. Under the flag: asynchronous behaviours ignored, one rotating cursor, the exceptions.
 
 ### SS-Q24 Acquire/Release without ParametricResourceDemand {#ss-q24}
 
@@ -131,9 +140,10 @@ with Slingshot's timing (passed elements).
 
 ### SS-Q32 `simTime` is the only stop condition {#ss-q32}
 
-[SS-RUN-5](./core.md#ss-run-start-and-stop). SimOxide's livelock guard
-([Deviations](../../correctness/deviations.md)) applies in all modes; an exact comparison of such a
-model is impossible anyway (the oracle never ends).
+[SS-RUN-5](./core.md#ss-run-start-and-stop). Fixed (U13): the maximum measurement count of the run
+configuration stops the run as in SimuLizar (SIM-6), next to `simTime`; the flag ignores it. SimOxide's
+livelock guard ([Deviations](../../correctness/deviations.md)) applies in all modes, flag or not; an
+exact comparison of such a model is impossible anyway (the oracle never ends).
 
 ### SS-Q33 Entry-level assembly-operation key {#ss-q33}
 
@@ -158,24 +168,26 @@ model is impossible anyway (the oracle never ends).
 
 ## SPD quirks Q1–Q16 {#spd-quirks-q1-q16}
 
-Defined in `DESIGN-SPD.md` §1.5, rules on [SPD](./spd.md). The fixed behaviours are decided in phases
-P1/P2 (interpreter, adjustment) unless stated.
+Defined in `DESIGN-SPD.md` §1.5, rules on [SPD](./spd.md). The fixed behaviour is the evident intent
+of the code (U13); *proposed* rows are confirmed in phases P1/P2 (interpreter, adjustment). Fixes
+inside the QVTo transformations (Q4, Q6, Q7) need a patched copy of the transformations, selected
+when the flag is off; the unchanged transformations run under the flag.
 
 | # | Quirk | Rule | Fixed behaviour |
 |---|---|---|---|
-| Q1 | `doOnDisregard` does not restore the state | SS-SPD-3.2 | open (P1); without effect on results as far as known |
-| Q2 | constraint state changes when the request is made, even if QVTo fails | SS-SPD-3.2 | open (P1): update on a successful adjustment |
-| Q3 | AVERAGE is an EMA (60 s, 10 s, 0.2); the others use the last 10 values | SS-SPD-2.4 | open (P1) |
-| Q4 | relative 0 % ignores `minAdjustmentValue` | SS-SPD-4.2 | open (P2) |
+| Q1 | `doOnDisregard` does not restore the state | SS-SPD-3.2 | defined: a disregard restores the state as `doOnDisregard` intends (no effect on results known) |
+| Q2 | constraint state changes when the request is made, even if QVTo fails | SS-SPD-3.2 | defined: the adjustor's state change is committed only by a successful `ModelAdjusted` |
+| Q3 | AVERAGE is an EMA (60 s, 10 s, 0.2); the others use the last 10 values | SS-SPD-2.4 | kept: Slingshot's aggregator design (no SimuLizar counterpart, no other intent in the code); P1 may revisit |
+| Q4 | relative 0 % ignores `minAdjustmentValue` | SS-SPD-4.2 | proposed (P2): a zero change stays zero; otherwise the magnitude is at least `minAdjustmentValue`, in the direction of the percentage. Needs a patched transformation |
 | Q5 | scale-in aborts one job, loses the others | SS-SPD-5.4 | defined in the design (§5.3): drain |
-| Q6 | every link connects every container after an adjustment | SS-SPD-4.2 | open (P2) |
-| Q7 | top-down scale-in removes emptied containers one enactment late | SS-SPD-4.2 | open (P2) |
+| Q6 | every link connects every container after an adjustment | SS-SPD-4.2 | proposed (P2): a new container joins the links of the unit container; other links unchanged. Needs a patched transformation |
+| Q7 | top-down scale-in removes emptied containers one enactment late | SS-SPD-4.2 | proposed (P2): removed in the same enactment (the transformation's own TODO). Needs a patched transformation |
 | Q8 | top-down placement `->any(true)`: Java-hash order | SS-SPD-4.2 | qvto-rs deterministic order (documented deviation, §5.5) |
-| Q9 | only thrashing constraints in the chain | SS-SPD-1.4 | open (P1) |
+| Q9 | only thrashing constraints in the chain | SS-SPD-1.4 | proposed (P1): the `TargetGroupSizeConstraint` is also checked in the chain, so a policy whose change would be clamped to zero is disregarded (and changes no constraint state) |
 | Q10 | static fields in `TargetGroupUtils` | – | not reproduced (no shared JVM state in SimOxide) |
 | Q11 | unsupported stimuli: NPE at set-up | SS-SPD-2.2 | defined: a configuration error naming the stimulus |
 | Q12 | composed triggers broken | SS-SPD-2.6 | defined: AND/OR/XOR of the children's results |
-| Q13 | instantaneous samples merged over containers; aggregation on every event | SS-SPD-2.3/2.4 | open (P1) |
-| Q14 | deleted elements not reported; population changes ineffective | SS-SPD-5.2 | open (F4/P2) |
+| Q13 | instantaneous samples merged over containers; aggregation on every event | SS-SPD-2.3/2.4 | proposed (P1): `aggregationOverElements` aggregates the latest value of each element of the group; `getResult` only for events that were aggregated; samples are consumed only when the chain gets that far |
+| Q14 | deleted elements not reported; population changes ineffective | SS-SPD-5.2 | proposed (F4/P2): deletions are reported, monitors and passive resources of removed elements are dropped, a population change takes effect |
 | Q15 | policies react to each other's `SimulationTimeReached` | SS-SPD-2.1 | defined: only the policy's own event |
 | Q16 | container order after an adjustment follows Java identity hashes | SS-SPD-4.2 | insertion order (the `det` rule, phase Q2) |

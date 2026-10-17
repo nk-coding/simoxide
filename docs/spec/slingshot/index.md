@@ -71,7 +71,8 @@ cited by class name. Where they match SimuLizar 5.2.2, the SimuLizar pages apply
   runner (`corpus/<name>`, results in `reference/slingshot/results/det-verify.csv`).
 - Bugs and oddities carry a quirk id `SS-Qn` ([Quirks](./quirks.md)). Following decision U5, the
   Slingshot flavour **fixes** each bug by default and reproduces it under a compat flag; the
-  Slingshot-exact mode turns all compat flags on. Behaviour that is Slingshot's design rather than
+  Slingshot-exact mode turns all compat flags on. The fixed behaviour is SimuLizar's semantics
+  (decision U13). Behaviour that is Slingshot's design rather than
   a bug (double time, instantaneous utilisation, first allocation match, `Math.random()` branches,
   ...) is simply the flavour's semantics and has no flag.
 - "Result order" below always means the order in the `det` oracle: insertion order of the handler's
