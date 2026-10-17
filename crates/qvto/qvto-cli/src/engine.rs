@@ -623,7 +623,22 @@ pub fn load_metamodel(rs: &mut ResourceSet, uri: &str) -> Result<(), String> {
         rs.add_ns_location(uri, &loc);
     }
     if let Some(loc) = rs.ns_location(uri).map(String::from) {
-        return rs.load_metamodel(&loc).map(|_| ());
+        rs.load_metamodel(&loc)?;
+        // the global registry's descriptor: the package with that namespace in the file, also
+        // when the file was loaded (and its packages registered) before as another file's
+        // dependency (`Env.applyConf`'s `find`)
+        if rs.graph.meta().package_by_ns_uri(uri).is_none()
+            && let Some(r) = rs.get_resource(&loc, false)
+        {
+            let found = rs.graph.resource_contents(r).into_iter().find_map(|o| {
+                let p = rs.graph.links().obj_package.get(&o).copied()?;
+                (rs.graph.meta().package(p).ns_uri.as_deref() == Some(uri)).then_some(p)
+            });
+            if let Some(p) = found {
+                rs.graph.meta_mut().register_alias(uri, p);
+            }
+        }
+        return Ok(());
     }
     let packages = rs.load_metamodel(uri)?;
     // a metamodel by file location: the registry key is the location, bound to the file's
