@@ -348,3 +348,158 @@ fn repeated_adjustments_grow_the_model_by_one_replica_each() {
             .all(|a| a["ok"] == true)
     );
 }
+
+/// The SPD corpus of the QVTo engine (`crates/qvto/qvto-testkit/corpus/spd/q1`): the model
+/// directory `state` with the semantic configuration `cfg`.
+fn q1_model(state: &str, cfg: &str) -> simoxide_model::Model {
+    let dir = qvto_paths::root()
+        .join("qvto-testkit/corpus/spd/q1")
+        .join(state);
+    let mut files = vec![
+        dir.join("default.usagemodel"),
+        dir.join("default.allocation"),
+        dir.join("default.spd"),
+        dir.join(cfg),
+    ];
+    files.dedup();
+    let m = simoxide_model::load_files(&files);
+    for d in &m.diagnostics.0 {
+        assert!(
+            d.level != simoxide_model::Level::Error,
+            "{state}/{cfg}: {d}"
+        );
+    }
+    m
+}
+
+/// A dry run of `policy` (enacted, as `SpdAdjustmentBehavior` sets it) in `variant` on the
+/// not-started simulation of `model`, after `edit`: the transformation's success and the
+/// element counts of the target-group configurations and the number of containers after it.
+fn dry(
+    model: simoxide_model::Model,
+    variant: simoxide_reconf::SpdVariant,
+    policy: &str,
+    edit: &dyn Fn(&mut simoxide_model::raw::Graph, &Spd),
+) -> (bool, Vec<usize>, usize) {
+    use qvto_model::{Datum, ModelStore};
+    use simoxide_model::meta::feat as mf;
+    use simoxide_reconf::{Invocation, InvokeHooks, QvtoRun, RunConfig};
+    let spd = spd_of(&model, Quirks::fixed()).unwrap().expect("an SPD");
+    let cm = CompiledModel::compile(model).unwrap();
+    let sim =
+        Simulation::<Exact>::new(&cm, RunSpec::default().sim_config("p2"), Outputs::default())
+            .unwrap();
+    let t = simoxide_reconf::main_transformation(core(), variant).unwrap();
+    let mut run = QvtoRun::new(
+        core(),
+        RunConfig {
+            mode: QvtMode::InsertionOrderSets,
+            ..RunConfig::default()
+        },
+    )
+    .unwrap();
+    let p = spd
+        .model()
+        .policies
+        .iter()
+        .find(|p| &*p.name == policy)
+        .unwrap()
+        .obj;
+    let cfg = spd.model().configuration.unwrap();
+    let mut before = |g: &mut simoxide_model::raw::Graph| {
+        g.set(cfg, mf::Configuration_enactedPolicy, Datum::Obj(p))
+            .unwrap();
+        edit(g, &spd);
+    };
+    let inv = Invocation::slingshot().config("keepModeling", "true");
+    let hooks = InvokeHooks {
+        before: Some(&mut before),
+        ids: None,
+    };
+    let (out, (sizes, containers)) = run
+        .dry_run(&sim, &t, &inv, hooks, |g, _| {
+            let m = simoxide_spd::Membership::from_graph(g, spd.model());
+            let sizes = m
+                .cfgs
+                .iter()
+                .map(|c| match c {
+                    simoxide_spd::model::GroupCfg::ElasticInfrastructure { elements, .. }
+                    | simoxide_spd::model::GroupCfg::ServiceGroup { elements, .. }
+                    | simoxide_spd::model::GroupCfg::CompetingConsumers { elements, .. } => {
+                        elements.len()
+                    }
+                })
+                .collect();
+            (sizes, m.environment.len())
+        })
+        .unwrap();
+    (out.succeeded, sizes, containers)
+}
+
+/// The patched transformations change exactly what their quirk is about (dry runs on the Q1
+/// corpus' states, without the change path, so scale-ins are covered before F4):
+/// - Q4: a relative -10 % with a minimum of 2 on three containers removes none in Slingshot
+///   (`min(-0.3, 2)` rounds to 0) and two with the fix (at least the minimum);
+/// - Q7: a top-down scale-in that empties a container removes it in the same enactment with the
+///   fix, at the next one in Slingshot;
+/// - everything else equal (a plain step).
+#[test]
+fn patched_transformations_fix_their_quirk() {
+    use simoxide_model::meta::feat as mf;
+    use simoxide_reconf::SpdVariant;
+    let fixed = SpdVariant::fixed();
+    let sling = SpdVariant::slingshot();
+    let none = |_: &mut simoxide_model::raw::Graph, _: &Spd| {};
+    // Q4
+    let rel = |g: &mut simoxide_model::raw::Graph, spd: &Spd| {
+        use qvto_model::{Datum, ModelStore};
+        let p = spd
+            .model()
+            .policies
+            .iter()
+            .find(|p| &*p.name == "relative 50 %, min 2")
+            .unwrap()
+            .obj;
+        let adj = g.get_ref(p, mf::ScalingPolicy_adjustmentType).unwrap();
+        g.set(
+            adj,
+            mf::RelativeAdjustment_percentageGrowthValue,
+            Datum::Int(-10),
+        )
+        .unwrap();
+    };
+    let m = || q1_model("s_min_abs_3", "state.semanticspd");
+    let (ok_s, s, _) = dry(m(), sling, "relative 50 %, min 2", &rel);
+    let (ok_f, f, _) = dry(m(), fixed, "relative 50 %, min 2", &rel);
+    assert!(ok_s && ok_f);
+    assert_eq!((s[0], f[0]), (3, 1), "{s:?} {f:?}");
+    // equal where no quirk is involved
+    assert_eq!(
+        dry(m(), sling, "step +3", &none),
+        dry(m(), fixed, "step +3", &none)
+    );
+    // Q7: top-down scale-ins of the service group
+    let mut seen = false;
+    for (state, cfg) in [
+        ("s_full_sg4_step_minus2", "state.semanticspd"),
+        ("s_full_sg4_step_minus2", "full_sg2_step_minus1.semanticspd"),
+        ("s_full_sg4_step_minus2", "full_sg2_step_0.semanticspd"),
+        ("s_full_sg_step_plus3", "state.semanticspd"),
+    ] {
+        let dir = qvto_paths::root()
+            .join("qvto-testkit/corpus/spd/q1")
+            .join(state);
+        if !dir.join(cfg).is_file() {
+            continue;
+        }
+        for policy in ["SG step -1", "SG step -2"] {
+            let s = dry(q1_model(state, cfg), sling, policy, &none);
+            let f = dry(q1_model(state, cfg), fixed, policy, &none);
+            eprintln!("{state}/{cfg} {policy}: slingshot {s:?}, fixed {f:?}");
+            assert!(f.2 <= s.2, "{state} {policy}");
+            assert_eq!(s.1[1..], f.1[1..], "{state} {policy}: service groups");
+            seen |= f.2 < s.2;
+        }
+    }
+    assert!(seen, "no scale-in emptied a container");
+}
