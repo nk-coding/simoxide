@@ -126,6 +126,60 @@ let result = sim.finish()?;
   `simoxide-bench change` measures the cost of a change: a copy of the graph, a rebuild of the
   typed model, a recompilation and a merge, about 0.3 ms for MediaStore (1 220 objects).
 
+## QVTo transformations on a run
+
+`simoxide-reconf` runs QVTo transformations (SimuLizar's reconfiguration rules, Slingshot's SPD
+transformations, your own) on a paused run's model and applies their changes through the same
+path:
+
+```rust
+use simoxide_reconf::{Imports, Invocation, QvtoCore, QvtoRun, RuleSet, RunConfig};
+
+let core = QvtoCore::new()?;                         // once per process (Send + Sync)
+let rule = core.compile_file(Path::new("rules/scaleOut.qvto"), &Imports::Folder)?;
+let mut qvto = QvtoRun::new(&core, RunConfig::default())?;   // per run, empty until used
+
+sim.run_until(Pause::After(60_000_000_000))?;
+let out = qvto.invoke(&mut sim, &rule, &Invocation::simulizar())?;
+println!("{} {}: {}", out.transformation, out.succeeded, out.log);
+if let Some(report) = &out.change {               // the ChangeReport of the applied changes
+    println!("{:?}", report.applied);
+}
+
+let rules = RuleSet::load_dir(&core, Path::new("rules"))?;   // SimuLizar: file-name order
+let all = qvto.run_rules(&mut sim, &rules, &Invocation::simulizar()).map_err(|(_, e)| e)?;
+```
+
+- **Core and run state.** `QvtoCore` holds what never changes: the metamodel registry,
+  metamodel objects, and the metamodels SimuLizar and Slingshot register besides SimOxide's
+  (runtime measurements, feature model and configuration, completions); compile each
+  transformation once with it and share both between runs and threads. `QvtoRun` is a run's QVTo
+  state, created on first use (about 1 ms). Clone it with the run's fork (copy on write): new
+  objects then get the same ids in both.
+- **Bindings.** By default every model parameter is bound as SimuLizar does: the models whose
+  metamodel is the parameter's (`Bind::ByNsUri`); `Invocation::slingshot()` binds as Slingshot
+  does; `Invocation::bind(name, Bind::Models(..))` names models (graph resources, or models of
+  other metamodels loaded with `QvtoRun::load_model`/`create_model`). Configuration properties:
+  `Invocation::config("keepModeling", "true")`.
+- **Outcome.** A transformation that fails (`assert fatal`, an exception) is not an error:
+  `Outcome::succeeded` is false ("not applied"), and what it changed before it failed is
+  applied, as SimuLizar and Slingshot do (`RunConfig::failed_runs` drops it instead). Changes the
+  run cannot take return `ReconfError::Rejected` with the run unchanged; changes SimuLizar aborts
+  on fail the run (`ReconfError::RunFailed`; `RunConfig::on_abort = AbortPolicy::Reject` keeps
+  the run going instead).
+- **Natives.** `getSimulationTime()` is the run's clock. Palladio's `ProfilesLibrary`
+  (stereotypes) is a stub that throws.
+- **Modes.** The default build runs QVTo's fast mode: Eclipse's semantics, with sets and
+  `->any` in a deterministic insertion order instead of Java's hash order. A build with the
+  feature `compat` (or `exact`) runs Eclipse's compat mode, whose models equal Eclipse QVTo's;
+  `QvtMode::Compat` in other builds is `ReconfError::ModeUnavailable`.
+- **SPD.** `QvtoAdjuster` (feature `spd`) executes the SPD interpreter's adjustment requests
+  with a transformation such as Slingshot's `MainTransformation.qvto` ([SPD](spd.md)).
+- **Flavours.** The host works with both flavours; the Slingshot flavour does not take model
+  changes yet (`ChangeError::Unsupported`).
+- `dry_run` runs a transformation on a scratch copy, `with_scratch_store` reads one, and
+  `with_store` edits the run's models with any `ModelStore` operation.
+
 ## Outputs
 
 `Outputs` takes optional writers for the trace and the random tape; the measurements are always
@@ -167,5 +221,7 @@ collected in `RunResult::measurements`:
 | `simoxide-hotspot-math` | port of HotSpot's x86-64 `Math.log`/`exp` intrinsics; **GPL-2.0-only**, linked only with the feature `hotspot-math` |
 | `simoxide-sched` | processor sharing, FCFS, delay and passive resources on DESMO-J nanosecond time |
 | `simoxide-sim` | IR compiler, event core, interpreter, measurements, batch and embedding API, exact and fast mode |
+| `simoxide-spd` | scaling policy definitions: Slingshot's filter-chain interpreter and its driver |
+| `simoxide-reconf` | runtime model changes: direct edits, the QVTo host (transformations, SimuLizar rule sets, SPD adjustments); QVTo through the `qvto-simoxide` adapter |
 | `simoxide-cli` | the `simoxide` and `simoxide-bench` binaries |
 | `simoxide-testkit` | differential testing: formats, diff, reference driver, model generator, `simoxide-fuzz`, exact-vs-fast statistics |

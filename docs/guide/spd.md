@@ -9,7 +9,11 @@ are on [Scaling policies (Slingshot)](../spec/slingshot/spd.md); the design is
 ::: warning Decisions only
 This is phase P1. A policy that fires produces an *adjustment request* (policy, target group,
 adjustment) and the decision log records it, but the adjustment itself (Slingshot's
-`MainTransformation.qvto`, phase P2) is not executed yet: the model does not change.
+`MainTransformation.qvto`, phase P2) is not executed yet: the model does not change. The
+command line runs no adjustment; as a library, `simoxide-reconf`'s `QvtoAdjuster` runs a
+transformation for each request on the run's model ([QVTo transformations on a
+run](library.md#qvto-transformations-on-a-run)), with hooks for what P2 adds (the enacted
+policy, Slingshot's model summaries).
 :::
 
 ## What is supported

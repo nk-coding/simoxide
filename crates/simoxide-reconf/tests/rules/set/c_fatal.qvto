@@ -1,0 +1,8 @@
+-- Runs third: not applied (`assert fatal`); the others still are.
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+
+transformation never(in env : PCM_RES_ENV) {
+	main() {
+		assert fatal (env.rootObjects()->isEmpty()) with log('c: not applied');
+	}
+}

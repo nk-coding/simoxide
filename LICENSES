@@ -43,6 +43,12 @@ Used in:
 - crates/simoxide-model/models/: Palladio.resourcetype, PrimitiveTypes.repository,
   FailureTypes.repository, Glassfish.repository, default_event_middleware.repository and
   commonMetrics.metricspec, copied verbatim from the 5.2.2 product.
+- crates/simoxide-reconf/data/: featuremodel.ecore and featureconfig.ecore (bundles
+  de.uka.ipd.sdq.featuremodel and de.uka.ipd.sdq.featureconfig) and completions.ecore (bundle
+  org.palladiosimulator.analyzer.completions), copied verbatim from the 5.2.2 product (their
+  bundle manifests declare the Apache License 2.0); runtimemeasurement.ecore from SimuLizar's
+  bundle org.palladiosimulator.simulizar.runtimemeasurement (also in
+  crates/qvto/qvto-simoxide/data/). Embedded by the QVTo host.
 - crates/simoxide-model/src/meta/generated.rs, generated_ext.rs: tables generated from the PCM,
   StoEx, probability-function, units, identifier, metric-specification, EDP2, monitor-repository
   and measuring-point metamodels (.ecore) of the 5.2.2 product (the SPD packages appended to the

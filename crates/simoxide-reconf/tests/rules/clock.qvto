@@ -1,0 +1,11 @@
+-- Logs the simulation time and the number of containers; changes nothing.
+import org.palladiosimulator.simulizar.action.repository.black.SimulationStateLibrary;
+
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+
+transformation clock(in env : PCM_RES_ENV) {
+	main() {
+		log('t=' + getSimulationTime().toString() + ' containers='
+			+ env.rootObjects()[ResourceEnvironment]->any(true).resourceContainer_ResourceEnvironment->size().toString());
+	}
+}

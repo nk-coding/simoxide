@@ -39,7 +39,7 @@ pub(crate) enum Res {
 }
 
 /// The session's bookkeeping besides the `qvto_emf` resource set.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(crate) struct State {
     pub res: Vec<Res>,
     /// Root handles per store resource (the storage of `Mem` resources, a copy for the others).
@@ -65,6 +65,10 @@ pub(crate) struct State {
 /// Everything that lives as long as the host's model: the metamodel registry (SimOxide's tables,
 /// Ecore, metamodels loaded later), metamodel objects, models of other metamodels, the resource
 /// table, mirrors, the journal. One session belongs to one `raw::Graph`.
+///
+/// A clone is an independent session with the same state (the id generator included): the
+/// session of a copy of the graph, e.g. of a forked simulation run.
+#[derive(Clone)]
 pub struct Session {
     pub(crate) rs: ResourceSet,
     pub(crate) st: State,

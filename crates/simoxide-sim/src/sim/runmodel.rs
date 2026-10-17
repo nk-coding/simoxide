@@ -142,6 +142,24 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         Ok(report)
     }
 
+    /// Ends the run with an error between two events, for a host whose model change makes the
+    /// reference abort (a reconfiguration whose change set fails with [`ChangeError::Abort`]:
+    /// SimuLizar's syncer throws inside the reconfiguration process). The run is
+    /// [`Phase::Failed`] at the current time; its outputs are flushed, and every later
+    /// [`Simulation::run_until`] or [`Simulation::finish`] returns the error (also in forks).
+    /// Returns the error.
+    pub fn fail_run(&mut self, message: impl Into<String>) -> SimError {
+        let e = SimError {
+            message: message.into(),
+            at_ns: F::Clock::to_ns(self.st.now),
+            kind: SimErrorKind::Model,
+        };
+        self.st.phase = Phase::Failed;
+        self.st.failure = Some(e.clone());
+        self.flush_outputs();
+        e
+    }
+
     /// Fits the run state to the recompiled model `cm` (which keeps every index of the current
     /// one): runtime state for new resources, the resolution caches dropped (calls resolve again
     /// on the changed system), the assembly-context paths created during the run moved into
