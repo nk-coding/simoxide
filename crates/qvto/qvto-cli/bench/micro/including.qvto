@@ -1,0 +1,9 @@
+-- 20 000 Set(Integer)::including in a loop (benchmark B6).
+transformation including();
+
+main() {
+	var st : Set(Integer) := Set{};
+	var j := 0;
+	while (j < 20000) { st := st->including(j); j := j + 1; };
+	log(st->size().toString());
+}

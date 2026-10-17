@@ -1,0 +1,10 @@
+-- Recursive helper calls: fib(25), 250k calls (benchmark B6).
+transformation fib();
+
+helper fib(n : Integer) : Integer {
+	return if n <= 1 then n else fib(n - 1) + fib(n - 2) endif;
+}
+
+main() {
+	log(fib(25).toString());
+}

@@ -1,0 +1,14 @@
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation strops(in m : FZ);
+main() {
+	var n := m.objectsOfType(FZ::Node)->any(true);
+	log('a', Sequence{'x', 'y', 'z'}->sortedBy(e | 'k'.addSuffixNumber()));
+	log('b', 'k'.addSuffixNumber());
+	log('c', 'abc'.substring(n.big, 1));
+	log('d', 'abc'.at(n.big));
+	log('e', 'abc'.substring(1, n.value));
+	log('f', Sequence{1, 2}->at(n.big));
+	log('g', ''.addSuffixNumber());
+	log('h', ''.addSuffixNumber());
+	log('i', 'Hello'.replace(''.addSuffixNumber(), '-'));
+}

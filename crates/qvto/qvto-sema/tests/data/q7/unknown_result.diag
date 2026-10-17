@@ -1,0 +1,5 @@
+problem	error	unknown_result.qvto	2	45	8	Unknown type (Unknown1)
+problem	error	unknown_result.qvto	5	84	8	Unknown type (Unknown1)
+problem	error	unknown_result.qvto	8	122	8	Unknown type (Unknown1)
+problem	error	unknown_result.qvto	14	197	8	Unknown type (Unknown1)
+problem	error	unknown_result.qvto	9	141	1	Unrecognized variable: (x)

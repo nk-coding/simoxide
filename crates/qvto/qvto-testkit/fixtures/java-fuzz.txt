@@ -1,0 +1,2722 @@
+qvto-testkit java fixture 1
+@case fuzz_argeval_ae1
+@file result.txt 139
+id	fuzz_argeval_ae1
+load	OK
+params	
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 298
+a, data: <Invalid>
+a2, data: 
+b, data: <Invalid>
+b2, data: q
+c, data: <Invalid>
+c2, data: r
+d, data: <Invalid>
+d2, data: t
+e, data: <Invalid>
+e2, data: u
+f, data: false
+f2, data: v0
+g, data: true
+g2, data: w
+h, data: <Invalid>
+h2, data: y0
+i, data: [k]
+i2, data: k0
+j, data: <Invalid>
+j2, data: m0
+
+@file diag.txt 290
+exec	1	OK	0	a
+exec	1	OK	0	a2
+exec	1	OK	0	b
+exec	1	OK	0	b2
+exec	1	OK	0	c
+exec	1	OK	0	c2
+exec	1	OK	0	d
+exec	1	OK	0	d2
+exec	1	OK	0	e
+exec	1	OK	0	e2
+exec	1	OK	0	f
+exec	1	OK	0	f2
+exec	1	OK	0	g
+exec	1	OK	0	g2
+exec	1	OK	0	h
+exec	1	OK	0	h2
+exec	1	OK	0	i
+exec	1	OK	0	i2
+exec	1	OK	0	j
+exec	1	OK	0	j2
+
+@case fuzz_argeval_ae2
+@file result.txt 139
+id	fuzz_argeval_ae2
+load	OK
+params	
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 440
+a, data: <Invalid>
+b, data: <Invalid>
+c, data: <Invalid>
+d, data: <Invalid>
+q called, data: e
+e, data: <Invalid>
+f, data: <Invalid>
+q called, data: g
+g, data: [1, 2, 1]
+h, data: <Invalid>
+i, data: <Invalid>
+q called, data: j
+j, data: false
+k, data: <Invalid>
+l, data: <Invalid>
+m, data: <Invalid>
+n, data: <Invalid>
+o, data: <Invalid>
+p, data: <Invalid>
+r, data: <Invalid>
+s, data: <Invalid>
+t, data: <Invalid>
+q called, data: u
+u, data: 2
+
+@file diag.txt 364
+exec	1	OK	0	a
+exec	1	OK	0	b
+exec	1	OK	0	c
+exec	1	OK	0	d
+exec	1	OK	0	q called
+exec	1	OK	0	e
+exec	1	OK	0	f
+exec	1	OK	0	q called
+exec	1	OK	0	g
+exec	1	OK	0	h
+exec	1	OK	0	i
+exec	1	OK	0	q called
+exec	1	OK	0	j
+exec	1	OK	0	k
+exec	1	OK	0	l
+exec	1	OK	0	m
+exec	1	OK	0	n
+exec	1	OK	0	o
+exec	1	OK	0	p
+exec	1	OK	0	r
+exec	1	OK	0	s
+exec	1	OK	0	t
+exec	1	OK	0	q called
+exec	1	OK	0	u
+
+@case fuzz_collcopy_interm
+@file result.txt 152
+id	fuzz_collcopy_interm
+load	WARNING
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 900
+o, data: [i14, i5, i0, i15, i7, i3, i1, i2, i4, i6, i8, i9, i10, i11, i12, i13, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44]
+b, data: [i13, i2, i15, i14, i5, i0, i7, i3, i1, i4, i6, i8, i9, i10, i11, i12, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44]
+c, data: [i14, i5, i0, i15, i7, i3, i1, i2, i4, i6, i8, i9, i10, i11, i12, i13, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44]
+d, data: [i13, i2, i15, i14, i5, i0, i7, i3, i1, i4, i6, i8, i9, i10, i11, i12, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44]
+
+@file diag.txt 307
+problem	warning	interm.qvto	6	215	8	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+load	0	WARNING	0	OK
+load	1	WARNING	0	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+exec	1	OK	0	o
+exec	1	OK	0	b
+exec	1	OK	0	c
+exec	1	OK	0	d
+
+@case fuzz_collcopy_props
+@file result.txt 146
+id	fuzz_collcopy_props
+load	OK
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 675
+o, data: [n14, n5, n0, n15, n7, n3, n1, n2, n4, n6, n8, n9, n10, n11, n12, n13, n16, n17, n18, n19, n20, n21, n22, n23, n24, n25, n26, n27, n28, n29, n30, n31, n32, n33, n34, n35, n36, n37, n38, n39, n40, n41, n42, n43, n44]
+b, data: [n13, n2, n15, n14, n5, n0, n7, n3, n1, n4, n6, n8, n9, n10, n11, n12, n16, n17, n18, n19, n20, n21, n22, n23, n24, n25, n26, n27, n28, n29, n30, n31, n32, n33, n34, n35, n36, n37, n38, n39, n40, n41, n42, n43, n44]
+p, data: [n13, n2, n15, n14, n5, n0, n7, n3, n1, n4, n6, n8, n9, n10, n11, n12, n16, n17, n18, n19, n20, n21, n22, n23, n24, n25, n26, n27, n28, n29, n30, n31, n32, n33, n34, n35, n36, n37, n38, n39, n40, n41, n42, n43, n44]
+
+@file diag.txt 42
+exec	1	OK	0	o
+exec	1	OK	0	b
+exec	1	OK	0	p
+
+@case fuzz_ecoreprint
+@file result.txt 142
+id	fuzz_ecoreprint
+load	OK
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 1040
+p, data: org.eclipse.emf.ecore.impl.EPackageImpl@1 (name: fz) (nsURI: http://qvto-rs/fuzz, nsPrefix: fz)
+c, data: org.eclipse.emf.ecore.impl.EEnumImpl@1 (name: Kind) (instanceClassName: null) (serializable: true)
+c, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Named) (instanceClassName: null) (abstract: true, interface: false)
+c, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Root) (instanceClassName: null) (abstract: false, interface: false)
+c, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Node) (instanceClassName: null) (abstract: false, interface: false)
+c, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Leaf) (instanceClassName: null) (abstract: false, interface: false)
+c, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Item) (instanceClassName: null) (abstract: false, interface: false)
+l, data: A
+l, data: B
+l, data: C
+a, data: org.eclipse.emf.ecore.impl.EAnnotationImpl@1 (source: src)
+d, data: [org.eclipse.emf.ecore.impl.EStringToStringMapEntryImpl@1 (key: k, value: v)]
+g, data: <Invalid>
+
+@file diag.txt 182
+exec	1	OK	0	p
+exec	1	OK	0	c
+exec	1	OK	0	c
+exec	1	OK	0	c
+exec	1	OK	0	c
+exec	1	OK	0	c
+exec	1	OK	0	c
+exec	1	OK	0	l
+exec	1	OK	0	l
+exec	1	OK	0	l
+exec	1	OK	0	a
+exec	1	OK	0	d
+exec	1	OK	0	g
+
+@case fuzz_extent_roots_a
+@file result.txt 152
+id	fuzz_extent_roots_a
+load	OK
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 449
+{"resource":"extent1.xmi","roots":2}
+{"path":"/0","type":"http://qvto-rs/fuzz#Root","attrs":{"name":"r"},"refs":{}}
+{"path":"/0/@nodes.0","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"y","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/1","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"x","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+
+@file log.txt 26
+q, data: 3
+roots, data: 1
+
+@file diag.txt 32
+exec	1	OK	0	q
+exec	1	OK	0	roots
+
+@case fuzz_extent_roots_b
+@file result.txt 152
+id	fuzz_extent_roots_b
+load	OK
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 449
+{"resource":"extent1.xmi","roots":2}
+{"path":"/0","type":"http://qvto-rs/fuzz#Root","attrs":{"name":"r"},"refs":{}}
+{"path":"/0/@nodes.0","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"y","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/1","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"x","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+
+@case fuzz_extent_roots_c
+@file result.txt 152
+id	fuzz_extent_roots_c
+load	OK
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 449
+{"resource":"extent1.xmi","roots":2}
+{"path":"/0","type":"http://qvto-rs/fuzz#Root","attrs":{"name":"r"},"refs":{}}
+{"path":"/0/@nodes.0","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"y","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/1","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"x","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+
+@file log.txt 11
+q, data: 3
+
+@file diag.txt 14
+exec	1	OK	0	q
+
+@case fuzz_extent_roots_d
+@file result.txt 152
+id	fuzz_extent_roots_d
+load	OK
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	2
+verdict	pass
+
+@file out.jsonl 279
+{"resource":"extent1.xmi","roots":2}
+{"path":"/0","type":"http://qvto-rs/fuzz#Root","attrs":{"name":null},"refs":{}}
+{"path":"/1","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"x","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+
+@file log.txt 11
+q, data: 2
+
+@file diag.txt 14
+exec	1	OK	0	q
+
+@case fuzz_flatten
+@file result.txt 135
+id	fuzz_flatten
+load	OK
+params	
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 170
+a, data: [1, 2, 3]
+b, data: [1, 2]
+c, data: [1]
+d, data: [1, 2, 3]
+e, data: [1, 2]
+f, data: 1
+g, data: 2
+h, data: [1, 1, 2, 2]
+i, data: [1, 2]
+j, data: [1, 2]
+k, data: 4
+
+@file diag.txt 154
+exec	1	OK	0	a
+exec	1	OK	0	b
+exec	1	OK	0	c
+exec	1	OK	0	d
+exec	1	OK	0	e
+exec	1	OK	0	f
+exec	1	OK	0	g
+exec	1	OK	0	h
+exec	1	OK	0	i
+exec	1	OK	0	j
+exec	1	OK	0	k
+
+@case fuzz_floats
+@file result.txt 138
+id	fuzz_floats
+load	OK
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 597
+e1, data: true
+e2, data: true
+e3, data: false
+e4, data: true
+e5, data: true
+e6, data: true
+e7, data: 3.5
+e8, data: 5.0
+e9, data: 1.25
+e10, data: 2
+e11, data: 3
+e12, data: -2.5
+e13, data: 3.0
+e14, data: 2.5
+e15, data: true
+e16, data: 6
+e17, data: 10
+e18, data: true
+e19, data: 5
+e20, data: true
+e21, data: true
+s1, data: [j, i]
+s2, data: [x, y]
+s3, data: [1, 3, 2]
+s4, data: <Invalid>
+s5, data: [2, 1]
+s6, data: <Invalid>
+m1, data: 2.5
+m2, data: 3.5
+m3, data: 2147483648
+m4, data: 2147483653
+m5, data: 4.0
+c1, data: 2
+c2, data: 2
+c3, data: false
+c4, data: 1
+t1, data: 2.5
+t2, data: 5
+t3, data: 2.5
+
+@file diag.txt 597
+exec	1	OK	0	e1
+exec	1	OK	0	e2
+exec	1	OK	0	e3
+exec	1	OK	0	e4
+exec	1	OK	0	e5
+exec	1	OK	0	e6
+exec	1	OK	0	e7
+exec	1	OK	0	e8
+exec	1	OK	0	e9
+exec	1	OK	0	e10
+exec	1	OK	0	e11
+exec	1	OK	0	e12
+exec	1	OK	0	e13
+exec	1	OK	0	e14
+exec	1	OK	0	e15
+exec	1	OK	0	e16
+exec	1	OK	0	e17
+exec	1	OK	0	e18
+exec	1	OK	0	e19
+exec	1	OK	0	e20
+exec	1	OK	0	e21
+exec	1	OK	0	s1
+exec	1	OK	0	s2
+exec	1	OK	0	s3
+exec	1	OK	0	s4
+exec	1	OK	0	s5
+exec	1	OK	0	s6
+exec	1	OK	0	m1
+exec	1	OK	0	m2
+exec	1	OK	0	m3
+exec	1	OK	0	m4
+exec	1	OK	0	m5
+exec	1	OK	0	c1
+exec	1	OK	0	c2
+exec	1	OK	0	c3
+exec	1	OK	0	c4
+exec	1	OK	0	t1
+exec	1	OK	0	t2
+exec	1	OK	0	t3
+
+@case fuzz_floatsave
+@file result.txt 147
+id	fuzz_floatsave
+load	OK
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 1012
+{"resource":"extent1.xmi","roots":1}
+{"path":"/0","type":"http://qvto-rs/fuzz#Root","attrs":{"name":null},"refs":{}}
+{"path":"/0/@nodes.0","type":"http://qvto-rs/fuzz#Node","attrs":{"name":null,"value":"0","big":"0","weight":"9.9E-323","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/0/@nodes.1","type":"http://qvto-rs/fuzz#Node","attrs":{"name":null,"value":"0","big":"0","weight":"4.9E-324","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/0/@nodes.2","type":"http://qvto-rs/fuzz#Node","attrs":{"name":null,"value":"0","big":"0","weight":"2.0E-322","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/0/@items.0","type":"http://qvto-rs/fuzz#Item","attrs":{"name":null,"count":null,"ratio":"3004983.2"},"refs":{}}
+{"path":"/0/@items.1","type":"http://qvto-rs/fuzz#Item","attrs":{"name":null,"count":null,"ratio":"1.4E-45"},"refs":{}}
+{"path":"/0/@items.2","type":"http://qvto-rs/fuzz#Item","attrs":{"name":null,"count":null,"ratio":"3004983.2"},"refs":{}}
+
+@file log.txt 81
+w, data: [9.9E-323, 4.9E-324, 2.0E-322]
+r, data: [3004983.2, 1.4E-45, 3004983.2]
+
+@file diag.txt 28
+exec	1	OK	0	w
+exec	1	OK	0	r
+
+@case fuzz_inherit_ip_a
+@file result.txt 218
+id	fuzz_inherit_ip_a
+load	OK
+params	in:m,out:o
+severity	ERROR
+code	100
+message	Postcondition failed in mapping 'n0'
+exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
+trace-records	-1
+verdict	pass
+
+@file out.jsonl 37
+{"resource":"extent1.xmi","roots":0}
+
+@file log.txt 200
+Terminating execution...
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at a::Node::n0(a.qvto:7)
+	at a::Node::n1(a.qvto:13)
+	at a::main(a.qvto:4)
+
+@file stack.txt 174
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at a::Node::n0(a.qvto:7)
+	at a::Node::n1(a.qvto:13)
+	at a::main(a.qvto:4)
+@file diag.txt 54
+exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_inherit_ip_b
+@file result.txt 218
+id	fuzz_inherit_ip_b
+load	OK
+params	in:m,out:o
+severity	ERROR
+code	100
+message	Postcondition failed in mapping 'n0'
+exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
+trace-records	-1
+verdict	pass
+
+@file out.jsonl 37
+{"resource":"extent1.xmi","roots":0}
+
+@file log.txt 200
+Terminating execution...
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at b::Node::n0(b.qvto:7)
+	at b::Node::n1(b.qvto:13)
+	at b::main(b.qvto:4)
+
+@file stack.txt 174
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at b::Node::n0(b.qvto:7)
+	at b::Node::n1(b.qvto:13)
+	at b::main(b.qvto:4)
+@file diag.txt 54
+exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_inherit_ip_c
+@file result.txt 218
+id	fuzz_inherit_ip_c
+load	OK
+params	in:m,out:o
+severity	ERROR
+code	100
+message	Postcondition failed in mapping 'n0'
+exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
+trace-records	-1
+verdict	pass
+
+@file out.jsonl 37
+{"resource":"extent1.xmi","roots":0}
+
+@file log.txt 200
+Terminating execution...
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at c::Node::n0(c.qvto:7)
+	at c::Node::n1(c.qvto:14)
+	at c::main(c.qvto:4)
+
+@file stack.txt 174
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at c::Node::n0(c.qvto:7)
+	at c::Node::n1(c.qvto:14)
+	at c::main(c.qvto:4)
+@file diag.txt 54
+exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_inherit_ip_d
+@file result.txt 218
+id	fuzz_inherit_ip_d
+load	OK
+params	in:m,out:o
+severity	ERROR
+code	100
+message	Postcondition failed in mapping 'n0'
+exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
+trace-records	-1
+verdict	pass
+
+@file out.jsonl 37
+{"resource":"extent1.xmi","roots":0}
+
+@file log.txt 200
+Terminating execution...
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at d::Node::n0(d.qvto:7)
+	at d::Node::n1(d.qvto:13)
+	at d::main(d.qvto:4)
+
+@file stack.txt 174
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at d::Node::n0(d.qvto:7)
+	at d::Node::n1(d.qvto:13)
+	at d::main(d.qvto:4)
+@file diag.txt 54
+exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_inherit_ip_e
+@file result.txt 218
+id	fuzz_inherit_ip_e
+load	OK
+params	in:m,out:o
+severity	ERROR
+code	100
+message	Postcondition failed in mapping 'n0'
+exception	org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed
+trace-records	-1
+verdict	pass
+
+@file out.jsonl 37
+{"resource":"extent1.xmi","roots":0}
+
+@file log.txt 200
+Terminating execution...
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at e::Node::n0(e.qvto:7)
+	at e::Node::n1(e.qvto:11)
+	at e::main(e.qvto:4)
+
+@file stack.txt 174
+org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition failed in mapping 'n0'
+	at e::Node::n0(e.qvto:7)
+	at e::Node::n1(e.qvto:11)
+	at e::main(e.qvto:4)
+@file diag.txt 54
+exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_iterate_names
+@file result.txt 141
+id	fuzz_iterate_names
+load	OK
+params	
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 97
+i1, data: <Invalid>
+i3, data: 26
+i4, data: 9
+i5, data: <Invalid>
+i7, data: 4
+i9, data: <Invalid>
+
+@file diag.txt 90
+exec	1	OK	0	i1
+exec	1	OK	0	i3
+exec	1	OK	0	i4
+exec	1	OK	0	i5
+exec	1	OK	0	i7
+exec	1	OK	0	i9
+
+@case fuzz_numconv
+@file result.txt 150
+id	fuzz_numconv
+load	WARNING
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 347
+{"resource":"extent1.xmi","roots":2}
+{"path":"/0","type":"http://qvto-rs/fuzz#Node","attrs":{"name":null,"value":"-2147483648","big":"2147483648","weight":"9.223372036854776E18","flag":"false","kind":"A","tags":[],"nums":["-1"]},"refs":{}}
+{"path":"/1","type":"http://qvto-rs/fuzz#Item","attrs":{"name":null,"count":"-1","ratio":"3.0"},"refs":{}}
+
+@file log.txt 535
+v, data: 9223372036854775807
+p, data: -1
+ica, data: -1
+ica2
+icr, data: 9.223372036854776E18
+icr2, data: 3.0
+pr, data: 3.0
+pr2, data: 9.223372036854776E18
+ics, data: [-1, 1]
+ics2, data: [-1, 1, -1]
+nv, data: -1
+nb, data: 0
+nw, data: 9.223372036854776E18
+nn, data: [-1]
+nv2, data: -2147483648
+nb2, data: 5
+nb3, data: 2147483648
+s, data: [9223372036854775807]
+r, data: 9223372036854775807
+r2, data: 3
+t, data: Tuple{a = 9223372036854775807}
+l, data: [9223372036854775807]
+itc, data: -1
+itr, data: 2.5
+itr2, data: Infinity
+itr3, data: 3.0
+
+@file diag.txt 1110
+problem	warning	numconv.qvto	10	345	8	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+problem	warning	numconv.qvto	13	690	3	Local variable declaration 'big' hides property with the same name of type 'Node'
+problem	warning	numconv.qvto	20	1194	14	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+load	0	WARNING	0	OK
+load	1	WARNING	0	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+load	1	WARNING	0	Local variable declaration 'big' hides property with the same name of type 'Node'
+load	1	WARNING	0	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+exec	1	OK	0	v
+exec	1	OK	0	p
+exec	1	OK	0	ica
+exec	1	OK	0	ica2
+exec	1	OK	0	icr
+exec	1	OK	0	icr2
+exec	1	OK	0	pr
+exec	1	OK	0	pr2
+exec	1	OK	0	ics
+exec	1	OK	0	ics2
+exec	1	OK	0	nv
+exec	1	OK	0	nb
+exec	1	OK	0	nw
+exec	1	OK	0	nn
+exec	1	OK	0	nv2
+exec	1	OK	0	nb2
+exec	1	OK	0	nb3
+exec	1	OK	0	s
+exec	1	OK	0	r
+exec	1	OK	0	r2
+exec	1	OK	0	t
+exec	1	OK	0	l
+exec	1	OK	0	itc
+exec	1	OK	0	itr
+exec	1	OK	0	itr2
+exec	1	OK	0	itr3
+
+@case fuzz_regex
+@file result.txt 133
+id	fuzz_regex
+load	OK
+params	
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 123
+r1, data: --
+r2, data: -
+r3, data: -a-b-
+r4, data: <a><a><>b<>
+r5, data: -
+r6, data: xbay
+r7, data: $$
+r8, data: _a__b__c_
+
+@file diag.txt 120
+exec	1	OK	0	r1
+exec	1	OK	0	r2
+exec	1	OK	0	r3
+exec	1	OK	0	r4
+exec	1	OK	0	r5
+exec	1	OK	0	r6
+exec	1	OK	0	r7
+exec	1	OK	0	r8
+
+@case fuzz_strops
+@file result.txt 138
+id	fuzz_strops
+load	OK
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 137
+a, data: [x, y, z]
+b, data: k5
+c, data: <Invalid>
+d, data: <Invalid>
+e, data: abc
+f, data: <Invalid>
+g, data: 
+h, data: 0
+i, data: Hello
+
+@file diag.txt 126
+exec	1	OK	0	a
+exec	1	OK	0	b
+exec	1	OK	0	c
+exec	1	OK	0	d
+exec	1	OK	0	e
+exec	1	OK	0	f
+exec	1	OK	0	g
+exec	1	OK	0	h
+exec	1	OK	0	i
+
+@case fuzz_typelit
+@file result.txt 150
+id	fuzz_typelit
+load	WARNING
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 610
+{"resource":"extent1.xmi","roots":1}
+{"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"x","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{"eType":"http://www.eclipse.org/emf/2002/Ecore#/0/@eClassifiers.39"},"set":["eType"]}
+{"path":"/0/@eGenericType","type":"http://www.eclipse.org/emf/2002/Ecore#EGenericType","attrs":{},"refs":{"eClassifier":"http://www.eclipse.org/emf/2002/Ecore#/0/@eClassifiers.39"}}
+
+@file log.txt 648
+a, data: true
+b, data: EInt
+c, data: true
+d, data: EInt
+e, data: 1
+f, data: 12
+g, data: true
+h, data: EString
+p, data: org.eclipse.emf.ecore.impl.EDataTypeImpl@1 (name: EInt) (instanceClassName: int) (serializable: true)
+q, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Node) (instanceClassName: null) (abstract: false, interface: false)
+r, data: org.eclipse.emf.ecore.impl.EEnumImpl@1 (name: Kind) (instanceClassName: null) (serializable: true)
+s, data: org.eclipse.ocl.ecore.impl.PrimitiveTypeImpl@1 (name: Integer) (instanceClassName: java.lang.Integer) (serializable: true)
+t, data: 1
+u, data: 1
+v, data: [Node, Leaf]
+x, data: {false=1}
+
+@file diag.txt 681
+problem	warning	typelit.qvto	6	288	21	The type 'ecore::EClassifier' does not conform to the type 'OclType(typelit::EInt)'
+problem	warning	typelit.qvto	12	580	82	The type 'OclType(typelit::Node)' does not conform to the type 'ecore::EClass'
+load	0	WARNING	0	OK
+load	1	WARNING	0	The type 'ecore::EClassifier' does not conform to the type 'OclType(typelit::EInt)'
+load	1	WARNING	0	The type 'OclType(typelit::Node)' does not conform to the type 'ecore::EClass'
+exec	1	OK	0	a
+exec	1	OK	0	b
+exec	1	OK	0	c
+exec	1	OK	0	d
+exec	1	OK	0	e
+exec	1	OK	0	f
+exec	1	OK	0	g
+exec	1	OK	0	h
+exec	1	OK	0	p
+exec	1	OK	0	q
+exec	1	OK	0	r
+exec	1	OK	0	s
+exec	1	OK	0	t
+exec	1	OK	0	u
+exec	1	OK	0	v
+exec	1	OK	0	x
+
+@case fuzz_typematrix
+@file result.txt 142
+id	fuzz_typematrix
+load	OK
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 40282
+1 oclIsTypeOf OclAny, data: false
+1 oclIsKindOf OclAny, data: true
+1 oclIsTypeOf Integer, data: true
+1 oclIsKindOf Integer, data: true
+1 oclIsTypeOf Real, data: false
+1 oclIsKindOf Real, data: true
+1 oclIsTypeOf String, data: false
+1 oclIsKindOf String, data: false
+1 oclIsTypeOf Boolean, data: false
+1 oclIsKindOf Boolean, data: false
+1 oclIsTypeOf FZ::Node, data: false
+1 oclIsKindOf FZ::Node, data: false
+1 oclIsTypeOf FZ::Named, data: false
+1 oclIsKindOf FZ::Named, data: false
+1 oclIsTypeOf FZ::Kind, data: false
+1 oclIsKindOf FZ::Kind, data: false
+1 oclIsTypeOf OclVoid, data: false
+1 oclIsKindOf OclVoid, data: false
+1 oclIsTypeOf OclInvalid, data: false
+1 oclIsKindOf OclInvalid, data: false
+1 oclIsTypeOf Collection(Integer), data: false
+1 oclIsKindOf Collection(Integer), data: false
+1 oclIsTypeOf Sequence(Integer), data: false
+1 oclIsKindOf Sequence(Integer), data: false
+1 oclIsTypeOf Set(Integer), data: false
+1 oclIsKindOf Set(Integer), data: false
+1 oclIsTypeOf Bag(Integer), data: false
+1 oclIsKindOf Bag(Integer), data: false
+1 oclIsTypeOf OrderedSet(Integer), data: false
+1 oclIsKindOf OrderedSet(Integer), data: false
+1 oclIsTypeOf Sequence(OclAny), data: false
+1 oclIsKindOf Sequence(OclAny), data: false
+1 oclIsTypeOf Collection(OclAny), data: false
+1 oclIsKindOf Collection(OclAny), data: false
+1 oclIsTypeOf Tuple(a:Integer), data: false
+1 oclIsKindOf Tuple(a:Integer), data: false
+1 oclIsTypeOf Set(FZ::Node), data: false
+1 oclIsKindOf Set(FZ::Node), data: false
+1 oclIsTypeOf Collection(FZ::Named), data: false
+1 oclIsKindOf Collection(FZ::Named), data: false
+2147483648 oclIsTypeOf OclAny, data: false
+2147483648 oclIsKindOf OclAny, data: true
+2147483648 oclIsTypeOf Integer, data: false
+2147483648 oclIsKindOf Integer, data: false
+2147483648 oclIsTypeOf Real, data: false
+2147483648 oclIsKindOf Real, data: false
+2147483648 oclIsTypeOf String, data: false
+2147483648 oclIsKindOf String, data: false
+2147483648 oclIsTypeOf Boolean, data: false
+2147483648 oclIsKindOf Boolean, data: false
+2147483648 oclIsTypeOf FZ::Node, data: false
+2147483648 oclIsKindOf FZ::Node, data: false
+2147483648 oclIsTypeOf FZ::Named, data: false
+2147483648 oclIsKindOf FZ::Named, data: false
+2147483648 oclIsTypeOf FZ::Kind, data: false
+2147483648 oclIsKindOf FZ::Kind, data: false
+2147483648 oclIsTypeOf OclVoid, data: false
+2147483648 oclIsKindOf OclVoid, data: false
+2147483648 oclIsTypeOf OclInvalid, data: false
+2147483648 oclIsKindOf OclInvalid, data: false
+2147483648 oclIsTypeOf Collection(Integer), data: false
+2147483648 oclIsKindOf Collection(Integer), data: false
+2147483648 oclIsTypeOf Sequence(Integer), data: false
+2147483648 oclIsKindOf Sequence(Integer), data: false
+2147483648 oclIsTypeOf Set(Integer), data: false
+2147483648 oclIsKindOf Set(Integer), data: false
+2147483648 oclIsTypeOf Bag(Integer), data: false
+2147483648 oclIsKindOf Bag(Integer), data: false
+2147483648 oclIsTypeOf OrderedSet(Integer), data: false
+2147483648 oclIsKindOf OrderedSet(Integer), data: false
+2147483648 oclIsTypeOf Sequence(OclAny), data: false
+2147483648 oclIsKindOf Sequence(OclAny), data: false
+2147483648 oclIsTypeOf Collection(OclAny), data: false
+2147483648 oclIsKindOf Collection(OclAny), data: false
+2147483648 oclIsTypeOf Tuple(a:Integer), data: false
+2147483648 oclIsKindOf Tuple(a:Integer), data: false
+2147483648 oclIsTypeOf Set(FZ::Node), data: false
+2147483648 oclIsKindOf Set(FZ::Node), data: false
+2147483648 oclIsTypeOf Collection(FZ::Named), data: false
+2147483648 oclIsKindOf Collection(FZ::Named), data: false
+2.5 oclIsTypeOf OclAny, data: false
+2.5 oclIsKindOf OclAny, data: true
+2.5 oclIsTypeOf Integer, data: false
+2.5 oclIsKindOf Integer, data: false
+2.5 oclIsTypeOf Real, data: true
+2.5 oclIsKindOf Real, data: true
+2.5 oclIsTypeOf String, data: false
+2.5 oclIsKindOf String, data: false
+2.5 oclIsTypeOf Boolean, data: false
+2.5 oclIsKindOf Boolean, data: false
+2.5 oclIsTypeOf FZ::Node, data: false
+2.5 oclIsKindOf FZ::Node, data: false
+2.5 oclIsTypeOf FZ::Named, data: false
+2.5 oclIsKindOf FZ::Named, data: false
+2.5 oclIsTypeOf FZ::Kind, data: false
+2.5 oclIsKindOf FZ::Kind, data: false
+2.5 oclIsTypeOf OclVoid, data: false
+2.5 oclIsKindOf OclVoid, data: false
+2.5 oclIsTypeOf OclInvalid, data: false
+2.5 oclIsKindOf OclInvalid, data: false
+2.5 oclIsTypeOf Collection(Integer), data: false
+2.5 oclIsKindOf Collection(Integer), data: false
+2.5 oclIsTypeOf Sequence(Integer), data: false
+2.5 oclIsKindOf Sequence(Integer), data: false
+2.5 oclIsTypeOf Set(Integer), data: false
+2.5 oclIsKindOf Set(Integer), data: false
+2.5 oclIsTypeOf Bag(Integer), data: false
+2.5 oclIsKindOf Bag(Integer), data: false
+2.5 oclIsTypeOf OrderedSet(Integer), data: false
+2.5 oclIsKindOf OrderedSet(Integer), data: false
+2.5 oclIsTypeOf Sequence(OclAny), data: false
+2.5 oclIsKindOf Sequence(OclAny), data: false
+2.5 oclIsTypeOf Collection(OclAny), data: false
+2.5 oclIsKindOf Collection(OclAny), data: false
+2.5 oclIsTypeOf Tuple(a:Integer), data: false
+2.5 oclIsKindOf Tuple(a:Integer), data: false
+2.5 oclIsTypeOf Set(FZ::Node), data: false
+2.5 oclIsKindOf Set(FZ::Node), data: false
+2.5 oclIsTypeOf Collection(FZ::Named), data: false
+2.5 oclIsKindOf Collection(FZ::Named), data: false
+s oclIsTypeOf OclAny, data: false
+s oclIsKindOf OclAny, data: true
+s oclIsTypeOf Integer, data: false
+s oclIsKindOf Integer, data: false
+s oclIsTypeOf Real, data: false
+s oclIsKindOf Real, data: false
+s oclIsTypeOf String, data: true
+s oclIsKindOf String, data: true
+s oclIsTypeOf Boolean, data: false
+s oclIsKindOf Boolean, data: false
+s oclIsTypeOf FZ::Node, data: false
+s oclIsKindOf FZ::Node, data: false
+s oclIsTypeOf FZ::Named, data: false
+s oclIsKindOf FZ::Named, data: false
+s oclIsTypeOf FZ::Kind, data: false
+s oclIsKindOf FZ::Kind, data: false
+s oclIsTypeOf OclVoid, data: false
+s oclIsKindOf OclVoid, data: false
+s oclIsTypeOf OclInvalid, data: false
+s oclIsKindOf OclInvalid, data: false
+s oclIsTypeOf Collection(Integer), data: false
+s oclIsKindOf Collection(Integer), data: false
+s oclIsTypeOf Sequence(Integer), data: false
+s oclIsKindOf Sequence(Integer), data: false
+s oclIsTypeOf Set(Integer), data: false
+s oclIsKindOf Set(Integer), data: false
+s oclIsTypeOf Bag(Integer), data: false
+s oclIsKindOf Bag(Integer), data: false
+s oclIsTypeOf OrderedSet(Integer), data: false
+s oclIsKindOf OrderedSet(Integer), data: false
+s oclIsTypeOf Sequence(OclAny), data: false
+s oclIsKindOf Sequence(OclAny), data: false
+s oclIsTypeOf Collection(OclAny), data: false
+s oclIsKindOf Collection(OclAny), data: false
+s oclIsTypeOf Tuple(a:Integer), data: false
+s oclIsKindOf Tuple(a:Integer), data: false
+s oclIsTypeOf Set(FZ::Node), data: false
+s oclIsKindOf Set(FZ::Node), data: false
+s oclIsTypeOf Collection(FZ::Named), data: false
+s oclIsKindOf Collection(FZ::Named), data: false
+true oclIsTypeOf OclAny, data: false
+true oclIsKindOf OclAny, data: true
+true oclIsTypeOf Integer, data: false
+true oclIsKindOf Integer, data: false
+true oclIsTypeOf Real, data: false
+true oclIsKindOf Real, data: false
+true oclIsTypeOf String, data: false
+true oclIsKindOf String, data: false
+true oclIsTypeOf Boolean, data: true
+true oclIsKindOf Boolean, data: true
+true oclIsTypeOf FZ::Node, data: false
+true oclIsKindOf FZ::Node, data: false
+true oclIsTypeOf FZ::Named, data: false
+true oclIsKindOf FZ::Named, data: false
+true oclIsTypeOf FZ::Kind, data: false
+true oclIsKindOf FZ::Kind, data: false
+true oclIsTypeOf OclVoid, data: false
+true oclIsKindOf OclVoid, data: false
+true oclIsTypeOf OclInvalid, data: false
+true oclIsKindOf OclInvalid, data: false
+true oclIsTypeOf Collection(Integer), data: false
+true oclIsKindOf Collection(Integer), data: false
+true oclIsTypeOf Sequence(Integer), data: false
+true oclIsKindOf Sequence(Integer), data: false
+true oclIsTypeOf Set(Integer), data: false
+true oclIsKindOf Set(Integer), data: false
+true oclIsTypeOf Bag(Integer), data: false
+true oclIsKindOf Bag(Integer), data: false
+true oclIsTypeOf OrderedSet(Integer), data: false
+true oclIsKindOf OrderedSet(Integer), data: false
+true oclIsTypeOf Sequence(OclAny), data: false
+true oclIsKindOf Sequence(OclAny), data: false
+true oclIsTypeOf Collection(OclAny), data: false
+true oclIsKindOf Collection(OclAny), data: false
+true oclIsTypeOf Tuple(a:Integer), data: false
+true oclIsKindOf Tuple(a:Integer), data: false
+true oclIsTypeOf Set(FZ::Node), data: false
+true oclIsKindOf Set(FZ::Node), data: false
+true oclIsTypeOf Collection(FZ::Named), data: false
+true oclIsKindOf Collection(FZ::Named), data: false
+n oclIsTypeOf OclAny, data: false
+n oclIsKindOf OclAny, data: true
+n oclIsTypeOf Integer, data: false
+n oclIsKindOf Integer, data: false
+n oclIsTypeOf Real, data: false
+n oclIsKindOf Real, data: false
+n oclIsTypeOf String, data: false
+n oclIsKindOf String, data: false
+n oclIsTypeOf Boolean, data: false
+n oclIsKindOf Boolean, data: false
+n oclIsTypeOf FZ::Node, data: true
+n oclIsKindOf FZ::Node, data: true
+n oclIsTypeOf FZ::Named, data: false
+n oclIsKindOf FZ::Named, data: true
+n oclIsTypeOf FZ::Kind, data: false
+n oclIsKindOf FZ::Kind, data: false
+n oclIsTypeOf OclVoid, data: false
+n oclIsKindOf OclVoid, data: false
+n oclIsTypeOf OclInvalid, data: false
+n oclIsKindOf OclInvalid, data: false
+n oclIsTypeOf Collection(Integer), data: false
+n oclIsKindOf Collection(Integer), data: false
+n oclIsTypeOf Sequence(Integer), data: false
+n oclIsKindOf Sequence(Integer), data: false
+n oclIsTypeOf Set(Integer), data: false
+n oclIsKindOf Set(Integer), data: false
+n oclIsTypeOf Bag(Integer), data: false
+n oclIsKindOf Bag(Integer), data: false
+n oclIsTypeOf OrderedSet(Integer), data: false
+n oclIsKindOf OrderedSet(Integer), data: false
+n oclIsTypeOf Sequence(OclAny), data: false
+n oclIsKindOf Sequence(OclAny), data: false
+n oclIsTypeOf Collection(OclAny), data: false
+n oclIsKindOf Collection(OclAny), data: false
+n oclIsTypeOf Tuple(a:Integer), data: false
+n oclIsKindOf Tuple(a:Integer), data: false
+n oclIsTypeOf Set(FZ::Node), data: false
+n oclIsKindOf Set(FZ::Node), data: false
+n oclIsTypeOf Collection(FZ::Named), data: false
+n oclIsKindOf Collection(FZ::Named), data: false
+n.kind oclIsTypeOf OclAny, data: false
+n.kind oclIsKindOf OclAny, data: true
+n.kind oclIsTypeOf Integer, data: false
+n.kind oclIsKindOf Integer, data: false
+n.kind oclIsTypeOf Real, data: false
+n.kind oclIsKindOf Real, data: false
+n.kind oclIsTypeOf String, data: false
+n.kind oclIsKindOf String, data: false
+n.kind oclIsTypeOf Boolean, data: false
+n.kind oclIsKindOf Boolean, data: false
+n.kind oclIsTypeOf FZ::Node, data: false
+n.kind oclIsKindOf FZ::Node, data: false
+n.kind oclIsTypeOf FZ::Named, data: false
+n.kind oclIsKindOf FZ::Named, data: false
+n.kind oclIsTypeOf FZ::Kind, data: false
+n.kind oclIsKindOf FZ::Kind, data: true
+n.kind oclIsTypeOf OclVoid, data: false
+n.kind oclIsKindOf OclVoid, data: false
+n.kind oclIsTypeOf OclInvalid, data: false
+n.kind oclIsKindOf OclInvalid, data: false
+n.kind oclIsTypeOf Collection(Integer), data: false
+n.kind oclIsKindOf Collection(Integer), data: false
+n.kind oclIsTypeOf Sequence(Integer), data: false
+n.kind oclIsKindOf Sequence(Integer), data: false
+n.kind oclIsTypeOf Set(Integer), data: false
+n.kind oclIsKindOf Set(Integer), data: false
+n.kind oclIsTypeOf Bag(Integer), data: false
+n.kind oclIsKindOf Bag(Integer), data: false
+n.kind oclIsTypeOf OrderedSet(Integer), data: false
+n.kind oclIsKindOf OrderedSet(Integer), data: false
+n.kind oclIsTypeOf Sequence(OclAny), data: false
+n.kind oclIsKindOf Sequence(OclAny), data: false
+n.kind oclIsTypeOf Collection(OclAny), data: false
+n.kind oclIsKindOf Collection(OclAny), data: false
+n.kind oclIsTypeOf Tuple(a:Integer), data: false
+n.kind oclIsKindOf Tuple(a:Integer), data: false
+n.kind oclIsTypeOf Set(FZ::Node), data: false
+n.kind oclIsKindOf Set(FZ::Node), data: false
+n.kind oclIsTypeOf Collection(FZ::Named), data: false
+n.kind oclIsKindOf Collection(FZ::Named), data: false
+n.big oclIsTypeOf OclAny, data: false
+n.big oclIsKindOf OclAny, data: true
+n.big oclIsTypeOf Integer, data: false
+n.big oclIsKindOf Integer, data: false
+n.big oclIsTypeOf Real, data: false
+n.big oclIsKindOf Real, data: false
+n.big oclIsTypeOf String, data: false
+n.big oclIsKindOf String, data: false
+n.big oclIsTypeOf Boolean, data: false
+n.big oclIsKindOf Boolean, data: false
+n.big oclIsTypeOf FZ::Node, data: false
+n.big oclIsKindOf FZ::Node, data: false
+n.big oclIsTypeOf FZ::Named, data: false
+n.big oclIsKindOf FZ::Named, data: false
+n.big oclIsTypeOf FZ::Kind, data: false
+n.big oclIsKindOf FZ::Kind, data: false
+n.big oclIsTypeOf OclVoid, data: false
+n.big oclIsKindOf OclVoid, data: false
+n.big oclIsTypeOf OclInvalid, data: false
+n.big oclIsKindOf OclInvalid, data: false
+n.big oclIsTypeOf Collection(Integer), data: false
+n.big oclIsKindOf Collection(Integer), data: false
+n.big oclIsTypeOf Sequence(Integer), data: false
+n.big oclIsKindOf Sequence(Integer), data: false
+n.big oclIsTypeOf Set(Integer), data: false
+n.big oclIsKindOf Set(Integer), data: false
+n.big oclIsTypeOf Bag(Integer), data: false
+n.big oclIsKindOf Bag(Integer), data: false
+n.big oclIsTypeOf OrderedSet(Integer), data: false
+n.big oclIsKindOf OrderedSet(Integer), data: false
+n.big oclIsTypeOf Sequence(OclAny), data: false
+n.big oclIsKindOf Sequence(OclAny), data: false
+n.big oclIsTypeOf Collection(OclAny), data: false
+n.big oclIsKindOf Collection(OclAny), data: false
+n.big oclIsTypeOf Tuple(a:Integer), data: false
+n.big oclIsKindOf Tuple(a:Integer), data: false
+n.big oclIsTypeOf Set(FZ::Node), data: false
+n.big oclIsKindOf Set(FZ::Node), data: false
+n.big oclIsTypeOf Collection(FZ::Named), data: false
+n.big oclIsKindOf Collection(FZ::Named), data: false
+Sequence{1} oclIsTypeOf OclAny, data: [false]
+Sequence{1} oclIsKindOf OclAny, data: [true]
+Sequence{1} oclIsTypeOf Integer, data: [true]
+Sequence{1} oclIsKindOf Integer, data: [true]
+Sequence{1} oclIsTypeOf Real, data: [false]
+Sequence{1} oclIsKindOf Real, data: [true]
+Sequence{1} oclIsTypeOf String, data: [false]
+Sequence{1} oclIsKindOf String, data: [false]
+Sequence{1} oclIsTypeOf Boolean, data: [false]
+Sequence{1} oclIsKindOf Boolean, data: [false]
+Sequence{1} oclIsTypeOf FZ::Node, data: [false]
+Sequence{1} oclIsKindOf FZ::Node, data: [false]
+Sequence{1} oclIsTypeOf FZ::Named, data: [false]
+Sequence{1} oclIsKindOf FZ::Named, data: [false]
+Sequence{1} oclIsTypeOf FZ::Kind, data: [false]
+Sequence{1} oclIsKindOf FZ::Kind, data: [false]
+Sequence{1} oclIsTypeOf OclVoid, data: [false]
+Sequence{1} oclIsKindOf OclVoid, data: [false]
+Sequence{1} oclIsTypeOf OclInvalid, data: [false]
+Sequence{1} oclIsKindOf OclInvalid, data: [false]
+Sequence{1} oclIsTypeOf Collection(Integer), data: [false]
+Sequence{1} oclIsKindOf Collection(Integer), data: [false]
+Sequence{1} oclIsTypeOf Sequence(Integer), data: [false]
+Sequence{1} oclIsKindOf Sequence(Integer), data: [false]
+Sequence{1} oclIsTypeOf Set(Integer), data: [false]
+Sequence{1} oclIsKindOf Set(Integer), data: [false]
+Sequence{1} oclIsTypeOf Bag(Integer), data: [false]
+Sequence{1} oclIsKindOf Bag(Integer), data: [false]
+Sequence{1} oclIsTypeOf OrderedSet(Integer), data: [false]
+Sequence{1} oclIsKindOf OrderedSet(Integer), data: [false]
+Sequence{1} oclIsTypeOf Sequence(OclAny), data: [false]
+Sequence{1} oclIsKindOf Sequence(OclAny), data: [false]
+Sequence{1} oclIsTypeOf Collection(OclAny), data: [false]
+Sequence{1} oclIsKindOf Collection(OclAny), data: [false]
+Sequence{1} oclIsTypeOf Tuple(a:Integer), data: [false]
+Sequence{1} oclIsKindOf Tuple(a:Integer), data: [false]
+Sequence{1} oclIsTypeOf Set(FZ::Node), data: [false]
+Sequence{1} oclIsKindOf Set(FZ::Node), data: [false]
+Sequence{1} oclIsTypeOf Collection(FZ::Named), data: [false]
+Sequence{1} oclIsKindOf Collection(FZ::Named), data: [false]
+Set{1} oclIsTypeOf OclAny, data: {false=1}
+Set{1} oclIsKindOf OclAny, data: {true=1}
+Set{1} oclIsTypeOf Integer, data: {true=1}
+Set{1} oclIsKindOf Integer, data: {true=1}
+Set{1} oclIsTypeOf Real, data: {false=1}
+Set{1} oclIsKindOf Real, data: {true=1}
+Set{1} oclIsTypeOf String, data: {false=1}
+Set{1} oclIsKindOf String, data: {false=1}
+Set{1} oclIsTypeOf Boolean, data: {false=1}
+Set{1} oclIsKindOf Boolean, data: {false=1}
+Set{1} oclIsTypeOf FZ::Node, data: {false=1}
+Set{1} oclIsKindOf FZ::Node, data: {false=1}
+Set{1} oclIsTypeOf FZ::Named, data: {false=1}
+Set{1} oclIsKindOf FZ::Named, data: {false=1}
+Set{1} oclIsTypeOf FZ::Kind, data: {false=1}
+Set{1} oclIsKindOf FZ::Kind, data: {false=1}
+Set{1} oclIsTypeOf OclVoid, data: {false=1}
+Set{1} oclIsKindOf OclVoid, data: {false=1}
+Set{1} oclIsTypeOf OclInvalid, data: {false=1}
+Set{1} oclIsKindOf OclInvalid, data: {false=1}
+Set{1} oclIsTypeOf Collection(Integer), data: {false=1}
+Set{1} oclIsKindOf Collection(Integer), data: {false=1}
+Set{1} oclIsTypeOf Sequence(Integer), data: {false=1}
+Set{1} oclIsKindOf Sequence(Integer), data: {false=1}
+Set{1} oclIsTypeOf Set(Integer), data: {false=1}
+Set{1} oclIsKindOf Set(Integer), data: {false=1}
+Set{1} oclIsTypeOf Bag(Integer), data: {false=1}
+Set{1} oclIsKindOf Bag(Integer), data: {false=1}
+Set{1} oclIsTypeOf OrderedSet(Integer), data: {false=1}
+Set{1} oclIsKindOf OrderedSet(Integer), data: {false=1}
+Set{1} oclIsTypeOf Sequence(OclAny), data: {false=1}
+Set{1} oclIsKindOf Sequence(OclAny), data: {false=1}
+Set{1} oclIsTypeOf Collection(OclAny), data: {false=1}
+Set{1} oclIsKindOf Collection(OclAny), data: {false=1}
+Set{1} oclIsTypeOf Tuple(a:Integer), data: {false=1}
+Set{1} oclIsKindOf Tuple(a:Integer), data: {false=1}
+Set{1} oclIsTypeOf Set(FZ::Node), data: {false=1}
+Set{1} oclIsKindOf Set(FZ::Node), data: {false=1}
+Set{1} oclIsTypeOf Collection(FZ::Named), data: {false=1}
+Set{1} oclIsKindOf Collection(FZ::Named), data: {false=1}
+OrderedSet{1} oclIsTypeOf OclAny, data: [false]
+OrderedSet{1} oclIsKindOf OclAny, data: [true]
+OrderedSet{1} oclIsTypeOf Integer, data: [true]
+OrderedSet{1} oclIsKindOf Integer, data: [true]
+OrderedSet{1} oclIsTypeOf Real, data: [false]
+OrderedSet{1} oclIsKindOf Real, data: [true]
+OrderedSet{1} oclIsTypeOf String, data: [false]
+OrderedSet{1} oclIsKindOf String, data: [false]
+OrderedSet{1} oclIsTypeOf Boolean, data: [false]
+OrderedSet{1} oclIsKindOf Boolean, data: [false]
+OrderedSet{1} oclIsTypeOf FZ::Node, data: [false]
+OrderedSet{1} oclIsKindOf FZ::Node, data: [false]
+OrderedSet{1} oclIsTypeOf FZ::Named, data: [false]
+OrderedSet{1} oclIsKindOf FZ::Named, data: [false]
+OrderedSet{1} oclIsTypeOf FZ::Kind, data: [false]
+OrderedSet{1} oclIsKindOf FZ::Kind, data: [false]
+OrderedSet{1} oclIsTypeOf OclVoid, data: [false]
+OrderedSet{1} oclIsKindOf OclVoid, data: [false]
+OrderedSet{1} oclIsTypeOf OclInvalid, data: [false]
+OrderedSet{1} oclIsKindOf OclInvalid, data: [false]
+OrderedSet{1} oclIsTypeOf Collection(Integer), data: [false]
+OrderedSet{1} oclIsKindOf Collection(Integer), data: [false]
+OrderedSet{1} oclIsTypeOf Sequence(Integer), data: [false]
+OrderedSet{1} oclIsKindOf Sequence(Integer), data: [false]
+OrderedSet{1} oclIsTypeOf Set(Integer), data: [false]
+OrderedSet{1} oclIsKindOf Set(Integer), data: [false]
+OrderedSet{1} oclIsTypeOf Bag(Integer), data: [false]
+OrderedSet{1} oclIsKindOf Bag(Integer), data: [false]
+OrderedSet{1} oclIsTypeOf OrderedSet(Integer), data: [false]
+OrderedSet{1} oclIsKindOf OrderedSet(Integer), data: [false]
+OrderedSet{1} oclIsTypeOf Sequence(OclAny), data: [false]
+OrderedSet{1} oclIsKindOf Sequence(OclAny), data: [false]
+OrderedSet{1} oclIsTypeOf Collection(OclAny), data: [false]
+OrderedSet{1} oclIsKindOf Collection(OclAny), data: [false]
+OrderedSet{1} oclIsTypeOf Tuple(a:Integer), data: [false]
+OrderedSet{1} oclIsKindOf Tuple(a:Integer), data: [false]
+OrderedSet{1} oclIsTypeOf Set(FZ::Node), data: [false]
+OrderedSet{1} oclIsKindOf Set(FZ::Node), data: [false]
+OrderedSet{1} oclIsTypeOf Collection(FZ::Named), data: [false]
+OrderedSet{1} oclIsKindOf Collection(FZ::Named), data: [false]
+Bag{1} oclIsTypeOf OclAny, data: {false=1}
+Bag{1} oclIsKindOf OclAny, data: {true=1}
+Bag{1} oclIsTypeOf Integer, data: {true=1}
+Bag{1} oclIsKindOf Integer, data: {true=1}
+Bag{1} oclIsTypeOf Real, data: {false=1}
+Bag{1} oclIsKindOf Real, data: {true=1}
+Bag{1} oclIsTypeOf String, data: {false=1}
+Bag{1} oclIsKindOf String, data: {false=1}
+Bag{1} oclIsTypeOf Boolean, data: {false=1}
+Bag{1} oclIsKindOf Boolean, data: {false=1}
+Bag{1} oclIsTypeOf FZ::Node, data: {false=1}
+Bag{1} oclIsKindOf FZ::Node, data: {false=1}
+Bag{1} oclIsTypeOf FZ::Named, data: {false=1}
+Bag{1} oclIsKindOf FZ::Named, data: {false=1}
+Bag{1} oclIsTypeOf FZ::Kind, data: {false=1}
+Bag{1} oclIsKindOf FZ::Kind, data: {false=1}
+Bag{1} oclIsTypeOf OclVoid, data: {false=1}
+Bag{1} oclIsKindOf OclVoid, data: {false=1}
+Bag{1} oclIsTypeOf OclInvalid, data: {false=1}
+Bag{1} oclIsKindOf OclInvalid, data: {false=1}
+Bag{1} oclIsTypeOf Collection(Integer), data: {false=1}
+Bag{1} oclIsKindOf Collection(Integer), data: {false=1}
+Bag{1} oclIsTypeOf Sequence(Integer), data: {false=1}
+Bag{1} oclIsKindOf Sequence(Integer), data: {false=1}
+Bag{1} oclIsTypeOf Set(Integer), data: {false=1}
+Bag{1} oclIsKindOf Set(Integer), data: {false=1}
+Bag{1} oclIsTypeOf Bag(Integer), data: {false=1}
+Bag{1} oclIsKindOf Bag(Integer), data: {false=1}
+Bag{1} oclIsTypeOf OrderedSet(Integer), data: {false=1}
+Bag{1} oclIsKindOf OrderedSet(Integer), data: {false=1}
+Bag{1} oclIsTypeOf Sequence(OclAny), data: {false=1}
+Bag{1} oclIsKindOf Sequence(OclAny), data: {false=1}
+Bag{1} oclIsTypeOf Collection(OclAny), data: {false=1}
+Bag{1} oclIsKindOf Collection(OclAny), data: {false=1}
+Bag{1} oclIsTypeOf Tuple(a:Integer), data: {false=1}
+Bag{1} oclIsKindOf Tuple(a:Integer), data: {false=1}
+Bag{1} oclIsTypeOf Set(FZ::Node), data: {false=1}
+Bag{1} oclIsKindOf Set(FZ::Node), data: {false=1}
+Bag{1} oclIsTypeOf Collection(FZ::Named), data: {false=1}
+Bag{1} oclIsKindOf Collection(FZ::Named), data: {false=1}
+List{1} oclIsTypeOf OclAny, data: [false]
+List{1} oclIsKindOf OclAny, data: [true]
+List{1} oclIsTypeOf Integer, data: [true]
+List{1} oclIsKindOf Integer, data: [true]
+List{1} oclIsTypeOf Real, data: [false]
+List{1} oclIsKindOf Real, data: [true]
+List{1} oclIsTypeOf String, data: [false]
+List{1} oclIsKindOf String, data: [false]
+List{1} oclIsTypeOf Boolean, data: [false]
+List{1} oclIsKindOf Boolean, data: [false]
+List{1} oclIsTypeOf FZ::Node, data: [false]
+List{1} oclIsKindOf FZ::Node, data: [false]
+List{1} oclIsTypeOf FZ::Named, data: [false]
+List{1} oclIsKindOf FZ::Named, data: [false]
+List{1} oclIsTypeOf FZ::Kind, data: [false]
+List{1} oclIsKindOf FZ::Kind, data: [false]
+List{1} oclIsTypeOf OclVoid, data: [false]
+List{1} oclIsKindOf OclVoid, data: [false]
+List{1} oclIsTypeOf OclInvalid, data: [false]
+List{1} oclIsKindOf OclInvalid, data: [false]
+List{1} oclIsTypeOf Collection(Integer), data: [false]
+List{1} oclIsKindOf Collection(Integer), data: [false]
+List{1} oclIsTypeOf Sequence(Integer), data: [false]
+List{1} oclIsKindOf Sequence(Integer), data: [false]
+List{1} oclIsTypeOf Set(Integer), data: [false]
+List{1} oclIsKindOf Set(Integer), data: [false]
+List{1} oclIsTypeOf Bag(Integer), data: [false]
+List{1} oclIsKindOf Bag(Integer), data: [false]
+List{1} oclIsTypeOf OrderedSet(Integer), data: [false]
+List{1} oclIsKindOf OrderedSet(Integer), data: [false]
+List{1} oclIsTypeOf Sequence(OclAny), data: [false]
+List{1} oclIsKindOf Sequence(OclAny), data: [false]
+List{1} oclIsTypeOf Collection(OclAny), data: [false]
+List{1} oclIsKindOf Collection(OclAny), data: [false]
+List{1} oclIsTypeOf Tuple(a:Integer), data: [false]
+List{1} oclIsKindOf Tuple(a:Integer), data: [false]
+List{1} oclIsTypeOf Set(FZ::Node), data: [false]
+List{1} oclIsKindOf Set(FZ::Node), data: [false]
+List{1} oclIsTypeOf Collection(FZ::Named), data: [false]
+List{1} oclIsKindOf Collection(FZ::Named), data: [false]
+Dict{1=2} oclIsTypeOf OclAny, data: [false]
+Dict{1=2} oclIsKindOf OclAny, data: [true]
+Dict{1=2} oclIsTypeOf Integer, data: [true]
+Dict{1=2} oclIsKindOf Integer, data: [true]
+Dict{1=2} oclIsTypeOf Real, data: [false]
+Dict{1=2} oclIsKindOf Real, data: [true]
+Dict{1=2} oclIsTypeOf String, data: [false]
+Dict{1=2} oclIsKindOf String, data: [false]
+Dict{1=2} oclIsTypeOf Boolean, data: [false]
+Dict{1=2} oclIsKindOf Boolean, data: [false]
+Dict{1=2} oclIsTypeOf FZ::Node, data: [false]
+Dict{1=2} oclIsKindOf FZ::Node, data: [false]
+Dict{1=2} oclIsTypeOf FZ::Named, data: [false]
+Dict{1=2} oclIsKindOf FZ::Named, data: [false]
+Dict{1=2} oclIsTypeOf FZ::Kind, data: [false]
+Dict{1=2} oclIsKindOf FZ::Kind, data: [false]
+Dict{1=2} oclIsTypeOf OclVoid, data: [false]
+Dict{1=2} oclIsKindOf OclVoid, data: [false]
+Dict{1=2} oclIsTypeOf OclInvalid, data: [false]
+Dict{1=2} oclIsKindOf OclInvalid, data: [false]
+Dict{1=2} oclIsTypeOf Collection(Integer), data: [false]
+Dict{1=2} oclIsKindOf Collection(Integer), data: [false]
+Dict{1=2} oclIsTypeOf Sequence(Integer), data: [false]
+Dict{1=2} oclIsKindOf Sequence(Integer), data: [false]
+Dict{1=2} oclIsTypeOf Set(Integer), data: [false]
+Dict{1=2} oclIsKindOf Set(Integer), data: [false]
+Dict{1=2} oclIsTypeOf Bag(Integer), data: [false]
+Dict{1=2} oclIsKindOf Bag(Integer), data: [false]
+Dict{1=2} oclIsTypeOf OrderedSet(Integer), data: [false]
+Dict{1=2} oclIsKindOf OrderedSet(Integer), data: [false]
+Dict{1=2} oclIsTypeOf Sequence(OclAny), data: [false]
+Dict{1=2} oclIsKindOf Sequence(OclAny), data: [false]
+Dict{1=2} oclIsTypeOf Collection(OclAny), data: [false]
+Dict{1=2} oclIsKindOf Collection(OclAny), data: [false]
+Dict{1=2} oclIsTypeOf Tuple(a:Integer), data: [false]
+Dict{1=2} oclIsKindOf Tuple(a:Integer), data: [false]
+Dict{1=2} oclIsTypeOf Set(FZ::Node), data: [false]
+Dict{1=2} oclIsKindOf Set(FZ::Node), data: [false]
+Dict{1=2} oclIsTypeOf Collection(FZ::Named), data: [false]
+Dict{1=2} oclIsKindOf Collection(FZ::Named), data: [false]
+Tuple{a=1} oclIsTypeOf OclAny, data: false
+Tuple{a=1} oclIsKindOf OclAny, data: true
+Tuple{a=1} oclIsTypeOf Integer, data: false
+Tuple{a=1} oclIsKindOf Integer, data: false
+Tuple{a=1} oclIsTypeOf Real, data: false
+Tuple{a=1} oclIsKindOf Real, data: false
+Tuple{a=1} oclIsTypeOf String, data: false
+Tuple{a=1} oclIsKindOf String, data: false
+Tuple{a=1} oclIsTypeOf Boolean, data: false
+Tuple{a=1} oclIsKindOf Boolean, data: false
+Tuple{a=1} oclIsTypeOf FZ::Node, data: false
+Tuple{a=1} oclIsKindOf FZ::Node, data: false
+Tuple{a=1} oclIsTypeOf FZ::Named, data: false
+Tuple{a=1} oclIsKindOf FZ::Named, data: false
+Tuple{a=1} oclIsTypeOf FZ::Kind, data: false
+Tuple{a=1} oclIsKindOf FZ::Kind, data: false
+Tuple{a=1} oclIsTypeOf OclVoid, data: false
+Tuple{a=1} oclIsKindOf OclVoid, data: false
+Tuple{a=1} oclIsTypeOf OclInvalid, data: false
+Tuple{a=1} oclIsKindOf OclInvalid, data: false
+Tuple{a=1} oclIsTypeOf Collection(Integer), data: false
+Tuple{a=1} oclIsKindOf Collection(Integer), data: false
+Tuple{a=1} oclIsTypeOf Sequence(Integer), data: false
+Tuple{a=1} oclIsKindOf Sequence(Integer), data: false
+Tuple{a=1} oclIsTypeOf Set(Integer), data: false
+Tuple{a=1} oclIsKindOf Set(Integer), data: false
+Tuple{a=1} oclIsTypeOf Bag(Integer), data: false
+Tuple{a=1} oclIsKindOf Bag(Integer), data: false
+Tuple{a=1} oclIsTypeOf OrderedSet(Integer), data: false
+Tuple{a=1} oclIsKindOf OrderedSet(Integer), data: false
+Tuple{a=1} oclIsTypeOf Sequence(OclAny), data: false
+Tuple{a=1} oclIsKindOf Sequence(OclAny), data: false
+Tuple{a=1} oclIsTypeOf Collection(OclAny), data: false
+Tuple{a=1} oclIsKindOf Collection(OclAny), data: false
+Tuple{a=1} oclIsTypeOf Tuple(a:Integer), data: false
+Tuple{a=1} oclIsKindOf Tuple(a:Integer), data: true
+Tuple{a=1} oclIsTypeOf Set(FZ::Node), data: false
+Tuple{a=1} oclIsKindOf Set(FZ::Node), data: false
+Tuple{a=1} oclIsTypeOf Collection(FZ::Named), data: false
+Tuple{a=1} oclIsKindOf Collection(FZ::Named), data: false
+null oclIsTypeOf OclAny, data: false
+null oclIsKindOf OclAny, data: true
+null oclIsTypeOf Integer, data: false
+null oclIsKindOf Integer, data: true
+null oclIsTypeOf Real, data: false
+null oclIsKindOf Real, data: true
+null oclIsTypeOf String, data: false
+null oclIsKindOf String, data: true
+null oclIsTypeOf Boolean, data: false
+null oclIsKindOf Boolean, data: true
+null oclIsTypeOf FZ::Node, data: false
+null oclIsKindOf FZ::Node, data: true
+null oclIsTypeOf FZ::Named, data: false
+null oclIsKindOf FZ::Named, data: true
+null oclIsTypeOf FZ::Kind, data: false
+null oclIsKindOf FZ::Kind, data: true
+null oclIsTypeOf OclVoid, data: true
+null oclIsKindOf OclVoid, data: true
+null oclIsTypeOf OclInvalid, data: false
+null oclIsKindOf OclInvalid, data: false
+null oclIsTypeOf Collection(Integer), data: false
+null oclIsKindOf Collection(Integer), data: true
+null oclIsTypeOf Sequence(Integer), data: false
+null oclIsKindOf Sequence(Integer), data: true
+null oclIsTypeOf Set(Integer), data: false
+null oclIsKindOf Set(Integer), data: true
+null oclIsTypeOf Bag(Integer), data: false
+null oclIsKindOf Bag(Integer), data: true
+null oclIsTypeOf OrderedSet(Integer), data: false
+null oclIsKindOf OrderedSet(Integer), data: true
+null oclIsTypeOf Sequence(OclAny), data: false
+null oclIsKindOf Sequence(OclAny), data: true
+null oclIsTypeOf Collection(OclAny), data: false
+null oclIsKindOf Collection(OclAny), data: true
+null oclIsTypeOf Tuple(a:Integer), data: false
+null oclIsKindOf Tuple(a:Integer), data: true
+null oclIsTypeOf Set(FZ::Node), data: false
+null oclIsKindOf Set(FZ::Node), data: true
+null oclIsTypeOf Collection(FZ::Named), data: false
+null oclIsKindOf Collection(FZ::Named), data: true
+invalid oclIsTypeOf OclAny, data: false
+invalid oclIsKindOf OclAny, data: true
+invalid oclIsTypeOf Integer, data: false
+invalid oclIsKindOf Integer, data: true
+invalid oclIsTypeOf Real, data: false
+invalid oclIsKindOf Real, data: true
+invalid oclIsTypeOf String, data: false
+invalid oclIsKindOf String, data: true
+invalid oclIsTypeOf Boolean, data: false
+invalid oclIsKindOf Boolean, data: true
+invalid oclIsTypeOf FZ::Node, data: false
+invalid oclIsKindOf FZ::Node, data: true
+invalid oclIsTypeOf FZ::Named, data: false
+invalid oclIsKindOf FZ::Named, data: true
+invalid oclIsTypeOf FZ::Kind, data: false
+invalid oclIsKindOf FZ::Kind, data: true
+invalid oclIsTypeOf OclVoid, data: false
+invalid oclIsKindOf OclVoid, data: true
+invalid oclIsTypeOf OclInvalid, data: true
+invalid oclIsKindOf OclInvalid, data: true
+invalid oclIsTypeOf Collection(Integer), data: false
+invalid oclIsKindOf Collection(Integer), data: true
+invalid oclIsTypeOf Sequence(Integer), data: false
+invalid oclIsKindOf Sequence(Integer), data: true
+invalid oclIsTypeOf Set(Integer), data: false
+invalid oclIsKindOf Set(Integer), data: true
+invalid oclIsTypeOf Bag(Integer), data: false
+invalid oclIsKindOf Bag(Integer), data: true
+invalid oclIsTypeOf OrderedSet(Integer), data: false
+invalid oclIsKindOf OrderedSet(Integer), data: true
+invalid oclIsTypeOf Sequence(OclAny), data: false
+invalid oclIsKindOf Sequence(OclAny), data: true
+invalid oclIsTypeOf Collection(OclAny), data: false
+invalid oclIsKindOf Collection(OclAny), data: true
+invalid oclIsTypeOf Tuple(a:Integer), data: false
+invalid oclIsKindOf Tuple(a:Integer), data: true
+invalid oclIsTypeOf Set(FZ::Node), data: false
+invalid oclIsKindOf Set(FZ::Node), data: true
+invalid oclIsTypeOf Collection(FZ::Named), data: false
+invalid oclIsKindOf Collection(FZ::Named), data: true
+FZ::Kind::A oclIsTypeOf OclAny, data: false
+FZ::Kind::A oclIsKindOf OclAny, data: true
+FZ::Kind::A oclIsTypeOf Integer, data: false
+FZ::Kind::A oclIsKindOf Integer, data: false
+FZ::Kind::A oclIsTypeOf Real, data: false
+FZ::Kind::A oclIsKindOf Real, data: false
+FZ::Kind::A oclIsTypeOf String, data: false
+FZ::Kind::A oclIsKindOf String, data: false
+FZ::Kind::A oclIsTypeOf Boolean, data: false
+FZ::Kind::A oclIsKindOf Boolean, data: false
+FZ::Kind::A oclIsTypeOf FZ::Node, data: false
+FZ::Kind::A oclIsKindOf FZ::Node, data: false
+FZ::Kind::A oclIsTypeOf FZ::Named, data: false
+FZ::Kind::A oclIsKindOf FZ::Named, data: false
+FZ::Kind::A oclIsTypeOf FZ::Kind, data: false
+FZ::Kind::A oclIsKindOf FZ::Kind, data: true
+FZ::Kind::A oclIsTypeOf OclVoid, data: false
+FZ::Kind::A oclIsKindOf OclVoid, data: false
+FZ::Kind::A oclIsTypeOf OclInvalid, data: false
+FZ::Kind::A oclIsKindOf OclInvalid, data: false
+FZ::Kind::A oclIsTypeOf Collection(Integer), data: false
+FZ::Kind::A oclIsKindOf Collection(Integer), data: false
+FZ::Kind::A oclIsTypeOf Sequence(Integer), data: false
+FZ::Kind::A oclIsKindOf Sequence(Integer), data: false
+FZ::Kind::A oclIsTypeOf Set(Integer), data: false
+FZ::Kind::A oclIsKindOf Set(Integer), data: false
+FZ::Kind::A oclIsTypeOf Bag(Integer), data: false
+FZ::Kind::A oclIsKindOf Bag(Integer), data: false
+FZ::Kind::A oclIsTypeOf OrderedSet(Integer), data: false
+FZ::Kind::A oclIsKindOf OrderedSet(Integer), data: false
+FZ::Kind::A oclIsTypeOf Sequence(OclAny), data: false
+FZ::Kind::A oclIsKindOf Sequence(OclAny), data: false
+FZ::Kind::A oclIsTypeOf Collection(OclAny), data: false
+FZ::Kind::A oclIsKindOf Collection(OclAny), data: false
+FZ::Kind::A oclIsTypeOf Tuple(a:Integer), data: false
+FZ::Kind::A oclIsKindOf Tuple(a:Integer), data: false
+FZ::Kind::A oclIsTypeOf Set(FZ::Node), data: false
+FZ::Kind::A oclIsKindOf Set(FZ::Node), data: false
+FZ::Kind::A oclIsTypeOf Collection(FZ::Named), data: false
+FZ::Kind::A oclIsKindOf Collection(FZ::Named), data: false
+m oclIsTypeOf OclAny, data: false
+m oclIsKindOf OclAny, data: true
+m oclIsTypeOf Integer, data: false
+m oclIsKindOf Integer, data: false
+m oclIsTypeOf Real, data: false
+m oclIsKindOf Real, data: false
+m oclIsTypeOf String, data: false
+m oclIsKindOf String, data: false
+m oclIsTypeOf Boolean, data: false
+m oclIsKindOf Boolean, data: false
+m oclIsTypeOf FZ::Node, data: false
+m oclIsKindOf FZ::Node, data: false
+m oclIsTypeOf FZ::Named, data: false
+m oclIsKindOf FZ::Named, data: false
+m oclIsTypeOf FZ::Kind, data: false
+m oclIsKindOf FZ::Kind, data: false
+m oclIsTypeOf OclVoid, data: false
+m oclIsKindOf OclVoid, data: false
+m oclIsTypeOf OclInvalid, data: false
+m oclIsKindOf OclInvalid, data: false
+m oclIsTypeOf Collection(Integer), data: false
+m oclIsKindOf Collection(Integer), data: false
+m oclIsTypeOf Sequence(Integer), data: false
+m oclIsKindOf Sequence(Integer), data: false
+m oclIsTypeOf Set(Integer), data: false
+m oclIsKindOf Set(Integer), data: false
+m oclIsTypeOf Bag(Integer), data: false
+m oclIsKindOf Bag(Integer), data: false
+m oclIsTypeOf OrderedSet(Integer), data: false
+m oclIsKindOf OrderedSet(Integer), data: false
+m oclIsTypeOf Sequence(OclAny), data: false
+m oclIsKindOf Sequence(OclAny), data: false
+m oclIsTypeOf Collection(OclAny), data: false
+m oclIsKindOf Collection(OclAny), data: false
+m oclIsTypeOf Tuple(a:Integer), data: false
+m oclIsKindOf Tuple(a:Integer), data: false
+m oclIsTypeOf Set(FZ::Node), data: false
+m oclIsKindOf Set(FZ::Node), data: false
+m oclIsTypeOf Collection(FZ::Named), data: false
+m oclIsKindOf Collection(FZ::Named), data: false
+Sequence{} oclIsTypeOf OclAny, data: []
+Sequence{} oclIsKindOf OclAny, data: []
+Sequence{} oclIsTypeOf Integer, data: []
+Sequence{} oclIsKindOf Integer, data: []
+Sequence{} oclIsTypeOf Real, data: []
+Sequence{} oclIsKindOf Real, data: []
+Sequence{} oclIsTypeOf String, data: []
+Sequence{} oclIsKindOf String, data: []
+Sequence{} oclIsTypeOf Boolean, data: []
+Sequence{} oclIsKindOf Boolean, data: []
+Sequence{} oclIsTypeOf FZ::Node, data: []
+Sequence{} oclIsKindOf FZ::Node, data: []
+Sequence{} oclIsTypeOf FZ::Named, data: []
+Sequence{} oclIsKindOf FZ::Named, data: []
+Sequence{} oclIsTypeOf FZ::Kind, data: []
+Sequence{} oclIsKindOf FZ::Kind, data: []
+Sequence{} oclIsTypeOf OclVoid, data: []
+Sequence{} oclIsKindOf OclVoid, data: []
+Sequence{} oclIsTypeOf OclInvalid, data: []
+Sequence{} oclIsKindOf OclInvalid, data: []
+Sequence{} oclIsTypeOf Collection(Integer), data: []
+Sequence{} oclIsKindOf Collection(Integer), data: []
+Sequence{} oclIsTypeOf Sequence(Integer), data: []
+Sequence{} oclIsKindOf Sequence(Integer), data: []
+Sequence{} oclIsTypeOf Set(Integer), data: []
+Sequence{} oclIsKindOf Set(Integer), data: []
+Sequence{} oclIsTypeOf Bag(Integer), data: []
+Sequence{} oclIsKindOf Bag(Integer), data: []
+Sequence{} oclIsTypeOf OrderedSet(Integer), data: []
+Sequence{} oclIsKindOf OrderedSet(Integer), data: []
+Sequence{} oclIsTypeOf Sequence(OclAny), data: []
+Sequence{} oclIsKindOf Sequence(OclAny), data: []
+Sequence{} oclIsTypeOf Collection(OclAny), data: []
+Sequence{} oclIsKindOf Collection(OclAny), data: []
+Sequence{} oclIsTypeOf Tuple(a:Integer), data: []
+Sequence{} oclIsKindOf Tuple(a:Integer), data: []
+Sequence{} oclIsTypeOf Set(FZ::Node), data: []
+Sequence{} oclIsKindOf Set(FZ::Node), data: []
+Sequence{} oclIsTypeOf Collection(FZ::Named), data: []
+Sequence{} oclIsKindOf Collection(FZ::Named), data: []
+n.weight oclIsTypeOf OclAny, data: false
+n.weight oclIsKindOf OclAny, data: true
+n.weight oclIsTypeOf Integer, data: false
+n.weight oclIsKindOf Integer, data: false
+n.weight oclIsTypeOf Real, data: true
+n.weight oclIsKindOf Real, data: true
+n.weight oclIsTypeOf String, data: false
+n.weight oclIsKindOf String, data: false
+n.weight oclIsTypeOf Boolean, data: false
+n.weight oclIsKindOf Boolean, data: false
+n.weight oclIsTypeOf FZ::Node, data: false
+n.weight oclIsKindOf FZ::Node, data: false
+n.weight oclIsTypeOf FZ::Named, data: false
+n.weight oclIsKindOf FZ::Named, data: false
+n.weight oclIsTypeOf FZ::Kind, data: false
+n.weight oclIsKindOf FZ::Kind, data: false
+n.weight oclIsTypeOf OclVoid, data: false
+n.weight oclIsKindOf OclVoid, data: false
+n.weight oclIsTypeOf OclInvalid, data: false
+n.weight oclIsKindOf OclInvalid, data: false
+n.weight oclIsTypeOf Collection(Integer), data: false
+n.weight oclIsKindOf Collection(Integer), data: false
+n.weight oclIsTypeOf Sequence(Integer), data: false
+n.weight oclIsKindOf Sequence(Integer), data: false
+n.weight oclIsTypeOf Set(Integer), data: false
+n.weight oclIsKindOf Set(Integer), data: false
+n.weight oclIsTypeOf Bag(Integer), data: false
+n.weight oclIsKindOf Bag(Integer), data: false
+n.weight oclIsTypeOf OrderedSet(Integer), data: false
+n.weight oclIsKindOf OrderedSet(Integer), data: false
+n.weight oclIsTypeOf Sequence(OclAny), data: false
+n.weight oclIsKindOf Sequence(OclAny), data: false
+n.weight oclIsTypeOf Collection(OclAny), data: false
+n.weight oclIsKindOf Collection(OclAny), data: false
+n.weight oclIsTypeOf Tuple(a:Integer), data: false
+n.weight oclIsKindOf Tuple(a:Integer), data: false
+n.weight oclIsTypeOf Set(FZ::Node), data: false
+n.weight oclIsKindOf Set(FZ::Node), data: false
+n.weight oclIsTypeOf Collection(FZ::Named), data: false
+n.weight oclIsKindOf Collection(FZ::Named), data: false
+Set{n} oclIsTypeOf OclAny, data: {false=1}
+Set{n} oclIsKindOf OclAny, data: {true=1}
+Set{n} oclIsTypeOf Integer, data: {false=1}
+Set{n} oclIsKindOf Integer, data: {false=1}
+Set{n} oclIsTypeOf Real, data: {false=1}
+Set{n} oclIsKindOf Real, data: {false=1}
+Set{n} oclIsTypeOf String, data: {false=1}
+Set{n} oclIsKindOf String, data: {false=1}
+Set{n} oclIsTypeOf Boolean, data: {false=1}
+Set{n} oclIsKindOf Boolean, data: {false=1}
+Set{n} oclIsTypeOf FZ::Node, data: {true=1}
+Set{n} oclIsKindOf FZ::Node, data: {true=1}
+Set{n} oclIsTypeOf FZ::Named, data: {false=1}
+Set{n} oclIsKindOf FZ::Named, data: {true=1}
+Set{n} oclIsTypeOf FZ::Kind, data: {false=1}
+Set{n} oclIsKindOf FZ::Kind, data: {false=1}
+Set{n} oclIsTypeOf OclVoid, data: {false=1}
+Set{n} oclIsKindOf OclVoid, data: {false=1}
+Set{n} oclIsTypeOf OclInvalid, data: {false=1}
+Set{n} oclIsKindOf OclInvalid, data: {false=1}
+Set{n} oclIsTypeOf Collection(Integer), data: {false=1}
+Set{n} oclIsKindOf Collection(Integer), data: {false=1}
+Set{n} oclIsTypeOf Sequence(Integer), data: {false=1}
+Set{n} oclIsKindOf Sequence(Integer), data: {false=1}
+Set{n} oclIsTypeOf Set(Integer), data: {false=1}
+Set{n} oclIsKindOf Set(Integer), data: {false=1}
+Set{n} oclIsTypeOf Bag(Integer), data: {false=1}
+Set{n} oclIsKindOf Bag(Integer), data: {false=1}
+Set{n} oclIsTypeOf OrderedSet(Integer), data: {false=1}
+Set{n} oclIsKindOf OrderedSet(Integer), data: {false=1}
+Set{n} oclIsTypeOf Sequence(OclAny), data: {false=1}
+Set{n} oclIsKindOf Sequence(OclAny), data: {false=1}
+Set{n} oclIsTypeOf Collection(OclAny), data: {false=1}
+Set{n} oclIsKindOf Collection(OclAny), data: {false=1}
+Set{n} oclIsTypeOf Tuple(a:Integer), data: {false=1}
+Set{n} oclIsKindOf Tuple(a:Integer), data: {false=1}
+Set{n} oclIsTypeOf Set(FZ::Node), data: {false=1}
+Set{n} oclIsKindOf Set(FZ::Node), data: {false=1}
+Set{n} oclIsTypeOf Collection(FZ::Named), data: {false=1}
+Set{n} oclIsKindOf Collection(FZ::Named), data: {false=1}
+
+@file diag.txt 38820
+exec	1	OK	0	1 oclIsTypeOf OclAny
+exec	1	OK	0	1 oclIsKindOf OclAny
+exec	1	OK	0	1 oclIsTypeOf Integer
+exec	1	OK	0	1 oclIsKindOf Integer
+exec	1	OK	0	1 oclIsTypeOf Real
+exec	1	OK	0	1 oclIsKindOf Real
+exec	1	OK	0	1 oclIsTypeOf String
+exec	1	OK	0	1 oclIsKindOf String
+exec	1	OK	0	1 oclIsTypeOf Boolean
+exec	1	OK	0	1 oclIsKindOf Boolean
+exec	1	OK	0	1 oclIsTypeOf FZ::Node
+exec	1	OK	0	1 oclIsKindOf FZ::Node
+exec	1	OK	0	1 oclIsTypeOf FZ::Named
+exec	1	OK	0	1 oclIsKindOf FZ::Named
+exec	1	OK	0	1 oclIsTypeOf FZ::Kind
+exec	1	OK	0	1 oclIsKindOf FZ::Kind
+exec	1	OK	0	1 oclIsTypeOf OclVoid
+exec	1	OK	0	1 oclIsKindOf OclVoid
+exec	1	OK	0	1 oclIsTypeOf OclInvalid
+exec	1	OK	0	1 oclIsKindOf OclInvalid
+exec	1	OK	0	1 oclIsTypeOf Collection(Integer)
+exec	1	OK	0	1 oclIsKindOf Collection(Integer)
+exec	1	OK	0	1 oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	1 oclIsKindOf Sequence(Integer)
+exec	1	OK	0	1 oclIsTypeOf Set(Integer)
+exec	1	OK	0	1 oclIsKindOf Set(Integer)
+exec	1	OK	0	1 oclIsTypeOf Bag(Integer)
+exec	1	OK	0	1 oclIsKindOf Bag(Integer)
+exec	1	OK	0	1 oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	1 oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	1 oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	1 oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	1 oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	1 oclIsKindOf Collection(OclAny)
+exec	1	OK	0	1 oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	1 oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	1 oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	1 oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	1 oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	1 oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	2147483648 oclIsTypeOf OclAny
+exec	1	OK	0	2147483648 oclIsKindOf OclAny
+exec	1	OK	0	2147483648 oclIsTypeOf Integer
+exec	1	OK	0	2147483648 oclIsKindOf Integer
+exec	1	OK	0	2147483648 oclIsTypeOf Real
+exec	1	OK	0	2147483648 oclIsKindOf Real
+exec	1	OK	0	2147483648 oclIsTypeOf String
+exec	1	OK	0	2147483648 oclIsKindOf String
+exec	1	OK	0	2147483648 oclIsTypeOf Boolean
+exec	1	OK	0	2147483648 oclIsKindOf Boolean
+exec	1	OK	0	2147483648 oclIsTypeOf FZ::Node
+exec	1	OK	0	2147483648 oclIsKindOf FZ::Node
+exec	1	OK	0	2147483648 oclIsTypeOf FZ::Named
+exec	1	OK	0	2147483648 oclIsKindOf FZ::Named
+exec	1	OK	0	2147483648 oclIsTypeOf FZ::Kind
+exec	1	OK	0	2147483648 oclIsKindOf FZ::Kind
+exec	1	OK	0	2147483648 oclIsTypeOf OclVoid
+exec	1	OK	0	2147483648 oclIsKindOf OclVoid
+exec	1	OK	0	2147483648 oclIsTypeOf OclInvalid
+exec	1	OK	0	2147483648 oclIsKindOf OclInvalid
+exec	1	OK	0	2147483648 oclIsTypeOf Collection(Integer)
+exec	1	OK	0	2147483648 oclIsKindOf Collection(Integer)
+exec	1	OK	0	2147483648 oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	2147483648 oclIsKindOf Sequence(Integer)
+exec	1	OK	0	2147483648 oclIsTypeOf Set(Integer)
+exec	1	OK	0	2147483648 oclIsKindOf Set(Integer)
+exec	1	OK	0	2147483648 oclIsTypeOf Bag(Integer)
+exec	1	OK	0	2147483648 oclIsKindOf Bag(Integer)
+exec	1	OK	0	2147483648 oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	2147483648 oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	2147483648 oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	2147483648 oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	2147483648 oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	2147483648 oclIsKindOf Collection(OclAny)
+exec	1	OK	0	2147483648 oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	2147483648 oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	2147483648 oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	2147483648 oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	2147483648 oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	2147483648 oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	2.5 oclIsTypeOf OclAny
+exec	1	OK	0	2.5 oclIsKindOf OclAny
+exec	1	OK	0	2.5 oclIsTypeOf Integer
+exec	1	OK	0	2.5 oclIsKindOf Integer
+exec	1	OK	0	2.5 oclIsTypeOf Real
+exec	1	OK	0	2.5 oclIsKindOf Real
+exec	1	OK	0	2.5 oclIsTypeOf String
+exec	1	OK	0	2.5 oclIsKindOf String
+exec	1	OK	0	2.5 oclIsTypeOf Boolean
+exec	1	OK	0	2.5 oclIsKindOf Boolean
+exec	1	OK	0	2.5 oclIsTypeOf FZ::Node
+exec	1	OK	0	2.5 oclIsKindOf FZ::Node
+exec	1	OK	0	2.5 oclIsTypeOf FZ::Named
+exec	1	OK	0	2.5 oclIsKindOf FZ::Named
+exec	1	OK	0	2.5 oclIsTypeOf FZ::Kind
+exec	1	OK	0	2.5 oclIsKindOf FZ::Kind
+exec	1	OK	0	2.5 oclIsTypeOf OclVoid
+exec	1	OK	0	2.5 oclIsKindOf OclVoid
+exec	1	OK	0	2.5 oclIsTypeOf OclInvalid
+exec	1	OK	0	2.5 oclIsKindOf OclInvalid
+exec	1	OK	0	2.5 oclIsTypeOf Collection(Integer)
+exec	1	OK	0	2.5 oclIsKindOf Collection(Integer)
+exec	1	OK	0	2.5 oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	2.5 oclIsKindOf Sequence(Integer)
+exec	1	OK	0	2.5 oclIsTypeOf Set(Integer)
+exec	1	OK	0	2.5 oclIsKindOf Set(Integer)
+exec	1	OK	0	2.5 oclIsTypeOf Bag(Integer)
+exec	1	OK	0	2.5 oclIsKindOf Bag(Integer)
+exec	1	OK	0	2.5 oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	2.5 oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	2.5 oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	2.5 oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	2.5 oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	2.5 oclIsKindOf Collection(OclAny)
+exec	1	OK	0	2.5 oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	2.5 oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	2.5 oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	2.5 oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	2.5 oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	2.5 oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	s oclIsTypeOf OclAny
+exec	1	OK	0	s oclIsKindOf OclAny
+exec	1	OK	0	s oclIsTypeOf Integer
+exec	1	OK	0	s oclIsKindOf Integer
+exec	1	OK	0	s oclIsTypeOf Real
+exec	1	OK	0	s oclIsKindOf Real
+exec	1	OK	0	s oclIsTypeOf String
+exec	1	OK	0	s oclIsKindOf String
+exec	1	OK	0	s oclIsTypeOf Boolean
+exec	1	OK	0	s oclIsKindOf Boolean
+exec	1	OK	0	s oclIsTypeOf FZ::Node
+exec	1	OK	0	s oclIsKindOf FZ::Node
+exec	1	OK	0	s oclIsTypeOf FZ::Named
+exec	1	OK	0	s oclIsKindOf FZ::Named
+exec	1	OK	0	s oclIsTypeOf FZ::Kind
+exec	1	OK	0	s oclIsKindOf FZ::Kind
+exec	1	OK	0	s oclIsTypeOf OclVoid
+exec	1	OK	0	s oclIsKindOf OclVoid
+exec	1	OK	0	s oclIsTypeOf OclInvalid
+exec	1	OK	0	s oclIsKindOf OclInvalid
+exec	1	OK	0	s oclIsTypeOf Collection(Integer)
+exec	1	OK	0	s oclIsKindOf Collection(Integer)
+exec	1	OK	0	s oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	s oclIsKindOf Sequence(Integer)
+exec	1	OK	0	s oclIsTypeOf Set(Integer)
+exec	1	OK	0	s oclIsKindOf Set(Integer)
+exec	1	OK	0	s oclIsTypeOf Bag(Integer)
+exec	1	OK	0	s oclIsKindOf Bag(Integer)
+exec	1	OK	0	s oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	s oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	s oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	s oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	s oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	s oclIsKindOf Collection(OclAny)
+exec	1	OK	0	s oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	s oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	s oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	s oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	s oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	s oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	true oclIsTypeOf OclAny
+exec	1	OK	0	true oclIsKindOf OclAny
+exec	1	OK	0	true oclIsTypeOf Integer
+exec	1	OK	0	true oclIsKindOf Integer
+exec	1	OK	0	true oclIsTypeOf Real
+exec	1	OK	0	true oclIsKindOf Real
+exec	1	OK	0	true oclIsTypeOf String
+exec	1	OK	0	true oclIsKindOf String
+exec	1	OK	0	true oclIsTypeOf Boolean
+exec	1	OK	0	true oclIsKindOf Boolean
+exec	1	OK	0	true oclIsTypeOf FZ::Node
+exec	1	OK	0	true oclIsKindOf FZ::Node
+exec	1	OK	0	true oclIsTypeOf FZ::Named
+exec	1	OK	0	true oclIsKindOf FZ::Named
+exec	1	OK	0	true oclIsTypeOf FZ::Kind
+exec	1	OK	0	true oclIsKindOf FZ::Kind
+exec	1	OK	0	true oclIsTypeOf OclVoid
+exec	1	OK	0	true oclIsKindOf OclVoid
+exec	1	OK	0	true oclIsTypeOf OclInvalid
+exec	1	OK	0	true oclIsKindOf OclInvalid
+exec	1	OK	0	true oclIsTypeOf Collection(Integer)
+exec	1	OK	0	true oclIsKindOf Collection(Integer)
+exec	1	OK	0	true oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	true oclIsKindOf Sequence(Integer)
+exec	1	OK	0	true oclIsTypeOf Set(Integer)
+exec	1	OK	0	true oclIsKindOf Set(Integer)
+exec	1	OK	0	true oclIsTypeOf Bag(Integer)
+exec	1	OK	0	true oclIsKindOf Bag(Integer)
+exec	1	OK	0	true oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	true oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	true oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	true oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	true oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	true oclIsKindOf Collection(OclAny)
+exec	1	OK	0	true oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	true oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	true oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	true oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	true oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	true oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	n oclIsTypeOf OclAny
+exec	1	OK	0	n oclIsKindOf OclAny
+exec	1	OK	0	n oclIsTypeOf Integer
+exec	1	OK	0	n oclIsKindOf Integer
+exec	1	OK	0	n oclIsTypeOf Real
+exec	1	OK	0	n oclIsKindOf Real
+exec	1	OK	0	n oclIsTypeOf String
+exec	1	OK	0	n oclIsKindOf String
+exec	1	OK	0	n oclIsTypeOf Boolean
+exec	1	OK	0	n oclIsKindOf Boolean
+exec	1	OK	0	n oclIsTypeOf FZ::Node
+exec	1	OK	0	n oclIsKindOf FZ::Node
+exec	1	OK	0	n oclIsTypeOf FZ::Named
+exec	1	OK	0	n oclIsKindOf FZ::Named
+exec	1	OK	0	n oclIsTypeOf FZ::Kind
+exec	1	OK	0	n oclIsKindOf FZ::Kind
+exec	1	OK	0	n oclIsTypeOf OclVoid
+exec	1	OK	0	n oclIsKindOf OclVoid
+exec	1	OK	0	n oclIsTypeOf OclInvalid
+exec	1	OK	0	n oclIsKindOf OclInvalid
+exec	1	OK	0	n oclIsTypeOf Collection(Integer)
+exec	1	OK	0	n oclIsKindOf Collection(Integer)
+exec	1	OK	0	n oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	n oclIsKindOf Sequence(Integer)
+exec	1	OK	0	n oclIsTypeOf Set(Integer)
+exec	1	OK	0	n oclIsKindOf Set(Integer)
+exec	1	OK	0	n oclIsTypeOf Bag(Integer)
+exec	1	OK	0	n oclIsKindOf Bag(Integer)
+exec	1	OK	0	n oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	n oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	n oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	n oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	n oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	n oclIsKindOf Collection(OclAny)
+exec	1	OK	0	n oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	n oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	n oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	n oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	n oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	n oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	n.kind oclIsTypeOf OclAny
+exec	1	OK	0	n.kind oclIsKindOf OclAny
+exec	1	OK	0	n.kind oclIsTypeOf Integer
+exec	1	OK	0	n.kind oclIsKindOf Integer
+exec	1	OK	0	n.kind oclIsTypeOf Real
+exec	1	OK	0	n.kind oclIsKindOf Real
+exec	1	OK	0	n.kind oclIsTypeOf String
+exec	1	OK	0	n.kind oclIsKindOf String
+exec	1	OK	0	n.kind oclIsTypeOf Boolean
+exec	1	OK	0	n.kind oclIsKindOf Boolean
+exec	1	OK	0	n.kind oclIsTypeOf FZ::Node
+exec	1	OK	0	n.kind oclIsKindOf FZ::Node
+exec	1	OK	0	n.kind oclIsTypeOf FZ::Named
+exec	1	OK	0	n.kind oclIsKindOf FZ::Named
+exec	1	OK	0	n.kind oclIsTypeOf FZ::Kind
+exec	1	OK	0	n.kind oclIsKindOf FZ::Kind
+exec	1	OK	0	n.kind oclIsTypeOf OclVoid
+exec	1	OK	0	n.kind oclIsKindOf OclVoid
+exec	1	OK	0	n.kind oclIsTypeOf OclInvalid
+exec	1	OK	0	n.kind oclIsKindOf OclInvalid
+exec	1	OK	0	n.kind oclIsTypeOf Collection(Integer)
+exec	1	OK	0	n.kind oclIsKindOf Collection(Integer)
+exec	1	OK	0	n.kind oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	n.kind oclIsKindOf Sequence(Integer)
+exec	1	OK	0	n.kind oclIsTypeOf Set(Integer)
+exec	1	OK	0	n.kind oclIsKindOf Set(Integer)
+exec	1	OK	0	n.kind oclIsTypeOf Bag(Integer)
+exec	1	OK	0	n.kind oclIsKindOf Bag(Integer)
+exec	1	OK	0	n.kind oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	n.kind oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	n.kind oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	n.kind oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	n.kind oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	n.kind oclIsKindOf Collection(OclAny)
+exec	1	OK	0	n.kind oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	n.kind oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	n.kind oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	n.kind oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	n.kind oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	n.kind oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	n.big oclIsTypeOf OclAny
+exec	1	OK	0	n.big oclIsKindOf OclAny
+exec	1	OK	0	n.big oclIsTypeOf Integer
+exec	1	OK	0	n.big oclIsKindOf Integer
+exec	1	OK	0	n.big oclIsTypeOf Real
+exec	1	OK	0	n.big oclIsKindOf Real
+exec	1	OK	0	n.big oclIsTypeOf String
+exec	1	OK	0	n.big oclIsKindOf String
+exec	1	OK	0	n.big oclIsTypeOf Boolean
+exec	1	OK	0	n.big oclIsKindOf Boolean
+exec	1	OK	0	n.big oclIsTypeOf FZ::Node
+exec	1	OK	0	n.big oclIsKindOf FZ::Node
+exec	1	OK	0	n.big oclIsTypeOf FZ::Named
+exec	1	OK	0	n.big oclIsKindOf FZ::Named
+exec	1	OK	0	n.big oclIsTypeOf FZ::Kind
+exec	1	OK	0	n.big oclIsKindOf FZ::Kind
+exec	1	OK	0	n.big oclIsTypeOf OclVoid
+exec	1	OK	0	n.big oclIsKindOf OclVoid
+exec	1	OK	0	n.big oclIsTypeOf OclInvalid
+exec	1	OK	0	n.big oclIsKindOf OclInvalid
+exec	1	OK	0	n.big oclIsTypeOf Collection(Integer)
+exec	1	OK	0	n.big oclIsKindOf Collection(Integer)
+exec	1	OK	0	n.big oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	n.big oclIsKindOf Sequence(Integer)
+exec	1	OK	0	n.big oclIsTypeOf Set(Integer)
+exec	1	OK	0	n.big oclIsKindOf Set(Integer)
+exec	1	OK	0	n.big oclIsTypeOf Bag(Integer)
+exec	1	OK	0	n.big oclIsKindOf Bag(Integer)
+exec	1	OK	0	n.big oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	n.big oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	n.big oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	n.big oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	n.big oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	n.big oclIsKindOf Collection(OclAny)
+exec	1	OK	0	n.big oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	n.big oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	n.big oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	n.big oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	n.big oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	n.big oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	Sequence{1} oclIsTypeOf OclAny
+exec	1	OK	0	Sequence{1} oclIsKindOf OclAny
+exec	1	OK	0	Sequence{1} oclIsTypeOf Integer
+exec	1	OK	0	Sequence{1} oclIsKindOf Integer
+exec	1	OK	0	Sequence{1} oclIsTypeOf Real
+exec	1	OK	0	Sequence{1} oclIsKindOf Real
+exec	1	OK	0	Sequence{1} oclIsTypeOf String
+exec	1	OK	0	Sequence{1} oclIsKindOf String
+exec	1	OK	0	Sequence{1} oclIsTypeOf Boolean
+exec	1	OK	0	Sequence{1} oclIsKindOf Boolean
+exec	1	OK	0	Sequence{1} oclIsTypeOf FZ::Node
+exec	1	OK	0	Sequence{1} oclIsKindOf FZ::Node
+exec	1	OK	0	Sequence{1} oclIsTypeOf FZ::Named
+exec	1	OK	0	Sequence{1} oclIsKindOf FZ::Named
+exec	1	OK	0	Sequence{1} oclIsTypeOf FZ::Kind
+exec	1	OK	0	Sequence{1} oclIsKindOf FZ::Kind
+exec	1	OK	0	Sequence{1} oclIsTypeOf OclVoid
+exec	1	OK	0	Sequence{1} oclIsKindOf OclVoid
+exec	1	OK	0	Sequence{1} oclIsTypeOf OclInvalid
+exec	1	OK	0	Sequence{1} oclIsKindOf OclInvalid
+exec	1	OK	0	Sequence{1} oclIsTypeOf Collection(Integer)
+exec	1	OK	0	Sequence{1} oclIsKindOf Collection(Integer)
+exec	1	OK	0	Sequence{1} oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	Sequence{1} oclIsKindOf Sequence(Integer)
+exec	1	OK	0	Sequence{1} oclIsTypeOf Set(Integer)
+exec	1	OK	0	Sequence{1} oclIsKindOf Set(Integer)
+exec	1	OK	0	Sequence{1} oclIsTypeOf Bag(Integer)
+exec	1	OK	0	Sequence{1} oclIsKindOf Bag(Integer)
+exec	1	OK	0	Sequence{1} oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	Sequence{1} oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	Sequence{1} oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	Sequence{1} oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	Sequence{1} oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	Sequence{1} oclIsKindOf Collection(OclAny)
+exec	1	OK	0	Sequence{1} oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	Sequence{1} oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	Sequence{1} oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	Sequence{1} oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	Sequence{1} oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	Sequence{1} oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	Set{1} oclIsTypeOf OclAny
+exec	1	OK	0	Set{1} oclIsKindOf OclAny
+exec	1	OK	0	Set{1} oclIsTypeOf Integer
+exec	1	OK	0	Set{1} oclIsKindOf Integer
+exec	1	OK	0	Set{1} oclIsTypeOf Real
+exec	1	OK	0	Set{1} oclIsKindOf Real
+exec	1	OK	0	Set{1} oclIsTypeOf String
+exec	1	OK	0	Set{1} oclIsKindOf String
+exec	1	OK	0	Set{1} oclIsTypeOf Boolean
+exec	1	OK	0	Set{1} oclIsKindOf Boolean
+exec	1	OK	0	Set{1} oclIsTypeOf FZ::Node
+exec	1	OK	0	Set{1} oclIsKindOf FZ::Node
+exec	1	OK	0	Set{1} oclIsTypeOf FZ::Named
+exec	1	OK	0	Set{1} oclIsKindOf FZ::Named
+exec	1	OK	0	Set{1} oclIsTypeOf FZ::Kind
+exec	1	OK	0	Set{1} oclIsKindOf FZ::Kind
+exec	1	OK	0	Set{1} oclIsTypeOf OclVoid
+exec	1	OK	0	Set{1} oclIsKindOf OclVoid
+exec	1	OK	0	Set{1} oclIsTypeOf OclInvalid
+exec	1	OK	0	Set{1} oclIsKindOf OclInvalid
+exec	1	OK	0	Set{1} oclIsTypeOf Collection(Integer)
+exec	1	OK	0	Set{1} oclIsKindOf Collection(Integer)
+exec	1	OK	0	Set{1} oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	Set{1} oclIsKindOf Sequence(Integer)
+exec	1	OK	0	Set{1} oclIsTypeOf Set(Integer)
+exec	1	OK	0	Set{1} oclIsKindOf Set(Integer)
+exec	1	OK	0	Set{1} oclIsTypeOf Bag(Integer)
+exec	1	OK	0	Set{1} oclIsKindOf Bag(Integer)
+exec	1	OK	0	Set{1} oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	Set{1} oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	Set{1} oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	Set{1} oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	Set{1} oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	Set{1} oclIsKindOf Collection(OclAny)
+exec	1	OK	0	Set{1} oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	Set{1} oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	Set{1} oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	Set{1} oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	Set{1} oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	Set{1} oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf OclAny
+exec	1	OK	0	OrderedSet{1} oclIsKindOf OclAny
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Integer
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Integer
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Real
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Real
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf String
+exec	1	OK	0	OrderedSet{1} oclIsKindOf String
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Boolean
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Boolean
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf FZ::Node
+exec	1	OK	0	OrderedSet{1} oclIsKindOf FZ::Node
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf FZ::Named
+exec	1	OK	0	OrderedSet{1} oclIsKindOf FZ::Named
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf FZ::Kind
+exec	1	OK	0	OrderedSet{1} oclIsKindOf FZ::Kind
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf OclVoid
+exec	1	OK	0	OrderedSet{1} oclIsKindOf OclVoid
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf OclInvalid
+exec	1	OK	0	OrderedSet{1} oclIsKindOf OclInvalid
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Collection(Integer)
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Collection(Integer)
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Sequence(Integer)
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Set(Integer)
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Set(Integer)
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Bag(Integer)
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Bag(Integer)
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	OrderedSet{1} oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Collection(OclAny)
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	OrderedSet{1} oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	OrderedSet{1} oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	Bag{1} oclIsTypeOf OclAny
+exec	1	OK	0	Bag{1} oclIsKindOf OclAny
+exec	1	OK	0	Bag{1} oclIsTypeOf Integer
+exec	1	OK	0	Bag{1} oclIsKindOf Integer
+exec	1	OK	0	Bag{1} oclIsTypeOf Real
+exec	1	OK	0	Bag{1} oclIsKindOf Real
+exec	1	OK	0	Bag{1} oclIsTypeOf String
+exec	1	OK	0	Bag{1} oclIsKindOf String
+exec	1	OK	0	Bag{1} oclIsTypeOf Boolean
+exec	1	OK	0	Bag{1} oclIsKindOf Boolean
+exec	1	OK	0	Bag{1} oclIsTypeOf FZ::Node
+exec	1	OK	0	Bag{1} oclIsKindOf FZ::Node
+exec	1	OK	0	Bag{1} oclIsTypeOf FZ::Named
+exec	1	OK	0	Bag{1} oclIsKindOf FZ::Named
+exec	1	OK	0	Bag{1} oclIsTypeOf FZ::Kind
+exec	1	OK	0	Bag{1} oclIsKindOf FZ::Kind
+exec	1	OK	0	Bag{1} oclIsTypeOf OclVoid
+exec	1	OK	0	Bag{1} oclIsKindOf OclVoid
+exec	1	OK	0	Bag{1} oclIsTypeOf OclInvalid
+exec	1	OK	0	Bag{1} oclIsKindOf OclInvalid
+exec	1	OK	0	Bag{1} oclIsTypeOf Collection(Integer)
+exec	1	OK	0	Bag{1} oclIsKindOf Collection(Integer)
+exec	1	OK	0	Bag{1} oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	Bag{1} oclIsKindOf Sequence(Integer)
+exec	1	OK	0	Bag{1} oclIsTypeOf Set(Integer)
+exec	1	OK	0	Bag{1} oclIsKindOf Set(Integer)
+exec	1	OK	0	Bag{1} oclIsTypeOf Bag(Integer)
+exec	1	OK	0	Bag{1} oclIsKindOf Bag(Integer)
+exec	1	OK	0	Bag{1} oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	Bag{1} oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	Bag{1} oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	Bag{1} oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	Bag{1} oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	Bag{1} oclIsKindOf Collection(OclAny)
+exec	1	OK	0	Bag{1} oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	Bag{1} oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	Bag{1} oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	Bag{1} oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	Bag{1} oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	Bag{1} oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	List{1} oclIsTypeOf OclAny
+exec	1	OK	0	List{1} oclIsKindOf OclAny
+exec	1	OK	0	List{1} oclIsTypeOf Integer
+exec	1	OK	0	List{1} oclIsKindOf Integer
+exec	1	OK	0	List{1} oclIsTypeOf Real
+exec	1	OK	0	List{1} oclIsKindOf Real
+exec	1	OK	0	List{1} oclIsTypeOf String
+exec	1	OK	0	List{1} oclIsKindOf String
+exec	1	OK	0	List{1} oclIsTypeOf Boolean
+exec	1	OK	0	List{1} oclIsKindOf Boolean
+exec	1	OK	0	List{1} oclIsTypeOf FZ::Node
+exec	1	OK	0	List{1} oclIsKindOf FZ::Node
+exec	1	OK	0	List{1} oclIsTypeOf FZ::Named
+exec	1	OK	0	List{1} oclIsKindOf FZ::Named
+exec	1	OK	0	List{1} oclIsTypeOf FZ::Kind
+exec	1	OK	0	List{1} oclIsKindOf FZ::Kind
+exec	1	OK	0	List{1} oclIsTypeOf OclVoid
+exec	1	OK	0	List{1} oclIsKindOf OclVoid
+exec	1	OK	0	List{1} oclIsTypeOf OclInvalid
+exec	1	OK	0	List{1} oclIsKindOf OclInvalid
+exec	1	OK	0	List{1} oclIsTypeOf Collection(Integer)
+exec	1	OK	0	List{1} oclIsKindOf Collection(Integer)
+exec	1	OK	0	List{1} oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	List{1} oclIsKindOf Sequence(Integer)
+exec	1	OK	0	List{1} oclIsTypeOf Set(Integer)
+exec	1	OK	0	List{1} oclIsKindOf Set(Integer)
+exec	1	OK	0	List{1} oclIsTypeOf Bag(Integer)
+exec	1	OK	0	List{1} oclIsKindOf Bag(Integer)
+exec	1	OK	0	List{1} oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	List{1} oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	List{1} oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	List{1} oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	List{1} oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	List{1} oclIsKindOf Collection(OclAny)
+exec	1	OK	0	List{1} oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	List{1} oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	List{1} oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	List{1} oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	List{1} oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	List{1} oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	Dict{1=2} oclIsTypeOf OclAny
+exec	1	OK	0	Dict{1=2} oclIsKindOf OclAny
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Integer
+exec	1	OK	0	Dict{1=2} oclIsKindOf Integer
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Real
+exec	1	OK	0	Dict{1=2} oclIsKindOf Real
+exec	1	OK	0	Dict{1=2} oclIsTypeOf String
+exec	1	OK	0	Dict{1=2} oclIsKindOf String
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Boolean
+exec	1	OK	0	Dict{1=2} oclIsKindOf Boolean
+exec	1	OK	0	Dict{1=2} oclIsTypeOf FZ::Node
+exec	1	OK	0	Dict{1=2} oclIsKindOf FZ::Node
+exec	1	OK	0	Dict{1=2} oclIsTypeOf FZ::Named
+exec	1	OK	0	Dict{1=2} oclIsKindOf FZ::Named
+exec	1	OK	0	Dict{1=2} oclIsTypeOf FZ::Kind
+exec	1	OK	0	Dict{1=2} oclIsKindOf FZ::Kind
+exec	1	OK	0	Dict{1=2} oclIsTypeOf OclVoid
+exec	1	OK	0	Dict{1=2} oclIsKindOf OclVoid
+exec	1	OK	0	Dict{1=2} oclIsTypeOf OclInvalid
+exec	1	OK	0	Dict{1=2} oclIsKindOf OclInvalid
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Collection(Integer)
+exec	1	OK	0	Dict{1=2} oclIsKindOf Collection(Integer)
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	Dict{1=2} oclIsKindOf Sequence(Integer)
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Set(Integer)
+exec	1	OK	0	Dict{1=2} oclIsKindOf Set(Integer)
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Bag(Integer)
+exec	1	OK	0	Dict{1=2} oclIsKindOf Bag(Integer)
+exec	1	OK	0	Dict{1=2} oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	Dict{1=2} oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	Dict{1=2} oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	Dict{1=2} oclIsKindOf Collection(OclAny)
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	Dict{1=2} oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	Dict{1=2} oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	Dict{1=2} oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	Dict{1=2} oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf OclAny
+exec	1	OK	0	Tuple{a=1} oclIsKindOf OclAny
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Integer
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Integer
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Real
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Real
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf String
+exec	1	OK	0	Tuple{a=1} oclIsKindOf String
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Boolean
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Boolean
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf FZ::Node
+exec	1	OK	0	Tuple{a=1} oclIsKindOf FZ::Node
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf FZ::Named
+exec	1	OK	0	Tuple{a=1} oclIsKindOf FZ::Named
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf FZ::Kind
+exec	1	OK	0	Tuple{a=1} oclIsKindOf FZ::Kind
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf OclVoid
+exec	1	OK	0	Tuple{a=1} oclIsKindOf OclVoid
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf OclInvalid
+exec	1	OK	0	Tuple{a=1} oclIsKindOf OclInvalid
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Collection(Integer)
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Collection(Integer)
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Sequence(Integer)
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Set(Integer)
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Set(Integer)
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Bag(Integer)
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Bag(Integer)
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	Tuple{a=1} oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Collection(OclAny)
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	Tuple{a=1} oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	Tuple{a=1} oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	null oclIsTypeOf OclAny
+exec	1	OK	0	null oclIsKindOf OclAny
+exec	1	OK	0	null oclIsTypeOf Integer
+exec	1	OK	0	null oclIsKindOf Integer
+exec	1	OK	0	null oclIsTypeOf Real
+exec	1	OK	0	null oclIsKindOf Real
+exec	1	OK	0	null oclIsTypeOf String
+exec	1	OK	0	null oclIsKindOf String
+exec	1	OK	0	null oclIsTypeOf Boolean
+exec	1	OK	0	null oclIsKindOf Boolean
+exec	1	OK	0	null oclIsTypeOf FZ::Node
+exec	1	OK	0	null oclIsKindOf FZ::Node
+exec	1	OK	0	null oclIsTypeOf FZ::Named
+exec	1	OK	0	null oclIsKindOf FZ::Named
+exec	1	OK	0	null oclIsTypeOf FZ::Kind
+exec	1	OK	0	null oclIsKindOf FZ::Kind
+exec	1	OK	0	null oclIsTypeOf OclVoid
+exec	1	OK	0	null oclIsKindOf OclVoid
+exec	1	OK	0	null oclIsTypeOf OclInvalid
+exec	1	OK	0	null oclIsKindOf OclInvalid
+exec	1	OK	0	null oclIsTypeOf Collection(Integer)
+exec	1	OK	0	null oclIsKindOf Collection(Integer)
+exec	1	OK	0	null oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	null oclIsKindOf Sequence(Integer)
+exec	1	OK	0	null oclIsTypeOf Set(Integer)
+exec	1	OK	0	null oclIsKindOf Set(Integer)
+exec	1	OK	0	null oclIsTypeOf Bag(Integer)
+exec	1	OK	0	null oclIsKindOf Bag(Integer)
+exec	1	OK	0	null oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	null oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	null oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	null oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	null oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	null oclIsKindOf Collection(OclAny)
+exec	1	OK	0	null oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	null oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	null oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	null oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	null oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	null oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	invalid oclIsTypeOf OclAny
+exec	1	OK	0	invalid oclIsKindOf OclAny
+exec	1	OK	0	invalid oclIsTypeOf Integer
+exec	1	OK	0	invalid oclIsKindOf Integer
+exec	1	OK	0	invalid oclIsTypeOf Real
+exec	1	OK	0	invalid oclIsKindOf Real
+exec	1	OK	0	invalid oclIsTypeOf String
+exec	1	OK	0	invalid oclIsKindOf String
+exec	1	OK	0	invalid oclIsTypeOf Boolean
+exec	1	OK	0	invalid oclIsKindOf Boolean
+exec	1	OK	0	invalid oclIsTypeOf FZ::Node
+exec	1	OK	0	invalid oclIsKindOf FZ::Node
+exec	1	OK	0	invalid oclIsTypeOf FZ::Named
+exec	1	OK	0	invalid oclIsKindOf FZ::Named
+exec	1	OK	0	invalid oclIsTypeOf FZ::Kind
+exec	1	OK	0	invalid oclIsKindOf FZ::Kind
+exec	1	OK	0	invalid oclIsTypeOf OclVoid
+exec	1	OK	0	invalid oclIsKindOf OclVoid
+exec	1	OK	0	invalid oclIsTypeOf OclInvalid
+exec	1	OK	0	invalid oclIsKindOf OclInvalid
+exec	1	OK	0	invalid oclIsTypeOf Collection(Integer)
+exec	1	OK	0	invalid oclIsKindOf Collection(Integer)
+exec	1	OK	0	invalid oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	invalid oclIsKindOf Sequence(Integer)
+exec	1	OK	0	invalid oclIsTypeOf Set(Integer)
+exec	1	OK	0	invalid oclIsKindOf Set(Integer)
+exec	1	OK	0	invalid oclIsTypeOf Bag(Integer)
+exec	1	OK	0	invalid oclIsKindOf Bag(Integer)
+exec	1	OK	0	invalid oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	invalid oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	invalid oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	invalid oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	invalid oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	invalid oclIsKindOf Collection(OclAny)
+exec	1	OK	0	invalid oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	invalid oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	invalid oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	invalid oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	invalid oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	invalid oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf OclAny
+exec	1	OK	0	FZ::Kind::A oclIsKindOf OclAny
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Integer
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Integer
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Real
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Real
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf String
+exec	1	OK	0	FZ::Kind::A oclIsKindOf String
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Boolean
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Boolean
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf FZ::Node
+exec	1	OK	0	FZ::Kind::A oclIsKindOf FZ::Node
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf FZ::Named
+exec	1	OK	0	FZ::Kind::A oclIsKindOf FZ::Named
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf FZ::Kind
+exec	1	OK	0	FZ::Kind::A oclIsKindOf FZ::Kind
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf OclVoid
+exec	1	OK	0	FZ::Kind::A oclIsKindOf OclVoid
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf OclInvalid
+exec	1	OK	0	FZ::Kind::A oclIsKindOf OclInvalid
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Collection(Integer)
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Collection(Integer)
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Sequence(Integer)
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Set(Integer)
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Set(Integer)
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Bag(Integer)
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Bag(Integer)
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	FZ::Kind::A oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Collection(OclAny)
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	FZ::Kind::A oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	FZ::Kind::A oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	m oclIsTypeOf OclAny
+exec	1	OK	0	m oclIsKindOf OclAny
+exec	1	OK	0	m oclIsTypeOf Integer
+exec	1	OK	0	m oclIsKindOf Integer
+exec	1	OK	0	m oclIsTypeOf Real
+exec	1	OK	0	m oclIsKindOf Real
+exec	1	OK	0	m oclIsTypeOf String
+exec	1	OK	0	m oclIsKindOf String
+exec	1	OK	0	m oclIsTypeOf Boolean
+exec	1	OK	0	m oclIsKindOf Boolean
+exec	1	OK	0	m oclIsTypeOf FZ::Node
+exec	1	OK	0	m oclIsKindOf FZ::Node
+exec	1	OK	0	m oclIsTypeOf FZ::Named
+exec	1	OK	0	m oclIsKindOf FZ::Named
+exec	1	OK	0	m oclIsTypeOf FZ::Kind
+exec	1	OK	0	m oclIsKindOf FZ::Kind
+exec	1	OK	0	m oclIsTypeOf OclVoid
+exec	1	OK	0	m oclIsKindOf OclVoid
+exec	1	OK	0	m oclIsTypeOf OclInvalid
+exec	1	OK	0	m oclIsKindOf OclInvalid
+exec	1	OK	0	m oclIsTypeOf Collection(Integer)
+exec	1	OK	0	m oclIsKindOf Collection(Integer)
+exec	1	OK	0	m oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	m oclIsKindOf Sequence(Integer)
+exec	1	OK	0	m oclIsTypeOf Set(Integer)
+exec	1	OK	0	m oclIsKindOf Set(Integer)
+exec	1	OK	0	m oclIsTypeOf Bag(Integer)
+exec	1	OK	0	m oclIsKindOf Bag(Integer)
+exec	1	OK	0	m oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	m oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	m oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	m oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	m oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	m oclIsKindOf Collection(OclAny)
+exec	1	OK	0	m oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	m oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	m oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	m oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	m oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	m oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	Sequence{} oclIsTypeOf OclAny
+exec	1	OK	0	Sequence{} oclIsKindOf OclAny
+exec	1	OK	0	Sequence{} oclIsTypeOf Integer
+exec	1	OK	0	Sequence{} oclIsKindOf Integer
+exec	1	OK	0	Sequence{} oclIsTypeOf Real
+exec	1	OK	0	Sequence{} oclIsKindOf Real
+exec	1	OK	0	Sequence{} oclIsTypeOf String
+exec	1	OK	0	Sequence{} oclIsKindOf String
+exec	1	OK	0	Sequence{} oclIsTypeOf Boolean
+exec	1	OK	0	Sequence{} oclIsKindOf Boolean
+exec	1	OK	0	Sequence{} oclIsTypeOf FZ::Node
+exec	1	OK	0	Sequence{} oclIsKindOf FZ::Node
+exec	1	OK	0	Sequence{} oclIsTypeOf FZ::Named
+exec	1	OK	0	Sequence{} oclIsKindOf FZ::Named
+exec	1	OK	0	Sequence{} oclIsTypeOf FZ::Kind
+exec	1	OK	0	Sequence{} oclIsKindOf FZ::Kind
+exec	1	OK	0	Sequence{} oclIsTypeOf OclVoid
+exec	1	OK	0	Sequence{} oclIsKindOf OclVoid
+exec	1	OK	0	Sequence{} oclIsTypeOf OclInvalid
+exec	1	OK	0	Sequence{} oclIsKindOf OclInvalid
+exec	1	OK	0	Sequence{} oclIsTypeOf Collection(Integer)
+exec	1	OK	0	Sequence{} oclIsKindOf Collection(Integer)
+exec	1	OK	0	Sequence{} oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	Sequence{} oclIsKindOf Sequence(Integer)
+exec	1	OK	0	Sequence{} oclIsTypeOf Set(Integer)
+exec	1	OK	0	Sequence{} oclIsKindOf Set(Integer)
+exec	1	OK	0	Sequence{} oclIsTypeOf Bag(Integer)
+exec	1	OK	0	Sequence{} oclIsKindOf Bag(Integer)
+exec	1	OK	0	Sequence{} oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	Sequence{} oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	Sequence{} oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	Sequence{} oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	Sequence{} oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	Sequence{} oclIsKindOf Collection(OclAny)
+exec	1	OK	0	Sequence{} oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	Sequence{} oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	Sequence{} oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	Sequence{} oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	Sequence{} oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	Sequence{} oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	n.weight oclIsTypeOf OclAny
+exec	1	OK	0	n.weight oclIsKindOf OclAny
+exec	1	OK	0	n.weight oclIsTypeOf Integer
+exec	1	OK	0	n.weight oclIsKindOf Integer
+exec	1	OK	0	n.weight oclIsTypeOf Real
+exec	1	OK	0	n.weight oclIsKindOf Real
+exec	1	OK	0	n.weight oclIsTypeOf String
+exec	1	OK	0	n.weight oclIsKindOf String
+exec	1	OK	0	n.weight oclIsTypeOf Boolean
+exec	1	OK	0	n.weight oclIsKindOf Boolean
+exec	1	OK	0	n.weight oclIsTypeOf FZ::Node
+exec	1	OK	0	n.weight oclIsKindOf FZ::Node
+exec	1	OK	0	n.weight oclIsTypeOf FZ::Named
+exec	1	OK	0	n.weight oclIsKindOf FZ::Named
+exec	1	OK	0	n.weight oclIsTypeOf FZ::Kind
+exec	1	OK	0	n.weight oclIsKindOf FZ::Kind
+exec	1	OK	0	n.weight oclIsTypeOf OclVoid
+exec	1	OK	0	n.weight oclIsKindOf OclVoid
+exec	1	OK	0	n.weight oclIsTypeOf OclInvalid
+exec	1	OK	0	n.weight oclIsKindOf OclInvalid
+exec	1	OK	0	n.weight oclIsTypeOf Collection(Integer)
+exec	1	OK	0	n.weight oclIsKindOf Collection(Integer)
+exec	1	OK	0	n.weight oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	n.weight oclIsKindOf Sequence(Integer)
+exec	1	OK	0	n.weight oclIsTypeOf Set(Integer)
+exec	1	OK	0	n.weight oclIsKindOf Set(Integer)
+exec	1	OK	0	n.weight oclIsTypeOf Bag(Integer)
+exec	1	OK	0	n.weight oclIsKindOf Bag(Integer)
+exec	1	OK	0	n.weight oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	n.weight oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	n.weight oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	n.weight oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	n.weight oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	n.weight oclIsKindOf Collection(OclAny)
+exec	1	OK	0	n.weight oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	n.weight oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	n.weight oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	n.weight oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	n.weight oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	n.weight oclIsKindOf Collection(FZ::Named)
+exec	1	OK	0	Set{n} oclIsTypeOf OclAny
+exec	1	OK	0	Set{n} oclIsKindOf OclAny
+exec	1	OK	0	Set{n} oclIsTypeOf Integer
+exec	1	OK	0	Set{n} oclIsKindOf Integer
+exec	1	OK	0	Set{n} oclIsTypeOf Real
+exec	1	OK	0	Set{n} oclIsKindOf Real
+exec	1	OK	0	Set{n} oclIsTypeOf String
+exec	1	OK	0	Set{n} oclIsKindOf String
+exec	1	OK	0	Set{n} oclIsTypeOf Boolean
+exec	1	OK	0	Set{n} oclIsKindOf Boolean
+exec	1	OK	0	Set{n} oclIsTypeOf FZ::Node
+exec	1	OK	0	Set{n} oclIsKindOf FZ::Node
+exec	1	OK	0	Set{n} oclIsTypeOf FZ::Named
+exec	1	OK	0	Set{n} oclIsKindOf FZ::Named
+exec	1	OK	0	Set{n} oclIsTypeOf FZ::Kind
+exec	1	OK	0	Set{n} oclIsKindOf FZ::Kind
+exec	1	OK	0	Set{n} oclIsTypeOf OclVoid
+exec	1	OK	0	Set{n} oclIsKindOf OclVoid
+exec	1	OK	0	Set{n} oclIsTypeOf OclInvalid
+exec	1	OK	0	Set{n} oclIsKindOf OclInvalid
+exec	1	OK	0	Set{n} oclIsTypeOf Collection(Integer)
+exec	1	OK	0	Set{n} oclIsKindOf Collection(Integer)
+exec	1	OK	0	Set{n} oclIsTypeOf Sequence(Integer)
+exec	1	OK	0	Set{n} oclIsKindOf Sequence(Integer)
+exec	1	OK	0	Set{n} oclIsTypeOf Set(Integer)
+exec	1	OK	0	Set{n} oclIsKindOf Set(Integer)
+exec	1	OK	0	Set{n} oclIsTypeOf Bag(Integer)
+exec	1	OK	0	Set{n} oclIsKindOf Bag(Integer)
+exec	1	OK	0	Set{n} oclIsTypeOf OrderedSet(Integer)
+exec	1	OK	0	Set{n} oclIsKindOf OrderedSet(Integer)
+exec	1	OK	0	Set{n} oclIsTypeOf Sequence(OclAny)
+exec	1	OK	0	Set{n} oclIsKindOf Sequence(OclAny)
+exec	1	OK	0	Set{n} oclIsTypeOf Collection(OclAny)
+exec	1	OK	0	Set{n} oclIsKindOf Collection(OclAny)
+exec	1	OK	0	Set{n} oclIsTypeOf Tuple(a:Integer)
+exec	1	OK	0	Set{n} oclIsKindOf Tuple(a:Integer)
+exec	1	OK	0	Set{n} oclIsTypeOf Set(FZ::Node)
+exec	1	OK	0	Set{n} oclIsKindOf Set(FZ::Node)
+exec	1	OK	0	Set{n} oclIsTypeOf Collection(FZ::Named)
+exec	1	OK	0	Set{n} oclIsKindOf Collection(FZ::Named)
+
+@case fuzz_types
+@file result.txt 142
+id	fuzz_types
+load	WARNING
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 708
+k1, data: true
+k2, data: false
+k3, data: false
+k4, data: true
+k5, data: false
+k6, data: false
+k7, data: false
+k8, data: false
+k9, data: false
+k10, data: false
+k11, data: true
+k12, data: 5
+a1, data: <Invalid>
+a2, data: 1.0
+a3, data: <Invalid>
+a4, data: <Invalid>
+a5, data: <Invalid>
+a6, data: <Invalid>
+a7
+a8, data: <Invalid>
+a9, data: <Invalid>
+a10, data: false
+a11, data: true
+a12, data: <Invalid>
+a13, data: 1
+a14, data: <Invalid>
+t1, data: Tuple{a = invalid, b = 1}
+t2, data: Tuple{a = invalid}
+t3, data: Tuple{a = null}
+t4, data: Tuple{a = invalid}
+t5, data: <Invalid>
+t6, data: 1
+s1, data: <Invalid>
+s2, data: <Invalid>
+s3, data: [1, null]
+s4, data: <Invalid>
+l1, data: <Invalid>
+d1, data: Dictionary{}
+
+@file diag.txt 851
+problem	warning	types.qvto	9	608	22	Incorrect cast
+problem	warning	types.qvto	12	1039	24	Incorrect cast
+problem	warning	types.qvto	12	1110	24	Incorrect cast
+load	0	WARNING	0	OK
+load	1	WARNING	0	Incorrect cast
+load	1	WARNING	0	Incorrect cast
+load	1	WARNING	0	Incorrect cast
+exec	1	OK	0	k1
+exec	1	OK	0	k2
+exec	1	OK	0	k3
+exec	1	OK	0	k4
+exec	1	OK	0	k5
+exec	1	OK	0	k6
+exec	1	OK	0	k7
+exec	1	OK	0	k8
+exec	1	OK	0	k9
+exec	1	OK	0	k10
+exec	1	OK	0	k11
+exec	1	OK	0	k12
+exec	1	OK	0	a1
+exec	1	OK	0	a2
+exec	1	OK	0	a3
+exec	1	OK	0	a4
+exec	1	OK	0	a5
+exec	1	OK	0	a6
+exec	1	OK	0	a7
+exec	1	OK	0	a8
+exec	1	OK	0	a9
+exec	1	OK	0	a10
+exec	1	OK	0	a11
+exec	1	OK	0	a12
+exec	1	OK	0	a13
+exec	1	OK	0	a14
+exec	1	OK	0	t1
+exec	1	OK	0	t2
+exec	1	OK	0	t3
+exec	1	OK	0	t4
+exec	1	OK	0	t5
+exec	1	OK	0	t6
+exec	1	OK	0	s1
+exec	1	OK	0	s2
+exec	1	OK	0	s3
+exec	1	OK	0	s4
+exec	1	OK	0	l1
+exec	1	OK	0	d1
+

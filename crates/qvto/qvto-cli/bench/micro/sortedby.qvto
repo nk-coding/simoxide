@@ -1,0 +1,9 @@
+-- sortedBy of 50 000 Integers and 20 000 Strings (benchmark B6).
+transformation sortedby();
+
+main() {
+	var xs := Sequence{1..50000}->collect(i | (i * 7919).mod(100003));
+	var sorted := xs->sortedBy(x | x);
+	var strs := Sequence{1..20000}->collect(i | 's' + ((i * 31).mod(20011)).toString())->sortedBy(s | s);
+	log(sorted->first().toString() + ' ' + sorted->last().toString() + ' ' + strs->first() + ' ' + strs->last());
+}

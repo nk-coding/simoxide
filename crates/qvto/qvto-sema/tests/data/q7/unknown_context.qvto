@@ -1,0 +1,11 @@
+transformation unknown_context();
+query Unknown1::repr() : String {
+	return 'x';
+}
+query Unknown1::toString() : String {
+	return 'y';
+}
+query Unknown1::foo() : String {
+	return 'z';
+}
+main() {}

@@ -1,0 +1,17 @@
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation types(in m : FZ);
+main() {
+  var n : FZ::Node := m.objectsOfType(FZ::Node)->any(true);
+  log('k1', 1.oclIsKindOf(Integer)); log('k2', 2147483648.oclIsKindOf(Integer)); log('k3', 2147483648.oclIsKindOf(Real));
+  log('k4', 1.oclIsKindOf(Real)); log('k5', 1.oclIsTypeOf(Real)); log('k6', 2147483648.oclIsTypeOf(Integer));
+  log('k7', 2.5.oclIsKindOf(Integer)); log('k8', n.big.oclIsKindOf(Integer)); log('k9', n.big.oclIsKindOf(Real));
+  log('k10', n.big.oclIsTypeOf(Integer)); log('k11', n.value.oclIsKindOf(Integer)); log('k12', n.big);
+  log('a1', 2.5.oclAsType(Integer)); log('a2', 1.oclAsType(Real)); log('a3', 2147483648.oclAsType(Real)); log('a4', 2147483648.oclAsType(Integer));
+  log('a5', n.big.oclAsType(Integer)); log('a6', n.big.oclAsType(Real)); log('a7', null.oclAsType(Integer)); log('a8', 'x'.oclAsType(Integer));
+  log('a9', n.oclAsType(FZ::Leaf)); log('a10', (1 + 2147483647).oclIsKindOf(Integer)); log('a11', (2147483647+1-1).oclIsKindOf(Integer));
+  log('a12', (1.0).oclAsType(Integer)); log('a13', 1.oclAsType(OclAny)); log('a14', (1/2).oclAsType(Integer));
+  log('t1', Tuple{a = invalid, b = 1}); log('t2', Tuple{a = 'a'.toInteger()}); log('t3', Tuple{a = null}); log('t4', Tuple{a = Sequence{1}->at(3)});
+  log('t5', Tuple{a = invalid}.a); log('t6', Tuple{a = 1, b = invalid}.a);
+  log('s1', Sequence{1, invalid, 2}); log('s2', Set{invalid}); log('s3', Sequence{1, null}); log('s4', OrderedSet{1, 'a'.toInteger()});
+  log('l1', List{1, invalid}); log('d1', Dict{1 = invalid});
+}

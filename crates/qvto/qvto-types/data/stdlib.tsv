@@ -1,0 +1,745 @@
+type	predefined	oclstdlib::OclAny	AnyType
+op	ocl	oclstdlib::OclAny	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	oclstdlib::OclAny	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	oclIsNew		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	toString		oclstdlib::String	
+op	ocl	oclstdlib::OclAny	oclAsSet		Set(oclstdlib::T)	
+op	ocl	oclstdlib::OclAny	<	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	>	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	<=	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclAny	>=	object:oclstdlib::T	oclstdlib::Boolean	
+type	predefined	oclstdlib::OclVoid	VoidType
+op	ocl	oclstdlib::OclVoid	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	oclstdlib::OclVoid	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	oclIsNew		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	toString		oclstdlib::String	
+op	ocl	oclstdlib::OclVoid	oclAsSet		Set(oclstdlib::T)	
+op	ocl	oclstdlib::OclVoid	<	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	>	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	<=	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclVoid	>=	object:oclstdlib::T	oclstdlib::Boolean	
+type	predefined	oclstdlib::OclInvalid	InvalidType
+op	ocl	oclstdlib::OclInvalid	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	oclstdlib::OclInvalid	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	oclIsNew		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	toString		oclstdlib::String	
+op	ocl	oclstdlib::OclInvalid	oclAsSet		Set(oclstdlib::T)	
+op	ocl	oclstdlib::OclInvalid	<	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	>	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	<=	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclInvalid	>=	object:oclstdlib::T	oclstdlib::Boolean	
+type	predefined	oclstdlib::Boolean	PrimitiveType
+op	ocl	oclstdlib::Boolean	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	oclstdlib::Boolean	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	oclIsNew		oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	toString		oclstdlib::String	
+op	ocl	oclstdlib::Boolean	oclAsSet		Set(oclstdlib::T)	
+op	ocl	oclstdlib::Boolean	not		oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	and	b:oclstdlib::Boolean	oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	or	b:oclstdlib::Boolean	oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	implies	b:oclstdlib::Boolean	oclstdlib::Boolean	
+op	ocl	oclstdlib::Boolean	xor	b:oclstdlib::Boolean	oclstdlib::Boolean	
+type	predefined	oclstdlib::Integer	PrimitiveType
+op	ocl	oclstdlib::Integer	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	oclstdlib::Integer	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	oclIsNew		oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	toString		oclstdlib::String	
+op	ocl	oclstdlib::Integer	oclAsSet		Set(oclstdlib::T)	
+op	ocl	oclstdlib::Integer	<	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	>	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	<=	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	>=	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	+	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Integer	-	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Integer	-		oclstdlib::Real	
+op	ocl	oclstdlib::Integer	*	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Integer	/	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Integer	min	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Integer	max	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Integer	abs		oclstdlib::Real	
+op	ocl	oclstdlib::Integer	floor		oclstdlib::Integer	
+op	ocl	oclstdlib::Integer	round		oclstdlib::Integer	
+op	ocl	oclstdlib::Integer	<	i:oclstdlib::Integer	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	>	i:oclstdlib::Integer	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	<=	i:oclstdlib::Integer	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	>=	i:oclstdlib::Integer	oclstdlib::Boolean	
+op	ocl	oclstdlib::Integer	div	i:oclstdlib::Integer	oclstdlib::Integer	
+op	ocl	oclstdlib::Integer	mod	i:oclstdlib::Integer	oclstdlib::Integer	
+type	predefined	oclstdlib::Real	PrimitiveType
+op	ocl	oclstdlib::Real	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	oclstdlib::Real	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	oclIsNew		oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	toString		oclstdlib::String	
+op	ocl	oclstdlib::Real	oclAsSet		Set(oclstdlib::T)	
+op	ocl	oclstdlib::Real	<	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	>	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	<=	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	>=	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::Real	+	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Real	-	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Real	-		oclstdlib::Real	
+op	ocl	oclstdlib::Real	*	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Real	/	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Real	min	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Real	max	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::Real	abs		oclstdlib::Real	
+op	ocl	oclstdlib::Real	floor		oclstdlib::Integer	
+op	ocl	oclstdlib::Real	round		oclstdlib::Integer	
+type	predefined	oclstdlib::String	PrimitiveType
+op	ocl	oclstdlib::String	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	oclstdlib::String	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	oclstdlib::String	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	oclstdlib::String	oclIsNew		oclstdlib::Boolean	
+op	ocl	oclstdlib::String	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	toString		oclstdlib::String	
+op	ocl	oclstdlib::String	oclAsSet		Set(oclstdlib::T)	
+op	ocl	oclstdlib::String	<	s:oclstdlib::String	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	>	s:oclstdlib::String	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	<=	s:oclstdlib::String	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	>=	s:oclstdlib::String	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	size		oclstdlib::Integer	
+op	ocl	oclstdlib::String	concat	s:oclstdlib::String	oclstdlib::String	
+op	ocl	oclstdlib::String	substring	lower:oclstdlib::Integer;upper:oclstdlib::Integer	oclstdlib::String	
+op	ocl	oclstdlib::String	toInteger		oclstdlib::Integer	
+op	ocl	oclstdlib::String	toReal		oclstdlib::Real	
+op	ocl	oclstdlib::String	toLower		oclstdlib::String	
+op	ocl	oclstdlib::String	toUpper		oclstdlib::String	
+op	ocl	oclstdlib::String	+	s:oclstdlib::String	oclstdlib::String	
+op	ocl	oclstdlib::String	toLowerCase		oclstdlib::String	
+op	ocl	oclstdlib::String	toUpperCase		oclstdlib::String	
+op	ocl	oclstdlib::String	at	index:oclstdlib::Integer	oclstdlib::String	
+op	ocl	oclstdlib::String	characters		Sequence(oclstdlib::T)	
+op	ocl	oclstdlib::String	endsWith	s:oclstdlib::String	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	equalsIgnoreCase	s:oclstdlib::String	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	indexOf	s:oclstdlib::String	oclstdlib::Integer	
+op	ocl	oclstdlib::String	lastIndexOf	s:oclstdlib::String	oclstdlib::Integer	
+op	ocl	oclstdlib::String	matches	s:oclstdlib::String	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	replaceAll	regex:oclstdlib::String;replacement:oclstdlib::String	oclstdlib::String	
+op	ocl	oclstdlib::String	replaceFirst	regex:oclstdlib::String;replacement:oclstdlib::String	oclstdlib::String	
+op	ocl	oclstdlib::String	startsWith	s:oclstdlib::String	oclstdlib::Boolean	
+op	ocl	oclstdlib::String	substituteAll	regex:oclstdlib::String;replacement:oclstdlib::String	oclstdlib::String	
+op	ocl	oclstdlib::String	substituteFirst	regex:oclstdlib::String;replacement:oclstdlib::String	oclstdlib::String	
+op	ocl	oclstdlib::String	toBoolean		oclstdlib::Boolean	
+op	ocl	oclstdlib::String	tokenize		Sequence(oclstdlib::T)	
+op	ocl	oclstdlib::String	tokenize	delimiters:oclstdlib::String	Sequence(oclstdlib::T)	
+op	ocl	oclstdlib::String	tokenize	delimiters:oclstdlib::String;returnDelimiters:oclstdlib::Boolean	Sequence(oclstdlib::T)	
+op	ocl	oclstdlib::String	trim		oclstdlib::String	
+type	predefined	oclstdlib::UnlimitedNatural	PrimitiveType
+op	ocl	oclstdlib::UnlimitedNatural	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	oclstdlib::UnlimitedNatural	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	oclIsNew		oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	toString		oclstdlib::String	
+op	ocl	oclstdlib::UnlimitedNatural	oclAsSet		Set(oclstdlib::T)	
+op	ocl	oclstdlib::UnlimitedNatural	<	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	>	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	<=	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	>=	r:oclstdlib::Real	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	+	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::UnlimitedNatural	-	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::UnlimitedNatural	-		oclstdlib::Real	
+op	ocl	oclstdlib::UnlimitedNatural	*	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::UnlimitedNatural	/	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::UnlimitedNatural	min	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::UnlimitedNatural	max	r:oclstdlib::Real	oclstdlib::Real	
+op	ocl	oclstdlib::UnlimitedNatural	abs		oclstdlib::Real	
+op	ocl	oclstdlib::UnlimitedNatural	floor		oclstdlib::Integer	
+op	ocl	oclstdlib::UnlimitedNatural	round		oclstdlib::Integer	
+op	ocl	oclstdlib::UnlimitedNatural	<	n:oclstdlib::UnlimitedNatural	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	>	n:oclstdlib::UnlimitedNatural	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	<=	n:oclstdlib::UnlimitedNatural	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	>=	n:oclstdlib::UnlimitedNatural	oclstdlib::Boolean	
+op	ocl	oclstdlib::UnlimitedNatural	toInteger		oclstdlib::Integer	
+op	ocl	oclstdlib::UnlimitedNatural	div	n:oclstdlib::UnlimitedNatural	oclstdlib::Integer	
+op	ocl	oclstdlib::UnlimitedNatural	mod	n:oclstdlib::UnlimitedNatural	oclstdlib::Integer	
+type	predefined	TypeType(oclstdlib::T)	TypeType
+op	ocl	TypeType(oclstdlib::T)	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::T)	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::T)	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	TypeType(oclstdlib::T)	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::T)	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::T)	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::T)	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::T)	oclIsNew		oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::T)	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::T)	toString		oclstdlib::String	
+op	ocl	TypeType(oclstdlib::T)	oclAsSet		Set(oclstdlib::T)	
+op	ocl	TypeType(oclstdlib::T)	allInstances		Set(oclstdlib::T)	
+type	predefined	oclstdlib::OclElement	ElementType
+type	predefined	oclstdlib::OclMessage	MessageType
+op	ocl	oclstdlib::OclMessage	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclMessage	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclMessage	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	oclstdlib::OclMessage	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclMessage	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclMessage	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclMessage	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclMessage	oclIsNew		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclMessage	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	oclstdlib::OclMessage	toString		oclstdlib::String	
+op	ocl	oclstdlib::OclMessage	oclAsSet		Set(oclstdlib::T)	
+op	ocl	oclstdlib::OclMessage	hasReturned		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclMessage	result		oclstdlib::T	
+op	ocl	oclstdlib::OclMessage	isSignalSent		oclstdlib::Boolean	
+op	ocl	oclstdlib::OclMessage	isOperationCall		oclstdlib::Boolean	
+type	predefined	oclstdlib::State	ElementType
+type	predefined	Collection(oclstdlib::T)	CollectionType
+op	ocl	Collection(oclstdlib::T)	=	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Collection(oclstdlib::T)	<>	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Collection(oclstdlib::T)	count	object:oclstdlib::T	oclstdlib::Integer	
+op	ocl	Collection(oclstdlib::T)	excludes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	Collection(oclstdlib::T)	excludesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Collection(oclstdlib::T)	includes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	Collection(oclstdlib::T)	includesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Collection(oclstdlib::T)	isEmpty		oclstdlib::Boolean	
+op	ocl	Collection(oclstdlib::T)	notEmpty		oclstdlib::Boolean	
+op	ocl	Collection(oclstdlib::T)	product	c2:Collection(oclstdlib::T2)	Set(Tuple(first:oclstdlib::T,second:oclstdlib::T2))	
+op	ocl	Collection(oclstdlib::T)	sum		oclstdlib::Real	
+op	ocl	Collection(oclstdlib::T)	size		oclstdlib::Integer	
+op	ocl	Collection(oclstdlib::T)	max		oclstdlib::Real	
+op	ocl	Collection(oclstdlib::T)	min		oclstdlib::Real	
+op	ocl	Collection(oclstdlib::T)	selectByKind	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	Collection(oclstdlib::T)	selectByType	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	Collection(oclstdlib::T)	oclAsSet		Set(oclstdlib::T)	
+op	ocl	Collection(oclstdlib::T)	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	Collection(oclstdlib::T)	oclIsInvalid		oclstdlib::Boolean	
+type	predefined	Set(oclstdlib::T)	SetType
+op	ocl	Set(oclstdlib::T)	=	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	<>	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	count	object:oclstdlib::T	oclstdlib::Integer	
+op	ocl	Set(oclstdlib::T)	excludes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	excludesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	includes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	includesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	isEmpty		oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	notEmpty		oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	product	c2:Collection(oclstdlib::T2)	Set(Tuple(first:oclstdlib::T,second:oclstdlib::T2))	
+op	ocl	Set(oclstdlib::T)	sum		oclstdlib::Real	
+op	ocl	Set(oclstdlib::T)	size		oclstdlib::Integer	
+op	ocl	Set(oclstdlib::T)	max		oclstdlib::Real	
+op	ocl	Set(oclstdlib::T)	min		oclstdlib::Real	
+op	ocl	Set(oclstdlib::T)	selectByKind	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	Set(oclstdlib::T)	selectByType	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	Set(oclstdlib::T)	oclAsSet		Set(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	=	set:Set(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	<>	set:Set(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Set(oclstdlib::T)	union	bag:Bag(oclstdlib::T)	Bag(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	union	set:Set(oclstdlib::T)	Set(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	-	set:Set(oclstdlib::T)	Set(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	intersection	bag:Bag(oclstdlib::T)	Set(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	intersection	set:Set(oclstdlib::T)	Set(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	including	object:oclstdlib::T	Set(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	excluding	object:oclstdlib::T	Set(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	symmetricDifference	s:Set(oclstdlib::T)	Set(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	flatten		Set(oclstdlib::T2)	
+op	ocl	Set(oclstdlib::T)	asBag		Bag(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	asSet		Set(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	asSequence		Sequence(oclstdlib::T)	
+op	ocl	Set(oclstdlib::T)	asOrderedSet		OrderedSet(oclstdlib::T)	
+type	predefined	OrderedSet(oclstdlib::T)	OrderedSetType
+op	ocl	OrderedSet(oclstdlib::T)	=	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	<>	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	count	object:oclstdlib::T	oclstdlib::Integer	
+op	ocl	OrderedSet(oclstdlib::T)	excludes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	excludesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	includes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	includesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	isEmpty		oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	notEmpty		oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	product	c2:Collection(oclstdlib::T2)	Set(Tuple(first:oclstdlib::T,second:oclstdlib::T2))	
+op	ocl	OrderedSet(oclstdlib::T)	sum		oclstdlib::Real	
+op	ocl	OrderedSet(oclstdlib::T)	size		oclstdlib::Integer	
+op	ocl	OrderedSet(oclstdlib::T)	max		oclstdlib::Real	
+op	ocl	OrderedSet(oclstdlib::T)	min		oclstdlib::Real	
+op	ocl	OrderedSet(oclstdlib::T)	selectByKind	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	OrderedSet(oclstdlib::T)	selectByType	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	OrderedSet(oclstdlib::T)	oclAsSet		Set(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	=	set:Set(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	<>	set:Set(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	union	bag:Bag(oclstdlib::T)	Bag(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	union	set:Set(oclstdlib::T)	Set(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	-	set:Set(oclstdlib::T)	Set(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	intersection	bag:Bag(oclstdlib::T)	Set(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	intersection	set:Set(oclstdlib::T)	Set(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	including	object:oclstdlib::T	Set(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	excluding	object:oclstdlib::T	Set(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	symmetricDifference	s:Set(oclstdlib::T)	Set(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	flatten		Set(oclstdlib::T2)	
+op	ocl	OrderedSet(oclstdlib::T)	asBag		Bag(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	asSet		Set(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	asSequence		Sequence(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	asOrderedSet		OrderedSet(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	=	s:OrderedSet(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	<>	s:OrderedSet(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	OrderedSet(oclstdlib::T)	append	object:oclstdlib::T	OrderedSet(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	at	index:oclstdlib::Integer	oclstdlib::T	
+op	ocl	OrderedSet(oclstdlib::T)	indexOf	object:oclstdlib::T	oclstdlib::Integer	
+op	ocl	OrderedSet(oclstdlib::T)	insertAt	index:oclstdlib::Integer;object:oclstdlib::T	OrderedSet(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	prepend	object:oclstdlib::T	OrderedSet(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	subOrderedSet	lower:oclstdlib::Integer;upper:oclstdlib::Integer	OrderedSet(oclstdlib::T)	
+op	ocl	OrderedSet(oclstdlib::T)	first		oclstdlib::T	
+op	ocl	OrderedSet(oclstdlib::T)	last		oclstdlib::T	
+type	predefined	Bag(oclstdlib::T)	BagType
+op	ocl	Bag(oclstdlib::T)	=	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	<>	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	count	object:oclstdlib::T	oclstdlib::Integer	
+op	ocl	Bag(oclstdlib::T)	excludes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	excludesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	includes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	includesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	isEmpty		oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	notEmpty		oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	product	c2:Collection(oclstdlib::T2)	Set(Tuple(first:oclstdlib::T,second:oclstdlib::T2))	
+op	ocl	Bag(oclstdlib::T)	sum		oclstdlib::Real	
+op	ocl	Bag(oclstdlib::T)	size		oclstdlib::Integer	
+op	ocl	Bag(oclstdlib::T)	max		oclstdlib::Real	
+op	ocl	Bag(oclstdlib::T)	min		oclstdlib::Real	
+op	ocl	Bag(oclstdlib::T)	selectByKind	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	Bag(oclstdlib::T)	selectByType	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	Bag(oclstdlib::T)	oclAsSet		Set(oclstdlib::T)	
+op	ocl	Bag(oclstdlib::T)	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	=	bag:Bag(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	<>	bag:Bag(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Bag(oclstdlib::T)	union	bag:Bag(oclstdlib::T)	Bag(oclstdlib::T)	
+op	ocl	Bag(oclstdlib::T)	union	set:Set(oclstdlib::T)	Bag(oclstdlib::T)	
+op	ocl	Bag(oclstdlib::T)	intersection	bag:Bag(oclstdlib::T)	Bag(oclstdlib::T)	
+op	ocl	Bag(oclstdlib::T)	intersection	set:Set(oclstdlib::T)	Bag(oclstdlib::T)	
+op	ocl	Bag(oclstdlib::T)	including	object:oclstdlib::T	Bag(oclstdlib::T)	
+op	ocl	Bag(oclstdlib::T)	excluding	object:oclstdlib::T	Bag(oclstdlib::T)	
+op	ocl	Bag(oclstdlib::T)	flatten		Bag(oclstdlib::T2)	
+op	ocl	Bag(oclstdlib::T)	asBag		Bag(oclstdlib::T)	
+op	ocl	Bag(oclstdlib::T)	asSet		Set(oclstdlib::T)	
+op	ocl	Bag(oclstdlib::T)	asSequence		Sequence(oclstdlib::T)	
+op	ocl	Bag(oclstdlib::T)	asOrderedSet		OrderedSet(oclstdlib::T)	
+type	predefined	Sequence(oclstdlib::T)	SequenceType
+op	ocl	Sequence(oclstdlib::T)	=	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	<>	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	count	object:oclstdlib::T	oclstdlib::Integer	
+op	ocl	Sequence(oclstdlib::T)	excludes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	excludesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	includes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	includesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	isEmpty		oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	notEmpty		oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	product	c2:Collection(oclstdlib::T2)	Set(Tuple(first:oclstdlib::T,second:oclstdlib::T2))	
+op	ocl	Sequence(oclstdlib::T)	sum		oclstdlib::Real	
+op	ocl	Sequence(oclstdlib::T)	size		oclstdlib::Integer	
+op	ocl	Sequence(oclstdlib::T)	max		oclstdlib::Real	
+op	ocl	Sequence(oclstdlib::T)	min		oclstdlib::Real	
+op	ocl	Sequence(oclstdlib::T)	selectByKind	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	Sequence(oclstdlib::T)	selectByType	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	Sequence(oclstdlib::T)	oclAsSet		Set(oclstdlib::T)	
+op	ocl	Sequence(oclstdlib::T)	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	=	s:Sequence(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	<>	s:Sequence(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	union	s:Sequence(oclstdlib::T)	Sequence(oclstdlib::T)	
+op	ocl	Sequence(oclstdlib::T)	append	object:oclstdlib::T	Sequence(oclstdlib::T)	
+op	ocl	Sequence(oclstdlib::T)	prepend	object:oclstdlib::T	Sequence(oclstdlib::T)	
+op	ocl	Sequence(oclstdlib::T)	insertAt	index:oclstdlib::Integer;object:oclstdlib::T	Sequence(oclstdlib::T)	
+op	ocl	Sequence(oclstdlib::T)	subSequence	lower:oclstdlib::Integer;upper:oclstdlib::Integer	Sequence(oclstdlib::T)	
+op	ocl	Sequence(oclstdlib::T)	at	index:oclstdlib::Integer	oclstdlib::T	
+op	ocl	Sequence(oclstdlib::T)	indexOf	object:oclstdlib::T	oclstdlib::Integer	
+op	ocl	Sequence(oclstdlib::T)	including	object:oclstdlib::T	Sequence(oclstdlib::T)	
+op	ocl	Sequence(oclstdlib::T)	excluding	object:oclstdlib::T	Sequence(oclstdlib::T)	
+op	ocl	Sequence(oclstdlib::T)	first		oclstdlib::T	
+op	ocl	Sequence(oclstdlib::T)	last		oclstdlib::T	
+op	ocl	Sequence(oclstdlib::T)	flatten		Sequence(oclstdlib::T2)	
+op	ocl	Sequence(oclstdlib::T)	asBag		Bag(oclstdlib::T)	
+op	ocl	Sequence(oclstdlib::T)	asSet		Set(oclstdlib::T)	
+op	ocl	Sequence(oclstdlib::T)	asSequence		oclstdlib::Boolean	
+op	ocl	Sequence(oclstdlib::T)	asOrderedSet		OrderedSet(oclstdlib::T)	
+type	predefined	List(oclstdlib::T)	ListType
+op	ocl	List(oclstdlib::T)	=	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	List(oclstdlib::T)	<>	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	List(oclstdlib::T)	count	object:oclstdlib::T	oclstdlib::Integer	
+op	ocl	List(oclstdlib::T)	excludes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	List(oclstdlib::T)	excludesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	List(oclstdlib::T)	includes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	List(oclstdlib::T)	includesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	List(oclstdlib::T)	isEmpty		oclstdlib::Boolean	
+op	ocl	List(oclstdlib::T)	notEmpty		oclstdlib::Boolean	
+op	ocl	List(oclstdlib::T)	product	c2:Collection(oclstdlib::T2)	Set(Tuple(first:oclstdlib::T,second:oclstdlib::T2))	
+op	ocl	List(oclstdlib::T)	sum		oclstdlib::Real	
+op	ocl	List(oclstdlib::T)	size		oclstdlib::Integer	
+op	ocl	List(oclstdlib::T)	max		oclstdlib::Real	
+op	ocl	List(oclstdlib::T)	min		oclstdlib::Real	
+op	ocl	List(oclstdlib::T)	selectByKind	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	List(oclstdlib::T)	selectByType	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	List(oclstdlib::T)	oclAsSet		Set(oclstdlib::T)	
+op	ocl	List(oclstdlib::T)	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	List(oclstdlib::T)	oclIsInvalid		oclstdlib::Boolean	
+type	predefined	Dict(Stdlib::KeyT,oclstdlib::T)	DictionaryType
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	=	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	<>	c:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	count	object:oclstdlib::T	oclstdlib::Integer	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	excludes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	excludesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	includes	object:oclstdlib::T	oclstdlib::Boolean	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	includesAll	c2:Collection(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	isEmpty		oclstdlib::Boolean	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	notEmpty		oclstdlib::Boolean	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	product	c2:Collection(oclstdlib::T2)	Set(Tuple(first:oclstdlib::T,second:oclstdlib::T2))	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	sum		oclstdlib::Real	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	size		oclstdlib::Integer	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	max		oclstdlib::Real	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	min		oclstdlib::Real	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	selectByKind	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	selectByType	typespec:TypeType(oclstdlib::T)	Collection(oclstdlib::T2)	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	oclAsSet		Set(oclstdlib::T)	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	Dict(Stdlib::KeyT,oclstdlib::T)	oclIsInvalid		oclstdlib::Boolean	
+type	predefined	TypeType(oclstdlib::String)	TypeType
+op	ocl	TypeType(oclstdlib::String)	=	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::String)	<>	object:oclstdlib::OclAny	oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::String)	oclAsType	typespec:TypeType(oclstdlib::T)	oclstdlib::T	
+op	ocl	TypeType(oclstdlib::String)	oclIsKindOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::String)	oclIsTypeOf	typespec:TypeType(oclstdlib::T)	oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::String)	oclIsUndefined		oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::String)	oclIsInvalid		oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::String)	oclIsNew		oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::String)	oclIsInState	statespec:oclstdlib::State	oclstdlib::Boolean	
+op	ocl	TypeType(oclstdlib::String)	toString		oclstdlib::String	
+op	ocl	TypeType(oclstdlib::String)	oclAsSet		Set(oclstdlib::T)	
+op	ocl	TypeType(oclstdlib::String)	allInstances		Set(oclstdlib::T)	
+type	stdlib	Stdlib::Element	EClass	abstract
+type	stdlib	Stdlib::Exception	EClass
+type	stdlib	Stdlib::AssertionFailed	EClass	Stdlib::Exception
+type	stdlib	Stdlib::Model	ModelType
+type	stdlib	Stdlib::OrderedTupleType(T)	OrderedTupleType
+type	stdlib	Stdlib::Object	EClass	abstract
+type	stdlib	Stdlib::Status	EClass
+type	stdlib	Stdlib::Transformation	EClass	abstract
+type	stdlib	List(oclstdlib::T)	ListType
+type	stdlib	Stdlib::KeyT	TemplateParameterType
+type	stdlib	Dict(Stdlib::KeyT,oclstdlib::T)	DictionaryType
+type	stdlib	Stdlib::CommonT	TemplateParameterType
+type	stdlib	Stdlib::String	Typedef
+type	stdlib	Set(Stdlib::Element)	SetType
+type	stdlib	Stdlib::OclAny	Typedef
+type	stdlib	Collection(oclstdlib::T2)	CollectionType
+type	stdlib	List(oclstdlib::Integer)	ListType
+type	stdlib	Stdlib::Integer	Typedef
+type	stdlib	List(Stdlib::Status)	ListType
+type	stdlib	List(oclstdlib::T2)	ListType
+type	stdlib	List(Stdlib::CommonT)	ListType
+type	stdlib	Stdlib::List(T)	Typedef
+type	stdlib	List(Stdlib::KeyT)	ListType
+type	stdlib	Stdlib::Dictionary(KeyT, T)	Typedef
+type	stdlib	Stdlib::Collection(T)	Typedef
+type	stdlib	Set(oclstdlib::T2)	SetType
+type	stdlib	Bag(oclstdlib::T2)	BagType
+type	stdlib	Set(Stdlib::CommonT)	SetType
+type	stdlib	Bag(Stdlib::CommonT)	BagType
+type	stdlib	Stdlib::Set(T)	Typedef
+type	stdlib	OrderedSet(Stdlib::CommonT)	OrderedSetType
+type	stdlib	Stdlib::OrderedSet(T)	Typedef
+type	stdlib	Stdlib::Bag(T)	Typedef
+type	stdlib	Sequence(oclstdlib::T2)	SequenceType
+type	stdlib	Sequence(Stdlib::CommonT)	SequenceType
+type	stdlib	Stdlib::Sequence(T)	Typedef
+type	stdlib	TypeType(oclstdlib::String)	TypeType
+op	class	Stdlib::Element	_localId		oclstdlib::String	unsupported=
+op	class	Stdlib::Element	_globalId		oclstdlib::String	unsupported=
+op	class	Stdlib::Element	allSubobjects		Set(Stdlib::Element)	
+op	class	Stdlib::Element	allSubobjectsOfType	type:TypeType(oclstdlib::T)	Set(oclstdlib::T)	
+op	class	Stdlib::Element	allSubobjectsOfKind	type:TypeType(oclstdlib::T)	Set(oclstdlib::T)	
+op	class	Stdlib::Element	clone		oclstdlib::T	
+op	class	Stdlib::Element	container		Stdlib::Element	
+op	class	Stdlib::Element	deepclone		oclstdlib::T	
+op	class	Stdlib::Element	markedAs	value:oclstdlib::String	oclstdlib::Boolean	unsupported=
+op	class	Stdlib::Element	markValue		Stdlib::Object	unsupported=
+op	class	Stdlib::Element	metaClassName		oclstdlib::String	
+op	class	Stdlib::Element	stereotypedBy	value:oclstdlib::String	oclstdlib::Boolean	unsupported=
+op	class	Stdlib::Element	stereotypedStrictBy	value:oclstdlib::String	oclstdlib::Boolean	unsupported=
+op	class	Stdlib::Element	subobjects		Set(Stdlib::Element)	
+op	class	Stdlib::Element	subobjectsOfType	type:TypeType(oclstdlib::T)	Set(oclstdlib::T)	
+op	class	Stdlib::Element	subobjectsOfKind	type:TypeType(oclstdlib::T)	Set(oclstdlib::T)	
+op	class	Stdlib::Exception	getArgument		oclstdlib::String	
+op	class	Stdlib::Model	asTransformation	model:Stdlib::Model	Stdlib::Transformation	unsupported=
+op	class	Stdlib::Model	copy		oclstdlib::T	
+op	class	Stdlib::Model	createEmptyModel		oclstdlib::T	static
+op	class	Stdlib::Model	objects		Set(Stdlib::Element)	
+op	class	Stdlib::Model	objectsOfType	type:TypeType(oclstdlib::T)	Set(oclstdlib::T)	
+op	class	Stdlib::Model	objectsOfKind	type:TypeType(oclstdlib::T)	Set(oclstdlib::T)	
+op	class	Stdlib::Model	removeElement	element:Stdlib::Element	oclstdlib::OclVoid	
+op	class	Stdlib::Model	rootObjects		Set(Stdlib::Element)	
+op	class	Stdlib::Model	allInstances	OclType:TypeType(oclstdlib::T)	Set(oclstdlib::T)	deprecatedBy=Model::objectsOfKind(OclType)
+op	class	Stdlib::Status	succeeded		oclstdlib::Boolean	
+op	class	Stdlib::Status	failed		oclstdlib::Boolean	
+op	class	Stdlib::Status	raisedException		Stdlib::Exception	
+op	class	Stdlib::Transformation	transform		Stdlib::Status	
+op	class	Stdlib::Transformation	parallelTransform		Stdlib::Status	unsupported=
+op	class	Stdlib::Transformation	wait	statusList:List(Stdlib::Status)	oclstdlib::OclVoid	unsupported=
+op	class	Stdlib::String	addSuffixNumber		oclstdlib::String	
+op	class	Stdlib::String	asBoolean		oclstdlib::Boolean	
+op	class	Stdlib::String	asFloat		oclstdlib::Real	
+op	class	Stdlib::String	asInteger		oclstdlib::Integer	
+op	class	Stdlib::String	find	match:oclstdlib::String	oclstdlib::Integer	
+op	class	Stdlib::String	firstToUpper		oclstdlib::String	
+op	class	Stdlib::String	format	value:Stdlib::Object	oclstdlib::String	unsupported=
+op	class	Stdlib::String	getStrCounter	s:oclstdlib::String	oclstdlib::Integer	static
+op	class	Stdlib::String	incrStrCounter	s:oclstdlib::String	oclstdlib::Integer	static
+op	class	Stdlib::String	isQuoted	s:oclstdlib::String	oclstdlib::Boolean	
+op	class	Stdlib::String	lastToUpper		oclstdlib::String	
+op	class	Stdlib::String	length		oclstdlib::Integer	
+op	class	Stdlib::String	match	matchPattern:oclstdlib::String	oclstdlib::Boolean	
+op	class	Stdlib::String	matchBoolean	b:oclstdlib::Boolean	oclstdlib::Boolean	
+op	class	Stdlib::String	matchFloat	r:oclstdlib::Real	oclstdlib::Boolean	
+op	class	Stdlib::String	matchIdentifier	s:oclstdlib::String	oclstdlib::Boolean	
+op	class	Stdlib::String	matchInteger	s:oclstdlib::Integer	oclstdlib::Boolean	
+op	class	Stdlib::String	normalizeSpace		oclstdlib::String	
+op	class	Stdlib::String	replace	m1:oclstdlib::String;m2:oclstdlib::String	oclstdlib::String	
+op	class	Stdlib::String	restartAllStrCounter		oclstdlib::OclVoid	static
+op	class	Stdlib::String	rfind	match:oclstdlib::String	oclstdlib::Integer	
+op	class	Stdlib::String	startStrCounter	s:oclstdlib::String	oclstdlib::OclVoid	static
+op	class	Stdlib::String	substringAfter	match:oclstdlib::String	oclstdlib::String	
+op	class	Stdlib::String	substringBefore	match:oclstdlib::String	oclstdlib::String	
+op	class	Stdlib::String	quotify	s:oclstdlib::String	oclstdlib::String	
+op	class	Stdlib::String	unquotify	s:oclstdlib::String	oclstdlib::String	
+op	class	Stdlib::OclAny	repr		oclstdlib::String	
+op	class	Stdlib::OclAny	dump		oclstdlib::OclVoid	deprecated
+op	class	Stdlib::OclAny	allInstances	OclType:TypeType(oclstdlib::T)	Set(oclstdlib::T)	deprecatedBy=Element::allSubobjectsOfKind(OclType)
+op	class	Stdlib::Integer	range	start:oclstdlib::Integer;end:oclstdlib::Integer	List(oclstdlib::Integer)	unsupported=
+op	class	Stdlib::List(T)	add	object:oclstdlib::T	oclstdlib::OclVoid	
+op	class	Stdlib::List(T)	add	obj:oclstdlib::T2	oclstdlib::OclVoid	unsupported=List(T)::add(object:T2) is supported only for case T2_isSubtypeOf_T
+op	class	Stdlib::List(T)	insertAt	object:oclstdlib::T;index:oclstdlib::Integer	oclstdlib::OclVoid	
+op	class	Stdlib::List(T)	remove	element:oclstdlib::T2	oclstdlib::OclVoid	
+op	class	Stdlib::List(T)	removeAll	elements:Collection(oclstdlib::T2)	oclstdlib::OclVoid	
+op	class	Stdlib::List(T)	removeAt	index:oclstdlib::Integer	oclstdlib::T	
+op	class	Stdlib::List(T)	removeFirst		oclstdlib::T	
+op	class	Stdlib::List(T)	removeLast		oclstdlib::T	
+op	class	Stdlib::List(T)	joinfields	sep:oclstdlib::String;begin:oclstdlib::String;end:oclstdlib::String	oclstdlib::String	
+op	class	Stdlib::List(T)	first		oclstdlib::T	
+op	class	Stdlib::List(T)	last		oclstdlib::T	
+op	class	Stdlib::List(T)	at	i:oclstdlib::Integer	oclstdlib::T	
+op	class	Stdlib::List(T)	clone		List(oclstdlib::T)	
+op	class	Stdlib::List(T)	deepclone		List(oclstdlib::T)	unsupported=List(T)::deepclone() is not supported yet
+op	class	Stdlib::List(T)	selectByType	type:TypeType(oclstdlib::T)	List(oclstdlib::T)	
+op	class	Stdlib::List(T)	selectByKind	type:TypeType(oclstdlib::T)	List(oclstdlib::T)	
+op	class	Stdlib::List(T)	subSequence	lower:oclstdlib::Integer;upper:oclstdlib::Integer	List(oclstdlib::T)	
+op	class	Stdlib::List(T)	flatten		List(oclstdlib::T2)	
+op	class	Stdlib::List(T)	including	object:oclstdlib::T2	List(Stdlib::CommonT)	
+op	class	Stdlib::List(T)	excluding	object:oclstdlib::T2	List(oclstdlib::T)	
+op	class	Stdlib::List(T)	union	s:List(oclstdlib::T2)	List(Stdlib::CommonT)	
+op	class	Stdlib::List(T)	reverse		List(oclstdlib::T)	
+op	class	Stdlib::List(T)	append	object:oclstdlib::T2	List(Stdlib::CommonT)	
+op	class	Stdlib::List(T)	prepend	object:oclstdlib::T2	List(Stdlib::CommonT)	
+op	class	Stdlib::List(T)	insertAt	index:oclstdlib::Integer;object:oclstdlib::T2	List(Stdlib::CommonT)	
+op	class	Stdlib::List(T)	indexOf	object:oclstdlib::T2	oclstdlib::Integer	
+op	class	Stdlib::Dictionary(KeyT, T)	get	key:Stdlib::KeyT	oclstdlib::T	
+op	class	Stdlib::Dictionary(KeyT, T)	put	key:Stdlib::KeyT;value:oclstdlib::T	oclstdlib::OclVoid	
+op	class	Stdlib::Dictionary(KeyT, T)	hasKey	key:Stdlib::KeyT	oclstdlib::Boolean	
+op	class	Stdlib::Dictionary(KeyT, T)	clear		oclstdlib::OclVoid	
+op	class	Stdlib::Dictionary(KeyT, T)	keys		List(Stdlib::KeyT)	
+op	class	Stdlib::Dictionary(KeyT, T)	values		List(oclstdlib::T)	
+op	class	Stdlib::Dictionary(KeyT, T)	defaultget	key:Stdlib::KeyT;default:oclstdlib::T	oclstdlib::T	
+op	class	Stdlib::Collection(T)	asSet		Set(oclstdlib::T)	
+op	class	Stdlib::Collection(T)	asOrderedSet		OrderedSet(oclstdlib::T)	
+op	class	Stdlib::Collection(T)	asSequence		Sequence(oclstdlib::T)	
+op	class	Stdlib::Collection(T)	asBag		Bag(oclstdlib::T)	
+op	class	Stdlib::Collection(T)	asList		List(oclstdlib::T)	
+op	class	Stdlib::Collection(T)	flatten		Collection(oclstdlib::T2)	
+op	class	Stdlib::Collection(T)	repr		oclstdlib::String	
+op	class	Stdlib::Collection(T)	dump		oclstdlib::OclVoid	deprecated
+op	class	Stdlib::Collection(T)	includes	object:oclstdlib::T2	oclstdlib::Boolean	
+op	class	Stdlib::Collection(T)	excludes	object:oclstdlib::T2	oclstdlib::Boolean	
+op	class	Stdlib::Collection(T)	count	object:oclstdlib::T2	oclstdlib::Integer	
+op	class	Stdlib::Collection(T)	includesAll	c2:Collection(oclstdlib::T2)	oclstdlib::Boolean	
+op	class	Stdlib::Collection(T)	excludesAll	c2:Collection(oclstdlib::T2)	oclstdlib::Boolean	
+op	class	Stdlib::Collection(T)	=	c:Collection(oclstdlib::T2)	oclstdlib::Boolean	
+op	class	Stdlib::Collection(T)	<>	c:Collection(oclstdlib::T2)	oclstdlib::Boolean	
+op	class	Stdlib::Set(T)	union	set:Set(oclstdlib::T2)	Set(Stdlib::CommonT)	
+op	class	Stdlib::Set(T)	union	bag:Bag(oclstdlib::T2)	Bag(Stdlib::CommonT)	
+op	class	Stdlib::Set(T)	intersection	set:Set(oclstdlib::T2)	Set(oclstdlib::T)	
+op	class	Stdlib::Set(T)	intersection	bag:Bag(oclstdlib::T2)	Set(oclstdlib::T)	
+op	class	Stdlib::Set(T)	-	set:Set(oclstdlib::T2)	Set(oclstdlib::T)	
+op	class	Stdlib::Set(T)	including	object:oclstdlib::T2	Set(Stdlib::CommonT)	
+op	class	Stdlib::Set(T)	excluding	object:oclstdlib::T2	Set(oclstdlib::T)	
+op	class	Stdlib::Set(T)	symmetricDifference	set:Set(oclstdlib::T2)	Set(Stdlib::CommonT)	
+op	class	Stdlib::OrderedSet(T)	append	object:oclstdlib::T2	OrderedSet(Stdlib::CommonT)	
+op	class	Stdlib::OrderedSet(T)	prepend	object:oclstdlib::T2	OrderedSet(Stdlib::CommonT)	
+op	class	Stdlib::OrderedSet(T)	insertAt	index:oclstdlib::Integer;object:oclstdlib::T2	OrderedSet(Stdlib::CommonT)	
+op	class	Stdlib::OrderedSet(T)	indexOf	object:oclstdlib::T2	oclstdlib::Integer	
+op	class	Stdlib::OrderedSet(T)	reverse		OrderedSet(oclstdlib::T)	
+op	class	Stdlib::Bag(T)	union	set:Set(oclstdlib::T2)	Bag(Stdlib::CommonT)	
+op	class	Stdlib::Bag(T)	union	bag:Bag(oclstdlib::T2)	Bag(Stdlib::CommonT)	
+op	class	Stdlib::Bag(T)	intersection	set:Set(oclstdlib::T2)	Set(oclstdlib::T)	
+op	class	Stdlib::Bag(T)	intersection	bag:Bag(oclstdlib::T2)	Bag(oclstdlib::T)	
+op	class	Stdlib::Bag(T)	including	object:oclstdlib::T2	Bag(Stdlib::CommonT)	
+op	class	Stdlib::Bag(T)	excluding	object:oclstdlib::T2	Bag(oclstdlib::T)	
+op	class	Stdlib::Sequence(T)	union	s:Sequence(oclstdlib::T2)	Sequence(Stdlib::CommonT)	
+op	class	Stdlib::Sequence(T)	including	object:oclstdlib::T2	Sequence(Stdlib::CommonT)	
+op	class	Stdlib::Sequence(T)	excluding	object:oclstdlib::T2	Sequence(oclstdlib::T)	
+op	class	Stdlib::Sequence(T)	append	object:oclstdlib::T2	Sequence(Stdlib::CommonT)	
+op	class	Stdlib::Sequence(T)	prepend	object:oclstdlib::T2	Sequence(Stdlib::CommonT)	
+op	class	Stdlib::Sequence(T)	insertAt	index:oclstdlib::Integer;object:oclstdlib::T2	Sequence(Stdlib::CommonT)	
+op	class	Stdlib::Sequence(T)	indexOf	object:oclstdlib::T2	oclstdlib::Integer	
+op	class	Stdlib::Sequence(T)	reverse		Sequence(oclstdlib::T)	
+op	module	Stdlib::Stdlib	dump	OclAny:oclstdlib::OclAny	oclstdlib::OclVoid	deprecated
+op	module	Stdlib::Stdlib	dump	Collection(T2):Collection(oclstdlib::T2)	oclstdlib::OclVoid	deprecated
+owner	oclstdlib::String
+op	qvto	oclstdlib::String	addSuffixNumber		oclstdlib::String	
+op	qvto	oclstdlib::String	asBoolean		oclstdlib::Boolean	
+op	qvto	oclstdlib::String	asFloat		oclstdlib::Real	
+op	qvto	oclstdlib::String	asInteger		oclstdlib::Integer	
+op	qvto	oclstdlib::String	find	match:oclstdlib::String	oclstdlib::Integer	
+op	qvto	oclstdlib::String	firstToUpper		oclstdlib::String	
+op	qvto	oclstdlib::String	format	value:Stdlib::Object	oclstdlib::String	unsupported=
+op	qvto	oclstdlib::String	getStrCounter	s:oclstdlib::String	oclstdlib::Integer	static
+op	qvto	oclstdlib::String	incrStrCounter	s:oclstdlib::String	oclstdlib::Integer	static
+op	qvto	oclstdlib::String	isQuoted	s:oclstdlib::String	oclstdlib::Boolean	
+op	qvto	oclstdlib::String	lastToUpper		oclstdlib::String	
+op	qvto	oclstdlib::String	length		oclstdlib::Integer	
+op	qvto	oclstdlib::String	match	matchPattern:oclstdlib::String	oclstdlib::Boolean	
+op	qvto	oclstdlib::String	matchBoolean	b:oclstdlib::Boolean	oclstdlib::Boolean	
+op	qvto	oclstdlib::String	matchFloat	r:oclstdlib::Real	oclstdlib::Boolean	
+op	qvto	oclstdlib::String	matchIdentifier	s:oclstdlib::String	oclstdlib::Boolean	
+op	qvto	oclstdlib::String	matchInteger	s:oclstdlib::Integer	oclstdlib::Boolean	
+op	qvto	oclstdlib::String	normalizeSpace		oclstdlib::String	
+op	qvto	oclstdlib::String	replace	m1:oclstdlib::String;m2:oclstdlib::String	oclstdlib::String	
+op	qvto	oclstdlib::String	restartAllStrCounter		oclstdlib::OclVoid	static
+op	qvto	oclstdlib::String	rfind	match:oclstdlib::String	oclstdlib::Integer	
+op	qvto	oclstdlib::String	startStrCounter	s:oclstdlib::String	oclstdlib::OclVoid	static
+op	qvto	oclstdlib::String	substringAfter	match:oclstdlib::String	oclstdlib::String	
+op	qvto	oclstdlib::String	substringBefore	match:oclstdlib::String	oclstdlib::String	
+op	qvto	oclstdlib::String	quotify	s:oclstdlib::String	oclstdlib::String	
+op	qvto	oclstdlib::String	unquotify	s:oclstdlib::String	oclstdlib::String	
+owner	oclstdlib::OclAny
+op	qvto	oclstdlib::OclAny	repr		oclstdlib::String	
+op	qvto	oclstdlib::OclAny	dump		oclstdlib::OclVoid	deprecated
+op	qvto	oclstdlib::OclAny	allInstances	OclType:TypeType(oclstdlib::T)	Set(oclstdlib::T)	deprecatedBy=Element::allSubobjectsOfKind(OclType)
+owner	oclstdlib::Integer
+op	qvto	oclstdlib::Integer	range	start:oclstdlib::Integer;end:oclstdlib::Integer	List(oclstdlib::Integer)	unsupported=
+owner	List(oclstdlib::T)
+op	qvto	List(oclstdlib::T)	add	object:oclstdlib::T	oclstdlib::OclVoid	
+op	qvto	List(oclstdlib::T)	add	obj:oclstdlib::T2	oclstdlib::OclVoid	unsupported=List(T)::add(object:T2) is supported only for case T2_isSubtypeOf_T
+op	qvto	List(oclstdlib::T)	insertAt	object:oclstdlib::T;index:oclstdlib::Integer	oclstdlib::OclVoid	
+op	qvto	List(oclstdlib::T)	remove	element:oclstdlib::T2	oclstdlib::OclVoid	
+op	qvto	List(oclstdlib::T)	removeAll	elements:Collection(oclstdlib::T2)	oclstdlib::OclVoid	
+op	qvto	List(oclstdlib::T)	removeAt	index:oclstdlib::Integer	oclstdlib::T	
+op	qvto	List(oclstdlib::T)	removeFirst		oclstdlib::T	
+op	qvto	List(oclstdlib::T)	removeLast		oclstdlib::T	
+op	qvto	List(oclstdlib::T)	joinfields	sep:oclstdlib::String;begin:oclstdlib::String;end:oclstdlib::String	oclstdlib::String	
+op	qvto	List(oclstdlib::T)	first		oclstdlib::T	
+op	qvto	List(oclstdlib::T)	last		oclstdlib::T	
+op	qvto	List(oclstdlib::T)	at	i:oclstdlib::Integer	oclstdlib::T	
+op	qvto	List(oclstdlib::T)	clone		List(oclstdlib::T)	
+op	qvto	List(oclstdlib::T)	deepclone		List(oclstdlib::T)	unsupported=List(T)::deepclone() is not supported yet
+op	qvto	List(oclstdlib::T)	selectByType	type:TypeType(oclstdlib::T)	List(oclstdlib::T)	
+op	qvto	List(oclstdlib::T)	selectByKind	type:TypeType(oclstdlib::T)	List(oclstdlib::T)	
+op	qvto	List(oclstdlib::T)	subSequence	lower:oclstdlib::Integer;upper:oclstdlib::Integer	List(oclstdlib::T)	
+op	qvto	List(oclstdlib::T)	flatten		List(oclstdlib::T2)	
+op	qvto	List(oclstdlib::T)	including	object:oclstdlib::T2	List(Stdlib::CommonT)	
+op	qvto	List(oclstdlib::T)	excluding	object:oclstdlib::T2	List(oclstdlib::T)	
+op	qvto	List(oclstdlib::T)	union	s:List(oclstdlib::T2)	List(Stdlib::CommonT)	
+op	qvto	List(oclstdlib::T)	reverse		List(oclstdlib::T)	
+op	qvto	List(oclstdlib::T)	append	object:oclstdlib::T2	List(Stdlib::CommonT)	
+op	qvto	List(oclstdlib::T)	prepend	object:oclstdlib::T2	List(Stdlib::CommonT)	
+op	qvto	List(oclstdlib::T)	insertAt	index:oclstdlib::Integer;object:oclstdlib::T2	List(Stdlib::CommonT)	
+op	qvto	List(oclstdlib::T)	indexOf	object:oclstdlib::T2	oclstdlib::Integer	
+owner	Dict(Stdlib::KeyT,oclstdlib::T)
+op	qvto	Dict(Stdlib::KeyT,oclstdlib::T)	get	key:Stdlib::KeyT	oclstdlib::T	
+op	qvto	Dict(Stdlib::KeyT,oclstdlib::T)	put	key:Stdlib::KeyT;value:oclstdlib::T	oclstdlib::OclVoid	
+op	qvto	Dict(Stdlib::KeyT,oclstdlib::T)	hasKey	key:Stdlib::KeyT	oclstdlib::Boolean	
+op	qvto	Dict(Stdlib::KeyT,oclstdlib::T)	clear		oclstdlib::OclVoid	
+op	qvto	Dict(Stdlib::KeyT,oclstdlib::T)	keys		List(Stdlib::KeyT)	
+op	qvto	Dict(Stdlib::KeyT,oclstdlib::T)	values		List(oclstdlib::T)	
+op	qvto	Dict(Stdlib::KeyT,oclstdlib::T)	defaultget	key:Stdlib::KeyT;default:oclstdlib::T	oclstdlib::T	
+owner	Collection(oclstdlib::T)
+op	qvto	Collection(oclstdlib::T)	asSet		Set(oclstdlib::T)	
+op	qvto	Collection(oclstdlib::T)	asOrderedSet		OrderedSet(oclstdlib::T)	
+op	qvto	Collection(oclstdlib::T)	asSequence		Sequence(oclstdlib::T)	
+op	qvto	Collection(oclstdlib::T)	asBag		Bag(oclstdlib::T)	
+op	qvto	Collection(oclstdlib::T)	asList		List(oclstdlib::T)	
+op	qvto	Collection(oclstdlib::T)	flatten		Collection(oclstdlib::T2)	
+op	qvto	Collection(oclstdlib::T)	repr		oclstdlib::String	
+op	qvto	Collection(oclstdlib::T)	dump		oclstdlib::OclVoid	deprecated
+op	qvto	Collection(oclstdlib::T)	includes	object:oclstdlib::T2	oclstdlib::Boolean	
+op	qvto	Collection(oclstdlib::T)	excludes	object:oclstdlib::T2	oclstdlib::Boolean	
+op	qvto	Collection(oclstdlib::T)	count	object:oclstdlib::T2	oclstdlib::Integer	
+op	qvto	Collection(oclstdlib::T)	includesAll	c2:Collection(oclstdlib::T2)	oclstdlib::Boolean	
+op	qvto	Collection(oclstdlib::T)	excludesAll	c2:Collection(oclstdlib::T2)	oclstdlib::Boolean	
+op	qvto	Collection(oclstdlib::T)	=	c:Collection(oclstdlib::T2)	oclstdlib::Boolean	
+op	qvto	Collection(oclstdlib::T)	<>	c:Collection(oclstdlib::T2)	oclstdlib::Boolean	
+owner	Set(oclstdlib::T)
+op	qvto	Set(oclstdlib::T)	union	set:Set(oclstdlib::T2)	Set(Stdlib::CommonT)	
+op	qvto	Set(oclstdlib::T)	union	bag:Bag(oclstdlib::T2)	Bag(Stdlib::CommonT)	
+op	qvto	Set(oclstdlib::T)	intersection	set:Set(oclstdlib::T2)	Set(oclstdlib::T)	
+op	qvto	Set(oclstdlib::T)	intersection	bag:Bag(oclstdlib::T2)	Set(oclstdlib::T)	
+op	qvto	Set(oclstdlib::T)	-	set:Set(oclstdlib::T2)	Set(oclstdlib::T)	
+op	qvto	Set(oclstdlib::T)	including	object:oclstdlib::T2	Set(Stdlib::CommonT)	
+op	qvto	Set(oclstdlib::T)	excluding	object:oclstdlib::T2	Set(oclstdlib::T)	
+op	qvto	Set(oclstdlib::T)	symmetricDifference	set:Set(oclstdlib::T2)	Set(Stdlib::CommonT)	
+owner	OrderedSet(oclstdlib::T)
+op	qvto	OrderedSet(oclstdlib::T)	append	object:oclstdlib::T2	OrderedSet(Stdlib::CommonT)	
+op	qvto	OrderedSet(oclstdlib::T)	prepend	object:oclstdlib::T2	OrderedSet(Stdlib::CommonT)	
+op	qvto	OrderedSet(oclstdlib::T)	insertAt	index:oclstdlib::Integer;object:oclstdlib::T2	OrderedSet(Stdlib::CommonT)	
+op	qvto	OrderedSet(oclstdlib::T)	indexOf	object:oclstdlib::T2	oclstdlib::Integer	
+op	qvto	OrderedSet(oclstdlib::T)	reverse		OrderedSet(oclstdlib::T)	
+owner	Bag(oclstdlib::T)
+op	qvto	Bag(oclstdlib::T)	union	set:Set(oclstdlib::T2)	Bag(Stdlib::CommonT)	
+op	qvto	Bag(oclstdlib::T)	union	bag:Bag(oclstdlib::T2)	Bag(Stdlib::CommonT)	
+op	qvto	Bag(oclstdlib::T)	intersection	set:Set(oclstdlib::T2)	Set(oclstdlib::T)	
+op	qvto	Bag(oclstdlib::T)	intersection	bag:Bag(oclstdlib::T2)	Bag(oclstdlib::T)	
+op	qvto	Bag(oclstdlib::T)	including	object:oclstdlib::T2	Bag(Stdlib::CommonT)	
+op	qvto	Bag(oclstdlib::T)	excluding	object:oclstdlib::T2	Bag(oclstdlib::T)	
+owner	Sequence(oclstdlib::T)
+op	qvto	Sequence(oclstdlib::T)	union	s:Sequence(oclstdlib::T2)	Sequence(Stdlib::CommonT)	
+op	qvto	Sequence(oclstdlib::T)	including	object:oclstdlib::T2	Sequence(Stdlib::CommonT)	
+op	qvto	Sequence(oclstdlib::T)	excluding	object:oclstdlib::T2	Sequence(oclstdlib::T)	
+op	qvto	Sequence(oclstdlib::T)	append	object:oclstdlib::T2	Sequence(Stdlib::CommonT)	
+op	qvto	Sequence(oclstdlib::T)	prepend	object:oclstdlib::T2	Sequence(Stdlib::CommonT)	
+op	qvto	Sequence(oclstdlib::T)	insertAt	index:oclstdlib::Integer;object:oclstdlib::T2	Sequence(Stdlib::CommonT)	
+op	qvto	Sequence(oclstdlib::T)	indexOf	object:oclstdlib::T2	oclstdlib::Integer	
+op	qvto	Sequence(oclstdlib::T)	reverse		Sequence(oclstdlib::T)	

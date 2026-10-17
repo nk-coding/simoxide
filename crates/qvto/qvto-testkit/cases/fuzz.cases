@@ -1,0 +1,259 @@
+# Regression cases found by differential fuzzing and the external corpora (PLAN Q7): minimised
+# programs on the fuzz metamodel (crates/qvto-testkit/fuzz/fuzz.ecore), run like the Eclipse
+# cases (`qvto conform --suite fuzz`; fixture: `qvto conform record --suite fuzz`).
+
+case fuzz_types
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/types
+qvto types.qvto
+in model.xmi
+mmfile ../fuzz.ecore
+note oclIsKindOf/oclIsTypeOf/oclAsType of Integer, Long, Real values (EDataType.isInstance); invalid tuple parts; invalid collection elements
+end
+
+case fuzz_typematrix
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/types
+qvto typematrix.qvto
+in model.xmi
+mmfile ../fuzz.ecore
+note oclIsTypeOf/oclIsKindOf of 22 kinds of values against 20 types
+end
+
+case fuzz_numconv
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/numconv
+qvto numconv.qvto
+in numconv.xmi
+mmfile ../fuzz.ecore
+note numbers stored in module properties and intermediate class features are converted to the declared type
+end
+
+case fuzz_inherit_ip_a
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/inherit_ip
+qvto a.qvto
+in a.xmi
+mmfile ../fuzz.ecore
+note the mapping body is the current instruction while inherited mappings run
+end
+
+case fuzz_inherit_ip_b
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/inherit_ip
+qvto b.qvto
+in b.xmi
+mmfile ../fuzz.ecore
+note the mapping body is the current instruction while inherited mappings run
+end
+
+case fuzz_inherit_ip_c
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/inherit_ip
+qvto c.qvto
+in c.xmi
+mmfile ../fuzz.ecore
+note the mapping body is the current instruction while inherited mappings run
+end
+
+case fuzz_inherit_ip_d
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/inherit_ip
+qvto d.qvto
+in d.xmi
+mmfile ../fuzz.ecore
+note the mapping body is the current instruction while inherited mappings run
+end
+
+case fuzz_inherit_ip_e
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/inherit_ip
+qvto e.qvto
+in e.xmi
+mmfile ../fuzz.ecore
+note the mapping body is the current instruction while inherited mappings run
+end
+
+case fuzz_regex
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/regex
+qvto regex.qvto
+note Java's find loop in replaceAll (an empty match after a non-empty one)
+end
+
+case fuzz_iterate_names
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/iterate_names
+qvto iterate_names.qvto
+note iterate adds its result variable before evaluating the source; a variable of the same name added meanwhile makes the expression invalid
+end
+
+case fuzz_floats
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/floats
+qvto floats.qvto
+in floats.xmi
+mmfile ../fuzz.ecore
+note Float (EFloat) and Long (ELong) values: = with promotion, sortedBy keys by Java class, oclIsTypeOf/oclAsType Real
+end
+
+case fuzz_collcopy_interm
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/collcopy
+qvto interm.qvto
+in interm.xmi
+mmfile ../fuzz.ecore
+note collection-typed module properties, intermediate features and contextual properties are copied on every read (coerceValue): order of identity-hashed sets with colliding hashes
+end
+
+case fuzz_collcopy_props
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/collcopy
+qvto props.qvto
+in props.xmi
+mmfile ../fuzz.ecore
+note collection-typed module properties, intermediate features and contextual properties are copied on every read (coerceValue): order of identity-hashed sets with colliding hashes
+end
+
+case fuzz_flatten
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/flatten
+qvto flatten.qvto
+note flatten and collect flatten List and Dict values (both are collection types); the static type too
+end
+
+case fuzz_typelit
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/typelit
+qvto typelit.qvto
+in typelit.xmi
+mmfile ../fuzz.ecore
+note a type literal of a metamodel classifier is its EClassifier object (equality, navigation, oclAsType, printing)
+end
+
+case fuzz_ecoreprint
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/ecoreprint
+qvto ecoreprint.qvto
+in ecoreprint.xmi
+mmfile ../fuzz.ecore
+note objects of Ecore's classes print with their generated toString; OCL primitive types as PrimitiveTypeImpl
+end
+
+case fuzz_extent_roots_a
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/extent_roots
+qvto a.qvto
+in a.xmi
+mmfile ../fuzz.ecore
+note objects added to the in-memory extent resource are roots at the end when they have no container, even if a purge dropped them (ResourceModificationAdapter)
+end
+
+case fuzz_extent_roots_b
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/extent_roots
+qvto b.qvto
+in b.xmi
+mmfile ../fuzz.ecore
+note objects added to the in-memory extent resource are roots at the end when they have no container, even if a purge dropped them (ResourceModificationAdapter)
+end
+
+case fuzz_extent_roots_c
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/extent_roots
+qvto c.qvto
+in c.xmi
+mmfile ../fuzz.ecore
+note objects added to the in-memory extent resource are roots at the end when they have no container, even if a purge dropped them (ResourceModificationAdapter)
+end
+
+case fuzz_extent_roots_d
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/extent_roots
+qvto d.qvto
+in d.xmi
+mmfile ../fuzz.ecore
+note objects added to the in-memory extent resource are roots at the end when they have no container, even if a purge dropped them (ResourceModificationAdapter)
+end
+
+case fuzz_strops
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/strops
+qvto strops.qvto
+in strops.xmi
+mmfile ../fuzz.ecore
+note string counters evaluated twice by sortedBy; Long boxes are no Integer index (substring, at)
+end
+
+case fuzz_floatsave
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/floatsave
+qvto floatsave.qvto
+in floatsave.xmi
+mmfile ../fuzz.ecore
+note EMF's float and double serialisation as Java's Double/Float.toString (two-digit subnormals, ties)
+end
+
+case fuzz_argeval_ae1
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/argeval
+qvto ae1.qvto
+mmfile ../fuzz.ecore
+note predefined OCL operations give invalid for an undefined source before evaluating their arguments (EvaluationVisitorImpl)
+end
+
+case fuzz_argeval_ae2
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/argeval
+qvto ae2.qvto
+mmfile ../fuzz.ecore
+note predefined OCL operations give invalid for an undefined source before evaluating their arguments (EvaluationVisitorImpl)
+end

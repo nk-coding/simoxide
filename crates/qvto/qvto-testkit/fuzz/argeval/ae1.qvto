@@ -1,0 +1,26 @@
+transformation ae1();
+main() {
+  var s1 := '';
+  var n : String := null;
+  log('a', (OrderedSet{'x'}->select(x | false)->last() + s1.addSuffixNumber()));
+  log('a2', s1.addSuffixNumber());
+  log('b', (n + 'q'.addSuffixNumber()));
+  log('b2', 'q'.addSuffixNumber());
+  log('c', n.concat('r'.addSuffixNumber()));
+  log('c2', 'r'.addSuffixNumber());
+  log('d', n.size() + 't'.addSuffixNumber().size());
+  log('d2', 't'.addSuffixNumber());
+  log('e', invalid.oclAsType(String).startsWith('u'.addSuffixNumber()));
+  log('e2', 'u'.addSuffixNumber());
+  log('f', n = 'v'.addSuffixNumber());
+  log('f2', 'v'.addSuffixNumber());
+  log('g', n.oclIsUndefined() or 'w'.addSuffixNumber() = '');
+  log('g2', 'w'.addSuffixNumber());
+  log('h', Sequence{n}->first().replace('y'.addSuffixNumber(), 'z'));
+  log('h2', 'y'.addSuffixNumber());
+  log('i', n->including('k'.addSuffixNumber()));
+  log('i2', 'k'.addSuffixNumber());
+  var l : List(String) := null;
+  log('j', l->including('m'.addSuffixNumber()));
+  log('j2', 'm'.addSuffixNumber());
+}

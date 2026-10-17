@@ -1,0 +1,4 @@
+problem	error	unknown_context.qvto	2	40	8	Unknown type (Unknown1)
+problem	error	unknown_context.qvto	5	89	8	Unknown type (Unknown1)
+problem	error	unknown_context.qvto	8	142	8	Unknown type (Unknown1)
+problem	warning	unknown_context.qvto	2	34	31	Hiding operation 'repr' from standard library is discouraged

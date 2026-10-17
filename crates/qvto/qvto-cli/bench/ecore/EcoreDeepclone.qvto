@@ -1,0 +1,11 @@
+-- Copies Ecore models with deepclone and queries them (benchmark B5, `qvto bench`).
+modeltype ECORE uses 'http://www.eclipse.org/emf/2002/Ecore';
+
+transformation EcoreDeepclone(in src : ECORE, out dst : ECORE);
+
+main() {
+	var copies := src.rootObjects()[EPackage]->collect(p | p.deepclone().oclAsType(EPackage));
+	var classes := copies->collect(p | p.allSubobjectsOfKind(EClass))->size();
+	var features := src.objectsOfType(EClass)->collect(c | c.eAllStructuralFeatures)->size();
+	log('classes ' + classes.toString() + ', features ' + features.toString());
+}

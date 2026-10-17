@@ -1,0 +1,1 @@
+problem	error	common_elems_c.qvto	4	107	85	Type mismatch. No common supertype: (String), (Bag(OclAny))

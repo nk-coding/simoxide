@@ -1,0 +1,39 @@
+THIRD-PARTY CODE IN qvto-emf
+============================
+
+qvto-emf is licensed under the Eclipse Public License 2.0 (see the repository's LICENSE). It
+reproduces EMF's behaviour; the following files port or adapt third-party code, all EPL-2.0.
+
+1. Eclipse Modeling Framework (EMF) 2.41 / EMF XMI 2.39 / EMF Common 2.44
+   Source:    https://github.com/eclipse-emf/org.eclipse.emf (the jars of the reference runner,
+              reference/runner/lib/qvto-3.11.0)
+   Copyright: Eclipse Foundation, IBM and others
+   Licence:   Eclipse Public License 2.0
+   Used in:
+   - models/Ecore.ecore: the runtime EcorePackage of org.eclipse.emf.ecore 2.41, saved as XMI by
+     oracle/run.sh ecore (data, verbatim).
+   - src/xmi_save.rs: port of XMLSaveImpl, XMISaveImpl, XMLString, XMLSaveImpl.Escape and parts
+     of XMLHelperImpl (feature kinds, prefixes, hrefs, namespace declarations, line width).
+   - src/xmi_load.rs: loading rules of XMLHandler, XMIHandler and XMLHelperImpl (through
+     SimOxide's loader, see 2).
+   - src/uri.rs: port of org.eclipse.emf.common.util.URI (parsing, resolve, deresolve).
+   - src/graph.rs, src/ecore_hooks.rs: semantics of BasicEObjectImpl, DynamicEObjectImpl, the
+     setting delegates of EStructuralFeatureImpl, EcoreEList, EClassImpl, ETypedElementImpl,
+     EClassifierImpl, EGenericTypeImpl, EcoreUtil.delete, ECollections.setEList.
+   - src/fragment.rs: ResourceImpl, XMLResourceImpl, BasicEObjectImpl and EModelElementImpl URI
+     fragments.
+   - src/datatypes.rs: EcoreFactoryImpl and EFactoryImpl string conversions.
+
+2. SimOxide (simoxide-model, same author)
+   Licence:   Eclipse Public License 2.0
+   Used in:
+   - src/xmi_load.rs: adapted from crates/simoxide-model/src/xmi.rs (IDREF forward references,
+     mustAdd logic, same-document proxies, attribute scanning) and raw.rs (Java number parsing).
+
+3. Eclipse QVTo test suite (org.eclipse.m2m.tests.qvt.oml)
+   Source:    https://github.com/eclipse-qvto/org.eclipse.qvto, commit 8c01c4f6
+   Licence:   Eclipse Public License 2.0
+   Used in:
+   - src/compare.rs: port of api/framework/comparator (TreeComparator and its tree nodes).
+   - tests/data/suite-models.txt, suite-oracle.tsv, compare-oracle.tsv: lists of and results on
+     the suite's model files (the files themselves are not copied).

@@ -1,0 +1,16 @@
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation floats(in m : FZ);
+main() {
+  var r := m.rootObjects()![FZ::Root];
+  var f := r.items->first().ratio; var f1 := r.items->last().ratio;
+  var n := r.nodes->first(); var b := n.big; var b2 := r.nodes->last().big;
+  log('e1', f = 2.5); log('e2', f1 = 1); log('e3', f <> 2.5); log('e4', f < 3); log('e5', f > 1.5); log('e6', 2.5 = f);
+  log('e7', f + 1); log('e8', f * 2); log('e9', f / 2); log('e10', f.floor()); log('e11', f.round()); log('e12', -f); log('e13', f.max(3.0)); log('e14', f.abs());
+  log('e15', b = 5); log('e16', b + 1); log('e17', b * 2); log('e18', b < 6); log('e19', b.max(2)); log('e20', b2 = 2147483648); log('e21', b = 5.0);
+  log('s1', r.items->sortedBy(ratio)->collect(name)); log('s2', r.nodes->sortedBy(big)->collect(name)); log('s3', Sequence{3, 1, 2}->sortedBy(x | if x = 1 then b else b2 endif));
+  log('s4', Sequence{f, 1.5, 2.0}->sortedBy(x | x)); log('s5', Sequence{1, 2}->sortedBy(x | if x = 1 then f else f1 endif));
+  log('s6', Sequence{1, 2}->sortedBy(x | if x = 1 then b else 3 endif));
+  log('m1', Sequence{f, f1}->max()); log('m2', Sequence{f, f1}->sum()); log('m3', Sequence{b, b2}->max()); log('m4', Sequence{b, b2}->sum()); log('m5', Sequence{f, 1.5}->sum());
+  log('c1', Set{f, 2.5}->size()); log('c2', Set{b, 5}->size()); log('c3', Sequence{f}->includes(2.5)); log('c4', Bag{b}->count(5));
+  log('t1', f.toString()); log('t2', b.toString()); log('t3', f.repr());
+}

@@ -1,0 +1,5 @@
+transformation eq_unresolved_cf();
+main() {
+	var b0 : Boolean := true; var s0 := 'x'; var s1 := ''; var i0 := 1; var i1 := -3; var seq0 := Sequence{1, 2};
+	log('x', OrderedSet{3.0, 0.3} = seq0->collect(x18 | OrderedSet{1.25E7, i0, 1.0E-5})->last());
+}

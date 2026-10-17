@@ -1,0 +1,18 @@
+transformation unknown_result();
+query a() : Unknown1 {
+	return null;
+}
+query b() : Unknown1 {
+	return a();
+}
+query c() : Unknown1 {
+	return x.y;
+}
+query d() : Integer {
+	return a();
+}
+query e() : Unknown1 {
+	var v := a();
+	return v;
+}
+main() {}

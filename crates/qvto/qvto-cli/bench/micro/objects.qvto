@@ -1,0 +1,23 @@
+-- Creates 15 000 model objects with attributes and references (store writes, benchmark B6).
+modeltype ECORE uses 'http://www.eclipse.org/emf/2002/Ecore';
+
+transformation objects(out dst : ECORE);
+
+main() {
+	var p := object EPackage { name := 'generated'; nsURI := 'http://generated'; nsPrefix := 'g' };
+	var base := object EClass { name := 'Base'; _abstract := true };
+	p.eClassifiers += base;
+	var prev : EClass := base;
+	Sequence{1..5000}->forEach(i) {
+		var c := object EClass {
+			name := 'C' + i.toString();
+			eSuperTypes += base;
+			eStructuralFeatures += object EAttribute { name := 'a' + i.toString(); upperBound := 1 };
+			eStructuralFeatures += object EReference { name := 'r' + i.toString(); eType := prev; containment := i.mod(2) = 0 };
+		};
+		p.eClassifiers += c;
+		prev := c;
+	};
+	log(p.eClassifiers->size().toString() + ' '
+		+ p.eClassifiers->collect(c | c.oclAsType(EClass).eAllStructuralFeatures->size())->sum().toString());
+}

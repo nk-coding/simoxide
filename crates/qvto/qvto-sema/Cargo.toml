@@ -1,0 +1,17 @@
+[package]
+name = "qvto-sema"
+description = "Semantic analysis: name resolution, imports, type checking against metamodels; produces the typed IR"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+qvto-syntax.workspace = true
+qvto-model.workspace = true
+qvto-types.workspace = true
+
+[dev-dependencies]
+qvto-emf.workspace = true
+qvto-testkit.workspace = true

@@ -1,0 +1,17 @@
+# QVTo's deprecated blackbox libraries (org.eclipse.m2m.qvt.oml.ocl legacy libraries) as Eclipse loads them;
+# rows of qvto-types/data/blackboxes.tsv (env bundle), format: qvto::blackbox::Catalog::parse.
+env	stdlib	builtin	Strings; emf.tools	-
+unit	stdlib	Strings	qvto://blackbox/Strings	OK
+module	stdlib	Strings	Strings	Library	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.StringLibrary	
+op	stdlib	Strings	Strings	indexOf	helper	oclstdlib::String	false	arg1:in:oclstdlib::String;arg2:in:oclstdlib::Integer	oclstdlib::Integer	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.StringLibrary#indexOf(java.lang.String,java.lang.String,java.lang.Integer)	
+op	stdlib	Strings	Strings	lastIndexOf	helper	oclstdlib::String	false	arg1:in:oclstdlib::String;arg2:in:oclstdlib::Integer	oclstdlib::Integer	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.StringLibrary#lastIndexOf(java.lang.String,java.lang.String,java.lang.Integer)	
+op	stdlib	Strings	Strings	replace	helper	oclstdlib::String	false	arg1:in:oclstdlib::String;arg2:in:oclstdlib::String	oclstdlib::String	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.StringLibrary#replace(java.lang.String,java.lang.String,java.lang.String)	
+op	stdlib	Strings	Strings	split	helper	oclstdlib::String	false	arg1:in:oclstdlib::String	Sequence(oclstdlib::String)	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.StringLibrary#split(java.lang.String,java.lang.String)	
+op	stdlib	Strings	Strings	split	helper	oclstdlib::String	false	arg1:in:oclstdlib::String;arg2:in:oclstdlib::Integer	Sequence(oclstdlib::String)	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.StringLibrary#split(java.lang.String,java.lang.String,java.lang.Integer)	
+op	stdlib	Strings	Strings	startsWith	helper	oclstdlib::String	false	arg1:in:oclstdlib::String;arg2:in:oclstdlib::Integer	oclstdlib::Boolean	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.StringLibrary#startsWith(java.lang.String,java.lang.String,java.lang.Integer)	
+unit	stdlib	emf.tools	qvto://blackbox/emf.tools	OK
+module	stdlib	emf.tools	emf.tools	Library	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.EmfToolsLibrary	http://www.eclipse.org/emf/2002/Ecore
+op	stdlib	emf.tools	emf.tools	asEObject	helper	oclstdlib::OclAny	false		http://www.eclipse.org/emf/2002/Ecore#EObject	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.EmfToolsLibrary#asEObject(java.lang.Object)	
+op	stdlib	emf.tools	emf.tools	currentTimeMillis	helper	-	false		oclstdlib::Integer	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.EmfToolsLibrary#currentTimeMillis()	
+op	stdlib	emf.tools	emf.tools	getDataTypeInstance	helper	-	false	arg0:in:oclstdlib::String;arg1:in:oclstdlib::String	http://www.eclipse.org/emf/2002/Ecore#EDataType	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.EmfToolsLibrary#getDataTypeInstance(java.lang.String,java.lang.String)	
+op	stdlib	emf.tools	emf.tools	getDetails	helper	http://www.eclipse.org/emf/2002/Ecore#EAnnotation	false	arg1:in:oclstdlib::String	oclstdlib::String	org.eclipse.m2m.qvt.oml.ocl.legacy.libraries.EmfToolsLibrary#getDetails(org.eclipse.emf.ecore.EAnnotation,java.lang.String)	

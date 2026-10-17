@@ -1,0 +1,28 @@
+[package]
+name = "qvto-cli"
+description = "Command line: run, check, conform, bench"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[[bin]]
+name = "qvto"
+path = "src/main.rs"
+
+[dependencies]
+qvto.workspace = true
+qvto-testkit.workspace = true
+qvto-emf.workspace = true
+qvto-sema.workspace = true
+qvto-runtime.workspace = true
+qvto-model.workspace = true
+qvto-vm.workspace = true
+qvto-bytecode.workspace = true
+qvto-syntax.workspace = true
+# Sampling profiler for `qvto bench --profile` (SIGPROF, works without perf events).
+pprof = { version = "0.15", optional = true, default-features = false, features = ["flamegraph"] }
+
+[features]
+profile = ["dep:pprof"]

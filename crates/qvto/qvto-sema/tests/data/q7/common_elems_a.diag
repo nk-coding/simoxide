@@ -1,0 +1,2 @@
+problem	error	common_elems_a.qvto	4	107	52	Type mismatch. No common supertype: (String), (Bag(Integer))
+problem	error	common_elems_a.qvto	4	180	1	Type mismatch: can not convert from 'common_elems_a::Sequence(unknown)' to 'oclstdlib::Integer' type

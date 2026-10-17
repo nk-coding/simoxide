@@ -1,0 +1,146 @@
+library CompetingConsumersGroupPCMTransformation();
+
+import pcm.helpers.Constructors;
+import pcm.helpers.Commons;
+import pcm.helpers.Wiring;
+import spd.common.queries.SystemQueries;
+
+modeltype SPD_MOD uses 'http://palladiosimulator.org/ScalingPolicyDefinition/1.0';
+modeltype SPD_ADJ uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0';
+modeltype SPD_TRI uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0';
+modeltype SPD_TAR uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype SPD_SEM uses 'http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0';
+
+modeltype PCM uses 'http://palladiosimulator.org/PalladioComponentModel/5.2';
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+modeltype PCM_REP uses 'http://palladiosimulator.org/PalladioComponentModel/Repository/5.2';
+modeltype PCM_SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2';
+modeltype PCM_SYS uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+modeltype PCM_RES_TYPE uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceType/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+modeltype PCM_COMP uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2';
+modeltype PCM_ENTITY uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Entity/5.2';
+modeltype PCM_PARAM uses 'http://palladiosimulator.org/PalladioComponentModel/Parameter/5.2';
+modeltype PCM_USG uses 'http://palladiosimulator.org/PalladioComponentModel/UsageModel/5.2';
+
+
+modeltype SPD_CON uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/1.0';
+modeltype SPD_CONP uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0';
+modeltype SPD_CONT uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0';
+
+mapping inout UsageScenario::modifyUsageScenarioOnScaleOut(competingConsumersGroupCfg:CompetingConsumersGroupCfg, newRoles:Set(OperationProvidedRole)){
+	init {
+		var branches:Set(Branch) := Set{};	
+		assert fatal(self.scenarioBehaviour_UsageScenario.actions_ScenarioBehaviour->selectByKind(Branch)->size()=1) with log('There must be exactly one branch action in the usage scenario');
+	}
+	scenarioBehaviour_UsageScenario.actions_ScenarioBehaviour[Branch].map modifyUsageScenarioBranch(competingConsumersGroupCfg, newRoles);
+	workload_UsageScenario[ClosedWorkload].map modifyClosedWorkload(competingConsumersGroupCfg.elements->size());
+}
+
+mapping inout UsageScenario::modifyUsageScenarioOnScaleIn(competingConsumersGroupCfg:CompetingConsumersGroupCfg, deletedRoles:Set(OperationProvidedRole)){
+	scenarioBehaviour_UsageScenario.actions_ScenarioBehaviour[Branch].map modifyUsageScenarioBranchOnScaleIn(competingConsumersGroupCfg, deletedRoles);
+	workload_UsageScenario[ClosedWorkload].map modifyClosedWorkload(deletedRoles->size()+competingConsumersGroupCfg.elements->size(),competingConsumersGroupCfg.elements->size());
+}
+
+mapping inout ClosedWorkload::modifyClosedWorkload(numberOfReplicas:Integer){
+	// in case the workload configuration initially forsees more threads than one per replica
+	_population := numberOfReplicas * self._population;
+}
+mapping inout ClosedWorkload::modifyClosedWorkload(currentNumber:Integer, newNumberOfReplicas:Integer){
+	// in case the workload configuration initially forsees more threads than one per replica
+	_population := self._population.div(currentNumber) * newNumberOfReplicas;
+}
+
+mapping inout Branch::modifyUsageScenarioBranch(competingConsumersGroupCfg:CompetingConsumersGroupCfg, newRoles:Set(OperationProvidedRole)){
+	init {
+		var newProbabilisticBranches:Set(BranchTransition) := Set{};
+		var branchTransition:BranchTransition := self.branchTransitions_Branch[BranchTransition]->any(true);
+		var operationSignature:OperationSignature := branchTransition.branchedBehaviour_BranchTransition.actions_ScenarioBehaviour[EntryLevelSystemCall]->any(true).operationSignature__EntryLevelSystemCall;
+		newRoles->forEach(role){
+			newProbabilisticBranches += new BranchTransition(operationSignature,role);
+		}	
+	}
+	branchTransitions_Branch += newProbabilisticBranches;
+	branchTransitions_Branch->map modifyProbability(competingConsumersGroupCfg.elements->size());
+}
+
+
+mapping inout Branch::modifyUsageScenarioBranchOnScaleIn(competingConsumersGroupCfg:CompetingConsumersGroupCfg, deletedRoles:Set(OperationProvidedRole)){
+	
+	init {
+		var opprovidedRoles:Bag(OperationProvidedRole) := self.branchTransitions_Branch[BranchTransition].branchedBehaviour_BranchTransition.actions_ScenarioBehaviour[EntryLevelSystemCall].providedRole_EntryLevelSystemCall;
+		var branchTransitionsToPreserve:Set(BranchTransition) := self.branchTransitions_Branch[BranchTransition]
+		->select(bt | deletedRoles->excludes(
+			bt.branchedBehaviour_BranchTransition.actions_ScenarioBehaviour[EntryLevelSystemCall]->any(true).providedRole_EntryLevelSystemCall)
+		);	
+	}
+	
+	branchTransitions_Branch := branchTransitionsToPreserve;
+	branchTransitions_Branch->map modifyProbability(competingConsumersGroupCfg.elements->size());
+}
+
+mapping inout BranchTransition::modifyProbability(numberOfReplicas:Integer){
+	self.branchProbability := 1/numberOfReplicas;
+}
+
+mapping inout System::modifySystemModel(competingConsumers:CompetingConsumersGroupCfg, newAssemblies:Set(AssemblyContext)){
+	init {
+		var provDelegationConnectorsOfUnit : Set(ProvidedDelegationConnector) := self.connectors__ComposedStructure[ProvidedDelegationConnector]->select(pvc | pvc.assemblyContext_ProvidedDelegationConnector=competingConsumers.unit);
+		var newProvidedRoles : Set(OperationProvidedRole) := Set{};
+		var newProvidedDelegationConnectors : Set(ProvidedDelegationConnector) := Set{};
+		
+		assert fatal(provDelegationConnectorsOfUnit->size()=1) with log('The number of provided delegation connector for the unit consumer must be 1');
+		assert fatal(competingConsumers.unit.encapsulatedComponent__AssemblyContext.providedRoles_InterfaceProvidingEntity->size()=1) with log('The number of provided roles for the unit of a competing queue consumer is not exactly one!');
+		
+		var provDelegationConnectorOfUnit : ProvidedDelegationConnector := provDelegationConnectorsOfUnit->any(true);
+		
+
+		newAssemblies->forEach(assembly){
+			var providedRole: OperationProvidedRole := object OperationProvidedRole {
+					entityName := provDelegationConnectorOfUnit.outerProvidedRole_ProvidedDelegationConnector.entityName+'replicated'+Commons_getUniqueElementNameSuffix();
+					providedInterface__OperationProvidedRole := provDelegationConnectorOfUnit.outerProvidedRole_ProvidedDelegationConnector.providedInterface__OperationProvidedRole;	
+			};
+			
+			var providedDelegationConnector : ProvidedDelegationConnector := object ProvidedDelegationConnector {
+				entityName := provDelegationConnectorOfUnit.entityName;
+				outerProvidedRole_ProvidedDelegationConnector := providedRole;
+				innerProvidedRole_ProvidedDelegationConnector := assembly.encapsulatedComponent__AssemblyContext.providedRoles_InterfaceProvidingEntity[OperationProvidedRole]->any(true);
+				assemblyContext_ProvidedDelegationConnector := assembly;
+			};
+			
+			newProvidedRoles += providedRole;
+			newProvidedDelegationConnectors += providedDelegationConnector;
+		};
+			
+	}
+	providedRoles_InterfaceProvidingEntity += newProvidedRoles;
+	connectors__ComposedStructure += newProvidedDelegationConnectors;
+	createConnectorsForRequiredRolesForReplicatedAssemblies(competingConsumers.unit, newAssemblies->asOrderedSet(), self);
+	competingConsumers.unitQueues.usageScenarioForConsumption->map modifyUsageScenarioOnScaleOut(competingConsumers, newProvidedRoles);
+	
+}
+
+mapping inout System::modifySystemModelOnScaleIn(queueConsumers:CompetingConsumersGroupCfg){
+	init{
+		var assembliesToPreserve:Set(AssemblyContext) := self.assemblyContexts__ComposedStructure
+		->select(assembly | 
+			queueConsumers.elements->includes(assembly) 
+			or assembly.encapsulatedComponent__AssemblyContext<>queueConsumers.unit.encapsulatedComponent__AssemblyContext);
+
+		var assembliesForDeletion:Set(AssemblyContext) :=  self.assemblyContexts__ComposedStructure
+		->select(assembly | 
+			queueConsumers.elements->excludes(assembly)
+			and assembly.encapsulatedComponent__AssemblyContext=queueConsumers.unit.encapsulatedComponent__AssemblyContext);
+		
+		var connectorsToRemove:Set(Connector) := self.selectConnectorsForRemoval(assembliesForDeletion);
+		var operationProvidedRolesToRemove:Set(OperationProvidedRole) := self.selectRolesForRemoval(assembliesForDeletion);
+		var connectorsToPreserve:Set(Connector) := self.connectors__ComposedStructure - connectorsToRemove;
+		var rolesToPreserve:Set(ProvidedRole) := self.providedRoles_InterfaceProvidingEntity - operationProvidedRolesToRemove;
+		queueConsumers.unitQueues.usageScenarioForConsumption->map modifyUsageScenarioOnScaleIn(queueConsumers, operationProvidedRolesToRemove);
+	}
+	assemblyContexts__ComposedStructure := assembliesToPreserve;
+	connectors__ComposedStructure := connectorsToPreserve;
+	providedRoles_InterfaceProvidingEntity := rolesToPreserve;
+	
+}

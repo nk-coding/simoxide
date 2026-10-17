@@ -1,0 +1,19 @@
+problem	error	unknown_types.qvto	2	50	7	Unknown type (Package)
+problem	error	unknown_types.qvto	6	163	7	Unknown type (Package)
+problem	error	unknown_types.qvto	10	267	7	Unknown type (Package)
+problem	error	unknown_types.qvto	3	75	7	Unknown type (Package)
+problem	error	unknown_types.qvto	3	75	7	Unknown classifier type 'Package'
+problem	error	unknown_types.qvto	3	87	5	Type mismatch: can not convert from 'unknown_types::Bag(T)' to 'unknown_types::Bag(unknown)' type
+problem	error	unknown_types.qvto	4	121	10	Cannot find operation (foo(String)) for the type (<null>)
+problem	error	unknown_types.qvto	7	188	7	Unknown type (Package)
+problem	error	unknown_types.qvto	7	188	7	Unknown classifier type 'Package'
+problem	error	unknown_types.qvto	7	200	5	Type mismatch: can not convert from 'unknown_types::Bag(T)' to 'unknown_types::Bag(unknown)' type
+problem	error	unknown_types.qvto	11	292	7	Unknown type (Package)
+problem	error	unknown_types.qvto	11	292	7	Unknown classifier type 'Package'
+problem	error	unknown_types.qvto	11	304	5	Type mismatch: can not convert from 'unknown_types::Bag(T)' to 'unknown_types::Bag(unknown)' type
+problem	error	unknown_types.qvto	12	340	10	Cannot find operation (foo(String)) for the type (<null>)
+problem	error	unknown_types.qvto	4	121	1	Incomplete reference to variable declaration in variable expression: (p)
+problem	error	unknown_types.qvto	8	234	1	Incomplete reference to variable declaration in variable expression: (p)
+problem	error	unknown_types.qvto	12	340	1	Incomplete reference to variable declaration in variable expression: (p)
+problem	error	unknown_types.qvto	13	369	1	Incomplete reference to variable declaration in variable expression: (x)
+problem	warning	unknown_types.qvto	8	234	9	The type 'unknown' does not conform to the type 'oclstdlib::OclVoid'

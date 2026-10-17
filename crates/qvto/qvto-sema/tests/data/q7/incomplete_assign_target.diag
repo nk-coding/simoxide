@@ -1,0 +1,11 @@
+problem	error	incomplete_assign_target.qvto	3	61	3	Unknown type (Foo)
+problem	error	incomplete_assign_target.qvto	4	72	1	The type 'oclstdlib::Integer' does not conform to the type 'unknown' of the property 'x'
+problem	error	incomplete_assign_target.qvto	5	76	1	Property 'x' must have collection type
+problem	error	incomplete_assign_target.qvto	8	129	3	Unknown type (Foo)
+problem	error	incomplete_assign_target.qvto	8	129	3	Unknown classifier type 'Foo'
+problem	error	incomplete_assign_target.qvto	9	141	10	The type 'incomplete_assign_target::Sequence(T)' does not conform to the type 'incomplete_assign_target::Sequence(unknown)' of the property 's'
+problem	error	incomplete_assign_target.qvto	10	159	1	The type 'oclstdlib::Integer' does not conform to the base type 'unknown' of the multi-valued property 's' 
+problem	error	incomplete_assign_target.qvto	11	171	3	Unknown type (Foo)
+problem	error	incomplete_assign_target.qvto	4	67	1	Incomplete reference to variable declaration in variable expression: (x)
+problem	error	incomplete_assign_target.qvto	6	94	1	Incomplete reference to variable declaration in variable expression: (x)
+problem	error	incomplete_assign_target.qvto	7	107	1	Incomplete reference to variable declaration in variable expression: (x)

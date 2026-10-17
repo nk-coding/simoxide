@@ -1,0 +1,3 @@
+problem	error	literal_parts_tj.qvto	5	203	13	Type mismatch. No common supertype: (String), (Bag(Integer))
+problem	error	literal_parts_tj.qvto	5	255	11	Type mismatch. No common supertype: (Sequence(Integer)), (Integer)
+problem	error	literal_parts_tj.qvto	-1	-1	1	Type mismatch. No common supertype: (String), (Bag(Integer))

@@ -1,0 +1,2 @@
+problem	error	literal_parts_tf.qvto	4	143	1	Tuple type mismatch: (Integer), (Tuple(a : Integer))
+problem	error	literal_parts_tf.qvto	-1	-1	1	Tuple type mismatch: (Integer), (Tuple(a : Integer))

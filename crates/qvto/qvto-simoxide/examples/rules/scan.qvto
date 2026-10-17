@@ -1,0 +1,39 @@
+/*
+ * A read-only rule for the benchmark: navigates the whole model the way SimuLizar's rules
+ * do (objectsOfType, rootObjects, feature navigation, implicit collect, select, string
+ * operations) and logs a summary.
+ */
+modeltype RUNTIMEMEASUREMENT uses 'http://simulizar.palladiosimulator.org/RuntimeMeasurement/1.0';
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+modeltype PCM_REP uses 'http://palladiosimulator.org/PalladioComponentModel/Repository/5.2';
+modeltype PCM_SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2';
+modeltype PCM_SEFF_PERF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/SEFF_Performance/5.2';
+modeltype PCM_SYS uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_COMP uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2';
+
+transformation Scan(in prm : RUNTIMEMEASUREMENT,
+                    in pcmRepository : PCM_REP,
+                    in pcmSystem : PCM_SYS,
+                    in pcmAllocation : PCM_ALLOC,
+                    inout pcmResources : PCM_RES_ENV) {
+
+	main() {
+		var values := prm.rootObjects()[RuntimeMeasurement].measuringValue->sum();
+		var seffs := pcmRepository.objectsOfType(ResourceDemandingSEFF);
+		var demands := pcmRepository.objectsOfType(ParametricResourceDemand)
+			->collect(d | d.specification_ParametericResourceDemand.specification)
+			->select(s | s.size() > 0);
+		var contexts := pcmSystem.objectsOfType(AssemblyContext)
+			->collect(a | a.encapsulatedComponent__AssemblyContext.entityName);
+		var allocated := pcmAllocation.rootObjects()[Allocation].allocationContexts_Allocation
+			->select(a | not a.resourceContainer_AllocationContext.oclIsUndefined())
+			->collect(a | a.resourceContainer_AllocationContext.entityName + '/' + a.assemblyContext_AllocationContext.entityName);
+		var rates := pcmResources.objectsOfType(ProcessingResourceSpecification)
+			->collect(p | p.processingRate_ProcessingResourceSpecification.specification.toReal())
+			->sum();
+		log('scan ' + seffs->size().toString() + ' ' + demands->size().toString() + ' '
+			+ contexts->size().toString() + ' ' + allocated->size().toString() + ' '
+			+ rates.toString() + ' ' + values.toString());
+	}
+}

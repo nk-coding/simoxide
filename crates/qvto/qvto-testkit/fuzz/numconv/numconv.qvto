@@ -1,0 +1,21 @@
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation numconv(in m : FZ, out o : FZ);
+property p : Integer = 0;
+property pr : Real = 0.0;
+intermediate class IC { a : Integer; r : Real; s : Sequence(Integer); }
+main() {
+  var big : Integer := 9223372036854775807;
+  var v : Integer := big; log('v', v);
+  p := big; log('p', p);
+  var ic := new IC(); ic.a := big; log('ica', ic.a); ic.a := 2.5.oclAsType(OclAny).oclAsType(Integer); log('ica2', ic.a);
+  ic.r := big; log('icr', ic.r); ic.r := 3; log('icr2', ic.r); pr := 3; log('pr', pr); pr := big; log('pr2', pr);
+  ic.s := Sequence{big, 1}; log('ics', ic.s); ic.s += big; log('ics2', ic.s);
+  var n := object FZ::Node { value := big; big := big; weight := big; nums += big; }; log('nv', n.value); log('nb', n.big); log('nw', n.weight); log('nn', n.nums);
+  n.value := 2147483648; log('nv2', n.value); n.big := 5; log('nb2', n.big); n.big := 2147483648; log('nb3', n.big);
+  var s : Sequence(Integer) := Sequence{big}; log('s', s);
+  var r : Real := big; log('r', r);
+  var r2 : Real := 3; log('r2', r2);
+  var t : Tuple(a : Integer) := Tuple{a = big}; log('t', t);
+  var l : List(Integer) := List{}; l->add(big); log('l', l);
+  var it := new FZ::Item(); it.count := big; log('itc', it.count); it.ratio := 2.5; log('itr', it.ratio); it.ratio := 1.0E300; log('itr2', it.ratio); it.ratio := 3; log('itr3', it.ratio);
+}

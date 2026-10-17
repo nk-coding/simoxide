@@ -1,0 +1,14 @@
+-- Dict put/get with Integer and String keys, List add (benchmark B6).
+transformation dict();
+
+main() {
+	var d : Dict(Integer, Integer) := Dict{};
+	Sequence{1..50000}->forEach(i) { d->put((i * 7919).mod(50021), i) };
+	var sum := 0;
+	Sequence{1..50000}->forEach(i) { sum := sum + d->get(i).oclAsType(Integer) };
+	var names : Dict(String, String) := Dict{};
+	var l : List(String) := List{};
+	Sequence{1..20000}->forEach(i) { var k := 'k' + i.toString(); names->put(k, k + '!'); l->add(k) };
+	var found := l->select(k | names->hasKey(k))->size();
+	log(d->size().toString() + ' ' + sum.toString() + ' ' + found.toString() + ' ' + names->keys()->size().toString());
+}

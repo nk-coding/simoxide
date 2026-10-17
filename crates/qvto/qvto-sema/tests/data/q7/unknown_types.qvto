@@ -1,0 +1,15 @@
+transformation unknown_types();
+query getView() : Package {
+	var seq : Bag(Package) := Bag{};
+	return seq->selectOne(p | p.foo('x') != null);
+}
+query getView2() : Package {
+	var seq : Bag(Package) := Bag{};
+	return seq->selectOne(p | p <> null);
+}
+query getView3() : Package {
+	var seq : Bag(Package) := Bag{};
+	var x := seq->selectOne(p | p.foo('x') != null);
+	return x;
+}
+main() {}

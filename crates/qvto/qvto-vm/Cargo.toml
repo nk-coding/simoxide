@@ -1,0 +1,26 @@
+[package]
+name = "qvto-vm"
+description = "Bytecode interpreter: frames, mappings, traces and resolve, extents, exceptions, log and assert"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[features]
+default = ["emf"]
+# `ObjHandle` for qvto-emf's object ids
+emf = ["dep:qvto-emf"]
+
+[dependencies]
+qvto-model.workspace = true
+qvto-types.workspace = true
+qvto-sema.workspace = true
+qvto-bytecode.workspace = true
+qvto-runtime.workspace = true
+qvto-emf = { workspace = true, optional = true }
+regex = { version = "1", default-features = false, features = ["std", "unicode"] }
+
+[dev-dependencies]
+qvto-emf.workspace = true
+qvto-syntax.workspace = true

@@ -1,0 +1,6 @@
+modeltype ECORE uses "http://www.eclipse.org/emf/2002/Ecore";
+transformation literal_parts_ti();
+main() {
+	var b0 : Boolean := true; var s0 := 'x'; var i0 := 1; var t := Tuple{a = 1};
+	var c := object ECORE::EClass { name := Sequence{1, t}->size().toString(); };
+}

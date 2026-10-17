@@ -1,0 +1,5 @@
+transformation common_elems_c();
+main() {
+	var b0 : Boolean := true; var s0 := 'x'; var i0 := 1;
+	log('x', if false then OrderedSet{true}->collect(x3 | Bag{s0}) else Sequence{Bag{s0, 1}} endif->flatten()->subSequence(0, 1));
+}

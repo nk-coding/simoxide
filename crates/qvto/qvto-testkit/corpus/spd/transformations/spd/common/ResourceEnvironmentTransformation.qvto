@@ -1,0 +1,25 @@
+library ResourceEnvironmentTransformation;
+
+modeltype SPD_MOD uses 'http://palladiosimulator.org/ScalingPolicyDefinition/1.0';
+modeltype SPD_ADJ uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0';
+modeltype SPD_TRI uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0';
+modeltype SPD_TAR uses 'http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype SPD_SEM uses 'http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0';
+
+
+mapping inout ResourceEnvironment::modifyResourceEnvironment(elasticInfrastructureCfg:ElasticInfrastructureCfg, invariantResourceContainers:Set(ResourceContainer)){
+	init { 
+		var completeSetOfResourceContainers:Set(ResourceContainer) := Set{};
+		completeSetOfResourceContainers+=elasticInfrastructureCfg.elements;
+		completeSetOfResourceContainers+=invariantResourceContainers;
+	}
+	resourceContainer_ResourceEnvironment := completeSetOfResourceContainers;
+	linkingResources__ResourceEnvironment.map modifyLinkingResource(completeSetOfResourceContainers);
+}
+
+mapping inout LinkingResource::modifyLinkingResource(resourceContainers:Set(ResourceContainer)){
+	connectedResourceContainers_LinkingResource := resourceContainers;
+}
+
+

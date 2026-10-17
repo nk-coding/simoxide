@@ -1,0 +1,7 @@
+transformation common_t();
+main() {
+	log('a', Sequence{1}->including(Set{1}));
+	log('b', Set{1.5}->including(Tuple{a = 1, b = 'x'}));
+	log('c', OrderedSet{'x'}->append(Sequence{'y'}));
+	log('d', if true then Sequence{1} else 2 endif);
+}

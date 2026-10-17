@@ -1,0 +1,2 @@
+problem	error	eq_unresolved_cc.qvto	4	165	88	Cannot find operation (<>(Integer)) for the type (Sequence(Integer))
+problem	warning	eq_unresolved_cc.qvto	4	165	88	The type 'eq_unresolved_cc::Sequence(Integer)' does not conform to the type 'oclstdlib::Integer'

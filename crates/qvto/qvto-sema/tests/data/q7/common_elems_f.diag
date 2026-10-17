@@ -1,0 +1,2 @@
+problem	error	common_elems_f.qvto	4	107	47	Type mismatch. No common supertype: (String), (Bag(Integer))
+problem	error	common_elems_f.qvto	4	175	1	Type mismatch: can not convert from 'common_elems_f::Collection()' to 'oclstdlib::Integer' type

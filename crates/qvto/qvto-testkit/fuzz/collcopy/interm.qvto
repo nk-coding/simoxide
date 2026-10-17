@@ -1,0 +1,16 @@
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation interm(in m : FZ);
+intermediate class IC { s : Set(FZ::Item); b : Bag(FZ::Item); }
+intermediate property FZ::Root::cs : Set(FZ::Item);
+main() {
+	var ic := new IC();
+	ic.s := m.objectsOfType(FZ::Item);
+	log('o', ic.s->asSequence()->collect(name));
+	ic.b := m.objectsOfType(FZ::Item)->asBag();
+	log('b', ic.b->asSequence()->collect(name));
+	var r := m.rootObjects()![FZ::Root];
+	r.cs := m.objectsOfType(FZ::Item);
+	log('c', r.cs->asSequence()->collect(name));
+	ic.s += r.items->first();
+	log('d', ic.s->asSequence()->collect(name));
+}

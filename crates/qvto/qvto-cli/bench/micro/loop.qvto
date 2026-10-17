@@ -1,0 +1,9 @@
+-- 1M iterations of an Integer while loop (benchmark B6).
+transformation loop();
+
+main() {
+	var s := 0;
+	var i := 0;
+	while (i < 1000000) { s := s + i; i := i + 1; };
+	log(s.toString());
+}

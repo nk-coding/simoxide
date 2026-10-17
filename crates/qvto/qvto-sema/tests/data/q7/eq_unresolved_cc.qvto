@@ -1,0 +1,5 @@
+transformation eq_unresolved_cc();
+main() {
+	var b0 : Boolean := true; var s0 := 'x'; var s1 := ''; var i0 := 1; var i1 := -3; var seq0 := Sequence{1, 2};
+	log('x', seq0 <> Sequence{s1}->collect(x4 | 5)->collect(x5 | Bag{3..2}->sortedBy(x6 | s0))->at(2));
+}

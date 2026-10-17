@@ -1,0 +1,1 @@
+problem	error	common_elems_b.qvto	4	107	52	Type mismatch. No common supertype: (String), (Bag(Integer))

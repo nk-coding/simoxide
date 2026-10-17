@@ -1,0 +1,8 @@
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation b(in m : FZ, out o : FZ);
+main() {
+	var r := object FZ::Root { name := 'r'; };
+	r.nodes += object FZ::Node { name := 'x'; };
+	r.nodes += object FZ::Node { name := 'y'; };
+	r.nodes := r.nodes->excluding(r.nodes->first());
+}

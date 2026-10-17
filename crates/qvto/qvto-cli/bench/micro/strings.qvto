@@ -1,0 +1,14 @@
+-- String operations on 50 000 short strings: concat, toUpper, indexOf, substring, size, tokens
+-- (benchmark B6).
+transformation strings();
+
+main() {
+	var n := 0;
+	Sequence{1..50000}->forEach(i) {
+		var s := 'Item_' + i.toString() + '_name';
+		var u := s.toUpper();
+		n := n + u.indexOf('_NAME') + s.substring(2, 5).size() + (if s.endsWith('name') then 1 else 0 endif);
+	};
+	var joined := Sequence{1..2000}->iterate(i; acc : String = '' | acc + i.toString() + ',');
+	log(n.toString() + ' ' + joined.size().toString());
+}

@@ -1,0 +1,18 @@
+[package]
+name = "qvto"
+description = "QVTo engine facade: compile a transformation, bind models, run in compat or fast mode"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+qvto-syntax.workspace = true
+qvto-model.workspace = true
+qvto-emf.workspace = true
+qvto-types.workspace = true
+qvto-sema.workspace = true
+qvto-bytecode.workspace = true
+qvto-runtime.workspace = true
+qvto-vm.workspace = true
