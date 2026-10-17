@@ -111,6 +111,20 @@ impl<J: Copy + PartialEq, K: Clock> FcfsHead<J, K> {
         Some(Completion { job, next })
     }
 
+    /// The job that just completed failed after all (a link failure, SS-RES-5.3): nothing to do
+    /// for the queue, which [`FcfsHead::on_wakeup`] already advanced, unless `stall` (Q28): then
+    /// the next job is not served and every later job waits behind it. Returns the pending
+    /// wake-up to schedule.
+    pub fn fail_head(&mut self, stall: bool) -> Option<Wakeup<J>> {
+        if stall {
+            self.generation += 1;
+            // the next job stays at the head without a completion: a later arrival does not
+            // schedule anything either (the queue is not empty)
+            self.pending = None;
+        }
+        self.pending
+    }
+
     /// Forgets all jobs (Slingshot's `clearJobs` at the end of the run).
     pub fn stop(&mut self) {
         self.queue.clear();

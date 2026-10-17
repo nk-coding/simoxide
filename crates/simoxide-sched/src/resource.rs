@@ -106,6 +106,26 @@ impl<J: Copy + PartialEq, K: Clock> ActiveResource<J, K> {
         }
     }
 
+    /// All jobs at the resource (Slingshot's `requestsAtResource`, SS-RES-2.7).
+    pub fn jobs(&self) -> u64 {
+        match self {
+            Self::Ps(r) => r.len() as u64,
+            Self::PsVirtualTime(r) => r.len() as u64,
+            Self::Fcfs(r) => r.len() as u64,
+            Self::Delay(r) => r.len() as u64,
+            Self::FcfsHead(r) => r.len() as u64,
+        }
+    }
+
+    /// Slingshot's link failure (SS-RES-5.3): the head of an [`FcfsHead`] is removed without
+    /// serving it; with `stall` (Q28) the next job is not scheduled. Returns the next wake-up.
+    pub fn fail_head(&mut self, stall: bool) -> Option<Wakeup<J>> {
+        match self {
+            Self::FcfsHead(r) => r.fail_head(stall),
+            _ => None,
+        }
+    }
+
     /// `TakeScheduledResourceUtilization`: fraction of the `instances` replicas (the
     /// `numberOfReplicas` of the model, which for FCFS/delay may differ from [`Self::cores`])
     /// whose queue length is positive.

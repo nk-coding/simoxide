@@ -105,10 +105,33 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 }
                 // the providing entity
                 match pr.target {
+                    ProvTarget::Fail(_) if self.quirk(crate::flavour::Quirk::Q35) => {
+                        // Q35: no connector or SEFF: the request stops silently (SS-ACT-4.3)
+                        d.conts.push(Cont::Stall);
+                        return Ok(Flow::Wait);
+                    }
                     ProvTarget::Fail(msg) => return self.err(msg),
+                    ProvTarget::Deleg { .. }
+                        if ac != SYSTEM_AC
+                            && self.quirk(crate::flavour::Quirk::Q30)
+                            && d.conts.len() >= 2
+                            && matches!(d.conts[d.conts.len() - 2],
+                                Cont::ProvRole { prov: outer, .. }
+                                    if self.st.provs[outer as usize].ac == SYSTEM_AC) =>
+                    {
+                        // Q30: an entry-level call into a composite stops the user (SS-ACT-1.5)
+                        d.conts.push(Cont::Stall);
+                        return Ok(Flow::Wait);
+                    }
                     ProvTarget::Deleg { ia, ir, inner } => {
                         let inner = if inner == u32::MAX {
-                            let id = self.prov_id(ia, ir, sig);
+                            let id = if ac == SYSTEM_AC && self.quirk(crate::flavour::Quirk::Q33) {
+                                // Q33: an entry-level SEFF is keyed by the system's role
+                                // (SS-MEAS-2.3)
+                                self.ss_prov_entry(ia, ir, role, sig)
+                            } else {
+                                self.prov_id(ia, ir, sig)
+                            };
                             if let ProvTarget::Deleg { inner, .. } =
                                 &mut self.st.provs[prov as usize].target
                             {
@@ -164,6 +187,13 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         self.component_instance(d)?;
                         // the SEFF for the signature (matched by signature id)
                         let Some(beh) = seff else {
+                            if self.quirk(crate::flavour::Quirk::Q35)
+                                && !cm.seff_for.contains_key(&(comp, cm.sig_key[sig.index()]))
+                            {
+                                // Q35: no SEFF for the signature: the request stops silently
+                                d.conts.push(Cont::Stall);
+                                return Ok(Flow::Wait);
+                            }
                             return self.err("Only exactly one SEFF is currently supported.");
                         };
                         // (the reference's SEFF exit level: its frames are popped by the end of
@@ -243,6 +273,8 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         return Ok(self.wait_consumed(d, res));
                     }
                 }
+                // Slingshot: a failed transfer is requested again (SS-ACT-7.3)
+                1 | 3 if F::SLINGSHOT && self.ss_take_link_failure(s) => *st -= 1,
                 1 => {
                     *st = 2;
                     d.conts.push(Cont::ProvRole {

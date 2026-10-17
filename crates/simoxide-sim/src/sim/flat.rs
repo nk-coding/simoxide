@@ -88,6 +88,13 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     let aid = &cm.action_ids[a.index()];
                     let cur = d.frames.last().map(|f| &**f);
                     let v = self.eval_f64(prog, cur, Origin::Elem("demand", aid))?;
+                    if F::SLINGSHOT {
+                        let rtype = (rtype != NO_TYPE).then_some(ResourceTypeId(rtype));
+                        if let Some(f) = self.ss_demand(s, d, rtype, v)? {
+                            return Ok(f);
+                        }
+                        continue;
+                    }
                     let c = self.container_of(cur_path(d))?;
                     let rtype = (rtype != NO_TYPE).then_some(ResourceTypeId(rtype));
                     let ri = self.resource_of(c, rtype)?;
@@ -128,8 +135,18 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         unreachable!()
                     };
                     let rc = &rescalls[i as usize];
+                    if self.quirk(crate::flavour::Quirk::Q35) {
+                        // Q35: nothing in Slingshot reads resource calls (SS-ACT-3.4)
+                        continue;
+                    }
                     let cur = d.frames.last().map(|f| &**f);
                     let v = self.eval_f64(rc.count, cur, Origin::Elem("rescall", &rc.id))?;
+                    if F::SLINGSHOT {
+                        if let Some(f) = self.ss_demand(s, d, rc.resource_type, v)? {
+                            return Ok(f);
+                        }
+                        continue;
+                    }
                     let c = self.container_of(cur_path(d))?;
                     let ri = self.resource_of(c, rc.resource_type)?;
                     if self.consume(s, ri, v, rc.service_id)? {
@@ -248,7 +265,16 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 }
                 Some(Cont::SLoop { body, left }) => {
                     self.tick()?;
-                    if *left <= 0 {
+                    if F::SLINGSHOT && *left <= slingshot::Q19_ONCE + 1 {
+                        // Q19: a loop count of 0 runs the body once, then throws (SS-ACT-6.2)
+                        if *left == slingshot::Q19_ONCE {
+                            *left += 1;
+                            let body = *body;
+                            d.conts.push(self.sbeh(body));
+                        } else {
+                            return self.err(slingshot::Q19_SEFF);
+                        }
+                    } else if *left <= 0 {
                         d.conts.pop();
                     } else {
                         *left -= 1;
@@ -323,9 +349,15 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 behaviours,
                 sels,
             } => {
-                let prev = self.st.rng.set_origin(Origin::Elem("branch", aid));
-                let u = self.st.rng.next_uniform();
-                self.st.rng.restore_origin(prev);
+                let u = if F::SLINGSHOT {
+                    // Slingshot's Math.random() stream (SS-ACT-5.1)
+                    self.ss_math("branch", aid)
+                } else {
+                    let prev = self.st.rng.set_origin(Origin::Elem("branch", aid));
+                    let u = self.st.rng.next_uniform();
+                    self.st.rng.restore_origin(prev);
+                    u
+                };
                 let Some(i) = simoxide_random::probfn::branch_index(cum, u) else {
                     return self.err("branch: no transition selected");
                 };
@@ -375,6 +407,16 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 let Some(body) = *body else {
                     return self.err("loop without body");
                 };
+                if n <= 0 && self.quirk(crate::flavour::Quirk::Q19) {
+                    if n < 0 {
+                        return self.err(slingshot::Q19_NEGATIVE);
+                    }
+                    d.conts.push(Cont::SLoop {
+                        body,
+                        left: slingshot::Q19_ONCE,
+                    });
+                    return Ok(Flow::Continue);
+                }
                 d.conts.push(Cont::SLoop { body, left: n });
             }
             CAct::Collection { count, .. } => {
@@ -384,6 +426,25 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     t.count(self.st.now, "loop", pid, aid, i64::from(n));
                 }
                 d.conts.push(Cont::Coll { a, left: n, st: 0 });
+            }
+            CAct::Fork { synchronous, .. } if self.quirk(crate::flavour::Quirk::Q23) => {
+                // Q23 (SS-ACT-10): asynchronous behaviours are ignored; a fork without a
+                // synchronisation point throws; the synchronous behaviours share the user's stack
+                // and cursor, which works for exactly one
+                if !cm.ss.fork_sync_point[a.index()] {
+                    return self.err(
+                        "IllegalStateException: ForkAction without SynchronisationPoint (Slingshot Q23)",
+                    );
+                }
+                match synchronous[..] {
+                    [] => {}
+                    [b] => d.conts.push(self.sbeh(b)),
+                    _ => {
+                        return self.err(
+                            "NoSuchElementException: the synchronous behaviours of a ForkAction share one cursor (Slingshot Q23)",
+                        );
+                    }
+                }
             }
             CAct::Fork {
                 asynchronous,
@@ -434,6 +495,14 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 *d = std::mem::take(&mut *self.st.procs[s as usize].data);
                 r?;
             }
+            CAct::Acquire(pr) if F::SLINGSHOT => {
+                if self.ss_acquire(s, d, a, *pr)? {
+                    return Ok(Flow::Wait);
+                }
+            }
+            CAct::Release(pr) if F::SLINGSHOT => {
+                self.ss_release(s, d, a, *pr)?;
+            }
             CAct::Acquire(pr) => {
                 if self.acquire(s, d, *pr)? {
                     return Ok(Flow::Wait);
@@ -456,6 +525,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 );
                 d.results.push(target);
                 r?;
+            }
+            CAct::Recovery(_) | CAct::Unsupported(_) if self.quirk(crate::flavour::Quirk::Q35) => {
+                // Q35: unsupported actions end the request silently (SS-ACT-4.3)
+                d.conts.push(Cont::Stall);
+                return Ok(Flow::Wait);
             }
             CAct::Recovery(primary) => {
                 let Some(b) = *primary else {
@@ -597,6 +671,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     let (Some(role), Some(sig)) = (*role, *signature) else {
                         unreachable!("checked by the call")
                     };
+                    if F::SLINGSHOT && self.st.procs[s as usize].ss_flags & SS_EXTRA_FRAME != 0 {
+                        return self.err(slingshot::Q22_STACK);
+                    }
                     d.elided -= 1;
                     self.st.pool.recycle(d.frames.pop());
                     let res = d.results.pop();
@@ -649,16 +726,27 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                             behaviours,
                             sels,
                         } => {
-                            let prev = self.st.rng.set_origin(Origin::Elem("branch", aid));
-                            let idx = if cum.is_empty() {
-                                None
+                            let idx = if F::SLINGSHOT {
+                                // Slingshot's Math.random() stream (SS-WL-4.2)
+                                if cum.is_empty() {
+                                    None
+                                } else {
+                                    let u = self.ss_math("branch", aid);
+                                    simoxide_random::probfn::branch_index(cum, u)
+                                }
                             } else {
-                                simoxide_random::probfn::branch_index(
-                                    cum,
-                                    self.st.rng.next_uniform(),
-                                )
+                                let prev = self.st.rng.set_origin(Origin::Elem("branch", aid));
+                                let idx = if cum.is_empty() {
+                                    None
+                                } else {
+                                    simoxide_random::probfn::branch_index(
+                                        cum,
+                                        self.st.rng.next_uniform(),
+                                    )
+                                };
+                                self.st.rng.restore_origin(prev);
+                                idx
                             };
-                            self.st.rng.restore_origin(prev);
                             let Some(i) = idx else {
                                 return self.err("branch: no transition selected");
                             };
@@ -672,6 +760,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         }
                         CUAct::Loop { count, body } => {
                             let n = self.eval_i32(*count, None, Origin::Elem("loop", aid))?;
+                            if n <= 0 && self.quirk(crate::flavour::Quirk::Q19) {
+                                return self.err(slingshot::Q19_USAGE);
+                            }
                             if let Some(t) = self.trace.as_mut() {
                                 t.count(self.st.now, "loop", pid, aid, i64::from(n));
                             }

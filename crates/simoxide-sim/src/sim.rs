@@ -41,6 +41,7 @@ use std::io::Write;
 mod calls;
 mod flat;
 mod runmodel;
+mod slingshot;
 mod state;
 
 pub use runmodel::RunModel;
@@ -332,6 +333,8 @@ enum Cont {
     ConsumeDone {
         res: ResIdx,
     },
+    /// Slingshot (Q35): the request stopped silently; the process never continues.
+    Stall,
 }
 
 #[derive(Default, Clone)]
@@ -365,7 +368,14 @@ struct Proc {
     fork_done: bool,
     /// Response-time series of the open external-call / assembly-operation starts (MEAS-1.5).
     rt: Vec<SeriesId>,
+    /// Slingshot flavour: [`SS_EXTRA_FRAME`], [`SS_LINK_FAILED`].
+    ss_flags: u8,
 }
+
+/// Slingshot (Q22): a collection iterator left its frame on the stack.
+const SS_EXTRA_FRAME: u8 = 1;
+/// Slingshot: the process's last link transfer failed (SS-RES-5.3).
+const SS_LINK_FAILED: u8 = 2;
 
 /// The last resolution of an external-call site (`call_required` from the caller's assembly
 /// context `ac`, with `parent` the path id of the context below it): the continuation it
@@ -424,13 +434,16 @@ struct ResRt<K: Clock> {
 }
 
 impl<K: Clock> ResRt<K> {
-    /// An idle resource.
-    fn new(r: &CRes, ps: PsAlgorithm) -> ResRt<K> {
+    /// An idle resource (`slingshot`: Slingshot's schedulers, SS-RES-1).
+    fn new(r: &CRes, ps: PsAlgorithm, slingshot: bool) -> ResRt<K> {
         ResRt {
             sched: match r.policy {
                 SchedulingPolicy::Delay => None,
                 SchedulingPolicy::ProcessorSharing => {
                     Some(ActiveResource::new(r.policy, r.instances, ps))
+                }
+                SchedulingPolicy::Fcfs if slingshot => {
+                    Some(ActiveResource::new_slingshot(r.policy, 1, ps))
                 }
                 SchedulingPolicy::Fcfs => Some(ActiveResource::new(r.policy, 1, ps)),
             },
@@ -451,6 +464,8 @@ struct PassiveInst {
     holding: Option<SeriesId>,
     wait_start: Vec<(u64, i64)>,
     hold_start: Vec<(u64, i64)>,
+    /// Slingshot flavour: the passive-resource monitors of this instance (SS-MEAS-4).
+    ss_mon: Vec<(SeriesId, SsPassiveMetric)>,
 }
 
 #[derive(Clone)]
@@ -477,6 +492,12 @@ pub(crate) struct Sink {
     error: Option<&'static str>,
     /// PRM recorders exist (MEAS-7.2).
     prm_armed: bool,
+    /// `prm_armed` or a series is observed: tuples take the slow path ([`emit_hooks`]).
+    armed: bool,
+    /// Observed series (empty: none), see [`Simulation::observe_series`].
+    observe: Vec<bool>,
+    /// Tuples of observed series since the last [`Simulation::take_observed`].
+    observed: Vec<Observed>,
     prm: Prm,
     reconf: Reconf,
     /// The event list: runtime-measurement writes schedule the reconfiguration process from
@@ -625,6 +646,7 @@ fn prm_write(meas: &mut Sink, trace: &mut Option<TraceOut>, now: i64) {
             "IllegalStateException: Tried to schedule thread which was not suspended [Reconfiguration Process]",
         );
         meas.prm_armed = false;
+        meas.armed = !meas.observe.is_empty();
         if let Some(tr) = trace.as_mut() {
             tr.pend(now, meas.reconf_pid);
         }
@@ -704,8 +726,37 @@ fn emit(
             meas.windows[w as usize].add(t, v);
         }
     }
+    if meas.armed {
+        emit_hooks(meas, trace, now, s, t, v);
+    }
+}
+
+/// A tuple of an observed series (the measurement-observer hook, `DESIGN-SPD.md` §5.4
+/// "Stimulus sources": Slingshot's `MeasurementMade` stream for the SPD interpreter).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Observed {
+    pub series: SeriesId,
+    /// The tuple: point in time (seconds) and value.
+    pub t: f64,
+    pub v: f64,
+}
+
+/// The tuple's PRM recorders and observers (the slow path of [`emit`]).
+#[cold]
+#[inline(never)]
+fn emit_hooks(
+    meas: &mut Sink,
+    trace: &mut Option<TraceOut>,
+    now: i64,
+    s: SeriesId,
+    t: f64,
+    v: f64,
+) {
     if meas.prm_armed {
         prm_tuple(meas, trace, now, s, t);
+    }
+    if meas.observe.get(s as usize).copied().unwrap_or(false) {
+        meas.observed.push(Observed { series: s, t, v });
     }
 }
 
@@ -849,6 +900,10 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 at_ns: 0,
                 kind: SimErrorKind::Model,
             });
+        }
+        let mut cfg = cfg;
+        if F::SLINGSHOT {
+            Self::ss_check(cm, &mut cfg)?;
         }
         let rng = C::Rng::create(
             &cfg.rng,
@@ -1015,6 +1070,16 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             {
                 return Ok(Status::Paused);
             }
+            // Slingshot: `SimulationFinished`, queued at t = 0 for `simTime`, comes before every
+            // other event at `simTime` (SS-RUN-3)
+            if F::SLINGSHOT
+                && self.st.cfg.max_sim_time > 0
+                && let Some(t) = self.st.meas.events.next_time()
+                && F::Clock::secs(t) >= self.st.cfg.max_sim_time as f64
+            {
+                self.st.ss_time_stop = true;
+                break;
+            }
             let Some((t, ev)) = self.st.meas.events.pop() else {
                 break;
             };
@@ -1134,6 +1199,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 prm.recs.push(PrmState::new(rec));
             }
             self.st.meas.prm_armed = true;
+            self.st.meas.armed = true;
         }
         // probe-framework decorators: sliding windows, first events at span(length) (MEAS-6.3)
         self.st.meas.series_windows = vec![Vec::new(); self.st.meas.m.series.len()];
@@ -1146,6 +1212,10 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 return self.err("invalid sliding window length");
             };
             self.st.meas.events.insert(at, Ev::Window(i as u32));
+        }
+        // Slingshot: the passive resources exist before the simulation starts (SS-RES-4.1)
+        if F::SLINGSHOT {
+            self.ss_create_passives()?;
         }
         // SimuComModel.init at t = 0: run the drivers in scenario order
         for (i, s) in cm.scenarios.iter().enumerate() {
@@ -1214,6 +1284,12 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
 
     #[inline]
     fn stop_condition(&self) -> bool {
+        if F::SLINGSHOT {
+            // simTime is checked before each event; the maximum measurement count as SimuLizar
+            // (the fixed behaviour of Q32, which sets it to -1)
+            return self.st.cfg.max_measurements > 0
+                && self.st.main_count >= self.st.cfg.max_measurements;
+        }
         (self.st.cfg.max_sim_time > 0
             && F::Clock::secs(self.st.now) >= self.st.cfg.max_sim_time as f64)
             || (self.st.cfg.max_measurements > 0
@@ -1221,6 +1297,10 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     }
 
     fn finalise(&mut self) -> R<()> {
+        if F::SLINGSHOT {
+            self.ss_finalise();
+            return Ok(());
+        }
         let cm = self.cm;
         self.st.running = false;
         self.st.meas.reconf.stopped = true;
@@ -1335,6 +1415,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 p.last_res = LastRes::None;
                 p.table_seq = None;
                 p.fork_done = false;
+                p.ss_flags = 0;
                 s
             }
             None => {
@@ -1351,6 +1432,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     table_seq: None,
                     fork_done: false,
                     rt: Vec::new(),
+                    ss_flags: 0,
                 });
                 (self.st.procs.len() - 1) as u32
             }
@@ -1460,9 +1542,13 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     rt.delay_set.swap_remove(pos);
                     let n = rt.delay_set.len() as u64;
                     self.delay_state_changed(ri, n);
+                    if F::SLINGSHOT {
+                        self.ss_res_samples(ri);
+                    }
                     self.handoff(k)?;
                 }
             }
+            Ev::Stale(ri) => self.ss_res_samples(ri),
             Ev::Window(i) => {
                 self.window_full(i as usize);
                 let inc = self.cm.windows[i as usize].inc;
@@ -1471,6 +1557,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 };
                 self.st.meas.events.insert(at, Ev::Window(i));
             }
+            Ev::Wake(ri) if F::SLINGSHOT => self.ss_wake(ri)?,
             Ev::Wake(ri) => {
                 let cm = self.cm;
                 let def = &cm.resources[ri as usize];
@@ -1807,6 +1894,17 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             return Ok(false);
         }
         let k = self.pkey(s);
+        if F::SLINGSHOT {
+            // Slingshot: a think time or usage delay is an event after `d` (SS-WL-3.2, SS-WL-4.1)
+            self.st.procs[s as usize].in_think = true;
+            let Some(at) = F::Clock::checked_after(self.st.now, d) else {
+                return self.err(format!(
+                    "IllegalArgumentException: invalid delay {d} (AbstractSimulationEvent)"
+                ));
+            };
+            self.st.meas.events.insert(at, Ev::Think(k));
+            return Ok(true);
+        }
         let last = self.st.procs[s as usize].last_res;
         if last != LastRes::Think {
             if let LastRes::Active(r) = last {
@@ -2093,6 +2191,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         dst: ContainerId,
         payload: Option<&Frame>,
     ) -> R<Option<ResIdx>> {
+        if F::SLINGSHOT {
+            return self.ss_transmit(s, src, dst, payload);
+        }
         let cm = self.cm;
         let demand = if self.st.cfg.simulate_linking_resources {
             // MiddlewareCompletionAwareDemandCalculator: the middleware completion is expected to
@@ -2141,6 +2242,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
 
     fn component_instance(&mut self, d: &ProcData) -> R<()> {
         let path = cur_path(d);
+        if F::SLINGSHOT {
+            return self.ss_component_instance(path);
+        }
         if self
             .st
             .comps
@@ -2214,6 +2318,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 holding,
                 wait_start: Vec::new(),
                 hold_start: Vec::new(),
+                ss_mon: Vec::new(),
             });
             passives.push((pr, idx));
         }
@@ -2409,10 +2514,48 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         if m.assembly_contexts[acid].parent.is_none() {
             return self.err("Required delegation of the system cannot be simulated");
         }
-        let Some(&c) = cm.req_conn.get(&(acid, role)) else {
+        let conn = if self.quirk(crate::flavour::Quirk::Q20) {
+            // Q20: the first assembly connector of the system with this required role id,
+            // whatever the requiring assembly context (SS-ACT-2.2)
+            cm.ss.sys_req_conn.get(&m.roles[role].id).copied()
+        } else {
+            cm.req_conn.get(&(acid, role)).copied()
+        };
+        let Some(c) = conn else {
+            if self.quirk(crate::flavour::Quirk::Q35) {
+                d.conts.push(Cont::Stall);
+                return Ok(());
+            }
             return self.err("Found unbound provided role. PCM model is invalid.");
         };
         match &m.connectors[c].kind {
+            ConnectorKind::Assembly {
+                requiring: Some(req),
+                providing: Some(prov),
+                provided_role: Some(prole),
+                ..
+            } if F::SLINGSHOT => {
+                // the caller's container and the provider's; no transfer if either has none
+                // (SS-ACT-7.1)
+                let _ = req;
+                let sp = self.path_after_push(&d.acs, ac);
+                let src = self
+                    .path_node(sp)
+                    .container
+                    .unwrap_or(slingshot::NO_CONTAINER);
+                let dp = self.path_after_push(&d.acs, prov.0);
+                let dst = self
+                    .path_node(dp)
+                    .container
+                    .unwrap_or(slingshot::NO_CONTAINER);
+                let prov = self.prov_id(prov.0, *prole, sig);
+                d.conts.push(Cont::AsmConn {
+                    src,
+                    dst,
+                    prov,
+                    st: 0,
+                });
+            }
             ConnectorKind::Assembly {
                 requiring: Some(req),
                 providing: Some(prov),
@@ -2438,6 +2581,15 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 ..
             } => {
                 let prov = self.prov_id(prov.0, *prole, sig);
+                if F::SLINGSHOT {
+                    if self.quirk(crate::flavour::Quirk::Q31) && cm.ss.asmop_monitored {
+                        return self.err(
+                            "IllegalArgumentException: AssemblyOperationCompoundKey of a SEFF reached through an infrastructure call (Slingshot Q31)",
+                        );
+                    }
+                    // the fixed Q31: infrastructure SEFFs are not measured
+                    self.st.provs[prov as usize].aser = None;
+                }
                 d.conts.push(Cont::ProvRole {
                     prov,
                     t0: -1,
@@ -2524,6 +2676,21 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         return Ok(Flow::Wait);
                     }
                 }
+                // Slingshot: a new user replacing an aborted one (SS-WL-5.1): a think time,
+                // then the next iteration; the aborted one is not counted
+                3 => {
+                    *st = 4;
+                    let CWorkload::Closed { think_time, .. } =
+                        cm.scenarios[*scen as usize].workload
+                    else {
+                        unreachable!()
+                    };
+                    let tt = self.eval_f64(think_time, None, Origin::Plain("think"))?;
+                    if self.hold(s, tt)? {
+                        return Ok(Flow::Wait);
+                    }
+                }
+                4 => *st = 0,
                 _ => {
                     *st = 0;
                     self.st.main_count += 1;
@@ -2570,7 +2737,16 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             // ------------------------------------------------------------------ SEFF
             Cont::SBeh { .. } => return self.step_sbeh(s, d),
             Cont::SLoop { body, left } => {
-                if *left <= 0 {
+                if F::SLINGSHOT && *left <= slingshot::Q19_ONCE + 1 {
+                    // Q19: a loop count of 0 runs the body once, then throws (SS-ACT-6.2)
+                    if *left == slingshot::Q19_ONCE {
+                        *left += 1;
+                        let body = *body;
+                        d.conts.push(self.sbeh(body));
+                    } else {
+                        return self.err(slingshot::Q19_SEFF);
+                    }
+                } else if *left <= 0 {
                     d.conts.pop();
                 } else {
                     *left -= 1;
@@ -2578,7 +2754,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     d.conts.push(self.sbeh(body));
                 }
             }
-            Cont::Coll { .. } => return self.step_coll(d),
+            Cont::Coll { .. } => return self.step_coll(s, d),
             Cont::ForkJoin { a, join } => {
                 let waiting = self.st.joins[*join as usize]
                     .iter()
@@ -2595,6 +2771,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     t.join(self.st.now, pid, &cm.action_ids[a.index()]);
                 }
             }
+            Cont::Stall => return Ok(Flow::Wait),
             Cont::ConsumeDone { res } => {
                 let def = &cm.resources[*res as usize];
                 d.conts.pop();
@@ -2726,6 +2903,32 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         inner_role: Some(ir),
                         assembly: Some(ia),
                         ..
+                    } if ac == SYSTEM_AC && self.quirk(crate::flavour::Quirk::Q20) => {
+                        // Q20: the first assembly context of the system whose component provides
+                        // the inner role, by id (SS-ACT-1.2)
+                        let rid = &m.roles[*ir].id;
+                        let first = m.structures[stc]
+                            .assembly_contexts
+                            .iter()
+                            .copied()
+                            .find(|a| {
+                                m.assembly_contexts[*a].component.is_some_and(|c| {
+                                    m.components[c]
+                                        .provided_roles
+                                        .iter()
+                                        .any(|r| m.roles[*r].id == *rid)
+                                })
+                            });
+                        res(ProvTarget::Deleg {
+                            ia: first.unwrap_or(*ia).0,
+                            ir: *ir,
+                            inner: u32::MAX,
+                        })
+                    }
+                    ConnectorKind::ProvidedDelegation {
+                        inner_role: Some(ir),
+                        assembly: Some(ia),
+                        ..
                     } => res(ProvTarget::Deleg {
                         ia: ia.0,
                         ir: *ir,
@@ -2776,11 +2979,16 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             let Some(sig) = call.signature else {
                 return self.err("infrastructure call without signature");
             };
-            let fin = self.input_frame(
-                &call.inputs,
-                d.frames.last(),
-                Origin::Elem("param", &call.id),
-            )?;
+            let fin = if self.quirk(crate::flavour::Quirk::Q36) {
+                // Q36: the call's input variable usages are ignored (SS-ACT-2.5)
+                self.st.empty.clone()
+            } else {
+                self.input_frame(
+                    &call.inputs,
+                    d.frames.last(),
+                    Origin::Elem("param", &call.id),
+                )?
+            };
             d.frames.push(fin);
             let c = d.acs.pop().unwrap_or((SYSTEM_AC, ROOT_PATH));
             *caller = c;
@@ -2836,8 +3044,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     }
 
     #[inline(never)]
-    fn step_coll(&mut self, d: &mut ProcData) -> R<Flow> {
+    fn step_coll(&mut self, s: u32, d: &mut ProcData) -> R<Flow> {
         let cm = self.cm;
+        let q22 = self.quirk(crate::flavour::Quirk::Q22);
         let Some(Cont::Coll { a, left, st }) = d.conts.last_mut() else {
             unreachable!()
         };
@@ -2845,6 +3054,29 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         let CAct::Collection { prefix, body, .. } = &cm.act[a.index()] else {
             unreachable!()
         };
+        if q22 {
+            // Q22 (SS-ACT-6.3): one frame with the INNER values, evaluated once and never
+            // popped; the body runs `n` times
+            if *st == 0 {
+                *st = 2;
+                let cur = d.frames.last().cloned();
+                let aid = &cm.action_ids[a.index()];
+                let prev = self.st.rng.set_origin(Origin::Elem("inner", aid));
+                let fi = self.eval_inner(cur, prefix);
+                self.st.rng.restore_origin(prev);
+                d.frames.push(fi?);
+                self.st.procs[s as usize].ss_flags |= SS_EXTRA_FRAME;
+            } else if *left <= 0 {
+                d.conts.pop();
+            } else {
+                *left -= 1;
+                let Some(body) = *body else {
+                    return self.err("collection iterator without body");
+                };
+                d.conts.push(self.sbeh(body));
+            }
+            return Ok(Flow::Continue);
+        }
         if *st == 0 {
             if *left <= 0 {
                 d.conts.pop();

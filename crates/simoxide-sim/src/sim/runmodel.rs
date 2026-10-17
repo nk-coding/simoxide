@@ -150,7 +150,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         let st = &mut self.st;
         let ps = st.cfg.ps_algorithm;
         for r in &cm.resources[st.res.len()..] {
-            st.res.push(ResRt::new(r, ps));
+            st.res.push(ResRt::new(r, ps, F::SLINGSHOT));
         }
         debug_assert_eq!(cm.series.len(), st.meas.m.series.len());
         st.dyn_paths.clear();

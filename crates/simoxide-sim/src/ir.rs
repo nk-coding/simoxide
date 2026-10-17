@@ -455,6 +455,8 @@ pub struct CompiledModel {
     pub warnings: Vec<String>,
     /// The flavour the model is compiled for (its runs follow it, [`crate::run`]).
     pub flavour: crate::flavour::FlavourConfig,
+    /// The Slingshot flavour's tables (empty for SimuLizar).
+    pub ss: SsTables,
 }
 
 impl fmt::Debug for CompiledModel {
@@ -738,6 +740,12 @@ impl CompiledModel {
         let monitors: Vec<&Monitor> = repo
             .map(|r| r.monitors.iter().map(|&x| &m.monitors[x]).collect())
             .unwrap_or_default();
+        let ss = flavour.kind == crate::flavour::FlavourKind::Slingshot;
+        let quirks = flavour.quirks;
+        // monitors of SimuLizar's probe framework (sliding windows, PRM, reconfiguration time,
+        // container count, passive resources): none in the Slingshot flavour, which has its own
+        // (`SsTables`, `docs/spec/slingshot/monitoring.md`)
+        let sim_monitors: Vec<&Monitor> = if ss { Vec::new() } else { monitors.clone() };
 
         // response time calculators: key(MP) -> series (later specs overwrite the probes)
         // (probes are looked up by `MonitorRepositoryUtil` measurement identifiers, i.e. by id
@@ -755,6 +763,18 @@ impl CompiledModel {
                 continue;
             };
             let mp = &m.measuring_points[mpid];
+            // Q29: Slingshot ignores entry-level call, system-operation and external-call points
+            if ss
+                && quirks.has(crate::flavour::Quirk::Q29)
+                && matches!(
+                    mp.kind,
+                    MeasuringPointKind::EntryLevelSystemCall { .. }
+                        | MeasuringPointKind::SystemOperation { .. }
+                        | MeasuringPointKind::ExternalCallAction { .. }
+                )
+            {
+                continue;
+            }
             for spec in &mon.specifications {
                 if metric_id(m, spec) != Some(metric_ids::RESPONSE_TIME) {
                     continue;
@@ -1180,9 +1200,16 @@ impl CompiledModel {
         // allocation: FQ path -> container (later entries overwrite; AllocationLookupSyncer)
         let mut alloc: FxMap<Box<[u32]>, ContainerId> = FxMap::default();
         let sys_structure = m.systems[system].structure;
+        // Slingshot: the first allocation context of an assembly context wins (SS-ACT-9.1);
+        // with Q30 the inner assembly contexts of a composite are not allocated (SS-ACT-1.5)
+        let alloc_mode = match (ss, quirks.has(crate::flavour::Quirk::Q30)) {
+            (false, _) => AllocMode::LastNested,
+            (true, false) => AllocMode::FirstNested,
+            (true, true) => AllocMode::FirstFlat,
+        };
         for al in m.allocations.iter() {
             for &ctx in &al.contexts {
-                allocate_context(m, sys_structure, ctx, &mut alloc)?;
+                allocate_context_mode(m, sys_structure, ctx, &mut alloc, alloc_mode)?;
             }
         }
 
@@ -1247,7 +1274,25 @@ impl CompiledModel {
         // registry keys in insertion order (containers, then links) and per-container type ids
         let mut registry: Vec<(String, Vec<(String, ResIdx)>)> = Vec::new();
         let mut container_simulated = vec![false; m.containers.len()];
-        if let Some(env) = env {
+        let mut ss_tables = SsTables::default();
+        if ss {
+            ss_resources(
+                m,
+                env,
+                quirks,
+                &monitors,
+                &mut b,
+                &mut series,
+                &mut series_map,
+                &mut resources,
+                &mut container_res,
+                &mut link_res,
+                &mut links,
+                &mut registry,
+                &mut container_simulated,
+                &mut ss_tables,
+            )?;
+        } else if let Some(env) = env {
             let e = &m.resource_environments[env];
             for &cid in &e.containers {
                 container_simulated[cid.index()] = true;
@@ -1432,7 +1477,7 @@ impl CompiledModel {
         // sliding windows (probe-framework decorators in extension-registry order:
         // slidingwindow = TimeDrivenAggregation, then utilization = TimeDriven utilisation)
         let mut windows = Vec::new();
-        for mon in monitors.iter().filter(|x| x.activated) {
+        for mon in sim_monitors.iter().filter(|x| x.activated) {
             for spec in &mon.specifications {
                 if let ProcessingType::TimeDrivenAggregation {
                     window_length,
@@ -1451,7 +1496,7 @@ impl CompiledModel {
             }
         }
         for wanted in [metric_ids::UTILIZATION_TUPLE, metric_ids::UTILIZATION] {
-            for mon in monitors.iter().filter(|x| x.activated) {
+            for mon in sim_monitors.iter().filter(|x| x.activated) {
                 for spec in &mon.specifications {
                     if metric_id(m, spec) != Some(wanted) {
                         continue;
@@ -1519,7 +1564,7 @@ impl CompiledModel {
         let mut passive_mon = vec![PassiveMon::default(); m.passive_resources.len()];
         for (pid, pr) in m.passive_resources.iter_ids() {
             let mut pm = PassiveMon::default();
-            for mon in &monitors {
+            for mon in &sim_monitors {
                 let Some(mpid) = mon.measuring_point else {
                     continue;
                 };
@@ -1550,7 +1595,7 @@ impl CompiledModel {
         // number of resource containers (NumberOfResourceContainerTrackingListener), MEAS-7.3
         let mut reconf_time_series = Vec::new();
         let mut container_count = None;
-        for mon in monitors.iter().filter(|x| x.activated) {
+        for mon in sim_monitors.iter().filter(|x| x.activated) {
             let Some(mp) = mon.measuring_point.map(|x| &m.measuring_points[x]) else {
                 continue;
             };
@@ -1592,7 +1637,7 @@ impl CompiledModel {
         // measurement-driven aggregations attach to the calculator of their MP and base metric
         let mut prm_series = Vec::new();
         let mut prm_passive = Vec::new();
-        for mon in monitors.iter().filter(|x| x.activated) {
+        for mon in sim_monitors.iter().filter(|x| x.activated) {
             let Some(mpid) = mon.measuring_point else {
                 continue;
             };
@@ -1718,7 +1763,7 @@ impl CompiledModel {
         }
         // execution-result tuples (MEAS-7.4) need an explicit monitor with this metric; they are
         // textual (SUCCESS/FAILURE) and not produced here
-        if monitors.iter().any(|mon| {
+        if sim_monitors.iter().any(|mon| {
             mon.specifications
                 .iter()
                 .any(|s| metric_id(m, s) == Some(metric_ids::EXECUTION_RESULT_TYPE_TUPLE))
@@ -1728,6 +1773,9 @@ impl CompiledModel {
             );
         }
         let stream_bytesize = b.prog("stream.BYTESIZE");
+        if ss {
+            ss_actions(m, sys_structure, &mut b, &mut ss_tables);
+        }
         let prm_any =
             !prm_series.is_empty() || !prm_passive.is_empty() || windows.iter().any(|w| w.prm);
 
@@ -1856,6 +1904,7 @@ impl CompiledModel {
             warnings,
             model,
             flavour,
+            ss: ss_tables,
         })
     }
 
@@ -1953,6 +2002,29 @@ pub(crate) fn allocate_context(
     ctx: AllocationContextId,
     alloc: &mut FxMap<Box<[u32]>, ContainerId>,
 ) -> Result<(), CompileError> {
+    allocate_context_mode(m, sys_structure, ctx, alloc, AllocMode::LastNested)
+}
+
+/// How allocation contexts map assembly-context paths to containers.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum AllocMode {
+    /// SimuLizar: a later allocation context of the same path overwrites an earlier one; the
+    /// inner assembly contexts of a composite are allocated with it (ACT-2.8).
+    LastNested,
+    /// Slingshot: the first allocation context wins (SS-ACT-9.1); inner contexts as SimuLizar
+    /// (the fixed behaviour of Q30).
+    FirstNested,
+    /// Slingshot with Q30: the first wins; inner assembly contexts stay unallocated (SS-ACT-1.5).
+    FirstFlat,
+}
+
+pub(crate) fn allocate_context_mode(
+    m: &Model,
+    sys_structure: StructureId,
+    ctx: AllocationContextId,
+    alloc: &mut FxMap<Box<[u32]>, ContainerId>,
+    mode: AllocMode,
+) -> Result<(), CompileError> {
     let c = &m.allocation_contexts[ctx];
     if let (Some(ac), Some(cont)) = (c.assembly, c.container) {
         let mut base = if m.assembly_contexts[ac].parent == Some(sys_structure) {
@@ -1974,7 +2046,7 @@ pub(crate) fn allocate_context(
             }
             out.pop().expect("one path")
         };
-        add_nested(m, &mut base, cont, alloc, 0);
+        add_nested(m, &mut base, cont, alloc, 0, mode);
     }
     Ok(())
 }
@@ -1985,16 +2057,25 @@ fn add_nested(
     cont: ContainerId,
     alloc: &mut FxMap<Box<[u32]>, ContainerId>,
     depth: usize,
+    mode: AllocMode,
 ) {
-    alloc.insert(base.clone().into_boxed_slice(), cont);
+    match mode {
+        AllocMode::LastNested => {
+            alloc.insert(base.clone().into_boxed_slice(), cont);
+        }
+        AllocMode::FirstNested | AllocMode::FirstFlat => {
+            alloc.entry(base.clone().into_boxed_slice()).or_insert(cont);
+        }
+    }
     let ac = AssemblyContextId(*base.last().expect("path"));
     if depth < 32
+        && mode != AllocMode::FirstFlat
         && let Some(comp) = m.assembly_contexts[ac].component
         && let Some(st) = m.components[comp].structure()
     {
         for &inner in &m.structures[st].assembly_contexts {
             base.push(inner.0);
-            add_nested(m, base, cont, alloc, depth + 1);
+            add_nested(m, base, cont, alloc, depth + 1, mode);
             base.pop();
         }
     }
@@ -2085,4 +2166,344 @@ fn check_composition(m: &Model, sys: StructureId) -> Result<(), CompileError> {
         stack.pop();
     }
     Ok(())
+}
+
+// ------------------------------------------------------------------------------------------
+// Slingshot flavour tables (`docs/spec/slingshot/`)
+
+/// What a Slingshot active-resource monitor samples at every resource event (SS-MEAS-3).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SsProbe {
+    /// `requestsAtResource`: all jobs at the resource (SS-MEAS-3.2).
+    State,
+    /// Busy cores / cores (SS-MEAS-3.3).
+    Util,
+    /// The jobs `reportCoreUsage` attributes to core `k` (fixed Q34, a multi-core PS resource).
+    CoreState(u32),
+    /// Core `k` busy: 1 or 0 (fixed Q34).
+    CoreUtil(u32),
+}
+
+/// A passive-resource metric of Slingshot's monitor (SS-MEAS-4.2).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SsPassiveMetric {
+    Waiting,
+    Holding,
+    State,
+}
+
+/// A Slingshot passive-resource monitor.
+#[derive(Debug, Clone, Copy)]
+pub struct SsPassiveMon {
+    pub pr: PassiveResourceId,
+    /// The assembly context of the measuring point; `None`: every instance of the passive
+    /// resource (Q34: probes per passive resource).
+    pub ac: Option<AssemblyContextId>,
+    pub metric: SsPassiveMetric,
+    pub series: SeriesId,
+}
+
+/// The tables of the Slingshot flavour (empty for SimuLizar).
+#[derive(Debug, Clone, Default)]
+pub struct SsTables {
+    /// Per resource (`ResIdx`): the active-resource monitors, in registration order.
+    pub res_mon: Vec<Vec<(SeriesId, SsProbe)>>,
+    /// Per resource (`ResIdx`): the failure probability of a linking resource (0 otherwise).
+    pub link_failure: Vec<f64>,
+    /// Per SEFF action: the amount of an `AcquireAction`/`ReleaseAction`, its first
+    /// `ParametricResourceDemand` (SS-ACT-8.1).
+    pub passive_amount: Vec<Option<ProgId>>,
+    /// Per SEFF action: a `ForkAction` with a `SynchronisationPoint`.
+    pub fork_sync_point: Vec<bool>,
+    /// Passive-resource monitors.
+    pub passive_mon: Vec<SsPassiveMon>,
+    /// Q20: the first assembly connector of the system per required-role id.
+    pub sys_req_conn: HashMap<Box<str>, ConnectorId>,
+    /// An `AssemblyOperationMeasuringPoint` response-time monitor exists (Q31).
+    pub asmop_monitored: bool,
+}
+
+/// Measuring-point key of the Slingshot flavour: [`mp_key`] plus the points only Slingshot
+/// records (`AssemblyPassiveResourceMeasuringPoint[assembly|passive resource]`, the reference
+/// runner's `Keys.mpKey`).
+fn ss_mp_key(m: &Model, mp: &MeasuringPoint) -> Option<String> {
+    match &mp.kind {
+        MeasuringPointKind::AssemblyPassiveResource {
+            assembly,
+            passive_resource,
+        } => Some(format!(
+            "AssemblyPassiveResourceMeasuringPoint[{}|{}]",
+            m.assembly_contexts[(*assembly)?].id,
+            m.passive_resources[(*passive_resource)?].id
+        )),
+        _ => mp_key(m, mp),
+    }
+}
+
+/// Resources and resource monitors of the Slingshot flavour (SS-RES-1, SS-MEAS-3, SS-MEAS-4).
+#[allow(clippy::too_many_arguments)]
+fn ss_resources(
+    m: &Model,
+    env: Option<ResourceEnvironmentId>,
+    quirks: crate::flavour::Quirks,
+    monitors: &[&Monitor],
+    b: &mut Builder,
+    series: &mut Vec<SeriesDef>,
+    series_map: &mut HashMap<(String, &'static str), SeriesId>,
+    resources: &mut Vec<CRes>,
+    container_res: &mut FxMap<(ContainerId, ResourceTypeId), ResIdx>,
+    link_res: &mut FxMap<LinkingResourceId, ResIdx>,
+    links: &mut Vec<LinkingResourceId>,
+    registry: &mut Vec<(String, Vec<(String, ResIdx)>)>,
+    container_simulated: &mut [bool],
+    t: &mut SsTables,
+) -> Result<(), CompileError> {
+    use crate::flavour::Quirk;
+    let mut new_series = |mp: String, metric: &'static str| -> SeriesId {
+        *series_map.entry((mp.clone(), metric)).or_insert_with(|| {
+            series.push(SeriesDef {
+                mp: mp.into(),
+                metric,
+            });
+            (series.len() - 1) as SeriesId
+        })
+    };
+    // the containers of the allocation contexts, in allocation order (ActiveResourceTable)
+    let mut conts: Vec<ContainerId> = Vec::new();
+    for al in m.allocations.iter() {
+        for &ctx in &al.contexts {
+            if let Some(c) = m.allocation_contexts[ctx].container
+                && !conts.contains(&c)
+            {
+                conts.push(c);
+            }
+        }
+    }
+    for cid in conts {
+        let cont = &m.containers[cid];
+        let mut types: Vec<(String, ResIdx)> = Vec::new();
+        for &prid in &cont.processing_resources {
+            let pr = &m.processing_resources[prid];
+            let Some(rt) = pr.resource_type else {
+                continue;
+            };
+            let pol_id = pr
+                .scheduling
+                .map(|s| m.scheduling_policies[s].id.to_string())
+                .unwrap_or_default();
+            // FCFS and processor sharing; Delay only with the fixed Q25; anything else: no
+            // resource (a demand on it aborts the user, SS-RES-1.2)
+            let policy = match SchedulingPolicy::from_pcm_id(&pol_id) {
+                Some(SchedulingPolicy::Delay) if quirks.has(Quirk::Q25) => continue,
+                Some(p) => p,
+                None => continue,
+            };
+            if pr.replicas > MAX_REPLICAS {
+                return Err(CompileError(format!(
+                    "numberOfReplicas {} of {} exceeds the supported maximum {MAX_REPLICAS}",
+                    pr.replicas, pr.id
+                )));
+            }
+            let instances = pr.replicas.max(1) as u32;
+            let r = CRes {
+                kind: ResKind::Processing(prid),
+                policy,
+                instances,
+                rate: b.prog(&pr.processing_rate.spec),
+                latency: None,
+                // Slingshot ignores the HDD read and write rates (SS-RES-0.2)
+                hdd: None,
+                type_id: m.resource_types[rt].id.clone(),
+                rc: cont.id.clone(),
+                spec_name: pr.id.clone(),
+                sched_name: pol_id.as_str().into(),
+                origin: format!("rate:{}", cont.id).into(),
+                state_series: vec![Vec::new(); instances as usize],
+                overall_series: None,
+                demand_series: Vec::new(),
+                initial_states: Vec::new(),
+            };
+            container_simulated[cid.index()] = true;
+            match container_res.get(&(cid, rt)) {
+                // a later specification of the same type replaces the earlier one
+                Some(&existing) => resources[existing as usize] = r,
+                None => {
+                    let idx = resources.len() as ResIdx;
+                    resources.push(r);
+                    container_res.insert((cid, rt), idx);
+                    types.push((m.resource_types[rt].id.to_string(), idx));
+                }
+            }
+        }
+        registry.push((cont.id.to_string(), types));
+    }
+    t.link_failure = vec![0.0; resources.len()];
+    if let Some(env) = env {
+        for &lid in &m.resource_environments[env].linking_resources {
+            let l = &m.linking_resources[lid];
+            links.push(lid);
+            let idx = resources.len() as ResIdx;
+            let (type_id, type_name) = l
+                .resource_type
+                .map(|t| {
+                    (
+                        m.resource_types[t].id.clone(),
+                        m.resource_types[t].name.clone(),
+                    )
+                })
+                .unwrap_or_default();
+            resources.push(CRes {
+                kind: ResKind::Link(lid),
+                policy: SchedulingPolicy::Fcfs,
+                instances: 1,
+                rate: b.prog(&l.throughput.spec),
+                latency: Some(b.prog(&l.latency.spec)),
+                hdd: None,
+                type_id: type_id.clone(),
+                rc: l.id.clone(),
+                spec_name: type_name,
+                sched_name: "FCFS".into(),
+                origin: format!("rate:{}", l.id).into(),
+                state_series: vec![Vec::new()],
+                overall_series: None,
+                demand_series: Vec::new(),
+                initial_states: Vec::new(),
+            });
+            t.link_failure.push(l.failure_probability);
+            link_res.insert(lid, idx);
+            registry.push((l.id.to_string(), vec![(type_id.to_string(), idx)]));
+        }
+    }
+    // monitors, in repository order (MonitorRepositoryInterpreterBehavior)
+    t.res_mon = vec![Vec::new(); resources.len()];
+    for mon in monitors.iter().filter(|x| x.activated) {
+        let Some(mp) = mon.measuring_point.map(|x| &m.measuring_points[x]) else {
+            continue;
+        };
+        match &mp.kind {
+            MeasuringPointKind::ActiveResource {
+                resource: Some(mres),
+                replica_id,
+            } => {
+                let Some(key) = ss_mp_key(m, mp) else {
+                    continue;
+                };
+                // probes per ProcessingResourceSpecification (ActiveResourceProbeTable)
+                let idx = resources.iter().position(|r| {
+                    matches!(r.kind, ResKind::Processing(p)
+                        if m.processing_resources[p].id == m.processing_resources[*mres].id)
+                });
+                for spec in &mon.specifications {
+                    let (metric, util) = match metric_id(m, spec) {
+                        Some(metric_ids::STATE_OF_ACTIVE_RESOURCE) => {
+                            (metric_names::STATE_OF_ACTIVE_RESOURCE, false)
+                        }
+                        Some(metric_ids::UTILIZATION) => (metric_names::UTILIZATION, true),
+                        Some(metric_ids::RESOURCE_DEMAND) => {
+                            let s = new_series(key.clone(), metric_names::RESOURCE_DEMAND);
+                            if let Some(i) = idx {
+                                resources[i].demand_series.push(s);
+                            }
+                            continue;
+                        }
+                        _ => continue,
+                    };
+                    let s = new_series(key.clone(), metric);
+                    let Some(i) = idx else { continue };
+                    let r = &resources[i];
+                    let probe = if quirks.has(Quirk::Q34) {
+                        Some(if util { SsProbe::Util } else { SsProbe::State })
+                    } else if *replica_id < 0 || *replica_id >= i64::from(r.instances) {
+                        None
+                    } else if r.policy == SchedulingPolicy::ProcessorSharing && r.instances > 1 {
+                        let k = *replica_id as u32;
+                        Some(if util {
+                            SsProbe::CoreUtil(k)
+                        } else {
+                            SsProbe::CoreState(k)
+                        })
+                    } else {
+                        Some(if util { SsProbe::Util } else { SsProbe::State })
+                    };
+                    if let Some(p) = probe {
+                        t.res_mon[i].push((s, p));
+                    }
+                }
+            }
+            MeasuringPointKind::AssemblyPassiveResource {
+                assembly: Some(a),
+                passive_resource: Some(p),
+            } => {
+                let Some(key) = ss_mp_key(m, mp) else {
+                    continue;
+                };
+                for spec in &mon.specifications {
+                    let (metric, name) = match metric_id(m, spec) {
+                        Some(metric_ids::WAITING_TIME) => {
+                            (SsPassiveMetric::Waiting, metric_names::WAITING_TIME)
+                        }
+                        Some(metric_ids::HOLDING_TIME) => {
+                            (SsPassiveMetric::Holding, metric_names::HOLDING_TIME)
+                        }
+                        Some(metric_ids::STATE_OF_PASSIVE_RESOURCE) => (
+                            SsPassiveMetric::State,
+                            metric_names::STATE_OF_PASSIVE_RESOURCE,
+                        ),
+                        _ => continue,
+                    };
+                    let s = new_series(key.clone(), name);
+                    t.passive_mon.push(SsPassiveMon {
+                        pr: *p,
+                        ac: (!quirks.has(Quirk::Q34)).then_some(*a),
+                        metric,
+                        series: s,
+                    });
+                }
+            }
+            MeasuringPointKind::AssemblyOperation { .. } => {
+                t.asmop_monitored |= mon
+                    .specifications
+                    .iter()
+                    .any(|s| metric_id(m, s) == Some(metric_ids::RESPONSE_TIME));
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+/// Per-action tables of the Slingshot flavour.
+fn ss_actions(m: &Model, sys: StructureId, b: &mut Builder, t: &mut SsTables) {
+    t.passive_amount = m
+        .actions
+        .iter()
+        .map(|a| match a.kind {
+            ActionKind::Acquire { .. } | ActionKind::Release { .. } => {
+                a.resource_demands.first().map(|d| b.prog(&d.spec.spec))
+            }
+            _ => None,
+        })
+        .collect();
+    t.fork_sync_point = m
+        .actions
+        .iter()
+        .map(|a| {
+            matches!(
+                &a.kind,
+                ActionKind::Fork {
+                    synchronisation: Some(_),
+                    ..
+                }
+            )
+        })
+        .collect();
+    for &c in &m.structures[sys].connectors {
+        if let ConnectorKind::Assembly {
+            required_role: Some(r),
+            ..
+        } = &m.connectors[c].kind
+        {
+            t.sys_req_conn.entry(m.roles[*r].id.clone()).or_insert(c);
+        }
+    }
 }

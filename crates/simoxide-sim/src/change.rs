@@ -206,6 +206,12 @@ pub(crate) fn recompile(
     changes: &ChangeSet,
 ) -> Result<Recompiled, ChangeError> {
     let t0 = std::time::Instant::now();
+    if old.flavour.kind != crate::flavour::FlavourKind::SimuLizar {
+        // the Slingshot flavour's syncers (scale-in removal policies, cloned monitors) are F4/P3
+        return Err(ChangeError::Unsupported(vec![
+            "model changes of a Slingshot-flavour run (DESIGN-SPD.md F4, P3)".into(),
+        ]));
+    }
     check_graph(&old.model.graph, &graph)?;
     journal_checks(&graph, changes)?;
     let mut report = ChangeReport::default();
@@ -843,6 +849,7 @@ pub(crate) fn recompile(
         code,
         warnings,
         flavour: old.flavour,
+        ss: old.ss.clone(),
     };
     report.micros = t0.elapsed().as_micros() as u64;
     Ok(Recompiled {

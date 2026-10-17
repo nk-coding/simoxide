@@ -142,6 +142,11 @@ pub struct RunState<C: Compat = Exact, F: Flavour = SimuLizar> {
     pub(super) dyn_path_child: FxMap<(u32, AcRef), u32>,
     // ------------------------------------------------------------------ random numbers
     pub(super) rng: C::Rng,
+    /// Slingshot's `Math.random()` stream (branches, link failures) in the exact RNG mode
+    /// (SS-RNG-1.2); unused otherwise.
+    pub(super) math: crate::javarand::JavaRandom,
+    /// Slingshot: the run stopped at `simTime` (`SimulationFinished`, SS-RUN-3).
+    pub(super) ss_time_stop: bool,
     // ------------------------------------------------------------------ measurements
     /// Recorded tuples, sliding windows, PRM recorders, reconfiguration process, event list.
     pub(super) meas: Sink,
@@ -213,6 +218,8 @@ impl<C: Compat, F: Flavour> Clone for RunState<C, F> {
             dyn_paths: self.dyn_paths.clone(),
             dyn_path_child: self.dyn_path_child.clone(),
             rng: self.rng.clone(),
+            math: self.math.clone(),
+            ss_time_stop: self.ss_time_stop,
             meas: self.meas.clone(),
             run_series: self.run_series.clone(),
             warnings: self.warnings.clone(),
@@ -238,7 +245,11 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
     /// A new state for `cm` (the run has not started).
     pub(crate) fn new(cm: &CompiledModel, cfg: SimConfig, traced: bool, rng: C::Rng) -> Self {
         let ps = cfg.ps_algorithm;
-        let res = cm.resources.iter().map(|r| ResRt::new(r, ps)).collect();
+        let res = cm
+            .resources
+            .iter()
+            .map(|r| ResRt::new(r, ps, F::SLINGSHOT))
+            .collect();
         let meas = Sink {
             m: Measurements {
                 series: cm.series.clone(),
@@ -252,6 +263,9 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             reconf_pid: 0,
             error: None,
             prm_armed: false,
+            armed: false,
+            observe: Vec::new(),
+            observed: Vec::new(),
             prm: Prm::default(),
             reconf: Reconf {
                 time_series: cm.reconf_time_series.clone(),
@@ -261,6 +275,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             events: EventList::default(),
         };
         let max_depth = max_depth(&cfg.limits);
+        let math = crate::javarand::JavaRandom::slingshot_math(cfg.seed);
         RunState {
             cfg,
             phase: Phase::NotStarted,
@@ -284,6 +299,8 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             comps: Vec::new(),
             dyn_paths: Vec::new(),
             dyn_path_child: FxMap::default(),
+            math,
+            ss_time_stop: false,
             rng,
             meas,
             run_series: HashMap::new(),
@@ -548,6 +565,26 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         self.flush_outputs();
         let _ = self.st.rng.attach_tape(false);
         self.st
+    }
+
+    /// Observes series `s` from now on: every tuple recorded for it is also kept for
+    /// [`Simulation::take_observed`] (the measurement-observer hook for an SPD interpreter,
+    /// `DESIGN-SPD.md` §5.4; in the Slingshot flavour the tuples are Slingshot's
+    /// `MeasurementMade` stream). Unobserved runs pay nothing but the existing branch of the
+    /// measurement path.
+    pub fn observe_series(&mut self, s: SeriesId) {
+        let meas = &mut self.st.meas;
+        let n = meas.m.series.len().max(s as usize + 1);
+        if meas.observe.len() < n {
+            meas.observe.resize(n, false);
+        }
+        meas.observe[s as usize] = true;
+        meas.armed = true;
+    }
+
+    /// The tuples of observed series recorded since the last call, in emission order.
+    pub fn take_observed(&mut self) -> Vec<Observed> {
+        std::mem::take(&mut self.st.meas.observed)
     }
 
     /// Replaces the [`Limits`] of the run (e.g. a fork's own deadline or cancellation flag:

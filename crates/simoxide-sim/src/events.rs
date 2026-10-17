@@ -26,6 +26,9 @@ pub(crate) enum Ev {
     Wake(ResIdx),
     /// `Resume` of the reconfiguration process (MEAS-7.2).
     Reconf,
+    /// Slingshot (Q26): a superseded processor-sharing completion of a resource, dispatched at
+    /// its old time and position (SS-RES-2.6).
+    Stale(ResIdx),
 }
 
 #[derive(Clone, Copy)]
@@ -164,7 +167,12 @@ impl EventList {
     pub fn insert(&mut self, t: i64, ev: Ev) {
         let seq = self.seq;
         self.seq += 1;
-        let note = Note { t, seq, ev };
+        self.push(Note { t, seq, ev });
+    }
+
+    /// Inserts a note with its own key.
+    #[inline(always)]
+    fn push(&mut self, note: Note) {
         // sift up with a hole
         let h = &mut self.heap;
         h.push(note);
@@ -186,6 +194,22 @@ impl EventList {
         let seq = self.seq;
         self.seq += 1;
         self.timers.set(r, t, seq);
+    }
+
+    /// [`EventList::set_timer`], and the superseded completion (if any) stays in the list as an
+    /// [`Ev::Stale`] note with its old time and sequence number (Slingshot, Q26).
+    pub fn set_timer_keep_stale(&mut self, r: ResIdx, t: i64) {
+        if let Some(&p) = self.timers.pos.get(r as usize)
+            && p != NONE
+        {
+            let (ot, oseq) = self.timers.key[r as usize];
+            self.push(Note {
+                t: ot,
+                seq: oseq,
+                ev: Ev::Stale(r),
+            });
+        }
+        self.set_timer(r, t);
     }
 
     /// Removes the pending completion of resource `r`, if any.
