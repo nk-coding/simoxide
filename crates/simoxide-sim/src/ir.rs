@@ -453,6 +453,8 @@ pub struct CompiledModel {
     pub code: crate::code::Code,
     /// Warnings (unsupported features that only matter if reached).
     pub warnings: Vec<String>,
+    /// The flavour the model is compiled for (its runs follow it, [`crate::run`]).
+    pub flavour: crate::flavour::FlavourConfig,
 }
 
 impl fmt::Debug for CompiledModel {
@@ -660,6 +662,8 @@ fn metric_id<'a>(m: &'a Model, spec: &MeasurementSpecification) -> Option<&'a st
 /// keys, StoEx programs and measurement series keep their ids, new ones are appended.
 #[derive(Clone, Debug, Default)]
 pub struct Seed {
+    /// The flavour to compile for (SimuLizar by default).
+    pub flavour: crate::flavour::FlavourConfig,
     pub keys: Keys,
     pub progs: Vec<Prog>,
     pub series: Vec<SeriesDef>,
@@ -671,11 +675,31 @@ impl CompiledModel {
         Self::compile_seeded(model, Seed::default())
     }
 
+    /// Compiles a loaded model for `flavour` (SimuLizar or Slingshot with its compat flags).
+    pub fn compile_flavour(
+        model: Model,
+        flavour: crate::flavour::FlavourConfig,
+    ) -> Result<CompiledModel, CompileError> {
+        Self::compile_seeded(
+            model,
+            Seed {
+                flavour,
+                ..Seed::default()
+            },
+        )
+    }
+
     /// [`CompiledModel::compile`] starting from the keys, programs and series of `seed`: equal
     /// keys, StoEx strings and (measuring point, metric) pairs get the seed's ids. Used to
     /// recompile a changed model for a running simulation (`crate::change`).
     pub fn compile_seeded(model: Model, seed: Seed) -> Result<CompiledModel, CompileError> {
         let m = &model;
+        let flavour = seed.flavour;
+        if flavour.kind == crate::flavour::FlavourKind::SimuLizar && !flavour.quirks.is_empty() {
+            return Err(CompileError(
+                "Slingshot quirk flags need the Slingshot flavour".into(),
+            ));
+        }
         let prog_map = seed
             .progs
             .iter()
@@ -1831,6 +1855,7 @@ impl CompiledModel {
             code,
             warnings,
             model,
+            flavour,
         })
     }
 

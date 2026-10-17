@@ -232,6 +232,7 @@ pub(crate) fn recompile(
         return Err(ChangeError::Invalid(errors));
     }
     let seed = Seed {
+        flavour: old.flavour,
         keys: old.keys.clone(),
         progs: old.progs.clone(),
         series: run.series.to_vec(),
@@ -841,6 +842,7 @@ pub(crate) fn recompile(
         uaction_type,
         code,
         warnings,
+        flavour: old.flavour,
     };
     report.micros = t0.elapsed().as_micros() as u64;
     Ok(Recompiled {

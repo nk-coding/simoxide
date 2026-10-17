@@ -5,7 +5,7 @@
 use super::*;
 use crate::code::{NO_TYPE, SOp, UOp};
 
-impl<'m, C: Compat> Simulation<'m, C> {
+impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// The continuation of SEFF behaviour `beh`, at its start.
     #[inline]
     pub(super) fn sbeh(&self, beh: BehaviourId) -> Cont {
@@ -72,7 +72,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     }
                     self.seff_element(s, d, a, false);
                     if self.st.running && tstart >= 0 {
-                        let now = seconds(self.st.now);
+                        let now = F::Clock::secs(self.st.now);
                         emit(
                             &mut self.st.meas,
                             &mut self.trace,
@@ -80,7 +80,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                             self.st.now,
                             se,
                             now,
-                            now - seconds(tstart),
+                            now - F::Clock::secs(tstart),
                         );
                     }
                 }
@@ -508,7 +508,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     let tstart = std::mem::replace(t0, -1);
                     self.user_element(s, a, false);
                     if self.st.running && tstart >= 0 {
-                        let now = seconds(self.st.now);
+                        let now = F::Clock::secs(self.st.now);
                         emit(
                             &mut self.st.meas,
                             &mut self.trace,
@@ -516,7 +516,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                             self.st.now,
                             se,
                             now,
-                            now - seconds(tstart),
+                            now - F::Clock::secs(tstart),
                         );
                     }
                 }
@@ -628,7 +628,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         && self.st.running
                         && tstart >= 0
                     {
-                        let now = seconds(self.st.now);
+                        let now = F::Clock::secs(self.st.now);
                         emit(
                             &mut self.st.meas,
                             &mut self.trace,
@@ -636,7 +636,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                             self.st.now,
                             *se,
                             now,
-                            now - seconds(tstart),
+                            now - F::Clock::secs(tstart),
                         );
                     }
                 }

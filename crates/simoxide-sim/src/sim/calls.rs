@@ -16,7 +16,7 @@ const MAX_DIRECT: u32 = 24;
 /// A continuation handler.
 type Handler<S> = fn(&mut S, u32, &mut ProcData) -> R<Flow>;
 
-impl<'m, C: Compat> Simulation<'m, C> {
+impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// Runs handler `f` of the continuation on top of the stack right away (one interpreter
     /// step), unless the direct calls are nested too deeply already.
     #[inline(always)]
@@ -200,7 +200,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     && self.st.running
                     && t0 >= 0
                 {
-                    let now = seconds(self.st.now);
+                    let now = F::Clock::secs(self.st.now);
                     emit(
                         &mut self.st.meas,
                         &mut self.trace,
@@ -208,7 +208,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         self.st.now,
                         se,
                         now,
-                        now - seconds(t0),
+                        now - F::Clock::secs(t0),
                     );
                 }
                 // an enclosing delegation ends right away; otherwise the caller goes on

@@ -3,9 +3,10 @@
 use crate::common::{Completion, ResourceListener, SchedError, Wakeup};
 use crate::delay::Delay;
 use crate::fcfs::Fcfs;
+use crate::fcfs_head::FcfsHead;
 use crate::ps::ProcessorSharing;
 use crate::ps_vt::VirtualTimeProcessorSharing;
-use crate::time::SimTime;
+use crate::time::{Clock, Nanos, SimTime};
 
 /// Scheduling policy of a processing resource, from the PCM `SchedulingPolicy` id.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -44,20 +45,23 @@ pub enum PsAlgorithm {
     VirtualTime,
 }
 
-/// Any active resource model, dispatching statically on the variant.
+/// Any active resource model, dispatching statically on the variant (`K`: the time encoding,
+/// see [`Clock`]).
 #[derive(Clone, Debug)]
-pub enum ActiveResource<J> {
+pub enum ActiveResource<J, K: Clock = Nanos> {
     /// Exact processor sharing.
-    Ps(ProcessorSharing<J>),
+    Ps(ProcessorSharing<J, K>),
     /// Virtual-time processor sharing.
-    PsVirtualTime(VirtualTimeProcessorSharing<J>),
+    PsVirtualTime(VirtualTimeProcessorSharing<J, K>),
     /// First-come-first-served.
-    Fcfs(Fcfs<J>),
+    Fcfs(Fcfs<J, K>),
     /// Delay.
-    Delay(Delay),
+    Delay(Delay<K>),
+    /// Slingshot's first-come-first-served ([`FcfsHead`]).
+    FcfsHead(FcfsHead<J, K>),
 }
 
-impl<J: Copy + PartialEq> ActiveResource<J> {
+impl<J: Copy + PartialEq, K: Clock> ActiveResource<J, K> {
     /// Creates the resource SimuLizar creates for a processing resource with `policy` and
     /// `replicas` (`numberOfReplicas`). Linking resources are always `Fcfs`.
     pub fn new(policy: SchedulingPolicy, replicas: u32, ps: PsAlgorithm) -> Self {
@@ -73,12 +77,21 @@ impl<J: Copy + PartialEq> ActiveResource<J> {
         }
     }
 
+    /// The resource Slingshot creates for `policy` (SS-RES-1): processor sharing as
+    /// [`ActiveResource::new`], FCFS (and linking resources) as [`FcfsHead`].
+    pub fn new_slingshot(policy: SchedulingPolicy, replicas: u32, ps: PsAlgorithm) -> Self {
+        match policy {
+            SchedulingPolicy::Fcfs => Self::FcfsHead(FcfsHead::new()),
+            p => Self::new(p, replicas, ps),
+        }
+    }
+
     /// Number of scheduler cores (1 for FCFS and delay).
     pub fn cores(&self) -> u32 {
         match self {
             Self::Ps(r) => r.cores(),
             Self::PsVirtualTime(r) => r.cores(),
-            Self::Fcfs(_) | Self::Delay(_) => 1,
+            Self::Fcfs(_) | Self::Delay(_) | Self::FcfsHead(_) => 1,
         }
     }
 
@@ -89,6 +102,7 @@ impl<J: Copy + PartialEq> ActiveResource<J> {
             Self::PsVirtualTime(r) => r.queue_length(core),
             Self::Fcfs(r) => r.len() as u64,
             Self::Delay(r) => r.len() as u64,
+            Self::FcfsHead(r) => r.len() as u64,
         }
     }
 
@@ -115,6 +129,11 @@ impl<J: Copy + PartialEq> ActiveResource<J> {
             Self::PsVirtualTime(r) => Ok(r.process(now, job, demand, listener)),
             Self::Fcfs(r) => r.process(now, job, demand, listener),
             Self::Delay(r) => Ok(r.process(now, job, demand, listener)),
+            // an unchanged head keeps its pending completion (returned again)
+            Self::FcfsHead(r) => Ok(r
+                .process(now, job, demand, listener)
+                .or(r.pending())
+                .expect("a job was just added, so a completion is pending")),
         }
     }
 
@@ -131,6 +150,7 @@ impl<J: Copy + PartialEq> ActiveResource<J> {
             Self::PsVirtualTime(r) => Ok(r.on_wakeup(now, wakeup, listener)),
             Self::Fcfs(r) => r.on_wakeup(now, wakeup, listener),
             Self::Delay(r) => Ok(r.on_wakeup(now, wakeup, listener)),
+            Self::FcfsHead(r) => Ok(r.on_wakeup(now, wakeup, listener)),
         }
     }
 
@@ -143,6 +163,7 @@ impl<J: Copy + PartialEq> ActiveResource<J> {
             Self::Ps(r) => r.pending(),
             Self::PsVirtualTime(r) => r.pending(),
             Self::Fcfs(r) => r.pending(),
+            Self::FcfsHead(r) => r.pending(),
             Self::Delay(r) => return r.is_current(wakeup),
         };
         pending.is_some_and(|p| p.generation() == wakeup.generation())
@@ -156,6 +177,7 @@ impl<J: Copy + PartialEq> ActiveResource<J> {
             Self::Ps(r) => r.pending(),
             Self::PsVirtualTime(r) => r.pending(),
             Self::Fcfs(r) => r.pending(),
+            Self::FcfsHead(r) => r.pending(),
             Self::Delay(_) => None,
         }
     }
@@ -167,6 +189,7 @@ impl<J: Copy + PartialEq> ActiveResource<J> {
             Self::PsVirtualTime(r) => r.stop(),
             Self::Fcfs(r) => r.stop(),
             Self::Delay(r) => r.stop(),
+            Self::FcfsHead(r) => r.stop(),
         }
     }
 }

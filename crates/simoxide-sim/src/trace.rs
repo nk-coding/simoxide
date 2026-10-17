@@ -12,15 +12,18 @@ pub(crate) struct TraceOut {
     /// Current time as printed (`ns / 1e9`), cached per ns value.
     t_ns: i64,
     t_str: String,
+    /// The flavour's clock: seconds of a point in time.
+    secs: fn(i64) -> f64,
 }
 
 impl TraceOut {
-    pub fn new(out: Box<dyn Write>) -> TraceOut {
+    pub fn new(out: Box<dyn Write>, secs: fn(i64) -> f64) -> TraceOut {
         TraceOut {
             buf: String::with_capacity(1 << 17),
             out,
             t_ns: -1,
             t_str: String::new(),
+            secs,
         }
     }
 
@@ -35,7 +38,7 @@ impl TraceOut {
         if now != self.t_ns {
             self.t_ns = now;
             self.t_str.clear();
-            push_json_double(&mut self.t_str, now as f64 / 1e9);
+            push_json_double(&mut self.t_str, (self.secs)(now));
         }
         self.buf.push_str("{\"ev\":\"");
         self.buf.push_str(ev);

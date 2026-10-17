@@ -103,7 +103,7 @@ impl Shape {
 /// let (a, b) = (sim.finish().unwrap(), fork.finish().unwrap());
 /// assert_eq!(a.measurements.to_csv(), b.measurements.to_csv());
 /// ```
-pub struct RunState<C: Compat = Exact> {
+pub struct RunState<C: Compat = Exact, F: Flavour = SimuLizar> {
     /// The run configuration (stop conditions, seed, limits).
     pub(super) cfg: SimConfig,
     pub(super) phase: Phase,
@@ -133,7 +133,7 @@ pub struct RunState<C: Compat = Exact> {
     pub(super) joins: Vec<Vec<u64>>,
     pub(super) free_joins: Vec<u32>,
     // ------------------------------------------------------------------ resources
-    pub(super) res: Vec<ResRt>,
+    pub(super) res: Vec<ResRt<F::Clock>>,
     pub(super) passives: Vec<PassiveInst>,
     /// Basic component instances by path id.
     pub(super) comps: Vec<Option<CompInst>>,
@@ -185,7 +185,7 @@ pub struct RunState<C: Compat = Exact> {
     pub(super) spare_data: Vec<Box<ProcData>>,
 }
 
-impl<C: Compat> Clone for RunState<C> {
+impl<C: Compat, F: Flavour> Clone for RunState<C, F> {
     /// A fork: an independent copy that continues exactly like this state. Frames are shared
     /// (copy on write); the allocation-reuse pools are not copied.
     fn clone(&self) -> Self {
@@ -234,7 +234,7 @@ impl<C: Compat> Clone for RunState<C> {
     }
 }
 
-impl<C: Compat> RunState<C> {
+impl<C: Compat, F: Flavour> RunState<C, F> {
     /// A new state for `cm` (the run has not started).
     pub(crate) fn new(cm: &CompiledModel, cfg: SimConfig, traced: bool, rng: C::Rng) -> Self {
         let ps = cfg.ps_algorithm;
@@ -317,12 +317,12 @@ impl<C: Compat> RunState<C> {
 
     /// Current simulation time (ns).
     pub fn now_ns(&self) -> i64 {
-        self.now
+        F::Clock::to_ns(self.now)
     }
 
     /// Time of the next pending event (ns), if any.
     pub fn next_event_ns(&self) -> Option<i64> {
-        self.meas.events.next_time()
+        self.meas.events.next_time().map(F::Clock::to_ns)
     }
 
     /// Events processed so far ([`RunResult::events`]).
@@ -356,10 +356,10 @@ impl<C: Compat> RunState<C> {
     }
 }
 
-impl<C: Compat> RunState<C> {
+impl<C: Compat, F: Flavour> RunState<C, F> {
     /// A deep copy that shares no frame with this state (frames shared within the state stay
     /// shared in the copy), to continue on another thread ([`Detached::into_state`]).
-    pub fn detach(&self) -> Detached<C> {
+    pub fn detach(&self) -> Detached<C, F> {
         let mut st = self.clone();
         let mut c = crate::frames::FrameCopier::default();
         st.empty = c.frame(&st.empty);
@@ -373,7 +373,7 @@ impl<C: Compat> RunState<C> {
 
 /// A [`RunState`] that shares no frame with any other value ([`RunState::detach`]), so it can
 /// be sent to another thread.
-pub struct Detached<C: Compat = Exact>(RunState<C>);
+pub struct Detached<C: Compat = Exact, F: Flavour = SimuLizar>(RunState<C, F>);
 
 // SAFETY: a `RunState` is not `Send` only because of the `Rc`s of its frames and proxies (every
 // other field is `Send`: the random source by the `SimRng` bound, the rest plain data and
@@ -383,11 +383,11 @@ pub struct Detached<C: Compat = Exact>(RunState<C>);
 // result stacks (and from there through parents and proxies), which are all copied. So every
 // reference count of the wrapped frames is owned by the wrapped state alone, and moving it to
 // another thread as a whole cannot race with anything. `tests/fork.rs` checks the threads.
-unsafe impl<C: Compat> Send for Detached<C> {}
+unsafe impl<C: Compat, F: Flavour> Send for Detached<C, F> {}
 
-impl<C: Compat> Detached<C> {
+impl<C: Compat, F: Flavour> Detached<C, F> {
     /// The state, on this thread.
-    pub fn into_state(self) -> RunState<C> {
+    pub fn into_state(self) -> RunState<C, F> {
         self.0
     }
 }
@@ -401,20 +401,20 @@ pub(crate) fn max_depth(l: &Limits) -> usize {
 }
 
 /// A pause condition of [`Simulation::advance`], checked before every event.
-pub(crate) trait PauseWhen<C: Compat> {
+pub(crate) trait PauseWhen<C: Compat, F: Flavour> {
     /// Never pauses: the check compiles away ([`Simulation::finish`]).
     const NEVER: bool = false;
     /// Pause before the event at `next` (ns)?
-    fn pause(&mut self, st: &RunState<C>, next: i64) -> bool;
+    fn pause(&mut self, st: &RunState<C, F>, next: i64) -> bool;
 }
 
-impl<C: Compat> PauseWhen<C> for Pause {
+impl<C: Compat, F: Flavour> PauseWhen<C, F> for Pause {
     const NEVER: bool = false;
     #[inline]
-    fn pause(&mut self, st: &RunState<C>, next: i64) -> bool {
+    fn pause(&mut self, st: &RunState<C, F>, next: i64) -> bool {
         match *self {
-            Pause::After(t) => next > t,
-            Pause::Before(t) => next >= t,
+            Pause::After(t) => next > F::Clock::from_ns(t),
+            Pause::Before(t) => next >= F::Clock::from_ns(t),
             Pause::Events(n) => st.n_events >= n,
             Pause::Never => false,
         }
@@ -424,20 +424,20 @@ impl<C: Compat> PauseWhen<C> for Pause {
 /// [`PauseWhen`] that never pauses.
 pub(crate) struct NoPause;
 
-impl<C: Compat> PauseWhen<C> for NoPause {
+impl<C: Compat, F: Flavour> PauseWhen<C, F> for NoPause {
     const NEVER: bool = true;
     #[inline(always)]
-    fn pause(&mut self, _: &RunState<C>, _: i64) -> bool {
+    fn pause(&mut self, _: &RunState<C, F>, _: i64) -> bool {
         false
     }
 }
 
 /// [`PauseWhen`] from a predicate (`true`: go on).
-pub(crate) struct While<F>(pub F);
+pub(crate) struct While<G>(pub G);
 
-impl<C: Compat, F: FnMut(&RunState<C>) -> bool> PauseWhen<C> for While<F> {
+impl<C: Compat, F: Flavour, G: FnMut(&RunState<C, F>) -> bool> PauseWhen<C, F> for While<G> {
     #[inline]
-    fn pause(&mut self, st: &RunState<C>, _: i64) -> bool {
+    fn pause(&mut self, st: &RunState<C, F>, _: i64) -> bool {
         !(self.0)(st)
     }
 }
@@ -455,7 +455,7 @@ impl Write for Discard {
     }
 }
 
-impl<'m, C: Compat> Simulation<'m, C> {
+impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// Continues `state` on `cm` (the model it was created on) with the outputs `out`, which
     /// receive the continuation only.
     ///
@@ -465,16 +465,16 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// any pause (exact mode only).
     pub fn resume(
         cm: &'m CompiledModel,
-        state: RunState<C>,
+        state: RunState<C, F>,
         out: Outputs,
     ) -> Result<Self, SimError> {
         let fail = |message: String| SimError {
             message,
-            at_ns: state.now,
+            at_ns: F::Clock::to_ns(state.now),
             kind: SimErrorKind::Model,
         };
         let base_shape = state.model.base_shape().unwrap_or(state.shape);
-        if base_shape != Shape::of(cm) {
+        if base_shape != Shape::of(cm) || cm.flavour.kind != F::KIND {
             return Err(fail(
                 "the run state belongs to another compiled model".to_string(),
             ));
@@ -486,12 +486,12 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// changes the state's own compiled model is used).
     pub(super) fn resume_on(
         base: &'m CompiledModel,
-        mut state: RunState<C>,
+        mut state: RunState<C, F>,
         out: Outputs,
     ) -> Result<Self, SimError> {
         let fail = |message: String| SimError {
             message,
-            at_ns: state.now,
+            at_ns: F::Clock::to_ns(state.now),
             kind: SimErrorKind::Model,
         };
         // SAFETY: see `RunModel::compiled_ref`: the reference points into the `Arc` that the
@@ -515,20 +515,20 @@ impl<'m, C: Compat> Simulation<'m, C> {
         Ok(Simulation {
             cm,
             code: cm.code.get(state.traced),
-            trace: trace.map(TraceOut::new),
+            trace: trace.map(|w| TraceOut::new(w, F::Clock::secs)),
             tape: out.tape,
             st: state,
         })
     }
 
     /// The state (read only).
-    pub fn state(&self) -> &RunState<C> {
+    pub fn state(&self) -> &RunState<C, F> {
         &self.st
     }
 
     /// A copy of the current state (a fork), to continue with [`Simulation::resume`]. Flushes
     /// the outputs first, so that what they hold is exactly the output up to this point.
-    pub fn snapshot(&mut self) -> RunState<C> {
+    pub fn snapshot(&mut self) -> RunState<C, F> {
         self.flush_outputs();
         let mut st = self.st.clone();
         // the copy has no outputs
@@ -538,13 +538,13 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     /// Forks the run: a new simulation that continues from the current state with the outputs
     /// `out` (see [`Simulation::resume`]); this one goes on unchanged.
-    pub fn fork(&mut self, out: Outputs) -> Result<Simulation<'m, C>, SimError> {
+    pub fn fork(&mut self, out: Outputs) -> Result<Simulation<'m, C, F>, SimError> {
         let st = self.snapshot();
         Simulation::resume_on(self.cm, st, out)
     }
 
     /// Ends this simulation and returns its state (outputs flushed and detached).
-    pub fn into_state(mut self) -> RunState<C> {
+    pub fn into_state(mut self) -> RunState<C, F> {
         self.flush_outputs();
         let _ = self.st.rng.attach_tape(false);
         self.st
@@ -569,7 +569,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// including the first), or until the run is over.
     pub fn run_while(
         &mut self,
-        keep_going: impl FnMut(&RunState<C>) -> bool,
+        keep_going: impl FnMut(&RunState<C, F>) -> bool,
     ) -> Result<Status, SimError> {
         let r = self.advance(&mut While(keep_going));
         self.settle(r)

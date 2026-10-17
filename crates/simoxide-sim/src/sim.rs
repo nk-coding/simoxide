@@ -16,6 +16,7 @@
 
 use crate::compat::{Compat, Exact, Mode, SimRng};
 use crate::events::{Ev, EventList};
+use crate::flavour::{Flavour, SimuLizar};
 use crate::frames::{
     Binding, Frame, FrameEnv, FramePool, FrameRef, Proxy, ProxyRef, eval_proxy, frame_mut,
 };
@@ -27,9 +28,9 @@ use crate::trace::TraceOut;
 use crate::windows::Window;
 use simoxide_model::*;
 use simoxide_random::UniformSource;
-use simoxide_sched::time::{checked_span, seconds};
+use simoxide_sched::time::seconds;
 use simoxide_sched::{
-    ActiveResource, PassiveListener, PassiveResource, PsAlgorithm, ResourceListener,
+    ActiveResource, Clock, PassiveListener, PassiveResource, PsAlgorithm, ResourceListener,
     SchedulingPolicy,
 };
 use simoxide_stoex::Value;
@@ -414,17 +415,17 @@ enum Flow {
 // resources at run time
 
 #[derive(Clone)]
-struct ResRt {
-    sched: Option<ActiveResource<u64>>,
+struct ResRt<K: Clock> {
+    sched: Option<ActiveResource<u64, K>>,
     /// DELAY-type resources: `running_processes` (process keys).
     delay_set: Vec<u64>,
     /// Queue length per instance as the state probes read it.
     shadow: Vec<u64>,
 }
 
-impl ResRt {
+impl<K: Clock> ResRt<K> {
     /// An idle resource.
-    fn new(r: &CRes, ps: PsAlgorithm) -> ResRt {
+    fn new(r: &CRes, ps: PsAlgorithm) -> ResRt<K> {
         ResRt {
             sched: match r.policy {
                 SchedulingPolicy::Delay => None,
@@ -728,7 +729,7 @@ fn emit_out(
     }
 }
 
-struct ResListener<'a> {
+struct ResListener<'a, K: Clock> {
     meas: &'a mut Sink,
     trace: &'a mut Option<TraceOut>,
     store: bool,
@@ -736,11 +737,12 @@ struct ResListener<'a> {
     def: &'a CRes,
     shadow: &'a mut Vec<u64>,
     per_core: bool,
+    clock: std::marker::PhantomData<K>,
 }
 
-impl ResourceListener<u64> for ResListener<'_> {
+impl<K: Clock> ResourceListener<u64> for ResListener<'_, K> {
     fn state_changed(&mut self, core: u32, state: u64) {
-        let t = seconds(self.now);
+        let t = K::secs(self.now);
         let c = core as usize;
         if c < self.shadow.len() {
             self.shadow[c] = state;
@@ -784,7 +786,7 @@ fn busy_fraction(shadow: &[u64], instances: u32, per_core: bool) -> f64 {
 /// One simulation run over a [`CompiledModel`], with the simulator policy `C` ([`Exact`] by
 /// default; see [`crate::compat`]): the engine, which borrows the compiled model, holds the
 /// output writers and runs one [`RunState`] (which explains pausing, forking and resuming).
-pub struct Simulation<'m, C: Compat = Exact> {
+pub struct Simulation<'m, C: Compat = Exact, F: Flavour = SimuLizar> {
     /// The compiled model the run simulates: the one it was created on, or after model changes
     /// the one in `st.model` (see `RunModel`; the reference then lives as long as that `Arc`,
     /// which only `Simulation::apply_changes` replaces).
@@ -796,7 +798,7 @@ pub struct Simulation<'m, C: Compat = Exact> {
     /// Where the buffered tape records go (`SimRng::tape_buf`).
     tape: Option<Box<dyn Write>>,
     /// Everything the run changes.
-    st: RunState<C>,
+    st: RunState<C, F>,
 }
 
 /// Proxy-depth errors of the evaluator are limits (see `frames::MAX_PROXY_DEPTH`).
@@ -822,7 +824,7 @@ impl<'m> Simulation<'m, Exact> {
     }
 }
 
-impl<'m, C: Compat> Simulation<'m, C> {
+impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// A simulation with policy `C`, e.g. `Simulation::<Fast>::create(..)`; `cfg.mode` must be
     /// `C::MODE`.
     pub fn create(cm: &'m CompiledModel, cfg: SimConfig, out: Outputs) -> Result<Self, SimError> {
@@ -832,6 +834,17 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     "SimConfig::mode is {} but the simulation is built for mode {} (use simoxide_sim::run to dispatch on the mode)",
                     cfg.mode,
                     C::MODE
+                ),
+                at_ns: 0,
+                kind: SimErrorKind::Model,
+            });
+        }
+        if cm.flavour.kind != F::KIND {
+            return Err(SimError {
+                message: format!(
+                    "the model is compiled for the {} flavour but the simulation is built for {} (use simoxide_sim::run to dispatch on the flavour)",
+                    cm.flavour.kind,
+                    F::KIND
                 ),
                 at_ns: 0,
                 kind: SimErrorKind::Model,
@@ -853,7 +866,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         Ok(Simulation {
             cm,
             code: cm.code.get(traced),
-            trace: out.trace.map(TraceOut::new),
+            trace: out.trace.map(|w| TraceOut::new(w, F::Clock::secs)),
             tape: out.tape,
             st: RunState::new(cm, cfg, traced, rng),
         })
@@ -864,7 +877,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn err<T>(&self, msg: impl Into<String>) -> R<T> {
         Err(Box::new(SimError {
             message: msg.into(),
-            at_ns: self.st.now,
+            at_ns: F::Clock::to_ns(self.st.now),
             kind: SimErrorKind::Model,
         }))
     }
@@ -874,7 +887,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn limit_err<T>(&self, kind: SimErrorKind, msg: String) -> R<T> {
         Err(Box::new(SimError {
             message: msg,
-            at_ns: self.st.now,
+            at_ns: F::Clock::to_ns(self.st.now),
             kind,
         }))
     }
@@ -955,7 +968,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             measurements: std::mem::take(&mut self.st.meas.m),
             uniforms: self.st.rng.count(),
             events: self.st.n_events,
-            end_ns: self.st.now,
+            end_ns: F::Clock::to_ns(self.st.now),
             main_count: self.st.main_count,
             warnings: std::mem::take(&mut self.st.warnings),
         })
@@ -963,7 +976,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     /// Runs events until `p` asks for a pause between two events, or to the end of the run
     /// (stop condition and post-stop drain). An error ends the run ([`Phase::Failed`]).
-    fn advance<P: PauseWhen<C>>(&mut self, p: &mut P) -> R<Status> {
+    fn advance<P: PauseWhen<C, F>>(&mut self, p: &mut P) -> R<Status> {
         match self.st.phase {
             Phase::Running => {}
             Phase::NotStarted => {
@@ -994,7 +1007,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     /// The main loop: one event after the other until a stop condition holds or no event is
     /// left, then the stop (SIM-6); or a pause before an event.
-    fn event_loop<P: PauseWhen<C>>(&mut self, p: &mut P) -> R<Status> {
+    fn event_loop<P: PauseWhen<C, F>>(&mut self, p: &mut P) -> R<Status> {
         loop {
             if !P::NEVER
                 && let Some(t) = self.st.meas.events.next_time()
@@ -1129,10 +1142,10 @@ impl<'m, C: Compat> Simulation<'m, C> {
             if let Some(inp) = w.input {
                 self.st.meas.series_windows[inp as usize].push(i as u32);
             }
-            let Some(span) = checked_span(w.len) else {
+            let Some(at) = F::Clock::checked_after(0, w.len) else {
                 return self.err("invalid sliding window length");
             };
-            self.st.meas.events.insert(span, Ev::Window(i as u32));
+            self.st.meas.events.insert(at, Ev::Window(i as u32));
         }
         // SimuComModel.init at t = 0: run the drivers in scenario order
         for (i, s) in cm.scenarios.iter().enumerate() {
@@ -1195,13 +1208,14 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn livelock(&self, n: u64, t: i64) -> R<()> {
         self.limit_err(SimErrorKind::Limit, format!(
             "livelock: {n} events at simulation time {} s without progress towards a stop condition (REF-7; see --max-events-per-instant)",
-            seconds(t)
+            F::Clock::secs(t)
         ))
     }
 
     #[inline]
     fn stop_condition(&self) -> bool {
-        (self.st.cfg.max_sim_time > 0 && seconds(self.st.now) >= self.st.cfg.max_sim_time as f64)
+        (self.st.cfg.max_sim_time > 0
+            && F::Clock::secs(self.st.now) >= self.st.cfg.max_sim_time as f64)
             || (self.st.cfg.max_measurements > 0
                 && self.st.main_count >= self.st.cfg.max_measurements)
     }
@@ -1216,7 +1230,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         }
         // simulationStop listeners: final partial windows
         for i in 0..self.st.meas.windows.len() {
-            let eff = self.st.meas.windows[i].effective_length(seconds(now));
+            let eff = self.st.meas.windows[i].effective_length(F::Clock::secs(now));
             if eff != 0.0 || eff.is_sign_negative() {
                 self.window_full(i);
             }
@@ -1239,7 +1253,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         self.st.cfg.store_measurements,
                         now,
                         s,
-                        seconds(now),
+                        F::Clock::secs(now),
                         q as f64,
                     );
                 }
@@ -1252,7 +1266,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     self.st.cfg.store_measurements,
                     now,
                     s,
-                    seconds(now),
+                    F::Clock::secs(now),
                     f,
                 );
             }
@@ -1452,20 +1466,17 @@ impl<'m, C: Compat> Simulation<'m, C> {
             Ev::Window(i) => {
                 self.window_full(i as usize);
                 let inc = self.cm.windows[i as usize].inc;
-                let Some(span) = checked_span(inc) else {
+                let Some(at) = F::Clock::checked_after(self.st.now, inc) else {
                     return self.err("invalid sliding window increment");
                 };
-                self.st
-                    .meas
-                    .events
-                    .insert(self.st.now + span, Ev::Window(i));
+                self.st.meas.events.insert(at, Ev::Window(i));
             }
             Ev::Wake(ri) => {
                 let cm = self.cm;
                 let def = &cm.resources[ri as usize];
                 let rt = &mut self.st.res[ri as usize];
                 let per_core = def.policy == SchedulingPolicy::ProcessorSharing;
-                let mut l = ResListener {
+                let mut l = ResListener::<F::Clock> {
                     meas: &mut self.st.meas,
                     trace: &mut self.trace,
                     store: self.st.cfg.store_measurements,
@@ -1473,6 +1484,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     def,
                     shadow: &mut rt.shadow,
                     per_core,
+                    clock: std::marker::PhantomData,
                 };
                 let sched = rt.sched.as_mut().expect("scheduler");
                 // the timer slot always holds the resource's current (pending) wake-up
@@ -1496,7 +1508,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     /// `onWindowFullEvent`: aggregate and record, then move the window on.
     fn window_full(&mut self, i: usize) {
-        let now_s = seconds(self.st.now);
+        let now_s = F::Clock::secs(self.st.now);
         let w = &mut self.st.meas.windows[i];
         let eff = w.effective_length(now_s);
         let res = crate::windows::utilization(&w.data, w.lower, eff);
@@ -1520,7 +1532,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn delay_state_changed(&mut self, ri: ResIdx, n: u64) {
         let def = &self.cm.resources[ri as usize];
         let rt = &mut self.st.res[ri as usize];
-        let mut l = ResListener {
+        let mut l = ResListener::<F::Clock> {
             meas: &mut self.st.meas,
             trace: &mut self.trace,
             store: self.st.cfg.store_measurements,
@@ -1528,6 +1540,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             def,
             shadow: &mut rt.shadow,
             per_core: false,
+            clock: std::marker::PhantomData,
         };
         l.state_changed(0, n);
     }
@@ -1664,7 +1677,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 "Evaluation of expression {} failed: {:?}",
                 self.cm.progs[prog as usize].spec, e
             ),
-            at_ns: self.st.now,
+            at_ns: F::Clock::to_ns(self.st.now),
             kind: eval_error_kind(&e),
         })
     }
@@ -1679,7 +1692,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         v.to_f64().map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.st.now,
+                at_ns: F::Clock::to_ns(self.st.now),
                 kind: SimErrorKind::Model,
             })
         })
@@ -1690,7 +1703,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         v.to_i32().map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.st.now,
+                at_ns: F::Clock::to_ns(self.st.now),
                 kind: SimErrorKind::Model,
             })
         })
@@ -1701,7 +1714,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         v.to_bool().map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.st.now,
+                at_ns: F::Clock::to_ns(self.st.now),
                 kind: SimErrorKind::Model,
             })
         })
@@ -1722,7 +1735,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         r.map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.st.now,
+                at_ns: F::Clock::to_ns(self.st.now),
                 kind: eval_error_kind(&e),
             })
         })
@@ -1806,10 +1819,10 @@ impl<'m, C: Compat> Simulation<'m, C> {
         if !p.in_think {
             p.in_think = true;
         }
-        let Some(span) = checked_span(d) else {
+        let Some(at) = F::Clock::checked_after(self.st.now, d) else {
             return self.err(format!("SimAbortedException: invalid delay {d}"));
         };
-        self.st.meas.events.insert(self.st.now + span, Ev::Think(k));
+        self.st.meas.events.insert(at, Ev::Think(k));
         Ok(true)
     }
 
@@ -1900,7 +1913,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 self.st.cfg.store_measurements,
                 self.st.now,
                 sid,
-                seconds(self.st.now),
+                F::Clock::secs(self.st.now),
                 concrete,
             );
         }
@@ -1935,17 +1948,14 @@ impl<'m, C: Compat> Simulation<'m, C> {
             if !self.st.res[ri as usize].delay_set.contains(&k) {
                 self.delay_enqueue(ri, k);
             }
-            let Some(span) = checked_span(concrete) else {
+            let Some(at) = F::Clock::checked_after(self.st.now, concrete) else {
                 return self.err(format!("SimAbortedException: invalid delay {concrete}"));
             };
-            self.st
-                .meas
-                .events
-                .insert(self.st.now + span, Ev::DelayRes(ri, k));
+            self.st.meas.events.insert(at, Ev::DelayRes(ri, k));
         } else {
             let rt = &mut self.st.res[ri as usize];
             let per_core = def.policy == SchedulingPolicy::ProcessorSharing;
-            let mut l = ResListener {
+            let mut l = ResListener::<F::Clock> {
                 meas: &mut self.st.meas,
                 trace: &mut self.trace,
                 store: self.st.cfg.store_measurements,
@@ -1953,6 +1963,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 def,
                 shadow: &mut rt.shadow,
                 per_core,
+                clock: std::marker::PhantomData,
             };
             let w = rt
                 .sched
@@ -2180,7 +2191,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     self.st.cfg.store_measurements,
                     self.st.now,
                     st,
-                    seconds(self.st.now),
+                    F::Clock::secs(self.st.now),
                     capacity as f64,
                 );
             }
@@ -2306,7 +2317,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         let inst = &mut self.st.passives[pi];
         let avail = inst.res.available();
         let queue = inst.res.waiting().count();
-        let mut l = PassiveL {
+        let mut l = PassiveL::<F::Clock> {
             meas: &mut self.st.meas,
             trace: &mut self.trace,
             store: self.st.cfg.store_measurements,
@@ -2323,6 +2334,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             woken: Vec::new(),
             pre: Some((pid, avail, queue)),
             error: None,
+            clock: std::marker::PhantomData,
         };
         let granted = inst.res.acquire(k, 1, &mut l);
         if let Some(e) = l.error {
@@ -2340,7 +2352,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         let cm = self.cm;
         let now = self.st.now;
         let inst = &mut self.st.passives[pi];
-        let mut l = PassiveL {
+        let mut l = PassiveL::<F::Clock> {
             meas: &mut self.st.meas,
             trace: &mut self.trace,
             store: self.st.cfg.store_measurements,
@@ -2357,6 +2369,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             woken: Vec::new(),
             pre: None,
             error: None,
+            clock: std::marker::PhantomData,
         };
         inst.res.release(k, 1, &mut l);
         let woken = std::mem::take(&mut l.woken);
@@ -2632,7 +2645,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 && self.st.running
                 && t0 >= 0
             {
-                let now = seconds(self.st.now);
+                let now = F::Clock::secs(self.st.now);
                 emit(
                     &mut self.st.meas,
                     &mut self.trace,
@@ -2640,7 +2653,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     self.st.now,
                     se,
                     now,
-                    now - seconds(t0),
+                    now - F::Clock::secs(t0),
                 );
             }
             d.conts.pop();
@@ -2870,7 +2883,7 @@ fn cur_path(d: &ProcData) -> u32 {
 }
 
 /// Listener for passive-resource events: trace lines, state/waiting/holding tuples, wake-ups.
-struct PassiveL<'a> {
+struct PassiveL<'a, K: Clock> {
     meas: &'a mut Sink,
     trace: &'a mut Option<TraceOut>,
     store: bool,
@@ -2888,9 +2901,10 @@ struct PassiveL<'a> {
     /// acquire: (pid, available before, queue length before)
     pre: Option<(u64, i64, usize)>,
     error: Option<String>,
+    clock: std::marker::PhantomData<K>,
 }
 
-impl PassiveL<'_> {
+impl<K: Clock> PassiveL<'_, K> {
     fn pid_of(&self, k: u64) -> u64 {
         let (s, _) = unkey(k);
         self.procs[s as usize].pid
@@ -2900,7 +2914,7 @@ impl PassiveL<'_> {
     }
 }
 
-impl PassiveListener<u64> for PassiveL<'_> {
+impl<K: Clock> PassiveListener<u64> for PassiveL<'_, K> {
     fn requested(&mut self, job: u64, _num: u64) {
         if self.waiting.is_some() {
             if self.wait_start.iter().any(|x| x.0 == job) {
@@ -2924,7 +2938,7 @@ impl PassiveListener<u64> for PassiveL<'_> {
     fn acquired(&mut self, job: u64, _num: u64, available: i64) {
         let pid = self.pid_of(job);
         let now = self.now;
-        let t = seconds(now);
+        let t = K::secs(now);
         if let Some(tr) = self.trace.as_mut() {
             tr.passive(now, "grant", pid, self.pr_id, self.ac_id, available, None);
         }
@@ -2950,7 +2964,7 @@ impl PassiveListener<u64> for PassiveL<'_> {
                 now,
                 s,
                 t,
-                t - seconds(t0),
+                t - K::secs(t0),
             );
         }
         if self.holding.is_some() {
@@ -2965,7 +2979,7 @@ impl PassiveListener<u64> for PassiveL<'_> {
     fn released(&mut self, job: u64, _num: u64, available: i64) {
         let pid = self.pid_of(job);
         let now = self.now;
-        let t = seconds(now);
+        let t = K::secs(now);
         if let Some(tr) = self.trace.as_mut() {
             tr.passive(now, "release", pid, self.pr_id, self.ac_id, available, None);
         }
@@ -2991,7 +3005,7 @@ impl PassiveListener<u64> for PassiveL<'_> {
                     now,
                     s,
                     t,
-                    t - seconds(t0),
+                    t - K::secs(t0),
                 );
             }
         }

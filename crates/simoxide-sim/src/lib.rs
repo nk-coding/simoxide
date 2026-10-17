@@ -27,6 +27,7 @@ pub mod code;
 pub mod compat;
 pub mod config;
 mod events;
+pub mod flavour;
 mod frames;
 pub mod fxhash;
 pub mod ir;
@@ -43,6 +44,9 @@ pub use change::{Change, ChangeError, ChangeKind, ChangeReport, ChangeSet};
 pub use compat::Fast;
 pub use compat::{Compat, Exact, Literal, Mode};
 pub use config::RunSpec;
+pub use flavour::{
+    Flavour, FlavourConfig, FlavourKind, Quirk, Quirks, SimuLizar, Slingshot, Support,
+};
 pub use ir::{CompileError, CompiledModel};
 pub use meas::{Measurements, SeriesSummary};
 pub use rng::{RngMode, Tape};
@@ -52,15 +56,25 @@ pub use sim::{
 };
 pub use simoxide_sched::PsAlgorithm;
 
-/// Runs one simulation in the mode `cfg.mode` ([`Mode::Exact`] by default): the policy is
-/// chosen here, once per run; the simulation itself is monomorphized per mode.
+/// Runs one simulation in the mode `cfg.mode` ([`Mode::Exact`] by default) and the flavour the
+/// model is compiled for ([`CompiledModel::flavour`]): the policy and the flavour are chosen
+/// here, once per run; the simulation itself is monomorphized per mode and flavour.
 pub fn run(cm: &CompiledModel, cfg: SimConfig, out: Outputs) -> Result<RunResult, SimError> {
-    match cfg.mode {
-        Mode::Exact => Simulation::<Exact>::create(cm, cfg, out)?.run(),
+    match (cfg.mode, cm.flavour.kind) {
+        (Mode::Exact, FlavourKind::SimuLizar) => Simulation::<Exact>::create(cm, cfg, out)?.run(),
+        (Mode::Exact, FlavourKind::Slingshot) => {
+            Simulation::<Exact, Slingshot>::create(cm, cfg, out)?.run()
+        }
         #[cfg(feature = "fast")]
-        Mode::Fast => Simulation::<compat::Fast>::create(cm, cfg, out)?.run(),
+        (Mode::Fast, FlavourKind::SimuLizar) => {
+            Simulation::<compat::Fast>::create(cm, cfg, out)?.run()
+        }
+        #[cfg(feature = "fast")]
+        (Mode::Fast, FlavourKind::Slingshot) => {
+            Simulation::<compat::Fast, Slingshot>::create(cm, cfg, out)?.run()
+        }
         #[cfg(not(feature = "fast"))]
-        m => Err(SimError {
+        (m, _) => Err(SimError {
             message: format!("mode {m} needs the cargo feature `fast` of simoxide-sim"),
             at_ns: 0,
             kind: SimErrorKind::Model,

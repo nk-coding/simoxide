@@ -119,7 +119,8 @@ fn requeued_job_replaces_its_demand_in_both_algorithms() {
     use simoxide_sched::{ActiveResource, SchedulingPolicy};
     let mut out = Vec::new();
     for alg in [PsAlgorithm::Exact, PsAlgorithm::VirtualTime] {
-        let mut r = ActiveResource::new(SchedulingPolicy::ProcessorSharing, 1, alg);
+        let mut r: ActiveResource<u64> =
+            ActiveResource::new(SchedulingPolicy::ProcessorSharing, 1, alg);
         let mut done = Vec::new();
         r.process(0, 1u64, 2.0, &mut ()).unwrap();
         r.process(0, 2u64, 3.0, &mut ()).unwrap();

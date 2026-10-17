@@ -64,14 +64,14 @@ impl RunModel {
     }
 }
 
-impl<C: Compat> RunState<C> {
+impl<C: Compat, F: Flavour> RunState<C, F> {
     /// The run's model (base or changed).
     pub fn model(&self) -> &RunModel {
         &self.model
     }
 }
 
-impl<'m, C: Compat> Simulation<'m, C> {
+impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// The compiled model the run simulates now: the one it was created on, or its own after
     /// model changes ([`Simulation::apply_changes`]).
     pub fn compiled(&self) -> &CompiledModel {

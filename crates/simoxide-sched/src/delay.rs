@@ -4,19 +4,21 @@
 //! rescheduled. The state is the number of jobs currently delayed.
 
 use crate::common::{Completion, ResourceListener, Wakeup};
-use crate::time::{SimTime, span};
+use crate::time::{Clock, Nanos, SimTime};
+use std::marker::PhantomData;
 
 /// Delay resource.
 #[derive(Clone, Debug, Default)]
-pub struct Delay {
+pub struct Delay<K: Clock = Nanos> {
     /// `running_processes.size()`.
     count: u64,
     /// Bumped by `start()`/`stop()` (which clear `running_processes`): older wake-ups then find
     /// their process missing and do nothing, as in `dequeue()`.
     epoch: u64,
+    clock: PhantomData<K>,
 }
 
-impl Delay {
+impl<K: Clock> Delay<K> {
     /// Creates an idle resource.
     pub fn new() -> Self {
         Self::default()
@@ -47,7 +49,7 @@ impl Delay {
         self.count += 1;
         listener.state_changed(0, self.count);
         Wakeup {
-            at: now + span(demand),
+            at: K::after(now, demand),
             job,
             generation: self.epoch,
         }
