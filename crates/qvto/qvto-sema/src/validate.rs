@@ -595,6 +595,21 @@ impl<'r> Sema<'r> {
                 );
             }
             ExprKind::Assign(a) => {
+                // the left-hand side is a `VariableExp` that OCL's validator visits
+                if let ir::LValue::Local(l) = &a.target
+                    && self.local_ty(ctx, *l) == TypeId::NULL
+                {
+                    let name = ctx
+                        .locals
+                        .get(l.index())
+                        .map(|x| x.name.clone())
+                        .unwrap_or_default();
+                    self.validator_error(
+                        ctx,
+                        a.target_span,
+                        bind(om::IncompleteVariableExp_ERROR_, &[&name]),
+                    );
+                }
                 if let ir::LValue::Global(g) = &a.target
                     && self.globals[g.index()].ir.ty == TypeId::NULL
                 {

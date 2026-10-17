@@ -1,0 +1,13 @@
+transformation incomplete_assign_target();
+main() {
+	var x : Foo;
+	x := 1;
+	x += 2;
+	var y := x;
+	log('a', x);
+	var s : Sequence(Foo);
+	s := Sequence{};
+	s += 3;
+	var t : Foo := 4;
+	t := 5;
+}
