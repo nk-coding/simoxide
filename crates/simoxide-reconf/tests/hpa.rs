@@ -644,3 +644,267 @@ fn parameters_change_at_a_pause() {
     assert_eq!(r210["reason"], "AboveMax");
     assert_eq!(r.hpa_summary()[0].ready, 4);
 }
+
+// ---------------------------------------------------------------------------------------------
+// cost per scaling step on a model of MiSArch's size (a quick sanity measurement, ignored by
+// default: `cargo test --release -p simoxide-reconf --test hpa cost -- --ignored --nocapture`)
+
+/// A generated model of `k` services, each the V4 pattern (a 1-core application server behind
+/// its own load balancer, an open workload of `Exp(rate)`, 0.5 s mean demand), each an elastic
+/// infrastructure with an HPA (CPU 50 %, 1..8 replicas). `k = 40`: about 2 300 objects.
+fn services_model(k: usize, rate: f64) -> PathBuf {
+    const CPU: &str = "pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ";
+    const FCFS: &str = "pathmap://PCM_MODELS/Palladio.resourcetype#FCFS";
+    const LAN: &str = "pathmap://PCM_MODELS/Palladio.resourcetype#_o3sScH2AEdyH8uerKnHYug";
+    static N: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+    let n = N.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let out = Path::new(env!("CARGO_TARGET_TMPDIR"))
+        .join(format!("hpa-services-{}-{n}", std::process::id()))
+        .join("services");
+    std::fs::create_dir_all(&out).unwrap();
+    let xmi = r#"xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance""#;
+    let (mut repo, mut sys, mut env, mut alloc, mut usage, mut spd, mut sem, mut hpa) = (
+        String::new(),
+        String::new(),
+        String::new(),
+        String::new(),
+        String::new(),
+        String::new(),
+        String::new(),
+        Vec::new(),
+    );
+    for i in 0..k {
+        let s = format!("_s{i}");
+        repo += &format!(
+            r#"  <components__Repository xsi:type="repository:BasicComponent" id="{s}_comp" entityName="Service{i}">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="{s}_prov" entityName="Service{i}.Provided" providedInterface__OperationProvidedRole="{s}_if"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="{s}_seff" describedService__SEFF="{s}_sig">
+      <steps_Behaviour xsi:type="seff:StartAction" id="{s}_start" successor_AbstractAction="{s}_ia"/>
+      <steps_Behaviour xsi:type="seff:StopAction" id="{s}_stop" predecessor_AbstractAction="{s}_ia"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="{s}_ia" entityName="work{i}" predecessor_AbstractAction="{s}_start" successor_AbstractAction="{s}_stop">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Exp(2.0)"/>
+          <requiredResource_ParametricResourceDemand href="{CPU}"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="{s}_lb" entityName="LoadBalancer{i}">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="{s}_lbprov" entityName="LoadBalancer{i}.Provided" providedInterface__OperationProvidedRole="{s}_if"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="{s}_lbreq" entityName="LoadBalancer{i}.Required" requiredInterface__OperationRequiredRole="{s}_if"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="{s}_lbseff" describedService__SEFF="{s}_sig">
+      <steps_Behaviour xsi:type="seff:StartAction" id="{s}_lbstart" successor_AbstractAction="{s}_br"/>
+      <steps_Behaviour xsi:type="seff:StopAction" id="{s}_lbstop" predecessor_AbstractAction="{s}_br"/>
+      <steps_Behaviour xsi:type="seff:BranchAction" id="{s}_br" entityName="Branch{i}" predecessor_AbstractAction="{s}_lbstart" successor_AbstractAction="{s}_lbstop">
+        <branches_Branch xsi:type="seff:ProbabilisticBranchTransition" id="{s}_bt" entityName="Transition{i}" branchProbability="1.0">
+          <branchBehaviour_BranchTransition id="{s}_bb">
+            <steps_Behaviour xsi:type="seff:StartAction" id="{s}_bstart" successor_AbstractAction="{s}_call"/>
+            <steps_Behaviour xsi:type="seff:StopAction" id="{s}_bstop" predecessor_AbstractAction="{s}_call"/>
+            <steps_Behaviour xsi:type="seff:ExternalCallAction" id="{s}_call" entityName="Call{i}" predecessor_AbstractAction="{s}_bstart" successor_AbstractAction="{s}_bstop" calledService_ExternalService="{s}_sig" role_ExternalService="{s}_lbreq"/>
+          </branchBehaviour_BranchTransition>
+        </branches_Branch>
+      </steps_Behaviour>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="{s}_if" entityName="Interface{i}">
+    <signatures__OperationInterface id="{s}_sig" entityName="op{i}"/>
+  </interfaces__Repository>
+"#
+        );
+        sys += &format!(
+            r#"  <assemblyContexts__ComposedStructure id="{s}_ac" entityName="Assembly_Service{i}">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="default.repository#{s}_comp"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="{s}_lbac" entityName="Assembly_LoadBalancer{i}">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="default.repository#{s}_lb"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="{s}_pdc" entityName="Delegation{i}" outerProvidedRole_ProvidedDelegationConnector="{s}_sysrole" assemblyContext_ProvidedDelegationConnector="{s}_lbac">
+    <innerProvidedRole_ProvidedDelegationConnector href="default.repository#{s}_lbprov"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="{s}_conn" entityName="Connector{i}" requiringAssemblyContext_AssemblyConnector="{s}_lbac" providingAssemblyContext_AssemblyConnector="{s}_ac">
+    <providedRole_AssemblyConnector href="default.repository#{s}_prov"/>
+    <requiredRole_AssemblyConnector href="default.repository#{s}_lbreq"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="{s}_sysrole" entityName="Provided{i}">
+    <providedInterface__OperationProvidedRole href="default.repository#{s}_if"/>
+  </providedRoles_InterfaceProvidingEntity>
+"#
+        );
+        env += &format!(
+            r#"  <linkingResources__ResourceEnvironment id="{s}_link" entityName="Link{i}" connectedResourceContainers_LinkingResource="{s}_rc {s}_lbrc">
+    <communicationLinkResourceSpecifications_LinkingResource id="{s}_linkspec">
+      <communicationLinkResourceType_CommunicationLinkResourceSpecification href="{LAN}"/>
+      <latency_CommunicationLinkResourceSpecification specification="0.0"/>
+      <throughput_CommunicationLinkResourceSpecification specification="10000"/>
+    </communicationLinkResourceSpecifications_LinkingResource>
+  </linkingResources__ResourceEnvironment>
+  <resourceContainer_ResourceEnvironment id="{s}_rc" entityName="Server{i}">
+    <activeResourceSpecifications_ResourceContainer id="{s}_cpu">
+      <schedulingPolicy href="{FCFS}"/>
+      <activeResourceType_ActiveResourceSpecification href="{CPU}"/>
+      <processingRate_ProcessingResourceSpecification specification="1.0"/>
+    </activeResourceSpecifications_ResourceContainer>
+  </resourceContainer_ResourceEnvironment>
+  <resourceContainer_ResourceEnvironment id="{s}_lbrc" entityName="Balancer{i}">
+    <activeResourceSpecifications_ResourceContainer id="{s}_lbcpu">
+      <schedulingPolicy href="{FCFS}"/>
+      <activeResourceType_ActiveResourceSpecification href="{CPU}"/>
+      <processingRate_ProcessingResourceSpecification specification="100000"/>
+    </activeResourceSpecifications_ResourceContainer>
+  </resourceContainer_ResourceEnvironment>
+"#
+        );
+        alloc += &format!(
+            r#"  <allocationContexts_Allocation id="{s}_alloc" entityName="Allocation_Service{i}">
+    <resourceContainer_AllocationContext href="My.resourceenvironment#{s}_rc"/>
+    <assemblyContext_AllocationContext href="default.system#{s}_ac"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="{s}_lballoc" entityName="Allocation_LoadBalancer{i}">
+    <resourceContainer_AllocationContext href="My.resourceenvironment#{s}_lbrc"/>
+    <assemblyContext_AllocationContext href="default.system#{s}_lbac"/>
+  </allocationContexts_Allocation>
+"#
+        );
+        usage += &format!(
+            r#"  <usageScenario_UsageModel id="{s}_us" entityName="svc{i}">
+    <scenarioBehaviour_UsageScenario id="{s}_usb" entityName="behaviour{i}">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="{s}_ustart" successor="{s}_elsc"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="{s}_ustop" predecessor="{s}_elsc"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="{s}_elsc" successor="{s}_ustop" predecessor="{s}_ustart">
+        <providedRole_EntryLevelSystemCall href="default.system#{s}_sysrole"/>
+        <operationSignature__EntryLevelSystemCall href="default.repository#{s}_sig"/>
+      </actions_ScenarioBehaviour>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:OpenWorkload">
+      <interArrivalTime_OpenWorkload specification="Exp({rate})"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+"#
+        );
+        spd += &format!(
+            r#"  <targetGroups xsi:type="targets:ElasticInfrastructure" id="{s}_tg" entityName="svc{i}">
+    <unit href="My.resourceenvironment#{s}_rc"/>
+  </targetGroups>
+"#
+        );
+        sem += &format!(
+            r#"  <targetCfgs xsi:type="semanticspd:ElasticInfrastructureCfg">
+    <unit href="My.resourceenvironment#{s}_rc"/>
+    <elements href="My.resourceenvironment#{s}_rc"/>
+    <linkingResource href="My.resourceenvironment#{s}_link"/>
+    <resourceEnvironment href="My.resourceenvironment#/0"/>
+  </targetCfgs>
+  <targetCfgs xsi:type="semanticspd:ServiceGroupCfg">
+    <unit href="default.system#{s}_ac"/>
+    <elements href="default.system#{s}_ac"/>
+    <loadBalancingAssembly href="default.system#{s}_lbac"/>
+  </targetCfgs>
+"#
+        );
+        hpa.push(format!(
+            r#"{{"metadata":{{"name":"svc{i}"}},"spec":{{"scaleTargetRef":{{"name":"svc{i}"}},"minReplicas":1,"maxReplicas":8,
+  "metrics":[{{"type":"Resource","resource":{{"name":"cpu","target":{{"type":"Utilization","averageUtilization":50}}}}}}]}}}}"#
+        ));
+    }
+    let files = [
+        ("default.repository", format!(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<repository:Repository {xmi} xmlns:repository=\"http://palladiosimulator.org/PalladioComponentModel/Repository/5.2\" xmlns:seff=\"http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2\" id=\"_repo\" entityName=\"repository\">\n{repo}</repository:Repository>\n"
+        )),
+        ("default.system", format!(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<system:System {xmi} xmlns:composition=\"http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2\" xmlns:repository=\"http://palladiosimulator.org/PalladioComponentModel/Repository/5.2\" xmlns:system=\"http://palladiosimulator.org/PalladioComponentModel/System/5.2\" id=\"_sys\" entityName=\"services\">\n{sys}</system:System>\n"
+        )),
+        ("My.resourceenvironment", format!(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<resourceenvironment:ResourceEnvironment {xmi} xmlns:resourceenvironment=\"http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2\">\n{env}</resourceenvironment:ResourceEnvironment>\n"
+        )),
+        ("default.allocation", format!(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<allocation:Allocation {xmi} xmlns:allocation=\"http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2\" id=\"_alloc\" entityName=\"allocation\">\n  <targetResourceEnvironment_Allocation href=\"My.resourceenvironment#/\"/>\n  <system_Allocation href=\"default.system#_sys\"/>\n{alloc}</allocation:Allocation>\n"
+        )),
+        ("default.usagemodel", format!(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<usagemodel:UsageModel {xmi} xmlns:usagemodel=\"http://palladiosimulator.org/PalladioComponentModel/UsageModel/5.2\">\n{usage}</usagemodel:UsageModel>\n"
+        )),
+        ("default.spd", format!(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<spd:SPD {xmi} xmlns:spd=\"http://palladiosimulator.org/ScalingPolicyDefinition/1.0\" xmlns:targets=\"http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0\" id=\"_spd\">\n{spd}</spd:SPD>\n"
+        )),
+        ("default.semanticspd", format!(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<semanticspd:Configuration {xmi} xmlns:semanticspd=\"http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0\">\n  <spd href=\"default.spd#_spd\"/>\n{sem}  <allocation href=\"default.allocation#_alloc\"/>\n  <system href=\"default.system#_sys\"/>\n  <resourceEnvironment href=\"My.resourceenvironment#/0\"/>\n  <repository href=\"default.repository#_repo\"/>\n</semanticspd:Configuration>\n"
+        )),
+        ("services.hpa.json", format!("{{\"items\":[{}]}}", hpa.join(",\n"))),
+    ];
+    for (name, text) in files {
+        std::fs::write(out.join(name), text).unwrap();
+    }
+    out
+}
+
+/// Times the adjustments of an inner adjuster.
+struct Timed {
+    inner: QvtoAdjuster,
+    total: std::time::Duration,
+    n: u32,
+}
+
+impl<C: Compat, F: Flavour> simoxide_spd::sim::Adjuster<C, F> for Timed {
+    fn adjust(
+        &mut self,
+        sim: &mut Simulation<'_, C, F>,
+        spd: &Spd,
+        state: &mut simoxide_spd::SpdState,
+        req: &simoxide_spd::AdjustmentRequest,
+    ) -> Result<simoxide_spd::AdjustOutcome, simoxide_sim::SimError> {
+        let t0 = std::time::Instant::now();
+        let r = self.inner.adjust_on(sim, spd, state, req);
+        self.total += t0.elapsed();
+        self.n += 1;
+        r
+    }
+}
+
+#[test]
+#[ignore]
+fn cost_per_scaling_step() {
+    let t0 = std::time::Instant::now();
+    let core = QvtoCore::new().unwrap();
+    let inner = QvtoAdjuster::spd(&core, &SpdAdjust::new(&Quirks::fixed())).unwrap();
+    println!("QVTo set-up (core, MainTransformation): {:.1} ms", t0.elapsed().as_secs_f64() * 1e3);
+    for k in [1, 10, 30, 40] {
+        let dir = services_model(k, 0.4);
+        let model = RunSpec::default().load_model(&dir).unwrap();
+        let objects = model.graph.object_count();
+        let typed = model.repositories.len(); // touch
+        let _ = typed;
+        let s = setup(&dir);
+        let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
+        let sim = Simulation::<Fast>::create(&s.cm, sim_cfg(1, 900), Outputs::default()).unwrap();
+        let mut r = SpdRun::new(sim, &s.spd).unwrap().with_hpa(&hpa).unwrap();
+        let mut adj = Timed {
+            inner: QvtoAdjuster::spd(&core, &SpdAdjust::new(&Quirks::fixed())).unwrap(),
+            total: Default::default(),
+            n: 0,
+        };
+        let mut log = NoLog;
+        let wall = std::time::Instant::now();
+        r.run_until(&mut adj, &mut log, Some(300 * S)).unwrap();
+        // a step on every service: 0.2 -> 2 offered cores
+        let text: String = (0..k)
+            .map(|i| format!("arrival-rate svc{i} 4.0\n"))
+            .collect();
+        ChangeFile::parse(&text).unwrap().apply(&mut r.sim).unwrap();
+        r.model_changed();
+        r.run_until(&mut adj, &mut log, Some(890 * S)).unwrap();
+        let c0 = std::time::Instant::now();
+        ChangeFile::parse("rate Server0:CPU 1.0")
+            .unwrap()
+            .apply(&mut r.sim)
+            .unwrap();
+        let change = c0.elapsed().as_secs_f64() * 1e3;
+        r.run(&mut adj, &mut log).unwrap();
+        let wall = wall.elapsed().as_secs_f64();
+        let created: u64 = r.hpa_summary().iter().map(|s| s.created).sum();
+        println!(
+            "k={k}: {objects} objects (graph before QVTo), {} adjustments ({created} pods created), {:.2} ms per adjustment, change path alone {change:.2} ms; run {wall:.2} s wall, events {}",
+            adj.n,
+            adj.total.as_secs_f64() * 1e3 / f64::from(adj.n.max(1)),
+            r.sim.state().events()
+        );
+    }
+}
