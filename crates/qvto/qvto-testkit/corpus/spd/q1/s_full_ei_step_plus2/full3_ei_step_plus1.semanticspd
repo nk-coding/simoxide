@@ -7,8 +7,8 @@
     <enactedPolicies href="default.spd#_fEi2"/>
     <unit href="My.resourceenvironment#_rcApp"/>
     <elements href="My.resourceenvironment#_rcApp"/>
-    <elements href="My.resourceenvironment#_q1_full_ei_step_plus2_18"/>
-    <elements href="My.resourceenvironment#_q1_full_ei_step_plus2_22"/>
+    <elements href="My.resourceenvironment#_q1_full_ei_step_plus2_24"/>
+    <elements href="My.resourceenvironment#_q1_full_ei_step_plus2_28"/>
     <linkingResource href="My.resourceenvironment#_lApp"/>
     <resourceEnvironment href="My.resourceenvironment#/"/>
   </targetCfgs>
@@ -22,16 +22,16 @@
     <enactedPolicies href="default.spd#_fEi2"/>
     <unit href="default.system#_acAcc"/>
     <elements href="default.system#_acAcc"/>
-    <elements href="default.system#_q1_full_ei_step_plus2_5"/>
-    <elements href="default.system#_q1_full_ei_step_plus2_6"/>
+    <elements href="default.system#_q1_full_ei_step_plus2_7"/>
+    <elements href="default.system#_q1_full_ei_step_plus2_8"/>
     <loadBalancingAssembly href="default.system#_acLb"/>
   </targetCfgs>
   <targetCfgs xsi:type="semanticspd:CompetingConsumersGroupCfg">
     <enactedPolicies href="default.spd#_fEi2"/>
     <unit href="default.system#_acWork"/>
     <elements href="default.system#_acWork"/>
-    <elements href="default.system#_q1_full_ei_step_plus2_7"/>
-    <elements href="default.system#_q1_full_ei_step_plus2_8"/>
+    <elements href="default.system#_q1_full_ei_step_plus2_9"/>
+    <elements href="default.system#_q1_full_ei_step_plus2_10"/>
     <unitQueues name="orders">
       <usageScenarioForConsumption href="default.usagemodel#_usWork"/>
     </unitQueues>

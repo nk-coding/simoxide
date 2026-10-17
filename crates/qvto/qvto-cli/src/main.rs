@@ -7,6 +7,7 @@ mod bench;
 mod engine;
 mod fuzz;
 mod robust;
+mod spdreplay;
 
 use qvto_model::ModelStore;
 use qvto_testkit::case::{Case, read_cases};
@@ -53,6 +54,11 @@ usage:
       rule, reference/slingshot/seed-agent.sh), cache target/qvto-testkit/java-det/<suite>.
   qvto conform java [--suite ...] [--det] [--out DIR] [--only ID,...] [--prefix P]... [--save-xmi]
       Runs the Java reference runner once into DIR.
+  qvto spd-replay [MODELDIR SPD.jsonl] [--mode compat|fast|ordered]
+      Replays the SPD adjustments a Slingshot reference run recorded (reference/slingshot,
+      spd.jsonl; without arguments the repository's det runs) with MainTransformation on one
+      in-memory copy of the models and compares each adjustment's outcome and model summary
+      (default: ordered mode, which the det runner's ordering rule defines).
   qvto fuzz expr|prog [--seed N] [--minutes M | --batches B] [--cases C] [--stmts S] [--depth D] [--out DIR] [--keep]
       Differential fuzzing against the Java runner: random expressions or programs over the fuzz
       metamodel; findings (minimised) in DIR/findings.tsv and DIR/findings/.
@@ -107,6 +113,7 @@ fn main() {
         Some("run") => run_cmd(&args[1..]),
         Some("bench") => bench::bench(&args[1..]),
         Some("fuzz") => fuzz::main(&args[1..]),
+        Some("spd-replay") => spdreplay::main(&args[1..]),
         Some("-h" | "--help") | None => {
             println!("{USAGE}");
         }

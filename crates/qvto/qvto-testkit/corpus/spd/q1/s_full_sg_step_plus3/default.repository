@@ -4,6 +4,9 @@
   <components__Repository xsi:type="repository:BasicComponent" id="_cAcc" entityName="AccountingComponent">
     <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_prAcc" entityName="Provided_Accounting_AccountingComponent" providedInterface__OperationProvidedRole="_iAcc"/>
     <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_rrAccDb" entityName="Required_Database_AccountingComponent" requiredInterface__OperationRequiredRole="_iDb"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_rrAccExt" entityName="Required_External_AccountingComponent" requiredInterface__OperationRequiredRole="_iExt"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_irAccMw" entityName="Required_Middleware_AccountingComponent" requiredInterface__InfrastructureRequiredRole="_iInfra"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_irAccExt" entityName="Required_ExternalInfrastructure_AccountingComponent" requiredInterface__InfrastructureRequiredRole="_iInfra"/>
     <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_seffAcc" describedService__SEFF="_sCharge">
       <steps_Behaviour xsi:type="seff:StartAction" id="_accStart" successor_AbstractAction="_accWork"/>
       <steps_Behaviour xsi:type="seff:StopAction" id="_accStop" predecessor_AbstractAction="_accCall"/>
@@ -19,9 +22,9 @@
   <components__Repository xsi:type="repository:BasicComponent" id="_cLb" entityName="LoadBalancer">
     <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_prLb" entityName="Provided_Accounting_LoadBalancer" providedInterface__OperationProvidedRole="_iAcc"/>
     <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_rrLb1" entityName="Required_Accounting_LoadBalancer_0" requiredInterface__OperationRequiredRole="_iAcc"/>
-    <requiredRoles_InterfaceRequiringEntity id="_q1_full_sg_step_plus3_19" xsi:type="repository:OperationRequiredRole" entityName="Required_AccountingInterface_LoadBalancer_1" requiredInterface__OperationRequiredRole="_iAcc"/>
-    <requiredRoles_InterfaceRequiringEntity id="_q1_full_sg_step_plus3_20" xsi:type="repository:OperationRequiredRole" entityName="Required_AccountingInterface_LoadBalancer_2" requiredInterface__OperationRequiredRole="_iAcc"/>
-    <requiredRoles_InterfaceRequiringEntity id="_q1_full_sg_step_plus3_21" xsi:type="repository:OperationRequiredRole" entityName="Required_AccountingInterface_LoadBalancer_3" requiredInterface__OperationRequiredRole="_iAcc"/>
+    <requiredRoles_InterfaceRequiringEntity id="_q1_full_sg_step_plus3_28" xsi:type="repository:OperationRequiredRole" entityName="Required_AccountingInterface_LoadBalancer_1" requiredInterface__OperationRequiredRole="_iAcc"/>
+    <requiredRoles_InterfaceRequiringEntity id="_q1_full_sg_step_plus3_29" xsi:type="repository:OperationRequiredRole" entityName="Required_AccountingInterface_LoadBalancer_2" requiredInterface__OperationRequiredRole="_iAcc"/>
+    <requiredRoles_InterfaceRequiringEntity id="_q1_full_sg_step_plus3_30" xsi:type="repository:OperationRequiredRole" entityName="Required_AccountingInterface_LoadBalancer_3" requiredInterface__OperationRequiredRole="_iAcc"/>
     <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_seffLb" describedService__SEFF="_sCharge">
       <steps_Behaviour xsi:type="seff:StartAction" id="_lbStart" successor_AbstractAction="_lbBranch"/>
       <steps_Behaviour xsi:type="seff:StopAction" id="_lbStop" predecessor_AbstractAction="_lbBranch"/>
@@ -40,10 +43,10 @@
             </steps_Behaviour>
           </branchBehaviour_BranchTransition>
         </branches_Branch>
-        <branches_Branch id="_q1_full_sg_step_plus3_22" xsi:type="seff:ProbabilisticBranchTransition" entityName="Branch for Required_AccountingInterface_LoadBalancer_1" branchProbability="0.25">
-          <branchBehaviour_BranchTransition id="_q1_full_sg_step_plus3_23">
-            <steps_Behaviour id="_q1_full_sg_step_plus3_24" xsi:type="seff:StartAction" successor_AbstractAction="_q1_full_sg_step_plus3_25"/>
-            <steps_Behaviour id="_q1_full_sg_step_plus3_25" xsi:type="seff:ExternalCallAction" entityName="Call chargeForEspresso" predecessor_AbstractAction="_q1_full_sg_step_plus3_24" successor_AbstractAction="_q1_full_sg_step_plus3_26" calledService_ExternalService="_sCharge" role_ExternalService="_q1_full_sg_step_plus3_19">
+        <branches_Branch id="_q1_full_sg_step_plus3_31" xsi:type="seff:ProbabilisticBranchTransition" entityName="Branch for Required_AccountingInterface_LoadBalancer_1" branchProbability="0.25">
+          <branchBehaviour_BranchTransition id="_q1_full_sg_step_plus3_32">
+            <steps_Behaviour id="_q1_full_sg_step_plus3_33" xsi:type="seff:StartAction" successor_AbstractAction="_q1_full_sg_step_plus3_34"/>
+            <steps_Behaviour id="_q1_full_sg_step_plus3_34" xsi:type="seff:ExternalCallAction" entityName="Call chargeForEspresso" predecessor_AbstractAction="_q1_full_sg_step_plus3_33" successor_AbstractAction="_q1_full_sg_step_plus3_35" calledService_ExternalService="_sCharge" role_ExternalService="_q1_full_sg_step_plus3_28">
               <inputVariableUsages__CallAction>
                 <variableCharacterisation_VariableUsage type="BYTESIZE">
                   <specification_VariableCharacterisation specification="10"/>
@@ -51,13 +54,13 @@
                 <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="order"/>
               </inputVariableUsages__CallAction>
             </steps_Behaviour>
-            <steps_Behaviour id="_q1_full_sg_step_plus3_26" xsi:type="seff:StopAction" predecessor_AbstractAction="_q1_full_sg_step_plus3_25"/>
+            <steps_Behaviour id="_q1_full_sg_step_plus3_35" xsi:type="seff:StopAction" predecessor_AbstractAction="_q1_full_sg_step_plus3_34"/>
           </branchBehaviour_BranchTransition>
         </branches_Branch>
-        <branches_Branch id="_q1_full_sg_step_plus3_27" xsi:type="seff:ProbabilisticBranchTransition" entityName="Branch for Required_AccountingInterface_LoadBalancer_2" branchProbability="0.25">
-          <branchBehaviour_BranchTransition id="_q1_full_sg_step_plus3_28">
-            <steps_Behaviour id="_q1_full_sg_step_plus3_29" xsi:type="seff:StartAction" successor_AbstractAction="_q1_full_sg_step_plus3_30"/>
-            <steps_Behaviour id="_q1_full_sg_step_plus3_30" xsi:type="seff:ExternalCallAction" entityName="Call chargeForEspresso" predecessor_AbstractAction="_q1_full_sg_step_plus3_29" successor_AbstractAction="_q1_full_sg_step_plus3_31" calledService_ExternalService="_sCharge" role_ExternalService="_q1_full_sg_step_plus3_20">
+        <branches_Branch id="_q1_full_sg_step_plus3_36" xsi:type="seff:ProbabilisticBranchTransition" entityName="Branch for Required_AccountingInterface_LoadBalancer_2" branchProbability="0.25">
+          <branchBehaviour_BranchTransition id="_q1_full_sg_step_plus3_37">
+            <steps_Behaviour id="_q1_full_sg_step_plus3_38" xsi:type="seff:StartAction" successor_AbstractAction="_q1_full_sg_step_plus3_39"/>
+            <steps_Behaviour id="_q1_full_sg_step_plus3_39" xsi:type="seff:ExternalCallAction" entityName="Call chargeForEspresso" predecessor_AbstractAction="_q1_full_sg_step_plus3_38" successor_AbstractAction="_q1_full_sg_step_plus3_40" calledService_ExternalService="_sCharge" role_ExternalService="_q1_full_sg_step_plus3_29">
               <inputVariableUsages__CallAction>
                 <variableCharacterisation_VariableUsage type="BYTESIZE">
                   <specification_VariableCharacterisation specification="10"/>
@@ -65,13 +68,13 @@
                 <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="order"/>
               </inputVariableUsages__CallAction>
             </steps_Behaviour>
-            <steps_Behaviour id="_q1_full_sg_step_plus3_31" xsi:type="seff:StopAction" predecessor_AbstractAction="_q1_full_sg_step_plus3_30"/>
+            <steps_Behaviour id="_q1_full_sg_step_plus3_40" xsi:type="seff:StopAction" predecessor_AbstractAction="_q1_full_sg_step_plus3_39"/>
           </branchBehaviour_BranchTransition>
         </branches_Branch>
-        <branches_Branch id="_q1_full_sg_step_plus3_32" xsi:type="seff:ProbabilisticBranchTransition" entityName="Branch for Required_AccountingInterface_LoadBalancer_3" branchProbability="0.25">
-          <branchBehaviour_BranchTransition id="_q1_full_sg_step_plus3_33">
-            <steps_Behaviour id="_q1_full_sg_step_plus3_34" xsi:type="seff:StartAction" successor_AbstractAction="_q1_full_sg_step_plus3_35"/>
-            <steps_Behaviour id="_q1_full_sg_step_plus3_35" xsi:type="seff:ExternalCallAction" entityName="Call chargeForEspresso" predecessor_AbstractAction="_q1_full_sg_step_plus3_34" successor_AbstractAction="_q1_full_sg_step_plus3_36" calledService_ExternalService="_sCharge" role_ExternalService="_q1_full_sg_step_plus3_21">
+        <branches_Branch id="_q1_full_sg_step_plus3_41" xsi:type="seff:ProbabilisticBranchTransition" entityName="Branch for Required_AccountingInterface_LoadBalancer_3" branchProbability="0.25">
+          <branchBehaviour_BranchTransition id="_q1_full_sg_step_plus3_42">
+            <steps_Behaviour id="_q1_full_sg_step_plus3_43" xsi:type="seff:StartAction" successor_AbstractAction="_q1_full_sg_step_plus3_44"/>
+            <steps_Behaviour id="_q1_full_sg_step_plus3_44" xsi:type="seff:ExternalCallAction" entityName="Call chargeForEspresso" predecessor_AbstractAction="_q1_full_sg_step_plus3_43" successor_AbstractAction="_q1_full_sg_step_plus3_45" calledService_ExternalService="_sCharge" role_ExternalService="_q1_full_sg_step_plus3_30">
               <inputVariableUsages__CallAction>
                 <variableCharacterisation_VariableUsage type="BYTESIZE">
                   <specification_VariableCharacterisation specification="10"/>
@@ -79,7 +82,7 @@
                 <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="order"/>
               </inputVariableUsages__CallAction>
             </steps_Behaviour>
-            <steps_Behaviour id="_q1_full_sg_step_plus3_36" xsi:type="seff:StopAction" predecessor_AbstractAction="_q1_full_sg_step_plus3_35"/>
+            <steps_Behaviour id="_q1_full_sg_step_plus3_45" xsi:type="seff:StopAction" predecessor_AbstractAction="_q1_full_sg_step_plus3_44"/>
           </branchBehaviour_BranchTransition>
         </branches_Branch>
       </steps_Behaviour>
@@ -107,6 +110,15 @@
       <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_wCall" entityName="_wCall" predecessor_AbstractAction="_wStart" successor_AbstractAction="_wStop" calledService_ExternalService="_sQuery" role_ExternalService="_rrWorkDb"/>
     </serviceEffectSpecifications__BasicComponent>
   </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_cMw" entityName="Middleware">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:InfrastructureProvidedRole" id="_ipMw" entityName="Provided_Middleware" providedInterface__InfrastructureProvidedRole="_iInfra"/>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_iExt" entityName="ExternalInterface">
+    <signatures__OperationInterface id="_sExt" entityName="external"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:InfrastructureInterface" id="_iInfra" entityName="MiddlewareInterface">
+    <infrastructureSignatures__InfrastructureInterface id="_sLog" entityName="log"/>
+  </interfaces__Repository>
   <interfaces__Repository xsi:type="repository:OperationInterface" id="_iAcc" entityName="AccountingInterface">
     <signatures__OperationInterface id="_sCharge" entityName="chargeForEspresso"/>
   </interfaces__Repository>

@@ -2,10 +2,12 @@
 # Copies the SimuLizar and SPD test material for cases/corpus.cases into corpus/ and writes the
 # synthesized runtime-measurement inputs. Run from the QVTo root (crates/qvto):
 #   qvto-testkit/tools/copy-corpus.sh [repos-dir]
-# Sources (EPL-2.0), revisions used for the committed copy:
-#   Palladio-Analyzer-SimuLizar        2718d73a1f236d5cae10313c2022c6528a99e805
-#   Palladio-Addons-SPD-Metamodel      95cdb0b677276f5d14c3001b89705a17d8fb690f
-#   Palladio-Documentation-Slingshot   94448159e75f33edfb98e960ad244018b97e37d4
+# Sources, revisions used for the committed copy:
+#   Palladio-Analyzer-SimuLizar        2718d73a1f236d5cae10313c2022c6528a99e805 (EPL-2.0)
+#   Palladio-Addons-SPD-Metamodel      95cdb0b677276f5d14c3001b89705a17d8fb690f (licence pending
+#   Palladio-Documentation-Slingshot   94448159e75f33edfb98e960ad244018b97e37d4  confirmation,
+#                                      DESIGN-SPD U3 and LICENSES section 6: do not publish)
+# The SPD files get a header naming their source, revision and licence status.
 set -e
 R=${1:-/home/devbox/workspace/old/palladio-research/repos}
 S=$R/Palladio-Analyzer-SimuLizar
@@ -84,4 +86,12 @@ cp $M/default.allocation $M/default.system $M/default.repository $M/default.usag
 sed 's#<spd href="default.spd\#_PKdecLwZEe6i2ICnm9lfkw"/>#&\n  <enactedPolicy href="default.spd\#_7VIU0MAgEe6AcKIPVXJsSw"/>#' \
 	$M/default.semanticspd > $O/spd/minimalexample/default.semanticspd
 grep -q enactedPolicy $O/spd/minimalexample/default.semanticspd
+# licence marking (U3): a comment after the XML declaration, two comment lines atop each .qvto
+for f in $O/spd/minimalexample/*; do
+	sed -i "1a <!-- Copied from Palladio-Documentation-Slingshot examples/minimalexample/$(basename $f) (commit 94448159e75f33edfb98e960ad244018b97e37d4). Licence pending confirmation (DESIGN-SPD U3); do not publish. -->" "$f"
+done
+(cd $O/spd/transformations && find . -name '*.qvto' | sort) | while read -r f; do
+	f=${f#./}
+	sed -i "1i // Copied from Palladio-Addons-SPD-Metamodel (commit 95cdb0b677276f5d14c3001b89705a17d8fb690f),\\n// bundles/org.palladiosimulator.spd.semantic.transformations/transformations/$f. Licence pending confirmation (DESIGN-SPD U3); do not publish." "$O/spd/transformations/$f"
+done
 du -sh $O

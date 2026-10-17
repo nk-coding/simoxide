@@ -120,24 +120,24 @@ unstable	log
 {"path":"/0/@measuringPoints.5","type":"http://palladiosimulator.org/EDP2/MeasuringPoint/1.0#ResourceURIMeasuringPoint","attrs":{"stringRepresentation":"Server2","resourceURIRepresentation":"platform:/resource/org.palladiosimulator.simulizar.examples.loadbalancer/loadbalancer.repository#_-fSxAAEoEeS7FKokKTKFow","measuringPoint":"Server2","resourceURI":"platform:/resource/org.palladiosimulator.simulizar.examples.loadbalancer/loadbalancer.repository#_-fSxAAEoEeS7FKokKTKFow"},"refs":{}}
 {"path":"/0/@measuringPoints.6","type":"http://palladiosimulator.org/simulizar/measuringpoint#ReconfigurationMeasuringPoint","attrs":{"stringRepresentation":"Reconfiguration","resourceURIRepresentation":"platform:/resource/org.palladiosimulator.simulizar.examples.loadbalancer/reconfigurations_active/acquire.sdm","measuringPoint":"Reconfiguration","resourceURI":"platform:/resource/org.palladiosimulator.simulizar.examples.loadbalancer/reconfigurations_active/acquire.sdm"},"refs":{}}
 
-@file log.txt 637
+@file log.txt 636
 SimuLizar Outsource Rule Transformation started
 Measured value is 5.0
 Threshold is exceeded
 Found 3 AllocationContexts
-Branch1: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@73e7c314 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@4a4660ea (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
-Branch2: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@3749568c (eClass: org.eclipse.emf.ecore.impl.EClassImpl@4a4660ea (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
+Branch1: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@f1f2a3a (eClass: org.eclipse.emf.ecore.impl.EClassImpl@6d400f95 (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
+Branch2: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@786d77ef (eClass: org.eclipse.emf.ecore.impl.EClassImpl@6d400f95 (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
 Balancing Load...
 Set branchProbability to 0.1
 Set branchProbability to 0.9
 
-@file diag.txt 745
+@file diag.txt 744
 exec	1	OK	0	SimuLizar Outsource Rule Transformation started
 exec	1	OK	0	Measured value is 5.0
 exec	1	OK	0	Threshold is exceeded
 exec	1	OK	0	Found 3 AllocationContexts
-exec	1	OK	0	Branch1: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@73e7c314 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@4a4660ea (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
-exec	1	OK	0	Branch2: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@3749568c (eClass: org.eclipse.emf.ecore.impl.EClassImpl@4a4660ea (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
+exec	1	OK	0	Branch1: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@f1f2a3a (eClass: org.eclipse.emf.ecore.impl.EClassImpl@6d400f95 (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
+exec	1	OK	0	Branch2: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@786d77ef (eClass: org.eclipse.emf.ecore.impl.EClassImpl@6d400f95 (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
 exec	1	OK	0	Balancing Load...
 exec	1	OK	0	Set branchProbability to 0.1
 exec	1	OK	0	Set branchProbability to 0.9
@@ -2705,6 +2705,6 @@ operation required roles+needed:1
 size of inputvar 0
 
 @file diag.txt 197
-problem	warning	Commons.qvto	89	3769	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: aName}
 

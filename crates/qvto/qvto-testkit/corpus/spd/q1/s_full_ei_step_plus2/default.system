@@ -13,16 +13,19 @@
   <assemblyContexts__ComposedStructure id="_acWork" entityName="Assembly_Worker">
     <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="default.repository#_cWork"/>
   </assemblyContexts__ComposedStructure>
-  <assemblyContexts__ComposedStructure id="_q1_full_ei_step_plus2_5" entityName="AccountingComponent_AssemblyContext_3">
+  <assemblyContexts__ComposedStructure id="_acMw" entityName="Assembly_Middleware">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="default.repository#_cMw"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_q1_full_ei_step_plus2_7" entityName="AccountingComponent_AssemblyContext_3">
     <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="default.repository#_cAcc"/>
   </assemblyContexts__ComposedStructure>
-  <assemblyContexts__ComposedStructure id="_q1_full_ei_step_plus2_6" entityName="AccountingComponent_AssemblyContext_4">
+  <assemblyContexts__ComposedStructure id="_q1_full_ei_step_plus2_8" entityName="AccountingComponent_AssemblyContext_4">
     <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="default.repository#_cAcc"/>
   </assemblyContexts__ComposedStructure>
-  <assemblyContexts__ComposedStructure id="_q1_full_ei_step_plus2_7" entityName="Worker_AssemblyContext_5">
+  <assemblyContexts__ComposedStructure id="_q1_full_ei_step_plus2_9" entityName="Worker_AssemblyContext_5">
     <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="default.repository#_cWork"/>
   </assemblyContexts__ComposedStructure>
-  <assemblyContexts__ComposedStructure id="_q1_full_ei_step_plus2_8" entityName="Worker_AssemblyContext_6">
+  <assemblyContexts__ComposedStructure id="_q1_full_ei_step_plus2_10" entityName="Worker_AssemblyContext_6">
     <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="default.repository#_cWork"/>
   </assemblyContexts__ComposedStructure>
   <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_pdcAcc" entityName="_pdcAcc" outerProvidedRole_ProvidedDelegationConnector="_sprAcc" assemblyContext_ProvidedDelegationConnector="_acLb">
@@ -43,29 +46,53 @@
     <providedRole_AssemblyConnector href="default.repository#_prDb"/>
     <requiredRole_AssemblyConnector href="default.repository#_rrWorkDb"/>
   </connectors__ComposedStructure>
-  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_9" xsi:type="composition:AssemblyConnector" entityName="Assembly_LoadBalancer_AccountingComponent_AssemblyContext_3" requiringAssemblyContext_AssemblyConnector="_acLb" providingAssemblyContext_AssemblyConnector="_q1_full_ei_step_plus2_5">
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_aicAccMw" entityName="_aicAccMw" providingAssemblyContext__AssemblyInfrastructureConnector="_acMw" requiringAssemblyContext__AssemblyInfrastructureConnector="_acAcc">
+    <providedRole__AssemblyInfrastructureConnector href="default.repository#_ipMw"/>
+    <requiredRole__AssemblyInfrastructureConnector href="default.repository#_irAccMw"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:RequiredDelegationConnector" id="_rdcExt" entityName="_rdcExt" outerRequiredRole_RequiredDelegationConnector="_srrExt" assemblyContext_RequiredDelegationConnector="_acAcc">
+    <innerRequiredRole_RequiredDelegationConnector href="default.repository#_rrAccExt"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:RequiredInfrastructureDelegationConnector" id="_ridcExt" entityName="_ridcExt" outerRequiredRole__RequiredInfrastructureDelegationConnector="_srrInfra" assemblyContext__RequiredInfrastructureDelegationConnector="_acAcc">
+    <innerRequiredRole__RequiredInfrastructureDelegationConnector href="default.repository#_irAccExt"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_11" xsi:type="composition:AssemblyConnector" entityName="Assembly_LoadBalancer_AccountingComponent_AssemblyContext_3" requiringAssemblyContext_AssemblyConnector="_acLb" providingAssemblyContext_AssemblyConnector="_q1_full_ei_step_plus2_7">
     <providedRole_AssemblyConnector href="default.repository#_prAcc"/>
-    <requiredRole_AssemblyConnector href="default.repository#_q1_full_ei_step_plus2_26"/>
+    <requiredRole_AssemblyConnector href="default.repository#_q1_full_ei_step_plus2_32"/>
   </connectors__ComposedStructure>
-  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_10" xsi:type="composition:AssemblyConnector" entityName="AccountingComponent_AssemblyContext_3_Assembly_Database" requiringAssemblyContext_AssemblyConnector="_q1_full_ei_step_plus2_5" providingAssemblyContext_AssemblyConnector="_acDb">
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_12" xsi:type="composition:AssemblyConnector" entityName="AccountingComponent_AssemblyContext_3_Assembly_Database" requiringAssemblyContext_AssemblyConnector="_q1_full_ei_step_plus2_7" providingAssemblyContext_AssemblyConnector="_acDb">
     <providedRole_AssemblyConnector href="default.repository#_prDb"/>
     <requiredRole_AssemblyConnector href="default.repository#_rrAccDb"/>
   </connectors__ComposedStructure>
-  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_11" xsi:type="composition:AssemblyConnector" entityName="AccountingComponent_AssemblyContext_4_Assembly_Database" requiringAssemblyContext_AssemblyConnector="_q1_full_ei_step_plus2_6" providingAssemblyContext_AssemblyConnector="_acDb">
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_13" xsi:type="composition:AssemblyConnector" entityName="AccountingComponent_AssemblyContext_4_Assembly_Database" requiringAssemblyContext_AssemblyConnector="_q1_full_ei_step_plus2_8" providingAssemblyContext_AssemblyConnector="_acDb">
     <providedRole_AssemblyConnector href="default.repository#_prDb"/>
     <requiredRole_AssemblyConnector href="default.repository#_rrAccDb"/>
   </connectors__ComposedStructure>
-  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_12" xsi:type="composition:ProvidedDelegationConnector" entityName="_pdcWork" outerProvidedRole_ProvidedDelegationConnector="_q1_full_ei_step_plus2_16" assemblyContext_ProvidedDelegationConnector="_q1_full_ei_step_plus2_7">
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_14" xsi:type="composition:AssemblyInfrastructureConnector" entityName="AccountingComponent_AssemblyContext_3_Assembly_Middleware" providingAssemblyContext__AssemblyInfrastructureConnector="_acMw" requiringAssemblyContext__AssemblyInfrastructureConnector="_q1_full_ei_step_plus2_7">
+    <providedRole__AssemblyInfrastructureConnector href="default.repository#_ipMw"/>
+    <requiredRole__AssemblyInfrastructureConnector href="default.repository#_irAccMw"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_15" xsi:type="composition:AssemblyInfrastructureConnector" entityName="AccountingComponent_AssemblyContext_4_Assembly_Middleware" providingAssemblyContext__AssemblyInfrastructureConnector="_acMw" requiringAssemblyContext__AssemblyInfrastructureConnector="_q1_full_ei_step_plus2_8">
+    <providedRole__AssemblyInfrastructureConnector href="default.repository#_ipMw"/>
+    <requiredRole__AssemblyInfrastructureConnector href="default.repository#_irAccMw"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_16" xsi:type="composition:RequiredInfrastructureDelegationConnector" entityName="RequiredDelegation Required_ExternalInfrastructure_AccountingComponent_Required_Infrastructure" outerRequiredRole__RequiredInfrastructureDelegationConnector="_srrInfra" assemblyContext__RequiredInfrastructureDelegationConnector="_q1_full_ei_step_plus2_7">
+    <innerRequiredRole__RequiredInfrastructureDelegationConnector href="default.repository#_irAccExt"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_17" xsi:type="composition:RequiredInfrastructureDelegationConnector" entityName="RequiredDelegation Required_ExternalInfrastructure_AccountingComponent_Required_Infrastructure" outerRequiredRole__RequiredInfrastructureDelegationConnector="_srrInfra" assemblyContext__RequiredInfrastructureDelegationConnector="_q1_full_ei_step_plus2_8">
+    <innerRequiredRole__RequiredInfrastructureDelegationConnector href="default.repository#_irAccExt"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_18" xsi:type="composition:ProvidedDelegationConnector" entityName="_pdcWork" outerProvidedRole_ProvidedDelegationConnector="_q1_full_ei_step_plus2_22" assemblyContext_ProvidedDelegationConnector="_q1_full_ei_step_plus2_9">
     <innerProvidedRole_ProvidedDelegationConnector href="default.repository#_prWork"/>
   </connectors__ComposedStructure>
-  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_13" xsi:type="composition:ProvidedDelegationConnector" entityName="_pdcWork" outerProvidedRole_ProvidedDelegationConnector="_q1_full_ei_step_plus2_17" assemblyContext_ProvidedDelegationConnector="_q1_full_ei_step_plus2_8">
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_19" xsi:type="composition:ProvidedDelegationConnector" entityName="_pdcWork" outerProvidedRole_ProvidedDelegationConnector="_q1_full_ei_step_plus2_23" assemblyContext_ProvidedDelegationConnector="_q1_full_ei_step_plus2_10">
     <innerProvidedRole_ProvidedDelegationConnector href="default.repository#_prWork"/>
   </connectors__ComposedStructure>
-  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_14" xsi:type="composition:AssemblyConnector" entityName="Worker_AssemblyContext_5_Assembly_Database" requiringAssemblyContext_AssemblyConnector="_q1_full_ei_step_plus2_7" providingAssemblyContext_AssemblyConnector="_acDb">
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_20" xsi:type="composition:AssemblyConnector" entityName="Worker_AssemblyContext_5_Assembly_Database" requiringAssemblyContext_AssemblyConnector="_q1_full_ei_step_plus2_9" providingAssemblyContext_AssemblyConnector="_acDb">
     <providedRole_AssemblyConnector href="default.repository#_prDb"/>
     <requiredRole_AssemblyConnector href="default.repository#_rrWorkDb"/>
   </connectors__ComposedStructure>
-  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_15" xsi:type="composition:AssemblyConnector" entityName="Worker_AssemblyContext_6_Assembly_Database" requiringAssemblyContext_AssemblyConnector="_q1_full_ei_step_plus2_8" providingAssemblyContext_AssemblyConnector="_acDb">
+  <connectors__ComposedStructure id="_q1_full_ei_step_plus2_21" xsi:type="composition:AssemblyConnector" entityName="Worker_AssemblyContext_6_Assembly_Database" requiringAssemblyContext_AssemblyConnector="_q1_full_ei_step_plus2_10" providingAssemblyContext_AssemblyConnector="_acDb">
     <providedRole_AssemblyConnector href="default.repository#_prDb"/>
     <requiredRole_AssemblyConnector href="default.repository#_rrWorkDb"/>
   </connectors__ComposedStructure>
@@ -75,10 +102,16 @@
   <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_sprWork" entityName="Provided_Work">
     <providedInterface__OperationProvidedRole href="default.repository#_iWork"/>
   </providedRoles_InterfaceProvidingEntity>
-  <providedRoles_InterfaceProvidingEntity id="_q1_full_ei_step_plus2_16" xsi:type="repository:OperationProvidedRole" entityName="Provided_Workreplicated_7">
+  <providedRoles_InterfaceProvidingEntity id="_q1_full_ei_step_plus2_22" xsi:type="repository:OperationProvidedRole" entityName="Provided_Workreplicated_7">
     <providedInterface__OperationProvidedRole href="default.repository#_iWork"/>
   </providedRoles_InterfaceProvidingEntity>
-  <providedRoles_InterfaceProvidingEntity id="_q1_full_ei_step_plus2_17" xsi:type="repository:OperationProvidedRole" entityName="Provided_Workreplicated_8">
+  <providedRoles_InterfaceProvidingEntity id="_q1_full_ei_step_plus2_23" xsi:type="repository:OperationProvidedRole" entityName="Provided_Workreplicated_8">
     <providedInterface__OperationProvidedRole href="default.repository#_iWork"/>
   </providedRoles_InterfaceProvidingEntity>
+  <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_srrExt" entityName="Required_External">
+    <requiredInterface__OperationRequiredRole href="default.repository#_iExt"/>
+  </requiredRoles_InterfaceRequiringEntity>
+  <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_srrInfra" entityName="Required_Infrastructure">
+    <requiredInterface__InfrastructureRequiredRole href="default.repository#_iInfra"/>
+  </requiredRoles_InterfaceRequiringEntity>
 </system:System>

@@ -273,6 +273,13 @@ FULL_REPO = (
     'entityName="Provided_Accounting_AccountingComponent" providedInterface__OperationProvidedRole="_iAcc"/>\n'
     '    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_rrAccDb" '
     'entityName="Required_Database_AccountingComponent" requiredInterface__OperationRequiredRole="_iDb"/>\n'
+    # wired to the system's required roles and to a middleware (the replicas get copies of these)
+    '    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_rrAccExt" '
+    'entityName="Required_External_AccountingComponent" requiredInterface__OperationRequiredRole="_iExt"/>\n'
+    '    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_irAccMw" '
+    'entityName="Required_Middleware_AccountingComponent" requiredInterface__InfrastructureRequiredRole="_iInfra"/>\n'
+    '    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_irAccExt" '
+    'entityName="Required_ExternalInfrastructure_AccountingComponent" requiredInterface__InfrastructureRequiredRole="_iInfra"/>\n'
     '    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_seffAcc" describedService__SEFF="_sCharge">\n'
     + start_stop("_accStart", "_accStop", "_accWork", "_accCall")
     + internal("_accWork", "_accStart", "_accCall", "2.0")
@@ -318,6 +325,17 @@ FULL_REPO = (
     + ext_call("_wCall", "_wStart", "_wStop", "_rrWorkDb", "_sQuery")
     + '    </serviceEffectSpecifications__BasicComponent>\n'
     '  </components__Repository>\n'
+    # the middleware: an infrastructure provider
+    '  <components__Repository xsi:type="repository:BasicComponent" id="_cMw" entityName="Middleware">\n'
+    '    <providedRoles_InterfaceProvidingEntity xsi:type="repository:InfrastructureProvidedRole" id="_ipMw" '
+    'entityName="Provided_Middleware" providedInterface__InfrastructureProvidedRole="_iInfra"/>\n'
+    '  </components__Repository>\n'
+    '  <interfaces__Repository xsi:type="repository:OperationInterface" id="_iExt" entityName="ExternalInterface">\n'
+    '    <signatures__OperationInterface id="_sExt" entityName="external"/>\n'
+    '  </interfaces__Repository>\n'
+    '  <interfaces__Repository xsi:type="repository:InfrastructureInterface" id="_iInfra" entityName="MiddlewareInterface">\n'
+    '    <infrastructureSignatures__InfrastructureInterface id="_sLog" entityName="log"/>\n'
+    '  </interfaces__Repository>\n'
     '  <interfaces__Repository xsi:type="repository:OperationInterface" id="_iAcc" entityName="AccountingInterface">\n'
     '    <signatures__OperationInterface id="_sCharge" entityName="chargeForEspresso"/>\n'
     '  </interfaces__Repository>\n'
@@ -359,17 +377,40 @@ FULL_SYSTEM = (
     + asm("_acLb", "Assembly_LoadBalancer", "_cLb")
     + asm("_acDb", "Assembly_Database", "_cDb")
     + asm("_acWork", "Assembly_Worker", "_cWork")
+    + asm("_acMw", "Assembly_Middleware", "_cMw")
     + pdc("_pdcAcc", "_sprAcc", "_acLb", "_prLb")
     + asm_conn("_conLbAcc", "_acLb", "_acAcc", "_prAcc", "_rrLb1")
     + asm_conn("_conAccDb", "_acAcc", "_acDb", "_prDb", "_rrAccDb")
     + pdc("_pdcWork", "_sprWork", "_acWork", "_prWork")
     + asm_conn("_conWorkDb", "_acWork", "_acDb", "_prDb", "_rrWorkDb")
+    + '  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_aicAccMw" '
+    'entityName="_aicAccMw" requiringAssemblyContext__AssemblyInfrastructureConnector="_acAcc" '
+    'providingAssemblyContext__AssemblyInfrastructureConnector="_acMw">\n'
+    '    <providedRole__AssemblyInfrastructureConnector href="default.repository#_ipMw"/>\n'
+    '    <requiredRole__AssemblyInfrastructureConnector href="default.repository#_irAccMw"/>\n'
+    '  </connectors__ComposedStructure>\n'
+    '  <connectors__ComposedStructure xsi:type="composition:RequiredDelegationConnector" id="_rdcExt" '
+    'entityName="_rdcExt" outerRequiredRole_RequiredDelegationConnector="_srrExt" '
+    'assemblyContext_RequiredDelegationConnector="_acAcc">\n'
+    '    <innerRequiredRole_RequiredDelegationConnector href="default.repository#_rrAccExt"/>\n'
+    '  </connectors__ComposedStructure>\n'
+    '  <connectors__ComposedStructure xsi:type="composition:RequiredInfrastructureDelegationConnector" id="_ridcExt" '
+    'entityName="_ridcExt" outerRequiredRole__RequiredInfrastructureDelegationConnector="_srrInfra" '
+    'assemblyContext__RequiredInfrastructureDelegationConnector="_acAcc">\n'
+    '    <innerRequiredRole__RequiredInfrastructureDelegationConnector href="default.repository#_irAccExt"/>\n'
+    '  </connectors__ComposedStructure>\n'
     + '  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_sprAcc" entityName="Provided_Accounting">\n'
     '    <providedInterface__OperationProvidedRole href="default.repository#_iAcc"/>\n'
     '  </providedRoles_InterfaceProvidingEntity>\n'
     '  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_sprWork" entityName="Provided_Work">\n'
     '    <providedInterface__OperationProvidedRole href="default.repository#_iWork"/>\n'
     '  </providedRoles_InterfaceProvidingEntity>\n'
+    '  <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_srrExt" entityName="Required_External">\n'
+    '    <requiredInterface__OperationRequiredRole href="default.repository#_iExt"/>\n'
+    '  </requiredRoles_InterfaceRequiringEntity>\n'
+    '  <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_srrInfra" entityName="Required_Infrastructure">\n'
+    '    <requiredInterface__InfrastructureRequiredRole href="default.repository#_iInfra"/>\n'
+    '  </requiredRoles_InterfaceRequiringEntity>\n'
     '</system:System>\n')
 
 
@@ -389,6 +430,7 @@ FULL_ALLOC = (
     + alloc("_alLb", "_acLb", "_rcLb")
     + alloc("_alDb", "_acDb", "_rcDb")
     + alloc("_alWork", "_acWork", "_rcApp")
+    + alloc("_alMw", "_acMw", "_rcDb")
     + '</allocation:Allocation>\n')
 
 
@@ -631,26 +673,14 @@ def run_java(cases_file, out):
 
 
 def path_ids(text):
-    """EMF fragment path (`//@feature.i/@feature`) -> id of every element with an `id`."""
+    """EMF fragment path (`//@feature.i/@feature`, `/1/@...` for other roots) -> id of every
+    element with an `id`."""
     out = {}
-    stack = []  # per open element: (path, counts of child tags)
-    for m in re.finditer(r"<(/?)([A-Za-z_][\w:.-]*)([^>]*?)(/?)>", text):
-        closing, tag, attrs, selfclose = m.group(1), m.group(2), m.group(3), m.group(4)
-        if closing:
-            stack.pop()
-            continue
-        if not stack:
-            path = "/"
-        else:
-            parent, counts = stack[-1]
-            idx = counts.get(tag, 0)
-            counts[tag] = idx + 1
-            path = f"{parent}/@{tag}.{idx}" if parent != "/" else f"//@{tag}.{idx}"
-        idm = re.search(r'\sid="([^"]*)"', attrs)
-        if idm and stack:
-            out[norm(path)] = idm.group(1)
-        if not selfclose:
-            stack.append((path, {}))
+    for m, p in elements(text):
+        idm = re.search(r'\sid="([^"]*)"', m.group(3))
+        if idm and "/@" in p:
+            frag = "/" + p[len("/0"):] if p.startswith("/0/") else p
+            out[norm(frag)] = idm.group(1)
     return out
 
 
@@ -678,8 +708,28 @@ def refs_by_id(texts):
             vals = [ids[f].get(norm(v), v) if v.startswith("//@") else v for v in vals]
             return f'{m.group(1)}="{" ".join(vals)}"'
         t = re.sub(r'(\s[A-Za-z_]+)="([^"]*//@[^"]*)"', local, t)
-        out[f] = t
+        out[f] = drop_dangling(t, set(ids[f].values()))
     return out
+
+
+def drop_dangling(text, defined):
+    """Drops IDREFs to objects that are in no resource any more: EMF saves a reference to a
+    detached object as an IDREF of the same document, which then does not resolve (the
+    RequiredDelegationConnector that SPD's constructor leaves without container, as a root of the
+    allocation, still points to an assembly a scale-in removed)."""
+    refs = {"assemblyContext_RequiredDelegationConnector", "assemblyContext__RequiredInfrastructureDelegationConnector",
+            "requiringAssemblyContext_AssemblyConnector", "providingAssemblyContext_AssemblyConnector",
+            "requiringAssemblyContext__AssemblyInfrastructureConnector",
+            "providingAssemblyContext__AssemblyInfrastructureConnector", "assemblyContext_AllocationContext",
+            "resourceContainer_AllocationContext", "outerRequiredRole_RequiredDelegationConnector",
+            "outerRequiredRole__RequiredInfrastructureDelegationConnector"}
+
+    def fix(m):
+        if m.group(1) not in refs:
+            return m.group(0)
+        vals = [v for v in m.group(2).split(" ") if v in defined]
+        return f' {m.group(1)}="{" ".join(vals)}"' if vals else ""
+    return re.sub(r' ([A-Za-z_]+)="([^"#/]*)"', fix, text)
 
 
 def make_state(src_case, name, assign_ids):
@@ -726,32 +776,40 @@ def make_state(src_case, name, assign_ids):
         write(os.path.join(d, fname), with_header(text))
 
 
-def add_id(text, path, new_id):
-    """Sets `id` on the element at an XMI fragment path (`/0/@feature.i/@feature.j`), keeping the
-    rest of the text as it is."""
-    want = []
-    for seg in path.split("/")[2:]:
-        # `@feature.i` in a list, `@feature` for a single-valued containment
-        feat, _, idx = seg[1:].partition(".")
-        want.append((feat, int(idx or 0)))
-    stack = []  # per open element: (on the path, counts of child tags)
+def elements(text):
+    """(start tag match, canonical path `/i/@feature.j/...`) of every element; an `xmi:XMI`
+    wrapper (a resource with several roots) is not an element, its children are the roots."""
+    out = []
+    stack = []  # per open element: (path, counts of child tags), None for the wrapper
+    roots = 0
     for m in re.finditer(r"<(/?)([A-Za-z_][\w:.-]*)([^>]*?)(/?)>", text):
         closing, tag, selfclose = m.group(1), m.group(2), m.group(4)
         if closing:
             stack.pop()
             continue
-        if not stack:
-            ok = True
+        if not stack or stack[-1] is None:
+            if not stack and tag == "xmi:XMI":
+                stack.append(None)
+                continue
+            path = f"/{roots}"
+            roots += 1
         else:
-            parent_ok, counts = stack[-1]
+            parent, counts = stack[-1]
             idx = counts.get(tag, 0)
             counts[tag] = idx + 1
-            depth = len(stack)
-            ok = parent_ok and depth <= len(want) and want[depth - 1] == (tag, idx)
-        if ok and len(stack) == len(want):
-            return text[:m.start()] + insert_id(m.group(0), new_id) + text[m.end():]
+            path = f"{parent}/@{tag}.{idx}"
+        out.append((m, path))
         if not selfclose:
-            stack.append((ok, {}))
+            stack.append((path, {}))
+    return out
+
+
+def add_id(text, path, new_id):
+    """Sets `id` on the element at a canonical path (`/0/@feature.i/@feature`, as the dump
+    writes it), keeping the rest of the text as it is."""
+    for m, p in elements(text):
+        if norm(p) == norm(path):
+            return text[:m.start()] + insert_id(m.group(0), new_id) + text[m.end():]
     raise ValueError(f"no element at {path}")
 
 

@@ -4,6 +4,9 @@
   <components__Repository xsi:type="repository:BasicComponent" id="_cAcc" entityName="AccountingComponent">
     <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_prAcc" entityName="Provided_Accounting_AccountingComponent" providedInterface__OperationProvidedRole="_iAcc"/>
     <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_rrAccDb" entityName="Required_Database_AccountingComponent" requiredInterface__OperationRequiredRole="_iDb"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_rrAccExt" entityName="Required_External_AccountingComponent" requiredInterface__OperationRequiredRole="_iExt"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_irAccMw" entityName="Required_Middleware_AccountingComponent" requiredInterface__InfrastructureRequiredRole="_iInfra"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:InfrastructureRequiredRole" id="_irAccExt" entityName="Required_ExternalInfrastructure_AccountingComponent" requiredInterface__InfrastructureRequiredRole="_iInfra"/>
     <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_seffAcc" describedService__SEFF="_sCharge">
       <steps_Behaviour xsi:type="seff:StartAction" id="_accStart" successor_AbstractAction="_accWork"/>
       <steps_Behaviour xsi:type="seff:StopAction" id="_accStop" predecessor_AbstractAction="_accCall"/>
@@ -62,6 +65,15 @@
       <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_wCall" entityName="_wCall" predecessor_AbstractAction="_wStart" successor_AbstractAction="_wStop" calledService_ExternalService="_sQuery" role_ExternalService="_rrWorkDb"/>
     </serviceEffectSpecifications__BasicComponent>
   </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_cMw" entityName="Middleware">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:InfrastructureProvidedRole" id="_ipMw" entityName="Provided_Middleware" providedInterface__InfrastructureProvidedRole="_iInfra"/>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_iExt" entityName="ExternalInterface">
+    <signatures__OperationInterface id="_sExt" entityName="external"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:InfrastructureInterface" id="_iInfra" entityName="MiddlewareInterface">
+    <infrastructureSignatures__InfrastructureInterface id="_sLog" entityName="log"/>
+  </interfaces__Repository>
   <interfaces__Repository xsi:type="repository:OperationInterface" id="_iAcc" entityName="AccountingInterface">
     <signatures__OperationInterface id="_sCharge" entityName="chargeForEspresso"/>
   </interfaces__Repository>

@@ -19,4 +19,8 @@
     <resourceContainer_AllocationContext href="My.resourceenvironment#_rcApp"/>
     <assemblyContext_AllocationContext href="default.system#_acWork"/>
   </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alMw" entityName="_alMw">
+    <resourceContainer_AllocationContext href="My.resourceenvironment#_rcDb"/>
+    <assemblyContext_AllocationContext href="default.system#_acMw"/>
+  </allocationContexts_Allocation>
 </allocation:Allocation>

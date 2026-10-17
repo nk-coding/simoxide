@@ -19,6 +19,10 @@
     <resourceContainer_AllocationContext href="My.resourceenvironment#_rcApp"/>
     <assemblyContext_AllocationContext href="default.system#_acWork"/>
   </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_alMw" entityName="_alMw">
+    <resourceContainer_AllocationContext href="My.resourceenvironment#_rcDb"/>
+    <assemblyContext_AllocationContext href="default.system#_acMw"/>
+  </allocationContexts_Allocation>
   <allocationContexts_Allocation id="_q1_full_ccg_step_plus2_1" entityName="AssemblyContext_Worker_AssemblyContext_1">
     <resourceContainer_AllocationContext href="My.resourceenvironment#_q1_full_ccg_step_plus2_11"/>
     <assemblyContext_AllocationContext href="default.system#_q1_full_ccg_step_plus2_3"/>

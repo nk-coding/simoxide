@@ -535,12 +535,8 @@ fn execute(
         }
         let mut by_obj: HashMap<u32, i32> = HashMap::new();
         let mut others: Vec<i32> = Vec::new();
-        // the input objects by their keys before the run
-        for (k, h, _) in &t.pre {
-            if let Some(&o) = keys.get(k) {
-                by_obj.insert(o, *h);
-            }
-        }
+        // input objects by their keys before the run (`pre` lines) or after it (older
+        // tapes), metamodel objects by their fragments; the others are the run's own objects
         for (k, h, assigned) in &t.objects {
             match keys.get(k) {
                 Some(&o) => {
@@ -572,9 +568,8 @@ fn execute(
         if let Some(f) = std::env::var_os("QVTO_TAPE_DEBUG") {
             // the Java run's draws in the thread's order (tape objects only)
             let all: Vec<(String, i32)> = t
-                .pre
+                .objects
                 .iter()
-                .chain(&t.objects)
                 .filter(|e| e.2 != Some(false))
                 .map(|e| (e.0.clone(), e.1))
                 .collect();

@@ -7,8 +7,8 @@
     <enactedPolicies href="default.spd#_fSg3"/>
     <unit href="My.resourceenvironment#_rcApp"/>
     <elements href="My.resourceenvironment#_rcApp"/>
-    <elements href="My.resourceenvironment#_q1_full_sg_step_plus3_11"/>
-    <elements href="My.resourceenvironment#_q1_full_sg_step_plus3_15"/>
+    <elements href="My.resourceenvironment#_q1_full_sg_step_plus3_20"/>
+    <elements href="My.resourceenvironment#_q1_full_sg_step_plus3_24"/>
     <linkingResource href="My.resourceenvironment#_lApp"/>
     <resourceEnvironment href="My.resourceenvironment#/"/>
   </targetCfgs>
@@ -22,9 +22,9 @@
     <enactedPolicies href="default.spd#_fSg3"/>
     <unit href="default.system#_acAcc"/>
     <elements href="default.system#_acAcc"/>
-    <elements href="default.system#_q1_full_sg_step_plus3_4"/>
-    <elements href="default.system#_q1_full_sg_step_plus3_5"/>
-    <elements href="default.system#_q1_full_sg_step_plus3_6"/>
+    <elements href="default.system#_q1_full_sg_step_plus3_7"/>
+    <elements href="default.system#_q1_full_sg_step_plus3_8"/>
+    <elements href="default.system#_q1_full_sg_step_plus3_9"/>
     <loadBalancingAssembly href="default.system#_acLb"/>
   </targetCfgs>
   <targetCfgs xsi:type="semanticspd:CompetingConsumersGroupCfg">
