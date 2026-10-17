@@ -43,6 +43,9 @@ __pycache__/
 /docs/.vitepress/cache/
 /docs/.vitepress/dist/
 
+# The harnesses' shared seed agent (reference/oraclekit/seed-agent.sh)
+/reference/oraclekit/build/
+
 # Slingshot reference runner: build output, fresh installs, smoke outputs (reference/slingshot/setup.sh, install.sh)
 /reference/slingshot/build/
 /reference/slingshot/install/

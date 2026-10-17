@@ -26,14 +26,10 @@ if [ "${1:-}" = -o ]; then OUT=$2; shift 2; fi
 mkdir -p "$OUT"
 FILES="trace.jsonl tape.jsonl spd.jsonl measurements.csv"
 
-same() { # dirA dirB files... -> "yes" or the first differing file
-  local a=$1 b=$2; shift 2
-  [ -d "$a" ] && [ -d "$b" ] || { echo "missing"; return; }
-  for f in "$@"; do
-    [ -f "$a/$f" ] || [ -f "$b/$f" ] || continue
-    cmp -s "$a/$f" "$b/$f" || { echo "no($f)"; return; }
-  done
-  echo yes
+same() { # dirA dirB files... -> "yes", "no(<first differing file>)" or "missing"
+  [ -d "$1" ] && [ -d "$2" ] || { echo "missing"; return; }
+  local d; d=$(oraclekit_first_diff "$@")
+  if [ -z "$d" ]; then echo yes; else echo "no($d)"; fi
 }
 simtime() { # model dir -> simulated time
   python3 - "$1" <<'EOF'
@@ -67,8 +63,7 @@ for d in "$@"; do
   T=$(simtime "$d"); S=$(seed "$d")
   echo "== $m (simTime $T, seed $S)" >&2
   run() { local tag=$1 mode=$2; shift 2
-    ( ulimit -f "${RUN_FILE_LIMIT_KB:-1048576}"
-      timeout "${RUN_TIMEOUT:-180}" "$H/run.sh" $mode -model "$d" -simTime "$T" -out "$o/$tag" "$@" ) > "$o/$tag.log" 2>&1
+    oraclekit_limited "${RUN_TIMEOUT:-180}" "$H/run.sh" $mode -model "$d" -simTime "$T" -out "$o/$tag" "$@" > "$o/$tag.log" 2>&1
     local rc=$?
     [ $rc -eq 0 ] || echo "exit $rc" >> "$o/$tag.log"
     [ $rc -eq 124 ] || [ $rc -eq 153 ] && { echo "limit" > "$o/$tag.limit"; rm -f "$o/$tag/trace.jsonl" "$o/$tag/tape.jsonl"; }

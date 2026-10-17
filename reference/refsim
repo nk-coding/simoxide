@@ -3,8 +3,9 @@
 #   refsim run --model <dir|files> --seed N --max-sim-time T --max-measurements M --trace F --tape F --measurements F
 #   refsim batch <corpusDir> [--in-place|--out DIR] [--only a,b] [--repeat N] [--check]
 # Env: REFSIM_UNPATCHED=1 -> run the stock 5.2.2 classes (no determinism patches, no trace hooks)
-#      JAVA, JVM_OPTS, REFSIM_LOG (log4j level, default ERROR)
+#      JAVA, JVM_OPTS (default -Xmx2g -XX:+UseSerialGC), ORACLE_NICE (default 19), REFSIM_LOG (log4j level, default ERROR)
 D="$(cd "$(dirname "$0")" && pwd)"
+. "$D/oraclekit/lib.sh"
 P=${PALLADIO_PLUGINS:-$("$D/tools/palladio-research.sh")/work-simucom/palladio-5.2.2/plugins}
 [ -f "$D/build/classes-base/refsim/Main.class" ] || "$D/build.sh" >&2 || exit 1
 "$D/tools/classpath.sh" > /dev/null || exit 1
@@ -25,7 +26,7 @@ if [ -n "$REFSIM_EXCLUDE" ] && [ "$UNP" = false ]; then
   for c in $(echo "$REFSIM_EXCLUDE" | tr ',' ' '); do find "$X" \( -name "$c.class" -o -name "$c\$*.class" \) -delete; done
   CP="$X:$D/build/classes-base:$(cat "$D/build/classpath.txt")"
   trap 'rm -rf "$X"' EXIT
-  ${JAVA:-java} ${JVM_OPTS:--Xmx2g -XX:+UseSerialGC} $AGENT -Drefsim.log=${REFSIM_LOG:-ERROR} -Drefsim.verbose=${REFSIM_VERBOSE:-false} -Drefsim.unpatched=false -cp "$CP" refsim.Main "$P" "$@"
+  oraclekit_java ${JVM_OPTS:--Xmx2g -XX:+UseSerialGC} $AGENT -Drefsim.log=${REFSIM_LOG:-ERROR} -Drefsim.verbose=${REFSIM_VERBOSE:-false} -Drefsim.unpatched=false -cp "$CP" refsim.Main "$P" "$@"
   exit $?
 fi
-exec ${JAVA:-java} ${JVM_OPTS:--Xmx2g -XX:+UseSerialGC} $AGENT -Drefsim.log=${REFSIM_LOG:-ERROR} -Drefsim.verbose=${REFSIM_VERBOSE:-false} -Drefsim.unpatched=$UNP -cp "$CP" refsim.Main "$P" "$@"
+oraclekit_exec_java ${JVM_OPTS:--Xmx2g -XX:+UseSerialGC} $AGENT -Drefsim.log=${REFSIM_LOG:-ERROR} -Drefsim.verbose=${REFSIM_VERBOSE:-false} -Drefsim.unpatched=$UNP -cp "$CP" refsim.Main "$P" "$@"

@@ -8,7 +8,7 @@
 #   --slot N   Equinox configuration area build/osgi/<mode>-N (default: the first free one; locked
 #              with flock, so concurrent runs never share an area)
 # A -seed adds the seed agent (-javaagent). Runner options: see src/runner/.../Runner.java or
-# docs/reference-simulator/slingshot.md. Env: JAVA, JVM_OPTS (default -Xmx2g), NICE (default 19).
+# docs/reference-simulator/slingshot.md. Env: JAVA, JVM_OPTS (default -Xmx2g), NICE or ORACLE_NICE (default 19).
 set -euo pipefail
 H="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$H/env.sh"
@@ -38,7 +38,8 @@ for k in ${slot:-0 1 2 3 4 5 6 7}; do
 done
 [ -n "$d" ] || { echo "no free configuration area" >&2; exit 1; }
 cp "$B/equinox/$mode/config.ini" "$d/config.ini"
-exec nice -n "${NICE:-19}" "$JAVA" ${JVM_OPTS:--Xmx2g} "${agent[@]}" \
+ORACLE_NICE=${NICE:-${ORACLE_NICE:-19}}
+oraclekit_exec_java ${JVM_OPTS:--Xmx2g} "${agent[@]}" \
   -Dosgi.install.area=file:"$I"/ -Dosgi.configuration.area=file:"$d"/ \
   -Dosgi.instance.area=file:"$d"/ws/ -Dosgi.user.area=file:"$d"/user/ \
   -Dlog4j.configuration=file:"$B"/log4j.properties \

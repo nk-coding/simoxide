@@ -29,8 +29,7 @@ for n in "${names[@]}"; do
   c="$C/$n/case.json"; [ -f "$c" ] || { echo "no case $n" >&2; fail=1; continue; }
   m="$R/$(field "$c" model)"; T=$(field "$c" sim_time); S=$(field "$c" seed)
   o="$W/$n"; rm -rf "$o" "$W/$n.log"
-  ( ulimit -f "${RUN_FILE_LIMIT_KB:-1048576}"
-    timeout "${RUN_TIMEOUT:-300}" "$H/run.sh" -model "$m" -simTime "$T" -seed "$S" -out "$o" ) > "$W/$n.log" 2>&1
+  oraclekit_limited "${RUN_TIMEOUT:-300}" "$H/run.sh" -model "$m" -simTime "$T" -seed "$S" -out "$o" > "$W/$n.log" 2>&1
   mkdir -p "$o"
   [ -f "$o/trace.jsonl" ] && python3 "$H/tools/project.py" "$o" > /dev/null
   python3 "$H/tools/errors.py" "$W/$n.log" > "$o/errors.txt"
@@ -51,14 +50,9 @@ EOF
   [ -f "$o/summary.json" ] || grep -m1 -E 'Caused by|Exception' "$W/$n.log" | cut -c1-300 > "$o/error.txt"
   e="$C/$n/expected"
   if [ $check = 1 ]; then
-    r=ok
-    for f in $FILES; do
-      [ -f "$o/$f" ] || [ -f "$e/$f" ] || continue
-      cmp -s "$o/$f" "$e/$f" || { r="differs: $f"; break; }
-    done
-    if [ "$r" = ok ] && [ -f "$e/trace.jsonl.gz" ]; then
-      zcat "$e/trace.jsonl.gz" | cmp -s - "$o/trace.jsonl" || r="differs: trace.jsonl"
-    fi
+    # the full trace only where expected/ has one (trace.jsonl.gz)
+    d=$(oraclekit_first_diff "$o" "$e" $FILES $([ -f "$e/trace.jsonl.gz" ] && echo trace.jsonl))
+    r=ok; [ -z "$d" ] || r="differs: $d"
     [ "$r" = ok ] || fail=1
     echo "$n: $r"
   else
