@@ -7,9 +7,10 @@
 //!   run and batch thread. [`QvtoCore::compile`] compiles a transformation once against it
 //!   ([`Transformation`], also shared).
 //! - [`QvtoRun`] is a run's QVTo state. It is created empty with the run and filled on the
-//!   first transformation run (a session costs about 1 ms to clone from the core and 2.4 ms to
-//!   build, too much for runs that never reconfigure). It is plain data: a fork of the run
-//!   clones it, so new object ids (the seeded UUID generator) continue identically in both.
+//!   first use (the session is cloned from the core's, about 1 ms; building one takes 2.6 ms:
+//!   too much for runs that never reconfigure). It is plain data: a fork of the run clones it
+//!   (copy on write: the fork copies the session when it first uses it), so new object ids
+//!   (the seeded UUID generator) continue identically in both.
 //! - [`QvtoRun::invoke`] runs a transformation on the run's model graph: binds the model
 //!   parameters ([`Bind`]), binds `getSimulationTime()` to the run's clock, collects the
 //!   journal and applies its change set to the simulation. [`crate::RuleSet`] runs SimuLizar's
@@ -633,7 +634,9 @@ pub struct QvtoRun {
 }
 
 struct PerRun {
-    session: RunSession,
+    /// Shared copy on write between the clones of a run's state (a fork pays for the copy of
+    /// the session, about 0.3-0.8 ms, only when it uses it).
+    session: Arc<Mutex<RunSession>>,
     /// A copy of the simulation's model graph the transformations run on, with the
     /// simulation's model it equals (generation and address of the compiled model). Dropped by
     /// a clone and whenever it may differ; copied again when needed.
@@ -649,6 +652,24 @@ impl Clone for PerRun {
             invocations: self.invocations,
         }
     }
+}
+
+impl PerRun {
+    /// The session, unshared.
+    fn session(&mut self) -> &mut RunSession {
+        if Arc::get_mut(&mut self.session).is_none() {
+            let copy = lock(&self.session).clone();
+            self.session = Arc::new(Mutex::new(copy));
+        }
+        Arc::get_mut(&mut self.session)
+            .expect("unshared")
+            .get_mut()
+            .unwrap_or_else(|e| e.into_inner())
+    }
+}
+
+fn lock<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    m.lock().unwrap_or_else(|e| e.into_inner())
 }
 
 fn fingerprint<C: Compat, F: Flavour>(sim: &Simulation<'_, C, F>) -> (u32, usize) {
@@ -700,7 +721,7 @@ impl QvtoRun {
         let ids = self.cfg.ids;
         let st = self.state.get_or_insert_with(|| {
             Box::new(PerRun {
-                session: core.instantiate(ids),
+                session: Arc::new(Mutex::new(core.instantiate(ids))),
                 work: None,
                 invocations: 0,
             })
@@ -721,8 +742,10 @@ impl QvtoRun {
         path: &Path,
     ) -> Result<ModelRef, ReconfError> {
         let st = self.prepare(sim);
-        let (g, _) = st.work.as_mut().expect("work graph");
-        st.session.load_model(g, path).map_err(ReconfError::Load)
+        let mut work = st.work.take().expect("work graph");
+        let r = st.session().load_model(&mut work.0, path);
+        st.work = Some(work);
+        r.map_err(ReconfError::Load)
     }
 
     /// A new, empty model for objects of other metamodels (e.g. the PRM the reconfiguration
@@ -733,8 +756,10 @@ impl QvtoRun {
         uri: &str,
     ) -> ModelRef {
         let st = self.prepare(sim);
-        let (g, _) = st.work.as_mut().expect("work graph");
-        st.session.create_model(g, uri)
+        let mut work = st.work.take().expect("work graph");
+        let r = st.session().create_model(&mut work.0, uri);
+        st.work = Some(work);
+        r
     }
 
     /// Runs `f` on the QVTo store over the run's model (any `qvto_model::ModelStore`
@@ -746,8 +771,9 @@ impl QvtoRun {
         f: impl FnOnce(&mut SimStore<'_>) -> T,
     ) -> Result<(T, Option<ChangeReport>), ReconfError> {
         let st = self.prepare(sim);
-        let (g, _) = st.work.as_mut().expect("work graph");
-        let (t, journal) = st.session.with_store(g, f);
+        let mut work = st.work.take().expect("work graph");
+        let (t, journal) = st.session().with_store(&mut work.0, f);
+        st.work = Some(work);
         let raw = RawOutcome {
             severity: 0,
             code: 0,
@@ -769,7 +795,7 @@ impl QvtoRun {
     ) -> T {
         let st = self.prepare(sim);
         let (g, _) = st.work.as_ref().expect("work graph");
-        st.session.scratch(g, f)
+        lock(&st.session).scratch(g, f)
     }
 
     /// Runs `t` on the run's model and applies its changes (see the module documentation).
@@ -850,17 +876,29 @@ impl QvtoRun {
             profile_keys: &core.0.profile_keys,
         };
         let st = self.prepare(sim);
-        let t0 = Instant::now();
+        let mut t0 = Instant::now();
         let raw = match scratch {
             None => {
                 st.invocations += 1;
-                let (g, _) = st.work.as_mut().expect("work graph");
-                st.session
-                    .run(g, &t.0.program, &t.0.params, &binds, opts, &natives, hooks)
+                let mut work = st.work.take().expect("work graph");
+                let session = st.session();
+                t0 = Instant::now();
+                let r = session.run(
+                    &mut work.0,
+                    &t.0.program,
+                    &t.0.params,
+                    &binds,
+                    opts,
+                    &natives,
+                    hooks,
+                );
+                st.work = Some(work);
+                r
             }
             Some(slot) => {
-                let mut session = st.session.clone();
+                let mut session = lock(&st.session).clone();
                 let mut g = st.work.as_ref().expect("work graph").0.clone();
+                t0 = Instant::now();
                 let r = session.run(
                     &mut g,
                     &t.0.program,

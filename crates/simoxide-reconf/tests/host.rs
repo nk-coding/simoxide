@@ -680,3 +680,64 @@ mod spd {
         assert!(res.events > 0);
     }
 }
+
+#[test]
+fn repeated_runs_do_not_grow_the_state() {
+    let cm = model();
+    let clock = rule("clock.qvto");
+    let rate = rule("set/a_rate.qvto");
+    let mut run = qrun();
+    with_at(&cm, 100, |sim| {
+        run.invoke(sim, &clock, &Invocation::simulizar()).unwrap();
+        run.invoke(sim, &rate, &Invocation::simulizar()).unwrap();
+        let count = |run: &mut QvtoRun, sim: &Simulation<'_>| {
+            run.with_scratch_store(sim, |s| {
+                use qvto_model::ModelStore;
+                s.resource_count()
+            })
+        };
+        let n0 = count(&mut run, sim);
+        let t0 = std::time::Instant::now();
+        for _ in 0..1000 {
+            run.invoke(sim, &clock, &Invocation::simulizar()).unwrap();
+            run.invoke(sim, &rate, &Invocation::simulizar()).unwrap();
+        }
+        eprintln!("2000 invocations: {:?}", t0.elapsed());
+        assert_eq!(count(&mut run, sim), n0);
+    });
+}
+
+/// Prints what the host costs (release build): the core, a compilation, the per-run state.
+#[test]
+fn costs() {
+    let t0 = std::time::Instant::now();
+    let core = QvtoCore::new().unwrap();
+    let t_core = t0.elapsed();
+    let t0 = std::time::Instant::now();
+    let t = core
+        .compile_file(&rules().join("set/a_rate.qvto"), &Imports::Folder)
+        .unwrap();
+    let t_compile = t0.elapsed();
+    let cm = model();
+    let mut sim = Simulation::new(&cm, sim_config(), Outputs::default()).unwrap();
+    sim.run_until(Pause::After(100 * S)).unwrap();
+    let mut run = QvtoRun::new(&core, RunConfig::default()).unwrap();
+    let t0 = std::time::Instant::now();
+    run.create_model(&sim, "simoxide:/prm");
+    let t_state = t0.elapsed();
+    let t0 = std::time::Instant::now();
+    let _g = sim.model_graph().clone();
+    let t_graph = t0.elapsed();
+    let t0 = std::time::Instant::now();
+    let fork = run.clone();
+    let t_fork = t0.elapsed();
+    let o = run.invoke(&mut sim, &t, &Invocation::simulizar()).unwrap();
+    eprintln!(
+        "core {t_core:?}, compile {t_compile:?}, per-run state (session clone, graph copy) \
+         {t_state:?} (graph copy {t_graph:?}), fork of the state {t_fork:?}, rule run {} µs, \
+         change {} µs",
+        o.run_micros,
+        o.change.map_or(0, |c| c.micros)
+    );
+    drop(fork);
+}
