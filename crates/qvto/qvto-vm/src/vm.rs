@@ -319,8 +319,8 @@ where
             native: Default::default(),
             std_src_ty: TypeId::OCL_VOID,
             stack_base: std::cell::Cell::new(0),
-            type_objects: HashMap::new(),
-            object_types: HashMap::new(),
+            type_objects: HashMap::default(),
+            object_types: HashMap::default(),
             std_res_ty: TypeId::OCL_VOID,
         };
         if let Some(src) = vm.opts.id_source.take() {

@@ -13,7 +13,6 @@ use qvto_runtime::IntBox;
 use qvto_runtime::eq::{java_equals, ocl_equal};
 use qvto_runtime::num::{self, NumOp};
 use qvto_runtime::{ObjRef, Str, TypeRef, Value, strings};
-use std::collections::HashMap;
 use qvto_types::{Section, StdOp, StdOwner, TypeId};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -478,7 +477,7 @@ fn index_arg(v: &Value) -> Option<i32> {
     }
 }
 
-fn type_arg_of(v: &Value, objs: &HashMap<ObjRef, TypeId>) -> Option<TypeId> {
+fn type_arg_of(v: &Value, objs: &qvto_runtime::fxhash::FxHashMap<ObjRef, TypeId>) -> Option<TypeId> {
     match v {
         Value::Type(TypeRef(t)) => Some(TypeId(*t)),
         // a type literal of a metamodel classifier is its `EClassifier` object

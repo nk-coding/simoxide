@@ -63,6 +63,7 @@ dependencies = [
  "memchr",
  "quick-xml",
  "qvto-model",
+ "qvto-runtime",
 ]
 
 [[package]]
