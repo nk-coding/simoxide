@@ -197,7 +197,7 @@ pub fn apply(f: Aggregation, values: impl Iterator<Item = f64> + Clone) -> f64 {
             }
             v.sort_by(|a, b| java_compare(*a, *b));
             let n = v.len();
-            if n % 2 == 0 {
+            if n.is_multiple_of(2) {
                 (v[n / 2] + v[n / 2 - 1]) / 2.0
             } else {
                 v[(n - 1) / 2]

@@ -114,6 +114,9 @@ fn membership(elements: Vec<ObjId>) -> Membership {
     }
 }
 
+/// An evaluation: time, (filter, result) pairs, request.
+type Eval = (f64, Vec<(String, String)>, bool);
+
 struct Run {
     spd: Spd,
     st: SpdState,
@@ -168,7 +171,7 @@ impl Run {
             .collect()
     }
 
-    fn evals(&self, policy: &str) -> Vec<(f64, Vec<(String, String)>, bool)> {
+    fn evals(&self, policy: &str) -> Vec<Eval> {
         self.log
             .records
             .iter()

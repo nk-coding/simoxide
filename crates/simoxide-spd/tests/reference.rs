@@ -85,7 +85,7 @@ impl<C: Compat> Adjuster<C> for ReferenceAdjuster {
         let i = self
             .adjustments
             .iter()
-            .position(|a| a.policy == &*policy.id && a.t == now);
+            .position(|a| *a.policy == *policy.id && a.t == now);
         let Some(i) = i else {
             return Ok(AdjustOutcome {
                 ok: true,
