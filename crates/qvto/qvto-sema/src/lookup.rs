@@ -450,6 +450,9 @@ impl<'r> Sema<'r> {
         args: &[Arg],
     ) -> Result<Option<OpRef>, Vec<OpRef>> {
         let mut ops = self.get_operations(owner);
+        // only operations of this name can match below: filtering first keeps their order and
+        // the first occurrences the deduplication keeps
+        ops.retain(|&o| self.op_name(o) == name);
         dedup_keep_first(&mut ops);
         let mut matches: Vec<OpRef> = Vec::new();
         for o in ops {
@@ -841,6 +844,17 @@ impl<'r> Sema<'r> {
 }
 
 fn dedup_keep_first(v: &mut Vec<OpRef>) {
+    if v.len() <= 16 {
+        let mut i = 0;
+        while i < v.len() {
+            if v[..i].contains(&v[i]) {
+                v.remove(i);
+            } else {
+                i += 1;
+            }
+        }
+        return;
+    }
     let mut seen = std::collections::HashSet::new();
     v.retain(|o| seen.insert(*o));
 }

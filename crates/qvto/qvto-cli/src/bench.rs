@@ -956,7 +956,13 @@ mod profile {
                 return;
             }
         };
-        let skip = ["case_models", "compile_case", "bench::generate", "read_to_string"];
+        // `QVTO_PROFILE=compile`: the compiles instead of the runs
+        let compile = std::env::var("QVTO_PROFILE").is_ok_and(|v| v == "compile");
+        let (keep, skip): (&str, &[&str]) = if compile {
+            ("compile_case", &["case_models", "bench::generate"])
+        } else {
+            ("timed_run", &["case_models", "compile_case", "bench::generate", "read_to_string"])
+        };
         let mut data = HashMap::new();
         let mut selfc: HashMap<String, isize> = HashMap::new();
         let mut incl: HashMap<String, isize> = HashMap::new();
@@ -970,7 +976,7 @@ mod profile {
             if names.iter().any(|n| skip.iter().any(|k| n.contains(k))) {
                 continue;
             }
-            if !names.iter().any(|n| n.contains("timed_run")) {
+            if !names.iter().any(|n| n.contains(keep)) {
                 continue;
             }
             total += count;
@@ -995,7 +1001,7 @@ mod profile {
         let pct = |c: isize| 100.0 * c as f64 / total.max(1) as f64;
         let mut v: Vec<_> = selfc.into_iter().collect();
         v.sort_by(|a, b| b.1.cmp(&a.1));
-        let mut text = format!("{total} samples in runs\n\nself\n");
+        let mut text = format!("{total} samples in {}\n\nself\n", if compile { "compiles" } else { "runs" });
         for (n, c) in v.iter().take(60) {
             text.push_str(&format!("{:6.2}%  {n}\n", pct(*c)));
         }
