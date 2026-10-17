@@ -16,7 +16,7 @@ pub mod units;
 
 pub use qvto_bytecode::Program;
 pub use qvto_sema::{Compilation, Problem, UnitResolver, UnitResult, UnitSource};
-pub use qvto_vm::{RunOptions, RunOutcome, Vm};
+pub use qvto_vm::{CoveredOp, RunOptions, RunOutcome, Vm};
 
 use qvto_model::{MetaOperation, MetaRegistry};
 

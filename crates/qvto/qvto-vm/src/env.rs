@@ -42,6 +42,15 @@ impl RunEnv {
     pub fn peek(&self, key: IdentityKey) -> Option<i32> {
         self.ids.borrow().peek(key)
     }
+
+    /// Where Java hashes an object by identity as a side effect (a `HashSet` of the engine's
+    /// own), the hash is drawn here too, so that the identity-hash sequence (compat mode, or a
+    /// tape in ordered mode) assigns the values in Java's order. Nothing otherwise.
+    pub fn touch(&self, key: IdentityKey) {
+        if self.memo {
+            let _ = self.identity_hash(key);
+        }
+    }
 }
 
 impl HashEnv for RunEnv {

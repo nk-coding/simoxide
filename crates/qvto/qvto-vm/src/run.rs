@@ -97,7 +97,9 @@ where
             };
             let mut next = self.next_extent_uri;
             given.push(objs.clone());
-            e.bind_initial(self.store, objs, &mut next);
+            for o in e.bind_initial(self.store, objs, &mut next) {
+                self.env.touch(qvto_runtime::IdentityKey::Obj(o));
+            }
             self.next_extent_uri = next;
             self.extents.push(e);
             self.param_extents
@@ -179,7 +181,9 @@ where
         {
             let mut e = Extent::new(None, Direction::Out, "compatibility".into());
             let mut next = self.next_extent_uri;
-            e.bind_initial(self.store, vec![*o], &mut next);
+            for o in e.bind_initial(self.store, vec![*o], &mut next) {
+                self.env.touch(qvto_runtime::IdentityKey::Obj(o));
+            }
             self.next_extent_uri = next;
             results.push(e.contents(self.store));
         }

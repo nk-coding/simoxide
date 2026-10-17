@@ -672,10 +672,15 @@ where
         };
         let _ = self.store.add_root(r, S::Obj::from_u32(x.index()), None);
         // the extents watching the resource record the new root
+        let mut watched = false;
         for e in self.extents.iter_mut() {
             if e.watches(r) {
                 e.record_resource_addition(*x);
+                watched = true;
             }
+        }
+        if watched {
+            self.env.touch(qvto_runtime::IdentityKey::Obj(*x));
         }
         true
     }
@@ -762,7 +767,9 @@ where
     pub fn native_model_add(&mut self, model: &Value, obj: &Value) {
         if let (Value::Model(x), Value::Obj(o)) = (model, obj) {
             let mut next = self.next_extent_uri;
-            self.extents[*x as usize].add_object(self.store, *o, &mut next);
+            if self.extents[*x as usize].add_object(self.store, *o, &mut next) {
+                self.env.touch(qvto_runtime::IdentityKey::Obj(*o));
+            }
             self.next_extent_uri = next;
         }
     }

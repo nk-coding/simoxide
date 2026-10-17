@@ -72,6 +72,9 @@ pub struct RunOptions {
     /// Stack traces with units and lines; `false` gives `(Unknown Source)` (a program
     /// compiled without line numbers).
     pub line_numbers: bool,
+    /// Count the entries of each operation ([`Vm::coverage`]): which mappings, helpers,
+    /// queries and constructors a run reaches.
+    pub coverage: bool,
 }
 
 /// 2^27 elements (2 GB of values): a little below what a JVM with a few GB of heap holds.
@@ -92,7 +95,36 @@ impl Default for RunOptions {
             max_string_length: Some(DEFAULT_MAX_STRING_LENGTH),
             max_native_stack: Some(1 << 20),
             line_numbers: true,
+            coverage: false,
         }
+    }
+}
+
+/// An operation a run entered ([`Vm::coverage`]).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CoveredOp {
+    pub module: String,
+    /// The source file name.
+    pub unit: String,
+    pub kind: qvto_sema::ir::OpKind,
+    /// `op` or `Context::op`.
+    pub operation: String,
+    /// Number of parameters (tells overloads apart, with the line).
+    pub params: usize,
+    /// 1-based line of the declaration.
+    pub line: u32,
+    pub entries: u64,
+    /// Entries of a mapping whose `when` guard failed (its body did not run).
+    pub rejected: u64,
+}
+
+impl CoveredOp {
+    /// `Module::Context::op/params (unit:line)`.
+    pub fn key(&self) -> String {
+        format!(
+            "{}::{}/{} ({}:{})",
+            self.module, self.operation, self.params, self.unit, self.line
+        )
     }
 }
 
@@ -205,6 +237,10 @@ where
     pub(crate) steps: u64,
     /// Stderr-like messages of swallowed runtime errors (`Evaluation failed at ...`).
     pub errors: Vec<String>,
+    /// Entries per operation ([`RunOptions::coverage`]; empty when off).
+    pub(crate) op_entries: Vec<u64>,
+    /// Mapping entries whose `when` guard failed, per operation (likewise).
+    pub(crate) op_rejected: Vec<u64>,
     pub(crate) class_local: Vec<bool>,
     /// The declared OCL types of intermediate class features (`IntermClass::feature_types`).
     pub(crate) interm_feature_ty: HashMap<qvto_model::FeatureId, TypeId>,
@@ -274,6 +310,11 @@ where
 {
     pub fn new(prog: &'a Program, store: &'a mut S, opts: RunOptions) -> Vm<'a, S> {
         let env = RunEnv::new(opts.mode, None);
+        let n_cov = if opts.coverage {
+            prog.ir.operations.len()
+        } else {
+            0
+        };
         let mut vm = Vm {
             prog,
             store,
@@ -300,6 +341,8 @@ where
             str_counters: HashMap::default(),
             steps: 0,
             errors: Vec::new(),
+            op_entries: vec![0; n_cov],
+            op_rejected: vec![0; n_cov],
             class_local: Vec::new(),
             interm_feature_ty: prog
                 .ir
@@ -333,6 +376,37 @@ where
         vm.interm_info = crate::objects::IntermInfo::new(prog, vm.store);
         vm.class_local = crate::objects::local_classes(prog, vm.interm_info.in_store);
         vm
+    }
+
+    /// Every operation of the program, in program order, with its entry count (0 for those
+    /// the run did not reach; needs [`RunOptions::coverage`], empty otherwise). Mappings count
+    /// every invocation, also those whose guard fails or that a trace record answers.
+    pub fn coverage(&self) -> Vec<CoveredOp> {
+        let ir = &self.prog.ir;
+        let mut out = Vec::new();
+        for (i, &n) in self.op_entries.iter().enumerate() {
+            let o = &ir.operations[i];
+            let module = &ir.modules[o.module.index()];
+            let source = &ir.sources[o.source.index()];
+            out.push(CoveredOp {
+                module: module.name.clone(),
+                unit: source.name.clone(),
+                kind: o.kind,
+                operation: match o.context {
+                    Some(c) => format!(
+                        "{}::{}",
+                        crate::types::type_simple_name(self.prog, c),
+                        o.name
+                    ),
+                    None => o.name.clone(),
+                },
+                params: o.params.len(),
+                line: source.lines.line(o.decl_span.start),
+                entries: n,
+                rejected: self.op_rejected[i],
+            });
+        }
+        out
     }
 
     // ---- errors -----------------------------------------------------------------------------
