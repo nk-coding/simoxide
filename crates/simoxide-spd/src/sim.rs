@@ -26,7 +26,7 @@ use simoxide_model::Model;
 use simoxide_model::raw::ObjId;
 use simoxide_sim::compat::Compat;
 use simoxide_sim::ir::metric_names;
-use simoxide_sim::{CompiledModel, RunResult, SimError, SimErrorKind, Simulation, Status};
+use simoxide_sim::{CompiledModel, Outputs, RunResult, SimError, SimErrorKind, Simulation, Status};
 
 /// Tags of request notes (time events use their timer index).
 const REQUEST: u32 = 1 << 31;
@@ -254,13 +254,45 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
         adjuster: &mut dyn Adjuster<C>,
         log: &mut dyn Log,
     ) -> Result<(), SimError> {
+        self.run_until(adjuster, log, None).map(|_| ())
+    }
+
+    /// Runs like [`SpdRun::run`] until the next event is at or after `before_ns` (if given):
+    /// every event before it has run, and so has the SPD work they caused. Then the run can be
+    /// forked ([`SpdRun::fork`]) or continued.
+    pub fn run_until(
+        &mut self,
+        adjuster: &mut dyn Adjuster<C>,
+        log: &mut dyn Log,
+        before_ns: Option<i64>,
+    ) -> Result<Status, SimError> {
+        let bound = before_ns.unwrap_or(i64::MAX);
         loop {
-            let status = self.sim.run_while(|s| !s.hooks_pending())?;
+            let status = self
+                .sim
+                .run_while(|s| !s.hooks_pending() && s.next_event_ns().is_none_or(|t| t < bound))?;
+            let pending = self.sim.state().hooks_pending();
             self.handle(adjuster, log)?;
             if status == Status::Finished {
-                return Ok(());
+                return Ok(Status::Finished);
+            }
+            if !pending {
+                return Ok(Status::Paused);
             }
         }
+    }
+
+    /// A fork between events: the simulation's fork (outputs `out`) with a copy of the SPD
+    /// state and the queued requests. Both continue like the uninterrupted run.
+    pub fn fork(&mut self, out: Outputs) -> Result<SpdRun<'m, 's, C>, SimError> {
+        Ok(SpdRun {
+            sim: self.sim.fork(out)?,
+            spd: self.spd,
+            state: self.state.clone(),
+            series: self.series.clone(),
+            requests: self.requests.clone(),
+            adjusted_ok: self.adjusted_ok,
+        })
     }
 
     /// The run's result and the SPD counters.
