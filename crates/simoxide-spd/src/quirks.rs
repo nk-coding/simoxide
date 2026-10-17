@@ -10,6 +10,7 @@
 
 /// The compat flags of the interpreter. `Default` = all fixed.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct Quirks {
     /// Q1: a disregard does not restore the adjustor state. No filter before the adjustor
     /// changes that state, so both settings behave the same (kept for completeness).

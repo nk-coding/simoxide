@@ -121,6 +121,11 @@ impl RulesHost {
             .unwrap_or_default()
     }
 
+    /// The records kept so far (`None`: not kept), e.g. to put taken ones back.
+    pub fn records_mut(&mut self) -> Option<&mut Vec<ReconfRecord>> {
+        self.records.as_mut()
+    }
+
     pub fn rules(&self) -> &RuleSet {
         &self.rules
     }

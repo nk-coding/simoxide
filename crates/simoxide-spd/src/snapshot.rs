@@ -5,6 +5,7 @@
 
 use crate::interp::{AdjustmentRequest, PolicyState, Spd, SpdState};
 use crate::model::{GroupCfg, Membership};
+use crate::quirks::Quirks;
 use crate::sim::{SpdRun, series_points};
 use serde::{Deserialize, Serialize};
 use simoxide_model::raw::ObjId;
@@ -131,6 +132,8 @@ impl From<MembershipImage> for Membership {
 /// The section `spd`.
 #[derive(Serialize, Deserialize)]
 struct SpdImage {
+    /// The interpreter's compat flags (checked on restore).
+    quirks: Quirks,
     /// Shape of the interpreter: policy contexts and time events (checked on restore).
     contexts: u32,
     timers: u32,
@@ -144,12 +147,22 @@ struct SpdImage {
     adjusted_ok: u64,
 }
 
+/// The compat flags of the SPD interpreter of snapshot `s` (`None`: no SPD state), to build
+/// the interpreter for [`SpdRun::restore_from`] the same way.
+pub fn quirks_of(s: &Snapshot) -> Result<Option<Quirks>, SnapshotError> {
+    match s.section(SPD) {
+        None => Ok(None),
+        Some(sec) => Ok(Some(sec.decode::<SpdImage>(s.header.encoding)?.quirks)),
+    }
+}
+
 impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
     /// The run's snapshot (the simulation's sections and `spd`), between events: after
     /// [`SpdRun::run_until`] returned, when the SPD work of the last event is done.
     pub fn snapshot_value(&mut self, enc: Encoding) -> Result<Snapshot, SnapshotError> {
         let st = &self.state;
         let img = SpdImage {
+            quirks: self.spd.quirks(),
             contexts: self.spd.contexts().len() as u32,
             timers: self.spd.timers().len() as u32,
             policies: st.policies.clone(),
@@ -215,6 +228,13 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
             .section(SPD)
             .ok_or_else(|| SnapshotError::Mismatch("the snapshot has no SPD state".into()))?;
         let img: SpdImage = sec.decode(s.header.encoding)?;
+        if img.quirks != spd.quirks() {
+            return Err(SnapshotError::Mismatch(format!(
+                "the SPD state is of an interpreter with the compat flags {:?}, this one has {:?}",
+                img.quirks,
+                spd.quirks()
+            )));
+        }
         if img.contexts as usize != spd.contexts().len()
             || img.timers as usize != spd.timers().len()
             || img.policies.len() != spd.contexts().len()
