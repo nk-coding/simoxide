@@ -95,6 +95,38 @@ impl ChangeSet {
     }
 }
 
+/// A running model that takes model changes: a [`crate::Simulation`] between its events, or the
+/// Slingshot-exact engine inside its `ModelAdjustmentRequested` handler (`crate::ssx`, SPD
+/// adjustments). What a host of model transformations needs (`simoxide-reconf`'s QVTo runs and
+/// direct edits work on any `ChangeHost`).
+pub trait ChangeHost {
+    /// The current simulation time (s).
+    fn now_s(&self) -> f64;
+    /// The current simulation time (ns, as [`crate::SimError::at_ns`]).
+    fn now_ns(&self) -> i64;
+    /// The compiled model the run was created on (before any model change).
+    fn base_compiled(&self) -> &CompiledModel;
+    /// The compiled model the run simulates now.
+    fn compiled_now(&self) -> &CompiledModel;
+    /// Number of applied change sets that changed the model (0: the base model).
+    fn model_generation(&self) -> u32;
+    /// The model graph the run simulates now (to copy, change and pass to
+    /// [`ChangeHost::apply_changes`]).
+    fn model_graph(&self) -> &Graph;
+    /// Replaces the model graph by a copy whose objects of SimOxide's metamodels are unchanged
+    /// (`Simulation::set_model_graph`).
+    fn set_model_graph(&mut self, graph: std::sync::Arc<Graph>) -> Result<(), ChangeError>;
+    /// Applies a model change (`Simulation::apply_changes`): `graph` is a changed copy of
+    /// [`ChangeHost::model_graph`], `changes` its change journal. On an error nothing changes.
+    fn apply_changes(
+        &mut self,
+        graph: Graph,
+        changes: &ChangeSet,
+    ) -> Result<ChangeReport, ChangeError>;
+    /// Ends the run with an error (`Simulation::fail_run`); returns the error.
+    fn fail_run(&mut self, message: String) -> crate::SimError;
+}
+
 /// What applying a change set did.
 #[derive(Clone, Debug, Default)]
 pub struct ChangeReport {

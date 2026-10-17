@@ -41,6 +41,8 @@ pub mod resume;
 pub mod sim;
 #[cfg(feature = "snapshot")]
 pub mod snapshot;
+#[cfg(feature = "sim")]
+pub mod ssx;
 
 pub use interp::{
     AdjustOutcome, AdjustmentRequest, AdjustorState, Check, Cmp, FRes, Filter, GroupState,

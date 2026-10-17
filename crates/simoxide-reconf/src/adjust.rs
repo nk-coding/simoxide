@@ -13,8 +13,9 @@
 
 use crate::host::{Invocation, InvokeHooks, Outcome, QvtoRun, ReconfError, Transformation};
 use simoxide_model::raw::Graph;
-use simoxide_sim::{Compat, Flavour, SimError, SimErrorKind, Simulation};
+use simoxide_sim::{ChangeHost, Compat, Flavour, SimError, SimErrorKind, Simulation};
 use simoxide_spd::sim::{AdjustOutcome, Adjuster};
+use simoxide_spd::ssx::SsxAdjuster;
 use simoxide_spd::{AdjustmentRequest, Membership, Spd, SpdState};
 
 /// The parts of an adjustment that depend on the transformation (P2).
@@ -118,7 +119,35 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for QvtoAdjuster {
         state: &mut SpdState,
         req: &AdjustmentRequest,
     ) -> Result<AdjustOutcome, SimError> {
-        self.hooks.prepare(&sim.base_model().model.graph);
+        self.adjust_on(sim, spd, state, req)
+    }
+}
+
+/// The Slingshot-exact engine's adjustments (`DESIGN-SPD.md` X2d): the same transformation run
+/// on the engine's model inside its `ModelAdjustmentRequested` handler.
+impl SsxAdjuster for QvtoAdjuster {
+    fn adjust(
+        &mut self,
+        host: &mut dyn ChangeHost,
+        spd: &Spd,
+        state: &mut SpdState,
+        req: &AdjustmentRequest,
+    ) -> Result<AdjustOutcome, SimError> {
+        self.adjust_on(host, spd, state, req)
+    }
+}
+
+impl QvtoAdjuster {
+    /// Runs the transformation for `req` on the run `sim` (a simulation or the Slingshot-exact
+    /// engine) and applies its changes, then the cloned monitors.
+    pub fn adjust_on<H: ChangeHost + ?Sized>(
+        &mut self,
+        sim: &mut H,
+        spd: &Spd,
+        state: &mut SpdState,
+        req: &AdjustmentRequest,
+    ) -> Result<AdjustOutcome, SimError> {
+        self.hooks.prepare(&sim.base_compiled().model.graph);
         let hooks = &mut self.hooks;
         let mut before = |s: &mut Graph| hooks.before(s, spd, req);
         let r = self.run.invoke_with(
@@ -130,7 +159,7 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for QvtoAdjuster {
                 ids: None,
             },
         );
-        let at_ns = sim.state().now_ns();
+        let at_ns = sim.now_ns();
         if let Err(ReconfError::RunFailed { error, .. }) = &r {
             return Err(error.clone());
         }
@@ -151,7 +180,7 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for QvtoAdjuster {
             && let Some(adj) = &o.adjusted
             && !adj.monitor_clones.is_empty()
         {
-            let generation = sim.state().model().generation();
+            let generation = sim.model_generation();
             let mut e = crate::Edit::new(sim);
             let mut made = Ok(());
             for (k, c) in adj.monitor_clones.iter().enumerate() {

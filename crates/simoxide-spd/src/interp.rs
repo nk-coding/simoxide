@@ -901,6 +901,65 @@ impl Spd {
         req
     }
 
+    /// The policy subscribers Slingshot registers (`SpdBehavior`, SS-SPD-1.3), in registration
+    /// order: per active policy (model order) one on time events if its trigger has a
+    /// `SimulationTime` stimulus, and one on measurements, or with the Q12 compat flag one per
+    /// measurement stimulus kind. `(context, true)` is a time subscriber. For hosts that call
+    /// each subscriber on its own ([`Spd::on_timer_of`], [`Spd::on_measurement_of`]): the
+    /// Slingshot-exact engine, which disposes a subscriber that throws.
+    pub fn subscribers(&self) -> Vec<(usize, bool)> {
+        let mut v = Vec::new();
+        for (c, ctx) in self.ctxs.iter().enumerate() {
+            if ctx.time {
+                v.push((c, true));
+            }
+            let n = match ctx.measurement {
+                0 => 0,
+                k if self.quirks.q12_broken_composed => k,
+                _ => 1,
+            };
+            for _ in 0..n {
+                v.push((c, false));
+            }
+        }
+        v
+    }
+
+    /// [`Spd::on_timer`] for the subscriber of policy context `c` only.
+    pub fn on_timer_of(
+        &self,
+        c: usize,
+        st: &mut SpdState,
+        host: &mut dyn SpdHost,
+        timer: TimerId,
+        log: &mut dyn Log,
+    ) {
+        let ev = Ev::Time {
+            ev: self.timers[timer as usize],
+        };
+        if self.ctxs[c].time {
+            self.evaluate(c, st, host, &ev, log);
+        }
+    }
+
+    /// [`Spd::on_measurement`] for one measurement subscriber of policy context `c`.
+    pub fn on_measurement_of(
+        &self,
+        c: usize,
+        st: &mut SpdState,
+        host: &mut dyn SpdHost,
+        m: &Measurement,
+        log: &mut dyn Log,
+    ) {
+        let ev = Ev::Measurement {
+            m,
+            time: host.now(),
+        };
+        if self.ctxs[c].measurement > 0 {
+            self.evaluate(c, st, host, &ev, log);
+        }
+    }
+
     /// One handler invocation of policy context `c` for `ev`.
     fn evaluate(
         &self,

@@ -1,5 +1,5 @@
 //! The QVTo host (`DESIGN-SPD.md` 5.5): QVTo transformations run on a simulation run's model,
-//! their journal goes through the change path ([`Simulation::apply_changes`]).
+//! their journal goes through the change path ([`simoxide_sim::Simulation::apply_changes`]).
 //!
 //! - [`QvtoCore`] is the shared, immutable part: the metamodel registry, the metamodel objects
 //!   and the metamodels loaded at set-up (SimuLizar's runtime measurement metamodel by
@@ -29,7 +29,7 @@ use qvto_runtime::Mode;
 use qvto_runtime::identity::IdentityHashSource;
 use qvto_sema::ir::Direction;
 use simoxide_model::raw::{Graph, ResId};
-use simoxide_sim::{ChangeError, ChangeReport, Compat, Flavour, SimError, Simulation};
+use simoxide_sim::{ChangeError, ChangeHost, ChangeReport, SimError};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -579,7 +579,7 @@ pub struct InvokeHooks<'h> {
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 pub enum AbortPolicy {
     /// SimuLizar: the syncer throws inside the reconfiguration process and the simulation
-    /// aborts. The run fails ([`Simulation::fail_run`], [`ReconfError::RunFailed`]).
+    /// aborts. The run fails ([`simoxide_sim::Simulation::fail_run`], [`ReconfError::RunFailed`]).
     #[default]
     FailRun,
     /// The changes are not applied and the run continues unchanged ([`ReconfError::Rejected`]).
@@ -700,9 +700,9 @@ impl QvtoRun {
     /// Continues from a saved state on the restored simulation `sim`: its graph gets the QVTo
     /// state back with every id (see `qvt::SessionState`).
     #[cfg(feature = "snapshot")]
-    pub(crate) fn restore_session<C: Compat, F: Flavour>(
+    pub(crate) fn restore_session<H: ChangeHost + ?Sized>(
         &mut self,
-        sim: &Simulation<'_, C, F>,
+        sim: &H,
         invocations: u64,
         s: Option<&crate::qvt::SessionState>,
     ) -> Result<(), String> {
@@ -727,10 +727,10 @@ impl QvtoRun {
 /// model and the model graph (addresses).
 type Fp = (u32, usize, usize);
 
-fn fingerprint<C: Compat, F: Flavour>(sim: &Simulation<'_, C, F>) -> Fp {
+fn fingerprint<H: ChangeHost + ?Sized>(sim: &H) -> Fp {
     (
-        sim.state().model().generation(),
-        sim.compiled() as *const _ as usize,
+        sim.model_generation(),
+        sim.compiled_now() as *const _ as usize,
         sim.model_graph() as *const _ as usize,
     )
 }
@@ -772,10 +772,7 @@ impl QvtoRun {
     }
 
     /// The per-run state with a working graph equal to `sim`'s model graph.
-    pub(crate) fn prepare<C: Compat, F: Flavour>(
-        &mut self,
-        sim: &Simulation<'_, C, F>,
-    ) -> &mut PerRun {
+    pub(crate) fn prepare<H: ChangeHost + ?Sized>(&mut self, sim: &H) -> &mut PerRun {
         let core = &self.core;
         let ids = self.cfg.ids;
         let st = self.state.get_or_insert_with(|| {
@@ -801,7 +798,7 @@ impl QvtoRun {
 
     /// Hands the working graph to the simulation when only models of other metamodels changed
     /// (see [`PerRun::work`]).
-    fn share_work<C: Compat, F: Flavour>(&mut self, sim: &mut Simulation<'_, C, F>) {
+    fn share_work<H: ChangeHost + ?Sized>(&mut self, sim: &mut H) {
         let Some(st) = self.state.as_mut() else {
             return;
         };
@@ -819,9 +816,9 @@ impl QvtoRun {
     /// into the run's model graph; its references to the PCM documents are resolved. The
     /// returned reference binds it ([`Bind::Models`]). The model lives with the run's model
     /// from then on (forks, model changes).
-    pub fn load_model<C: Compat, F: Flavour>(
+    pub fn load_model<H: ChangeHost + ?Sized>(
         &mut self,
-        sim: &mut Simulation<'_, C, F>,
+        sim: &mut H,
         path: &Path,
     ) -> Result<ModelRef, ReconfError> {
         self.prepare(sim);
@@ -833,11 +830,7 @@ impl QvtoRun {
 
     /// A new, empty model for objects of other metamodels (e.g. the PRM the reconfiguration
     /// process fills, R1), filled with [`QvtoRun::with_store`].
-    pub fn create_model<C: Compat, F: Flavour>(
-        &mut self,
-        sim: &mut Simulation<'_, C, F>,
-        uri: &str,
-    ) -> ModelRef {
+    pub fn create_model<H: ChangeHost + ?Sized>(&mut self, sim: &mut H, uri: &str) -> ModelRef {
         self.prepare(sim);
         let r = self.work_mut().create_resource(uri);
         self.share_work(sim);
@@ -847,9 +840,9 @@ impl QvtoRun {
     /// Runs `f` on the run's model graph (any `qvto_model::ModelStore` operation: writing
     /// runtime measurement values, setting SPD's `enactedPolicy`, ...). Changes of PCM objects
     /// are applied to the simulation like a transformation's.
-    pub fn with_store<C: Compat, F: Flavour, T>(
+    pub fn with_store<H: ChangeHost + ?Sized, T>(
         &mut self,
-        sim: &mut Simulation<'_, C, F>,
+        sim: &mut H,
         f: impl FnOnce(&mut Graph) -> T,
     ) -> Result<(T, Option<ChangeReport>), ReconfError> {
         self.prepare(sim);
@@ -868,9 +861,9 @@ impl QvtoRun {
 
     /// Runs `f` on a scratch copy of the run's model graph (with the QVTo state): for reading
     /// (dumps, summaries, diffs) and for trying changes; nothing reaches the run.
-    pub fn with_scratch_store<C: Compat, F: Flavour, T>(
+    pub fn with_scratch_store<H: ChangeHost + ?Sized, T>(
         &mut self,
-        sim: &Simulation<'_, C, F>,
+        sim: &H,
         f: impl FnOnce(&mut Graph) -> T,
     ) -> T {
         let st = self.prepare(sim);
@@ -884,9 +877,9 @@ impl QvtoRun {
     /// (the run is unchanged, [`ReconfError::Rejected`]); SimuLizar would abort (the run has
     /// failed, [`ReconfError::RunFailed`], unless [`AbortPolicy::Reject`]). A transformation
     /// that fails (`assert fatal`, an exception) is no error: [`Outcome::succeeded`] is false.
-    pub fn invoke<C: Compat, F: Flavour>(
+    pub fn invoke<H: ChangeHost + ?Sized>(
         &mut self,
-        sim: &mut Simulation<'_, C, F>,
+        sim: &mut H,
         t: &Transformation,
         inv: &Invocation,
     ) -> Result<Outcome, ReconfError> {
@@ -895,9 +888,9 @@ impl QvtoRun {
 
     /// [`QvtoRun::invoke`] with [`InvokeHooks`]: edits before the run in its journal, identity
     /// hashes.
-    pub fn invoke_with<C: Compat, F: Flavour>(
+    pub fn invoke_with<H: ChangeHost + ?Sized>(
         &mut self,
-        sim: &mut Simulation<'_, C, F>,
+        sim: &mut H,
         t: &Transformation,
         inv: &Invocation,
         hooks: InvokeHooks<'_>,
@@ -910,9 +903,9 @@ impl QvtoRun {
     /// `f` on that graph after the run: the outcome (with [`Outcome::change`] `None`) and what
     /// `f` returns; nothing reaches the run. For trying a reconfiguration, and for inspecting a
     /// transformation's result (dumps, diffs).
-    pub fn dry_run<C: Compat, F: Flavour, T>(
+    pub fn dry_run<H: ChangeHost + ?Sized, T>(
         &mut self,
-        sim: &Simulation<'_, C, F>,
+        sim: &H,
         t: &Transformation,
         inv: &Invocation,
         hooks: InvokeHooks<'_>,
@@ -927,9 +920,9 @@ impl QvtoRun {
     }
 
     /// Runs `t` on the working graph, or on a copy stored in `scratch`.
-    fn execute<C: Compat, F: Flavour>(
+    fn execute<H: ChangeHost + ?Sized>(
         &mut self,
-        sim: &Simulation<'_, C, F>,
+        sim: &H,
         t: &Transformation,
         inv: &Invocation,
         hooks: InvokeHooks<'_>,
@@ -938,7 +931,7 @@ impl QvtoRun {
         if t.0.core != self.core.0.id {
             return Err(ReconfError::WrongCore);
         }
-        let now_s = sim.state().now_ns() as f64 / 1e9;
+        let now_s = sim.now_s();
         let opts = qvto::RunOptions {
             mode: self.mode,
             max_stack_depth: self.cfg.max_stack_depth,
@@ -988,9 +981,9 @@ impl QvtoRun {
     /// Applies the changes of a run to the simulation (or drops them): the changes of PCM
     /// objects through the change path; changes of other models only, by handing the graph
     /// over.
-    fn apply<C: Compat, F: Flavour>(
+    fn apply<H: ChangeHost + ?Sized>(
         &mut self,
-        sim: &mut Simulation<'_, C, F>,
+        sim: &mut H,
         name: &str,
         raw: RawOutcome,
         micros: u64,

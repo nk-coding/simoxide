@@ -13,15 +13,10 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 /// Cases that are not (yet) equal, with the cause.
-const KNOWN: &[(&str, &str)] = &[
-    (
-        "h27_collection_inner_multi",
-        "INNER evaluation order (java.util.HashMap)",
-    ),
-    ("spd_minimal", "SPD events (X2d)"),
-    ("spd_scale_in", "SPD events (X2d)"),
-    ("spd_time_policies", "SPD events (X2d)"),
-];
+const KNOWN: &[(&str, &str)] = &[(
+    "h27_collection_inner_multi",
+    "INNER evaluation order (java.util.HashMap)",
+)];
 
 fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
@@ -47,6 +42,8 @@ impl Buf {
 }
 
 struct Outcome {
+    /// The SPD decision log (`spd.jsonl`), for the SPD cases.
+    spd_log: Option<String>,
     projection: String,
     tape: String,
     csv: Option<String>,
@@ -55,7 +52,11 @@ struct Outcome {
 }
 
 fn run_case(name: &str) -> (Outcome, PathBuf) {
-    let dir = root().join("corpus-ss").join(name);
+    run_case_in("corpus-ss", name)
+}
+
+fn run_case_in(corpus: &str, name: &str) -> (Outcome, PathBuf) {
+    let dir = root().join(corpus).join(name);
     let case: serde_json::Value =
         serde_json::from_str(&std::fs::read_to_string(dir.join("case.json")).unwrap()).unwrap();
     let model_dir = root().join(case["model"].as_str().unwrap());
@@ -74,26 +75,57 @@ fn run_case(name: &str) -> (Outcome, PathBuf) {
         trace: Some(Box::new(p.clone())),
         tape: Some(Box::new(t.clone())),
     };
-    let r = simoxide_sim::run(&cm, cfg, out);
+    let spd = simoxide_spd::sim::spd_of(&cm.model, simoxide_spd::Quirks::slingshot()).unwrap();
+    let mut log = simoxide_spd::log::VecLog::default();
+    let r = match &spd {
+        // the SPD cases: Slingshot's adjustment in QVTo's ordered mode (the default build's)
+        Some(spd) => {
+            let core = simoxide_reconf::QvtoCore::new().unwrap();
+            let mut adj = simoxide_reconf::QvtoAdjuster::spd(
+                &core,
+                &simoxide_reconf::SpdAdjust::new(&spd.quirks()),
+            )
+            .unwrap();
+            let mut hooks = simoxide_spd::ssx::SsxSpd::new(spd, &cm.model, &mut adj, &mut log);
+            simoxide_sim::ssx::run_with_spd(&cm, cfg, out, &mut hooks)
+        }
+        None => simoxide_sim::run(&cm, cfg, out),
+    };
     let (csv, error, warnings) = match r {
         Ok(r) => (Some(r.measurements.to_csv()), None, r.warnings),
         Err(e) => (None, Some(e.to_string()), Vec::new()),
     };
-    (
-        Outcome {
-            projection: p.text(),
-            tape: t.text(),
-            csv,
-            error,
-            warnings,
-        },
-        dir.join("expected"),
-    )
+    let o = Outcome {
+        spd_log: spd.is_some().then(|| log.to_jsonl()),
+        projection: p.text(),
+        tape: t.text(),
+        csv,
+        error,
+        warnings,
+    };
+    // `SSX_DUMP=DIR`: the outputs in DIR/<case>/ (for debugging)
+    if let Some(d) = std::env::var_os("SSX_DUMP") {
+        let d = Path::new(&d).join(name);
+        std::fs::create_dir_all(&d).unwrap();
+        std::fs::write(d.join("projection.jsonl"), &o.projection).unwrap();
+        std::fs::write(d.join("tape-projection.jsonl"), &o.tape).unwrap();
+        if let Some(c) = &o.csv {
+            std::fs::write(d.join("measurements.csv"), c).unwrap();
+        }
+        if let Some(l) = &o.spd_log {
+            std::fs::write(d.join("spd.jsonl"), l).unwrap();
+        }
+    }
+    (o, dir.join("expected"))
 }
 
 /// `E`, `T`, `C`: projection, tape projection, measurements equal.
 fn compare(name: &str) -> (bool, bool, bool, String) {
-    let (o, exp) = run_case(name);
+    compare_in("corpus-ss", name)
+}
+
+fn compare_in(corpus: &str, name: &str) -> (bool, bool, bool, String) {
+    let (o, exp) = run_case_in(corpus, name);
     let read = |f: &str| std::fs::read_to_string(exp.join(f)).ok();
     if exp.join("error.txt").exists() {
         // the run fails before t = 0, like the reference
@@ -195,4 +227,50 @@ fn handler_errors_match_the_reference() {
         checked += 1;
     }
     assert!(checked >= 22, "{checked} cases with handler errors");
+}
+
+/// The SPD cases: the decision log (evaluations, requests, adjustments with their change counts
+/// and model summaries) equals the reference's `spd.jsonl` (`simoxide_spd::log::project_with_models`).
+#[test]
+fn spd_decision_logs_match_the_reference() {
+    let mut checked = 0;
+    for (corpus, name) in [
+        ("corpus-ss", "spd_minimal"),
+        ("corpus-ss", "spd_scale_in"),
+        ("corpus-ss", "spd_time_policies"),
+        ("corpus-spd", "spd_service_group"),
+    ] {
+        let (o, exp) = run_case_in(corpus, name);
+        let want = std::fs::read_to_string(exp.join("spd.jsonl")).unwrap();
+        let want = simoxide_spd::log::project_with_models(&want).unwrap();
+        let got = simoxide_spd::log::project_with_models(&o.spd_log.unwrap()).unwrap();
+        assert_eq!(
+            simoxide_spd::log::first_difference(&want, &got),
+            None,
+            "{name}"
+        );
+        checked += 1;
+    }
+    assert_eq!(checked, 4);
+}
+
+/// The SPD corpus (`corpus-spd/`, P2): every case byte-equal at level E (the case without a
+/// tape reference compares projection and measurements).
+#[test]
+fn corpus_spd_is_byte_equal_at_level_e() {
+    for name in [
+        "spd_minimal",
+        "spd_scale_in",
+        "spd_service_group",
+        "spd_time_policies",
+    ] {
+        let has_tape = root()
+            .join("corpus-spd")
+            .join(name)
+            .join("expected/tape-projection.jsonl")
+            .exists();
+        let (e, t, c, why) = compare_in("corpus-spd", name);
+        eprintln!("{name:40} E{} T{} C{} {why}", e as u8, t as u8, c as u8);
+        assert!(e && (t || !has_tape) && c, "{name}: {why}");
+    }
 }

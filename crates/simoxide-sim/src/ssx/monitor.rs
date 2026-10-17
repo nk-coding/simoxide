@@ -14,27 +14,69 @@ pub(super) fn build(cm: &CompiledModel, meas: &mut Measurements) -> Monitors {
         demand: vec![Vec::new(); cm.resources.len()],
         ..Monitors::default()
     };
-    let mut keys: HashMap<(String, &'static str), SeriesId> = HashMap::new();
-    let mut series = |meas: &mut Measurements, key: String, metric: &'static str| -> SeriesId {
-        *keys.entry((key.clone(), metric)).or_insert_with(|| {
-            meas.series.push(SeriesDef {
-                mp: key.into(),
-                metric,
-            });
-            meas.rows.push(Vec::new());
-            (meas.series.len() - 1) as SeriesId
-        })
-    };
     let Some(repo) = m.monitor_repositories.iter().next() else {
         return mon;
     };
     for &mid in &repo.monitors {
+        mon.add(cm, meas, mid, None);
+    }
+    mon
+}
+
+impl Monitors {
+    /// The calculators of monitor `mid` (`MonitorModelVisitor`, SS-MEAS-1.1), at the start or
+    /// for a monitor an SPD adjustment cloned (`MonitorRepositoryInterpreterBehavior.
+    /// onModelAdjusted`). `alias`: the measuring-point keys of monitors created during the run
+    /// name created elements by their aliases (`Keys.alias`).
+    pub(super) fn add(
+        &mut self,
+        cm: &CompiledModel,
+        meas: &mut Measurements,
+        mid: MonitorId,
+        alias: Option<&HashMap<Box<str>, Box<str>>>,
+    ) {
+        let m = &cm.model;
+        let n = cm.resources.len();
+        for v in [&mut self.state, &mut self.util, &mut self.demand] {
+            if v.len() < n {
+                v.resize(n, Vec::new());
+            }
+        }
+        if self.scenario.len() < cm.scenarios.len() {
+            self.scenario.resize(cm.scenarios.len(), None);
+        }
+        let mut series = |meas: &mut Measurements, key: String, metric: &'static str| -> SeriesId {
+            let shown = match alias {
+                Some(a) if !a.is_empty() => {
+                    let mut k = key.clone();
+                    for (id, al) in a {
+                        if k.contains(&**id) {
+                            k = k.replace(&**id, al);
+                        }
+                    }
+                    k
+                }
+                _ => key.clone(),
+            };
+            *self.keys.entry((key.clone(), metric)).or_insert_with(|| {
+                meas.series.push(SeriesDef {
+                    mp: shown.clone().into(),
+                    metric,
+                });
+                meas.rows.push(Vec::new());
+                let s = (meas.series.len() - 1) as SeriesId;
+                if shown != key {
+                    self.raw_keys.insert(s, key.into());
+                }
+                s
+            })
+        };
         let mo = &m.monitors[mid];
         if !mo.activated {
-            continue;
+            return;
         }
         let Some(mp) = mo.measuring_point.map(|x| &m.measuring_points[x]) else {
-            continue;
+            return;
         };
         for spec in &mo.specifications {
             let metric = metric_id(m, spec);
@@ -61,9 +103,9 @@ pub(super) fn build(cm: &CompiledModel, meas: &mut Measurements) -> Monitors {
                     });
                     if let Some(i) = idx {
                         match slot {
-                            0 => mon.state[i].push(s),
-                            1 => mon.util[i].push(s),
-                            _ => mon.demand[i].push(s),
+                            0 => self.state[i].push(s),
+                            1 => self.util[i].push(s),
+                            _ => self.demand[i].push(s),
                         }
                     }
                 }
@@ -84,14 +126,14 @@ pub(super) fn build(cm: &CompiledModel, meas: &mut Measurements) -> Monitors {
                     };
                     let s = series(meas, key, name);
                     // probes per passive resource id (PassiveResourceProbeTable, Q34)
-                    let probes = mon
+                    let probes = self
                         .passive
                         .entry(m.passive_resources[*p].id.clone())
                         .or_default();
                     match kind {
                         0 | 1 => {
-                            let ci = mon.calcs.len();
-                            mon.calcs.push(StartStop {
+                            let ci = self.calcs.len();
+                            self.calcs.push(StartStop {
                                 series: s,
                                 open: Vec::new(),
                             });
@@ -116,12 +158,12 @@ pub(super) fn build(cm: &CompiledModel, meas: &mut Measurements) -> Monitors {
                         continue;
                     };
                     let s = series(meas, key, metric_names::RESPONSE_TIME);
-                    let ci = mon.calcs.len();
-                    mon.calcs.push(StartStop {
+                    let ci = self.calcs.len();
+                    self.calcs.push(StartStop {
                         series: s,
                         open: Vec::new(),
                     });
-                    mon.asmop.insert(
+                    self.asmop.insert(
                         (
                             m.assembly_contexts[*ac].id.clone(),
                             m.roles[*role].id.clone(),
@@ -137,15 +179,15 @@ pub(super) fn build(cm: &CompiledModel, meas: &mut Measurements) -> Monitors {
                         continue;
                     };
                     let s = series(meas, key, metric_names::RESPONSE_TIME);
-                    let ci = mon.calcs.len();
-                    mon.calcs.push(StartStop {
+                    let ci = self.calcs.len();
+                    self.calcs.push(StartStop {
                         series: s,
                         open: Vec::new(),
                     });
                     // userProbesMap.put(scenario id): the last monitor of a scenario wins
                     for (i, x) in cm.scenarios.iter().enumerate() {
                         if m.usage_scenarios[x.id].id == m.usage_scenarios[*sc].id {
-                            mon.scenario[i] = Some(ci);
+                            self.scenario[i] = Some(ci);
                         }
                     }
                 }
@@ -153,7 +195,6 @@ pub(super) fn build(cm: &CompiledModel, meas: &mut Measurements) -> Monitors {
             }
         }
     }
-    mon
 }
 
 impl Engine<'_> {

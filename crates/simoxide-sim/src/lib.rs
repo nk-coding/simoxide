@@ -46,8 +46,8 @@ mod trace;
 pub mod windows;
 
 pub use change::{
-    Change, ChangeError, ChangeKind, ChangeOptions, ChangeReport, ChangeSet, InProgress,
-    MonitorSync, Reallocation, Removal,
+    Change, ChangeError, ChangeHost, ChangeKind, ChangeOptions, ChangeReport, ChangeSet,
+    InProgress, MonitorSync, Reallocation, Removal,
 };
 #[cfg(feature = "exact")]
 pub use compat::Exact;

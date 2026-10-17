@@ -12,6 +12,16 @@ pub(crate) enum ResRt {
     Fcfs(FcfsHead<u64, F64Secs>),
 }
 
+/// A fresh resource of the active-resource table.
+pub(super) fn new_res(r: &CRes) -> ResRt {
+    match (r.kind, r.policy) {
+        (ResKind::Processing(_), SchedulingPolicy::ProcessorSharing) => {
+            ResRt::Ps(ProcessorSharing::new(r.instances.max(1)))
+        }
+        _ => ResRt::Fcfs(FcfsHead::new()),
+    }
+}
+
 /// A `SimplePassiveResource`.
 pub(crate) struct Passive {
     pub available: i64,
@@ -30,23 +40,15 @@ impl Engine<'_> {
     pub(super) fn resources_init(&mut self) -> Result<(), Throw> {
         let cm = self.cm;
         let m = self.m;
-        self.res = cm
-            .resources
-            .iter()
-            .map(|r| match (r.kind, r.policy) {
-                (ResKind::Processing(_), SchedulingPolicy::ProcessorSharing) => {
-                    ResRt::Ps(ProcessorSharing::new(r.instances.max(1)))
-                }
-                _ => ResRt::Fcfs(FcfsHead::new()),
-            })
-            .collect();
+        self.res = cm.resources.iter().map(new_res).collect();
+        self.res_live = vec![true; cm.resources.len()];
         let Some(al) = m.allocations.iter().next() else {
             return Ok(());
         };
-        self.passives_init(al)?;
+        self.passives_init(&al.contexts)?;
         // LinkingResourceTable: a link without a communication specification throws in
         // SimulatedLinkingResource's constructor (corpus x_sl_runconfigtest)
-        for &l in &cm.links {
+        for &l in &self.links {
             let lr = &m.linking_resources[l];
             if lr.spec_id.is_empty() && lr.throughput.is_missing() && lr.latency.is_missing() {
                 return throw(
@@ -61,10 +63,12 @@ impl Engine<'_> {
         Ok(())
     }
 
-    fn passives_init(&mut self, al: &Allocation) -> Result<(), Throw> {
+    /// `PassiveResourceTable.buildTable` / `buildPassiveResources` for the allocation contexts
+    /// `contexts` (capacities drawn in order; an existing entry is replaced).
+    pub(super) fn passives_init(&mut self, contexts: &[AllocationContextId]) -> Result<(), Throw> {
         let cm = self.cm;
         let m = self.m;
-        for &ctx in &al.contexts {
+        for &ctx in contexts {
             let Some(ac) = m.allocation_contexts[ctx].assembly else {
                 continue;
             };
@@ -128,6 +132,7 @@ impl Engine<'_> {
             .container_res
             .get(&((*container)?, (*rtype)?))
             .copied()
+            .filter(|&ri| self.res_live.get(ri as usize) == Some(&true))
     }
 
     /// `onResourceDemandRequested` (SS-RES-0.1, SS-RES-4.2).
@@ -371,13 +376,13 @@ impl Engine<'_> {
                 .iter()
                 .any(|&x| m.containers[x].id == m.containers[c].id)
         };
-        let link = cm
+        let link = self
             .links
             .iter()
             .copied()
             .find(|&l| has(l, from) && has(l, to))
             .or_else(|| {
-                cm.links
+                self.links
                     .iter()
                     .copied()
                     .find(|&l| has(l, from) || has(l, to))
