@@ -861,6 +861,7 @@ version = "0.1.0"
 dependencies = [
  "mimalloc",
  "pprof",
+ "serde_json",
  "simoxide-emf",
  "simoxide-model",
  "simoxide-reconf",

@@ -12,8 +12,9 @@
 //!
 //! An adjustment request is queued as an external note at the current time (behind the notes
 //! already queued for now, like `ModelAdjustmentRequested`), and an [`Adjuster`] executes it
-//! when it is dispatched. P1 has no adjustment: [`NoAdjustment`] reports every request as not
-//! executed.
+//! when it is dispatched: `simoxide-reconf`'s QVTo adjuster runs Slingshot's
+//! `MainTransformation.qvto` on the run's model (P2); [`NoAdjustment`] reports every request as
+//! not executed. After an adjustment the driver observes the series a changed model appends.
 //!
 //! In the SimuLizar flavour the tuples are SimuLizar's (window-aggregated utilisation, not
 //! Slingshot's instantaneous samples): a documented deviation without a reference.
@@ -32,7 +33,7 @@ use simoxide_sim::{
 };
 
 /// Tags of request notes (time events use their timer index).
-const REQUEST: u32 = 1 << 31;
+pub(crate) const REQUEST: u32 = 1 << 31;
 
 /// Builds the interpreter of the SPD in `model` (`None`: the model has no SPD).
 pub fn spd_of(model: &Model, quirks: Quirks) -> Result<Option<Spd>, SpdError> {
@@ -47,14 +48,7 @@ pub fn spd_of(model: &Model, quirks: Quirks) -> Result<Option<Spd>, SpdError> {
     Ok(Some(Spd::new(m, quirks)?.with_signature_names(names)))
 }
 
-/// The outcome of an executed adjustment.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct AdjustOutcome {
-    pub ok: bool,
-    /// Element counts of the target group before and after, if known.
-    pub size_before: Option<usize>,
-    pub size_after: Option<usize>,
-}
+pub use crate::interp::AdjustOutcome;
 
 /// Executes adjustment requests (P2: Slingshot's `MainTransformation.qvto` on the run's
 /// model, then the syncers). It may change the simulation's model and must then refresh
@@ -70,8 +64,8 @@ pub trait Adjuster<C: Compat, F: Flavour = SimuLizar> {
     ) -> Result<AdjustOutcome, SimError>;
 }
 
-/// P1: no adjustment is executed; every request is reported as failed (`ok: false`), so the
-/// fixed Q2 commits no constraint state.
+/// No adjustment is executed (the decisions only); every request is reported as failed
+/// (`ok: false`), so the fixed Q2 commits no constraint state.
 pub struct NoAdjustment;
 
 impl<C: Compat, F: Flavour> Adjuster<C, F> for NoAdjustment {
@@ -87,6 +81,7 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for NoAdjustment {
             ok: false,
             size_before: size,
             size_after: size,
+            ..AdjustOutcome::default()
         })
     }
 }
@@ -177,8 +172,8 @@ pub struct SpdSummary {
 }
 
 /// A simulation with an SPD interpreter.
-pub struct SpdRun<'m, 's, C: Compat> {
-    pub sim: Simulation<'m, C>,
+pub struct SpdRun<'m, 's, C: Compat, F: Flavour = SimuLizar> {
+    pub sim: Simulation<'m, C, F>,
     pub(crate) spd: &'s Spd,
     pub state: SpdState,
     pub(crate) series: Vec<Option<(PointRef, Metric)>>,
@@ -187,13 +182,13 @@ pub struct SpdRun<'m, 's, C: Compat> {
     pub(crate) adjusted_ok: u64,
 }
 
-struct Host<'a, 'm, C: Compat> {
-    sim: &'a mut Simulation<'m, C>,
+struct Host<'a, 'm, C: Compat, F: Flavour> {
+    sim: &'a mut Simulation<'m, C, F>,
     requests: &'a mut Vec<Option<AdjustmentRequest>>,
     error: Option<SimError>,
 }
 
-impl<C: Compat> SpdHost for Host<'_, '_, C> {
+impl<C: Compat, F: Flavour> SpdHost for Host<'_, '_, C, F> {
     fn now(&self) -> f64 {
         self.sim.state().now_ns() as f64 / 1e9
     }
@@ -216,10 +211,10 @@ impl<C: Compat> SpdHost for Host<'_, '_, C> {
     }
 }
 
-impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
+impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
     /// Attaches `spd` to `sim` (not started): observes the series its triggers read and
     /// schedules the set-up's time events.
-    pub fn new(mut sim: Simulation<'m, C>, spd: &'s Spd) -> Result<Self, SimError> {
+    pub fn new(mut sim: Simulation<'m, C, F>, spd: &'s Spd) -> Result<Self, SimError> {
         let cm = sim.compiled();
         let membership = Membership::from_graph(&cm.model.graph, spd.model());
         let series = series_points(cm);
@@ -255,7 +250,7 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
     /// `adjuster`).
     pub fn run(
         &mut self,
-        adjuster: &mut dyn Adjuster<C>,
+        adjuster: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
     ) -> Result<(), SimError> {
         self.run_until(adjuster, log, None).map(|_| ())
@@ -266,7 +261,7 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
     /// forked ([`SpdRun::fork`]) or continued.
     pub fn run_until(
         &mut self,
-        adjuster: &mut dyn Adjuster<C>,
+        adjuster: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
         before_ns: Option<i64>,
     ) -> Result<Status, SimError> {
@@ -281,9 +276,9 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
     /// condition (`simoxide_sim::Watch::keep_going`).
     pub fn run_while(
         &mut self,
-        adjuster: &mut dyn Adjuster<C>,
+        adjuster: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
-        mut keep_going: impl FnMut(&RunState<C>) -> bool,
+        mut keep_going: impl FnMut(&RunState<C, F>) -> bool,
     ) -> Result<Status, SimError> {
         loop {
             let status = self
@@ -302,7 +297,7 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
 
     /// A fork between events: the simulation's fork (outputs `out`) with a copy of the SPD
     /// state and the queued requests. Both continue like the uninterrupted run.
-    pub fn fork(&mut self, out: Outputs) -> Result<SpdRun<'m, 's, C>, SimError> {
+    pub fn fork(&mut self, out: Outputs) -> Result<SpdRun<'m, 's, C, F>, SimError> {
         Ok(SpdRun {
             sim: self.sim.fork(out)?,
             spd: self.spd,
@@ -325,9 +320,28 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
         Ok((r, self.state, summary))
     }
 
+    /// After a model change: maps the series of the changed model (new containers' monitors
+    /// append series) and observes the new ones the triggers read.
+    pub(crate) fn observe_new_series(&mut self) {
+        let cm = self.sim.compiled();
+        if cm.series.len() == self.series.len() {
+            return;
+        }
+        let series = series_points(cm);
+        let metrics = self.spd.metrics();
+        for (i, s) in series.iter().enumerate().skip(self.series.len()) {
+            if let Some((_, m)) = s
+                && metrics.contains(m)
+            {
+                self.sim.observe_series(i as u32);
+            }
+        }
+        self.series = series;
+    }
+
     fn handle(
         &mut self,
-        adjuster: &mut dyn Adjuster<C>,
+        adjuster: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
     ) -> Result<(), SimError> {
         for tag in self.sim.take_external() {
@@ -339,15 +353,10 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
                 if out.ok {
                     self.adjusted_ok += 1;
                 }
+                self.observe_new_series();
                 let now = self.sim.state().now_ns() as f64 / 1e9;
-                self.spd.adjusted(
-                    &mut self.state,
-                    &req,
-                    out.ok,
-                    now,
-                    (out.size_before, out.size_after),
-                    log,
-                );
+                self.spd
+                    .adjusted_with(&mut self.state, &req, &out, now, log);
             } else {
                 let mut host = Host {
                     sim: &mut self.sim,

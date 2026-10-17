@@ -631,6 +631,11 @@ pub struct XmiResource {
     pub foreign: bool,
 }
 
+/// The URI prefix of a restored placeholder resource: `simoxide:/snapshot-placeholder/{i}?{uri}`
+/// (`uri`: the URI of the resource it stands for; another URI, so that it is not found in place
+/// of the rebuilt model).
+const PLACEHOLDER: &str = "simoxide:/snapshot-placeholder/";
+
 /// A graph as XMI documents plus the object table (see the module documentation).
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
@@ -686,15 +691,29 @@ impl GraphXmi {
             .resources()
             .iter()
             .enumerate()
-            .map(|(i, r)| XmiResource {
-                uri: r.uri.clone(),
-                name: r.name.clone(),
-                path: r.path.as_ref().map(|p| p.display().to_string()),
-                errors: r.errors.clone(),
-                failed: r.failed,
-                file: cx.locs[i].clone(),
-                xmi: docs[i].clone(),
-                foreign: !r.roots.is_empty() && r.roots.iter().all(|&o| !pcm(g, o)),
+            .map(|(i, r)| match r.uri.strip_prefix(PLACEHOLDER) {
+                // a placeholder of a restored graph: written as the resource it stands for, so
+                // that a restored graph saves the bytes it was restored from
+                Some(rest) => XmiResource {
+                    uri: rest.split_once('?').map_or(rest, |(_, u)| u).to_string(),
+                    name: r.name.clone(),
+                    path: r.path.as_ref().map(|p| p.display().to_string()),
+                    errors: r.errors.clone(),
+                    failed: r.failed,
+                    file: cx.locs[i].clone(),
+                    xmi: docs[i].clone(),
+                    foreign: true,
+                },
+                None => XmiResource {
+                    uri: r.uri.clone(),
+                    name: r.name.clone(),
+                    path: r.path.as_ref().map(|p| p.display().to_string()),
+                    errors: r.errors.clone(),
+                    failed: r.failed,
+                    file: cx.locs[i].clone(),
+                    xmi: docs[i].clone(),
+                    foreign: !r.roots.is_empty() && r.roots.iter().all(|&o| !pcm(g, o)),
+                },
             })
             .collect();
         let detached = l.elements.len() - 1;
@@ -956,7 +975,7 @@ impl GraphXmi {
         }
         for (i, r) in self.resources.iter().enumerate() {
             let uri = if r.foreign {
-                format!("simoxide:/snapshot-placeholder/{i}")
+                format!("{PLACEHOLDER}{i}?{}", r.uri)
             } else {
                 r.uri.clone()
             };

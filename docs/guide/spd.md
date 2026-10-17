@@ -6,14 +6,16 @@ policy a filter chain of target-group check, trigger, constraints and adjustor. 
 are on [Scaling policies (Slingshot)](../spec/slingshot/spd.md); the design is
 `DESIGN-SPD.md` §5.4.
 
-::: warning Decisions only
-This is phase P1. A policy that fires produces an *adjustment request* (policy, target group,
-adjustment) and the decision log records it, but the adjustment itself (Slingshot's
-`MainTransformation.qvto`, phase P2) is not executed yet: the model does not change. The
-command line runs no adjustment; as a library, `simoxide-reconf`'s `QvtoAdjuster` runs a
-transformation for each request on the run's model ([QVTo transformations on a
-run](library.md#qvto-transformations-on-a-run)), with hooks for what P2 adds (the enacted
-policy, Slingshot's model summaries).
+A policy that fires produces an *adjustment request* (policy, target group, adjustment); the
+adjustment runs Slingshot's own transformation, `MainTransformation.qvto`, on the run's model
+(below, [Adjustments](#adjustments)) and the run continues on the changed model.
+
+::: warning What waits for phase F4
+Adjustments that *remove* elements (scale-in: containers, assembly and allocation contexts) and
+every adjustment in the Slingshot flavour are refused by the change path until phase F4; the
+run then ends with the refusal (`... cannot remove an allocation context`). New containers get
+no monitors yet (Slingshot clones the unit's monitors; F4), so measurement-triggered policies
+do not see their utilisation.
 :::
 
 ## What is supported
@@ -52,8 +54,52 @@ simoxide run --model DIR --max-sim-time 100 --spd-log spd.jsonl
 | `--spd-quirks fixed\|slingshot\|Q2,Q12,…` | Slingshot's quirks to reproduce (default `fixed`: none) |
 | `--no-spd` | ignore the `.spd` file |
 
-The flags need the `spd` feature of `simoxide-cli` (on by default). After the run the CLI
-prints the number of policies, evaluations and requests.
+The flags need the `spd` feature of `simoxide-cli` (on by default). The adjustments run in a
+build with the `reconfiguration` feature (`cargo build --release -p simoxide-cli --features
+reconfiguration`); without it the run makes the decisions only and reports every adjustment
+as not executed. After the run the CLI prints the number of policies, evaluations, requests
+and executed adjustments (`adjusted=`).
+
+| Flag | Meaning |
+|---|---|
+| `--qvto-mode auto\|ordered\|fast` | QVTo's mode for the adjustments: `auto` = `ordered`, the collection order of the Slingshot reference's `det` mode; `fast` is the throughput option (equal on every corpus case) |
+
+At a resume, `simoxide resume FILE --model DIR --enforce POLICY,...` enforces policies (by
+name or id): their adjustments are requested at the resume time, past triggers and
+constraints, as Slingshot's initialisation extension enforces a state's incoming policies. They
+run after the events already queued for that time and appear in the decision log with
+`"enforced":true`; they change no cooldown, interval or thrashing state. `--change` and
+`--transform` steps at the resume of an SPD run use the adjustments' QVTo state (one per run,
+the snapshot's section `qvto`).
+
+## Adjustments
+
+Each executed request runs `MainTransformation.qvto` as Slingshot's
+`SpdAdjustmentBehavior` does:
+
+1. `Configuration.enactedPolicy` of the semantic configuration is set to the request's policy;
+   the container and allocation lists are copied.
+2. The transformation runs on the run's model graph with Slingshot's bindings (allocation,
+   system, resource environment, repository, semantic configuration and usage model `inout`, the
+   SPD `in`, every model of each metamodel) and `keepModeling = true`. Objects it creates get
+   distinct, seeded ids (Slingshot's generated classes give each a UUID; the transformation
+   compares ids).
+3. Its changes go through the change path (as a reconfiguration rule's). On success the outcome
+   is Slingshot's `ModelAdjusted`: the old, new and deleted containers, the new allocation
+   contexts and the monitors Slingshot clones for the new containers (the change count of the
+   log). The target groups' members are read from the changed model.
+
+A transformation that fails (`assert fatal`) reports `ok: false`; what it changed before stays
+(Slingshot transforms in place). The transformations are embedded in SimOxide (Slingshot's
+transformation bundle at a pinned commit, licence pending confirmation) and compiled once per
+process.
+
+**Scale-out** appends copies of the unit container (`<unit>_<n>`), each with a copy of the
+unit's assemblies, their allocation, connectors and a load-balancer branch; the branch
+probabilities become `1/n`. **Top-down** (a service group or competing consumers as the target)
+adds assemblies first and containers as the placement needs them. **Scale-in** removes the
+newest elements (F4, above).
+
 
 ## Fixed behaviour and compat flags
 
@@ -66,14 +112,20 @@ proposal that is not confirmed yet.
 | Q1 | a disregard does not restore the adjustor state | restored; no filter before the adjustor changes the state, so both behave the same |
 | Q2 | constraint state (cooldown, last enactment) changes when the request is made | changes only when the adjustment succeeds |
 | Q3 | AVERAGE is an EMA, the others use the last 10 values | kept (*provisional*) |
-| Q4 | relative 0 % ignores `minAdjustmentValue` | 0 stays 0, otherwise at least `minAdjustmentValue` in the direction of the percentage (*provisional*; used by the Q9 check) |
+| Q4 | a relative change below the minimum ignores `minAdjustmentValue` when it is not positive | 0 stays 0, otherwise at least `minAdjustmentValue` in the direction of the percentage (*provisional*; the Q9 check and a patched `AdjustmentCalculator.qvto`) |
+| Q6 | after an adjustment every linking resource connects every container | a new container joins the links its unit is connected to, appended; other links keep their containers (*provisional*; patched `ResourceEnvironmentTransformation.qvto`) |
+| Q7 | a top-down scale-in removes the containers it empties one enactment late | removed in the same enactment (*provisional*; patched `TopDownTransformationInfrastructure.qvto`) |
 | Q9 | only thrashing constraints are in the chain | group-size constraints too: a policy whose change would be clamped to zero is disregarded (*provisional*) |
 | Q11 | an unsupported stimulus or trigger throws at set-up: the whole SPD is dropped | a configuration error naming it |
 | Q12 | composed triggers: AND resumes after a failed child, OR never evaluates its children and parks the chain, XOR inverts after the first child; two measurement stimulus kinds run the chain twice | AND / OR / XOR (exactly one) of the children's results, every child evaluated, one evaluation per event |
 | Q13 | all elements of the group feed one window; any measurement reaching the checker reads it; reading consumes the EMA's emit slot | one window per measuring point, the aggregation over their values; only the stimulus' metric is evaluated; the slot is consumed when the policy fires (*provisional*) |
 | Q15 | every policy of a target group receives every time event of the group | only its own |
 
-The quirks of the adjustment (Q5-Q8, Q14, Q16) belong to phase P2.
+The patched transformations are marked "PATCHED by SimOxide"; with the flag on, Slingshot's
+unchanged file runs (`--spd-quirks slingshot` runs Slingshot's bundle as it is). Q8 and Q16
+(the order of sets in the transformation) follow QVTo's mode: the ordered mode equals the
+reference's `det` order. Q5 and Q14 (what a scale-in does to jobs and monitors) belong to the
+change path (F4).
 
 ## Decision log
 
@@ -84,18 +136,18 @@ One JSON object per line, in the format of the Slingshot reference runner's `spd
 ```json
 {"k":"policy","id":"_7VIU0MAgEe6AcKIPVXJsSw","name":"Basic Point in Time Trigger","active":true,"target_group":"_DC8fM8pgEe6u3p81um7oyQ","adjustment":"StepAdjustment","trigger":"SimpleFireOnValue","chain":["TargetGroupChecker","SimulationTimeChecker","Adjustor"]}
 {"k":"eval","t":50.0,"ev":"SimulationTimeReached","policy":"_7VIU0MAgEe6AcKIPVXJsSw","filters":[["TargetGroupChecker","ok"],["SimulationTimeChecker","ok"],["Adjustor","ok"]],"request":true}
-{"k":"adjust","t":50.0,"policy":"_7VIU0MAgEe6AcKIPVXJsSw","policy_name":"Basic Point in Time Trigger","ok":false,"size_before":1,"size_after":1}
+{"k":"adjust","t":50.0,"policy":"_7VIU0MAgEe6AcKIPVXJsSw","policy_name":"Basic Point in Time Trigger","ok":true,"changes":4,"before":{"containers":[["AppServer","_GAeeUCpXEeKNWc2UWjbmuw"],["Loadbalancer_RC","_R8hGoLwqEe6VP9cIU1FUYw"]],"links":[["LinkingResource1","AppServer","Loadbalancer_RC"]],"allocation":[...],"target_groups":[...]},"after":{"containers":[["AppServer","_GAeeUCpXEeKNWc2UWjbmuw"],["AppServer_1","~ResourceContainer:AppServer_1"],["Loadbalancer_RC","_R8hGoLwqEe6VP9cIU1FUYw"]],...},"size_before":1,"size_after":2}
 ```
 
 | `k` | Written | Fields |
 |---|---|---|
 | `policy` | when the policy's handler runs the first time | id, name, target group, adjustment and trigger class, the chain's filter classes |
 | `eval` | per evaluation (not those the target-group check rejects, unless `--spd-log-all`) | time, event (`SimulationTimeReached`, `MeasurementMade`), the filters that ran with `ok`, `disregard` and Slingshot's reason, `null` or `exception`, and whether a request came out |
-| `adjust` | when a request is executed | time, policy, success, the target group's size before and after. In P1 nothing is executed: `ok` is `false` |
+| `adjust` | when a request is executed | time, policy, success; Slingshot's change count (`changes`: the environment and allocation changes and one per cloned monitor) and the model summaries `before` and `after` (the containers with their ids, `~Class:name` for created ones; the links with their containers; the allocation contexts; the target-group configurations' elements; each in model order, as the reference runner's); the target group's size before and after; `enforced` for an enforced policy. Without the `reconfiguration` feature nothing is executed: `ok` is `false` |
 
-On the time-triggered models of the Slingshot reference runner, the decision log with
-`--spd-quirks slingshot` equals the runner's `spd.jsonl` (projected), see
-[Testing](../correctness/testing.md).
+On the time-triggered models of the Slingshot reference runner (`corpus-spd/`), the decision
+log with `--spd-quirks slingshot` equals the runner's `spd.jsonl`, the adjustments' change
+counts and model summaries included, see [Testing](../correctness/testing.md).
 
 ## Library
 
@@ -108,11 +160,16 @@ On the time-triggered models of the Slingshot reference runner, the decision log
   calls `Spd::on_timer`, `Spd::on_measurement` and `Spd::adjusted`;
 - `simoxide_spd::sim::SpdRun` is that host for `simoxide-sim`: it observes the series the
   triggers read, schedules the time events as external notes of the event list, queues requests
-  at the current time and hands them to an `Adjuster` (P1: `NoAdjustment`). `run_until` and
-  `fork` pause and fork the run with its SPD state.
+  at the current time and hands them to an `Adjuster` (`simoxide-reconf`'s
+  `QvtoAdjuster::spd`: Slingshot's adjustment; `NoAdjustment`: decisions only). `run_until`
+  and `fork` pause and fork the run with its SPD state; `enforce_policies` queues enforced
+  requests; `snapshot_value` and `restore_snapshot` write and read it (with the adjuster's
+  QVTo state: `QvtoRun::snapshot_section`, `restore_section`). It runs both flavours.
+- `simoxide_spd::adjusted`: Slingshot's `ModelAdjusted` and the model summary, for other hosts.
 
 ```rust
-use simoxide_spd::{Quirks, log::VecLog, sim::{NoAdjustment, SpdRun, spd_of}};
+use simoxide_reconf::{QvtoAdjuster, QvtoCore, SpdAdjust};
+use simoxide_spd::{Quirks, log::VecLog, sim::{SpdRun, spd_of}};
 use simoxide_sim::{CompiledModel, Outputs, RunSpec, Simulation};
 let spec = RunSpec::default();
 let model = spec.load_model("model-dir".as_ref())?;
@@ -121,7 +178,10 @@ let cm = CompiledModel::compile(model)?;
 let mut cfg = spec.sim_config("run");
 cfg.max_sim_time = 100;
 let mut run = SpdRun::new(Simulation::new(&cm, cfg, Outputs::default())?, &spd)?;
+// one core per process: it compiles the embedded transformations once
+let core = QvtoCore::new()?;
+let mut adjuster = QvtoAdjuster::spd(&core, &SpdAdjust::new(&spd.quirks()))?;
 let mut log = VecLog::default();
-run.run(&mut NoAdjustment, &mut log)?;
+run.run(&mut adjuster, &mut log)?;
 print!("{}", log.to_jsonl());
 ```

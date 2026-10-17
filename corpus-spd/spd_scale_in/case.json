@@ -1,0 +1,7 @@
+{
+ "model": "reference/slingshot/models/spd_scale_in",
+ "sim_time": 150,
+ "seed": 1,
+ "group": "spd",
+ "waits_for": "F4"
+}

@@ -227,6 +227,32 @@ differs from SimuLizar 5.2.2 itself:
   default), SimuLizar's in Java identity-hash order, which differs from run to run; the reference
   is patched to insertion order (P10, MC-7.6).
 
+### Scaling policies (SPD)
+
+With a `.spd` next to the model ([Scaling policies](../guide/spd.md)) and the adjustments
+running (`reconfiguration` feature):
+
+- **SimuLizar flavour.** The policies read SimuLizar's measurements (window utilisation, not
+  Slingshot's instantaneous samples) and the run follows SimuLizar's semantics; there is no
+  reference for this combination. The adjustment itself is Slingshot's transformation, so the
+  model after each adjustment equals Slingshot's (with the compat flags on).
+- **Fixed behaviour** (the default, *provisional*): patched copies of three transformation files
+  fix Q4, Q6 and Q7 (the [quirk table](../guide/spd.md#fixed-behaviour-and-compat-flags)); with
+  Q6 fixed the links differ from Slingshot's after a scale-out (the new container is appended to
+  its unit's links only).
+- **Ids** of created objects are seeded UUIDs, not Slingshot's; the decision log shows created
+  elements as `~Class:name`, as the reference runner does.
+- **Monitors of new containers** are counted in `changes` as Slingshot clones them, but not
+  created until phase F4: new containers have no measurement series.
+- **Scale-in and the Slingshot flavour**: the change path refuses removed containers and
+  allocation contexts, and every change in the Slingshot flavour, until phase F4; the run ends
+  with that error (Slingshot removes them; SimOxide's default will be to drain, Q5).
+- **Enforced policies** at a resume run at the resume time behind the events already queued for
+  it; Slingshot restarts the time base and schedules them first.
+- **Change steps at the resume of an SPD run** use the adjustments' QVTo state: a transformation
+  that does not complete keeps what it changed (as the adjustments do), instead of being
+  discarded as in runs without SPD.
+
 ### Virtual-time processor sharing
 
 `PsAlgorithm::VirtualTime` (CLI `--ps-algorithm virtual-time`, default `exact`) serves processor

@@ -153,6 +153,8 @@ struct CoreInner {
     derivations: Vec<qvto_model::MetaDerivation>,
     /// Implementation keys of Palladio's `ProfilesLibrary` operations (stubs).
     profile_keys: Vec<String>,
+    /// Transformations compiled once per core ([`QvtoCore::compiled`]).
+    memo: std::sync::Mutex<Vec<(String, Transformation)>>,
 }
 
 /// Builds a [`QvtoCore`].
@@ -196,6 +198,7 @@ impl CoreBuilder {
             derivations: template.derivations(),
             template,
             profile_keys,
+            memo: std::sync::Mutex::new(Vec::new()),
         })))
     }
 }
@@ -369,6 +372,23 @@ impl QvtoCore {
         })))
     }
 
+    /// The transformation compiled under `key` by this core: `compile` runs on the first
+    /// request (e.g. the embedded SPD transformations, `crate::spd`), later requests share its
+    /// result. A failed compilation is not kept.
+    pub fn compiled(
+        &self,
+        key: &str,
+        compile: impl FnOnce(&QvtoCore) -> Result<Transformation, ReconfError>,
+    ) -> Result<Transformation, ReconfError> {
+        let mut memo = self.0.memo.lock().unwrap_or_else(|e| e.into_inner());
+        if let Some((_, t)) = memo.iter().find(|(k, _)| k == key) {
+            return Ok(t.clone());
+        }
+        let t = compile(self)?;
+        memo.push((key.to_string(), t.clone()));
+        Ok(t)
+    }
+
     /// Gives a model graph the QVTo state of this core, once (the registry with the core's
     /// metamodels, their metamodel objects for `eClass()`, the id policy of new objects): for
     /// running the core's transformations on a graph outside a simulation. A run's graph gets
@@ -434,6 +454,11 @@ impl Transformation {
 
     pub fn params(&self) -> &[ParamInfo] {
         &self.0.params
+    }
+
+    /// Both are the same compilation (clones of one [`Transformation`]).
+    pub fn same(&self, other: &Transformation) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
     }
 }
 

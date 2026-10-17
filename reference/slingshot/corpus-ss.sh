@@ -6,6 +6,7 @@
 #
 #   ./corpus-ss.sh [NAME...]            run det once per case and (re)write corpus-ss/<name>/expected/
 #   ./corpus-ss.sh --check [NAME...]    run det again (a fresh JVM) and compare with expected/
+#   CORPUS=corpus-spd ./corpus-ss.sh ...  the same for the SPD corpus corpus-spd/ (DESIGN-SPD.md P2)
 #
 # expected/: measurements.csv, projection.jsonl (level E; level M is its subset), tape-projection.jsonl
 # (tools/project.py), errors.txt (handler exceptions, tools/errors.py), summary.json (sorted keys),
@@ -16,12 +17,12 @@ set -uo pipefail
 H="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$H/env.sh"
 R="$(cd "$H/../.." && pwd)"
-C="$R/corpus-ss"
+C="$R/${CORPUS:-corpus-ss}"
 check=0
 [ "${1:-}" = --check ] && { check=1; shift; }
 names=("$@")
 [ ${#names[@]} -gt 0 ] || names=($(cd "$C" && ls -d */ | tr -d /))
-W="$B/corpus-ss"; mkdir -p "$W"
+W="$B/${CORPUS:-corpus-ss}"; mkdir -p "$W"
 FILES="measurements.csv projection.jsonl tape-projection.jsonl errors.txt summary.json spd.jsonl error.txt"
 fail=0
 field() { python3 -c "import json,sys; print(json.load(open(sys.argv[1]))[sys.argv[2]])" "$1" "$2"; }

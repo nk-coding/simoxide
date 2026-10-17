@@ -793,9 +793,9 @@ The N3a spike corrected and extended this section from the code and real snapsho
   the three classes with overlapping parameter types reify to disjoint types. The bus itself
   refuses equal (type, reified) pairs in one class. So `getDeclaredMethods()` order cannot change
   a run (SS-BUS-2).
-- **SPD corpus in `det`.** The P2 corpus `corpus-spd/` does not exist yet; the three SPD example
-  models run in `det` as part of `corpus-ss/` (1, 2 and 8 adjustments, decision records in
-  `spd.jsonl`). `corpus-spd/` joins when P2 builds it.
+- **SPD corpus in `det`.** The three SPD example models run in `det` as part of `corpus-ss/` (1, 2
+  and 8 adjustments, decision records in `spd.jsonl`); P2's `corpus-spd/` holds them and
+  `spd_service_group` (`CORPUS=corpus-spd corpus-ss.sh`, 5.4 "P2 as built").
 
 ### 4.2 Validation levels
 
@@ -1466,6 +1466,100 @@ This follows plan D1-D4 (`history/qvto-simoxide-integration.md` §3), with these
   (container, link, allocation and target-group order equal the `det` runs); it also shows two
   candidates for the quirk list (the parentless `RequiredDelegationConnector`s, duplicate names
   across adjustments).
+
+**P2 as built** (2026-10-17, branch `p2`; guide `docs/guide/spd.md`, "Adjustments"; tests
+`simoxide-reconf/tests/spd_adjust.rs`, `simoxide-cli/tests/spd_cli.rs`). Done except what needs
+F4 (listed below).
+
+- **Transformations** (`simoxide-reconf/src/spd.rs`): the 17 units of Slingshot's bundle are
+  embedded with `include_str!` from the licence-headed copies in
+  `crates/qvto/qvto-testkit/corpus/spd/transformations` (U3: source, revision, "licence pending
+  confirmation"); an in-memory `UnitResolver` resolves `pcm.helpers.*`/`spd.*`. Patched copies
+  for the provisional fixed behaviours in `simoxide-reconf/transformations/spd-fixed` (headed
+  "PATCHED by SimOxide", changes marked `SimOxide Qn`): Q4 `AdjustmentCalculator` (0 stays 0,
+  otherwise at least the minimum in the percentage's direction, as P1's arithmetic), Q6
+  `ResourceEnvironmentTransformation` (a link keeps its remaining containers in order; a link
+  the unit is on gets the new elements appended), Q7 `TopDownTransformationInfrastructure`
+  (allocations that `modifyAllocationOnScaleIn` removes in this enactment do not count, so
+  emptied containers go now). `SpdVariant` (from `Quirks::{q4_relative_zero, q6_all_links,
+  q7_late_removal}`, new flags Q6/Q7) picks per unit; `Quirks::slingshot()` runs the unchanged
+  bundle. `main_transformation(core, variant)` compiles once per core (`QvtoCore::compiled`,
+  a per-core memo).
+- **Adjuster.** `QvtoAdjuster::spd(core, &SpdAdjust)`: QVTo `Ordered` by default (`Fast` an
+  option; compat never needed), `keepModeling=true`, Slingshot's binding, seeded ids for every
+  created PCM object (F3's `IdPolicy::Uuid`), `FailedRunChanges::Keep`. `SlingshotHooks`:
+  `prepare` (new `AdjustHooks` method: the run's base graph, for the summaries' input ids),
+  `before` sets `enactedPolicy` and captures the lists and the summary, `after` computes
+  `ModelAdjusted`, refreshes `Membership`, reports `ok`, sizes, `changes`, summaries.
+- **`simoxide-spd`.** `adjusted.rs`: `Before::capture`, `ModelAdjusted::compute` (old/new/deleted
+  containers, new allocation contexts, `monitor_clones` as `ResourceContainerMonitorCloner`
+  would create them: unit-container monitors, then same-type processing-resource monitors, ids
+  compared; `changes()` = 2 + clones), `summary` (the reference runner's `SpdObserver.summary`,
+  `~Class:name` keys for created elements). `AdjustOutcome` (now in `interp`, not `Copy`) carries
+  `changes`, `before`, `after`, `adjusted`; `Spd::adjusted_with`; the log's `adjust` record writes
+  them (`project_with_models` keeps them for comparisons). `SpdRun` is generic over the flavour
+  (`SpdRun<'m, 's, C, F = SimuLizar>`), observes series a changed model appends (after each
+  adjustment and `model_changed`), and restores its series map from the run's current model.
+- **`enforce_policies`** (N2's hook): `Spd::enforce` builds a request past chain and constraints
+  (`AdjustmentRequest::enforced`; an inactive policy has `ctx = usize::MAX`); the requests are
+  queued at the current time; their outcome commits no state (Slingshot's adjustor never sees
+  them); log records carry `"enforced":true`. Errors: `UnknownPolicy`, `NoTargetGroup`
+  (nothing queued). CLI `resume --enforce`.
+- **CLI.** With `spd` and `reconfiguration` the SPD run uses `QvtoAdjuster::spd` (`--qvto-mode`,
+  `auto` = ordered); one QVTo state per SPD run (the snapshot's `qvto` section, also for
+  `--change`/`--transform` at its resume); prints `adjusted=N`. Without `reconfiguration`:
+  decisions only, as before. The Slingshot flavour still refuses SPD (F4/P3).
+- **Snapshots.** An SPD run with adjustments (sections `engine`, `model`, `spd`, `qvto`) restores
+  and continues byte for byte; found and fixed: a restored graph wrote its placeholder resources
+  (the QVTo prototype's metamodel documents) under `simoxide:/snapshot-placeholder/{i}`, so a
+  restored run did not write the bytes it was read from. Placeholders now keep the original URI
+  (`simoxide:/snapshot-placeholder/{i}?{uri}`) and save as the foreign resource they stand for
+  (`simoxide-model/src/persist.rs`).
+- **SimuLizar flavour end to end.** The default path (ordered QVTo, fixed Q6) adds the replica
+  without moving a container inside a link list, so SimuLizar's router accepts it (F3's MC-2.3
+  abort was compat mode's HotSpot-hash order); also with all flags on (ordered and fast) the
+  minimal example, the time policies and the service group run. The Slingshot models' utilisation
+  monitors need a `TimeDriven` processing type there: the tests use copies with one.
+- **V3** (corpus `corpus-spd/`, `det` outputs written by `CORPUS=corpus-spd
+  reference/slingshot/corpus-ss.sh`, byte-equal to `corpus-ss/`'s for the three shared models;
+  SimuLizar flavour, all compat flags on, ordered and fast mode): decision log equal to
+  `spd.jsonl` including every `adjust` record's `changes`, `before` and `after` (scale times,
+  container, link, allocation and target-group names and order):
+
+  | Case | Records | Adjustments equal |
+  |---|---|---|
+  | `spd_minimal` | 3 | 1 of 1 |
+  | `spd_time_policies` | 64 | 8 of 8 |
+  | `spd_service_group` (new: top-down +1, +2, then bottom-up +1) | 11 | 3 of 3 |
+  | `spd_scale_in` | 7 of 8 | 1 of 2: the scale-in at 80 s waits for F4 |
+
+- **Other tests.** Fixed behaviour (minimal example's links per Q6); Q4/Q7 patches by dry runs
+  on the Q1 corpus' states (Q4: -10 % with minimum 2 on three containers removes 0 vs 2; Q7: a
+  top-down scale-in removes the emptied container at once); snapshots at eight times
+  (`spd_time_policies` Slingshot, `spd_minimal` fixed) with fresh adjusters, re-written bytes
+  equal; bounded growth: 40 enforced scale-outs add 12 objects each, journals stay flat; the
+  Slingshot flavour's refusal; `enforce` in `simoxide-spd/tests/sim.rs`; the CLI in new
+  processes.
+- **Waits for F4** (each a test that asserts today's refusal and the records before it):
+  scale-in in any form (`AllocationLookupSyncer cannot remove an allocation context`: corpus case
+  `spd_scale_in` from 80 s, `spd_time_policies` with the fixed behaviour from its first
+  scale-in), the Slingshot flavour (`slingshot_flavour_waits_for_f4`), monitors of new containers
+  (counted in `changes`, not created; then measurement-triggered policies on new containers),
+  add-and-remove in one adjustment.
+- **Gates.** `golden.sh` identical (312 runs, `cargo build-exact`, against `spd` fb03e7d);
+  `cargo test --release --workspace --features exact` 574 passed, 0 failed (566 before; +6
+  `spd_adjust`, +2 `spd` unit tests; `simoxide-cli`'s `spd_cli` runs with `reconfiguration`);
+  `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; `cargo conform --suite all` 589/589 (fast
+  584, ordered 583, unchanged), sema oracle unchanged, `test-qvto` 90; fmt and clippy `-D
+  warnings` clean (default, `exact,hotspot-math`, `compat`; `simoxide-cli` with
+  `reconfiguration` and `exact,reconfiguration`; `simoxide-reconf` and `simoxide-spd` without
+  default features); release check: 0 opt-in crates in `simoxide-cli` and `qvto-cli`. Timing
+  deferred; sanity: the CLI runs the minimal example with its adjustment (core, compilation, run)
+  in 13 ms wall.
+- **For X2d and P3.** `simoxide_spd::adjusted` (`Before`, `ModelAdjusted` with new/deleted
+  container names for `spd_adjusted`, `monitor_clones` for the `MonitorChange`s, `summary`),
+  `QvtoAdjuster::spd` callable from any `Simulation<C, F>` (`Adjuster<C, F>`), `SpdRun` over any
+  flavour, `Spd::enforce`.
 
 ### 5.5 QVTo host for both flavours (`simoxide-reconf`)
 
@@ -2249,8 +2343,8 @@ resume with changes, change files, exploration). Done except the P2 part (enforc
   rules added to a run without rules = `RulesRun::new(restored, host)`. SPD: `SpdRun::
   model_changed` (membership from the changed model), `SpdRun::enforce_policies(names)`: the
   hook for Slingshot's incoming policies; it checks the names (`EnforceError::UnknownPolicy`) and
-  returns `EnforceError::Unsupported` until P2 executes adjustments (then: queue a request per
-  policy at `now`, past triggers and constraints, as `SnapshotInitFromBehaviour` does).
+  returned `EnforceError::Unsupported` until P2; P2 queues a request per policy at `now`, past
+  triggers and constraints, as `SnapshotInitFromBehaviour` does (5.4 "P2 as built").
 - **CLI.** `simoxide resume FILE --model DIR [--change F.changes]... [--transform X.qvto]...
   [--rules DIR] [--enforce P,...] [--until T | --pause-when C ...] [--snapshot FILE2]`: the
   steps run in command-line order after the restore (plain, SPD and rules runs; transformations
@@ -2539,11 +2633,11 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **X2** | *a-c and e done 2026-10-17, d open* (findings: 5.2 "X2 as built"; d needs P2 and F4's Slingshot syncers). Slingshot-exact mode, **level E directly** (U14): the per-handler cascade as a FIFO queue of handler steps (insertion-ordered results, FIFO after queued events, direct `MeasurementMade`), double time, PS stale-event samples and zero-demand jiffy, `java.util.Random` branch stream, `SimulationFinished` order, all 37 quirk flags on, **handler disposal** (Q18: a disposed bit per handler, Slingshot's partial side effects up to each throw: Q17, Q19, Q21-Q24, Q30, Q31, Q37), level-E projection writer | S2, X1 | 7-10 w (a: handler-step queue, event order and time, 2-3 w; b: resources and monitoring, 1.5-2 w; c: handler disposal and the throwing quirks, 1.5-2.5 w; d: SPD events, 1 w; e: level-E projection and corpus debugging, 1-1.5 w) | V3x: level-E projection, tape (with positions) and measurements byte-equal with `det` on the Slingshot corpus, including the 22 models with handler errors. *Status:* 86 of 90 `corpus-ss/` cases (85 in the EPL build), 21 of the 22 handler-error cases; h27 (`HashMap` order) and h21 in the EPL build are licence-bound, the 3 SPD cases wait for X2d |
 | **Q2** | *Done 2026-10-17* (findings: 5.5 "Q2 as built"). qvto-rs insertion-order policy for `Set`s (the `det` oracle's QVTo/OCL rule), opt-in for the Slingshot-exact mode: `Mode::Ordered` (EPL) | Q1 | 3-5 d | met: SPD corpus adjustments equal the `det` Java runner's byte for byte, including container and link order (Q16); also the whole suite (589/589) and the 13 adjustments of the S0 Slingshot `det` runs |
 | **P1** | *Done 2026-10-17* (findings: 5.4 "P1 as built"). SPD interpreter: model view, filters, aggregators, state, stimulus observers, time events | F0 (F1 for state) | 1.5-2 w | met: V1 unit tests; decision log equals the reference runner's on the time-triggered models (5 SPD models, 83 records, compat flags on) |
-| **P2** | SPD adjustment via `MainTransformation`; `ModelAdjusted` diff; corpus `corpus-spd/` with reference outputs | P1, F3, F4 | 2 w | minimal example: same scale time, container and assembly names, models as Slingshot's (V3) |
+| **P2** | *Done 2026-10-17 except the F4 part* (findings: 5.4 "P2 as built"; scale-in, the Slingshot flavour and monitors of new containers wait for F4). SPD adjustment via `MainTransformation`; `ModelAdjusted` diff; corpus `corpus-spd/` with reference outputs | P1, F3, F4 | 2 w | met for scale-out: minimal example (and `spd_time_policies`, `spd_service_group`): same scale time, container and assembly names, models as Slingshot's (V3, model summaries of every adjustment equal); `spd_scale_in` up to its scale-in (F4) |
 | **P3** | SPD in the Slingshot flavour end to end; statistical scenarios; exact SPD runs (with X2, Q2) | P2, S2 | 1.5-2.5 w | V4 on utilisation and response-time scenarios; V3x on the SPD corpus |
 | **Q1** | *Done 2026-10-17* (findings: 5.5 "Q1 as built"). qvto-rs: SPD adjustment corpus for every path (V2) incl. service group, competing consumers, scale-in: 47 cases, 73 of 105 operations (all of `MainTransformation`'s call graph) | — | 3-5 d | met: strict match with the Java runner (47/47, also on identity-hash-dependent outputs); two engine discrepancies and three harness ones fixed |
 | **N1** | *Done 2026-10-17* (findings: 5.7 "N1 as built"). Snapshot serialisation: serde of `RunState`, XMI writer for the overlay, versioned format | F1, F2 | 1.5 w | met: serialize → deserialize → identical continuation, byte for byte, on every model directory in exact and fast mode and both flavours (Slingshot-exact engine: refused, no pause yet), after model changes, with SPD, with SimuLizar rules and a QVTo state; deterministic bytes |
-| **N2** | *Done 2026-10-17 except the P2 part* (findings: 5.7 "N2 as built"; enforced policies: a hook that refuses until P2). Pause/resume API with change sets, enforced policies, snapshot conditions (duration, trigger, threshold) | N1, P2 | 1 w | met: resume-with-change tests (change files, QVTo transformations, rule sets; byte-equal to the in-process change, exact and fast; the Slingshot flavour refuses until F4); pause-condition tests; fork-based exploration example (`explore.rs`, `simoxide explore`), deterministic |
+| **N2** | *Done 2026-10-17* (findings: 5.7 "N2 as built"; enforced policies built in P2, 5.4 "P2 as built"). Pause/resume API with change sets, enforced policies, snapshot conditions (duration, trigger, threshold) | N1, P2 | 1 w | met: resume-with-change tests (change files, QVTo transformations, rule sets; byte-equal to the in-process change, exact and fast; the Slingshot flavour refuses until F4); pause-condition tests; fork-based exploration example (`explore.rs`, `simoxide explore`), deterministic |
 | **N3** | Slingshot `.snapshot`/`.config`/`.state` interop: a: spike on the format mapping; b: export/import. *a done 2026-10-17: go for the fast flavour, export first, lossy* (5.7 "N3a spike"; real `.snapshot`s written and read back on 8 of 10 models; the MENTOR app is not available locally) | N2, S2 | a: 3 d; b: 2-3 w (export + `.config` + lite `.state`: 2.5-3 w; both directions 4-5 w) | a: met (verdict in 5.7); b: round trip with the MENTOR app on a model (if U7) |
 | **B1** | Benchmarks of §6 (both Slingshot modes) and docs pages | S2, X2, P3, N2 | 1-1.5 w | tables in `docs/performance/` |
 | **D** | Docs: guide pages (SPD, reconfiguration, snapshots, flavours), spec rules, deviations | continuous | +10 % | — |
