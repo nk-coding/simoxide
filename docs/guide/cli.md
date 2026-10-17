@@ -39,6 +39,8 @@ simoxide run --model <dir> [flags]
 | `--no-spd` | ignore a `.spd` file of the model |
 | `--rules DIR`, `--rules-log FILE` | run SimuLizar's reconfiguration rules of `DIR` (default: `run.json`'s `reconfiguration_rules`) and log each reconfiguration; feature `reconfiguration` ([Reconfiguration rules](./reconfiguration.md)) |
 | `--qvto-mode auto\|fast\|compat` | QVTo's mode for the rules, default `auto` (compat in builds with `exact` or `compat`) |
+| `--pause-at T`, `--pause-before T`, `--pause-events N` | stop between two events: after every event at or before `T` s, before the first event at or after `T` s, or after `N` events; prints `paused t=...` and writes the measurements so far ([Snapshots](./snapshots.md)) |
+| `--snapshot FILE`, `--snapshot-format postcard\|json` | write the paused run to `FILE` ([Snapshot format](../formats/snapshot.md)) |
 
 Limits (see [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)):
 
@@ -54,6 +56,18 @@ On success, `run` prints a summary line on stderr (`t_end`, `events`, `uniforms`
 `measurements`, `main_count`, wall time) and exits with 0. A load, compile or simulation error
 exits with 1 (`error: ...`), a usage error with 2. Compile warnings, for example about monitors
 that cannot be recorded, are printed as `warning: ...`.
+
+## `simoxide resume`
+
+```sh
+simoxide resume FILE --model DIR [--trace F] [--tape F] [--measurements F]
+                [--pause-at T | --until T ... --snapshot FILE2] [--spd-log F] [--rules DIR]
+simoxide snapshot-info FILE
+```
+
+Continues a snapshot on the model it was taken of (checked by fingerprint); mode, flavour and
+compat flags come from the snapshot. The outputs receive the continuation only. See
+[Snapshots](./snapshots.md).
 
 ## `simoxide bench`
 
@@ -104,6 +118,7 @@ See [Testing](../correctness/testing.md) and [Test kit](../development/testkit.m
 | `simoxide-cli` | `profile` | `--profile` on `bench` and `load-bench` |
 | `simoxide-cli` | `mimalloc` | mimalloc as the global allocator |
 | `simoxide-cli` | `reconfiguration` | `--rules`: SimuLizar's reconfiguration rules (`simoxide-reconf` and the QVTo engine) |
+| `simoxide-sim`, `simoxide-spd`, `simoxide-reconf` | `snapshot` (off; always on in `simoxide-cli`) | snapshots of runs (serde, postcard; MIT/Apache-2.0) |
 | `simoxide-sim`, `simoxide-random` | `fast` (off) | the fast mode in the libraries |
 | `simoxide-random` | `rcp-table` | a recorded AMD Zen 5 `rcpss` table instead of the instruction ([Exactness](../correctness/#caveats)) |
 | `simoxide-random` | `fast-bracket` | galloping bracket search for inverse CDFs (not proven exact) |

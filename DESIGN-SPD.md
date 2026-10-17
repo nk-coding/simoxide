@@ -1994,6 +1994,124 @@ together with the immutable `Arc<CompiledModel>`. Then:
   for the MT19937 state (`simoxide-random`) and the schedulers (`simoxide-sched`, generic
   `J`); `Shape` is only a size check and should become a content hash of the `CompiledModel`.
 
+**N1 as built** (2026-10-17, branch `n1`; guide `docs/guide/snapshots.md`, format
+`docs/formats/snapshot.md`):
+
+- **Format (version 1).** A magic line `SIMOXIDE-SNAPSHOT 1`, one JSON header line (format and
+  SimOxide version, mode, literal engine, flavour and compat flags, the base model's fingerprint,
+  the run model's generation and fingerprint, time, events, phase, traced, encoding, and the
+  sections with length and FNV-1a-64 checksum), then the sections. Encodings: postcard (default,
+  compact) or JSON (debugging; doubles bit for bit with serde_json's `float_roundtrip`,
+  non-finite values do not survive). Sections: `engine` (the `RunState`), `model` (after model
+  changes), `spd`, `rules`, `qvto` (layers above the engine add theirs; unknown ones are ignored).
+  No timestamps; maps in key order: the same state gives the same bytes. A snapshot is read by the
+  same SimOxide version only (the sections are internal state); version, model, mode and
+  flavour mismatches are distinct errors (`SnapshotError`).
+- **Model fingerprint** (`simoxide_model::persist::fingerprint`, `model_fingerprint`): two FNV
+  lanes over the graph's content (classes, ids, values, references, resource names; not paths or
+  lines) plus flavour and quirks. It replaces `Shape` for snapshots (`Shape` stays the in-memory
+  check of `resume`).
+- **`engine`.** serde derives behind the feature `snapshot` (`cfg_attr`, mechanical) on the
+  engine's state types in `sim.rs`, `sim/state.rs`, `sim/reconf.rs`, `sim/hooks.rs`, `events.rs`,
+  `meas.rs`, `windows.rs`, `javarand.rs`, `stats.rs`, `flavour.rs`, `code.rs`, `ir.rs`,
+  `compat.rs`; feature `serde` in `simoxide-sched` (schedulers, generic `J` with explicit bounds)
+  and in `simoxide-model` (typed ids only, `serde(transparent)`; the raw graph has none). The F1
+  blockers: frames and proxies as an arena in dependency order (`sim/snapshot.rs`, sharing kept);
+  `&'static str` fields are a type alias `ir::StaticStr` (so serde does not borrow) interned on
+  read; the MT19937 and xoshiro states through accessors (`simoxide-random`: `state`/`from_state`,
+  no serde there); `Limits::{deadline, cancel}` are not written; a replayed tape is part of the
+  configuration and the RNG keeps only its position; `SimRng::{save, load}`. Within-event
+  counters and pools are not written. A restored state is checked against the model's table sizes.
+- **`model` (U10).** After `apply_changes` the run's compiled model is not a fresh compilation of
+  its graph (the merge keeps old resources, appended instruction streams, the old allocation
+  lookups, dynamic paths, ...), so `build_from_graph_after` + `compile_seeded` alone cannot rebuild
+  it. The section holds: the generation; the build order; the graph as XMI documents with an object
+  table (`simoxide_model::persist::GraphXmi`, new: an EMF-form XMI writer for the raw graph, one
+  document per resource plus `detached-objects.xmi` for tombstones and unattached objects; the table
+  maps document elements to object ids and carries homes, lines, unresolved proxies and values XMI
+  cannot express); and the compiled tables by serde (StoEx programs by their text, keys by name,
+  the typed model and the finalisation orders rebuilt). Restore: load the documents with the
+  ordinary loader, renumber (the graph equals the saved one object for object, `same_graph`),
+  `build_from_graph_after(graph, ∅, order)`, recompile the programs, check the run model's
+  fingerprint. `write_xmi` is also the standalone XMI save of a resource. After M5 the documents
+  stay; the table maps to the shared graph's ids (or the graph's own serde replaces it).
+- **API.** `Simulation::{snapshot_to, snapshot_with, snapshot_value, restore_from,
+  restore_snapshot}`, `RunState::{serialize, deserialize}`, `Simulation::base_model` (a new field
+  `base` in `Simulation`: the fingerprint needs the base model after changes);
+  `SpdRun::{snapshot_to, restore_from}` (section `spd`: policy, group and window states,
+  membership, queued requests, counters, the interpreter's compat flags, checked on restore);
+  `RulesRun::{snapshot_to, restore_from(r, base, new host)}` (section `rules`);
+  `QvtoRun::{save_state, restore_state, snapshot_section, restore_section}` (section `qvto`).
+  CLI: `simoxide run --pause-at T|--pause-before T|--pause-events N --snapshot FILE
+  [--snapshot-format json]`, `simoxide resume FILE --model DIR [--until T --snapshot FILE2]`
+  (mode, flavour and quirks from the header; SPD and rules runs recognised by their sections;
+  the rules log and SPD log of each hop concatenate), `simoxide snapshot-info FILE`. The CLI always
+  has the `snapshot` feature.
+- **QVTo state.** The adapter's `Session` (a `qvto_emf` resource set) has no serialisation; the
+  state is "the run's graph (engine XMI) plus the id generator": `qvt::SessionState { ids }`
+  behind `RunSession::{save, restore}` (the one place M6 re-points), the journal is empty between
+  events, the PRM mirror is rebuilt by `RulesHost` with the same measurements in the same order
+  before the id generator is set. Adapter API added: `Session::{id_state, set_id_state}`. **What M6
+  must provide:** serde (or a save/restore) of the graph-resident QVTo state: the id policy's
+  generator state, the resources of other metamodels (PRM) with their handles, and the journal
+  position, so that the run's session is restored as it was instead of rebuilt.
+- **Slingshot-exact engine (`ssx`, merged from `spd` at 59484b7).** Not snapshotted: it has no
+  pause and resume (only `ssx::run`); the CLI refuses `--pause-at`/`--snapshot` for
+  `--flavour slingshot-exact` with an error. It needs: a pause API (the engine as a value with
+  `run_until`); its bus FIFO of handler steps and events; the `Rc<RefCell<…>>` graph of users,
+  behaviour contexts, SEFF contexts, holders, RPCs and requests and their Java-style mutable frames
+  as an arena that keeps identity (mutation through shared references, unlike the copy-on-write
+  frames of the other engine); the subscribers' disposed bits; its random streams (MT19937,
+  `java.util.Random`, the Palladio 6 samplers) and monitors. About 1 w after X2d.
+- **Tests (exit criterion).** `simoxide-sim/tests/snapshot.rs`: every model directory (104), each
+  run written at several pause points (event counts incl. same-instant splits, times), restored
+  into a fresh simulation each time, the last hop on another thread; the restored state must write
+  the bytes it was read from; output byte-identical to the uninterrupted run: exact with trace and
+  tape and without outputs (1 664 snapshots), fast (832), the Slingshot flavour in both modes on
+  every model it runs (104 models, 1 664), the literal engine and tape replays, JSON, after
+  model changes (three generations, a snapshot after the second and after a third change
+  following a restore, exact and fast: 197 runs), finished and failed runs, determinism (two runs
+  and a fork write equal bytes), refusals (model, mode, flavour, trace, format and SimOxide
+  version, checksum). `simoxide-model/tests/persist.rs`: every model directory's graph restores
+  object for object with the same typed model; changed graphs with detached subtrees, new and
+  unattached objects, proxies, `null` and mistyped values, odd strings; fingerprint independent of
+  the directory. `simoxide-spd`: snapshots at five points (postcard, JSON) equal the uninterrupted
+  SPD run (decision log, state, measurements, events), the five SPD reference models with
+  snapshots keep their decision logs, other interpreters are refused. `simoxide-reconf/tests/
+  snapshot.rs`: direct edits (F2 `Edit`: a new container and allocation, a rate change, a removal
+  with a tombstone; snapshots after each change and between, exact and fast); the QVTo state after
+  a rule ran (the next rule run creates the ids of the uninterrupted run; without the state they
+  repeat); the six `corpus-rules` examples with a fresh host at six pause points and while a
+  reconfiguration waits, byte-identical to the patched reference (exact build) and to the
+  uninterrupted fast run, rule records equal (72 snapshots). `simoxide-cli/tests/snapshot_cli.rs`:
+  `run --pause-at --snapshot` and `resume` in new processes (MediaStore three hops, a fork model,
+  the Slingshot flavour with quirks, an SPD model with its decision log, `lb_scaleout` with rules,
+  JSON hops), another model and the Slingshot-exact engine refused.
+- **Gates.** `golden.sh` identical (312 runs, exact build with `hotspot-math`, against `spd`
+  59484b7's binary); `cargo test --release --workspace --features exact` 586 passed, 0 failed (563
+  before: +4 `simoxide-model` persist, +9 `simoxide-sim` snapshot, +2 `simoxide-spd`, +3
+  `simoxide-reconf`, +6 `simoxide-cli`; QVTo's ignored reference material linked from the merge
+  checkout for the run); `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; fmt and clippy
+  `-D warnings` clean (workspace, all targets, default and `--features exact`; `simoxide-cli` with
+  `reconfiguration`, with `exact,reconfiguration`, without default features; `simoxide-reconf` and
+  `simoxide-spd` without default features; `snapshot` alone on sim, spd, reconf); release check:
+  `cargo tree -e normal` of `simoxide-cli` (also with `reconfiguration`) and `qvto-cli` lists no
+  opt-in crate (new dependencies serde, postcard, cobs, thiserror: MIT/Apache-2.0). Hot path: the
+  derives add impls only; a quick run of MediaStore (exact) and h20 (fast) against the base binary
+  is within noise (timing deferred). The CLI binary grows from 12.3 to 22.9 MB (the serde code of
+  four mode-flavour instantiations, two encodings).
+- **What N2 needs.** A change step between restore and continue (the CLI marks the place in
+  `snap::resume`): change sets from a file (direct edits, a QVTo transformation, an SPD or rule-set
+  change) applied with `apply_changes` on the restored run; enforced policies (adjustment events
+  queued at resume time, bypassing triggers); snapshot conditions as `run_while` predicates (time,
+  a policy's trigger, a threshold, an SLO) that write a snapshot; a fork-based exploration example
+  (snapshot once, restore many times with different changes; `Snapshot` is plain bytes, so
+  restores can run in parallel threads or processes).
+- **What N3 needs.** The `engine` section is SimOxide's internal state; the Slingshot `.snapshot`
+  export reads it through the `RunState` (processes with their continuation stacks and positions,
+  jobs with remaining demands, timers, adjustor states with times), not through the file format.
+  The header's mode, flavour and model fingerprint tell an importer what it has.
+
 ### 5.8 Performance considerations
 
 - Without SPD, rules or snapshots, nothing changes: the overlay is untouched, there are no
@@ -2096,7 +2214,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **P2** | SPD adjustment via `MainTransformation`; `ModelAdjusted` diff; corpus `corpus-spd/` with reference outputs | P1, F3, F4 | 2 w | minimal example: same scale time, container and assembly names, models as Slingshot's (V3) |
 | **P3** | SPD in the Slingshot flavour end to end; statistical scenarios; exact SPD runs (with X2, Q2) | P2, S2 | 1.5-2.5 w | V4 on utilisation and response-time scenarios; V3x on the SPD corpus |
 | **Q1** | *Done 2026-10-17* (findings: 5.5 "Q1 as built"). qvto-rs: SPD adjustment corpus for every path (V2) incl. service group, competing consumers, scale-in: 47 cases, 73 of 105 operations (all of `MainTransformation`'s call graph) | — | 3-5 d | met: strict match with the Java runner (47/47, also on identity-hash-dependent outputs); two engine discrepancies and three harness ones fixed |
-| **N1** | Snapshot serialisation: serde of `RunState`, XMI writer for the overlay, versioned format | F1, F2 | 1.5 w | serialize → deserialize → identical continuation (both flavours) |
+| **N1** | *Done 2026-10-17* (findings: 5.7 "N1 as built"). Snapshot serialisation: serde of `RunState`, XMI writer for the overlay, versioned format | F1, F2 | 1.5 w | met: serialize → deserialize → identical continuation, byte for byte, on every model directory in exact and fast mode and both flavours (Slingshot-exact engine: refused, no pause yet), after model changes, with SPD, with SimuLizar rules and a QVTo state; deterministic bytes |
 | **N2** | Pause/resume API with change sets, enforced policies, snapshot conditions (duration, trigger, threshold) | N1, P2 | 1 w | resume-with-change tests; fork-based exploration example |
 | **N3** | Slingshot `.snapshot`/`.config`/`.state` interop: a: spike on the format mapping; b: export/import | N2, S2 | a: 3 d; b: 2-3 w | a: go/no-go report; b: round trip with the MENTOR app on a model (if U7) |
 | **B1** | Benchmarks of §6 (both Slingshot modes) and docs pages | S2, X2, P3, N2 | 1-1.5 w | tables in `docs/performance/` |
