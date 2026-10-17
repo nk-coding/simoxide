@@ -36,6 +36,18 @@ where
     /// Runs the program's main transformation with the given root objects per model parameter
     /// (empty for `out` parameters).
     pub fn run_transformation(&mut self, args: Vec<Vec<S::Obj>>) -> RunOutcome {
+        let outer = self.stack_base.get() == 0;
+        if outer {
+            self.stack_base.set(crate::vm::stack_address());
+        }
+        let r = self.run_transformation_inner(args);
+        if outer {
+            self.stack_base.set(0);
+        }
+        r
+    }
+
+    fn run_transformation_inner(&mut self, args: Vec<Vec<S::Obj>>) -> RunOutcome {
         let ir = &self.prog.ir;
         let main = &ir.modules[ir.main_module.index()];
         if args.len() != main.model_params.len() {

@@ -56,10 +56,27 @@ pub struct RunOptions {
     pub config: Vec<(String, Option<String>)>,
     /// Step budget (backward jumps and calls); `None` for unlimited.
     pub step_limit: Option<u64>,
+    /// Largest collection a single operation may build (ranges, `product`, the results of
+    /// library operations): beyond it the execution is interrupted ("resource limit"). Eclipse
+    /// has no limit of its own (it runs out of heap); `None` for none.
+    pub max_collection_size: Option<usize>,
+    /// Longest string (UTF-16 units) an operation may build; likewise.
+    pub max_string_length: Option<usize>,
+    /// Native stack (bytes) the run may use below its entry: a call beyond it fails like the
+    /// depth limit (`QvtStackOverFlowError`), so that a deep recursion cannot overflow the
+    /// thread's stack. A QVTo call level takes about 2–4 KB in release builds (8–16 KB in debug
+    /// builds): the default (1 MB) is safe on a 2 MB thread; Eclipse's depth of 1 000 needs a
+    /// larger stack and budget (the conformance harness runs on a 512 MB thread).
+    pub max_native_stack: Option<usize>,
     /// Stack traces with units and lines; `false` gives `(Unknown Source)` (a program
     /// compiled without line numbers).
     pub line_numbers: bool,
 }
+
+/// 2^27 elements (2 GB of values): a little below what a JVM with a few GB of heap holds.
+pub const DEFAULT_MAX_COLLECTION_SIZE: usize = 1 << 27;
+/// 2^27 UTF-16 units (a quarter of a GB of text).
+pub const DEFAULT_MAX_STRING_LENGTH: usize = 1 << 27;
 
 impl Default for RunOptions {
     fn default() -> Self {
@@ -70,6 +87,9 @@ impl Default for RunOptions {
             readonly_guard: false,
             config: Vec::new(),
             step_limit: None,
+            max_collection_size: Some(DEFAULT_MAX_COLLECTION_SIZE),
+            max_string_length: Some(DEFAULT_MAX_STRING_LENGTH),
+            max_native_stack: Some(1 << 20),
             line_numbers: true,
         }
     }
@@ -209,6 +229,8 @@ where
     pub(crate) cur_transf: ModuleId,
     /// Static type of the receiver of the current `CallStdX`.
     pub(crate) std_src_ty: TypeId,
+    /// Address of a local of the outermost VM entry (native stack accounting).
+    pub(crate) stack_base: std::cell::Cell<usize>,
     /// The static type of that call.
     pub(crate) std_res_ty: TypeId,
     pub(crate) regexes: RefCell<HashMap<(String, bool), Result<regex::Regex, String>>>,
@@ -293,6 +315,7 @@ where
             regexes: RefCell::new(HashMap::default()),
             native: Default::default(),
             std_src_ty: TypeId::OCL_VOID,
+            stack_base: std::cell::Cell::new(0),
             std_res_ty: TypeId::OCL_VOID,
         };
         if let Some(src) = vm.opts.id_source.take() {
@@ -1002,7 +1025,10 @@ where
                     let a = r!(self, base, lo).clone();
                     let b = r!(self, base, lo + 1).clone();
                     let c = std::mem::take(&mut w!(self, base, coll));
-                    w!(self, base, coll) = self.lit_range(c, a, b);
+                    match self.lit_range(c, a, b) {
+                        Ok(v) => w!(self, base, coll) = v,
+                        Err(e) => fail!(e),
+                    }
                 }
                 Insn::LitPut { dict, key } => {
                     let k = r!(self, base, key).clone();
@@ -1278,25 +1304,57 @@ where
         c
     }
 
-    fn lit_range(&self, c: Value, a: Value, b: Value) -> Value {
+    fn lit_range(&self, c: Value, a: Value, b: Value) -> VmResult<Value> {
         if c.is_invalid() {
-            return c;
+            return Ok(c);
         }
         let (Value::Int(lo), Value::Int(hi)) = (&a, &b) else {
             // null bounds: the part is skipped; other bounds: Java casts fail
             if a.is_invalid() || b.is_invalid() {
-                return Value::Invalid;
+                return Ok(Value::Invalid);
             }
-            return c;
+            return Ok(c);
         };
         let (lo, hi) = (*lo as i32, *hi as i32);
         let mut c = c;
         if lo <= hi {
+            self.check_collection_size(hi as i64 - lo as i64 + 1 + coll_len(&c) as i64)?;
             for i in lo..=hi {
                 push(&mut c, Value::Int(i as i64), &self.env);
             }
         }
-        c
+        Ok(c)
+    }
+
+    /// Fails with an interruption when a collection of `n` elements is beyond the limit.
+    pub(crate) fn check_collection_size(&self, n: i64) -> VmResult<()> {
+        match self.opts.max_collection_size {
+            Some(m) if n > m as i64 => Err(self.error(
+                ErrorKind::Interrupted,
+                Some(format!("resource limit exceeded: a collection of {n} elements (limit {m})")),
+            )),
+            _ => Ok(()),
+        }
+    }
+
+    /// The size limits for a value an operation built (collections, strings).
+    pub(crate) fn check_value_size(&self, v: &Value) -> VmResult<()> {
+        match v {
+            Value::Coll(_) | Value::List(_) | Value::Dict(_) => {
+                self.check_collection_size(coll_len(v) as i64)
+            }
+            Value::Str(s) => match self.opts.max_string_length {
+                Some(m) if s.len16() > m => Err(self.error(
+                    ErrorKind::Interrupted,
+                    Some(format!(
+                        "resource limit exceeded: a string of {} characters (limit {m})",
+                        s.len16()
+                    )),
+                )),
+                _ => Ok(()),
+            },
+            _ => Ok(()),
+        }
     }
 
     fn new_tuple(&self, ty: TypeId, order: &[u16], at: usize) -> Value {
@@ -1418,4 +1476,21 @@ pub(crate) fn higher_precision(v: &Value) -> Option<Value> {
         }
         _ => None,
     }
+}
+
+/// The number of elements of a collection, `List` or `Dict` value (0 otherwise).
+pub(crate) fn coll_len(v: &Value) -> usize {
+    match v {
+        Value::Coll(c) => c.len(),
+        Value::List(l) => l.borrow().items.len(),
+        Value::Dict(d) => d.borrow().len(),
+        _ => 0,
+    }
+}
+
+/// An address on the current native stack (stacks grow downwards on the supported targets).
+#[inline(never)]
+pub(crate) fn stack_address() -> usize {
+    let x = 0u8;
+    std::hint::black_box(&x) as *const u8 as usize
 }

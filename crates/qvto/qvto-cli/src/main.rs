@@ -403,6 +403,8 @@ fn run_cmd(args: &[String]) {
         rs.resolve_all();
         let opts = qvto::RunOptions {
             mode,
+            // the main thread's stack (8 MB): Eclipse's depth of 1 000 fits
+            max_native_stack: Some(6 << 20),
             ..qvto::RunOptions::default()
         };
         let t1 = std::time::Instant::now();

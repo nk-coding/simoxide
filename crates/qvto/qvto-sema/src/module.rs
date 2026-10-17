@@ -1073,6 +1073,10 @@ impl<'r> Sema<'r> {
         let mut module_envs: Vec<ModuleId> = Vec::new();
         let mut legacy: Vec<ModuleId> = Vec::new();
         let n = usage.path.len();
+        if n == 0 {
+            // a module reference without name: only after a syntax error, which is reported
+            return;
+        }
         let unit_fq = usage.path[..n.saturating_sub(1)].join(".");
         let module_fq = usage.path.join(".");
         let short = usage.path[n - 1].clone();

@@ -552,11 +552,15 @@ where
         let r = self.prim(prim, op, &mut args, src_unl, arg_unl);
         args.clear();
         self.argbuf = args;
-        r
+        let v = r?;
+        self.check_value_size(&v)?;
+        Ok(v)
     }
 
     pub(crate) fn prim_call(&mut self, prim: Prim, op: StdOp, mut args: Vec<Value>) -> VmResult<Value> {
-        self.prim(prim, op, &mut args, false, false)
+        let v = self.prim(prim, op, &mut args, false, false)?;
+        self.check_value_size(&v)?;
+        Ok(v)
     }
 
     fn prim(
@@ -929,9 +933,10 @@ where
             },
             Product => {
                 // CollectionUtil.product: a Set of Tuple(first, second) of the call's element type
-                let (Some(_), Some(_)) = (self.as_coll(&s), self.as_coll(&a1)) else {
+                let (Some(x), Some(y)) = (self.as_coll(&s), self.as_coll(&a1)) else {
                     return Ok(Value::Invalid);
                 };
+                self.check_collection_size(x.len() as i64 * y.len() as i64)?;
                 let tt = self
                     .prog
                     .ir

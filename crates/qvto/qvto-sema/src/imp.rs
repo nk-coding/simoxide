@@ -1778,6 +1778,10 @@ impl<'r> Sema<'r> {
     pub(crate) fn map_call(&mut self, m: &ast::MapCall, cst: Span, pos: Pos) -> Option<Ex> {
         let cst = self.span_after_source(m.source.as_ref().map(|(s, _)| s), cst);
         let n = m.name.segments.len();
+        if n == 0 {
+            // a mapping call without name: only after a syntax error, which is reported
+            return None;
+        }
         let name = &m.name.segments[n - 1];
         let qualifier = &m.name.segments[..n - 1];
         let r = match &m.source {

@@ -379,6 +379,8 @@ fn check(ctx: &Ctx, text: &str, imports: &[String], model: &str) -> &'static str
     rs.resolve_all();
     let opts = qvto::RunOptions {
         step_limit: Some(2_000_000),
+        max_collection_size: Some(1 << 20),
+        max_string_length: Some(1 << 22),
         ..qvto::RunOptions::default()
     };
     let mut vm = qvto::Vm::new(&p, &mut rs.graph, opts);
@@ -417,7 +419,7 @@ pub fn worker(root: &Path, args: &[String]) {
     let mut n = 0u64;
     let crashes = o.out.join("crashes");
     let _ = std::fs::create_dir_all(&crashes);
-    std::panic::set_hook(Box::new(|_| {}));
+    set_quiet_hook();
     while Instant::now() < deadline {
         n += 1;
         // a base: a corpus seed or a generated case
@@ -468,7 +470,7 @@ pub fn worker(root: &Path, args: &[String]) {
                 for (k, u) in imports.iter().enumerate() {
                     let _ = std::fs::write(crashes.join(format!("{name}.unit{k}")), u);
                 }
-                let _ = std::fs::write(crashes.join(format!("{name}.txt")), &msg);
+                let _ = std::fs::write(crashes.join(format!("{name}.txt")), format!("{msg}\n{}", last_panic()));
             }
         }
         if n % 200 == 0 {
@@ -477,6 +479,28 @@ pub fn worker(root: &Path, args: &[String]) {
     }
     let _ = std::fs::write(o.out.join(format!("w{}.stats", o.id)), format!("inputs {n} {counts:?}\n"));
     let _ = std::io::stderr().flush();
+}
+
+thread_local! {
+    static LAST_PANIC: std::cell::RefCell<String> = const { std::cell::RefCell::new(String::new()) };
+}
+
+/// A panic hook that only records where the panic happened (and a short backtrace).
+fn set_quiet_hook() {
+    std::panic::set_hook(Box::new(|info| {
+        let loc = info.location().map(|l| format!("{}:{}", l.file(), l.line())).unwrap_or_default();
+        let bt = std::backtrace::Backtrace::force_capture().to_string();
+        let frames: Vec<&str> = bt
+            .lines()
+            .filter(|l| l.contains("qvto_") && !l.contains("panic"))
+            .take(12)
+            .collect();
+        LAST_PANIC.with(|p| *p.borrow_mut() = format!("at {loc}\n{}", frames.join("\n")));
+    }));
+}
+
+fn last_panic() -> String {
+    LAST_PANIC.with(|p| p.borrow().clone())
 }
 
 /// Runs the pipeline on files (with `<file>.unitN` siblings as imports) and reports panics.
@@ -492,6 +516,7 @@ pub fn replay(root: &Path, files: &[String]) {
         dir: dir.clone(),
     };
     let model = fz::model::generate(&mut Rng::new(1));
+    set_quiet_hook();
     for f in files {
         let text = String::from_utf8_lossy(&std::fs::read(f).unwrap_or_default()).into_owned();
         let stem = f.strip_suffix(".qvto").unwrap_or(f);
@@ -503,7 +528,7 @@ pub fn replay(root: &Path, files: &[String]) {
         let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| check(&ctx, &text, &imports, &model)));
         match r {
             Ok(s) => println!("{f}: {s} ({:.1} ms)", t0.elapsed().as_secs_f64() * 1e3),
-            Err(_) => println!("{f}: PANIC"),
+            Err(_) => println!("{f}: PANIC {}", last_panic()),
         }
     }
 }

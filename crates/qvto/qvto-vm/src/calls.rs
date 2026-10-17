@@ -133,7 +133,11 @@ where
 
     fn check_depth(&self) -> VmResult<()> {
         let depth = self.frames.len() + 1;
-        if depth >= self.opts.max_stack_depth {
+        let native = match (self.opts.max_native_stack, self.stack_base.get()) {
+            (Some(m), b) if b != 0 => b.saturating_sub(crate::vm::stack_address()) > m,
+            _ => false,
+        };
+        if depth >= self.opts.max_stack_depth || native {
             return Err(self.error(
                 ErrorKind::StackOverflow,
                 Some(format!("Stack depth: {depth}")),

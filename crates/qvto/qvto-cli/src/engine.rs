@@ -520,6 +520,8 @@ fn execute(
         readonly_guard: case.readonly_guard,
         config: case.config.clone(),
         line_numbers: !case.no_line_numbers,
+        // the case runs on a thread with a 512 MB stack: Eclipse's depth limit applies first
+        max_native_stack: Some(256 << 20),
         ..qvto::RunOptions::default()
     };
     let t1 = Instant::now();
