@@ -1,7 +1,7 @@
 # SimOxide: runtime reconfiguration, a Slingshot mode, SPD and snapshots (design)
 
-State: 2026-10-17. This is a design. Phase S0 (the Slingshot reference runner, `reference/slingshot/`) is
-implemented; the rest is not. User decisions of §8 are recorded. It is on branch `spd`
+State: 2026-10-17. This is a design. Phases S0 (the Slingshot reference runner,
+`reference/slingshot/`), F0, F1 and F2 are implemented; the rest is not. User decisions of §8 are recorded. It is on branch `spd`
 (forked from `qvto-adapter`). It is a plan, so it sits next to the code and not in the VitePress
 site, which describes the current state (`docs/development/contributing.md`). The parts that get
 built move into `docs/spec/` and `docs/guide/`.
@@ -843,6 +843,112 @@ This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these
     pending event, lose the others, Q5), or drain (fixed, the default for SPD in the SimuLizar flavour).
   - **Linking-resource rewiring** (Q6): the route table is rebuilt.
 
+**F2 as built** (2026-10-17, branch `f2`; rules: `docs/spec/model-changes.md`, MC-*):
+
+- **Where.** The run model and the first syncer live in `simoxide-sim`, because they index the
+  engine's private state: `src/change.rs` (change sets, `recompile`) and `src/sim/runmodel.rs`
+  (`RunModel`, `Simulation::apply_changes`). `simoxide-reconf` is the boundary to QVTo: the
+  adapter's `Journal` → `simoxide_sim::ChangeSet` (`change_set`, `apply_journal`) and direct
+  edits over the adapter's `SimStore` (`Edit`: `set_spec`/`set_rate`, `clone_container`,
+  `connect`, `allocate`, `clone_assembly`, `set_ref`, `set_double`, `remove_from_environment`,
+  `delete`, or any `ModelStore` operation through `Edit::store`). F2 runs no QVTo.
+- **Adapter in the build (temporary until M1/M2).** `crates/qvto-simoxide-bridge` is a package
+  named `qvto-simoxide` whose `[lib] path` is `../qvto-rs/crates/qvto-simoxide/src/lib.rs`,
+  built against this workspace's `simoxide-model`, with `qvto-model` and `qvto-emf` by path. A
+  plain path dependency on the adapter fails: its manifest points at the `qvto-adapter`
+  checkout, and two `simoxide-model` packages collide in one lockfile. The bridge and
+  `simoxide-reconf` are workspace members but not default members; `simoxide-cli`'s
+  `reconfiguration` feature pulls `simoxide-reconf` in. The adapter compiled unchanged against
+  the `spd` tables.
+- **`RunModel`** (in `RunState`): `Option<Box<{Arc<CompiledModel>, build order, base shape,
+  generation}>>`. Not a field-level overlay: after a change the run has its own complete
+  `CompiledModel`, a superset of the old one in which every index the state holds keeps its
+  meaning. `Simulation::cm` stays a plain `&'m CompiledModel` (the hot path does not change) and
+  is pointed into the state's `Arc` when a change is applied (`RunModel::compiled_ref`, an
+  `unsafe` lifetime extension; invariant: only `apply_changes` swaps it, between events). Forks
+  share the `Arc`; `Simulation::resume(&base, state)` checks the base model's shape and continues
+  on the state's own model. The run's graph is `cm.model.graph`; a change set starts from a
+  copy (`model_graph().clone()`, 58 µs for MediaStore). No copy-on-write graph was needed: the
+  graph is off the hot path.
+- **Stable typed ids.** `simoxide_model::build_from_graph_after(graph, diags, prev_order)`: the
+  builder's two passes run over the previous build order followed by the new objects, instead of
+  the graph traversal (`build` is `build_in_order(build_order(g))`, unchanged). Old elements keep
+  their typed ids, new ones are appended, elements no longer contained in a resource stay as
+  tombstones (built from the graph as it is: `EcoreUtil.delete` keeps an object's own values).
+  `CompiledModel::compile_seeded(model, Seed { keys, progs, series })` keeps key, program and
+  series ids (the series seed is the run's list, including series created during the run).
+- **Rebuild and diff** (`change::recompile`): validate (the graph is a changed copy; no new
+  error diagnostics; it compiles), rebuild, recompile, then merge into the running model:
+  - resources matched by `ResKind` (typed processing-resource or link id): index kept, rate and
+    latency synced (MC-1.3), replicas/scheduling/type/HDD ignored (MC-1.4); new ones appended,
+    the run state gets idle `ResRt`s; removed ones keep their entries and jobs (MC-1.5). The
+    resource registry is kept in the compiled model (`registry`) and the final-deactivation order
+    recomputed from it (MC-1.6);
+  - routing: `links` is the router's order; the typed model's `connected` lists become the
+    router's view (union semantics, MC-2.2); `route_res` recomputed;
+  - allocation: the old lookup plus the entries of added allocation contexts (MC-3.1); changed
+    contexts ignored (MC-3.2); removals, `UNSET` and `MOVE` in the allocation abort (MC-3.3, from
+    the change set);
+  - assembly-context path trie: old nodes and the run's dynamic paths keep their ids, new nodes
+    are appended, every node's container is recomputed from the merged lookup;
+  - system, repository and usage tables (`prov_deleg`, `req_conn`, `seff_for`, `act`, `uact`,
+    `scenarios`, parameters, trace ids) from the fresh compilation: read live (MC-4, MC-5.1);
+  - instructions: unchanged → kept; changed → the fresh streams are appended (`Flat::append`):
+    new executions start there, executions in progress keep their positions (MC-4.3);
+  - the run state: resolution caches (`prov_ids`, `call_cache`, `elsc_prov`) dropped, dynamic
+    paths moved into the compiled model.
+  Everything is computed before the state is touched: on any error the run is unchanged.
+- **Change sets.** `simoxide_sim::ChangeSet` is a neutral copy of the journal's kinds (objects
+  as `ObjId`). The syncer works from the changed graph; the change set triggers it (empty = no
+  change) and carries what only notifications show: aborts (MC-2.3, MC-3.3), connections added
+  and removed again (MC-2.2), containers or links added and removed again in one set (refused).
+- **Errors.** `ChangeError::{State, Invalid, Unsupported, Abort}`. `Abort` = SimuLizar's syncer
+  throws (allocation context removed or unset — also `EcoreUtil.delete` of an allocated
+  container —, `move`/`set` of link lists); a reconfiguration process (R1) must turn it into a
+  failed run. `Unsupported` (F4): new series, windows or PRM recorders (monitor changes);
+  population and scenario changes; structural action changes; a new container with an already
+  registered id.
+- **In-flight semantics (SimuLizar compat).** Queued jobs keep their demand; rates apply to
+  later demands; removed resources keep simulating and stay reachable through unchanged
+  allocation lookups; requests in progress use new allocation entries from their next demand
+  and new connectors from their next call; behaviours in progress finish their old
+  instructions (deviation: SimuLizar follows a changed successor chain at once).
+- **Tests.** `simoxide-sim/tests/model_change.rs`: on every model directory, a change set with
+  an unchanged graph at four pause points (the full path: rebuild, recompile, merge, adoption)
+  equals the uninterrupted run byte for byte, also its fork, a resume on the base model and a
+  detached copy on another thread, exact and fast. `simoxide-reconf/tests/changes.rs` (16):
+  rate, latency, SEFF demand and branch-probability changes before the start equal the model
+  changed on disk byte for byte; added container + allocation, composite moved to a new
+  container, rewired connector to a new assembly context, rate and demand changes mid-run, a
+  missing then added route; removed container = uninterrupted run; aborts and unsupported
+  changes leave the run unchanged; fork-with-change = change-then-continue; fork, resume and
+  detach after two generations; determinism, also in fast mode.
+- **Gates.** `golden.sh` identical (312 runs); `cargo test --release --workspace` 257 passed;
+  `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; clippy clean with and without `fast`.
+  Speed (`simoxide-bench suite`, pinned, 20 alternating rounds, load 2-2.4): geomean −1.0 %
+  exact, −0.1 % fast; single models swing ±4 % between builds that differ only off the hot path
+  (bisected: the hot path is byte-for-byte the old code; a build with only `ir.rs` changes shows
+  the same per-model swings), so this is code-layout noise. Two hot-path additions measured as
+  real regressions were removed (a fallback lookup in `dyn_path_child_slow`, a `route_links`
+  branch in `transmit`).
+- **Cost of a change** (`simoxide-bench change`, halfway through the long runs): MediaStore
+  (1 220 objects) graph copy 58 µs, rebuild-recompile-merge 216 µs (rate change 218 µs); small
+  models 21-40 µs; generated s10 models 79-94 µs.
+- **What F3 needs.** A per-run `Session` (2.4 ms; lazily on the first reconfiguration) that
+  forks can own: the session holds the journal and the UUID generator, so a fork must clone or
+  recreate it (id determinism); the session sees successive copies of the graph with the same
+  ids, which works. The reconfiguration process runs inside an event (`Ev::Reconf`): either
+  apply there (the swap is safe when no `cm` copy is live, true for `dispatch`'s `Reconf` arm) or
+  queue the change set to the end of the event. `ChangeError::Abort` → run failure.
+- **What F4 needs.** Incremental syncers where profiling says so (the merge is per kind
+  already); monitor syncing (extend `meas.m.series`/`rows`, `series_windows`, PRM recorders,
+  window events; `Number of Resource Containers` tuples); removal policies (keep = now;
+  Slingshot abort; drain); population and scenario changes (spawn/stop users); behaviour
+  changes in progress (follow the changed chain; structural action changes); dropping appended
+  instruction streams no execution uses; containers added and removed in one change set; the
+  Slingshot flavour's rules. After M5, port `build_from_graph_after` to the shared graph (the
+  order/tombstone scheme carries over) and drop the bridge.
+
 ### 5.4 SPD layer (`simoxide-spd`)
 
 - **Loading.**
@@ -1141,7 +1247,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **F0** | Branch hygiene: `reconfiguration` feature; **fix generic supertypes and `PCMBaseClass` in the main tables** (5.6); append SPD/semantic/measuring-point packages. QVTo is used through the Q6 adapter until the merge lands, then through the in-repo `crates/qvto/*` | — | 1-2 d | builds with and without features; golden hashes unchanged; `IntSample` test; SPD files load |
 | **M** | *(merge, designed separately)* QVTo crates and foundation crates in the repo; QVTo on the shared graph; the graph meets 5.9 | — | see the merge design | F3 switches from the adapter to the shared graph without API change |
 | **F1** | *Done 2026-10-17* (findings: 5.7 "F1 as built"). `RunState` extraction: all mutable run state in one struct; `Rc` → `Arc` or deep-clone decision; `clone()` | F0 | 1 w | met: fork, pause/resume and resume of a deep copy on another thread equal the uninterrupted run on every model directory (exact own/replay, fast, literal engine); golden hashes, corpus, fuzz corpus unchanged; benchmark within noise |
-| **F2** | `RunModel` overlay (D1) with rebuild-and-diff syncer; direct-edit API | F0 | 2-3 w (a: overlay; b: rebuild/diff; c: edit API) | a test edit adds a container mid-run and it receives load; runs without changes unchanged (golden) |
+| **F2** | *Done 2026-10-17* (findings: 5.3 "F2 as built"). `RunModel` overlay (D1) with rebuild-and-diff syncer; direct-edit API | F0 | 2-3 w (a: overlay; b: rebuild/diff; c: edit API) | met: a test edit adds a container mid-run and it receives load; changes before the start equal the changed model byte for byte; runs without changes unchanged (golden, corpus, fuzz corpus, fork tests); benchmark within noise |
 | **F3** | QVTo host `simoxide-reconf`: shared immutable core (registry, metamodel objects, compiled programs), lazy per-run state, journal to syncers, natives; first on the Q6 adapter, then on the shared graph (after M) | F0 | 1 w (+2-3 d to switch after M) | corpus rules run on a `RunModel`; journals equal the corpus results |
 | **F4** | Incremental syncers incl. SEFF recompilation, call-cache invalidation, monitor cloning, removal policies (keep / abort / drain) | F2, F3 | 2-3 w | each change kind has a test; load-balancer branch added mid-run changes routing; scale-in in all three policies |
 | **R1** | SimuLizar rules: PRM values (D2), reconfiguration process runs rules (D3), MEAS-7.3 series | F3, F4 | 1.5-2 w | SimuLizar's load-balancer and power examples run; statistical match vs SimuLizar |
