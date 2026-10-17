@@ -2,7 +2,8 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: 'SimOxide',
-  description: 'A byte-exact, much faster Rust port of the Palladio simulator SimuLizar 5.2.2',
+  description:
+    'A byte-exact, much faster Rust port of the Palladio simulator SimuLizar 5.2.2, with a QVTo engine',
   // GitHub Pages serves the site under /simoxide/ (set by .github/workflows/docs.yml)
   base: process.env.DOCS_BASE ?? '/',
   cleanUrls: true,
@@ -14,6 +15,7 @@ export default defineConfig({
       { text: 'Performance', link: '/performance/' },
       { text: 'Correctness', link: '/correctness/' },
       { text: 'Semantics', link: '/spec/' },
+      { text: 'QVTo', link: '/qvto/' },
       {
         text: 'More',
         items: [
@@ -22,7 +24,32 @@ export default defineConfig({
         ],
       },
     ],
-    sidebar: [
+    sidebar: {
+      '/qvto/': [
+        {
+          text: 'QVTo engine',
+          items: [
+            { text: 'Overview', link: '/qvto/' },
+            { text: 'Usage', link: '/qvto/usage' },
+            { text: 'Architecture', link: '/qvto/architecture' },
+            { text: 'Conformance', link: '/qvto/conformance' },
+            { text: 'Performance', link: '/qvto/performance' },
+            { text: 'QVTo in SimOxide', link: '/qvto/simoxide' },
+            { text: 'Licensing', link: '/qvto/licensing' },
+            { text: 'Development', link: '/qvto/development' },
+          ],
+        },
+        {
+          text: 'Related',
+          items: [
+            { text: 'Foundation crates', link: '/development/foundation' },
+            { text: 'Reconfiguration rules', link: '/guide/reconfiguration' },
+            { text: 'Scaling policies (SPD)', link: '/guide/spd' },
+            { text: 'Contributing', link: '/development/contributing' },
+          ],
+        },
+      ],
+      '/': [
       {
         text: 'Guide',
         items: [
@@ -106,9 +133,19 @@ export default defineConfig({
           { text: 'Contributing', link: '/development/contributing' },
           { text: 'Benchmarking', link: '/development/benchmarking' },
           { text: 'Test kit', link: '/development/testkit' },
+          { text: 'Foundation crates', link: '/development/foundation' },
         ],
       },
-    ],
+      {
+        text: 'QVTo engine',
+        collapsed: true,
+        items: [
+          { text: 'Overview', link: '/qvto/' },
+          { text: 'QVTo in SimOxide', link: '/qvto/simoxide' },
+        ],
+      },
+      ],
+    },
     socialLinks: [{ icon: 'github', link: 'https://github.com/nk-coding/simoxide' }],
     editLink: {
       pattern: 'https://github.com/nk-coding/simoxide/edit/main/docs/:path',

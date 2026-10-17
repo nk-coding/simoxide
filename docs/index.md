@@ -32,4 +32,8 @@ features:
     details: An opt-in mode with statistically equivalent, faster random numbers, up to 3.4 times faster on distribution-heavy models.
   - title: Specified
     details: The semantics of SimuLizar 5.2.2, extracted from its sources with file and line references, as numbered rules.
+  - title: A QVTo engine
+    details: SimuLizar's reconfiguration rules and Slingshot's SPD adjustments run on a Rust QVTo engine that equals Eclipse QVTo on all 589 runnable conformance cases (in its compat mode) and runs a rule in about 0.1 ms.
+    link: /qvto/
+    linkText: QVTo engine
 ---
