@@ -79,6 +79,23 @@ sample per arrival, Q26). Slingshot's own deterministic order (`det`) is outside
 well, so this statistic depends on the order of simultaneous events, not on the model: it is the
 exact mode's domain (X2), not a fast-mode criterion (see `DESIGN-SPD.md`, S2 as built).
 
+## The exact mode
+
+The Slingshot-exact mode (`--flavour slingshot-exact`, design phase X2) is compared with the
+Slingshot-exact corpus `corpus-ss/` ([SS-X-8](../spec/slingshot/exact.md#ss-x-8-the-slingshot-exact-corpus)):
+88 cases (the 20 probes, the 3 SPD examples, the 38 clean corpus models, 25 failure models, 2
+runs that end before t = 0), each with the `det` runner's outputs. A case counts as equal when
+the level-E projection, the tape projection (every draw with stream, index, value, site and
+position) and `measurements.csv` are byte-identical (`crates/simoxide-sim/tests/slingshot_exact.rs`;
+`reference/slingshot/tools/compare_exact.sh` from the shell).
+
+| Result | Cases |
+|---|---|
+| byte-equal (75) | all 20 probes; the clean corpus models but h05, h06, h21, x_pem_simple_optimisation; the failure models but h04, h27, x_pem_screencast_ms* and x_pem_simple_optimisation_composites (so 18 of the 22 handler-error cases, with their disposed handlers and partial side effects); x_pem_acquire and x_sl_runconfigtest (the run fails before t = 0, as in Slingshot) |
+| Palladio 6.0 samplers (9) | h04 (UniDouble), h05 (Gamma), h06 (Lognorm), h21 (several), x_pem_screencast_ms* (Norm), x_pem_simple_optimisation* (LognormMoments): the draws (tape) are equal, the sampled values differ in the last digits |
+| `java.util.HashMap` order (1) | h27: two `INNER` characterisations are evaluated in the iteration order of SimuCom's `HashMap` frame, which only OpenJDK's sources define; the EPL build iterates in insertion order |
+| SPD (3) | spd_minimal, spd_scale_in, spd_time_policies: SPD in the exact mode is design phase X2d |
+
 ## Reproducing
 
 ```sh

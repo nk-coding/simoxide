@@ -53,14 +53,21 @@ pub enum FlavourKind {
     #[default]
     SimuLizar,
     Slingshot,
+    /// Slingshot's **exact mode** (`DESIGN-SPD.md` X2, `docs/spec/slingshot/exact.md`): Slingshot's
+    /// bus cascade handler by handler, with every quirk (`Q1`-`Q37`) and the disposed handlers
+    /// (Q18), byte-equal to the reference runner's `det` mode at level E. Run by
+    /// [`crate::ssx`] (not by [`crate::Simulation`]); the model is compiled as for
+    /// [`FlavourKind::Slingshot`] with [`Quirks::all`].
+    SlingshotExact,
 }
 
 impl FlavourKind {
-    /// `simulizar`, `slingshot`.
+    /// `simulizar`, `slingshot`, `slingshot-exact`.
     pub fn name(self) -> &'static str {
         match self {
             FlavourKind::SimuLizar => "simulizar",
             FlavourKind::Slingshot => "slingshot",
+            FlavourKind::SlingshotExact => "slingshot-exact",
         }
     }
 
@@ -69,8 +76,15 @@ impl FlavourKind {
         match s {
             "simulizar" => Some(FlavourKind::SimuLizar),
             "slingshot" => Some(FlavourKind::Slingshot),
+            "slingshot-exact" => Some(FlavourKind::SlingshotExact),
             _ => None,
         }
+    }
+
+    /// Slingshot's semantics (fast or exact mode).
+    #[inline]
+    pub fn is_slingshot(self) -> bool {
+        matches!(self, FlavourKind::Slingshot | FlavourKind::SlingshotExact)
     }
 }
 
@@ -100,6 +114,14 @@ impl FlavourConfig {
         kind: FlavourKind::Slingshot,
         quirks: Quirks::NONE,
     };
+
+    /// Slingshot's exact mode: every quirk ([`FlavourKind::SlingshotExact`]).
+    pub fn slingshot_exact() -> FlavourConfig {
+        FlavourConfig {
+            kind: FlavourKind::SlingshotExact,
+            quirks: Quirks::all(),
+        }
+    }
 
     /// Slingshot reproducing `quirks`.
     pub fn slingshot(quirks: Quirks) -> FlavourConfig {

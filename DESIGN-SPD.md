@@ -983,6 +983,69 @@ handlers, with Slingshot's side effects up to the throwing statement (SS-X-3.6).
   changes for Slingshot runs (F4: `ss` tables, `res_mon` per new resource, first-match
   allocation in `change.rs`, removal policy Q5 = abort job / lose others).
 
+**X2 as built** (2026-10-17, branch `x2`; guide `docs/guide/slingshot.md`, evidence
+`docs/correctness/slingshot.md`, corpus `corpus-ss/`, SS-X-8):
+
+- **X2a: the engine (handler steps, event order, time).** A separate engine
+  `crates/simoxide-sim/src/ssx/` behind a third flavour kind, `FlavourKind::SlingshotExact`
+  (`--flavour slingshot-exact`; `FlavourConfig::slingshot_exact()` = all 37 quirks;
+  `simoxide_sim::run` dispatches to `ssx::run` in every build, the RNG mode is not read). The
+  design choice: not hooks in the process interpreter but a literal emulation of Slingshot's bus,
+  because level E needs the order of every projected step, and Slingshot's same-instant order is
+  a breadth-first tree of handler results (one handler often returns two or three events whose
+  chains interleave with every other user's), which a process model cannot express without
+  replaying the same structure. So:
+  - one `Ev` variant per Slingshot event that has a subscriber or a projected line (37);
+    bookkeeping events with neither (`UserSlept`, `ProbeTaken`, `UsageScenarioStarted/Finished`,
+    `MeasurementUpdated`, `CalculatorRegistered`, the monitor set-up events, and resource-state
+    events of resources without a monitor) are not created, which changes no order;
+  - an event list keyed by `(f64 time, insertion)` (SS-ENG-3), results queued at `now + delay`
+    in the handler's insertion order after it returns, `MeasurementMade` queued directly when a
+    probe fires (SS-BUS-4/5), `SimulationFinished` inserted third at t = 0 (SS-RUN-3);
+  - one function per subscriber method (38, enum `H`), called in subscription order (SS-BUS-2:
+    e.g. the passive monitor before `SeffSimulationBehavior` on `PassiveResourceAcquired`),
+    written statement by statement after the Java code, with Slingshot's entities as
+    reference-counted objects (`User` with its SimuCom stack, `UserInterpretationContext`,
+    `SEFFInterpretationContext`, the behaviour-context holders with their cursors and the fork
+    holder's rotating `ArrayList` iterator, `GeneralEntryRequest`, `CallOverWireRequest`,
+    `ResourceDemandRequest`, jobs);
+  - SimuCom stack frames with Java reference semantics (`ssx/frame.rs`: shared mutable frames;
+    `copyFrame` snapshots for `INNER` proxies are the process interpreter's immutable frames, so
+    proxy evaluation is shared code);
+  - **handler disposal** (Q18): every handler returns `Result<results, Throw>`; side effects up to
+    the throw (draws, pushed and popped frames, cursor moves, queue changes, measurements and
+    their `MeasurementMade`) stay, the results are dropped, the handler's disposed bit is set and
+    never cleared; the exceptions are listed in `RunResult::warnings`;
+  - the two random streams: StoEx from SimuCom's MT19937 `{N..N+5}` (simoxide-random, EPL),
+    `Math.random()` from `javarand.rs` (EPL); the tape projection records every uniform with its
+    site purpose and the position `p` (SS-X-4) as the reference's `project.py` does;
+  - the level-E projection writer (users and jobs numbered by first appearance) on
+    `Outputs::trace`, the tape projection on `Outputs::tape`.
+  Shared code: the compiled model (`CompiledModel::compile_flavour` builds the Slingshot tables
+  for both Slingshot kinds; `ir.rs` changed in one line, `is_slingshot()`), the StoEx programs and
+  evaluator, the frame bindings and proxies, `ProcessorSharing` and `FcfsHead` of
+  `simoxide-sched` on the `F64Secs` clock (a stale PS completion is a wake-up of an older
+  generation: Slingshot's `currentState` check), the measurement sink and CSV writer, the Java
+  number formatting. Nothing of the SimuLizar flavour or of the fast Slingshot flavour changed
+  (golden hashes identical).
+  - First run against `corpus-ss/` (`crates/simoxide-sim/tests/slingshot_exact.rs`,
+    `reference/slingshot/tools/compare_exact.sh`): **75 of 88 cases byte-equal** at level E
+    (projection, tape projection with positions, measurements), among them all 20 probes, 33 of
+    38 clean corpus models, 20 of the 25 failure models (18 of the 22 handler-error cases; the
+    disposal and partial side effects of Q17, Q19, Q21-Q24, Q30, Q31 match) and both runs that end
+    before t = 0. The other 13: Palladio 6.0's samplers (UniDouble, Gamma, Lognorm,
+    LognormMoments, Norm: 9 cases, see X2b), the `INNER` evaluation order of a
+    `java.util.HashMap` (h27, licence-bound, below), the three SPD examples (X2d).
+  - Speed (indicative, shared VM): `x_ss_mediastore` 200 000 s (15 735 Slingshot events) in about
+    0.9 ms against 0.16 ms for the fast mode and about 420 ms for Slingshot warm.
+  - Gates: `golden.sh` identical (312 runs); `cargo test --release --workspace --features exact`
+    548 passed (546 + 2); `simoxide-fuzz corpus` 132/132, corpus-fuzz 6/6; fmt, clippy
+    `-D warnings` clean (default and `exact`); release check: no opt-in crate in `simoxide-cli`
+    or `qvto-cli`.
+  - Shared files touched: `flavour.rs` (the kind), `ir.rs` (one line; `metric_id`, `ss_mp_key`,
+    `action_type`, `uaction_type` now `pub(crate)`), `lib.rs` (module, dispatch),
+    `simoxide-cli/src/main.rs` (the flavour name, the SPD refusal for both Slingshot kinds).
+
 ### 5.3 The runtime-model-change foundation (shared)
 
 This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these additions:
