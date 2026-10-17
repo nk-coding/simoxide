@@ -67,8 +67,11 @@ fn cases() -> Vec<Case> {
 /// Slingshot's monitor clones (the change count) are as in the reference.
 fn simulizar_copy(dir: &Path) -> PathBuf {
     const UTIL: &str = "_QIb6cikUEeSuf8LV7cHLgA";
+    // one copy per call: the tests run in parallel
+    static N: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+    let n = N.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
     let out = Path::new(env!("CARGO_TARGET_TMPDIR"))
-        .join("spd-simulizar")
+        .join(format!("spd-simulizar-{}-{n}", std::process::id()))
         .join(dir.file_name().unwrap());
     std::fs::create_dir_all(&out).unwrap();
     for e in std::fs::read_dir(dir).unwrap() {
