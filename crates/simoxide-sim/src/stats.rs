@@ -203,13 +203,13 @@ mod tests {
 
     #[test]
     fn java_average_is_compensated() {
-        // JDK 21 (checked on the JVM): averagingDouble subtracts the compensation
+        // JDK 21, executed on the JVM: Stream.of(0.1, 0.2, 0.3)
+        // .collect(Collectors.averagingDouble(d -> d)) = 0.19999999999999998
         assert_eq!(java_average([]), 0.0);
         assert_eq!(java_average([1.0, 2.0, 4.0]), 7.0 / 3.0);
-        let v = [0.1, 0.2, 0.3];
-        assert_eq!(java_average(v), 0.2);
-        // plain summation would give 0.20000000000000004
-        assert_ne!((0.1 + 0.2 + 0.3) / 3.0, 0.2);
+        assert_eq!(java_average([0.1, 0.2, 0.3]), 0.19999999999999998);
+        // plain summation gives 0.20000000000000004
+        assert_eq!((0.1 + 0.2 + 0.3) / 3.0, 0.20000000000000004);
     }
 
     #[test]

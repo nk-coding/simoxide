@@ -364,3 +364,30 @@ fn a_detached_snapshot_with_its_host_continues_on_another_thread() {
     assert_eq!(prefix.1 + &tape, want.tape);
     assert_eq!(csv, want.csv);
 }
+
+#[test]
+fn a_branch_added_to_a_seff_routes_new_requests() {
+    // the load balancer's SEFF gains a third branch at t = 10 s (new executions take it; the
+    // branch is the SEFF's first action, so no execution in progress is affected)
+    let (out, h) = example("lb_add_branch", QvtMode::Auto);
+    assert_eq!(h.stats().succeeded, 1);
+    assert!(out.trace.contains("_addBranch_call"));
+}
+
+#[test]
+fn a_change_simoxide_does_not_support_yet_ends_the_run_naming_the_rule() {
+    // a monitor added to the monitor repository (monitor cloning, DESIGN-SPD F4)
+    let dir = root().join("corpus-rules/lb_outsource");
+    let (cm, cfg) = load(&dir);
+    let rules = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/rules/f4");
+    let sim = Simulation::new(&cm, cfg, Outputs::default()).unwrap();
+    let Err(e) = RulesRun::new(sim, host(&rules, QvtMode::Auto)).finish() else {
+        panic!("the run must fail");
+    };
+    assert_eq!(e.at_ns, 10 * S);
+    assert!(
+        e.message.starts_with("reconfiguration rule cloneMonitor: ") && e.message.contains("F4"),
+        "{}",
+        e.message
+    );
+}

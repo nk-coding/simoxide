@@ -61,8 +61,8 @@ Used in:
   ExperimentAutomation (EPL-1.0 / EPL-2.0).
 - corpus-rules/: SimuLizar's reconfiguration example models and QVTo rules (load balancer,
   power-consumption variant, ReconfigurationSimulationTest; SimuLizar releases/5.2.2, EPL-2.0),
-  imported and adapted by reference/import-rules-examples.sh; scaleOut.qvto there and in
-  reference/rules-examples/ is SimOxide's own.
+  imported and adapted by reference/import-rules-examples.sh; scaleOut.qvto and addBranch.qvto
+  there and in reference/rules-examples/ are SimOxide's own.
 
 
 2. Apache Commons Math 2.1 (and MersenneTwister of 3.6.1)

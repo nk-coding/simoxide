@@ -68,8 +68,13 @@ the reference byte for byte (trace, random tape, measurements):
 | `lb_outsource` | the load balancer example as its launch configuration runs it | branch probabilities |
 | `lb_rules_qvto` | the load balancer with `reconfigurations_qvto` (outsource, scaleDown, scaleIn, scaleUp) | branch probabilities, processing rates |
 | `lb_scaleout` | the load balancer with outsource and SimOxide's `scaleOut.qvto` | a new resource container with resources, on the LAN; a new assembly context and allocation context; a rewired connector |
+| `lb_add_branch` | the load balancer with SimOxide's `addBranch.qvto` | a branch added to the load balancer's SEFF: new requests take it |
 | `power_rules_qvto` | the power-consumption variant with its PCM-only rules (power monitors removed: the power extension is not part of the 5.2.2 product) | processing rates, branch probabilities |
 | `sl_reconfiguration` | SimuLizar's `ReconfigurationSimulationTest`: the n-th user's response time is n | a resource demand |
+
+The default (EPL) build, which runs the fast simulator mode and QVTo's fast mode, matches the
+reference statistically: with 30 seeds per side (`reference/tools/rules-stat.sh`) no per-run
+statistic of these cases differs beyond what a comparison of the reference with itself shows.
 
 Not runnable (also not in SimuLizar 5.2.2 headless): rules that use SimuLizar's action framework
 (`AdaptationBehavior.execute`: the power example's `switchToStandby`, the media store's horizontal

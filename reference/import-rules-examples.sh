@@ -3,8 +3,8 @@
 # model files flat with relative hrefs and the example's own monitors (`refsim import
 # --keep-monitors`), the rules in <case>/rules/, run.json with `reconfiguration_rules` and the stop
 # conditions of the example's launch configuration. Sources: SimuLizar `releases/5.2.2` (EPL-2.0,
-# palladio-research/src-5.2.2/Palladio-Analyzer-SimuLizar, commit 23dc438); lb_scaleout's
-# scaleOut.qvto is SimOxide's (rules-examples/). Usage: import-rules-examples.sh [outDir]
+# palladio-research/src-5.2.2/Palladio-Analyzer-SimuLizar, commit 23dc438); scaleOut.qvto
+# (lb_scaleout) and addBranch.qvto (lb_add_branch) are SimOxide's (rules-examples/). Usage: import-rules-examples.sh [outDir]
 # Afterwards: CORPUS=../corpus-rules ./regen-expected.sh (expected outputs of the patched reference).
 set -e
 PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/reference/tools/palladio-research.sh")"
@@ -49,6 +49,10 @@ import lb_rules_qvto "$LB/overload.usagemodel,$LB/loadbalancer_on_iaas.allocatio
 #    resources, on the LAN), a new assembly context allocated to it, the connector rewired.
 import lb_scaleout "$LB/overload.usagemodel,$LB/loadbalancer_on_iaas.allocation,$LB/monitors/monitoring.monitorrepository" \
 	"$(runjson 1 100000 1000)" "$LB/reconfigurations_active/outsource.qvto" "$OWN/scaleOut.qvto"
+# 3b. The load balancer with SimOxide's addBranch.qvto: a third branch added to the load balancer's
+#     SEFF at the first reconfiguration (a structural behaviour change that routes load).
+import lb_add_branch "$LB/overload.usagemodel,$LB/loadbalancer_on_iaas.allocation,$LB/monitors/monitoring.monitorrepository" \
+	"$(runjson 1 100000 1000)" "$OWN/addBranch.qvto"
 # 4. The power-consumption variant (TransientEffects) with its PCM-only rules (reconf_qvto: scaleDown,
 #    scaleIn, scaleUp), 2000 s. Its power monitors need the Palladio power extension, which is not
 #    part of the 5.2.2 product: they are removed; its resource-URI measuring points with

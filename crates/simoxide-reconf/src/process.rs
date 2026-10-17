@@ -247,7 +247,13 @@ impl RulesHost {
                 .map_or("?", |r| r.name());
             return Err(match e {
                 ReconfError::RunFailed { error, .. } => error,
-                e => sim.fail_run(format!("reconfiguration rule {rule}: {e}")),
+                e => {
+                    let e = e.to_string();
+                    match e.strip_prefix(rule).and_then(|r| r.strip_prefix(": ")) {
+                        Some(r) => sim.fail_run(format!("reconfiguration rule {rule}: {r}")),
+                        None => sim.fail_run(format!("reconfiguration rule {rule}: {e}")),
+                    }
+                }
             });
         }
         sim.reconf_done(succeeded)?;

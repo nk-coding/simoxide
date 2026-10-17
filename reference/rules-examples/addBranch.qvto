@@ -1,0 +1,42 @@
+/*
+ * SimOxide R1 example (not part of SimuLizar): at the first reconfiguration a third branch is
+ * added to the load balancer's SEFF; it calls Server1 like the first one, and the probabilities
+ * become 0.5 / 0.25 / 0.25 (a structural behaviour change that routes load). Fixed ids.
+ */
+modeltype PRM uses 'http://simulizar.palladiosimulator.org/RuntimeMeasurement/1.0';
+modeltype PCM_REP uses 'http://palladiosimulator.org/PalladioComponentModel/Repository/5.2';
+modeltype PCM_SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+
+transformation addBranch(in prm : PRM, inout pcmRepository : PCM_REP) {
+	main() {
+		var branch : BranchAction := pcmRepository.rootObjects()[Repository].components__Repository[BasicComponent]
+			.serviceEffectSpecifications__BasicComponent[ResourceDemandingSEFF].steps_Behaviour[BranchAction]->any(true);
+		assert fatal (branch.branches_Branch->size() = 2) with log ('done');
+		var b1 : ProbabilisticBranchTransition := branch.branches_Branch[ProbabilisticBranchTransition]->any(entityName = 'delegateToServer1');
+		var b2 : ProbabilisticBranchTransition := branch.branches_Branch[ProbabilisticBranchTransition]->any(entityName = 'delegateToServer2');
+		var call : ExternalCallAction := b1.branchBehaviour_BranchTransition.steps_Behaviour[ExternalCallAction]->any(true);
+		var start := object StartAction { id := '_addBranch_start'; entityName := 'start3' };
+		var ext := object ExternalCallAction {
+			id := '_addBranch_call';
+			entityName := 'call3';
+			calledService_ExternalService := call.calledService_ExternalService;
+			role_ExternalService := call.role_ExternalService;
+			predecessor_AbstractAction := start;
+		};
+		var stop := object StopAction { id := '_addBranch_stop'; entityName := 'stop3'; predecessor_AbstractAction := ext };
+		branch.branches_Branch += object ProbabilisticBranchTransition {
+			id := '_addBranch_branch';
+			entityName := 'delegateToServer1Again';
+			branchProbability := 0.25;
+			branchBehaviour_BranchTransition := object ResourceDemandingBehaviour {
+				id := '_addBranch_behaviour';
+				steps_Behaviour += start;
+				steps_Behaviour += ext;
+				steps_Behaviour += stop;
+			};
+		};
+		b1.branchProbability := 0.5;
+		b2.branchProbability := 0.25;
+	}
+}
