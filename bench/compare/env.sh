@@ -1,7 +1,8 @@
 # Paths and command lines shared by the bench/compare scripts (sourced).
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
 C="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$C/../.." && pwd)"
-PR=${PALLADIO_RESEARCH:-/home/devbox/workspace/palladio-research}
+PR=$PRDIR
 WS=$PR/work-simucom
 WSL=$PR/work-slingshot
 PLUGINS=${PALLADIO_PLUGINS:-$WS/palladio-5.2.2/plugins}

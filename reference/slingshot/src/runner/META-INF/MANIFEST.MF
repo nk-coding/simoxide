@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SimOxide Slingshot reference runner
+Bundle-SymbolicName: simoxide.slingshot.runner;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.equinox.app,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.ecore.xmi,
+ org.apache.log4j,
+ org.palladiosimulator.analyzer.slingshot.core,
+ org.palladiosimulator.analyzer.slingshot.workflow,
+ org.palladiosimulator.analyzer.workflow.core,
+ de.uka.ipd.sdq.workflow.mdsd.blackboard,
+ de.uka.ipd.sdq.simucomframework.core,
+ de.uka.ipd.sdq.simulation.core,
+ org.palladiosimulator.edp2,
+ org.palladiosimulator.edp2.dao,
+ org.palladiosimulator.edp2.util,
+ org.palladiosimulator.metricspec,
+ org.jscience,
+ org.palladiosimulator.commons,
+ de.uka.ipd.sdq.probfunction.math,
+ simoxide.slingshot.instrument
+DynamicImport-Package: *

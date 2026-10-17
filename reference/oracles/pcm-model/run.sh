@@ -3,9 +3,10 @@
 # models.txt (name TAB directory; '-' = the bundled default models) is written by collect_models.py;
 # rerun it when model directories (e.g. corpus/) change. Each golden/<name>.jsonl is the canonical
 # dump (format: crates/simoxide-model/src/canon.rs) of the directory loaded with real EMF 5.2.2.
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
 set -e
 cd "$(dirname "$0")"
-P=${PALLADIO_PLUGINS:-/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins}
+P=${PALLADIO_PLUGINS:-$PRDIR/work-simucom/palladio-5.2.2/plugins}
 [ -d build/classes ] || ./build.sh
 LIST=${1:-models.txt}
 OUT=${2:-golden}

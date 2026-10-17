@@ -5,7 +5,11 @@ and ' ' replaced by '_' (corpus models are prefixed with 'corpus_', the loader's
 import hashlib, os, sys
 EXT = ('.repository', '.system', '.resourceenvironment', '.allocation', '.usagemodel', '.resourcetype',
        '.monitorrepository', '.measuringpoint')
-roots = [('', '/home/devbox/workspace/palladio-research/repos'),
+# palladio-research moved to workspace/old/ (2026-10); PALLADIO_RESEARCH overrides
+PR = os.environ.get('PALLADIO_RESEARCH') or next(
+    (d for d in ('/home/devbox/workspace/palladio-research', '/home/devbox/workspace/old/palladio-research')
+     if os.path.isdir(d)), '/home/devbox/workspace/palladio-research')
+roots = [('', PR + '/repos'),
          ('corpus_', os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../corpus'))),
          ('case_', os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../crates/simoxide-model/tests/xmi-cases')))]
 out = []

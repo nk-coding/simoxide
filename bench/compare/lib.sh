@@ -61,7 +61,8 @@ cmd() {
     eventsim)     echo "env JAVA_OPTS='$jo' $C/eventsim.sh $common $*" ;;
     # cold one-shot in the product's OSGi runtime (the way a Palladio user runs it headless)
     simulizar-osgi) echo "env JVM_OPTS='$jo' $WS/run-bench.sh models=$dir runs=1 threads=1 maxMeasurements=-1 simTime=$T quiet=true" ;;
-    slingshot-osgi) echo "env JAVA_OPTS='$jo' $WSL/run-osgi.sh -model $dir -simTime $T -runs 1 -seed $SEED -log ERROR" ;;
+    # Equinox one-shot through the Slingshot reference runner (unpatched nightly, seeded, no instrumentation)
+    slingshot-osgi) echo "env JVM_OPTS='$jo' NICE=0 $R/reference/slingshot/run.sh --stock -model $dir -simTime $T -seed $SEED -instrument false -measurements false -log ERROR -out $SCRATCH/slingshot-osgi" ;;
     simoxide-cli) echo "$SIMOXIDE run --model $dir --seed $SEED --max-sim-time $T --max-measurements -1 --measurements $SCRATCH/simoxide-cold.csv" ;;
     *) echo "unknown sim $sim" >&2; return 1 ;;
   esac

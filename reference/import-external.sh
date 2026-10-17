@@ -2,9 +2,10 @@
 # Imports the external example models listed in external-models.txt into a corpus dir (default ../corpus):
 # copies the model files (flat, relative hrefs), adds the refsim default monitors and writes run.json
 # (seed 1, network flags explicit). Usage: import-external.sh [corpusDir] [name-regex]
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
 cd "$(dirname "$0")"
 OUT=${1:-../corpus}; RE=${2:-.}
-BASE=/home/devbox/workspace/palladio-research
+BASE=$PRDIR
 LOG=$(mktemp)
 grep -v '^#' external-models.txt | grep -E "^($RE)" | while IFS='|' read -r name src opts; do
   [ -z "$name" ] && continue

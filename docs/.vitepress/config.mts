@@ -72,6 +72,7 @@ export default defineConfig({
         items: [
           { text: 'refsim', link: '/reference-simulator/refsim' },
           { text: 'Patches', link: '/reference-simulator/patches' },
+          { text: 'Slingshot runner', link: '/reference-simulator/slingshot' },
           { text: 'Model corpus', link: '/reference-simulator/corpus' },
         ],
       },
