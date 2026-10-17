@@ -4,6 +4,7 @@
 //! simoxide-bench suite  [--filter a,b] [--reps N] [--short-secs S] [--mode exact|fast]
 //! simoxide-bench batch  [--model DIR] [--max-measurements M] [--runs N] [--threads 1,2,4,8,16]
 //!                       [--mode exact|fast]
+//! simoxide-bench fork   [--filter a,b] [--reps N] [--mode exact|fast]
 //! ```
 //!
 //! The modes draw different random numbers, so their runs do different amounts of work: compare
@@ -13,12 +14,17 @@
 //! `suite` measures, for each benchmark model: XMI load and IR compile time; a short run with the
 //! corpus `run.json` (µs per `Simulation::new` + `run`, allocations); a long run (events/s,
 //! allocations per event, peak live heap bytes of one simulation) with measurements counted only
-//! and with measurements stored. `batch` measures scaling of `run_batch` over threads.
+//! and with measurements stored. `batch` measures scaling of `run_batch` over threads. `fork`
+//! pauses the long run halfway and measures the cost of a fork (`Simulation::snapshot`, a
+//! `RunState` clone), of a deep copy for another thread (`RunState::detach`), with measurements
+//! counted and stored, and of `into_state` plus `resume`.
 //!
 //! The binary counts allocations with a thread-local counting wrapper around the system
 //! allocator (or mimalloc with the `mimalloc` feature).
 
-use simoxide_sim::{CompiledModel, Mode, Outputs, RunSpec, SimConfig};
+use simoxide_sim::{
+    Compat, CompiledModel, Exact, Mode, Outputs, Pause, RunSpec, SimConfig, Simulation,
+};
 use std::alloc::{GlobalAlloc, Layout};
 use std::cell::Cell;
 use std::path::{Path, PathBuf};
@@ -398,11 +404,100 @@ fn batch(a: &Args) -> Result<(), String> {
     Ok(())
 }
 
+/// Microseconds of `f`, best of `reps`.
+fn time_us(reps: usize, mut f: impl FnMut()) -> f64 {
+    let mut v: Vec<f64> = (0..reps.max(1))
+        .map(|_| {
+            let t = Instant::now();
+            f();
+            t.elapsed().as_secs_f64() * 1e6
+        })
+        .collect();
+    best(&mut v)
+}
+
+/// The fork costs of one model halfway through its long run, with policy `C`.
+fn fork_costs<C: Compat>(
+    cm: &CompiledModel,
+    cfg: &SimConfig,
+    reps: usize,
+) -> Result<String, String> {
+    let total = simoxide_sim::run(cm, cfg.clone(), Outputs::default())
+        .map_err(|e| e.to_string())?
+        .events;
+    let mut cells = Vec::new();
+    for store in [false, true] {
+        let cfg = SimConfig {
+            store_measurements: store,
+            ..cfg.clone()
+        };
+        let mut sim =
+            Simulation::<C>::create(cm, cfg, Outputs::default()).map_err(|e| e.to_string())?;
+        sim.run_until(Pause::Events(total / 2))
+            .map_err(|e| e.to_string())?;
+        if !store {
+            cells.push(format!("{}", sim.state().events()));
+            cells.push(format!("{}", sim.state().live_processes()));
+        } else {
+            cells.push(format!("{}", sim.state().measurements().count));
+        }
+        let snap = time_us(reps, || drop(std::hint::black_box(sim.snapshot())));
+        let detach = time_us(reps, || drop(std::hint::black_box(sim.state().detach())));
+        cells.push(format!("{snap:.1}"));
+        cells.push(format!("{detach:.1}"));
+        if !store {
+            let st = sim.snapshot();
+            let mut st = Some(st);
+            let resume = time_us(reps, || {
+                let s = Simulation::resume(cm, st.take().expect("state"), Outputs::default())
+                    .expect("resume");
+                st = Some(s.into_state());
+            });
+            cells.push(format!("{resume:.1}"));
+        }
+    }
+    Ok(cells.join(" | "))
+}
+
+fn fork(a: &Args) -> Result<(), String> {
+    println!("mode {}", a.mode);
+    println!(
+        "| benchmark | events at fork | live processes | snapshot µs | detach µs | into_state + resume µs | tuples stored | snapshot µs (stored) | detach µs (stored) |"
+    );
+    println!("|---|---|---|---|---|---|---|---|---|");
+    for b in SUITE {
+        if let Some(f) = &a.filter
+            && !f
+                .iter()
+                .any(|x| b.name.contains(x.as_str()) || b.dir.contains(x.as_str()))
+        {
+            continue;
+        }
+        let (spec, cm, _, _) = load(&root().join(b.dir))?;
+        let cfg = SimConfig {
+            max_sim_time: -1,
+            max_measurements: b.long_meas,
+            mode: a.mode,
+            ..spec.sim_config(b.name)
+        };
+        let row = match a.mode {
+            Mode::Exact => fork_costs::<Exact>(&cm, &cfg, a.reps)?,
+            #[cfg(feature = "fast")]
+            Mode::Fast => fork_costs::<simoxide_sim::Fast>(&cm, &cfg, a.reps)?,
+            #[cfg(not(feature = "fast"))]
+            Mode::Fast => return Err("built without the `fast` feature".into()),
+        };
+        println!("| {} | {row} |", b.name);
+    }
+    Ok(())
+}
+
 fn main() -> std::process::ExitCode {
     let r = parse().and_then(|a| match a.cmd.as_str() {
         "suite" => suite(&a),
         "batch" => batch(&a),
-        _ => Err("usage: simoxide-bench suite|batch [flags] (see the source header)".into()),
+        "fork" => fork(&a),
+        _ => Err("usage: simoxide-bench suite|batch|fork [flags] (see the source header)".into()),
     });
     match r {
         Ok(()) => std::process::ExitCode::SUCCESS,
