@@ -7,8 +7,8 @@
 use super::java;
 use super::{Catalog, NativeCall, NativeResult, Natives};
 use qvto_model::{Classifier, ModelStore};
-use qvto_runtime::coll::CollKind;
 use qvto_runtime::Value;
+use qvto_runtime::coll::CollKind;
 use qvto_vm::{ObjHandle, Vm};
 
 /// The signatures of `Strings` and `emf.tools` (environment `stdlib`).
@@ -149,7 +149,8 @@ fn split<S: ModelStore>(vm: &mut Vm<'_, S>, c: &NativeCall, limit: Option<i32>) 
 where
     S::Obj: ObjHandle,
 {
-    let (Some(s), Some(re), Some(limit)) = (java::string(&c.self_), java::string(&c.args[0]), limit)
+    let (Some(s), Some(re), Some(limit)) =
+        (java::string(&c.self_), java::string(&c.args[0]), limit)
     else {
         return Ok(Value::Null);
     };

@@ -564,8 +564,16 @@ impl<'a> Checker<'a> {
                 return Some(t1);
             }
         }
-        let t1 = if t1 == TypeId::NULL { t1 } else { self.ocl_type(t1) };
-        let t2 = if t2 == TypeId::NULL { t2 } else { self.ocl_type(t2) };
+        let t1 = if t1 == TypeId::NULL {
+            t1
+        } else {
+            self.ocl_type(t1)
+        };
+        let t2 = if t2 == TypeId::NULL {
+            t2
+        } else {
+            self.ocl_type(t2)
+        };
         if t1 == t2 {
             return Some(t2);
         }

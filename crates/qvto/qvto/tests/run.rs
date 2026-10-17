@@ -150,7 +150,10 @@ fn ocl_annotation_bodies_and_derivations() {
     let mut vm = qvto::Vm::new(&program, &mut rs.graph, qvto::RunOptions::default());
     let out = vm.run_transformation(vec![Vec::new()]);
     assert_eq!(out.severity, 0, "{}", out.message);
-    assert_eq!(vm.log, "Sub::op 1 x\nBase::op 2\nX\nbroken, data: <Invalid>\n");
+    assert_eq!(
+        vm.log,
+        "Sub::op 1 x\nBase::op 2\nX\nbroken, data: <Invalid>\n"
+    );
 }
 
 #[test]
@@ -211,7 +214,13 @@ fn incremental_update_reuses_recorded_results() {
     let mut rs = ResourceSet::new();
     let _ = rs.ecore_resource();
     let meta = rs.graph.meta_mut().clone();
-    let epackage = meta.class_by_name(meta.package_by_ns_uri("http://www.eclipse.org/emf/2002/Ecore").unwrap(), "EPackage").unwrap();
+    let epackage = meta
+        .class_by_name(
+            meta.package_by_ns_uri("http://www.eclipse.org/emf/2002/Ecore")
+                .unwrap(),
+            "EPackage",
+        )
+        .unwrap();
     let name = meta.feature_by_name(epackage, "name").unwrap();
     let input = rs.graph.create(epackage).unwrap();
     rs.graph.set(input, name, Datum::Str("in")).unwrap();
@@ -290,7 +299,8 @@ fn nested_transformation_instances_have_their_own_properties() {
         qualified_name: "Outer".into(),
         file_name: "Outer.qvto".into(),
         path: None,
-        text: Rc::from(r#"import Inner;
+        text: Rc::from(
+            r#"import Inner;
 modeltype E uses 'http://www.eclipse.org/emf/2002/Ecore';
 transformation Outer(inout m : E) access Inner;
 property count : Integer = 100;
@@ -304,10 +314,15 @@ main() {
   log('t1 count', t1.count);
   log('t2 count', t2.count);
 }
-"#),
+"#,
+        ),
         blackbox: None,
     };
-    let c = qvto::compile(main, &OneImport("Inner", r#"modeltype E uses 'http://www.eclipse.org/emf/2002/Ecore';
+    let c = qvto::compile(
+        main,
+        &OneImport(
+            "Inner",
+            r#"modeltype E uses 'http://www.eclipse.org/emf/2002/Ecore';
 transformation Inner(inout m : E);
 property count : Integer = 0;
 configuration property label : String;
@@ -317,7 +332,10 @@ main() {
   log('label', label);
 }
 query bump() : Integer { count := count + 10; return count; }
-"#), meta);
+"#,
+        ),
+        meta,
+    );
     let program = c.program.expect("compiles");
     let mut vm = qvto::Vm::new(&program, &mut rs.graph, qvto::RunOptions::default());
     let out = vm.run_transformation(vec![Vec::new()]);

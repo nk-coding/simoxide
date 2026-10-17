@@ -280,9 +280,7 @@ impl<'x> RawView<'x> {
         match self.slot(o, f) {
             Some(Slot::Refs(v)) => v.get(i).map_or(Datum::Null, |x| Datum::Obj(x.0)),
             Some(Slot::Many(v)) => v.get(i).map_or(Datum::Null, |x| to_datum(self.meta, f, x)),
-            Some(Slot::Ref(Some(x))) if i == 0 && self.meta.feature(f).is_many() => {
-                Datum::Obj(x.0)
-            }
+            Some(Slot::Ref(Some(x))) if i == 0 && self.meta.feature(f).is_many() => Datum::Obj(x.0),
             _ => Datum::Null,
         }
     }
@@ -299,8 +297,7 @@ impl<'x> RawView<'x> {
             Some(Slot::Ref(r)) => r.is_some() || fi.unsettable,
             Some(Slot::One(Value::Null)) => true,
             Some(Slot::One(v)) => {
-                fi.unsettable
-                    || !to_datum(self.meta, f, v).java_equals(&self.default_datum(f))
+                fi.unsettable || !to_datum(self.meta, f, v).java_equals(&self.default_datum(f))
             }
         }
     }
@@ -340,7 +337,6 @@ impl<'x> RawView<'x> {
             None
         }
     }
-
 }
 
 impl Raw<'_> {
@@ -493,7 +489,13 @@ impl Raw<'_> {
         }
     }
 
-    fn list_insert(&mut self, o: u32, f: FeatureId, at: Option<usize>, v: &Datum<'_, u32>) -> usize {
+    fn list_insert(
+        &mut self,
+        o: u32,
+        f: FeatureId,
+        at: Option<usize>,
+        v: &Datum<'_, u32>,
+    ) -> usize {
         let i = match v {
             Datum::Obj(x) => {
                 let l = self.refs_mut(o, f);
@@ -591,7 +593,10 @@ impl Raw<'_> {
         if let Some(i) = at
             && i > len
         {
-            return Err(ModelError::IndexOutOfBounds { index: i, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: i,
+                size: len,
+            });
         }
         if self.st.roots[r.index()].contains(&o) {
             return match at {
@@ -619,7 +624,13 @@ impl Raw<'_> {
             }
             Res::Ext(_) => unreachable!(),
         }
-        self.record(o, ChangeKind::RootAdded { resource: r, index: i });
+        self.record(
+            o,
+            ChangeKind::RootAdded {
+                resource: r,
+                index: i,
+            },
+        );
         if let Some((_, f)) = self.v().container(o)
             && !self.meta.feature(f).resolve_proxies
         {
@@ -766,7 +777,10 @@ impl Raw<'_> {
 
     pub fn create(&mut self, c: ClassId, home: u32) -> u32 {
         let o = self.g.add_object(sm::ClassId(c.0), raw::ResId(home)).0;
-        assert!(o < EXT_BASE, "SimOxide graph too large for the store's handles");
+        assert!(
+            o < EXT_BASE,
+            "SimOxide graph too large for the store's handles"
+        );
         self.record(o, ChangeKind::Created(c));
         o
     }
@@ -854,7 +868,10 @@ impl Raw<'_> {
         if let Some(i) = at
             && i > len
         {
-            return Err(ModelError::IndexOutOfBounds { index: i, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: i,
+                size: len,
+            });
         }
         if unique && self.v().index_of(o, f, &v).is_some() {
             return match at {
@@ -892,7 +909,10 @@ impl Raw<'_> {
         self.require_many(f)?;
         let len = self.v().len(o, f);
         if i >= len {
-            return Err(ModelError::IndexOutOfBounds { index: i, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: i,
+                size: len,
+            });
         }
         let x = self.list_remove(o, f, i);
         if let OwnedDatum::Obj(x) = x
@@ -910,7 +930,10 @@ impl Raw<'_> {
         let (unique, is_ref) = (fi.unique, fi.kind == FeatureKind::Reference);
         let len = self.v().len(o, f);
         if i >= len {
-            return Err(ModelError::IndexOutOfBounds { index: i, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: i,
+                size: len,
+            });
         }
         if unique
             && let Some(j) = self.v().index_of(o, f, &v)
@@ -980,10 +1003,16 @@ impl Raw<'_> {
         self.require_many(f)?;
         let len = self.v().len(o, f);
         if to >= len {
-            return Err(ModelError::IndexOutOfBounds { index: to, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: to,
+                size: len,
+            });
         }
         if from >= len {
-            return Err(ModelError::IndexOutOfBounds { index: from, size: len });
+            return Err(ModelError::IndexOutOfBounds {
+                index: from,
+                size: len,
+            });
         }
         if self.meta.feature(f).kind == FeatureKind::Reference {
             let l = self.refs_mut(o, f);
@@ -995,7 +1024,14 @@ impl Raw<'_> {
             l.insert(to, x);
         }
         self.mark_set(o, f);
-        self.record(o, ChangeKind::Moved { feature: f, from, to });
+        self.record(
+            o,
+            ChangeKind::Moved {
+                feature: f,
+                from,
+                to,
+            },
+        );
         Ok(())
     }
 }

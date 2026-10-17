@@ -9,8 +9,8 @@
 use crate::vm::ObjHandle;
 use qvto_model::{ModelStore, ResourceId};
 use qvto_runtime::ObjRef;
-use qvto_sema::ir::{Direction, ModuleId};
 use qvto_runtime::fxhash::FxHashMap as HashMap;
+use qvto_sema::ir::{Direction, ModuleId};
 
 const INITIAL_EXTENT_SIZE: usize = 150;
 

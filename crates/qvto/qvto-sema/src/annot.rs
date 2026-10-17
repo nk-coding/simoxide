@@ -68,7 +68,9 @@ impl<'r> Sema<'r> {
         let span = Span::new(0, text.len() as u32);
         self.begin_code(module, None);
         self.fun.ocl_annotation = true;
-        let selfl = self.fun.new_local("self", self_ty, LocalKind::SelfVar, span);
+        let selfl = self
+            .fun
+            .new_local("self", self_ty, LocalKind::SelfVar, span);
         self.fun.push_scope();
         self.add_var("self", VarRef::Local(selfl), false);
         let mut locals = Vec::new();

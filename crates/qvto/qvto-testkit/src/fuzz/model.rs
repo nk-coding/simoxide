@@ -5,14 +5,39 @@ use std::fmt::Write;
 
 /// Names (some shared, so that equal names occur), including characters that need escaping.
 const NAMES: &[&str] = &[
-    "a", "b", "c", "n1", "n2", "alpha", "Beta", "gamma delta", "x<y", "q&a", "it's", "\"q\"", "",
-    "Äb", "a.b",
+    "a",
+    "b",
+    "c",
+    "n1",
+    "n2",
+    "alpha",
+    "Beta",
+    "gamma delta",
+    "x<y",
+    "q&a",
+    "it's",
+    "\"q\"",
+    "",
+    "Äb",
+    "a.b",
 ];
 const TAGS: &[&str] = &["t", "u", "v", "tag one", "T", ""];
 const KINDS: &[&str] = &["A", "B", "C"];
 const INTS: &[i64] = &[0, 1, 2, 3, -1, 7, 42, 100, -5, 2147483647, -2147483648];
-const LONGS: &[i64] = &[0, 1, -1, 3, 2147483647, 2147483648, -9223372036854775807, 1 << 40, 1024];
-const REALS: &[&str] = &["0.0", "1.0", "2.5", "-0.5", "1.0E10", "0.1", "3.0", "1.0E-5", "-0.0"];
+const LONGS: &[i64] = &[
+    0,
+    1,
+    -1,
+    3,
+    2147483647,
+    2147483648,
+    -9223372036854775807,
+    1 << 40,
+    1024,
+];
+const REALS: &[&str] = &[
+    "0.0", "1.0", "2.5", "-0.5", "1.0E10", "0.1", "3.0", "1.0E-5", "-0.0",
+];
 
 fn esc(s: &str) -> String {
     let mut o = String::new();
@@ -178,7 +203,11 @@ fn write_node(
         }
     }
     for _ in 0..nnums {
-        let _ = writeln!(o, "{pad}  <nums>{}</nums>", rng.pick(&[0, 1, 1, 2, 3, -4, 1024]));
+        let _ = writeln!(
+            o,
+            "{pad}  <nums>{}</nums>",
+            rng.pick(&[0, 1, 1, 2, 3, -4, 1024])
+        );
     }
     for &c in &n.children {
         write_node(rng, o, nodes, c, "children", indent + 1, paths, items);

@@ -107,7 +107,14 @@ pub fn compile(ir: ir::Program) -> CResult<Program> {
         meta_bodies.push(match &mo.body {
             Some(b) => {
                 let name = format!("{}::{}", ir.meta.class(mo.class).name, mo.name);
-                let code = compile_body(&ir, ir.main_module, &b.code, &name, &mut consts, &mut chunks)?;
+                let code = compile_body(
+                    &ir,
+                    ir.main_module,
+                    &b.code,
+                    &name,
+                    &mut consts,
+                    &mut chunks,
+                )?;
                 Some((code, b.params.iter().map(|l| l.0 as Reg).collect()))
             }
             None => None,
@@ -1161,7 +1168,10 @@ impl<'a> Builder<'a> {
                     let j_create = self.jump(Insn::JumpIfNull { r: var, target: 0 });
                     let j_body = self.jump(Insn::Jump { target: 0 });
                     self.patch(j_create);
-                    self.emit(Insn::LoadDefault { dst: var, ty: e.ty.0 });
+                    self.emit(Insn::LoadDefault {
+                        dst: var,
+                        ty: e.ty.0,
+                    });
                     self.patch(j_body);
                 }
                 self.emit(Insn::ObjectInit { var, site });
@@ -2117,7 +2127,10 @@ impl<'a> Builder<'a> {
         let m = self.mark();
         // `iterate`: the result variable with its initial value first, then the source
         // (`visitIterateExp`); the iterators are added after the source
-        let acc_name = lp.acc.as_ref().map(|(l, _)| self.locals[l.0 as usize].name.clone());
+        let acc_name = lp
+            .acc
+            .as_ref()
+            .map(|(l, _)| self.locals[l.0 as usize].name.clone());
         if let Some((accl, init)) = &lp.acc
             && lp.kind == LoopKind::Iterate
         {
@@ -2127,7 +2140,10 @@ impl<'a> Builder<'a> {
             self.expr(init, t)?;
             self.emit(Insn::Move { dst: ar, src: t });
             self.release(mm);
-            if acc_name.as_ref().is_some_and(|n| self.live_names.contains(n)) {
+            if acc_name
+                .as_ref()
+                .is_some_and(|n| self.live_names.contains(n))
+            {
                 self.emit(Insn::LoadInvalid { dst });
                 self.release(m);
                 return Ok(());
@@ -2700,8 +2716,19 @@ fn has_side_effects(e: &Expr) -> bool {
                         | qvto_types::StdOwner::Stdlib
                 ) && !matches!(
                     d.name,
-                    "at" | "first" | "last" | "size" | "includes" | "excludes" | "get" | "hasKey"
-                        | "keys" | "values" | "isEmpty" | "notEmpty" | "indexOf" | "count"
+                    "at" | "first"
+                        | "last"
+                        | "size"
+                        | "includes"
+                        | "excludes"
+                        | "get"
+                        | "hasKey"
+                        | "keys"
+                        | "values"
+                        | "isEmpty"
+                        | "notEmpty"
+                        | "indexOf"
+                        | "count"
                 ) || (
                     // QVTo's string counters (`StringOperations.StringCounter`, session state)
                     d.owner == qvto_types::StdOwner::String

@@ -7,9 +7,9 @@
 use crate::error::VmResult;
 use crate::vm::{Iter, ObjHandle, Vm, push};
 use qvto_model::{DataKind, ModelStore};
+use qvto_runtime::IntBox;
 use qvto_runtime::coll::{Coll, CollKind, ops};
 use qvto_runtime::dict::List;
-use qvto_runtime::IntBox;
 use qvto_runtime::eq::{java_equals, ocl_equal};
 use qvto_runtime::num::{self, NumOp};
 use qvto_runtime::{ObjRef, Str, TypeRef, Value, strings};
@@ -477,7 +477,10 @@ fn index_arg(v: &Value) -> Option<i32> {
     }
 }
 
-fn type_arg_of(v: &Value, objs: &qvto_runtime::fxhash::FxHashMap<ObjRef, TypeId>) -> Option<TypeId> {
+fn type_arg_of(
+    v: &Value,
+    objs: &qvto_runtime::fxhash::FxHashMap<ObjRef, TypeId>,
+) -> Option<TypeId> {
     match v {
         Value::Type(TypeRef(t)) => Some(TypeId(*t)),
         // a type literal of a metamodel classifier is its `EClassifier` object
@@ -548,7 +551,12 @@ where
         Ok(v)
     }
 
-    pub(crate) fn prim_call(&mut self, prim: Prim, op: StdOp, mut args: Vec<Value>) -> VmResult<Value> {
+    pub(crate) fn prim_call(
+        &mut self,
+        prim: Prim,
+        op: StdOp,
+        mut args: Vec<Value>,
+    ) -> VmResult<Value> {
         let v = self.prim(prim, op, &mut args, false, false)?;
         self.check_value_size(&v)?;
         Ok(v)
@@ -626,9 +634,7 @@ where
         }
         Ok(match prim {
             Eq | Ne | QEq | QNe => {
-                if s.is_invalid() || a1.is_invalid() {
-                    Value::Invalid
-                } else if matches!(prim, QEq | QNe) && s.is_null() {
+                if s.is_invalid() || a1.is_invalid() || (matches!(prim, QEq | QNe) && s.is_null()) {
                     Value::Invalid
                 } else {
                     let eq = ocl_equal(&s, &a1, env);
@@ -746,11 +752,11 @@ where
             Mul | Divide | IntDiv | Mod => Value::Invalid,
             Min => match &s {
                 Value::Coll(c) => ops::min(c),
-                _ => self.coll_op(&s, |c| ops::min(c)),
+                _ => self.coll_op(&s, ops::min),
             },
             Max => match &s {
                 Value::Coll(c) => ops::max(c),
-                _ => self.coll_op(&s, |c| ops::max(c)),
+                _ => self.coll_op(&s, ops::max),
             },
             Neg => num::negate(&s, su),
             Abs => num::abs(&s, su),
@@ -936,10 +942,15 @@ where
                     .element(self.std_res_ty)
                     .unwrap_or(TypeId::OCL_VOID);
                 let names: Rc<[Str]> = match self.prog.ir.types.get(tt) {
-                    qvto_types::Type::Tuple(parts) => parts.iter().map(|(n, _)| Str::new(n)).collect(),
-                    _ => [Str::new("first"), Str::new("second")].into_iter().collect(),
+                    qvto_types::Type::Tuple(parts) => {
+                        parts.iter().map(|(n, _)| Str::new(n)).collect()
+                    }
+                    _ => [Str::new("first"), Str::new("second")]
+                        .into_iter()
+                        .collect(),
                 };
-                let pos = |w: &str, d: usize| names.iter().position(|n| n.to_string() == w).unwrap_or(d);
+                let pos =
+                    |w: &str, d: usize| names.iter().position(|n| n.to_string() == w).unwrap_or(d);
                 let (first, second) = (pos("first", 0), pos("second", 1));
                 let xs = Iter::of(&s).items;
                 let ys = Iter::of(&a1).items;
@@ -1503,7 +1514,10 @@ where
                     // last occurrence; classes with the same hash are chained
                     let n = es.len();
                     let mut head: qvto_runtime::fxhash::FxHashMap<u64, u32> =
-                        qvto_runtime::fxhash::FxHashMap::with_capacity_and_hasher(n, Default::default());
+                        qvto_runtime::fxhash::FxHashMap::with_capacity_and_hasher(
+                            n,
+                            Default::default(),
+                        );
                     let mut next: Vec<u32> = vec![u32::MAX; n];
                     let mut last: Vec<u32> = vec![0; n];
                     for j in (0..n).rev() {
@@ -1574,14 +1588,13 @@ where
             return self.sorted_result(Vec::new(), ordered_set);
         };
         let c0 = class(first);
-        if c0.is_none() || !eff.iter().all(|k| class(k) == c0) {
-            if !(unlimited
+        if (c0.is_none() || !eff.iter().all(|k| class(k) == c0))
+            && !(unlimited
                 && eff
                     .iter()
                     .all(|k| matches!(class(k), Some(K::Int) | Some(K::Long))))
-            {
-                return Value::Invalid;
-            }
+        {
+            return Value::Invalid;
         }
         let mut idx: Vec<usize> = (0..es.len()).collect();
         let cmp = |a: &Value, b: &Value| -> std::cmp::Ordering {

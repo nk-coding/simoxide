@@ -5,9 +5,7 @@ use qvto_emf::materialize::describe_packages;
 use qvto_emf::xmi_save::{SaveOptions, save};
 use qvto_emf::{Graph, ResourceSet};
 use qvto_model::contract::{CONTRACT_ECORE, CONTRACT_NS_URI, build_metamodel};
-use qvto_model::{
-    Classifier, Datum, MetaMultiplicity, MetaOperation, MetaRegistry, ModelStore,
-};
+use qvto_model::{Classifier, Datum, MetaMultiplicity, MetaOperation, MetaRegistry, ModelStore};
 
 /// The contract suite on a graph whose registry has the contract package first, Ecore second.
 mod ecore_second {
@@ -48,13 +46,21 @@ fn materialized_objects_register_as_the_original() {
         result: Some((string, MetaMultiplicity { many: true, ..one })),
         body: None,
     }];
-    let r = rs.materialize(&[(p, "platform:/plugin/x/model/contract.ecore")], &ops).unwrap()[0];
+    let r = rs
+        .materialize(&[(p, "platform:/plugin/x/model/contract.ecore")], &ops)
+        .unwrap()[0];
     // eClass() objects
     let n = rs.graph.create(node).unwrap();
-    let co = rs.graph.classifier_object(Classifier::Class(rs.graph.class_of(n))).unwrap();
+    let co = rs
+        .graph
+        .classifier_object(Classifier::Class(rs.graph.class_of(n)))
+        .unwrap();
     let e = rs.graph.ecore().clone();
     assert_eq!(rs.graph.get(co, e.named_element_name), Datum::Str("Node"));
-    assert_eq!(rs.graph.object_classifier(co), Some(Classifier::Class(node)));
+    assert_eq!(
+        rs.graph.object_classifier(co),
+        Some(Classifier::Class(node))
+    );
     // the operations read back
     let back: Vec<_> = qvto_emf::operations::meta_operations(&rs.graph)
         .into_iter()
@@ -64,20 +70,35 @@ fn materialized_objects_register_as_the_original() {
     assert_eq!(back[0].name, "greet");
     assert!(back[0].result.unwrap().1.many);
     // saved and registered again from the text: the same entries
-    let text = save(&rs.graph, r, &SaveOptions::for_resource(rs.graph.resource(r))).unwrap();
+    let text = save(
+        &rs.graph,
+        r,
+        &SaveOptions::for_resource(rs.graph.resource(r)),
+    )
+    .unwrap();
     let mut fresh = ResourceSet::new();
     let r2 = fresh.load_text("file:/x/contract.ecore", &text).unwrap();
     fresh.register(r2).unwrap();
-    let p2 = fresh.graph.meta().package_by_ns_uri(CONTRACT_NS_URI).unwrap();
+    let p2 = fresh
+        .graph
+        .meta()
+        .package_by_ns_uri(CONTRACT_NS_URI)
+        .unwrap();
     assert_eq!(
         describe_packages(fresh.graph.meta(), &[p2]),
         describe_packages(rs.graph.meta(), &[p])
     );
     // and as `contract.ecore` registers
     let mut orig = ResourceSet::new();
-    let r3 = orig.load_text("file:/c/contract.ecore", CONTRACT_ECORE).unwrap();
+    let r3 = orig
+        .load_text("file:/c/contract.ecore", CONTRACT_ECORE)
+        .unwrap();
     orig.register(r3).unwrap();
-    let p3 = orig.graph.meta().package_by_ns_uri(CONTRACT_NS_URI).unwrap();
+    let p3 = orig
+        .graph
+        .meta()
+        .package_by_ns_uri(CONTRACT_NS_URI)
+        .unwrap();
     assert_eq!(
         describe_packages(orig.graph.meta(), &[p3]),
         describe_packages(rs.graph.meta(), &[p])
@@ -87,7 +108,8 @@ fn materialized_objects_register_as_the_original() {
 #[test]
 fn ecore_files_can_refer_to_materialized_packages() {
     let (mut rs, p) = contract_first();
-    rs.materialize(&[(p, "platform:/plugin/x/model/contract.ecore")], &[]).unwrap();
+    rs.materialize(&[(p, "platform:/plugin/x/model/contract.ecore")], &[])
+        .unwrap();
     let ext = r#"<?xml version="1.0" encoding="UTF-8"?>
 <ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="ext" nsURI="http://ext" nsPrefix="ext">
@@ -96,7 +118,9 @@ fn ecore_files_can_refer_to_materialized_packages() {
   </eClassifiers>
 </ecore:EPackage>
 "#;
-    let r = rs.load_text("platform:/plugin/y/model/ext.ecore", ext).unwrap();
+    let r = rs
+        .load_text("platform:/plugin/y/model/ext.ecore", ext)
+        .unwrap();
     let new = rs.register(r).unwrap();
     assert_eq!(new.len(), 1, "only the new package is registered");
     let meta = rs.graph.meta();

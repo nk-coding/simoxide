@@ -143,7 +143,12 @@ impl ResourceSet {
                     set_bool(g, fo, e.feature_transient, fi.transient);
                     set_bool(g, fo, e.feature_unsettable, fi.unsettable);
                     set_bool(g, fo, e.feature_derived, fi.derived);
-                    set_str(g, fo, e.feature_default_literal, fi.default_literal.as_deref());
+                    set_str(
+                        g,
+                        fo,
+                        e.feature_default_literal,
+                        fi.default_literal.as_deref(),
+                    );
                     if is_ref {
                         set_bool(g, fo, e.reference_containment, fi.containment);
                         set_bool_d(g, fo, e.reference_resolve_proxies, fi.resolve_proxies, true);
@@ -248,6 +253,9 @@ fn set_int(g: &mut Graph, o: ObjId, f: qvto_model::FeatureId, v: i32, default: i
     }
 }
 
+/// Looks up (or makes) the metamodel object of a classifier.
+type TypeObjFn<'a> = dyn Fn(&Graph, Classifier, &mut Vec<String>) -> Option<ObjId> + 'a;
+
 fn typed(
     g: &mut Graph,
     o: ObjId,
@@ -255,7 +263,7 @@ fn typed(
     m: qvto_model::MetaMultiplicity,
     e: &crate::ecore::EcoreIds,
     errors: &mut Vec<String>,
-    type_obj: &dyn Fn(&Graph, Classifier, &mut Vec<String>) -> Option<ObjId>,
+    type_obj: &TypeObjFn<'_>,
 ) {
     if let Some(to) = type_obj(g, t, errors) {
         let _ = g.set(o, e.typed_type, Datum::Obj(to));
@@ -294,7 +302,10 @@ pub fn describe_packages(meta: &MetaRegistry, tops: &[PackageId]) -> Vec<String>
             meta.package_path(p, "."),
             pi.ns_uri,
             pi.ns_prefix,
-            pi.subpackages.iter().map(|s| &*meta.package(*s).name).collect::<Vec<_>>()
+            pi.subpackages
+                .iter()
+                .map(|s| &*meta.package(*s).name)
+                .collect::<Vec<_>>()
         ));
         for &k in &pi.classifiers {
             match k {

@@ -540,7 +540,11 @@ impl<'a> SimStore<'a> {
                 }
                 for o in g.resource_contents(er) {
                     for &f in meta.class(g.class_of(o)).cross_references.iter() {
-                        let n = if meta.feature(f).is_many() { g.len(o, f) } else { 1 };
+                        let n = if meta.feature(f).is_many() {
+                            g.len(o, f)
+                        } else {
+                            1
+                        };
                         for i in 0..n {
                             let t = if meta.feature(f).is_many() {
                                 g.get_at(o, f, i)
@@ -583,7 +587,11 @@ impl<'a> SimStore<'a> {
         if let Some(path) = frag.strip_prefix('/') {
             let mut segs = path.split('/');
             let first = segs.next()?;
-            let idx: usize = if first.is_empty() { 0 } else { first.parse().ok()? };
+            let idx: usize = if first.is_empty() {
+                0
+            } else {
+                first.parse().ok()?
+            };
             let mut cur = self.g.resources.get(rr)?.roots.get(idx)?.0;
             for seg in segs {
                 let seg = seg.strip_prefix('@')?;
@@ -818,7 +826,14 @@ impl ModelStore for SimStore<'_> {
         self.after_ext(self.contained_by(o, f, &v));
         if let Some(old) = old {
             let new = self.get(o, f).to_owned();
-            self.record(o, ChangeKind::Set { feature: f, old, new });
+            self.record(
+                o,
+                ChangeKind::Set {
+                    feature: f,
+                    old,
+                    new,
+                },
+            );
         }
         Ok(())
     }
@@ -880,7 +895,14 @@ impl ModelStore for SimStore<'_> {
             && self.recording()
         {
             let value = v.to_owned();
-            self.record(o, ChangeKind::Removed { feature: f, index, value });
+            self.record(
+                o,
+                ChangeKind::Removed {
+                    feature: f,
+                    index,
+                    value,
+                },
+            );
         }
         Ok(removed)
     }
@@ -892,7 +914,14 @@ impl ModelStore for SimStore<'_> {
         let value = self.get_at(o, f, i).to_owned();
         self.s.rs.graph.remove_at(ext_id(o), f, i)?;
         self.after_ext(None);
-        self.record(o, ChangeKind::Removed { feature: f, index: i, value });
+        self.record(
+            o,
+            ChangeKind::Removed {
+                feature: f,
+                index: i,
+                value,
+            },
+        );
         Ok(())
     }
 
@@ -907,7 +936,15 @@ impl ModelStore for SimStore<'_> {
         self.after_ext(self.contained_by(o, f, &v));
         if self.recording() {
             let new = v.to_owned();
-            self.record(o, ChangeKind::Replaced { feature: f, index: i, old, new });
+            self.record(
+                o,
+                ChangeKind::Replaced {
+                    feature: f,
+                    index: i,
+                    old,
+                    new,
+                },
+            );
         }
         Ok(())
     }
@@ -922,7 +959,14 @@ impl ModelStore for SimStore<'_> {
         self.s.rs.graph.clear(ext_id(o), f)?;
         self.after_ext(None);
         for (index, value) in old.into_iter().enumerate().rev() {
-            self.record(o, ChangeKind::Removed { feature: f, index, value });
+            self.record(
+                o,
+                ChangeKind::Removed {
+                    feature: f,
+                    index,
+                    value,
+                },
+            );
         }
         Ok(())
     }
@@ -932,7 +976,14 @@ impl ModelStore for SimStore<'_> {
             return self.raw().move_to(o, f, to, from);
         }
         self.s.rs.graph.move_to(ext_id(o), f, to, from)?;
-        self.record(o, ChangeKind::Moved { feature: f, from, to });
+        self.record(
+            o,
+            ChangeKind::Moved {
+                feature: f,
+                from,
+                to,
+            },
+        );
         Ok(())
     }
 

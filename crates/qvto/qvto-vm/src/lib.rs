@@ -11,10 +11,10 @@
 //! ```
 
 mod calls;
-pub mod inctrace;
 pub mod env;
 pub mod error;
 pub mod extent;
+pub mod inctrace;
 mod jregex;
 mod log;
 mod meta;
@@ -28,8 +28,8 @@ mod types;
 pub mod vm;
 
 pub use env::{RunEnv, TapeHook};
-pub use inctrace::{IncrementalTrace, TraceParam, TraceRecordIn, TraceValue};
 pub use error::{ErrorKind, QvtError, StackElem, Unwind};
+pub use inctrace::{IncrementalTrace, TraceParam, TraceRecordIn, TraceValue};
 pub use native::{NativeCall, NativeError, NativeFn, NativeResult, Natives, java_method_key};
 pub use run::RunOutcome;
 pub use stdlib::Prim;

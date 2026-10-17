@@ -71,7 +71,9 @@ fn eclipse_problems() {
         expected.sort();
         let actual = problems(&name, &text);
         if actual != expected {
-            failures.push(format!("{name}:\n  eclipse {expected:#?}\n  ours {actual:#?}"));
+            failures.push(format!(
+                "{name}:\n  eclipse {expected:#?}\n  ours {actual:#?}"
+            ));
         }
     }
     assert!(failures.is_empty(), "{}", failures.join("\n"));

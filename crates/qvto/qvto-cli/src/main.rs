@@ -94,9 +94,7 @@ fn main() {
         Some("-h" | "--help") | None => {
             println!("{USAGE}");
         }
-        Some(c) => die(&format!(
-            "unknown command {c}\n{USAGE}"
-        )),
+        Some(c) => die(&format!("unknown command {c}\n{USAGE}")),
     }
 }
 
@@ -282,7 +280,11 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
         let mut engine: Box<dyn Engine> = match o.engine.as_deref().unwrap_or("qvto") {
             "stub" => Box::new(StubEngine),
             e @ ("qvto" | "qvto-fast") => {
-                let mode = if e == "qvto" { qvto_runtime::Mode::Compat } else { qvto_runtime::Mode::Fast };
+                let mode = if e == "qvto" {
+                    qvto_runtime::Mode::Compat
+                } else {
+                    qvto_runtime::Mode::Fast
+                };
                 let mut q = engine::QvtoEngine::new(root, mode);
                 if name == "fuzz" {
                     q.constant_identity = Some(1);
@@ -375,7 +377,13 @@ fn run_cmd(args: &[String]) {
     let rs = fresh();
     let t0 = std::time::Instant::now();
     let ops = qvto_emf::operations::meta_operations(&rs.graph);
-    let c = qvto::compile_with_metamodel(main, &resolver, rs.graph.meta().clone(), &ops, &qvto_emf::operations::meta_derivations(&rs.graph));
+    let c = qvto::compile_with_metamodel(
+        main,
+        &resolver,
+        rs.graph.meta().clone(),
+        &ops,
+        &qvto_emf::operations::meta_derivations(&rs.graph),
+    );
     let tc = t0.elapsed();
     for u in &c.units {
         for p in &u.problems {
@@ -471,7 +479,13 @@ fn disasm(args: &[String]) {
     }
     rs.ecore_resource();
     let ops = qvto_emf::operations::meta_operations(&rs.graph);
-    let c = qvto::compile_with_metamodel(main, &resolver, rs.graph.meta().clone(), &ops, &qvto_emf::operations::meta_derivations(&rs.graph));
+    let c = qvto::compile_with_metamodel(
+        main,
+        &resolver,
+        rs.graph.meta().clone(),
+        &ops,
+        &qvto_emf::operations::meta_derivations(&rs.graph),
+    );
     for u in &c.units {
         for p in &u.problems {
             println!(

@@ -70,7 +70,10 @@ fn natives() -> Natives<Graph> {
         Ok(o)
     });
     n.op("host#fail", |_vm, _c| {
-        Err(NativeError::exception("java.lang.IllegalStateException", "broken"))
+        Err(NativeError::exception(
+            "java.lang.IllegalStateException",
+            "broken",
+        ))
     });
     n.op("host#stop", |vm, _c| {
         vm.native_log("stopping");
@@ -83,7 +86,9 @@ fn natives() -> Natives<Graph> {
         Ok(Value::Int(st.0))
     });
     n.op("host#declared", |_vm, c| {
-        Ok(Value::Int(qvto::blackbox::java::int(&c.args[0]).unwrap_or(0) * 10))
+        Ok(Value::Int(
+            qvto::blackbox::java::int(&c.args[0]).unwrap_or(0) * 10,
+        ))
     });
     n.transformation("Native", "host transformation Native", |vm, c| {
         let cls = vm.native_class_by_name(ECORE, "EPackage").unwrap();
@@ -120,7 +125,8 @@ fn run(main: &str, units: &[(&str, &str)], registered: &[&str]) -> (String, i32,
     let mut rs = ResourceSet::new();
     rs.ecore_resource();
     let ops = qvto_emf::operations::meta_operations(&rs.graph);
-    let c = qvto::compile_with_operations(unit("t", main), &resolver, rs.graph.meta().clone(), &ops);
+    let c =
+        qvto::compile_with_operations(unit("t", main), &resolver, rs.graph.meta().clone(), &ops);
     for u in &c.units {
         for p in &u.problems {
             eprintln!("{} {}: {}", u.source.file_name, p.line(&u.lines), p.message);

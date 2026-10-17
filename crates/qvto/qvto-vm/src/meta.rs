@@ -290,7 +290,12 @@ where
             }
             ("EObject", "eAllContents", 0) => {
                 let items = match self.host(src) {
-                    Some(h) => self.store.all_contents(h).into_iter().map(Self::obj).collect(),
+                    Some(h) => self
+                        .store
+                        .all_contents(h)
+                        .into_iter()
+                        .map(Self::obj)
+                        .collect(),
                     None => Vec::new(),
                 };
                 Value::Coll(Rc::new(Coll::Sequence(items)))
@@ -319,18 +324,21 @@ where
                 }
                 Value::Coll(Rc::new(Coll::Sequence(items)))
             }
-            ("EObject", "eResource", 0) => match self.host(src).and_then(|h| self.store.resource_of(h)) {
-                // no Resource values: its URI stands for it
-                Some(r) => Value::str(self.store.resource_uri(r)),
-                None => Value::Null,
-            },
+            ("EObject", "eResource", 0) => {
+                match self.host(src).and_then(|h| self.store.resource_of(h)) {
+                    // no Resource values: its URI stands for it
+                    Some(r) => Value::str(self.store.resource_uri(r)),
+                    None => Value::Null,
+                }
+            }
             ("EObject", "eGet", 1 | 2) => {
                 let Some(f) = self.feature_of(&a0) else {
                     return Some(Err("IllegalArgumentException: not a feature".into()));
                 };
-                if self.class_of(src).is_some_and(|c| {
-                    !self.prog.ir.meta.class(c).all_features.contains(&f)
-                }) {
+                if self
+                    .class_of(src)
+                    .is_some_and(|c| !self.prog.ir.meta.class(c).all_features.contains(&f))
+                {
                     return Some(Err(format!(
                         "IllegalArgumentException: The feature '{}' is not a valid feature",
                         self.prog.ir.meta.feature(f).name
@@ -478,9 +486,7 @@ where
                 let mut found = Value::Null;
                 for l in lits {
                     let hit = match &a0 {
-                        Value::Str(s) => {
-                            self.name_of(&l) == Some(s.to_str_lossy().into_owned())
-                        }
+                        Value::Str(s) => self.name_of(&l) == Some(s.to_str_lossy().into_owned()),
                         v => {
                             let lv = self.read(&l, "value");
                             Self::int_arg(&lv).is_some() && Self::int_arg(&lv) == Self::int_arg(v)
@@ -510,7 +516,9 @@ where
                 let Some(Classifier::Class(c)) =
                     self.host(&a0).and_then(|h| self.store.object_classifier(h))
                 else {
-                    return Some(Err("IllegalArgumentException: not a registered class".into()));
+                    return Some(Err(
+                        "IllegalArgumentException: not a registered class".into()
+                    ));
                 };
                 match self.store.create(c) {
                     Ok(h) => Self::obj(h),

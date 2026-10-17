@@ -210,7 +210,10 @@ impl Catalog {
     /// Adds the units of another catalog (same environment names merge).
     pub fn extend(&mut self, other: &Catalog) {
         for (k, v) in &other.envs {
-            self.envs.entry(k.clone()).or_default().extend(v.iter().cloned());
+            self.envs
+                .entry(k.clone())
+                .or_default()
+                .extend(v.iter().cloned());
         }
         for (k, v) in &other.case_env {
             self.case_env.insert(k.clone(), v.clone());

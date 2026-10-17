@@ -23,8 +23,7 @@ use qvto_vm::ObjHandle;
 pub const SIGNATURES: &str = include_str!("../../data/palladio-blackboxes.tsv");
 
 /// The implementation key of `SimulationStateLibrary.getSimulationTime()`.
-pub const GET_SIMULATION_TIME: &str =
-    "org.palladiosimulator.simulizar.action.repository.black.SimulationStateLibrary#getSimulationTime()";
+pub const GET_SIMULATION_TIME: &str = "org.palladiosimulator.simulizar.action.repository.black.SimulationStateLibrary#getSimulationTime()";
 
 /// The units of Palladio's libraries.
 pub fn catalog() -> Catalog {
@@ -32,10 +31,8 @@ pub fn catalog() -> Catalog {
 }
 
 /// Binds `getSimulationTime()` to the host's simulation clock.
-pub fn register_simulation_time<S: ModelStore>(
-    n: &mut Natives<S>,
-    time: impl Fn() -> f64 + 'static,
-) where
+pub fn register_simulation_time<S: ModelStore>(n: &mut Natives<S>, time: impl Fn() -> f64 + 'static)
+where
     S::Obj: ObjHandle,
 {
     n.op(GET_SIMULATION_TIME, move |_vm, _c| Ok(Value::Real(time())));

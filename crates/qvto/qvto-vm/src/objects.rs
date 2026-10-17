@@ -314,7 +314,11 @@ where
     /// classes: the intermediate extent; model classes: the first non-`in` parameter whose
     /// model type's first metamodel is the class's root package, else the first non-`in`
     /// parameter, else the unbound extent).
-    pub(crate) fn default_extent(&mut self, class: ClassId, extent: Option<ModelParamRef>) -> usize {
+    pub(crate) fn default_extent(
+        &mut self,
+        class: ClassId,
+        extent: Option<ModelParamRef>,
+    ) -> usize {
         if let Some(x) = extent {
             // a parameter of a module that is not bound in this run (an imported
             // transformation's own extent): not an output
@@ -538,7 +542,13 @@ where
     /// single-valued features (also of collection types) whose OCL types accept null: `assign`
     /// gives the new value, an invalid one unsets the feature (null) on `:=` and leaves it
     /// unchanged on `+=`.
-    pub(crate) fn property_undefined(&self, ty: TypeId, old: Value, rhs: Value, reset: bool) -> Value {
+    pub(crate) fn property_undefined(
+        &self,
+        ty: TypeId,
+        old: Value,
+        rhs: Value,
+        reset: bool,
+    ) -> Value {
         if rhs.is_invalid() {
             if reset { Value::Null } else { old }
         } else {
@@ -715,7 +725,11 @@ where
             // intermediate class features convert to their declared OCL type
             num: match self.interm_feature_ty.get(&f) {
                 Some(&t) => {
-                    let t = if self.prog.ir.types.is_collection_like(t) { self.element_type(t) } else { t };
+                    let t = if self.prog.ir.types.is_collection_like(t) {
+                        self.element_type(t)
+                    } else {
+                        t
+                    };
                     self.num_class_of_type(t)
                 }
                 None => self.num_class_of_feature(f),
@@ -984,10 +998,11 @@ where
             }
         };
         let mut hit = ro(owner);
-        if hit.is_none() && self.prog.ir.meta.feature(f).containment {
-            if let Value::Obj(x) = v {
-                hit = ro(*x);
-            }
+        if hit.is_none()
+            && self.prog.ir.meta.feature(f).containment
+            && let Value::Obj(x) = v
+        {
+            hit = ro(*x);
         }
         if let Some(i) = hit {
             return Err(self.runtime_error(format!(
@@ -1200,8 +1215,11 @@ where
             }
             Value::Dict(d) => {
                 let out = self.new_coll_like(v);
-                let entries: Vec<(Value, Value)> =
-                    d.borrow().iter().map(|(k, x)| (k.clone(), x.clone())).collect();
+                let entries: Vec<(Value, Value)> = d
+                    .borrow()
+                    .iter()
+                    .map(|(k, x)| (k.clone(), x.clone()))
+                    .collect();
                 if let Value::Dict(o) = &out {
                     for (k, x) in entries {
                         let ck = self.clone_ocl(&k, map, memo);
@@ -1214,7 +1232,10 @@ where
             Value::Tuple(t) => Value::Tuple(Rc::new(qvto_runtime::tuple::Tuple::new(
                 t.type_id,
                 t.names.clone(),
-                t.values.iter().map(|x| self.clone_ocl(x, map, memo)).collect(),
+                t.values
+                    .iter()
+                    .map(|x| self.clone_ocl(x, map, memo))
+                    .collect(),
             ))),
             _ => v.clone(),
         };

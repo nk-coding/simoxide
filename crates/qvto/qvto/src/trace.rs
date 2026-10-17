@@ -42,9 +42,19 @@ impl Features<'_> {
         }
     }
     fn kind(&self, o: ObjId) -> Direction {
-        match self.feature("VarParameterValue", "kind").map(|f| self.g.get(o, f)) {
+        match self
+            .feature("VarParameterValue", "kind")
+            .map(|f| self.g.get(o, f))
+        {
             Some(Datum::Enum(e, l)) => {
-                match self.g.meta().enumeration(e).literals.get(l as usize).map(|x| x.name.as_ref()) {
+                match self
+                    .g
+                    .meta()
+                    .enumeration(e)
+                    .literals
+                    .get(l as usize)
+                    .map(|x| x.name.as_ref())
+                {
                     Some("OUT") => Direction::Out,
                     Some("INOUT") => Direction::InOut,
                     _ => Direction::In,
@@ -63,7 +73,9 @@ impl Features<'_> {
                 TraceValue::Obj(e.0)
             };
         }
-        let ty = self.string(v, "EValue", "collectionType").unwrap_or_default();
+        let ty = self
+            .string(v, "EValue", "collectionType")
+            .unwrap_or_default();
         if let Some(p) = self.string(v, "EValue", "primitiveValue") {
             return match ty.as_str() {
                 "Boolean" => TraceValue::Bool(p == "true"),
@@ -80,7 +92,9 @@ impl Features<'_> {
                 elems
                     .into_iter()
                     .map(|p| {
-                        let name = self.string(p, "ETuplePartValue", "name").unwrap_or_default();
+                        let name = self
+                            .string(p, "ETuplePartValue", "name")
+                            .unwrap_or_default();
                         let val = self
                             .obj(p, "ETuplePartValue", "value")
                             .map(|x| self.value(x))
@@ -107,15 +121,22 @@ impl Features<'_> {
                 TraceValue::Dict(kv)
             }
             "" => TraceValue::Null,
-            k => TraceValue::Coll(k.to_string(), elems.into_iter().map(|x| self.value(x)).collect()),
+            k => TraceValue::Coll(
+                k.to_string(),
+                elems.into_iter().map(|x| self.value(x)).collect(),
+            ),
         }
     }
 
     fn param(&self, p: ObjId) -> TraceParam {
         TraceParam {
-            name: self.string(p, "VarParameterValue", "name").unwrap_or_default(),
+            name: self
+                .string(p, "VarParameterValue", "name")
+                .unwrap_or_default(),
             kind: self.kind(p),
-            type_name: self.string(p, "VarParameterValue", "type").unwrap_or_default(),
+            type_name: self
+                .string(p, "VarParameterValue", "type")
+                .unwrap_or_default(),
             value: self
                 .obj(p, "VarParameterValue", "value")
                 .map(|v| self.value(v))
@@ -160,8 +181,12 @@ pub fn read_incremental_trace(g: &Graph, roots: &[ObjId]) -> IncrementalTrace {
                 .collect();
             out.records.push(TraceRecordIn {
                 mapping: f.string(m, "EMappingOperation", "name").unwrap_or_default(),
-                package: f.string(m, "EMappingOperation", "package").unwrap_or_default(),
-                module: f.string(m, "EMappingOperation", "module").unwrap_or_default(),
+                package: f
+                    .string(m, "EMappingOperation", "package")
+                    .unwrap_or_default(),
+                module: f
+                    .string(m, "EMappingOperation", "module")
+                    .unwrap_or_default(),
                 context,
                 params,
                 results,

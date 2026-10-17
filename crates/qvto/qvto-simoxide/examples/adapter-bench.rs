@@ -30,20 +30,39 @@ fn rules() -> Vec<Rule> {
     let pc = root().join("qvto-testkit/corpus/simulizar/powerconsumption");
     let scan = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/rules/scan.qvto");
     vec![
-        Rule { name: "scaleUp (fires)", file: pc.join("scaleUp.qvto"), value: 5.0 },
-        Rule { name: "scaleUp (no-op)", file: pc.join("scaleUp.qvto"), value: 1.0 },
-        Rule { name: "scaleDown (fires)", file: pc.join("scaleDown.qvto"), value: 5.0 },
-        Rule { name: "scan (read-only)", file: scan, value: 5.0 },
+        Rule {
+            name: "scaleUp (fires)",
+            file: pc.join("scaleUp.qvto"),
+            value: 5.0,
+        },
+        Rule {
+            name: "scaleUp (no-op)",
+            file: pc.join("scaleUp.qvto"),
+            value: 1.0,
+        },
+        Rule {
+            name: "scaleDown (fires)",
+            file: pc.join("scaleDown.qvto"),
+            value: 5.0,
+        },
+        Rule {
+            name: "scan (read-only)",
+            file: scan,
+            value: 5.0,
+        },
     ]
 }
 
 fn class<S: ModelStore>(s: &S, ns: &str, name: &str) -> ClassId {
     let m = s.meta();
-    m.class_by_name(m.package_by_ns_uri(ns).unwrap(), name).unwrap()
+    m.class_by_name(m.package_by_ns_uri(ns).unwrap(), name)
+        .unwrap()
 }
 
 fn feat<S: ModelStore>(s: &S, c: ClassId, name: &str) -> FeatureId {
-    s.meta().feature_by_name(c, name).unwrap_or_else(|| panic!("{name}"))
+    s.meta()
+        .feature_by_name(c, name)
+        .unwrap_or_else(|| panic!("{name}"))
 }
 
 const RE: &str = "http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2";
@@ -73,9 +92,16 @@ fn grow<S: ModelStore>(s: &mut S, env: S::Obj, n: usize) {
     let sched = feat(s, ps, "schedulingPolicy");
     let repl = feat(s, ps, "numberOfReplicas");
     let spec = feat(s, rv, "specification");
-    let Datum::Obj(first) = s.get_at(env, containers, 0) else { panic!("no container") };
-    let Datum::Obj(first_spec) = s.get_at(first, specs, 0) else { panic!("no resource") };
-    let (t, sp) = (s.get(first_spec, rtype).as_obj(), s.get(first_spec, sched).as_obj());
+    let Datum::Obj(first) = s.get_at(env, containers, 0) else {
+        panic!("no container")
+    };
+    let Datum::Obj(first_spec) = s.get_at(first, specs, 0) else {
+        panic!("no resource")
+    };
+    let (t, sp) = (
+        s.get(first_spec, rtype).as_obj(),
+        s.get(first_spec, sched).as_obj(),
+    );
     let mut k = s.len(env, containers);
     while k < n {
         let c = s.create(rc).unwrap();
@@ -108,7 +134,11 @@ fn by_ext<S: ModelStore>(s: &S, ext: &str) -> ResourceId {
         .unwrap_or_else(|| panic!("no {ext}"))
 }
 
-fn compile(file: &Path, meta: qvto_model::MetaRegistry, ops: &[qvto_model::MetaOperation]) -> qvto::Program {
+fn compile(
+    file: &Path,
+    meta: qvto_model::MetaRegistry,
+    ops: &[qvto_model::MetaOperation],
+) -> qvto::Program {
     let resolver = qvto::units::FsResolver::folder();
     let main = resolver.unit_source(file).unwrap();
     let c = qvto::compile_with_operations(main, &resolver, meta, ops);
@@ -156,14 +186,23 @@ fn last_rate<S: ModelStore>(s: &S, r: ResourceId) -> String {
     let containers = feat(s, re, "resourceContainer_ResourceEnvironment");
     let mut all = Vec::new();
     for i in 0..s.len(env, containers) {
-    let Datum::Obj(c) = s.get_at(env, containers, i) else { panic!() };
-    let rc = s.class_of(c);
-    let specs = feat(s, rc, "activeResourceSpecifications_ResourceContainer");
-    let Datum::Obj(p) = s.get_at(c, specs, 0) else { panic!() };
-    let ps = s.class_of(p);
-    let Datum::Obj(v) = s.get(p, feat(s, ps, "processingRate_ProcessingResourceSpecification")) else { panic!() };
-    let rv = s.class_of(v);
-    all.push(format!("{:?}", s.get(v, feat(s, rv, "specification"))));
+        let Datum::Obj(c) = s.get_at(env, containers, i) else {
+            panic!()
+        };
+        let rc = s.class_of(c);
+        let specs = feat(s, rc, "activeResourceSpecifications_ResourceContainer");
+        let Datum::Obj(p) = s.get_at(c, specs, 0) else {
+            panic!()
+        };
+        let ps = s.class_of(p);
+        let Datum::Obj(v) = s.get(
+            p,
+            feat(s, ps, "processingRate_ProcessingResourceSpecification"),
+        ) else {
+            panic!()
+        };
+        let rv = s.class_of(v);
+        all.push(format!("{:?}", s.get(v, feat(s, rv, "specification"))));
     }
     all.join(",")
 }
@@ -185,8 +224,14 @@ fn main() {
         .expect("model directory");
     let iters: usize = args.get(2).and_then(|x| x.parse().ok()).unwrap_or(300);
     let conf = Config::read(&root().join("target/pcm/pcm.conf"), &root()).expect("target/pcm");
-    println!("model {} , {iters} runs per rule, median (p10..p90)", dir.display());
-    println!("{:20} {:>11} {:>8} {:>30} {:>30} {:>6}", "rule", "containers", "changes", "adapter (journal on)", "qvto-emf", "ratio");
+    println!(
+        "model {} , {iters} runs per rule, median (p10..p90)",
+        dir.display()
+    );
+    println!(
+        "{:20} {:>11} {:>8} {:>30} {:>30} {:>6}",
+        "rule", "containers", "changes", "adapter (journal on)", "qvto-emf", "ratio"
+    );
     for size in [0usize, 100, 1000] {
         for rule in rules() {
             // the adapter: SimOxide's loader and typed model build, its graph
@@ -198,12 +243,21 @@ fn main() {
             let mut store = SimStore::new(&mut model.graph, &mut session);
             let prm_r = store.create_model_resource("file:/bench/prm.xmi");
             prm(&mut store, prm_r, rule.value);
-            let inputs = [prm_r, by_ext(&store, ".repository"), by_ext(&store, ".system"), by_ext(&store, ".allocation"), by_ext(&store, ".resourceenvironment")];
+            let inputs = [
+                prm_r,
+                by_ext(&store, ".repository"),
+                by_ext(&store, ".system"),
+                by_ext(&store, ".allocation"),
+                by_ext(&store, ".resourceenvironment"),
+            ];
             let env = store.roots(inputs[4])[0];
             grow(&mut store, env, size);
             let containers = {
                 let re = store.class_of(env);
-                store.len(env, feat(&store, re, "resourceContainer_ResourceEnvironment"))
+                store.len(
+                    env,
+                    feat(&store, re, "resourceContainer_ResourceEnvironment"),
+                )
             };
             store.session().start_journal();
             let mut changes = 0;
@@ -214,18 +268,33 @@ fn main() {
             let mut rs: ResourceSet = conf.resource_set_for(&dir.join("x"));
             let ns = conf.ns_index.get(SRM).unwrap().clone();
             rs.load_metamodel(&ns).unwrap();
-            let mut files: Vec<PathBuf> = std::fs::read_dir(&dir).unwrap().flatten().map(|e| e.path()).filter(|p| p.is_file() && p.extension().is_some_and(|x| x != "json")).collect();
+            let mut files: Vec<PathBuf> = std::fs::read_dir(&dir)
+                .unwrap()
+                .flatten()
+                .map(|e| e.path())
+                .filter(|p| p.is_file() && p.extension().is_some_and(|x| x != "json"))
+                .collect();
             files.sort();
             for f in files {
                 rs.load_file(&f).unwrap();
             }
             rs.resolve_all();
             rs.ecore_resource();
-            let program = compile(&rule.file, rs.graph.meta().clone(), &qvto_emf::operations::meta_operations(&rs.graph));
+            let program = compile(
+                &rule.file,
+                rs.graph.meta().clone(),
+                &qvto_emf::operations::meta_operations(&rs.graph),
+            );
             let g = &mut rs.graph;
             let prm_e = g.create_resource("file:/bench/prm.xmi");
             prm(g, prm_e, rule.value);
-            let inputs_e = [prm_e, by_ext(g, ".repository"), by_ext(g, ".system"), by_ext(g, ".allocation"), by_ext(g, ".resourceenvironment")];
+            let inputs_e = [
+                prm_e,
+                by_ext(g, ".repository"),
+                by_ext(g, ".system"),
+                by_ext(g, ".allocation"),
+                by_ext(g, ".resourceenvironment"),
+            ];
             let env = g.roots(inputs_e[4])[0];
             grow(g, env, size);
             let e = time_runs(&program, g, &inputs_e, iters, |_| {});
@@ -236,7 +305,15 @@ fn main() {
             let (em, e10, e90) = stats(e);
             println!(
                 "{:20} {:>11} {:>8} {:>12.1?} ({:.1?}..{:.1?}) {:>12.1?} ({:.1?}..{:.1?}) {:>6.2}",
-                rule.name, containers, changes / iters, am, a10, a90, em, e10, e90,
+                rule.name,
+                containers,
+                changes / iters,
+                am,
+                a10,
+                a90,
+                em,
+                e10,
+                e90,
                 am.as_secs_f64() / em.as_secs_f64()
             );
         }

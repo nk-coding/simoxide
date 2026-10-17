@@ -1517,8 +1517,13 @@ impl<'r> Sema<'r> {
     pub fn flattened_element(&self, t: TypeId) -> TypeId {
         // `List` and `Dict` are collection types too (their values are flattened)
         let mut e = self.ts.types.element(t).unwrap_or(t);
-        while matches!(self.ts.types.get(e), Type::Collection(..) | Type::List(_) | Type::Dict(..)) {
-            let Some(x) = self.ts.types.element(e) else { break };
+        while matches!(
+            self.ts.types.get(e),
+            Type::Collection(..) | Type::List(_) | Type::Dict(..)
+        ) {
+            let Some(x) = self.ts.types.element(e) else {
+                break;
+            };
             e = x;
         }
         e

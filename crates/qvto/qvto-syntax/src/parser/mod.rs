@@ -68,7 +68,11 @@ pub(crate) fn parse_expression(src: &str, lexed: Lexed) -> (crate::ast::Expr, Ve
     let e = p.expr();
     if !p.at(K::Eof) {
         let t = p.tok();
-        p.error(Code::UnexpectedTokens, t.span, "unexpected tokens after the expression");
+        p.error(
+            Code::UnexpectedTokens,
+            t.span,
+            "unexpected tokens after the expression",
+        );
     }
     let mut diags = p.diags;
     diags.sort_by_key(|d| (d.span.start, d.span.end));

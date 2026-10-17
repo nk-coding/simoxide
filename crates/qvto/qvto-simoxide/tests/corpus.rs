@@ -37,7 +37,12 @@ fn corpus_on_the_adapter() {
             diffs.push(format!("dump vs java: {d:?}"));
         }
         if a.log != e.log || (a.log != j.log() && !unstable.contains(&"log")) {
-            diffs.push(format!("log: {:?} | emf {:?} | java {:?}", a.log, e.log, j.log()));
+            diffs.push(format!(
+                "log: {:?} | emf {:?} | java {:?}",
+                a.log,
+                e.log,
+                j.log()
+            ));
         }
         let sev = match a.severity {
             0 => "OK",
@@ -46,9 +51,19 @@ fn corpus_on_the_adapter() {
             _ => "ERROR",
         };
         if Some(sev) != j.severity() || Some(a.code) != j.code() || a.severity != e.severity {
-            diffs.push(format!("status {sev} {} vs java {:?} {:?}", a.code, j.severity(), j.code()));
+            diffs.push(format!(
+                "status {sev} {} vs java {:?} {:?}",
+                a.code,
+                j.severity(),
+                j.code()
+            ));
         }
-        assert!(a.dump.lines().count() > 10, "{}: dump {:?}", case.id, a.dump);
+        assert!(
+            a.dump.lines().count() > 10,
+            "{}: dump {:?}",
+            case.id,
+            a.dump
+        );
         let changes = a.journal.as_ref().map_or(0, |j| j.changes.len());
         report.push(format!(
             "{:45} {} {:4} dump lines (java dump {}), unstable {:?}, journal {:4} run {:>9.3?} (qvto-emf {:>9.3?})",

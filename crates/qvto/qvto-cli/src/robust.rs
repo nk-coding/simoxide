@@ -58,7 +58,9 @@ fn parse(root: &Path, args: &[String]) -> Opts {
     let mut i = 0;
     let val = |i: &mut usize| -> String {
         *i += 1;
-        args.get(*i).cloned().unwrap_or_else(|| crate::die("missing value"))
+        args.get(*i)
+            .cloned()
+            .unwrap_or_else(|| crate::die("missing value"))
     };
     while i < args.len() {
         match args[i].as_str() {
@@ -83,13 +85,19 @@ pub fn main(root: &Path, args: &[String]) {
     let exe = std::env::current_exe().unwrap_or_else(|e| crate::die(&e.to_string()));
     let deadline = Instant::now() + Duration::from_secs_f64(o.minutes * 60.0);
     let spawn = |k: usize, generation: u64| -> Child {
-        let minutes = (deadline.saturating_duration_since(Instant::now()).as_secs_f64() / 60.0).max(0.05);
+        let minutes = (deadline
+            .saturating_duration_since(Instant::now())
+            .as_secs_f64()
+            / 60.0)
+            .max(0.05);
         // an address-space limit, so that runaway allocation aborts the worker instead of the machine
         let cmd = format!(
             "ulimit -v {}; exec nice -n 19 \"{}\" fuzz robust-worker --id {k} --seed {} --minutes {minutes} --out \"{}\"",
             o.mem_mb * 1024,
             exe.display(),
-            o.seed.wrapping_mul(1000).wrapping_add(k as u64 * 100 + generation),
+            o.seed
+                .wrapping_mul(1000)
+                .wrapping_add(k as u64 * 100 + generation),
             o.out.display()
         );
         Command::new("sh")
@@ -134,10 +142,24 @@ pub fn main(root: &Path, args: &[String]) {
                 let name = format!("w{k}-{}-{}", gens[k], found);
                 let _ = std::fs::copy(&cur, crashes.join(format!("{name}.qvto")));
                 for x in 0..4 {
-                    let _ = std::fs::copy(o.out.join(format!("w{k}.unit{x}")), crashes.join(format!("{name}.unit{x}")));
+                    let _ = std::fs::copy(
+                        o.out.join(format!("w{k}.unit{x}")),
+                        crashes.join(format!("{name}.unit{x}")),
+                    );
                 }
-                let tail: String = err.lines().rev().take(30).collect::<Vec<_>>().into_iter().rev().collect::<Vec<_>>().join("\n");
-                let _ = std::fs::write(crashes.join(format!("{name}.txt")), format!("{what}\n{tail}\n"));
+                let tail: String = err
+                    .lines()
+                    .rev()
+                    .take(30)
+                    .collect::<Vec<_>>()
+                    .into_iter()
+                    .rev()
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                let _ = std::fs::write(
+                    crashes.join(format!("{name}.txt")),
+                    format!("{what}\n{tail}\n"),
+                );
                 eprintln!("worker {k}: {what}; input kept as crashes/{name}.qvto");
             }
             if Instant::now() < deadline {
@@ -153,16 +175,27 @@ pub fn main(root: &Path, args: &[String]) {
     for k in 0..o.workers {
         if let Ok(t) = std::fs::read_to_string(o.out.join(format!("w{k}.stats"))) {
             println!("worker {k}: {}", t.trim());
-            total += t.split_whitespace().nth(1).and_then(|n| n.parse::<u64>().ok()).unwrap_or(0);
+            total += t
+                .split_whitespace()
+                .nth(1)
+                .and_then(|n| n.parse::<u64>().ok())
+                .unwrap_or(0);
         }
     }
-    println!("{total} inputs (last worker generations), {found} worker deaths/hangs; panics in {}", crashes.display());
+    println!(
+        "{total} inputs (last worker generations), {found} worker deaths/hangs; panics in {}",
+        crashes.display()
+    );
 }
 
 /// Seeds: the corpus files.
 fn seeds(root: &Path) -> Vec<String> {
     let mut v = Vec::new();
-    for d in ["reference/eclipse-qvto/tests", "qvto-testkit/corpus", "reference/external"] {
+    for d in [
+        "reference/eclipse-qvto/tests",
+        "qvto-testkit/corpus",
+        "reference/external",
+    ] {
         walk(&root.join(d), &mut v);
     }
     v
@@ -218,12 +251,44 @@ fn dictionary() -> Vec<String> {
         .map(|s| format!(" {s} "))
         .collect();
     for s in [
-        " 2147483648 ", " 9223372036854775807 ", " 99999999999999999999 ", " 1.0E400 ", " -0.0 ",
-        " 'x' ", " '\\u0041' ", " '\\4a' ", " \"q\" ", " null ", " invalid ", " self ", " result ",
-        " this ", " main ", " Set{1} ", " Sequence{1..1000000} ", " Dict{1=2} ", " List{} ",
-        " Tuple{a=1} ", " ->closure(x | x) ", " .oclAsType(OclAny) ", " ->iterate(a; b = 0 | b) ",
-        " xmap ", " resolveone ", " late resolveIn(", " \u{b4} ", " \u{feff} ", " \u{0} ",
-        " \u{1F600} ", " /* ", " */ ", " -- ", "\r", " _ ", " :: ", " # ", " ` ",
+        " 2147483648 ",
+        " 9223372036854775807 ",
+        " 99999999999999999999 ",
+        " 1.0E400 ",
+        " -0.0 ",
+        " 'x' ",
+        " '\\u0041' ",
+        " '\\4a' ",
+        " \"q\" ",
+        " null ",
+        " invalid ",
+        " self ",
+        " result ",
+        " this ",
+        " main ",
+        " Set{1} ",
+        " Sequence{1..1000000} ",
+        " Dict{1=2} ",
+        " List{} ",
+        " Tuple{a=1} ",
+        " ->closure(x | x) ",
+        " .oclAsType(OclAny) ",
+        " ->iterate(a; b = 0 | b) ",
+        " xmap ",
+        " resolveone ",
+        " late resolveIn(",
+        " \u{b4} ",
+        " \u{feff} ",
+        " \u{0} ",
+        " \u{1F600} ",
+        " /* ",
+        " */ ",
+        " -- ",
+        "\r",
+        " _ ",
+        " :: ",
+        " # ",
+        " ` ",
     ] {
         d.push(s.to_string());
     }
@@ -286,7 +351,13 @@ fn mutate(rng: &mut Rng, seeds: &[String], dict: &[String], base: &str) -> Strin
                 // numeric edge values
                 if toks[i].bytes().all(|b| b.is_ascii_digit()) {
                     toks[i] = rng
-                        .pick(&["0", "2147483648", "9223372036854775807", "99999999999999999999", "1000000000"])
+                        .pick(&[
+                            "0",
+                            "2147483648",
+                            "9223372036854775807",
+                            "99999999999999999999",
+                            "1000000000",
+                        ])
                         .to_string();
                 }
             }
@@ -306,7 +377,19 @@ fn mutate(rng: &mut Rng, seeds: &[String], dict: &[String], base: &str) -> Strin
             }
             _ => {
                 // a character from the edges of Unicode and the lexer's quirks
-                let c = *rng.pick(&['\u{0}', '\u{b4}', '\u{ffff}', '\u{fffd}', '\u{1F600}', '\u{7f}', '\r', '\u{2028}', '\\', '\'', '"']);
+                let c = *rng.pick(&[
+                    '\u{0}',
+                    '\u{b4}',
+                    '\u{ffff}',
+                    '\u{fffd}',
+                    '\u{1F600}',
+                    '\u{7f}',
+                    '\r',
+                    '\u{2028}',
+                    '\\',
+                    '\'',
+                    '"',
+                ]);
                 toks.insert(i, c.to_string());
             }
         }
@@ -324,7 +407,9 @@ impl UnitResolver for MemResolver {
         if self.units.is_empty() {
             return None;
         }
-        let h = qualified_name.bytes().fold(7u64, |h, b| h.wrapping_mul(31).wrapping_add(b as u64));
+        let h = qualified_name
+            .bytes()
+            .fold(7u64, |h, b| h.wrapping_mul(31).wrapping_add(b as u64));
         let k = (h % (self.units.len() as u64 + 1)) as usize;
         let text = self.units.get(k)?;
         Some(unit(&format!("mem{k}"), qualified_name, text))
@@ -364,7 +449,9 @@ fn check(ctx: &Ctx, text: &str, imports: &[String], model: &str) -> &'static str
     if c.has_errors() {
         return "errors";
     }
-    let Some(p) = c.program else { return "no-program" };
+    let Some(p) = c.program else {
+        return "no-program";
+    };
     // input: the fuzz model for every in/inout parameter
     let _ = std::fs::write(ctx.dir.join("in.xmi"), model);
     let mut a = Vec::new();
@@ -387,7 +474,11 @@ fn check(ctx: &Ctx, text: &str, imports: &[String], model: &str) -> &'static str
     vm.set_natives(Rc::new(crate::bbox::natives()));
     let out = vm.run_transformation(a);
     let _ = vm.log.len();
-    if out.severity == 0 { "ran" } else { "ran-error" }
+    if out.severity == 0 {
+        "ran"
+    } else {
+        "ran-error"
+    }
 }
 
 struct Ctx {
@@ -407,7 +498,12 @@ pub fn worker(root: &Path, args: &[String]) {
         models: qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), root)
             .unwrap_or_else(|e| crate::die(&e.to_string())),
         catalog: engine::cli_catalog(root),
-        fuzz_ecore_uri: qvto_emf::uri::Uri::file(&std::path::absolute(dir.join("fuzz.ecore")).unwrap().to_string_lossy()).to_string(),
+        fuzz_ecore_uri: qvto_emf::uri::Uri::file(
+            &std::path::absolute(dir.join("fuzz.ecore"))
+                .unwrap()
+                .to_string_lossy(),
+        )
+        .to_string(),
         dir: dir.clone(),
     };
     let seeds = seeds(root);
@@ -428,7 +524,9 @@ pub fn worker(root: &Path, args: &[String]) {
                 let mut r = rng.fork();
                 let stmts: Vec<_> = {
                     let mut g = fz::expr::Gen::new(&mut r, fz::expr::base_scope());
-                    (0..8).map(|k| fz::expr::statement(&mut g, &format!("@e{k}@"), 4)).collect()
+                    (0..8)
+                        .map(|k| fz::expr::statement(&mut g, &format!("@e{k}@"), 4))
+                        .collect()
                 };
                 fz::expr::transformation("g", &stmts)
             }
@@ -438,12 +536,20 @@ pub fn worker(root: &Path, args: &[String]) {
             }
             _ => rng.pick(&seeds).clone(),
         };
-        let text = if rng.pct(10) { base } else { mutate(&mut rng, &seeds, &dict, &base) };
+        let text = if rng.pct(10) {
+            base
+        } else {
+            mutate(&mut rng, &seeds, &dict, &base)
+        };
         let nimp = if rng.pct(30) { 1 + rng.below(2) } else { 0 };
         let imports: Vec<String> = (0..nimp)
             .map(|_| {
                 let b = rng.pick(&seeds).clone();
-                if rng.pct(50) { mutate(&mut rng, &seeds, &dict, &b) } else { b }
+                if rng.pct(50) {
+                    mutate(&mut rng, &seeds, &dict, &b)
+                } else {
+                    b
+                }
             })
             .collect();
         let model = fz::model::generate(&mut rng);
@@ -455,7 +561,9 @@ pub fn worker(root: &Path, args: &[String]) {
         for k in imports.len()..4 {
             let _ = std::fs::remove_file(o.out.join(format!("w{}.unit{k}", o.id)));
         }
-        let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| check(&ctx, &text, &imports, &model)));
+        let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            check(&ctx, &text, &imports, &model)
+        }));
         match r {
             Ok(s) => *counts.entry(s).or_default() += 1,
             Err(p) => {
@@ -470,14 +578,23 @@ pub fn worker(root: &Path, args: &[String]) {
                 for (k, u) in imports.iter().enumerate() {
                     let _ = std::fs::write(crashes.join(format!("{name}.unit{k}")), u);
                 }
-                let _ = std::fs::write(crashes.join(format!("{name}.txt")), format!("{msg}\n{}", last_panic()));
+                let _ = std::fs::write(
+                    crashes.join(format!("{name}.txt")),
+                    format!("{msg}\n{}", last_panic()),
+                );
             }
         }
         if n.is_multiple_of(200) {
-            let _ = std::fs::write(o.out.join(format!("w{}.stats", o.id)), format!("inputs {n} {counts:?}\n"));
+            let _ = std::fs::write(
+                o.out.join(format!("w{}.stats", o.id)),
+                format!("inputs {n} {counts:?}\n"),
+            );
         }
     }
-    let _ = std::fs::write(o.out.join(format!("w{}.stats", o.id)), format!("inputs {n} {counts:?}\n"));
+    let _ = std::fs::write(
+        o.out.join(format!("w{}.stats", o.id)),
+        format!("inputs {n} {counts:?}\n"),
+    );
     let _ = std::io::stderr().flush();
 }
 
@@ -488,7 +605,10 @@ thread_local! {
 /// A panic hook that only records where the panic happened (and a short backtrace).
 fn set_quiet_hook() {
     std::panic::set_hook(Box::new(|info| {
-        let loc = info.location().map(|l| format!("{}:{}", l.file(), l.line())).unwrap_or_default();
+        let loc = info
+            .location()
+            .map(|l| format!("{}:{}", l.file(), l.line()))
+            .unwrap_or_default();
         let bt = std::backtrace::Backtrace::force_capture().to_string();
         let frames: Vec<&str> = bt
             .lines()
@@ -512,7 +632,12 @@ pub fn replay(root: &Path, files: &[String]) {
         models: qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), root)
             .unwrap_or_else(|e| crate::die(&e.to_string())),
         catalog: engine::cli_catalog(root),
-        fuzz_ecore_uri: qvto_emf::uri::Uri::file(&std::path::absolute(dir.join("fuzz.ecore")).unwrap().to_string_lossy()).to_string(),
+        fuzz_ecore_uri: qvto_emf::uri::Uri::file(
+            &std::path::absolute(dir.join("fuzz.ecore"))
+                .unwrap()
+                .to_string_lossy(),
+        )
+        .to_string(),
         dir: dir.clone(),
     };
     let model = fz::model::generate(&mut Rng::new(1));
@@ -525,7 +650,9 @@ pub fn replay(root: &Path, files: &[String]) {
             .map(|b| String::from_utf8_lossy(&b).into_owned())
             .collect();
         let t0 = Instant::now();
-        let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| check(&ctx, &text, &imports, &model)));
+        let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            check(&ctx, &text, &imports, &model)
+        }));
         match r {
             Ok(s) => println!("{f}: {s} ({:.1} ms)", t0.elapsed().as_secs_f64() * 1e3),
             Err(_) => println!("{f}: PANIC {}", last_panic()),

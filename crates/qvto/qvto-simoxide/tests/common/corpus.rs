@@ -89,9 +89,10 @@ pub struct Units {
 }
 
 pub fn units(root: &Path, case: &Case) -> Units {
-    let catalog =
-        Catalog::parse(&std::fs::read_to_string(root.join("qvto-types/data/blackboxes.tsv")).unwrap())
-            .unwrap();
+    let catalog = Catalog::parse(
+        &std::fs::read_to_string(root.join("qvto-types/data/blackboxes.tsv")).unwrap(),
+    )
+    .unwrap();
     let files = FsResolver {
         bundles: match &case.import_root {
             Some(r) => vec![Bundle {
@@ -128,7 +129,10 @@ where
         let r = ResourceId(r as u32);
         let label = qvto_emf::canon::label(s.resource_uri(r));
         for o in s.resource_contents(r) {
-            out.insert(format!("{label}#{}", qvto_emf::canon::path(s, o)), o.to_u32());
+            out.insert(
+                format!("{label}#{}", qvto_emf::canon::path(s, o)),
+                o.to_u32(),
+            );
         }
     }
     out
@@ -191,7 +195,9 @@ where
         x.next();
     }
     let lookup = Box::new(move |k: IdentityKey| match k {
-        IdentityKey::Obj(r) if !r.is_local() && existed(r.index()) => by_obj.get(&r.index()).copied(),
+        IdentityKey::Obj(r) if !r.is_local() && existed(r.index()) => {
+            by_obj.get(&r.index()).copied()
+        }
         IdentityKey::Obj(_) => queue.pop_front(),
         _ => None,
     });
@@ -215,11 +221,7 @@ fn options(case: &Case, id_source: Option<Box<dyn IdentityHashSource>>) -> qvto:
 }
 
 /// Positional inputs of the in/inout parameters.
-fn bind<S: ModelStore>(
-    program: &qvto::Program,
-    s: &S,
-    inputs: &[ResourceId],
-) -> Vec<Vec<S::Obj>> {
+fn bind<S: ModelStore>(program: &qvto::Program, s: &S, inputs: &[ResourceId]) -> Vec<Vec<S::Obj>> {
     let ir = &program.ir;
     let main = &ir.modules[ir.main_module.index()];
     let mut args = Vec::new();
@@ -283,14 +285,18 @@ fn compile(
 ) -> Option<qvto::Program> {
     let u = units(root, case);
     let r = resolver(&u, case);
-    let main = u.files.unit_source(&path(root, case, case.qvto.as_deref().unwrap())).unwrap();
+    let main = u
+        .files
+        .unit_source(&path(root, case, case.qvto.as_deref().unwrap()))
+        .unwrap();
     let t0 = Instant::now();
     let compiled = qvto::compile_with_metamodel(main, &r, meta, ops, derivs);
     res.compile_time = t0.elapsed();
     for u in &compiled.units {
         for p in &u.problems {
             if p.is_error() {
-                res.compile_errors.push(format!("{}: {}", u.source.file_name, p.message));
+                res.compile_errors
+                    .push(format!("{}: {}", u.source.file_name, p.message));
             }
         }
     }
@@ -304,7 +310,10 @@ fn compile(
 fn metamodel_uris(root: &Path, case: &Case) -> Vec<String> {
     let u = units(root, case);
     let r = resolver(&u, case);
-    let main = u.files.unit_source(&path(root, case, case.qvto.as_deref().unwrap())).unwrap();
+    let main = u
+        .files
+        .unit_source(&path(root, case, case.qvto.as_deref().unwrap()))
+        .unwrap();
     let mut v = qvto_sema::scan_metamodel_uris(&main, &r);
     v.extend(case.packages.iter().cloned());
     v
@@ -406,8 +415,14 @@ pub fn run_adapter(root: &Path, case: &Case) -> Result {
     let mut setup = adapter_setup(root, case);
     let ops = setup.session.operations();
     let derivs = setup.session.derivations();
-    let Some(program) = compile(root, case, setup.session.meta().clone(), &ops, &derivs, &mut res)
-    else {
+    let Some(program) = compile(
+        root,
+        case,
+        setup.session.meta().clone(),
+        &ops,
+        &derivs,
+        &mut res,
+    ) else {
         return res;
     };
     setup.session.start_journal();
@@ -472,7 +487,8 @@ pub fn run_emf(root: &Path, case: &Case) -> Result {
     let (mut rs, inputs) = emf_setup(root, case);
     let ops = qvto_emf::operations::meta_operations(&rs.graph);
     let derivs = qvto_emf::operations::meta_derivations(&rs.graph);
-    let Some(program) = compile(root, case, rs.graph.meta().clone(), &ops, &derivs, &mut res) else {
+    let Some(program) = compile(root, case, rs.graph.meta().clone(), &ops, &derivs, &mut res)
+    else {
         return res;
     };
     let first = rs.graph.object_count() as u32;
@@ -496,6 +512,7 @@ pub fn run_emf(root: &Path, case: &Case) -> Result {
 
 /// The Java runner's results for the corpus.
 pub fn java() -> std::collections::BTreeMap<String, qvto_testkit::fixture::JavaResult> {
-    let text = std::fs::read_to_string(repo_root().join(qvto_testkit::paths::CORPUS_FIXTURE)).unwrap();
+    let text =
+        std::fs::read_to_string(repo_root().join(qvto_testkit::paths::CORPUS_FIXTURE)).unwrap();
     qvto_testkit::fixture::read_bundle(&text).unwrap()
 }

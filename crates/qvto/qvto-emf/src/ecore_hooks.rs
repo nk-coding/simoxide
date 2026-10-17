@@ -160,7 +160,12 @@ fn all_supers(g: &Graph, c: ObjId) -> Vec<ObjId> {
 
 /// For each supertype its value of the derived list `f` (cached; the supertypes' local lists in
 /// `eAllSuperTypes` order), then `c`'s local list, without duplicates.
-fn accumulate(g: &Graph, c: ObjId, f: FeatureId, local: &dyn Fn(ObjId) -> Vec<ObjId>) -> Vec<ObjId> {
+fn accumulate(
+    g: &Graph,
+    c: ObjId,
+    f: FeatureId,
+    local: &dyn Fn(ObjId) -> Vec<ObjId>,
+) -> Vec<ObjId> {
     let mut out = Vec::new();
     let mut seen = std::collections::HashSet::new();
     for s in supers(g, c) {
@@ -230,7 +235,9 @@ fn derived_list(g: &Graph, o: ObjId, f: FeatureId) -> Option<Vec<ObjId>> {
     Some(if f == e.class_all_super_types {
         all_supers(g, o)
     } else if f == e.class_all_structural_features {
-        accumulate(g, o, f, &|x| g.refs(x, e.class_structural_features).to_vec())
+        accumulate(g, o, f, &|x| {
+            g.refs(x, e.class_structural_features).to_vec()
+        })
     } else if f == e.class_attributes {
         local_of(g, o, e.eattribute)
     } else if f == e.class_references {
@@ -248,7 +255,9 @@ fn derived_list(g: &Graph, o: ObjId, f: FeatureId) -> Option<Vec<ObjId>> {
     } else if f == e.class_all_operations {
         accumulate(g, o, f, &|x| g.refs(x, e.class_operations).to_vec())
     } else if f == e.class_all_generic_super_types {
-        accumulate(g, o, f, &|x| g.refs(x, e.class_generic_super_types).to_vec())
+        accumulate(g, o, f, &|x| {
+            g.refs(x, e.class_generic_super_types).to_vec()
+        })
     } else {
         return None;
     })
@@ -272,8 +281,11 @@ fn derived_single(g: &Graph, o: ObjId, f: FeatureId) -> Datum<'_, ObjId> {
     } else if f == e.generic_raw_type {
         obj(raw_type(g, o))
     } else if f == e.class_id_attribute {
-        obj(derived(g, o, e.class_all_attributes)
-            .and_then(|v| v.iter().copied().find(|&a| matches!(g.op_get(a, e.attribute_id), Datum::Bool(true)))))
+        obj(derived(g, o, e.class_all_attributes).and_then(|v| {
+            v.iter()
+                .copied()
+                .find(|&a| matches!(g.op_get(a, e.attribute_id), Datum::Bool(true)))
+        }))
     } else {
         Datum::Null
     }

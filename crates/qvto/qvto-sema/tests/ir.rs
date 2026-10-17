@@ -21,7 +21,10 @@ fn unit(qname: &str, text: &str) -> UnitSource {
 
 impl UnitResolver for Mem {
     fn resolve(&self, _importer: &UnitSource, q: &str) -> Option<UnitSource> {
-        self.0.iter().find(|(n, _)| *n == q).map(|(n, t)| unit(n, t))
+        self.0
+            .iter()
+            .find(|(n, _)| *n == q)
+            .map(|(n, t)| unit(n, t))
     }
 }
 
@@ -33,7 +36,11 @@ fn compile_units(main: &str, others: Vec<(&'static str, &'static str)>) -> Compi
     let problems: Vec<String> = c
         .units
         .iter()
-        .flat_map(|u| u.problems.iter().map(|p| format!("{}: {}", u.source.file_name, p.message)))
+        .flat_map(|u| {
+            u.problems
+                .iter()
+                .map(|p| format!("{}: {}", u.source.file_name, p.message))
+        })
         .collect();
     assert!(!c.has_errors(), "errors: {problems:#?}");
     c
@@ -189,7 +196,10 @@ fn legacy_main_parameters_are_generated() {
         .collect();
     assert_eq!(
         got,
-        vec![("$x", Direction::In, true), ("$result", Direction::Out, true)]
+        vec![
+            ("$x", Direction::In, true),
+            ("$result", Direction::Out, true)
+        ]
     );
 }
 
@@ -221,7 +231,12 @@ fn virtual_tables_are_in_the_ir() {
     assert_eq!(ops.len(), 4);
     // EClassifier's table has both subtypes' operations, each subtype's has EClassifier's;
     // EPackage is unrelated
-    assert_eq!(p.operations[ops[0].index()].vtable, vec![ops[1], ops[2]], "{:?}", names(ops[0]));
+    assert_eq!(
+        p.operations[ops[0].index()].vtable,
+        vec![ops[1], ops[2]],
+        "{:?}",
+        names(ops[0])
+    );
     assert_eq!(p.operations[ops[1].index()].vtable, vec![ops[0]]);
     assert_eq!(p.operations[ops[2].index()].vtable, vec![ops[0]]);
     assert!(p.operations[ops[3].index()].vtable.is_empty());
@@ -268,7 +283,10 @@ fn raise_string_is_raise_exception() {
     let (class, arg) = &raises[0];
     let class = class.expect("raise without exception type");
     assert_eq!(&*p.meta.class(class).name, "Exception");
-    assert!(matches!(arg, Some(ExprKind::Str(s)) if &**s == "boom"), "{arg:?}");
+    assert!(
+        matches!(arg, Some(ExprKind::Str(s)) if &**s == "boom"),
+        "{arg:?}"
+    );
 }
 
 #[test]

@@ -50,7 +50,12 @@ fn intermediate_class_instances_refer_to_the_graph() {
         blackbox: None,
     };
     let resolver = qvto::units::FsResolver::folder();
-    let c = qvto::compile_with_operations(main, &resolver, setup.session.meta().clone(), &setup.session.operations());
+    let c = qvto::compile_with_operations(
+        main,
+        &resolver,
+        setup.session.meta().clone(),
+        &setup.session.operations(),
+    );
     for u in &c.units {
         for p in &u.problems {
             eprintln!("{}", p.message);

@@ -90,10 +90,9 @@ where
     /// (`QvtOperationalUtil.filterOverriddenOperations`).
     fn vtable(&self, op: OpId) -> impl Iterator<Item = OpId> + '_ {
         let t = &self.prog.op(op).vtable;
-        t.iter().copied().filter(move |&c| {
-            !t.iter()
-                .any(|&d| self.prog.op(d).overrides == Some(c))
-        })
+        t.iter()
+            .copied()
+            .filter(move |&c| !t.iter().any(|&d| self.prog.op(d).overrides == Some(c)))
     }
 
     fn lookup_actual(&self, op: OpId, actual: TypeId) -> Option<OpId> {
@@ -438,7 +437,7 @@ where
         args: &mut [Value],
         base: usize,
         ibase: usize,
-        mut shared: Option<&mut Shared>,
+        shared: Option<&mut Shared>,
     ) -> VmResult<(Value, MappingStatus)> {
         let prog = self.prog;
         let o = prog.op(op);
@@ -468,7 +467,7 @@ where
             }
         }
         if status == MappingStatus::Executed
-            && let Some(sh) = shared.as_deref_mut()
+            && let Some(sh) = shared
         {
             self.share_out(op, base, sh);
         }
@@ -543,7 +542,12 @@ where
             // a `blackbox mapping`: the native result, the trace record, merged mappings
             let value = self.native_mapping_body(op, src, args, base)?;
             let params = self.params_of(op, base, args);
-            self.add_trace(op, o.context.map(|_| src.clone()), params, Some(value.clone()));
+            self.add_trace(
+                op,
+                o.context.map(|_| src.clone()),
+                params,
+                Some(value.clone()),
+            );
             if let Some(m) = &o.mapping {
                 for &mg in &m.merges {
                     let mg = self.overriding(mg);

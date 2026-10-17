@@ -169,23 +169,29 @@ fn annotated(n: &mut Natives<Graph>) {
             |vm, c| primitive_args(vm, &c),
         );
     }
-    n.java(&m("public int ANN.getStrCounterX(java.lang.String)"), |vm, c| {
-        let key = java::string(&c.self_).unwrap_or_default();
-        let v = vm
-            .native_state::<AnnotatedState>()
-            .counters
-            .get(&key)
-            .copied()
-            .unwrap_or(0);
-        Ok(Value::Int(v))
-    });
-    n.java(&m("public int ANN.incStrCounterX(java.lang.String)"), |vm, c| {
-        let key = java::string(&c.self_).unwrap_or_default();
-        let st = vm.native_state::<AnnotatedState>();
-        let e = st.counters.entry(key).or_insert(0);
-        *e += 1;
-        Ok(Value::Int(*e))
-    });
+    n.java(
+        &m("public int ANN.getStrCounterX(java.lang.String)"),
+        |vm, c| {
+            let key = java::string(&c.self_).unwrap_or_default();
+            let v = vm
+                .native_state::<AnnotatedState>()
+                .counters
+                .get(&key)
+                .copied()
+                .unwrap_or(0);
+            Ok(Value::Int(v))
+        },
+    );
+    n.java(
+        &m("public int ANN.incStrCounterX(java.lang.String)"),
+        |vm, c| {
+            let key = java::string(&c.self_).unwrap_or_default();
+            let st = vm.native_state::<AnnotatedState>();
+            let e = st.counters.entry(key).or_insert(0);
+            *e += 1;
+            Ok(Value::Int(*e))
+        },
+    );
     n.java(
         &m("public static java.lang.String ANN.testContextualSuffixedName(org.eclipse.emf.ecore.ENamedElement,java.lang.String)"),
         |vm, c| {
@@ -194,8 +200,14 @@ fn annotated(n: &mut Natives<Graph>) {
             Ok(Value::str(&format!("{name}{suffix}")))
         },
     );
-    n.java(&m("public java.lang.String ANN.testEchoArgument(java.lang.String)"), |_vm, c| Ok(arg0(&c)));
-    n.java(&m("public java.lang.String ANN.staticTestEchoArgument(java.lang.String)"), |_vm, c| Ok(arg0(&c)));
+    n.java(
+        &m("public java.lang.String ANN.testEchoArgument(java.lang.String)"),
+        |_vm, c| Ok(arg0(&c)),
+    );
+    n.java(
+        &m("public java.lang.String ANN.staticTestEchoArgument(java.lang.String)"),
+        |_vm, c| Ok(arg0(&c)),
+    );
     n.java(
         &m("public static java.util.Set ANN.wrapInSet(java.util.ArrayList)"),
         |vm, c| Ok(vm.native_collection(CollKind::Set, vec![c.self_.clone()])),
@@ -221,7 +233,10 @@ fn annotated(n: &mut Natives<Graph>) {
             Ok(vm.native_collection(CollKind::Set, vec![os]))
         },
     );
-    n.java(&m("public void ANN.noReturnType(java.lang.String)"), |_vm, _c| Ok(Value::Null));
+    n.java(
+        &m("public void ANN.noReturnType(java.lang.String)"),
+        |_vm, _c| Ok(Value::Null),
+    );
     n.java(
         &m("public simpleuml.Model ANN.testUsedSimpleUMLModelPackage(simpleuml.Model)"),
         |_vm, c| Ok(arg0(&c)),
@@ -235,7 +250,10 @@ fn annotated(n: &mut Natives<Graph>) {
         },
     );
     // java.math.BigInteger / BigDecimal: OCL Integer / Real here
-    n.java(&m("public java.math.BigInteger ANN.createBigInteger(java.lang.String)"), |_vm, c| big_integer(&arg0(&c)));
+    n.java(
+        &m("public java.math.BigInteger ANN.createBigInteger(java.lang.String)"),
+        |_vm, c| big_integer(&arg0(&c)),
+    );
     n.java(
         &m("public java.math.BigInteger ANN.addBigInteger(java.math.BigInteger,java.math.BigInteger)"),
         |_vm, c| {
@@ -245,13 +263,16 @@ fn annotated(n: &mut Natives<Graph>) {
             Ok(Value::Int(a.wrapping_add(b)))
         },
     );
-    n.java(&m("public java.math.BigDecimal ANN.createBigDecimal(java.lang.String)"), |_vm, c| {
-        let s = java::string(&arg0(&c)).ok_or_else(NativeError::npe)?;
-        s.trim()
-            .parse::<f64>()
-            .map(Value::Real)
-            .map_err(|_| NativeError::exception("java.lang.NumberFormatException", s))
-    });
+    n.java(
+        &m("public java.math.BigDecimal ANN.createBigDecimal(java.lang.String)"),
+        |_vm, c| {
+            let s = java::string(&arg0(&c)).ok_or_else(NativeError::npe)?;
+            s.trim()
+                .parse::<f64>()
+                .map(Value::Real)
+                .map_err(|_| NativeError::exception("java.lang.NumberFormatException", s))
+        },
+    );
     n.java(
         &m("public java.math.BigDecimal ANN.addBigDecimal(java.math.BigDecimal,java.math.BigDecimal)"),
         |_vm, c| {
@@ -265,37 +286,70 @@ fn annotated(n: &mut Natives<Graph>) {
         &m("public java.lang.Long ANN.sumLowerPrecisions(java.lang.Short,java.lang.Integer,java.lang.Long)"),
         |_vm, c| sum_ints(&c),
     );
-    n.java(&m("public long ANN.sumLowerPrecisionWithoutWrappers(short,int,long)"), |_vm, c| sum_ints(&c));
+    n.java(
+        &m("public long ANN.sumLowerPrecisionWithoutWrappers(short,int,long)"),
+        |_vm, c| sum_ints(&c),
+    );
     n.java(
         &m("public java.lang.Double ANN.sumLowerPrecisionDoubles(java.lang.Float,java.lang.Double)"),
         |_vm, c| sum_float_double(&c),
     );
-    n.java(&m("public double ANN.sumLowerPrecisionDoublesWithoutWrappers(float,double)"), |_vm, c| sum_float_double(&c));
+    n.java(
+        &m("public double ANN.sumLowerPrecisionDoublesWithoutWrappers(float,double)"),
+        |_vm, c| sum_float_double(&c),
+    );
     n.java(
         &m("public static boolean ANN.theSameJavaBigIntegerInstance(java.math.BigInteger,java.math.BigInteger)"),
         |_vm, c| Ok(Value::Bool(java::int(&c.self_).is_some() && java::int(&c.self_) == java::int(&arg0(&c)))),
     );
-    n.java(&m("public static java.lang.String ANN.stringContextualEcho(java.lang.String)"), |_vm, c| Ok(c.self_));
-    for t in ["nonObjectBoolContextualEcho(boolean)", "boolContextualEcho(boolean)"] {
-        n.java(&m(&format!("public static boolean ANN.{t}")), |_vm, c| Ok(c.self_));
+    n.java(
+        &m("public static java.lang.String ANN.stringContextualEcho(java.lang.String)"),
+        |_vm, c| Ok(c.self_),
+    );
+    for t in [
+        "nonObjectBoolContextualEcho(boolean)",
+        "boolContextualEcho(boolean)",
+    ] {
+        n.java(&m(&format!("public static boolean ANN.{t}")), |_vm, c| {
+            Ok(c.self_)
+        });
     }
     for t in ["nonObjectIntContextualEcho(int)", "intContextualEcho(int)"] {
         n.java(&m(&format!("public static int ANN.{t}")), |_vm, c| {
-            Ok(Value::Int(java::int(&c.self_).ok_or_else(NativeError::npe)? as i32 as i64))
+            Ok(Value::Int(
+                java::int(&c.self_).ok_or_else(NativeError::npe)? as i32 as i64,
+            ))
         });
     }
-    for t in ["nonObjectDoubleContextualEcho(double)", "doubleContextualEcho(double)"] {
+    for t in [
+        "nonObjectDoubleContextualEcho(double)",
+        "doubleContextualEcho(double)",
+    ] {
         n.java(&m(&format!("public static double ANN.{t}")), |_vm, c| {
-            Ok(Value::Real(java::real(&c.self_).ok_or_else(NativeError::npe)?))
+            Ok(Value::Real(
+                java::real(&c.self_).ok_or_else(NativeError::npe)?,
+            ))
         });
     }
-    n.java(&m("public java.util.Date ANN.createDate(java.lang.String)"), |_vm, c| Ok(arg0(&c)));
-    n.java(&m("public static boolean ANN.before(java.util.Date,java.util.Date)"), |_vm, c| date_before(&c.self_, &arg0(&c)));
-    n.java(&m("public static int ANN.countIgnoreUndefined(java.util.Collection)"), |vm, c| {
-        Ok(Value::Int(
-            vm.native_items(&c.self_).iter().filter(|x| !x.is_null()).count() as i64,
-        ))
-    });
+    n.java(
+        &m("public java.util.Date ANN.createDate(java.lang.String)"),
+        |_vm, c| Ok(arg0(&c)),
+    );
+    n.java(
+        &m("public static boolean ANN.before(java.util.Date,java.util.Date)"),
+        |_vm, c| date_before(&c.self_, &arg0(&c)),
+    );
+    n.java(
+        &m("public static int ANN.countIgnoreUndefined(java.util.Collection)"),
+        |vm, c| {
+            Ok(Value::Int(
+                vm.native_items(&c.self_)
+                    .iter()
+                    .filter(|x| !x.is_null())
+                    .count() as i64,
+            ))
+        },
+    );
     n.java(
         &m("public static java.util.Collection ANN.shrinkAnotherCollectionToMySize(java.util.Collection,java.util.Collection)"),
         |vm, c| {
@@ -310,29 +364,43 @@ fn annotated(n: &mut Natives<Graph>) {
             Ok(vm.native_collection(CollKind::Sequence, other[..n].to_vec()))
         },
     );
-    n.java(&m("public java.lang.String ANN.foo()"), |_vm, _c| Ok(Value::Null));
-    n.java(&m("public static java.lang.Object ANN.anyElement(java.util.Collection)"), |vm, c| first_element(vm, &c.self_));
-    n.java(&m("public static java.util.Set ANN.echoAsSet(java.util.Collection)"), |vm, c| {
-        let items = vm.native_items(&c.self_);
-        Ok(vm.native_collection(CollKind::Set, items))
-    });
-    n.java(&m("public void ANN.setLibState(java.lang.String)"), |vm, c| {
-        vm.native_state::<AnnotatedState>().lib_state = java::string(&arg0(&c));
+    n.java(&m("public java.lang.String ANN.foo()"), |_vm, _c| {
         Ok(Value::Null)
     });
+    n.java(
+        &m("public static java.lang.Object ANN.anyElement(java.util.Collection)"),
+        |vm, c| first_element(vm, &c.self_),
+    );
+    n.java(
+        &m("public static java.util.Set ANN.echoAsSet(java.util.Collection)"),
+        |vm, c| {
+            let items = vm.native_items(&c.self_);
+            Ok(vm.native_collection(CollKind::Set, items))
+        },
+    );
+    n.java(
+        &m("public void ANN.setLibState(java.lang.String)"),
+        |vm, c| {
+            vm.native_state::<AnnotatedState>().lib_state = java::string(&arg0(&c));
+            Ok(Value::Null)
+        },
+    );
     n.java(&m("public java.lang.String ANN.getLibState()"), |vm, _c| {
         Ok(match &vm.native_state::<AnnotatedState>().lib_state {
             Some(s) => Value::str(s),
             None => Value::Null,
         })
     });
-    n.java(&m("public java.lang.String ANN.appendToLibState(java.lang.String)"), |vm, c| {
-        let add = jstr(vm, &c.self_);
-        let st = vm.native_state::<AnnotatedState>();
-        let s = format!("{}{add}", st.lib_state.as_deref().unwrap_or("null"));
-        st.lib_state = Some(s.clone());
-        Ok(Value::str(&s))
-    });
+    n.java(
+        &m("public java.lang.String ANN.appendToLibState(java.lang.String)"),
+        |vm, c| {
+            let add = jstr(vm, &c.self_);
+            let st = vm.native_state::<AnnotatedState>();
+            let s = format!("{}{add}", st.lib_state.as_deref().unwrap_or("null"));
+            st.lib_state = Some(s.clone());
+            Ok(Value::str(&s))
+        },
+    );
     n.java(
         &m("public org.eclipse.m2m.qvt.oml.util.Dictionary ANN.toString2StringDict(org.eclipse.m2m.qvt.oml.util.Dictionary)"),
         |vm, c| {
@@ -353,10 +421,13 @@ fn annotated(n: &mut Natives<Graph>) {
             Ok(Value::Null)
         },
     );
-    n.java(&m("public void ANN.cancelExecution(org.eclipse.m2m.qvt.oml.util.IContext)"), |vm, _c| {
-        vm.native_cancel();
-        Ok(Value::Null)
-    });
+    n.java(
+        &m("public void ANN.cancelExecution(org.eclipse.m2m.qvt.oml.util.IContext)"),
+        |vm, _c| {
+            vm.native_cancel();
+            Ok(Value::Null)
+        },
+    );
     n.java(
         &m("public java.lang.String ANN.getConfigProperty(org.eclipse.m2m.qvt.oml.util.IContext,java.lang.String)"),
         |vm, c| {
@@ -377,23 +448,40 @@ fn annotated(n: &mut Natives<Graph>) {
             let e = arg0(&c);
             if vm.native_has_resource(&e) {
                 let name = name_of(vm, &e)?;
-                let app = create_named(vm, ECORE, "EClass", &format!("{name} : stereotypeApplication"))?;
+                let app = create_named(
+                    vm,
+                    ECORE,
+                    "EClass",
+                    &format!("{name} : stereotypeApplication"),
+                )?;
                 vm.native_add_to_resource_of(&e, &app);
             }
             Ok(Value::Null)
         },
     );
-    n.java(&m("public void ANN.testThrowRuntimeException()"), |_vm, _c| {
-        Err(NativeError::exception("java.lang.RuntimeException", "Exception from bbox library"))
-    });
+    n.java(
+        &m("public void ANN.testThrowRuntimeException()"),
+        |_vm, _c| {
+            Err(NativeError::exception(
+                "java.lang.RuntimeException",
+                "Exception from bbox library",
+            ))
+        },
+    );
     for name in ["getGenericClsWildcard", "getGenericClsInteger"] {
-        n.java(&m(&format!("public generics.GenericCls ANN.{name}()")), |vm, _c| {
-            let g = create(vm, GENERICS, "GenericCls")?;
-            vm.native_add(&g, "values", Value::Int(1))?;
-            Ok(g)
-        });
+        n.java(
+            &m(&format!("public generics.GenericCls ANN.{name}()")),
+            |vm, _c| {
+                let g = create(vm, GENERICS, "GenericCls")?;
+                vm.native_add(&g, "values", Value::Int(1))?;
+                Ok(g)
+            },
+        );
     }
-    n.java(&m("public generics.GenericCls ANN.getGenericClsType()"), |vm, _c| create(vm, GENERICS, "GenericCls"));
+    n.java(
+        &m("public generics.GenericCls ANN.getGenericClsType()"),
+        |vm, _c| create(vm, GENERICS, "GenericCls"),
+    );
     n.java(&m("public java.sql.Time ANN.getTime()"), |_vm, _c| {
         let secs = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -429,9 +517,12 @@ fn config_string(vm: V, key: &str) -> NativeResult {
 
 fn big_integer(v: &Value) -> NativeResult {
     let s = java::string(v).ok_or_else(NativeError::npe)?;
-    s.parse::<i64>()
-        .map(Value::Int)
-        .map_err(|_| NativeError::exception("java.lang.NumberFormatException", format!("For input string: \"{s}\"")))
+    s.parse::<i64>().map(Value::Int).map_err(|_| {
+        NativeError::exception(
+            "java.lang.NumberFormatException",
+            format!("For input string: \"{s}\""),
+        )
+    })
 }
 
 fn sum_ints(c: &NativeCall) -> NativeResult {
@@ -452,9 +543,18 @@ fn sum_float_double(c: &NativeCall) -> NativeResult {
 fn simple(n: &mut Natives<Graph>) {
     let s = format!("{BBOX}.SimpleJavaLibrary");
     let m = |sig: &str| sig.replace("SJL", &s);
-    n.java(&m("public java.lang.String SJL.echoFromSimpleJavaLibrary(java.lang.String)"), |_vm, c| Ok(arg0(&c)));
-    n.java(&m("public java.util.Date SJL.simpleCreateDate(java.lang.String)"), |_vm, c| Ok(arg0(&c)));
-    n.java(&m("public static boolean SJL.isBefore(java.util.Date,java.util.Date)"), |_vm, c| date_before(&c.self_, &arg0(&c)));
+    n.java(
+        &m("public java.lang.String SJL.echoFromSimpleJavaLibrary(java.lang.String)"),
+        |_vm, c| Ok(arg0(&c)),
+    );
+    n.java(
+        &m("public java.util.Date SJL.simpleCreateDate(java.lang.String)"),
+        |_vm, c| Ok(arg0(&c)),
+    );
+    n.java(
+        &m("public static boolean SJL.isBefore(java.util.Date,java.util.Date)"),
+        |_vm, c| date_before(&c.self_, &arg0(&c)),
+    );
     // XMLCalendar(date, DATETIME): the date as an xsd:dateTime text
     n.java(
         &m("public static javax.xml.datatype.XMLGregorianCalendar SJL.toXMLCalendar(java.util.Date)"),
@@ -464,7 +564,10 @@ fn simple(n: &mut Natives<Graph>) {
         &m("public static java.util.Date SJL.toDate(javax.xml.datatype.XMLGregorianCalendar)"),
         |_vm, c| Ok(c.self_),
     );
-    n.java(&m("public java.math.BigInteger SJL.simpleCreateBigInt(java.lang.String)"), |_vm, c| big_integer(&arg0(&c)));
+    n.java(
+        &m("public java.math.BigInteger SJL.simpleCreateBigInt(java.lang.String)"),
+        |_vm, c| big_integer(&arg0(&c)),
+    );
 }
 
 fn test_blackbox(n: &mut Natives<Graph>) {
@@ -535,80 +638,148 @@ fn bug289982(n: &mut Natives<Graph>) {
         set_blackbox_name(vm, &c.self_)?;
         Ok(Value::Null)
     });
-    n.java(&m("public void LIB.EModelElement(E.EModelElement)"), |vm, c| {
-        let a = create(vm, ECORE, "EAnnotation")?;
-        vm.native_set(&a, "source", Value::str(BLACKBOX_TEXT))?;
-        vm.native_add(&c.self_, "eAnnotations", a)?;
-        Ok(Value::Null)
-    });
+    n.java(
+        &m("public void LIB.EModelElement(E.EModelElement)"),
+        |vm, c| {
+            let a = create(vm, ECORE, "EAnnotation")?;
+            vm.native_set(&a, "source", Value::str(BLACKBOX_TEXT))?;
+            vm.native_add(&c.self_, "eAnnotations", a)?;
+            Ok(Value::Null)
+        },
+    );
     // helpers
-    n.java(&m("public void LIB.contextualHelper(E.EPackage)"), |vm, c| {
-        set_blackbox_name(vm, &c.self_)?;
+    n.java(
+        &m("public void LIB.contextualHelper(E.EPackage)"),
+        |vm, c| {
+            set_blackbox_name(vm, &c.self_)?;
+            Ok(Value::Null)
+        },
+    );
+    n.java(&m("public void LIB.nonContextualHelper()"), |_vm, _c| {
         Ok(Value::Null)
     });
-    n.java(&m("public void LIB.nonContextualHelper()"), |_vm, _c| Ok(Value::Null));
-    n.java(&m("public java.util.Set LIB.contextualHelper(E.EPackage,ML)"), |vm, c| {
-        set_blackbox_name(vm, &c.self_)?;
-        list_as_set(vm, &arg0(&c))
-    });
-    n.java(&m("public java.util.Set LIB.nonContextualHelper(ML)"), |vm, c| list_as_set(vm, &arg0(&c)));
-    n.java(&m("public void LIB.contextualHelperWithExecContext(IC,E.EPackage)"), |vm, c| {
-        log_blackbox(vm);
-        set_blackbox_name(vm, &c.self_)?;
-        Ok(Value::Null)
-    });
-    n.java(&m("public void LIB.nonContextualHelperWithExecContext(IC)"), |vm, _c| {
-        log_blackbox(vm);
-        Ok(Value::Null)
-    });
-    n.java(&m("public java.util.Set LIB.contextualHelperWithExecContext(IC,E.EPackage,ML)"), |vm, c| {
-        log_blackbox(vm);
-        set_blackbox_name(vm, &c.self_)?;
-        list_as_set(vm, &arg0(&c))
-    });
-    n.java(&m("public java.util.Set LIB.nonContextualHelperWithExecContext(IC,ML)"), |vm, c| {
-        log_blackbox(vm);
-        list_as_set(vm, &arg0(&c))
-    });
+    n.java(
+        &m("public java.util.Set LIB.contextualHelper(E.EPackage,ML)"),
+        |vm, c| {
+            set_blackbox_name(vm, &c.self_)?;
+            list_as_set(vm, &arg0(&c))
+        },
+    );
+    n.java(
+        &m("public java.util.Set LIB.nonContextualHelper(ML)"),
+        |vm, c| list_as_set(vm, &arg0(&c)),
+    );
+    n.java(
+        &m("public void LIB.contextualHelperWithExecContext(IC,E.EPackage)"),
+        |vm, c| {
+            log_blackbox(vm);
+            set_blackbox_name(vm, &c.self_)?;
+            Ok(Value::Null)
+        },
+    );
+    n.java(
+        &m("public void LIB.nonContextualHelperWithExecContext(IC)"),
+        |vm, _c| {
+            log_blackbox(vm);
+            Ok(Value::Null)
+        },
+    );
+    n.java(
+        &m("public java.util.Set LIB.contextualHelperWithExecContext(IC,E.EPackage,ML)"),
+        |vm, c| {
+            log_blackbox(vm);
+            set_blackbox_name(vm, &c.self_)?;
+            list_as_set(vm, &arg0(&c))
+        },
+    );
+    n.java(
+        &m("public java.util.Set LIB.nonContextualHelperWithExecContext(IC,ML)"),
+        |vm, c| {
+            log_blackbox(vm);
+            list_as_set(vm, &arg0(&c))
+        },
+    );
     // queries and operations (same bodies)
     for kind in ["Query", "Operation"] {
-        n.java(&m(&format!("public void LIB.contextual{kind}(E.EClass)")), |vm, c| {
-            set_blackbox_name(vm, &c.self_)?;
-            Ok(Value::Null)
-        });
-        n.java(&m(&format!("public void LIB.nonContextual{kind}()")), |_vm, _c| Ok(Value::Null));
-        n.java(&m(&format!("public java.util.List LIB.contextual{kind}(E.EClass,DICT)")), |vm, c| {
-            set_blackbox_name(vm, &c.self_)?;
-            dict_keys_seq(vm, &arg0(&c))
-        });
-        n.java(&m(&format!("public java.util.List LIB.nonContextual{kind}(DICT)")), |vm, c| dict_keys_seq(vm, &arg0(&c)));
-        n.java(&m(&format!("public void LIB.contextual{kind}WithExecContext(IC,E.EClass)")), |vm, c| {
-            log_blackbox(vm);
-            set_blackbox_name(vm, &c.self_)?;
-            Ok(Value::Null)
-        });
-        n.java(&m(&format!("public void LIB.nonContextual{kind}WithExecContext(IC)")), |vm, _c| {
-            log_blackbox(vm);
-            Ok(Value::Null)
-        });
-        n.java(&m(&format!("public java.util.List LIB.contextual{kind}WithExecContext(IC,E.EClass,DICT)")), |vm, c| {
-            log_blackbox(vm);
-            set_blackbox_name(vm, &c.self_)?;
-            dict_keys_seq(vm, &arg0(&c))
-        });
-        n.java(&m(&format!("public java.util.List LIB.nonContextual{kind}WithExecContext(IC,DICT)")), |vm, c| {
-            log_blackbox(vm);
-            dict_keys_seq(vm, &arg0(&c))
-        });
+        n.java(
+            &m(&format!("public void LIB.contextual{kind}(E.EClass)")),
+            |vm, c| {
+                set_blackbox_name(vm, &c.self_)?;
+                Ok(Value::Null)
+            },
+        );
+        n.java(
+            &m(&format!("public void LIB.nonContextual{kind}()")),
+            |_vm, _c| Ok(Value::Null),
+        );
+        n.java(
+            &m(&format!(
+                "public java.util.List LIB.contextual{kind}(E.EClass,DICT)"
+            )),
+            |vm, c| {
+                set_blackbox_name(vm, &c.self_)?;
+                dict_keys_seq(vm, &arg0(&c))
+            },
+        );
+        n.java(
+            &m(&format!(
+                "public java.util.List LIB.nonContextual{kind}(DICT)"
+            )),
+            |vm, c| dict_keys_seq(vm, &arg0(&c)),
+        );
+        n.java(
+            &m(&format!(
+                "public void LIB.contextual{kind}WithExecContext(IC,E.EClass)"
+            )),
+            |vm, c| {
+                log_blackbox(vm);
+                set_blackbox_name(vm, &c.self_)?;
+                Ok(Value::Null)
+            },
+        );
+        n.java(
+            &m(&format!(
+                "public void LIB.nonContextual{kind}WithExecContext(IC)"
+            )),
+            |vm, _c| {
+                log_blackbox(vm);
+                Ok(Value::Null)
+            },
+        );
+        n.java(
+            &m(&format!(
+                "public java.util.List LIB.contextual{kind}WithExecContext(IC,E.EClass,DICT)"
+            )),
+            |vm, c| {
+                log_blackbox(vm);
+                set_blackbox_name(vm, &c.self_)?;
+                dict_keys_seq(vm, &arg0(&c))
+            },
+        );
+        n.java(
+            &m(&format!(
+                "public java.util.List LIB.nonContextual{kind}WithExecContext(IC,DICT)"
+            )),
+            |vm, c| {
+                log_blackbox(vm);
+                dict_keys_seq(vm, &arg0(&c))
+            },
+        );
     }
     // mappings
-    n.java(&m("public E.EClassifier LIB.contextualMapping(E.EClassifier)"), |vm, c| {
-        let name = vm.native_get(&c.self_, "name")?;
-        let cls = create(vm, ECORE, "EClass")?;
-        vm.native_set(&cls, "name", name)?;
-        Ok(cls)
-    });
-    n.java(&m("public E.EClassifier LIB.nonContextualMapping()"), |vm, _c| create_named(vm, ECORE, "EClass", BLACKBOX_TEXT));
+    n.java(
+        &m("public E.EClassifier LIB.contextualMapping(E.EClassifier)"),
+        |vm, c| {
+            let name = vm.native_get(&c.self_, "name")?;
+            let cls = create(vm, ECORE, "EClass")?;
+            vm.native_set(&cls, "name", name)?;
+            Ok(cls)
+        },
+    );
+    n.java(
+        &m("public E.EClassifier LIB.nonContextualMapping()"),
+        |vm, _c| create_named(vm, ECORE, "EClass", BLACKBOX_TEXT),
+    );
     n.java(
         &m("public java.util.List LIB.contextualMapping(E.EClassifier,java.lang.Double,java.util.Collection,E.EModelElement)"),
         |vm, c| {
@@ -628,34 +799,47 @@ fn bug289982(n: &mut Natives<Graph>) {
             Ok(vm.native_collection(CollKind::Sequence, vec![cls]))
         },
     );
-    n.java(&m("public E.EClassifier LIB.contextualMappingWithExecContext(IC,E.EClassifier)"), |vm, c| {
-        log_blackbox(vm);
-        let name = vm.native_get(&c.self_, "name")?;
-        let cls = create(vm, ECORE, "EClass")?;
-        vm.native_set(&cls, "name", name)?;
-        Ok(cls)
-    });
-    n.java(&m("public E.EClassifier LIB.nonContextualMappingWithExecContext(IC)"), |vm, _c| {
-        log_blackbox(vm);
-        create_named(vm, ECORE, "EClass", BLACKBOX_TEXT)
-    });
-    n.java(&m("public java.util.List LIB.contextualMappingWithExecContext(IC,E.EClassifier,DICT)"), |vm, c| {
-        log_blackbox(vm);
-        let size = vm.native_dict_keys(&arg0(&c)).len();
-        let name = name_of(vm, &c.self_)?;
-        let cls = create_named(vm, ECORE, "EClass", &format!("{name}{size}"))?;
-        Ok(vm.native_collection(CollKind::Sequence, vec![cls]))
-    });
-    n.java(&m("public java.util.List LIB.nonContextualMappingWithExecContext(IC,DICT)"), |vm, c| {
-        log_blackbox(vm);
-        let size = vm.native_dict_keys(&arg0(&c)).len();
-        let cls = create_named(vm, ECORE, "EClass", &format!("{BLACKBOX_TEXT}{size}"))?;
-        Ok(vm.native_collection(CollKind::Sequence, vec![cls]))
-    });
+    n.java(
+        &m("public E.EClassifier LIB.contextualMappingWithExecContext(IC,E.EClassifier)"),
+        |vm, c| {
+            log_blackbox(vm);
+            let name = vm.native_get(&c.self_, "name")?;
+            let cls = create(vm, ECORE, "EClass")?;
+            vm.native_set(&cls, "name", name)?;
+            Ok(cls)
+        },
+    );
+    n.java(
+        &m("public E.EClassifier LIB.nonContextualMappingWithExecContext(IC)"),
+        |vm, _c| {
+            log_blackbox(vm);
+            create_named(vm, ECORE, "EClass", BLACKBOX_TEXT)
+        },
+    );
+    n.java(
+        &m("public java.util.List LIB.contextualMappingWithExecContext(IC,E.EClassifier,DICT)"),
+        |vm, c| {
+            log_blackbox(vm);
+            let size = vm.native_dict_keys(&arg0(&c)).len();
+            let name = name_of(vm, &c.self_)?;
+            let cls = create_named(vm, ECORE, "EClass", &format!("{name}{size}"))?;
+            Ok(vm.native_collection(CollKind::Sequence, vec![cls]))
+        },
+    );
+    n.java(
+        &m("public java.util.List LIB.nonContextualMappingWithExecContext(IC,DICT)"),
+        |vm, c| {
+            log_blackbox(vm);
+            let size = vm.native_dict_keys(&arg0(&c)).len();
+            let cls = create_named(vm, ECORE, "EClass", &format!("{BLACKBOX_TEXT}{size}"))?;
+            Ok(vm.native_collection(CollKind::Sequence, vec![cls]))
+        },
+    );
     for t in ["java.util.ArrayList", "java.util.LinkedList"] {
-        n.java(&m(&format!("public int LIB.ambiguousQuery({t})")), |vm, c| {
-            Ok(Value::Int(vm.native_items(&arg0(&c)).len() as i64))
-        });
+        n.java(
+            &m(&format!("public int LIB.ambiguousQuery({t})")),
+            |vm, c| Ok(Value::Int(vm.native_items(&arg0(&c)).len() as i64)),
+        );
     }
 }
 
@@ -673,10 +857,19 @@ fn misc(n: &mut Natives<Graph>) {
     // Bug425066_Library
     let b = format!("{BBOX}.Bug425066_Library");
     for name in ["getEClass", "createEClass1", "createEClass2"] {
-        n.java(&format!("public org.eclipse.emf.ecore.EClass {b}.{name}()"), |vm, _c| create(vm, ECORE, "EClass"));
+        n.java(
+            &format!("public org.eclipse.emf.ecore.EClass {b}.{name}()"),
+            |vm, _c| create(vm, ECORE, "EClass"),
+        );
     }
-    n.java(&format!("public void {b}.EClass(org.eclipse.emf.ecore.EClass,int)"), |_vm, _c| Ok(Value::Null));
-    n.java(&format!("public void {b}.EClass(org.eclipse.emf.ecore.EClass,java.lang.String)"), |_vm, _c| Ok(Value::Null));
+    n.java(
+        &format!("public void {b}.EClass(org.eclipse.emf.ecore.EClass,int)"),
+        |_vm, _c| Ok(Value::Null),
+    );
+    n.java(
+        &format!("public void {b}.EClass(org.eclipse.emf.ecore.EClass,java.lang.String)"),
+        |_vm, _c| Ok(Value::Null),
+    );
     // Bug427237_Library: blackbox transformations
     for name in ["bug427237", "bug427237_javaless"] {
         n.transformation(
@@ -699,15 +892,37 @@ fn misc(n: &mut Natives<Graph>) {
     }
     // CollectionTypeLibrary
     let ct = format!("{BBOX}.CollectionTypeLibrary");
-    n.java(&format!("public java.util.Collection {ct}.commonCollectionOperation(java.util.Collection)"), |vm, _c| Ok(vm.native_list(Vec::new())));
-    n.java(&format!("public java.util.Set {ct}.setOperation(java.util.Set)"), |vm, _c| Ok(vm.native_collection(CollKind::Set, Vec::new())));
-    n.java(&format!("public java.lang.String {ct}.stringCollectionAny(java.util.Collection)"), |vm, c| first_element(vm, &c.self_));
+    n.java(
+        &format!(
+            "public java.util.Collection {ct}.commonCollectionOperation(java.util.Collection)"
+        ),
+        |vm, _c| Ok(vm.native_list(Vec::new())),
+    );
+    n.java(
+        &format!("public java.util.Set {ct}.setOperation(java.util.Set)"),
+        |vm, _c| Ok(vm.native_collection(CollKind::Set, Vec::new())),
+    );
+    n.java(
+        &format!("public java.lang.String {ct}.stringCollectionAny(java.util.Collection)"),
+        |vm, c| first_element(vm, &c.self_),
+    );
     // standalone modules
     for (class, suffix) in [
-        (format!("{BBOX}.StandaloneBBoxModuleRegistered"), "Registered"),
-        ("org.eclipse.m2m.tests.qvt.oml.buddy.bbox.StandaloneBBoxModuleUnregistered".to_string(), "Unregistered"),
+        (
+            format!("{BBOX}.StandaloneBBoxModuleRegistered"),
+            "Registered",
+        ),
+        (
+            "org.eclipse.m2m.tests.qvt.oml.buddy.bbox.StandaloneBBoxModuleUnregistered".to_string(),
+            "Unregistered",
+        ),
     ] {
-        n.java(&format!("public java.lang.String {class}.echoFromBBoxModule{suffix}(java.lang.String)"), |_vm, c| Ok(arg0(&c)));
+        n.java(
+            &format!(
+                "public java.lang.String {class}.echoFromBBoxModule{suffix}(java.lang.String)"
+            ),
+            |_vm, c| Ok(arg0(&c)),
+        );
         n.java(
             &format!("public org.eclipse.emf.ecore.EClass {class}.modifyClassName{suffix}(org.eclipse.emf.ecore.EClass,java.lang.String)"),
             |vm, c| {
@@ -718,9 +933,12 @@ fn misc(n: &mut Natives<Graph>) {
         );
     }
     // Bug565747_Library
-    n.java(&format!("public java.lang.String {BBOX}.Bug565747_Library.print(org.eclipse.emf.ecore.EObject)"), |vm, c| {
-        Ok(Value::str(&jstr(vm, &c.self_)))
-    });
+    n.java(
+        &format!(
+            "public java.lang.String {BBOX}.Bug565747_Library.print(org.eclipse.emf.ecore.EObject)"
+        ),
+        |vm, c| Ok(Value::str(&jstr(vm, &c.self_))),
+    );
     // Bug577992_Library: `self.op(t)` throws (generated EOperation stub), then the attribute
     n.java(
         &format!("public {BBOX}.bug577992.TestClass {BBOX}.Bug577992_Library.copyName({BBOX}.bug577992.TestClass,{BBOX}.bug577992.TestClass)"),
@@ -733,9 +951,14 @@ fn misc(n: &mut Natives<Graph>) {
     );
     n.java("public org.eclipse.emf.ecore.EClass org.eclipse.m2m.tests.qvto.transformationProject.Bug507955_Library.mirrorBug507955(org.eclipse.emf.ecore.EClass)", |_vm, c| Ok(arg0(&c)));
     n.java(&format!("public org.eclipse.emf.ecore.EClass {BBOX}.Bug579914_Library.mirrorBug579914(org.eclipse.emf.ecore.EClass)"), |_vm, c| Ok(arg0(&c)));
-    n.java(&format!("public simpleuml.Class {BBOX}.Bug573752_Library.test(simpleuml.DataType)"), |vm, _c| create(vm, SIMPLEUML, "Class"));
+    n.java(
+        &format!("public simpleuml.Class {BBOX}.Bug573752_Library.test(simpleuml.DataType)"),
+        |vm, _c| create(vm, SIMPLEUML, "Class"),
+    );
     // generated code of the samples' metamodels (`@generated NOT` EOperation bodies)
-    n.eoperation(SIMPLEUML, "Model", "getCustomProperty", |_vm, c| Ok(arg0(&c)));
+    n.eoperation(SIMPLEUML, "Model", "getCustomProperty", |_vm, c| {
+        Ok(arg0(&c))
+    });
     n.java("public java.lang.String org.eclipse.m2m.tests.qvt.oml.Bug578955_Library.echoBug578955(java.lang.String)", |_vm, c| Ok(arg0(&c)));
     n.java("public java.lang.String org.eclipse.m2m.tests.qvt.oml.Blackbox.doEchoFromSimpleJavaLibrary(java.lang.String)", |_vm, c| Ok(arg0(&c)));
     n.java("public java.lang.String org.eclipse.m2m.tests.qvt.oml.Bug578265_Library.doEchoFromSimpleJavaLibrary(java.lang.String)", |_vm, c| Ok(arg0(&c)));

@@ -11,9 +11,9 @@ use qvto_bytecode::Site;
 use qvto_model::ModelStore;
 use qvto_runtime::coll::Coll;
 use qvto_runtime::eq::{java_equals, java_hash};
+use qvto_runtime::fxhash::FxHashMap as HashMap;
 use qvto_runtime::{HashEnv, Value};
 use qvto_sema::ir::{Direction, OpId, ResolveKind};
-use qvto_runtime::fxhash::FxHashMap as HashMap;
 use std::rc::Rc;
 
 #[derive(Clone, Debug)]
@@ -136,13 +136,9 @@ where
         }?;
         // checkResultMatch
         if !result_now.is_null() {
-            match &self.traces.records[rec].result {
-                Some(r) => {
-                    if !ocl_identical(result_now, r, &self.env) {
-                        return None;
-                    }
-                }
-                None => return None,
+            let r = self.traces.records[rec].result.as_ref()?;
+            if !ocl_identical(result_now, r, &self.env) {
+                return None;
             }
         }
         Some(rec)

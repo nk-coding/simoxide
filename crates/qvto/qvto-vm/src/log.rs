@@ -60,7 +60,7 @@ impl ObjectFormat for Fmt<'_> {
         let en = meta.enumeration(qvto_model::EnumId(e.enum_id));
         match en.literals.get(e.literal as usize) {
             Some(l) => out.push_str(&l.literal),
-            None => out.push_str("?"),
+            None => out.push('?'),
         }
     }
     fn type_name(&self, t: TypeRef, out: &mut String) {
@@ -188,7 +188,14 @@ where
             s += &group(&["ordered", "unique", "lowerBound", "upperBound"]);
         }
         if is("EStructuralFeature") {
-            s += &group(&["changeable", "volatile", "transient", "defaultValueLiteral", "unsettable", "derived"]);
+            s += &group(&[
+                "changeable",
+                "volatile",
+                "transient",
+                "defaultValueLiteral",
+                "unsettable",
+                "derived",
+            ]);
         }
         if is("EAttribute") {
             s += &group(&["iD"]);
@@ -352,7 +359,7 @@ fn group(n: i32) -> String {
     let s = n.unsigned_abs().to_string();
     let mut out = String::new();
     for (i, c) in s.chars().enumerate() {
-        if i > 0 && (s.len() - i) % 3 == 0 {
+        if i > 0 && (s.len() - i).is_multiple_of(3) {
             out.push(',');
         }
         out.push(c);

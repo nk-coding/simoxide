@@ -9,13 +9,13 @@ use qvto_bytecode::{ChunkId, Const, Insn, Program, Site};
 use qvto_model::{ClassId, FeatureId, ModelStore};
 use qvto_runtime::coll::{Coll, CollKind};
 use qvto_runtime::dict::{Dict, List};
+use qvto_runtime::fxhash::FxHashMap as HashMap;
 use qvto_runtime::identity::IdentityHashSource;
 use qvto_runtime::{EnumLit, IdentityKey, Mode, ObjRef, Str, TypeRef, Value};
 use qvto_sema::ir::GlobalId;
 use qvto_sema::ir::{IntermPropId, ModuleId, OpId};
 use qvto_types::{StdOp, TypeId};
 use std::cell::RefCell;
-use qvto_runtime::fxhash::FxHashMap as HashMap;
 use std::rc::Rc;
 
 /// A store's object handle as a dense `u32` (the VM's `ObjRef::host`).
@@ -435,7 +435,8 @@ where
             };
             if let Some(o) = self.store.classifier_object(c) {
                 let r = ObjRef::host(o.to_u32());
-                self.env.alias(IdentityKey::Type(TypeRef(i as u32)), IdentityKey::Obj(r));
+                self.env
+                    .alias(IdentityKey::Type(TypeRef(i as u32)), IdentityKey::Obj(r));
                 self.type_objects.insert(TypeId(i as u32), r);
                 self.object_types.insert(r, TypeId(i as u32));
             }
@@ -445,7 +446,8 @@ where
             let c = ClassId(c as u32);
             if let Some(o) = self.store.classifier_object(Classifier::Class(c)) {
                 let target = IdentityKey::Obj(ObjRef::host(o.to_u32()));
-                self.env.alias(IdentityKey::Type(TypeRef(0x4000_0000 | c.0)), target);
+                self.env
+                    .alias(IdentityKey::Type(TypeRef(0x4000_0000 | c.0)), target);
             }
         }
     }
@@ -801,10 +803,10 @@ where
                     self.set_instance_global(&i, GlobalId(g as u32), v);
                 }
                 Insn::Jump { target } => {
-                    if (target as usize) <= pc {
-                        if let Err(e) = self.step() {
-                            fail!(e)
-                        }
+                    if (target as usize) <= pc
+                        && let Err(e) = self.step()
+                    {
+                        fail!(e)
                     }
                     pc = target as usize;
                     continue;
@@ -1089,7 +1091,9 @@ where
                 }
                 Insn::IterInit { slot, src } => {
                     self.iters[ibase + slot as usize] = match &r!(self, base, src) {
-                        Value::Coll(c) if matches!(&**c, Coll::Sequence(_) | Coll::OrderedSet(_)) => {
+                        Value::Coll(c)
+                            if matches!(&**c, Coll::Sequence(_) | Coll::OrderedSet(_)) =>
+                        {
                             IterSlot::Coll(c.clone(), 0)
                         }
                         v => IterSlot::Iter(Iter::of(v)),
@@ -1135,11 +1139,9 @@ where
                 Insn::ClosureNext { lp, target } => {
                     let info = chunk.loops[lp as usize];
                     let mut found = None;
-                    loop {
-                        let IterSlot::Closure(levels) = &mut self.iters[ibase + info.slot as usize]
-                        else {
-                            break;
-                        };
+                    while let IterSlot::Closure(levels) =
+                        &mut self.iters[ibase + info.slot as usize]
+                    {
                         let depth = levels.len();
                         let Some(top) = levels.last_mut() else {
                             break;
@@ -1352,7 +1354,9 @@ where
         match self.opts.max_collection_size {
             Some(m) if n > m as i64 => Err(self.error(
                 ErrorKind::Interrupted,
-                Some(format!("resource limit exceeded: a collection of {n} elements (limit {m})")),
+                Some(format!(
+                    "resource limit exceeded: a collection of {n} elements (limit {m})"
+                )),
             )),
             _ => Ok(()),
         }
@@ -1406,10 +1410,6 @@ where
             names,
             values.into_boxed_slice(),
         )))
-    }
-
-    pub(crate) fn exception_value(&mut self, e: &QvtError) -> Value {
-        self.exception_object(e)
     }
 
     fn exception_object(&mut self, e: &QvtError) -> Value {
@@ -1498,15 +1498,15 @@ pub(crate) fn const_value(c: &Const) -> Value {
     }
 }
 
-
 /// `NumberUtil.higherPrecisionNumber`: a `Float` as a `Double`, `Short`/`Byte`/`Long` boxes as
 /// (long) Integers; `None` for values it leaves alone.
 pub(crate) fn higher_precision(v: &Value) -> Option<Value> {
     match v {
         Value::Float(f) => Some(Value::Real(*f as f64)),
-        Value::Boxed(qvto_runtime::IntBox::Short | qvto_runtime::IntBox::Byte | qvto_runtime::IntBox::Long, i) => {
-            Some(Value::Int(*i as i64))
-        }
+        Value::Boxed(
+            qvto_runtime::IntBox::Short | qvto_runtime::IntBox::Byte | qvto_runtime::IntBox::Long,
+            i,
+        ) => Some(Value::Int(*i as i64)),
         _ => None,
     }
 }

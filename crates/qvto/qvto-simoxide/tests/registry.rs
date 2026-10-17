@@ -18,7 +18,10 @@ pub fn pcm_conf() -> Option<Config> {
     let root = repo_root();
     let conf = root.join("target/pcm/pcm.conf");
     if !conf.exists() {
-        eprintln!("skipped: no {} (qvto-emf/tools/pcm-setup.sh target/pcm)", conf.display());
+        eprintln!(
+            "skipped: no {} (qvto-emf/tools/pcm-setup.sh target/pcm)",
+            conf.display()
+        );
         return None;
     }
     Some(Config::read(&conf, &root).expect("pcm.conf"))
@@ -37,7 +40,12 @@ fn ids_are_simoxides() {
         assert_eq!(fi.owner.0, f.owner.0);
     }
     for (i, c) in sm::CLASSES.iter().enumerate() {
-        let all: Vec<u32> = m.class(ClassId(i as u32)).all_features.iter().map(|f| f.0).collect();
+        let all: Vec<u32> = m
+            .class(ClassId(i as u32))
+            .all_features
+            .iter()
+            .map(|f| f.0)
+            .collect();
         let sim: Vec<u32> = c.all_features.iter().map(|f| f.0).collect();
         // SimOxide's main tables miss generic supertypes (`IntSample extends Sample<Integer>`)
         let generic = sm::CLASS_EXT[i]
@@ -63,7 +71,8 @@ fn registry_equals_the_ecore_files() {
     for (p, loc) in sim_top_packages() {
         let ns = s.meta().package(p).ns_uri.clone().unwrap();
         let ours = describe_packages(s.meta(), &[p]);
-        rs.load_metamodel(loc).unwrap_or_else(|e| panic!("{loc}: {e}"));
+        rs.load_metamodel(loc)
+            .unwrap_or_else(|e| panic!("{loc}: {e}"));
         let q = rs.graph.meta().package_by_ns_uri(&ns).expect("registered");
         let theirs = describe_packages(rs.graph.meta(), &[q]);
         for (a, b) in ours.iter().zip(&theirs) {
@@ -73,7 +82,12 @@ fn registry_equals_the_ecore_files() {
         }
         assert_eq!(ours.len(), theirs.len(), "{ns}");
     }
-    assert!(diffs.is_empty(), "{} differences:\n{}", diffs.len(), diffs.join("\n"));
+    assert!(
+        diffs.is_empty(),
+        "{} differences:\n{}",
+        diffs.len(),
+        diffs.join("\n")
+    );
 }
 
 #[test]
@@ -82,7 +96,10 @@ fn metamodel_objects_and_operations() {
     // every class and feature has its Ecore object
     let g = &s.resource_set().graph;
     for i in 0..sm::CLASSES.len() {
-        assert!(g.classifier_object(qvto_model::Classifier::Class(ClassId(i as u32))).is_some());
+        assert!(
+            g.classifier_object(qvto_model::Classifier::Class(ClassId(i as u32)))
+                .is_some()
+        );
     }
     for i in 0..sm::FEATURES.len() {
         assert!(g.feature_object(FeatureId(i as u32)).is_some());
@@ -91,7 +108,8 @@ fn metamodel_objects_and_operations() {
     let ops = s.operations();
     for op in sm::OPERATIONS {
         assert!(
-            ops.iter().any(|o| o.class.0 == op.owner.0 && o.name == op.name),
+            ops.iter()
+                .any(|o| o.class.0 == op.owner.0 && o.name == op.name),
             "{}",
             op.name
         );

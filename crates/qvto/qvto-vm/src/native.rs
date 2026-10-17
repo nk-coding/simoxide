@@ -152,7 +152,9 @@ where
 /// `pkg.Class#name(java.lang.String,int)`), the form of `Operation::blackbox_impl`.
 pub fn java_method_key(method: &str) -> String {
     let open = method.find('(').unwrap_or(method.len());
-    let close = method[open..].find(')').map_or(method.len(), |i| open + i + 1);
+    let close = method[open..]
+        .find(')')
+        .map_or(method.len(), |i| open + i + 1);
     let head = &method[..open];
     let qualified = head.rsplit(' ').next().unwrap_or(head);
     let (class, name) = qualified.rsplit_once('.').unwrap_or(("", qualified));
@@ -324,7 +326,11 @@ where
     fn no_blackbox(&self, op: OpId) -> Unwind {
         let o = self.prog.op(op);
         let name = match o.context {
-            Some(c) => format!("{}::{}", crate::types::type_simple_name(self.prog, c), o.name),
+            Some(c) => format!(
+                "{}::{}",
+                crate::types::type_simple_name(self.prog, c),
+                o.name
+            ),
             None => o.name.clone(),
         };
         self.runtime_error(format!("No blackbox implementation found for '{name}'"))
@@ -332,7 +338,12 @@ where
 
     /// Calls the native implementation of a blackbox operation (helper, query, constructor,
     /// library operation) with `self` and the arguments.
-    pub(crate) fn call_native(&mut self, op: OpId, src: Value, args: Vec<Value>) -> VmResult<Value> {
+    pub(crate) fn call_native(
+        &mut self,
+        op: OpId,
+        src: Value,
+        args: Vec<Value>,
+    ) -> VmResult<Value> {
         let Some(n) = self.lookup_native(op) else {
             return Err(self.no_blackbox(op));
         };
@@ -464,9 +475,9 @@ where
             .as_ref()
             .and_then(|n| n.get_transformation(&name).cloned());
         let Some(n) = native else {
-            return Err(self.runtime_error(format!(
-                "No blackbox implementation found for '{name}'"
-            )));
+            return Err(
+                self.runtime_error(format!("No blackbox implementation found for '{name}'"))
+            );
         };
         let mut args = Vec::with_capacity(m.model_params.len());
         for i in 0..m.model_params.len() {
@@ -621,9 +632,7 @@ where
                 }
             }
         };
-        res.map_err(|e| {
-            NativeError::exception("java.lang.IllegalArgumentException", e.to_string())
-        })
+        res.map_err(|e| NativeError::exception("java.lang.IllegalArgumentException", e.to_string()))
     }
 
     /// `((EList) eGet(feature)).add(value)`.
@@ -645,7 +654,9 @@ where
         self.store
             .add(h, f, d.as_datum(), None)
             .map(|_| ())
-            .map_err(|e| NativeError::exception("java.lang.IllegalArgumentException", e.to_string()))
+            .map_err(|e| {
+                NativeError::exception("java.lang.IllegalArgumentException", e.to_string())
+            })
     }
 
     /// `obj.eResource().getContents().add(root)`; `false` if `obj` has no resource.
@@ -726,7 +737,11 @@ where
     /// `dict.get(key)`.
     pub fn native_dict_get(&self, d: &Value, key: &Value) -> Value {
         match d {
-            Value::Dict(d) => d.borrow().get(key, &self.env).cloned().unwrap_or(Value::Null),
+            Value::Dict(d) => d
+                .borrow()
+                .get(key, &self.env)
+                .cloned()
+                .unwrap_or(Value::Null),
             _ => Value::Null,
         }
     }
@@ -767,7 +782,12 @@ where
 
     /// `String.split(regex, limit)` (`Pattern.split`: no leading empty string for a zero-width
     /// match at the start, trailing empty strings removed when `limit == 0`).
-    pub fn native_split(&self, s: &str, regex: &str, limit: i32) -> Result<Vec<String>, NativeError> {
+    pub fn native_split(
+        &self,
+        s: &str,
+        regex: &str,
+        limit: i32,
+    ) -> Result<Vec<String>, NativeError> {
         let re = self
             .regex_find(&qvto_runtime::Str::new(regex))
             .map_err(java_exception)?;
@@ -804,11 +824,7 @@ where
     /// The name of an enumeration literal value (`Enumerator.getName()`).
     pub fn native_enum_name(&self, v: &Value) -> Option<String> {
         let Value::Enum(e) = v else { return None };
-        let info = self
-            .prog
-            .ir
-            .meta
-            .enumeration(qvto_model::EnumId(e.enum_id));
+        let info = self.prog.ir.meta.enumeration(qvto_model::EnumId(e.enum_id));
         info.literals
             .get(e.literal as usize)
             .map(|l| l.name.to_string())

@@ -709,10 +709,18 @@ fn read_blackboxes(path: &Path) -> Result<(BlackboxEnvs, HashMap<String, String>
         }
     }
     for e in envs.values_mut() {
-        let mut list: Vec<(String, BlackboxUnit)> = e.iter().map(|(k, (_, u))| (k.clone(), u.clone())).collect();
+        let mut list: Vec<(String, BlackboxUnit)> =
+            e.iter().map(|(k, (_, u))| (k.clone(), u.clone())).collect();
         qvto_sema::attach_alternatives(&mut list);
-        let files: HashMap<String, String> = e.iter().map(|(k, (f, _))| (k.clone(), f.clone())).collect();
-        *e = list.into_iter().map(|(k, u)| { let f = files[&k].clone(); (k, (f, u)) }).collect();
+        let files: HashMap<String, String> =
+            e.iter().map(|(k, (f, _))| (k.clone(), f.clone())).collect();
+        *e = list
+            .into_iter()
+            .map(|(k, u)| {
+                let f = files[&k].clone();
+                (k, (f, u))
+            })
+            .collect();
     }
     Ok((envs, case_env))
 }
@@ -1130,7 +1138,11 @@ fn compile_case(
             let text = &u.source.text;
             for p in &u.problems {
                 let (line, o, l) = p.eclipse_position(text, &u.lines);
-                let line = if u.source.blackbox.is_some() { -1 } else { line };
+                let line = if u.source.blackbox.is_some() {
+                    -1
+                } else {
+                    line
+                };
                 out.push(Prob {
                     unit: u.source.file_name.clone(),
                     sev: if p.severity == Severity::Error {

@@ -174,7 +174,10 @@ pub fn write_bundle(results: &BTreeMap<String, JavaResult>) -> String {
             let text = r.files.get(f).map(|t| {
                 if f == "result.txt" {
                     // timings vary from run to run; they stay in the cache
-                    t.lines().filter(|l| !l.starts_with("run-ms\t")).map(|l| format!("{l}\n")).collect()
+                    t.lines()
+                        .filter(|l| !l.starts_with("run-ms\t"))
+                        .map(|l| format!("{l}\n"))
+                        .collect()
                 } else {
                     t.clone()
                 }

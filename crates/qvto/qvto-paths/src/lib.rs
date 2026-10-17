@@ -60,7 +60,12 @@ pub fn target_dir() -> PathBuf {
     if let Some(d) = option_env!("CARGO_TARGET_DIR").filter(|d| !d.is_empty()) {
         return PathBuf::from(d);
     }
-    workspace_root(Path::new(env!("CARGO_MANIFEST_DIR")).parent().expect("crates/qvto")).join("target")
+    workspace_root(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .expect("crates/qvto"),
+    )
+    .join("target")
 }
 
 /// Makes `<qvto_root>/target` a link to [`target_dir`] (created or re-pointed; a real directory
@@ -84,7 +89,8 @@ pub fn ensure_target_link(qvto_root: &Path) {
         // atomic: a fresh link under a unique name, renamed over the old one
         let tmp = qvto_root.join(format!(".target-link-{}", std::process::id()));
         let _ = std::fs::remove_file(&tmp);
-        if std::os::unix::fs::symlink(&want, &tmp).is_ok() && std::fs::rename(&tmp, &link).is_err() {
+        if std::os::unix::fs::symlink(&want, &tmp).is_ok() && std::fs::rename(&tmp, &link).is_err()
+        {
             let _ = std::fs::remove_file(&tmp);
         }
     }

@@ -62,7 +62,9 @@ fn expand(rep: &str, c: &regex::Captures<'_>, re: &Regex, out: &mut String) -> R
                 match chars.get(i) {
                     Some(&x) => out.push(x),
                     None => {
-                        return Err("IllegalArgumentException: character to be escaped is missing".into());
+                        return Err(
+                            "IllegalArgumentException: character to be escaped is missing".into(),
+                        );
                     }
                 }
                 i += 1;
@@ -70,7 +72,10 @@ fn expand(rep: &str, c: &regex::Captures<'_>, re: &Regex, out: &mut String) -> R
             '$' => {
                 i += 1;
                 let Some(&d) = chars.get(i) else {
-                    return Err("IllegalArgumentException: Illegal group reference: group index is missing".into());
+                    return Err(
+                        "IllegalArgumentException: Illegal group reference: group index is missing"
+                            .into(),
+                    );
                 };
                 if d == '{' {
                     let end = chars[i..].iter().position(|&x| x == '}').map(|k| i + k);
@@ -79,7 +84,9 @@ fn expand(rep: &str, c: &regex::Captures<'_>, re: &Regex, out: &mut String) -> R
                     };
                     let name: String = chars[i + 1..end].iter().collect();
                     if re.capture_names().flatten().all(|n| n != name) {
-                        return Err(format!("IllegalArgumentException: No group with name {{{name}}}"));
+                        return Err(format!(
+                            "IllegalArgumentException: No group with name {{{name}}}"
+                        ));
                     }
                     if let Some(m) = c.name(&name) {
                         out.push_str(m.as_str());
@@ -141,7 +148,8 @@ mod tests {
     fn java_replacement() {
         let re = compile_full("[a-z]+").unwrap();
         assert!(re.is_match("abc") && !re.is_match("abc1"));
-        let f = |p: &str, t: &str, r: &str, all: bool| replace(&compile_find(p).unwrap(), t, r, all);
+        let f =
+            |p: &str, t: &str, r: &str, all: bool| replace(&compile_find(p).unwrap(), t, r, all);
         // java.lang.String.replaceAll / replaceFirst (JDK 21)
         assert_eq!(f(".*", "ab", "-", true).unwrap(), "--");
         assert_eq!(f(".*", "", "-", true).unwrap(), "-");

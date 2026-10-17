@@ -156,8 +156,9 @@ impl<V> LinkedMap<V> {
         let entries = &self.entries;
         for (i, e) in entries.iter().enumerate() {
             let h = e.as_ref().map_or(0, |e| e.hash);
-            self.table
-                .insert_unique(h, i as u32, |&j| entries[j as usize].as_ref().map_or(0, |e| e.hash));
+            self.table.insert_unique(h, i as u32, |&j| {
+                entries[j as usize].as_ref().map_or(0, |e| e.hash)
+            });
         }
     }
 

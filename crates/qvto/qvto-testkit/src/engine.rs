@@ -86,7 +86,10 @@ impl CaseEnv<'_> {
         for (uri, file) in crate::paths::EMF_JAR_MODELS {
             if rs.ns_location(uri).is_none() {
                 let abs = std::path::absolute(self.base.join(file)).map_err(|e| e.to_string())?;
-                rs.add_ns_location(uri, &qvto_emf::uri::Uri::file(&abs.to_string_lossy()).to_string());
+                rs.add_ns_location(
+                    uri,
+                    &qvto_emf::uri::Uri::file(&abs.to_string_lossy()).to_string(),
+                );
             }
         }
         // TestQvtStandaloneExecutor puts the first root package of each file into the
@@ -114,7 +117,11 @@ impl CaseEnv<'_> {
             }
             let after = rs.graph.meta().package_count();
             loaded.extend((before..after).map(|i| qvto_model::PackageId(i as u32)));
-            let root = rs.graph.roots(r).first().and_then(|&o| rs.graph.object_package(o));
+            let root = rs
+                .graph
+                .roots(r)
+                .first()
+                .and_then(|&o| rs.graph.object_package(o));
             if let Some(root) = root {
                 let ns = rs.graph.meta().package(root).ns_uri.clone();
                 // `containsKey` also asks the global registry: the index of a case
@@ -124,7 +131,11 @@ impl CaseEnv<'_> {
                         || crate::paths::EMF_JAR_MODELS.iter().any(|(k, _)| *k == u)
                         || (self.case.conf.is_some() && self.models.ns_index.contains_key(u))
                 });
-                if !global && !keys.iter().any(|k| rs.graph.meta().package(*k).ns_uri == ns) {
+                if !global
+                    && !keys
+                        .iter()
+                        .any(|k| rs.graph.meta().package(*k).ns_uri == ns)
+                {
                     keys.push(root);
                 }
             }

@@ -147,7 +147,8 @@ pub fn register_resources(
     }
     // pass 2: supertypes and features
     let mut errors = Vec::new();
-    let mut proxies: std::collections::HashMap<(String, bool), Classifier> = std::collections::HashMap::new();
+    let mut proxies: std::collections::HashMap<(String, bool), Classifier> =
+        std::collections::HashMap::new();
     let mut proxy_pkg: Option<PackageId> = None;
     let mut opposites = Vec::new();
     let mut keys = Vec::new();
@@ -306,7 +307,8 @@ fn proxy_classifier(
     let k = match proxies.get(&key) {
         Some(&k) => k,
         None => {
-            let pp = *proxy_pkg.get_or_insert_with(|| g.meta_mut().add_package("", None, None, None));
+            let pp =
+                *proxy_pkg.get_or_insert_with(|| g.meta_mut().add_package("", None, None, None));
             let k = if is_class {
                 Classifier::Class(g.meta_mut().add_class(pp, "null", false, false))
             } else {

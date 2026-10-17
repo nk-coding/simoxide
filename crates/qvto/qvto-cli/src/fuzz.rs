@@ -67,7 +67,9 @@ fn parse(args: &[String]) -> Opts {
     let mut i = 1;
     let val = |i: &mut usize| -> String {
         *i += 1;
-        args.get(*i).cloned().unwrap_or_else(|| crate::die("missing value"))
+        args.get(*i)
+            .cloned()
+            .unwrap_or_else(|| crate::die("missing value"))
     };
     while i < args.len() {
         match args[i].as_str() {
@@ -98,7 +100,9 @@ pub fn main(args: &[String]) {
         Some("recheck") => return recheck(&root, &args[1..]),
         Some("corpus") => return corpus(&root, &args[1..]),
         Some("expr" | "prog") => {}
-        k => crate::die(&format!("fuzz: unknown campaign {k:?} (expr, prog, robust, robust-replay)")),
+        k => crate::die(&format!(
+            "fuzz: unknown campaign {k:?} (expr, prog, robust, robust-replay)"
+        )),
     }
     let mut o = parse(args);
     if o.out.as_os_str().is_empty() {
@@ -146,7 +150,11 @@ fn recheck(root: &Path, dirs: &[String]) {
                         if let Some(df) = &r.diff {
                             println!("{}", df.first_difference().unwrap_or_default());
                         }
-                        println!("--- java log\n{}--- engine log\n{}", j.map(|j| j.log()).unwrap_or(""), r.outcome.log);
+                        println!(
+                            "--- java log\n{}--- engine log\n{}",
+                            j.map(|j| j.log()).unwrap_or(""),
+                            r.outcome.log
+                        );
                     }
                 }
             }
@@ -212,11 +220,25 @@ fn corpus(root: &Path, args: &[String]) {
     let mut mis = String::new();
     let mut tally: BTreeMap<&str, usize> = BTreeMap::new();
     for (id, r) in &ran {
-        let je = r.java.as_ref().map(|j| j.problems().iter().filter(|p| p.error).count());
+        let je = r
+            .java
+            .as_ref()
+            .map(|j| j.problems().iter().filter(|p| p.error).count());
         let ee = r.outcome.problems.iter().filter(|p| p.error).count();
-        let jv = r.java.as_ref().map(|j| j.verdict().to_string()).unwrap_or_default();
+        let jv = r
+            .java
+            .as_ref()
+            .map(|j| j.verdict().to_string())
+            .unwrap_or_default();
         let (verdict, detail) = if r.java.is_none() || jv == "error" || jv == "timeout" {
-            ("java-error", r.java.as_ref().and_then(|j| j.get("detail")).unwrap_or("").to_string())
+            (
+                "java-error",
+                r.java
+                    .as_ref()
+                    .and_then(|j| j.get("detail"))
+                    .unwrap_or("")
+                    .to_string(),
+            )
         } else if let Status::Crashed(m) = &r.outcome.status {
             ("crash", m.clone())
         } else if let Some(s) = &r.sema {
@@ -226,9 +248,19 @@ fn corpus(root: &Path, args: &[String]) {
                 ("problems-differ", s.clone())
             }
         } else if r.diff.as_ref().is_some_and(|d| !d.equal())
-            && !r.java.as_ref().is_some_and(|j| j.problems().iter().any(|p| p.error))
+            && !r
+                .java
+                .as_ref()
+                .is_some_and(|j| j.problems().iter().any(|p| p.error))
         {
-            ("run-differs", r.diff.as_ref().unwrap().first_difference().unwrap_or_default())
+            (
+                "run-differs",
+                r.diff
+                    .as_ref()
+                    .unwrap()
+                    .first_difference()
+                    .unwrap_or_default(),
+            )
         } else {
             ("equal", String::new())
         };
@@ -237,7 +269,10 @@ fn corpus(root: &Path, args: &[String]) {
             && let Some(j) = &r.java
         {
             let jp = j.problems();
-            for (side, mine, other) in [("engine", &r.outcome.problems, &jp), ("java", &jp, &r.outcome.problems)] {
+            for (side, mine, other) in [
+                ("engine", &r.outcome.problems, &jp),
+                ("java", &jp, &r.outcome.problems),
+            ] {
                 for p in mine.iter().filter(|p| !other.contains(p)) {
                     let _ = writeln!(
                         mis,
@@ -261,7 +296,11 @@ fn corpus(root: &Path, args: &[String]) {
     }
     let _ = std::fs::write(out.join("report.tsv"), rep);
     let _ = std::fs::write(out.join("mismatches.tsv"), mis);
-    println!("{} cases: {tally:?}; report in {}", ran.len(), out.join("report.tsv").display());
+    println!(
+        "{} cases: {tally:?}; report in {}",
+        ran.len(),
+        out.join("report.tsv").display()
+    );
 }
 
 /// A generated case before it is written.
@@ -285,7 +324,10 @@ pub struct Ran {
 }
 
 fn rel(root: &Path, p: &Path) -> String {
-    p.strip_prefix(root).unwrap_or(p).to_string_lossy().to_string()
+    p.strip_prefix(root)
+        .unwrap_or(p)
+        .to_string_lossy()
+        .to_string()
 }
 
 /// Writes the cases of a batch into `dir` and returns the case file.
@@ -297,7 +339,13 @@ pub fn write_batch(root: &Path, dir: &Path, cases: &[GenCase]) -> PathBuf {
         for (name, text) in &c.files {
             let _ = std::fs::write(dir.join(name), text);
         }
-        let _ = writeln!(cf, "case {}\ndriver fuzz\nkind fuzz\ndir {}\nqvto {}", c.id, rel(root, dir), c.qvto);
+        let _ = writeln!(
+            cf,
+            "case {}\ndriver fuzz\nkind fuzz\ndir {}\nqvto {}",
+            c.id,
+            rel(root, dir),
+            c.qvto
+        );
         if let Some(i) = &c.input {
             let _ = writeln!(cf, "in {i}");
         }
@@ -309,7 +357,11 @@ pub fn write_batch(root: &Path, dir: &Path, cases: &[GenCase]) -> PathBuf {
 }
 
 /// Runs the Java runner and the engine (compat mode) on a case file.
-pub fn run_batch(root: &Path, dir: &Path, case_file: &Path) -> Result<BTreeMap<String, Ran>, String> {
+pub fn run_batch(
+    root: &Path,
+    dir: &Path,
+    case_file: &Path,
+) -> Result<BTreeMap<String, Ran>, String> {
     run_batch_opts(root, dir, case_file, false, false)
 }
 
@@ -326,16 +378,17 @@ pub fn run_batch_opts(
     let tape = tape_mode() || default_hashes;
     if !reuse {
         let _ = std::fs::remove_dir_all(&jdir);
-    let run = JavaRun {
-        base: root.to_path_buf(),
-        cases: case_file.to_path_buf(),
-        out: jdir.clone(),
-        tape: true,
-        timeout: Some(30),
-        jvm_opts: (!tape).then(|| "-XX:+UnlockExperimentalVMOptions -XX:hashCode=2".to_string()),
-        ..JavaRun::default()
-    };
-    run.run()?;
+        let run = JavaRun {
+            base: root.to_path_buf(),
+            cases: case_file.to_path_buf(),
+            out: jdir.clone(),
+            tape: true,
+            timeout: Some(30),
+            jvm_opts: (!tape)
+                .then(|| "-XX:+UnlockExperimentalVMOptions -XX:hashCode=2".to_string()),
+            ..JavaRun::default()
+        };
+        run.run()?;
     }
     let java = fixture::read_result_dir(&jdir).map_err(|e| e.to_string())?;
     let cases: Vec<Case> = read_cases(case_file).map_err(|e| e.to_string())?;
@@ -360,19 +413,24 @@ pub fn run_batch_opts(
         let env = CaseEnv {
             case,
             base: root,
-            models: case.conf.as_ref().and_then(|c| confs.get(c)).unwrap_or(&models),
+            models: case
+                .conf
+                .as_ref()
+                .and_then(|c| confs.get(c))
+                .unwrap_or(&models),
         };
-        let outcome = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| engine.run(&env))) {
-            Ok(o) => o,
-            Err(p) => {
-                let msg = p
-                    .downcast_ref::<String>()
-                    .cloned()
-                    .or_else(|| p.downcast_ref::<&str>().map(|s| s.to_string()))
-                    .unwrap_or_default();
-                Outcome::with_status(Status::Crashed(format!("panic: {msg}")))
-            }
-        };
+        let outcome =
+            match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| engine.run(&env))) {
+                Ok(o) => o,
+                Err(p) => {
+                    let msg = p
+                        .downcast_ref::<String>()
+                        .cloned()
+                        .or_else(|| p.downcast_ref::<&str>().map(|s| s.to_string()))
+                        .unwrap_or_default();
+                    Outcome::with_status(Status::Crashed(format!("panic: {msg}")))
+                }
+            };
         let j = java.get(&case.id).cloned();
         let diff = j.as_ref().map(|j| differential(case, &outcome, j));
         let sema = j.as_ref().and_then(|j| sema_difference(&outcome, j));
@@ -396,7 +454,14 @@ fn tape_mode() -> bool {
 /// Compile problems compared with their messages (the differential compares severity and line).
 fn sema_difference(o: &Outcome, j: &JavaResult) -> Option<String> {
     let key = |p: &qvto_testkit::fixture::Problem| {
-        (p.unit.clone(), p.line, p.offset, p.length, p.error, p.message.clone())
+        (
+            p.unit.clone(),
+            p.line,
+            p.offset,
+            p.length,
+            p.error,
+            p.message.clone(),
+        )
     };
     let mut a: Vec<_> = o.problems.iter().map(key).collect();
     let mut b: Vec<_> = j.problems().iter().map(key).collect();
@@ -412,7 +477,9 @@ fn sema_difference(o: &Outcome, j: &JavaResult) -> Option<String> {
 
 fn has_errors(r: &Ran) -> bool {
     r.outcome.problems.iter().any(|p| p.error)
-        || r.java.as_ref().is_some_and(|j| j.problems().iter().any(|p| p.error))
+        || r.java
+            .as_ref()
+            .is_some_and(|j| j.problems().iter().any(|p| p.error))
 }
 
 /// The log split by statement labels (`@e12@`): every line that contains a label starts that
@@ -469,10 +536,14 @@ fn one_line(s: &str) -> String {
 fn campaign(root: &Path, o: &Opts) {
     let start = Instant::now();
     let deadline = o.minutes.map(|m| start + Duration::from_secs_f64(m * 60.0));
-    let max_batches = o.batches.unwrap_or(if deadline.is_some() { usize::MAX } else { 1 });
+    let max_batches = o
+        .batches
+        .unwrap_or(if deadline.is_some() { usize::MAX } else { 1 });
     let mut rng = Rng::new(o.seed);
     let mut stats: BTreeMap<String, usize> = BTreeMap::new();
-    let mut nfind = std::fs::read_dir(o.out.join("findings")).map(|d| d.count()).unwrap_or(0);
+    let mut nfind = std::fs::read_dir(o.out.join("findings"))
+        .map(|d| d.count())
+        .unwrap_or(0);
     let mut findings_tsv = std::fs::OpenOptions::new()
         .create(true)
         .append(true)
@@ -490,7 +561,9 @@ fn campaign(root: &Path, o: &Opts) {
             .map(|i| {
                 let mut r = Rng::new(bseed.wrapping_add(i as u64 * 7919));
                 match o.kind.as_str() {
-                    "expr" => expr_case(&mut r, &format!("x{}_{}_{i}", o.seed, b), o.stmts, o.depth),
+                    "expr" => {
+                        expr_case(&mut r, &format!("x{}_{}_{i}", o.seed, b), o.stmts, o.depth)
+                    }
                     _ => prog_case(&mut r, &format!("p{}_{}_{i}", o.seed, b)),
                 }
             })
@@ -517,7 +590,10 @@ fn campaign(root: &Path, o: &Opts) {
         }
         for f in &findings {
             nfind += 1;
-            let fdir = o.out.join("findings").join(format!("{nfind:05}-{}", f.class));
+            let fdir = o
+                .out
+                .join("findings")
+                .join(format!("{nfind:05}-{}", f.class));
             let _ = std::fs::create_dir_all(&fdir);
             for (n, t) in &f.repro {
                 let _ = std::fs::write(fdir.join(n), t);
@@ -603,7 +679,13 @@ fn case_findings(c: &GenCase, r: &Ran, stats: &mut BTreeMap<String, usize>) -> V
     if j.verdict() != "pass" {
         *stats.entry(format!("java-{}", j.verdict())).or_default() += 1;
         if j.verdict() == "timeout" || j.verdict() == "error" {
-            return vec![mk("java-error", "-", "", j.get("detail").unwrap_or("").into(), String::new())];
+            return vec![mk(
+                "java-error",
+                "-",
+                "",
+                j.get("detail").unwrap_or("").into(),
+                String::new(),
+            )];
         }
     }
     if let Status::Crashed(m) = &r.outcome.status {
@@ -651,7 +733,13 @@ fn case_findings(c: &GenCase, r: &Ran, stats: &mut BTreeMap<String, usize>) -> V
         } else {
             "log"
         };
-        out.push(mk(class, "-", "", j.log().to_string(), d.first_difference().unwrap_or_default()));
+        out.push(mk(
+            class,
+            "-",
+            "",
+            j.log().to_string(),
+            d.first_difference().unwrap_or_default(),
+        ));
     }
     out
 }
@@ -669,7 +757,13 @@ fn minimize_expr_findings(root: &Path, dir: &Path, cases: &[GenCase], findings: 
             continue;
         }
         let c = by_id[f.case.as_str()];
-        let Some(s) = c.stmts.iter().find(|s| s.label.trim_matches('@') == f.label) else { continue };
+        let Some(s) = c
+            .stmts
+            .iter()
+            .find(|s| s.label.trim_matches('@') == f.label)
+        else {
+            continue;
+        };
         let model = c.files[1].1.clone();
         work.push((i, model, s.clone()));
     }
@@ -715,7 +809,10 @@ fn minimize_expr_findings(root: &Path, dir: &Path, cases: &[GenCase], findings: 
                 let text = expr::transformation(&id, std::slice::from_ref(&st));
                 gen_cases.push(GenCase {
                     id: id.clone(),
-                    files: vec![(format!("{id}.qvto"), text), (format!("{id}.xmi"), model.clone())],
+                    files: vec![
+                        (format!("{id}.qvto"), text),
+                        (format!("{id}.xmi"), model.clone()),
+                    ],
                     qvto: format!("{id}.qvto"),
                     input: Some(format!("{id}.xmi")),
                     stmts: vec![st],
@@ -725,7 +822,9 @@ fn minimize_expr_findings(root: &Path, dir: &Path, cases: &[GenCase], findings: 
         }
         let _ = std::fs::remove_dir_all(&mdir);
         let cf = write_batch(root, &mdir, &gen_cases);
-        let Ok(ran) = run_batch(root, &mdir, &cf) else { break };
+        let Ok(ran) = run_batch(root, &mdir, &cf) else {
+            break;
+        };
         // per work item, the smallest differing candidate
         let mut best: BTreeMap<usize, (usize, String, Stmt, String, String)> = BTreeMap::new();
         for gc in &gen_cases {
@@ -736,8 +835,14 @@ fn minimize_expr_findings(root: &Path, dir: &Path, cases: &[GenCase], findings: 
                 continue;
             }
             let a = segments(j.log()).get("m0").cloned().unwrap_or_default();
-            let b = segments(&r.outcome.log).get("m0").cloned().unwrap_or_default();
-            let status_differs = r.diff.as_ref().is_some_and(|d| !matches!(d.status, Aspect::Equal));
+            let b = segments(&r.outcome.log)
+                .get("m0")
+                .cloned()
+                .unwrap_or_default();
+            let status_differs = r
+                .diff
+                .as_ref()
+                .is_some_and(|d| !matches!(d.status, Aspect::Equal));
             if a != b || status_differs {
                 let size = s.expr.size();
                 if best.get(w).is_none_or(|b| size < b.0) {

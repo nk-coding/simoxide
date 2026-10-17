@@ -18,9 +18,9 @@ where
     pub(crate) fn extent_model_type(&self, x: usize) -> Option<ModelTypeId> {
         let e = &self.extents[x];
         match e.param {
-            Some((module, idx)) => Some(
-                self.prog.ir.modules[module.index()].model_params[idx as usize].model_type,
-            ),
+            Some((module, idx)) => {
+                Some(self.prog.ir.modules[module.index()].model_params[idx as usize].model_type)
+            }
             None => e.model_type,
         }
     }

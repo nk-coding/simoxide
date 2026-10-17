@@ -202,7 +202,10 @@ impl<'r> Sema<'r> {
         let ty = self.fun.locals[l2.index()].ty;
         if init2.is_none() {
             // Eclipse reports at `getVariable2()`, which is the missing node for one declaration
-            self.error(result_cs.span, bind(om::DeclarationNoInitExp_ERROR_, &[&name]));
+            self.error(
+                result_cs.span,
+                bind(om::DeclarationNoInitExp_ERROR_, &[&name]),
+            );
         }
         if iter_init.is_some() {
             self.error(v1.span, bind(om::DeclarationInitExp_ERROR_, &[&name]));

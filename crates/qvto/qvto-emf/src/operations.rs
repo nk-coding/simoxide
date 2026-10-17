@@ -4,7 +4,8 @@
 
 use crate::graph::Graph;
 use qvto_model::{
-    ClassId, Classifier, Datum, FeatureId, MetaDerivation, MetaMultiplicity, MetaOperation, ModelStore,
+    ClassId, Classifier, Datum, FeatureId, MetaDerivation, MetaMultiplicity, MetaOperation,
+    ModelStore,
 };
 
 /// The annotation source of OCL bodies and derivations that Eclipse QVTo evaluates

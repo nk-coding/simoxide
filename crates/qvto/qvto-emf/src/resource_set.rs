@@ -363,13 +363,7 @@ impl ResourceSet {
 impl Graph {
     /// Replaces proxy `p` by `t` in `holder.f` (proxy resolution: no inverse update, except that
     /// a resolved containment proxy without container becomes contained).
-    pub fn replace_proxy(
-        &mut self,
-        holder: ObjId,
-        f: qvto_model::FeatureId,
-        p: ObjId,
-        t: ObjId,
-    ) {
+    pub fn replace_proxy(&mut self, holder: ObjId, f: qvto_model::FeatureId, p: ObjId, t: ObjId) {
         let Ok(i) = self.slot_index(holder, f) else {
             return;
         };

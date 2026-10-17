@@ -2515,7 +2515,12 @@ impl<'r> Sema<'r> {
 
     /// `IntermediatePropertyHierarchy.hasHierarchyClashes`: another property of the same name on
     /// a sub- or supertype of the context.
-    fn hierarchy_clash(&mut self, id: ModuleId, ip: ir::IntermPropId, _props: &[ir::IntermPropId]) -> bool {
+    fn hierarchy_clash(
+        &mut self,
+        id: ModuleId,
+        ip: ir::IntermPropId,
+        _props: &[ir::IntermPropId],
+    ) -> bool {
         let Some(c) = self.interm_props[ip.index()].context else {
             return false;
         };
@@ -2533,7 +2538,11 @@ impl<'r> Sema<'r> {
         }
         let others: Vec<ir::IntermPropId> = (0..self.interm_props.len() as u32)
             .map(ir::IntermPropId)
-            .filter(|&o| o != ip && modules.contains(&self.interm_props[o.index()].ir.module) && self.interm_props[o.index()].ir.name == name)
+            .filter(|&o| {
+                o != ip
+                    && modules.contains(&self.interm_props[o.index()].ir.module)
+                    && self.interm_props[o.index()].ir.name == name
+            })
             .collect();
         for o in others {
             if let Some(oc) = self.interm_props[o.index()].context

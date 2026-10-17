@@ -485,7 +485,11 @@ impl<'r> Sema<'r> {
                     .map(|x| x.name.clone())
                     .unwrap_or_default();
                 if lt == TypeId::NULL || e.ty == TypeId::NULL {
-                    self.validator_error(ctx, span, bind(om::IncompleteVariableExp_ERROR_, &[&name]));
+                    self.validator_error(
+                        ctx,
+                        span,
+                        bind(om::IncompleteVariableExp_ERROR_, &[&name]),
+                    );
                 } else if name == "result" && matches!(self.ts.types.get(lt), Type::Tuple(_)) {
                     let is_param = ctx
                         .extras
@@ -584,7 +588,11 @@ impl<'r> Sema<'r> {
                     && !self.ts.ck().compatible(init.ty, loc.ty)
                 {
                     let n = loc.name.clone();
-                    self.validator_error(ctx, loc.span, bind(om::TypeConformanceInit_ERROR_, &[&n]));
+                    self.validator_error(
+                        ctx,
+                        loc.span,
+                        bind(om::TypeConformanceInit_ERROR_, &[&n]),
+                    );
                 }
             }
             ExprKind::Global(_) if e.ty == TypeId::NULL => {

@@ -168,7 +168,9 @@ impl<'r> Sema<'r> {
             } else {
                 // a registered unit first loaded here, with the module's registry
                 match &unit.alt {
-                    Some((need, ms)) if only.is_none() && need.iter().all(|u| uris.contains(u)) => ms,
+                    Some((need, ms)) if only.is_none() && need.iter().all(|u| uris.contains(u)) => {
+                        ms
+                    }
                     _ => continue,
                 }
             };
@@ -419,7 +421,11 @@ impl<'r> Sema<'r> {
                 (Some(a), Some(b)) => a.span.to(b.span),
                 _ => {
                     let start: i64 = body.init.as_ref().map(|b| b.span.end as i64).unwrap_or(-1);
-                    let mut end: i64 = body.end.as_ref().map(|b| b.span.start as i64 - 1).unwrap_or(-1);
+                    let mut end: i64 = body
+                        .end
+                        .as_ref()
+                        .map(|b| b.span.start as i64 - 1)
+                        .unwrap_or(-1);
                     if start > end {
                         end = start;
                     }

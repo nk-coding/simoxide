@@ -9,8 +9,8 @@ use qvto_bytecode::Site;
 use qvto_model::ModelStore;
 use qvto_runtime::{ObjRef, Value};
 use qvto_sema::ir::{Direction, GlobalKind, ModuleId};
-use qvto_types::Type;
 use qvto_types::CollKind;
+use qvto_types::Type;
 
 /// The result of a run, in the terms of Eclipse's `ExecutionDiagnostic`.
 #[derive(Debug)]
@@ -345,7 +345,10 @@ where
         let gs = &self.prog.ir.modules[module.index()].globals;
         let mut globals = Vec::with_capacity(gs.len());
         for (i, g) in gs.iter().enumerate() {
-            let v = self.nested_globals[k].get(i).cloned().unwrap_or(Value::Null);
+            let v = self.nested_globals[k]
+                .get(i)
+                .cloned()
+                .unwrap_or(Value::Null);
             globals.push(std::mem::replace(&mut self.globals[g.index()], v));
         }
         self.bound_nested.push(k);
@@ -381,7 +384,10 @@ where
     /// value the instance keeps.
     pub(crate) fn instance_global(&self, inst: &Value, g: qvto_sema::ir::GlobalId) -> Value {
         match self.unbound_instance_slot(inst, g) {
-            Some((k, i)) => self.nested_globals[k].get(i).cloned().unwrap_or(Value::Null),
+            Some((k, i)) => self.nested_globals[k]
+                .get(i)
+                .cloned()
+                .unwrap_or(Value::Null),
             None => self.globals[g.index()].clone(),
         }
     }
@@ -404,7 +410,11 @@ where
 
     /// A nested instance that is not current and the index of the property among its
     /// module's properties.
-    fn unbound_instance_slot(&self, inst: &Value, g: qvto_sema::ir::GlobalId) -> Option<(usize, usize)> {
+    fn unbound_instance_slot(
+        &self,
+        inst: &Value,
+        g: qvto_sema::ir::GlobalId,
+    ) -> Option<(usize, usize)> {
         let Value::Instance(i) = inst else {
             return None;
         };

@@ -82,55 +82,61 @@ impl P<'_> {
         let mut o = String::new();
         let n = self.rng.range(1, 6);
         for _ in 0..n {
-            let line = match self.rng.below(16) {
-                0 | 1 => format!("result.name := {};", self.expr(scope.clone(), &Ty::Str, 3)),
-                2 => format!("result.value := {};", self.expr(scope.clone(), &Ty::Int, 3)),
-                3 => format!("result.big := {};", self.expr(scope.clone(), &Ty::Int, 2)),
-                4 => format!("result.weight := {};", self.expr(scope.clone(), &Ty::Real, 2)),
-                5 => format!("result.flag := {};", self.expr(scope.clone(), &Ty::Bool, 2)),
-                6 => format!("result.kind := {};", self.expr(scope.clone(), &Ty::Enum, 2)),
-                7 => format!("result.tags += {};", self.expr(scope.clone(), &Ty::Str, 2)),
-                8 => format!(
-                    "result.tags := {};",
-                    self.expr(scope.clone(), &Ty::coll(Ck::Sequence, Ty::Str), 2)
-                ),
-                9 => format!("result.nums += {};", self.expr(scope.clone(), &Ty::Int, 2)),
-                10 => format!(
-                    "result.nums := {};",
-                    self.expr(scope.clone(), &Ty::coll(Ck::Bag, Ty::Int), 2)
-                ),
-                11 => match rec {
-                    Some(r) => format!("result.children := self.children->map {r}();"),
-                    None => String::new(),
-                },
-                12 => {
-                    let k = self.rng.below(4);
-                    match k {
-                        0 => "result.refs := self.refs->collect(r | r.resolveone(FZ::Node));".into(),
-                        1 => "result.refs := self.refs.late resolve(FZ::Node);".into(),
-                        2 => "result.refs += self.refs->any(true).late resolveone(FZ::Node);".into(),
-                        _ => "result.refs := self.refs;".into(),
-                    }
-                }
-                13 => {
-                    if self.item_maps.is_empty() {
-                        String::new()
-                    } else {
-                        let im = self.rng.pick(&self.item_maps).clone();
-                        if self.rng.pct(50) {
-                            format!("result.first := self.first.map {im}();")
-                        } else {
-                            format!("result.items := self.items->map {im}();")
+            let line =
+                match self.rng.below(16) {
+                    0 | 1 => format!("result.name := {};", self.expr(scope.clone(), &Ty::Str, 3)),
+                    2 => format!("result.value := {};", self.expr(scope.clone(), &Ty::Int, 3)),
+                    3 => format!("result.big := {};", self.expr(scope.clone(), &Ty::Int, 2)),
+                    4 => format!(
+                        "result.weight := {};",
+                        self.expr(scope.clone(), &Ty::Real, 2)
+                    ),
+                    5 => format!("result.flag := {};", self.expr(scope.clone(), &Ty::Bool, 2)),
+                    6 => format!("result.kind := {};", self.expr(scope.clone(), &Ty::Enum, 2)),
+                    7 => format!("result.tags += {};", self.expr(scope.clone(), &Ty::Str, 2)),
+                    8 => format!(
+                        "result.tags := {};",
+                        self.expr(scope.clone(), &Ty::coll(Ck::Sequence, Ty::Str), 2)
+                    ),
+                    9 => format!("result.nums += {};", self.expr(scope.clone(), &Ty::Int, 2)),
+                    10 => format!(
+                        "result.nums := {};",
+                        self.expr(scope.clone(), &Ty::coll(Ck::Bag, Ty::Int), 2)
+                    ),
+                    11 => match rec {
+                        Some(r) => format!("result.children := self.children->map {r}();"),
+                        None => String::new(),
+                    },
+                    12 => {
+                        let k = self.rng.below(4);
+                        match k {
+                            0 => "result.refs := self.refs->collect(r | r.resolveone(FZ::Node));"
+                                .into(),
+                            1 => "result.refs := self.refs.late resolve(FZ::Node);".into(),
+                            2 => "result.refs += self.refs->any(true).late resolveone(FZ::Node);"
+                                .into(),
+                            _ => "result.refs := self.refs;".into(),
                         }
                     }
-                }
-                14 => self.stmt(scope.clone(), 2),
-                _ => {
-                    let c = self.expr(scope.clone(), &Ty::Bool, 2);
-                    let a = self.expr(scope.clone(), &Ty::Str, 2);
-                    format!("if ({c}) {{ result.name := {a}; }};")
-                }
-            };
+                    13 => {
+                        if self.item_maps.is_empty() {
+                            String::new()
+                        } else {
+                            let im = self.rng.pick(&self.item_maps).clone();
+                            if self.rng.pct(50) {
+                                format!("result.first := self.first.map {im}();")
+                            } else {
+                                format!("result.items := self.items->map {im}();")
+                            }
+                        }
+                    }
+                    14 => self.stmt(scope.clone(), 2),
+                    _ => {
+                        let c = self.expr(scope.clone(), &Ty::Bool, 2);
+                        let a = self.expr(scope.clone(), &Ty::Str, 2);
+                        format!("if ({c}) {{ result.name := {a}; }};")
+                    }
+                };
             if !line.is_empty() {
                 let _ = writeln!(o, "\t\t{line}");
             }
@@ -139,11 +145,24 @@ impl P<'_> {
     }
 
     fn helper(&mut self, k: usize) {
-        let t = self.rng.pick(&[Ty::Int, Ty::Str, Ty::Bool, Ty::Real, Ty::coll(Ck::Sequence, Ty::Int)]).clone();
+        let t = self
+            .rng
+            .pick(&[
+                Ty::Int,
+                Ty::Str,
+                Ty::Bool,
+                Ty::Real,
+                Ty::coll(Ck::Sequence, Ty::Int),
+            ])
+            .clone();
         let name = format!("h{k}");
         let scope = scope_with(&[("px", Ty::Int), ("ps", Ty::Str)]);
         let kind = if self.rng.pct(50) { "helper" } else { "query" };
-        let _ = writeln!(self.out, "{kind} {name}(px : Integer, ps : String) : {} {{", t.src());
+        let _ = writeln!(
+            self.out,
+            "{kind} {name}(px : Integer, ps : String) : {} {{",
+            t.src()
+        );
         for _ in 0..self.rng.below(3) {
             if kind == "helper" {
                 let st = self.stmt(scope.clone(), 2);
@@ -153,7 +172,11 @@ impl P<'_> {
         if self.rng.pct(30) && !self.helpers.is_empty() {
             // call an earlier helper (no recursion cycles)
             let (h, ht) = self.rng.pick(&self.helpers).clone();
-            let _ = writeln!(self.out, "\tvar hv : {} := {h}(px + 1, ps + 'h');", ht.src());
+            let _ = writeln!(
+                self.out,
+                "\tvar hv : {} := {h}(px + 1, ps + 'h');",
+                ht.src()
+            );
         }
         let e = self.expr(scope, &t, 3);
         let _ = writeln!(self.out, "\treturn {e};\n}}\n");
@@ -163,10 +186,19 @@ impl P<'_> {
     fn query(&mut self, k: usize) {
         let t = self.rng.pick(&[Ty::Int, Ty::Str, Ty::Bool]).clone();
         let name = format!("q{k}");
-        let ctx = if self.rng.pct(70) { Cls::Node } else { Cls::Leaf };
+        let ctx = if self.rng.pct(70) {
+            Cls::Node
+        } else {
+            Cls::Leaf
+        };
         let scope = scope_with(&[("self", Ty::Obj(ctx))]);
         let e = self.expr(scope, &t, 3);
-        let _ = writeln!(self.out, "query FZ::{}::{name}() : {} {{\n\treturn {e};\n}}\n", ctx.name(), t.src());
+        let _ = writeln!(
+            self.out,
+            "query FZ::{}::{name}() : {} {{\n\treturn {e};\n}}\n",
+            ctx.name(),
+            t.src()
+        );
         self.queries.push((name, t, ctx));
     }
 
@@ -174,12 +206,24 @@ impl P<'_> {
         let name = format!("item{k}");
         let scope = scope_with(&[("self", Ty::Obj(Cls::Item))]);
         let mut body = String::new();
-        let _ = writeln!(body, "\t\tresult.name := {};", self.expr(scope.clone(), &Ty::Str, 2));
+        let _ = writeln!(
+            body,
+            "\t\tresult.name := {};",
+            self.expr(scope.clone(), &Ty::Str, 2)
+        );
         if self.rng.pct(60) {
-            let _ = writeln!(body, "\t\tresult.count := {};", self.expr(scope.clone(), &Ty::Int, 2));
+            let _ = writeln!(
+                body,
+                "\t\tresult.count := {};",
+                self.expr(scope.clone(), &Ty::Int, 2)
+            );
         }
         if self.rng.pct(50) {
-            let _ = writeln!(body, "\t\tresult.ratio := {};", self.expr(scope.clone(), &Ty::Real, 2));
+            let _ = writeln!(
+                body,
+                "\t\tresult.ratio := {};",
+                self.expr(scope.clone(), &Ty::Real, 2)
+            );
         }
         if self.rng.pct(60) {
             let r = *self.rng.pick(&[
@@ -194,7 +238,10 @@ impl P<'_> {
         } else {
             String::new()
         };
-        let _ = writeln!(self.out, "mapping FZ::Item::{name}() : FZ::Item{when} {{\n{body}}}\n");
+        let _ = writeln!(
+            self.out,
+            "mapping FZ::Item::{name}() : FZ::Item{when} {{\n{body}}}\n"
+        );
         self.item_maps.push(name);
     }
 
@@ -202,7 +249,11 @@ impl P<'_> {
         let name = format!("node{k}");
         let leaf = self.rng.pct(20);
         let ctx = if leaf { Cls::Leaf } else { Cls::Node };
-        let res = if leaf && self.rng.pct(50) { "FZ::Leaf" } else { "FZ::Node" };
+        let res = if leaf && self.rng.pct(50) {
+            "FZ::Leaf"
+        } else {
+            "FZ::Node"
+        };
         let scope = scope_with(&[("self", Ty::Obj(ctx))]);
         let mut head = format!("mapping FZ::{}::{name}() : {res}", ctx.name());
         if !leaf && !self.node_maps.is_empty() && self.rng.pct(20) {
@@ -210,10 +261,18 @@ impl P<'_> {
             let _ = write!(head, " inherits FZ::Node::{base}");
         }
         if self.rng.pct(40) {
-            let _ = write!(head, "\n\twhen {{ {} }}", self.expr(scope.clone(), &Ty::Bool, 2));
+            let _ = write!(
+                head,
+                "\n\twhen {{ {} }}",
+                self.expr(scope.clone(), &Ty::Bool, 2)
+            );
         }
         if self.rng.pct(15) {
-            let _ = write!(head, "\n\twhere {{ {} }}", self.expr(scope.clone(), &Ty::Bool, 1));
+            let _ = write!(
+                head,
+                "\n\twhere {{ {} }}",
+                self.expr(scope.clone(), &Ty::Bool, 1)
+            );
         }
         let mut body = String::new();
         if self.rng.pct(30) {
@@ -246,7 +305,10 @@ impl P<'_> {
         let name = format!("disj{k}");
         let a = self.rng.pick(&self.node_maps).clone();
         let b = self.rng.pick(&self.node_maps).clone();
-        let _ = writeln!(self.out, "mapping FZ::Node::{name}() : FZ::Node disjuncts FZ::Node::{a}, FZ::Node::{b};\n");
+        let _ = writeln!(
+            self.out,
+            "mapping FZ::Node::{name}() : FZ::Node disjuncts FZ::Node::{a}, FZ::Node::{b};\n"
+        );
         Some(name)
     }
 
@@ -260,7 +322,9 @@ impl P<'_> {
             let line = match self.rng.below(20) {
                 0 | 1 => {
                     let l = self.label();
-                    format!("log('{l}', all->collect(x | x.resolveone(FZ::Node))->collect(name)->asSequence()->sortedBy(x | x));")
+                    format!(
+                        "log('{l}', all->collect(x | x.resolveone(FZ::Node))->collect(name)->asSequence()->sortedBy(x | x));"
+                    )
                 }
                 2 => {
                     let l = self.label();
@@ -279,7 +343,10 @@ impl P<'_> {
                 5 => {
                     let l = self.label();
                     let e = self.expr(scope.clone(), &Ty::Str, 2);
-                    format!("var o{l2} := object FZ::Node {{ name := {e}; value := i0; }}; log('{l}', o{l2}.name);", l2 = self.label)
+                    format!(
+                        "var o{l2} := object FZ::Node {{ name := {e}; value := i0; }}; log('{l}', o{l2}.name);",
+                        l2 = self.label
+                    )
                 }
                 6 => {
                     let l = self.label();
@@ -290,7 +357,9 @@ impl P<'_> {
                     let ex = self.rng.pick(&self.exceptions).clone();
                     let c = self.expr(scope.clone(), &Ty::Bool, 2);
                     let l = self.label();
-                    let handler = *self.rng.pick(&["Exception", ex.as_str(), "AssertionFailed"]);
+                    let handler = *self
+                        .rng
+                        .pick(&["Exception", ex.as_str(), "AssertionFailed"]);
                     format!(
                         "try {{ if ({c}) {{ raise {ex}; }}; log('{l}', 'no raise'); }} except ({handler}) {{ log('{l}', 'caught'); }};"
                     )
@@ -298,21 +367,33 @@ impl P<'_> {
                 8 => {
                     let l = self.label();
                     let e = super::quote(self.rng.pick(&["boom", "", "it's"]));
-                    format!("try {{ raise {e}; }} except (e : Exception) {{ log('{l}', e.getArgument()); }};")
+                    format!(
+                        "try {{ raise {e}; }} except (e : Exception) {{ log('{l}', e.getArgument()); }};"
+                    )
                 }
                 9 if self.interm => {
                     let l = self.label();
                     let a = self.expr(scope.clone(), &Ty::Int, 2);
                     let s = self.expr(scope.clone(), &Ty::Str, 2);
-                    format!("var ic{n} := new IC(); ic{n}.a := {a}; ic{n}.s := {s}; ic{n}.many += ic{n}.s; ic{n}.node := n0; log('{l}', ic{n}.many->size() + ic{n}.a);", n = self.label)
+                    format!(
+                        "var ic{n} := new IC(); ic{n}.a := {a}; ic{n}.s := {s}; ic{n}.many += ic{n}.s; ic{n}.node := n0; log('{l}', ic{n}.many->size() + ic{n}.a);",
+                        n = self.label
+                    )
                 }
                 10 if !self.queries.is_empty() => {
                     let (q, _, _) = self.rng.pick(&self.queries).clone();
                     let l = self.label();
-                    format!("log('{l}', all->select(oclIsKindOf(FZ::Leaf))->collect(x | x.oclAsType(FZ::Leaf).{q}())->asSequence()->size());")
+                    format!(
+                        "log('{l}', all->select(oclIsKindOf(FZ::Leaf))->collect(x | x.oclAsType(FZ::Leaf).{q}())->asSequence()->size());"
+                    )
                 }
                 11 if self.queries.iter().any(|q| q.2 == Cls::Node) => {
-                    let qs: Vec<_> = self.queries.iter().filter(|q| q.2 == Cls::Node).cloned().collect();
+                    let qs: Vec<_> = self
+                        .queries
+                        .iter()
+                        .filter(|q| q.2 == Cls::Node)
+                        .cloned()
+                        .collect();
                     let (q, _, _) = self.rng.pick(&qs).clone();
                     let l = self.label();
                     format!("log('{l}', ns->collect(x | x.{q}().repr()));")
@@ -326,12 +407,17 @@ impl P<'_> {
                 13 => {
                     let l = self.label();
                     let c = self.expr(scope.clone(), &Ty::Int, 2);
-                    format!("var w{n} := 0; while (w{n} < ({c}).min(5)) {{ w{n} := w{n} + 1; if (w{n} = 3) {{ break; }}; }}; log('{l}', w{n});", n = self.label)
+                    format!(
+                        "var w{n} := 0; while (w{n} < ({c}).min(5)) {{ w{n} := w{n} + 1; if (w{n} = 3) {{ break; }}; }}; log('{l}', w{n});",
+                        n = self.label
+                    )
                 }
                 14 => {
                     let l = self.label();
                     let e = self.expr(scope.clone(), &Ty::Int, 2);
-                    format!("switch {{ case ({e} > 3) log('{l}', 'big'); case ({e} < 0) log('{l}', 'neg'); else log('{l}', 'other'); }};")
+                    format!(
+                        "switch {{ case ({e} > 3) log('{l}', 'big'); case ({e} < 0) log('{l}', 'neg'); else log('{l}', 'other'); }};"
+                    )
                 }
                 15 => {
                     let l = self.label();
@@ -341,7 +427,9 @@ impl P<'_> {
                 16 if !extra.is_empty() => {
                     let l = self.label();
                     let d = self.rng.pick(extra).clone();
-                    format!("log('{l}', all->map {d}()->collect(name)->asSequence()->sortedBy(x | x));")
+                    format!(
+                        "log('{l}', all->map {d}()->collect(name)->asSequence()->sortedBy(x | x));"
+                    )
                 }
                 17 => {
                     let l = self.label();
@@ -382,10 +470,12 @@ pub fn transformation(rng: &mut Rng, name: &str) -> String {
         p.out.push_str("intermediate class IC {\n\ta : Integer;\n\ts : String;\n\tmany : Sequence(String);\n\tnode : FZ::Node;\n}\n\n");
     }
     if p.rng.pct(40) {
-        p.out.push_str("exception ExA {}\nexception ExB extends ExA {}\n\n");
+        p.out
+            .push_str("exception ExA {}\nexception ExB extends ExA {}\n\n");
         p.exceptions = vec!["ExA".into(), "ExB".into()];
     }
-    p.out.push_str("constructor FZ::Item::Item(n : String) {\n\tname := n;\n}\n\n");
+    p.out
+        .push_str("constructor FZ::Item::Item(n : String) {\n\tname := n;\n}\n\n");
     for k in 0..p.rng.range(0, 3) as usize {
         p.helper(k);
     }
@@ -399,7 +489,8 @@ pub fn transformation(rng: &mut Rng, name: &str) -> String {
         p.node_mapping(k);
     }
     if p.node_maps.is_empty() {
-        p.out.push_str("mapping FZ::Node::nodeX() : FZ::Node {\n\tname := self.name;\n}\n\n");
+        p.out
+            .push_str("mapping FZ::Node::nodeX() : FZ::Node {\n\tname := self.name;\n}\n\n");
         p.node_maps.push("nodeX".into());
     }
     let mut extra = Vec::new();
@@ -413,7 +504,10 @@ pub fn transformation(rng: &mut Rng, name: &str) -> String {
     let items = if p.item_maps.is_empty() {
         String::new()
     } else {
-        format!("\titems := self.items->map {}();\n", p.rng.pick(&p.item_maps))
+        format!(
+            "\titems := self.items->map {}();\n",
+            p.rng.pick(&p.item_maps)
+        )
     };
     let _ = writeln!(
         p.out,

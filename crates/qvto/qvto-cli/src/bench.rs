@@ -117,19 +117,28 @@ pub struct Measured {
 }
 
 fn bench_key<'a>(c: &'a Case, k: &str) -> Option<&'a str> {
-    c.bench.iter().find(|(x, _)| x == k).map(|(_, v)| v.as_str())
+    c.bench
+        .iter()
+        .find(|(x, _)| x == k)
+        .map(|(_, v)| v.as_str())
 }
 
 fn series_of(c: &Case) -> usize {
-    bench_key(c, "series").and_then(|v| v.parse().ok()).unwrap_or(0)
+    bench_key(c, "series")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0)
 }
 
 fn rounds_of(c: &Case) -> usize {
-    bench_key(c, "rounds").and_then(|v| v.parse().ok()).unwrap_or(2)
+    bench_key(c, "rounds")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(2)
 }
 
 fn group_of(c: &Case) -> String {
-    bench_key(c, "group").map(String::from).unwrap_or_else(|| c.kind.clone())
+    bench_key(c, "group")
+        .map(String::from)
+        .unwrap_or_else(|| c.kind.clone())
 }
 
 pub fn bench(args: &[String]) {
@@ -155,7 +164,9 @@ pub fn bench(args: &[String]) {
     let mut i = 0;
     let next = |i: &mut usize| -> String {
         *i += 1;
-        args.get(*i).cloned().unwrap_or_else(|| die("missing value"))
+        args.get(*i)
+            .cloned()
+            .unwrap_or_else(|| die("missing value"))
     };
     while i < args.len() {
         match args[i].as_str() {
@@ -189,7 +200,8 @@ pub fn bench(args: &[String]) {
         }
         i += 1;
     }
-    let root = find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
+    let root =
+        find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
     generate(&root, gen_only);
     if gen_only {
         return;
@@ -237,15 +249,21 @@ pub fn bench(args: &[String]) {
     let mut java: Vec<(String, Measured)> = Vec::new();
     let mut java_cold: Vec<(String, Measured)> = Vec::new();
     if let Some(f) = &o.java_results {
-        java = parse_java(&std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("{}: {e}", f.display()))));
+        java = parse_java(
+            &std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("{}: {e}", f.display()))),
+        );
         java.retain(|(id, _)| cases.iter().any(|c| &c.id == id));
     }
     if let Some(f) = &o.java_cold_results {
-        java_cold = parse_java(&std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("{}: {e}", f.display()))));
+        java_cold = parse_java(
+            &std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("{}: {e}", f.display()))),
+        );
         java_cold.retain(|(id, _)| cases.iter().any(|c| &c.id == id));
     }
     let before: Vec<(String, Measured)> = match &o.before {
-        Some(f) => parse_last(&std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("{}: {e}", f.display())))),
+        Some(f) => parse_last(
+            &std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("{}: {e}", f.display()))),
+        ),
         None => Vec::new(),
     };
     if o.java || o.java_cold {
@@ -386,12 +404,16 @@ fn measure_rust(root: &Path, c: &Case, o: &Opts) -> Result<Vec<(Mode, Measured)>
         }
         None => &models,
     };
-    let signatures = std::fs::read_to_string(root.join(engine::BLACKBOX_SIGNATURES)).unwrap_or_default();
-    let bundles = qvto::units::FsResolver::bundles_below(&root.join("reference/eclipse-qvto/tests"));
+    let signatures =
+        std::fs::read_to_string(root.join(engine::BLACKBOX_SIGNATURES)).unwrap_or_default();
+    let bundles =
+        qvto::units::FsResolver::bundles_below(&root.join("reference/eclipse-qvto/tests"));
     let compiles = o.compiles.max(1);
     let modes = o.modes.clone();
     let (runs, budget) = (
-        bench_key(c, "runs").and_then(|v| v.parse().ok()).unwrap_or(o.runs),
+        bench_key(c, "runs")
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(o.runs),
         o.budget_ms,
     );
     let series = series_of(c);
@@ -443,16 +465,24 @@ fn measure_rust(root: &Path, c: &Case, o: &Opts) -> Result<Vec<(Mode, Measured)>
                                 );
                             }
                             let cm = models.as_mut().unwrap();
-                            let args = if series > 0 && r > 0 { cm.current_args() } else { cm.args.clone() };
+                            let args = if series > 0 && r > 0 {
+                                cm.current_args()
+                            } else {
+                                cm.args.clone()
+                            };
                             let opts = qvto::RunOptions {
                                 mode,
-                                max_stack_depth: c.max_stack_depth.map(|d| d as usize).unwrap_or(1000),
+                                max_stack_depth: c
+                                    .max_stack_depth
+                                    .map(|d| d as usize)
+                                    .unwrap_or(1000),
                                 readonly_guard: c.readonly_guard,
                                 config: c.config.clone(),
                                 line_numbers: !c.no_line_numbers,
                                 ..qvto::RunOptions::default()
                             };
-                            let (res, log, dt) = timed_run(program, &mut cm.rs.graph, opts, args, &natives);
+                            let (res, log, dt) =
+                                timed_run(program, &mut cm.rs.graph, opts, args, &natives);
                             m.runs.push(dt);
                             total += dt;
                             m.severity = severity_name(res.severity).into();
@@ -512,7 +542,13 @@ fn severity_name(s: i32) -> &'static str {
 
 /// Runs the workloads in one JVM (`qvto-run --bench`) at normal priority (the caller pins the
 /// process to cores with `taskset`; the JVM inherits the affinity).
-fn run_java(root: &Path, jobs: &Path, out: &Path, only: Option<&str>, o: &Opts) -> Result<Vec<(String, Measured)>, String> {
+fn run_java(
+    root: &Path,
+    jobs: &Path,
+    out: &Path,
+    only: Option<&str>,
+    o: &Opts,
+) -> Result<Vec<(String, Measured)>, String> {
     let runner = root.join("reference/runner");
     // a runner built before its benchmark mode existed is rebuilt
     if !runner.join("build/classpath.txt").is_file()
@@ -560,7 +596,12 @@ fn run_java(root: &Path, jobs: &Path, out: &Path, only: Option<&str>, o: &Opts) 
 
 /// Rows in the format of the Java runner's `RESULTS.tsv`.
 fn java_tsv(rows: &[(String, Measured)]) -> String {
-    let join = |v: &[f64]| v.iter().map(|x| format!("{x:.4}")).collect::<Vec<_>>().join(",");
+    let join = |v: &[f64]| {
+        v.iter()
+            .map(|x| format!("{x:.4}"))
+            .collect::<Vec<_>>()
+            .join(",")
+    };
     let mut s = String::from("id\tcompile_ms\trun_ms\tseverity\tcode\tout_objects\tlog_lines\n");
     for (id, m) in rows {
         let _ = writeln!(
@@ -646,7 +687,11 @@ fn ratio(a: f64, b: f64) -> String {
         "–".into()
     } else {
         let r = b / a;
-        if r >= 10.0 { format!("{r:.0}×") } else { format!("{r:.1}×") }
+        if r >= 10.0 {
+            format!("{r:.0}×")
+        } else {
+            format!("{r:.1}×")
+        }
     }
 }
 
@@ -672,11 +717,17 @@ fn report(
         s,
         "| Group | Workload | compat before | compat run | speed-up | fast run | Java run (warm) | Java cold run | compat vs Java | fast vs compat | compile | Java compile (first) | check |"
     );
-    let _ = writeln!(s, "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|");
+    let _ = writeln!(
+        s,
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|"
+    );
     for c in cases {
         let series = series_of(c) > 0;
         let r = rust.iter().find(|(id, _)| id == &c.id).map(|x| &x.1);
-        let get = |mode: Mode| r.and_then(|v| v.iter().find(|(m, _)| *m == mode)).map(|x| &x.1);
+        let get = |mode: Mode| {
+            r.and_then(|v| v.iter().find(|(m, _)| *m == mode))
+                .map(|x| &x.1)
+        };
         let comp = get(Mode::Compat);
         let fast = get(Mode::Fast);
         let j = java.iter().find(|(id, _)| id == &c.id).map(|x| &x.1);
@@ -685,7 +736,12 @@ fn report(
             match m {
                 Some(m) if m.error.is_none() && !m.runs.is_empty() => {
                     let st = Stats::runs(&m.runs, series);
-                    let mut t = format!("{} [{}–{}]", fmt_ms(st.median), fmt_ms(st.p10), fmt_ms(st.p90));
+                    let mut t = format!(
+                        "{} [{}–{}]",
+                        fmt_ms(st.median),
+                        fmt_ms(st.p10),
+                        fmt_ms(st.p90)
+                    );
                     if series {
                         let _ = write!(t, " Σ {}", fmt_ms(st.total));
                     }
@@ -712,22 +768,34 @@ fn report(
         let jcompile = j
             .map(|m| {
                 let st = Stats::of(&m.compile, m.compile.len() / 2);
-                let first = jc.and_then(|m| m.compile.first().copied()).unwrap_or(st.first);
+                let first = jc
+                    .and_then(|m| m.compile.first().copied())
+                    .unwrap_or(st.first);
                 format!("{} ({})", fmt_ms(st.median), fmt_ms(first))
             })
             .unwrap_or_else(|| "–".into());
         let check = match (comp, j) {
             (Some(a), Some(b)) if a.error.is_none() && b.error.is_none() => {
-                if a.severity == b.severity && a.out_objects == b.out_objects && a.log_lines == b.log_lines {
+                if a.severity == b.severity
+                    && a.out_objects == b.out_objects
+                    && a.log_lines == b.log_lines
+                {
                     "same".to_string()
                 } else {
                     format!(
                         "differs: {} {} {} / {} {} {}",
-                        a.severity, a.out_objects, a.log_lines, b.severity, b.out_objects, b.log_lines
+                        a.severity,
+                        a.out_objects,
+                        a.log_lines,
+                        b.severity,
+                        b.out_objects,
+                        b.log_lines
                     )
                 }
             }
-            (Some(a), None) if a.error.is_none() => format!("{} objs {} log {}", a.severity, a.out_objects, a.log_lines),
+            (Some(a), None) if a.error.is_none() => {
+                format!("{} objs {} log {}", a.severity, a.out_objects, a.log_lines)
+            }
             _ => "–".into(),
         };
         let _ = writeln!(
@@ -750,7 +818,12 @@ fn tsv(
     cold: &[(String, Measured)],
 ) -> String {
     let mut s = String::from("id\tside\tcompile_ms\trun_ms\tseverity\tout_objects\tlog_lines\n");
-    let join = |v: &[f64]| v.iter().map(|x| format!("{x:.4}")).collect::<Vec<_>>().join(",");
+    let join = |v: &[f64]| {
+        v.iter()
+            .map(|x| format!("{x:.4}"))
+            .collect::<Vec<_>>()
+            .join(",")
+    };
     for c in cases {
         let mut rows: Vec<(&str, &Measured)> = Vec::new();
         if let Some((_, v)) = rust.iter().find(|(id, _)| id == &c.id) {
@@ -796,7 +869,10 @@ pub fn generate(root: &Path, force: bool) {
     let _ = std::fs::remove_dir_all(&gdir);
     let res = (|| -> Result<(), String> {
         for scale in [1, 10, 100] {
-            write(&gdir.join(format!("simpleuml/x{scale}.simpleuml")), &simpleuml(root, scale)?)?;
+            write(
+                &gdir.join(format!("simpleuml/x{scale}.simpleuml")),
+                &simpleuml(root, scale)?,
+            )?;
             write(&gdir.join(format!("ecore/x{scale}.ecore")), &ecore(scale))?;
         }
         let corpus = root.join("qvto-testkit/corpus");
@@ -806,7 +882,11 @@ pub fn generate(root: &Path, force: bool) {
             ("spd", "spd/minimalexample"),
         ] {
             for scale in [1, 10, 100] {
-                pcm(&corpus.join(dir), &gdir.join(format!("pcm/{name}-x{scale}")), scale)?;
+                pcm(
+                    &corpus.join(dir),
+                    &gdir.join(format!("pcm/{name}-x{scale}")),
+                    scale,
+                )?;
             }
         }
         write(&stamp, GEN_VERSION)
@@ -837,7 +917,10 @@ fn simpleuml(root: &Path, scale: usize) -> Result<String, String> {
         .ok_or("pim.simpleuml: no package 'class'")?;
     let indent = lines[start].len() - lines[start].trim_start().len();
     let end = (start + 1..lines.len())
-        .find(|&i| lines[i].trim() == "</ownedElements>" && lines[i].len() - lines[i].trim_start().len() == indent)
+        .find(|&i| {
+            lines[i].trim() == "</ownedElements>"
+                && lines[i].len() - lines[i].trim_start().len() == indent
+        })
         .ok_or("pim.simpleuml: unterminated package")?;
     // the path of the sample's package `class` (seven levels below the model)
     let class_pkg = format!("//@ownedElements.0{}/", "/@ownedElements.0".repeat(6));
@@ -845,7 +928,10 @@ fn simpleuml(root: &Path, scale: usize) -> Result<String, String> {
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<uml:Model xmi:version=\"2.0\" xmlns:xmi=\"http://www.omg.org/XMI\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:uml=\"http://www.eclipse.org/qvt/1.0.0/Operational/examples/simpleuml\" name=\"model\">\n",
     );
     for i in 0..scale {
-        let _ = writeln!(s, "  <ownedElements xsi:type=\"uml:Package\" name=\"domain{i}\">");
+        let _ = writeln!(
+            s,
+            "  <ownedElements xsi:type=\"uml:Package\" name=\"domain{i}\">"
+        );
         for l in &lines[start + 1..end] {
             let l = l
                 .replace("//@ownedElements.1/", &format!("//@ownedElements.{scale}/"))
@@ -929,10 +1015,17 @@ fn pcm(src: &Path, dst: &Path, scale: usize) -> Result<(), String> {
             .find(|p| p.extension().is_some_and(|x| x == ext))
             .ok_or_else(|| format!("{}: no .{ext}", dst.display()))
     };
-    let (env, sys, alloc) = (find("resourceenvironment")?, find("system")?, find("allocation")?);
+    let (env, sys, alloc) = (
+        find("resourceenvironment")?,
+        find("system")?,
+        find("allocation")?,
+    );
     let read = |p: &Path| std::fs::read_to_string(p).map_err(|e| format!("{}: {e}", p.display()));
     let (env_t, sys_t, alloc_t) = (read(&env)?, read(&sys)?, read(&alloc)?);
-    let k = alloc_t.matches("<allocationContexts_Allocation").count().max(1);
+    let k = alloc_t
+        .matches("<allocationContexts_Allocation")
+        .count()
+        .max(1);
     let extra = (scale - 1) * k;
     if extra == 0 {
         return Ok(());
@@ -941,7 +1034,10 @@ fn pcm(src: &Path, dst: &Path, scale: usize) -> Result<(), String> {
     let comp = sys_t
         .find("<encapsulatedComponent__AssemblyContext")
         .map(|i| {
-            let j = sys_t[i..].find("/>").map(|j| i + j + 2).unwrap_or(sys_t.len());
+            let j = sys_t[i..]
+                .find("/>")
+                .map(|j| i + j + 2)
+                .unwrap_or(sys_t.len());
             sys_t[i..j].to_string()
         })
         .ok_or("system without assembly contexts")?;
@@ -1031,7 +1127,15 @@ mod profile {
         let (keep, skip): (&str, &[&str]) = if compile {
             ("compile_case", &["case_models", "bench::generate"])
         } else {
-            ("timed_run", &["case_models", "compile_case", "bench::generate", "read_to_string"])
+            (
+                "timed_run",
+                &[
+                    "case_models",
+                    "compile_case",
+                    "bench::generate",
+                    "read_to_string",
+                ],
+            )
         };
         let mut data = HashMap::new();
         let mut selfc: HashMap<String, isize> = HashMap::new();
@@ -1071,7 +1175,10 @@ mod profile {
         let pct = |c: isize| 100.0 * c as f64 / total.max(1) as f64;
         let mut v: Vec<_> = selfc.into_iter().collect();
         v.sort_by(|a, b| b.1.cmp(&a.1));
-        let mut text = format!("{total} samples in {}\n\nself\n", if compile { "compiles" } else { "runs" });
+        let mut text = format!(
+            "{total} samples in {}\n\nself\n",
+            if compile { "compiles" } else { "runs" }
+        );
         for (n, c) in v.iter().take(60) {
             text.push_str(&format!("{:6.2}%  {n}\n", pct(*c)));
         }
@@ -1091,7 +1198,9 @@ mod profile {
 mod profile {
     pub struct Prof;
     pub fn start() -> Prof {
-        eprintln!("qvto bench: --profile needs the feature `profile` (cargo build --features profile)");
+        eprintln!(
+            "qvto bench: --profile needs the feature `profile` (cargo build --features profile)"
+        );
         Prof
     }
     pub fn finish(_: Prof, _: &std::path::Path) {}

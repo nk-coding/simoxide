@@ -100,7 +100,11 @@ fn id_map(ours: &MetaRegistry, theirs: &MetaRegistry) -> IdMap {
     }
     for p in ours.packages() {
         let pi = ours.package(p);
-        let Some(p2) = pi.ns_uri.as_deref().and_then(|n| theirs.package_by_ns_uri(n)) else {
+        let Some(p2) = pi
+            .ns_uri
+            .as_deref()
+            .and_then(|n| theirs.package_by_ns_uri(n))
+        else {
             continue;
         };
         for &k in &pi.classifiers {
@@ -177,7 +181,10 @@ impl<S: ModelStore> Side<'_, S> {
         fn r<T: std::fmt::Debug>(x: ModelResult<T>) -> String {
             match x {
                 Ok(v) => format!("Ok({v:?})"),
-                Err(e) => format!("Err({})", format!("{e:?}").split(['(', ' ']).next().unwrap()),
+                Err(e) => format!(
+                    "Err({})",
+                    format!("{e:?}").split(['(', ' ']).next().unwrap()
+                ),
             }
         }
         match op {
@@ -213,7 +220,9 @@ impl<S: ModelStore> Side<'_, S> {
                 r(self.s.set_list(self.objs[*o], self.f(*f), &ds))
             }
             Op::AddRoot(r_, o, at) => r(self.s.add_root(self.res[*r_], self.objs[*o], *at)),
-            Op::RemoveRoot(r_, o) => format!("{}", self.s.remove_root(self.res[*r_], self.objs[*o])),
+            Op::RemoveRoot(r_, o) => {
+                format!("{}", self.s.remove_root(self.res[*r_], self.objs[*o]))
+            }
             Op::Delete(o) => {
                 self.s.delete(self.objs[*o]);
                 "done".into()
@@ -223,7 +232,8 @@ impl<S: ModelStore> Side<'_, S> {
 
     /// Every feature of every object (objects by creation index), containers and resources.
     fn state(&self, ours: &MetaRegistry) -> String {
-        let idx: HashMap<S::Obj, usize> = self.objs.iter().enumerate().map(|(i, o)| (*o, i)).collect();
+        let idx: HashMap<S::Obj, usize> =
+            self.objs.iter().enumerate().map(|(i, o)| (*o, i)).collect();
         let show = |d: Datum<'_, S::Obj>| match d {
             Datum::Obj(x) => format!("#{}", idx.get(&x).map_or("?".into(), |i| i.to_string())),
             Datum::Enum(_, i) => format!("enum {i}"),
@@ -235,23 +245,45 @@ impl<S: ModelStore> Side<'_, S> {
             out.push_str(&format!(
                 "#{i} {} container={:?} direct={:?} resource={:?}\n",
                 c.name,
-                self.s.container(o).map(|(p, f)| (idx.get(&p).copied(), self.s.meta().feature(f).name.to_string())),
-                self.s.direct_resource(o).and_then(|r| self.res.iter().position(|x| *x == r)),
-                self.s.resource_of(o).and_then(|r| self.res.iter().position(|x| *x == r)),
+                self.s.container(o).map(|(p, f)| (
+                    idx.get(&p).copied(),
+                    self.s.meta().feature(f).name.to_string()
+                )),
+                self.s
+                    .direct_resource(o)
+                    .and_then(|r| self.res.iter().position(|x| *x == r)),
+                self.s
+                    .resource_of(o)
+                    .and_then(|r| self.res.iter().position(|x| *x == r)),
             ));
             for &f in c.all_features.iter() {
                 let g = self.f(f);
                 let name = &ours.feature(f).name;
                 if ours.feature(f).is_many() {
-                    let vals: Vec<String> = (0..self.s.len(o, g)).map(|k| show(self.s.get_at(o, g, k))).collect();
-                    out.push_str(&format!("  {name} set={} {:?}\n", self.s.is_set(o, g), vals));
+                    let vals: Vec<String> = (0..self.s.len(o, g))
+                        .map(|k| show(self.s.get_at(o, g, k)))
+                        .collect();
+                    out.push_str(&format!(
+                        "  {name} set={} {:?}\n",
+                        self.s.is_set(o, g),
+                        vals
+                    ));
                 } else {
-                    out.push_str(&format!("  {name} set={} {}\n", self.s.is_set(o, g), show(self.s.get(o, g))));
+                    out.push_str(&format!(
+                        "  {name} set={} {}\n",
+                        self.s.is_set(o, g),
+                        show(self.s.get(o, g))
+                    ));
                 }
             }
         }
         for (k, r) in self.res.iter().enumerate() {
-            let roots: Vec<String> = self.s.roots(*r).iter().map(|x| format!("#{:?}", idx.get(x))).collect();
+            let roots: Vec<String> = self
+                .s
+                .roots(*r)
+                .iter()
+                .map(|x| format!("#{:?}", idx.get(x)))
+                .collect();
             out.push_str(&format!("resource {k} {roots:?}\n"));
         }
         out
@@ -261,9 +293,12 @@ impl<S: ModelStore> Side<'_, S> {
         let c = self.s.class_of(o);
         match self.map {
             None => c,
-            Some(m) => *m.class.iter().find(|(_, v)| **v == c).map(|(k, _)| k).unwrap_or_else(|| {
-                panic!("class {}", ours.class_count())
-            }),
+            Some(m) => *m
+                .class
+                .iter()
+                .find(|(_, v)| **v == c)
+                .map(|(k, _)| k)
+                .unwrap_or_else(|| panic!("class {}", ours.class_count())),
         }
     }
 }
@@ -274,8 +309,12 @@ fn random_value(rng: &mut Rng, meta: &MetaRegistry, f: FeatureId, objs: &[ClassI
         return Val::Null;
     }
     if fi.kind == FeatureKind::Reference {
-        let Classifier::Class(t) = fi.ty else { return Val::Null };
-        let fitting: Vec<usize> = (0..objs.len()).filter(|&i| meta.is_subclass(objs[i], t)).collect();
+        let Classifier::Class(t) = fi.ty else {
+            return Val::Null;
+        };
+        let fitting: Vec<usize> = (0..objs.len())
+            .filter(|&i| meta.is_subclass(objs[i], t))
+            .collect();
         if !fitting.is_empty() && !rng.chance(10) {
             return Val::Obj(fitting[rng.below(fitting.len())]);
         }
@@ -328,7 +367,15 @@ fn script(seed: u64, meta: &MetaRegistry, classes: &[ClassId], focus: &[ClassId]
         let feats: Vec<FeatureId> = meta.class(objs[o]).all_features.to_vec();
         if rng.chance(6) {
             ops.push(match rng.below(3) {
-                0 => Op::AddRoot(rng.below(2), o, if rng.chance(20) { Some(rng.below(3)) } else { None }),
+                0 => Op::AddRoot(
+                    rng.below(2),
+                    o,
+                    if rng.chance(20) {
+                        Some(rng.below(3))
+                    } else {
+                        None
+                    },
+                ),
                 1 => Op::RemoveRoot(rng.below(2), o),
                 _ => Op::Delete(o),
             });
@@ -342,12 +389,25 @@ fn script(seed: u64, meta: &MetaRegistry, classes: &[ClassId], focus: &[ClassId]
         let fi = meta.feature(f);
         let v = random_value(&mut rng, meta, f, &objs);
         if !fi.is_many() {
-            ops.push(if rng.chance(80) { Op::Set(o, f, v) } else { Op::Unset(o, f) });
+            ops.push(if rng.chance(80) {
+                Op::Set(o, f, v)
+            } else {
+                Op::Unset(o, f)
+            });
             continue;
         }
         let n = 3; // index range for bad indexes
         ops.push(match rng.below(10) {
-            0..=3 => Op::Add(o, f, v, if rng.chance(25) { Some(rng.below(n)) } else { None }),
+            0..=3 => Op::Add(
+                o,
+                f,
+                v,
+                if rng.chance(25) {
+                    Some(rng.below(n))
+                } else {
+                    None
+                },
+            ),
             4 => Op::Remove(o, f, v),
             5 => Op::RemoveAt(o, f, rng.below(n)),
             6 => Op::SetAt(o, f, rng.below(n), v),
@@ -355,7 +415,9 @@ fn script(seed: u64, meta: &MetaRegistry, classes: &[ClassId], focus: &[ClassId]
             8 => Op::SetList(
                 o,
                 f,
-                (0..rng.below(3)).map(|_| random_value(&mut rng, meta, f, &objs)).collect(),
+                (0..rng.below(3))
+                    .map(|_| random_value(&mut rng, meta, f, &objs))
+                    .collect(),
             ),
             _ => Op::Clear(o, f),
         });
@@ -387,7 +449,9 @@ fn in_cycle<S: ModelStore>(s: &S, o: S::Obj) -> bool {
 
 #[test]
 fn pcm_scripts_equal_qvto_emf() {
-    let Some(conf) = registry::pcm_conf() else { return };
+    let Some(conf) = registry::pcm_conf() else {
+        return;
+    };
     let base = Session::new();
     let ours = base.meta().clone();
     let mut rs0 = conf.resource_set_for(&registry::repo_root().join("x"));
@@ -398,7 +462,9 @@ fn pcm_scripts_equal_qvto_emf() {
     let sim_classes = simoxide_model::meta::CLASSES.len() as u32;
     let classes: Vec<ClassId> = ours
         .classes()
-        .filter(|c| c.0 < sim_classes && !ours.class(*c).is_abstract && !ours.class(*c).is_interface)
+        .filter(|c| {
+            c.0 < sim_classes && !ours.class(*c).is_abstract && !ours.class(*c).is_interface
+        })
         .collect();
     let focus: Vec<ClassId> = classes
         .iter()
@@ -421,7 +487,10 @@ fn pcm_scripts_equal_qvto_emf() {
             objs: Vec::new(),
             res: Vec::new(),
         };
-        a.res = vec![a.s.create_resource("mem:/r1"), a.s.create_resource("mem:/r2")];
+        a.res = vec![
+            a.s.create_resource("mem:/r1"),
+            a.s.create_resource("mem:/r2"),
+        ];
         // qvto-emf
         let mut b = Side {
             s: rs0.graph.clone(),
@@ -429,7 +498,10 @@ fn pcm_scripts_equal_qvto_emf() {
             objs: Vec::new(),
             res: Vec::new(),
         };
-        b.res = vec![b.s.create_resource("mem:/r1"), b.s.create_resource("mem:/r2")];
+        b.res = vec![
+            b.s.create_resource("mem:/r1"),
+            b.s.create_resource("mem:/r2"),
+        ];
         for (k, op) in ops.iter().enumerate() {
             if TRACE || std::env::var_os("SCRIPT_TRACE").is_some() {
                 eprintln!("script {seed} op {k} {op:?}");

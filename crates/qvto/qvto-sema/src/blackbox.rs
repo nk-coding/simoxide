@@ -33,7 +33,10 @@ pub fn attach_alternatives(units: &mut Vec<(String, BlackboxUnit)>) {
         Some((base, uris)) => {
             alts.push((
                 base.to_string(),
-                uris.split(',').filter(|s| !s.is_empty()).map(String::from).collect(),
+                uris.split(',')
+                    .filter(|s| !s.is_empty())
+                    .map(String::from)
+                    .collect(),
                 u.modules.clone(),
             ));
             false

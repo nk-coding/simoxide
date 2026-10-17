@@ -35,8 +35,8 @@ pub const BLACKBOX_SIGNATURES: &str = "qvto-types/data/blackboxes.tsv";
 
 impl QvtoEngine {
     pub fn new(root: &Path, mode: Mode) -> QvtoEngine {
-        let signatures = std::fs::read_to_string(root.join(BLACKBOX_SIGNATURES))
-            .unwrap_or_else(|e| {
+        let signatures =
+            std::fs::read_to_string(root.join(BLACKBOX_SIGNATURES)).unwrap_or_else(|e| {
                 eprintln!("qvto: {BLACKBOX_SIGNATURES}: {e}");
                 String::new()
             });
@@ -53,7 +53,10 @@ impl QvtoEngine {
 /// The blackbox units a case sees, as the Java runner registers them: the test bundle's
 /// (`bundle-blackboxes`) or the case's own registrations first (they are also the candidates
 /// for `blackbox` operations declared in QVTo), then Java classes by name.
-fn case_blackboxes(catalog: &Catalog, case: &qvto_testkit::case::Case) -> (Vec<CatalogUnit>, Vec<CatalogUnit>) {
+fn case_blackboxes(
+    catalog: &Catalog,
+    case: &qvto_testkit::case::Case,
+) -> (Vec<CatalogUnit>, Vec<CatalogUnit>) {
     let mut envs: Vec<&str> = Vec::new();
     if case.bundle_blackboxes {
         envs.push("bundle");
@@ -103,7 +106,9 @@ impl Engine for QvtoEngine {
             std::thread::Builder::new()
                 .stack_size(512 << 20)
                 .spawn_scoped(s, || {
-                    std::panic::catch_unwind(AssertUnwindSafe(|| run_case(env, bundles, &signatures, mode, &tape_dirs, constant)))
+                    std::panic::catch_unwind(AssertUnwindSafe(|| {
+                        run_case(env, bundles, &signatures, mode, &tape_dirs, constant)
+                    }))
                 })
                 .expect("thread")
                 .join()
@@ -151,24 +156,42 @@ pub struct CaseProgram {
 
 /// Parses, analyses and compiles a case's transformation as the Java runner loads it.
 #[allow(clippy::result_large_err)]
-pub fn compile_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str) -> Result<CaseProgram, Outcome> {
+pub fn compile_case(
+    env: &CaseEnv,
+    bundles: Vec<Bundle>,
+    signatures: &str,
+) -> Result<CaseProgram, Outcome> {
     let catalog = match Catalog::parse(signatures) {
         Ok(c) => c,
-        Err(e) => return Err(Outcome::with_status(Status::Crashed(format!("{BLACKBOX_SIGNATURES}: {e}")))),
+        Err(e) => {
+            return Err(Outcome::with_status(Status::Crashed(format!(
+                "{BLACKBOX_SIGNATURES}: {e}"
+            ))));
+        }
     };
     let case = env.case;
     let Some(qvto) = env.transformation() else {
-        return Err(Outcome::with_status(Status::Unsupported("no transformation".into())));
+        return Err(Outcome::with_status(Status::Unsupported(
+            "no transformation".into(),
+        )));
     };
     let mut rs = match env.resource_set() {
         Ok(rs) => rs,
-        Err(e) => return Err(Outcome::with_status(Status::Crashed(format!("resource set: {e}")))),
+        Err(e) => {
+            return Err(Outcome::with_status(Status::Crashed(format!(
+                "resource set: {e}"
+            ))));
+        }
     };
     let resolver = FsResolver {
         bundles: match &case.import_root {
             // `imports root` is relative to the QVTo root (crates/qvto), not to the case's directory
             Some(r) => vec![Bundle {
-                root: env.base.join(r).canonicalize().unwrap_or_else(|_| env.base.join(r)),
+                root: env
+                    .base
+                    .join(r)
+                    .canonicalize()
+                    .unwrap_or_else(|_| env.base.join(r)),
                 containers: vec![String::new()],
             }],
             None => bundles,
@@ -184,7 +207,12 @@ pub fn compile_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str) -> Re
     };
     let main = match file_resolver.unit_source(&qvto) {
         Ok(m) => m,
-        Err(e) => return Err(Outcome::with_status(Status::Crashed(format!("{}: {e}", qvto.display())))),
+        Err(e) => {
+            return Err(Outcome::with_status(Status::Crashed(format!(
+                "{}: {e}",
+                qvto.display()
+            ))));
+        }
     };
     // metamodels the units refer to, then the case's global packages (each run loads them in
     // the same order, so that the store's ids are the program's)
@@ -201,7 +229,13 @@ pub fn compile_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str) -> Re
     rs.ecore_resource();
     let t0 = Instant::now();
     let operations = qvto_emf::operations::meta_operations(&rs.graph);
-    let compiled = qvto::compile_with_metamodel(main, &resolver, rs.graph.meta().clone(), &operations, &qvto_emf::operations::meta_derivations(&rs.graph));
+    let compiled = qvto::compile_with_metamodel(
+        main,
+        &resolver,
+        rs.graph.meta().clone(),
+        &operations,
+        &qvto_emf::operations::meta_derivations(&rs.graph),
+    );
     let compile_time = t0.elapsed();
     Ok(CaseProgram {
         compiled,
@@ -242,7 +276,11 @@ fn run_case(
                 error: p.is_error(),
                 unit: u.source.file_name.clone(),
                 // Java units have no lines (Eclipse prints -1)
-                line: if u.source.blackbox.is_some() { -1 } else { line as i32 },
+                line: if u.source.blackbox.is_some() {
+                    -1
+                } else {
+                    line as i32
+                },
                 offset: offset as i32,
                 length: length as i32,
                 message: p.message.clone(),
@@ -273,7 +311,10 @@ fn run_case(
                 // `InternalTransformationExecutor.execute` returns the load diagnostic
                 o.severity = Some(Severity::Error);
                 o.code = 130;
-                o.message = format!("Transformation '{}' is has no entry point for execution", m.name);
+                o.message = format!(
+                    "Transformation '{}' is has no entry point for execution",
+                    m.name
+                );
                 return o;
             }
         }
@@ -292,7 +333,11 @@ fn run_case(
         ));
         return o;
     };
-    let tape = if constant.is_some() { None } else { load_tape(env, tape_dirs) };
+    let tape = if constant.is_some() {
+        None
+    } else {
+        load_tape(env, tape_dirs)
+    };
     match execute(env, &program, &mm_uris, mode, tape.as_ref(), constant) {
         Ok(mut o2) => {
             o2.compile_time = o.compile_time;
@@ -307,7 +352,11 @@ fn run_case(
 /// The Java run's identity-hash tape of the case, if cached.
 fn load_tape(env: &CaseEnv, tape_dirs: &[std::path::PathBuf]) -> Option<Tape> {
     let cache = env.base.join(qvto_testkit::paths::JAVA_CACHE);
-    let dirs = [cache.join("eclipse"), cache.join("corpus"), cache.join("fuzz")];
+    let dirs = [
+        cache.join("eclipse"),
+        cache.join("corpus"),
+        cache.join("fuzz"),
+    ];
     for dir in dirs.iter().chain(tape_dirs) {
         let p = dir.join(&env.case.id).join("idtape.tsv");
         if let Ok(t) = std::fs::read_to_string(&p) {
@@ -365,7 +414,10 @@ impl CaseModels {
     pub fn current_args(&self) -> Vec<Vec<qvto_emf::ObjId>> {
         self.inputs
             .iter()
-            .map(|r| r.map(|r| self.rs.graph.roots(r).to_vec()).unwrap_or_default())
+            .map(|r| {
+                r.map(|r| self.rs.graph.roots(r).to_vec())
+                    .unwrap_or_default()
+            })
             .collect()
     }
 }
@@ -423,7 +475,9 @@ pub fn case_models(
         Some(t) => match rs.load_file(&env.path(t)) {
             Ok(r) => Some(r),
             Err(e) => {
-                return Err(Outcome::with_status(Status::Crashed(format!("trace {t}: {e}"))));
+                return Err(Outcome::with_status(Status::Crashed(format!(
+                    "trace {t}: {e}"
+                ))));
             }
         },
         None => None,
@@ -439,6 +493,7 @@ pub fn case_models(
 
 /// One run of the compiled program on fresh models; returns the outcome and the tape hashes of
 /// the created objects found in the outputs.
+#[allow(clippy::result_large_err)] // the error is the outcome of a failed case, built once
 fn execute(
     env: &CaseEnv,
     program: &qvto::Program,
@@ -513,7 +568,9 @@ fn execute(
         Box::new(qvto_vm::TapeHook::new(lookup, fb)) as Box<dyn IdentityHashSource>
     });
     let id_source = match constant {
-        Some(h) => Some(Box::new(qvto_runtime::identity::Constant(h)) as Box<dyn IdentityHashSource>),
+        Some(h) => {
+            Some(Box::new(qvto_runtime::identity::Constant(h)) as Box<dyn IdentityHashSource>)
+        }
         None => id_source,
     };
     let opts = qvto::RunOptions {
@@ -685,7 +742,10 @@ pub fn cli_resolver<'r>(files: &'r FsResolver, catalog: &Catalog) -> BlackboxRes
 }
 
 /// [`cli_resolver`] over any unit resolver.
-pub fn cli_resolver_dyn<'r>(files: &'r dyn qvto_sema::UnitResolver, catalog: &Catalog) -> BlackboxResolver<'r> {
+pub fn cli_resolver_dyn<'r>(
+    files: &'r dyn qvto_sema::UnitResolver,
+    catalog: &Catalog,
+) -> BlackboxResolver<'r> {
     let mut classpath: Vec<CatalogUnit> = catalog.units("bundle").to_vec();
     classpath.extend(catalog.units("classpath").iter().cloned());
     BlackboxResolver {

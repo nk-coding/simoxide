@@ -28,7 +28,9 @@ fn main() {
     let dir = std::env::args()
         .nth(1)
         .map(PathBuf::from)
-        .unwrap_or_else(|| qvto_paths::workspace_root(&qvto_paths::root()).join("corpus/x_sl_mediastore"));
+        .unwrap_or_else(|| {
+            qvto_paths::workspace_root(&qvto_paths::root()).join("corpus/x_sl_mediastore")
+        });
     // 1. SimOxide's model, the session
     let mut model = simoxide_model::load_dir(&dir).expect("model directory");
     println!(
@@ -40,8 +42,13 @@ fn main() {
     let t0 = std::time::Instant::now();
     let mut session = Session::new();
     session.set_id_policy(IdPolicy::Uuid { seed: 2026 });
-    session.load_metamodel_text(SRM_LOCATION, SRM_ECORE).expect("runtime measurement metamodel");
-    println!("session (registry, metamodel objects, PRM metamodel): {:.1?}", t0.elapsed());
+    session
+        .load_metamodel_text(SRM_LOCATION, SRM_ECORE)
+        .expect("runtime measurement metamodel");
+    println!(
+        "session (registry, metamodel objects, PRM metamodel): {:.1?}",
+        t0.elapsed()
+    );
     let t0 = std::time::Instant::now();
 
     // 2. the rule, compiled once; the clock
@@ -82,7 +89,9 @@ fn main() {
         // a reference from the PRM into SimOxide's graph (through a mirror)
         let mp = (0..store.resource_count() as u32)
             .flat_map(|r| store.resource_contents(ResourceId(r)))
-            .find(|&o| store.is_graph_object(o) && store.meta().is_subclass(store.class_of(o), mp_class));
+            .find(|&o| {
+                store.is_graph_object(o) && store.meta().is_subclass(store.class_of(o), mp_class)
+            });
         if let Some(mp) = mp {
             store.set(meas, mp_feature, Datum::Obj(mp)).unwrap();
         }
@@ -92,7 +101,11 @@ fn main() {
                 .find(|r| s.resource_uri(*r).ends_with(ext))
                 .unwrap()
         };
-        let inputs = [prm, by_ext(&store, ".allocation"), by_ext(&store, ".resourceenvironment")];
+        let inputs = [
+            prm,
+            by_ext(&store, ".allocation"),
+            by_ext(&store, ".resourceenvironment"),
+        ];
         (prm, meas, inputs)
     };
     let _ = prm;
@@ -170,15 +183,25 @@ fn syncer(j: &Journal, s: &SimStore) {
             continue; // the PRM model, intermediate data; new objects come with their container
         }
         match &c.kind {
-            ChangeKind::Added { feature, value: qvto_model::OwnedDatum::Obj(x), .. }
-                if &*m.feature(*feature).name == "resourceContainer_ResourceEnvironment" =>
-            {
-                println!("  syncer: new {} -> create its active and linking resources, update routes and the allocation lookup", name(*x));
+            ChangeKind::Added {
+                feature,
+                value: qvto_model::OwnedDatum::Obj(x),
+                ..
+            } if &*m.feature(*feature).name == "resourceContainer_ResourceEnvironment" => {
+                println!(
+                    "  syncer: new {} -> create its active and linking resources, update routes and the allocation lookup",
+                    name(*x)
+                );
             }
-            ChangeKind::Removed { feature, value: qvto_model::OwnedDatum::Obj(x), .. }
-                if &*m.feature(*feature).name == "resourceContainer_ResourceEnvironment" =>
-            {
-                println!("  syncer: removed {} -> drain and remove its resources (SimuLizar's syncer does not handle this: the container keeps simulating)", name(*x));
+            ChangeKind::Removed {
+                feature,
+                value: qvto_model::OwnedDatum::Obj(x),
+                ..
+            } if &*m.feature(*feature).name == "resourceContainer_ResourceEnvironment" => {
+                println!(
+                    "  syncer: removed {} -> drain and remove its resources (SimuLizar's syncer does not handle this: the container keeps simulating)",
+                    name(*x)
+                );
             }
             ChangeKind::Set { feature, .. } if &*m.feature(*feature).name == "specification" => {
                 println!("  syncer: StoEx of {} changed -> recompile it", name(c.obj));
@@ -186,7 +209,10 @@ fn syncer(j: &Journal, s: &SimStore) {
             ChangeKind::Set { feature, .. }
                 if &*m.feature(*feature).name == "resourceContainer_AllocationContext" =>
             {
-                println!("  syncer: {} moved to another container -> re-route (SimuLizar ignores this)", name(c.obj));
+                println!(
+                    "  syncer: {} moved to another container -> re-route (SimuLizar ignores this)",
+                    name(c.obj)
+                );
             }
             _ => {}
         }

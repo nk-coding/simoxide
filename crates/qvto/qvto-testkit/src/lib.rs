@@ -15,8 +15,8 @@
 pub mod case;
 pub mod compare;
 pub mod engine;
-pub mod fuzz;
 pub mod fixture;
+pub mod fuzz;
 pub mod idhash;
 pub mod inventory;
 pub mod java;

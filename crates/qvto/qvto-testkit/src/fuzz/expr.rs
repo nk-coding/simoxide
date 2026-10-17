@@ -248,23 +248,95 @@ pub fn default_literal(t: &Ty) -> Option<E> {
 }
 
 const INTS: &[&str] = &[
-    "0", "1", "2", "3", "5", "7", "10", "42", "100", "1024", "65536", "2147483647", "2147483648",
-    "4294967296", "9223372036854775807", "123456789",
+    "0",
+    "1",
+    "2",
+    "3",
+    "5",
+    "7",
+    "10",
+    "42",
+    "100",
+    "1024",
+    "65536",
+    "2147483647",
+    "2147483648",
+    "4294967296",
+    "9223372036854775807",
+    "123456789",
 ];
-const NEG_INTS: &[&str] = &["-1", "-7", "-2147483648", "-2147483649", "-9223372036854775807"];
+const NEG_INTS: &[&str] = &[
+    "-1",
+    "-7",
+    "-2147483648",
+    "-2147483649",
+    "-9223372036854775807",
+];
 const REALS: &[&str] = &[
-    "0.0", "1.0", "0.5", "2.5", "0.1", "0.3", "3.0", "1.0E10", "1.0E-5", "123456789.125",
-    "1.0E300", "3.4028235E38", "1.0E-320", "2.0E9", "100.0", "1.25E7",
+    "0.0",
+    "1.0",
+    "0.5",
+    "2.5",
+    "0.1",
+    "0.3",
+    "3.0",
+    "1.0E10",
+    "1.0E-5",
+    "123456789.125",
+    "1.0E300",
+    "3.4028235E38",
+    "1.0E-320",
+    "2.0E9",
+    "100.0",
+    "1.25E7",
 ];
 const STRS: &[&str] = &[
-    "", "a", "abc", "Hello World", "  a  b  ", "x,y,,z", "123", "-42", "+7", "0x1F", "1.5",
-    " 2.5 ", "1e3", "NaN", "Infinity", "true", "TRUE", "false", "abcabc", "aBc", "it's",
-    "tab\there", "line\nbreak", "back\\slash", "\u{df}", "\u{130}", "\u{c4}x", "\u{65e5}\u{672c}",
-    "a.b.c", "%s", "{0}", "$1", "_id9", "9id", "  ", "a b\tc", "\u{1F600}", "'q'", "\"dq\"",
-    "2147483648", "007",
+    "",
+    "a",
+    "abc",
+    "Hello World",
+    "  a  b  ",
+    "x,y,,z",
+    "123",
+    "-42",
+    "+7",
+    "0x1F",
+    "1.5",
+    " 2.5 ",
+    "1e3",
+    "NaN",
+    "Infinity",
+    "true",
+    "TRUE",
+    "false",
+    "abcabc",
+    "aBc",
+    "it's",
+    "tab\there",
+    "line\nbreak",
+    "back\\slash",
+    "\u{df}",
+    "\u{130}",
+    "\u{c4}x",
+    "\u{65e5}\u{672c}",
+    "a.b.c",
+    "%s",
+    "{0}",
+    "$1",
+    "_id9",
+    "9id",
+    "  ",
+    "a b\tc",
+    "\u{1F600}",
+    "'q'",
+    "\"dq\"",
+    "2147483648",
+    "007",
 ];
 /// Regular expressions that both Java and the `regex` crate accept.
-const REGEXES: &[&str] = &["a", "[a-c]+", ".*", "b|c", "\\s+", "^a", "(a)(b)", "x*", "[0-9]+", "\\.", ""];
+const REGEXES: &[&str] = &[
+    "a", "[a-c]+", ".*", "b|c", "\\s+", "^a", "(a)(b)", "x*", "[0-9]+", "\\.", "",
+];
 const REPLACEMENTS: &[&str] = &["", "-", "$1", "<$0>", "\\$", "x"];
 
 /// Variables of the generated `main` that every expression may use (name, type).
@@ -387,7 +459,9 @@ impl<'r> Gen<'r> {
 
     /// An expression of type `t` (conforming to it) of at most `depth` levels.
     pub fn ex(&mut self, t: &Ty, depth: u32) -> E {
-        if self.rng.pct(self.undefined_pct) && !matches!(t, Ty::Coll(..) | Ty::List(_) | Ty::Dict(..)) {
+        if self.rng.pct(self.undefined_pct)
+            && !matches!(t, Ty::Coll(..) | Ty::List(_) | Ty::Dict(..))
+        {
             // typed: `null`/`invalid` have no operations of their own (OclVoid)
             let u = if self.rng.pct(70) { "null" } else { "invalid" };
             return E::leaf(format!("{u}.oclAsType({})", t.src()), t.clone());
@@ -501,11 +575,17 @@ impl<'r> Gen<'r> {
             Ty::Str => E::leaf(quote(self.rng.pick(STRS)), Ty::Str),
             Ty::Bool => E::leaf(if self.rng.pct(50) { "true" } else { "false" }, Ty::Bool),
             Ty::Any => {
-                let u = self.rng.pick(&[Ty::Int, Ty::Real, Ty::Str, Ty::Bool, Ty::Enum]).clone();
+                let u = self
+                    .rng
+                    .pick(&[Ty::Int, Ty::Real, Ty::Str, Ty::Bool, Ty::Enum])
+                    .clone();
                 let e = self.leaf(&u);
                 E { ty: Ty::Any, ..e }
             }
-            Ty::Enum => E::leaf(format!("FZ::Kind::{}", self.rng.pick(&["A", "B", "C"])), Ty::Enum),
+            Ty::Enum => E::leaf(
+                format!("FZ::Kind::{}", self.rng.pick(&["A", "B", "C"])),
+                Ty::Enum,
+            ),
             Ty::Tuple => {
                 let a = self.leaf(&Ty::Int);
                 let b = self.leaf(&Ty::Str);
@@ -513,7 +593,11 @@ impl<'r> Gen<'r> {
             }
             Ty::Obj(c) => self.object_leaf(*c),
             Ty::Coll(k, e) => {
-                let k = if *k == Ck::Collection { *self.rng.pick(&Ck::CONCRETE) } else { *k };
+                let k = if *k == Ck::Collection {
+                    *self.rng.pick(&Ck::CONCRETE)
+                } else {
+                    *k
+                };
                 if **e == Ty::Int && self.rng.pct(20) {
                     let a = self.rng.range(-1, 3);
                     let b = self.rng.range(0, 5);
@@ -522,7 +606,11 @@ impl<'r> Gen<'r> {
                 let n = self.rng.range(1, 4) as usize;
                 let kids: Vec<E> = (0..n).map(|_| self.leaf(e)).collect();
                 let holes = vec!["{}"; n].join(", ");
-                E::tpl(&format!("{}{{{holes}}}", k.name()), kids, Ty::coll(k, (**e).clone()))
+                E::tpl(
+                    &format!("{}{{{holes}}}", k.name()),
+                    kids,
+                    Ty::coll(k, (**e).clone()),
+                )
             }
             Ty::List(e) => {
                 let n = self.rng.range(1, 3) as usize;
@@ -582,11 +670,23 @@ impl<'r> Gen<'r> {
             }
             4 => {
                 let a = self.ex(&int, d);
-                E::tpl(if self.rng.pct(50) { "-{}" } else { "{}.abs()" }, vec![a], int)
+                E::tpl(
+                    if self.rng.pct(50) { "-{}" } else { "{}.abs()" },
+                    vec![a],
+                    int,
+                )
             }
             5 => {
                 let r = self.ex(&Ty::Real, d);
-                E::tpl(if self.rng.pct(50) { "{}.floor()" } else { "{}.round()" }, vec![r], int)
+                E::tpl(
+                    if self.rng.pct(50) {
+                        "{}.floor()"
+                    } else {
+                        "{}.round()"
+                    },
+                    vec![r],
+                    int,
+                )
             }
             6 => {
                 let s = self.ex(&Ty::Str, d);
@@ -600,7 +700,11 @@ impl<'r> Gen<'r> {
             }
             8 => {
                 let s = self.numeric_string(d);
-                E::tpl(self.rng.pick(&["{}.toInteger()", "{}.asInteger()"]), vec![s], int)
+                E::tpl(
+                    self.rng.pick(&["{}.toInteger()", "{}.asInteger()"]),
+                    vec![s],
+                    int,
+                )
             }
             9 | 10 => {
                 let et = self.elem_type(1);
@@ -616,7 +720,11 @@ impl<'r> Gen<'r> {
             11 => {
                 let k = *self.rng.pick(&Ck::CONCRETE);
                 let c = self.ex(&Ty::coll(k, Ty::Int), d);
-                E::tpl(self.rng.pick(&["{}->sum()", "{}->max()", "{}->min()"]), vec![c], int)
+                E::tpl(
+                    self.rng.pick(&["{}->sum()", "{}->max()", "{}->min()"]),
+                    vec![c],
+                    int,
+                )
             }
             12 => {
                 let k = *self.rng.pick(&[Ck::Sequence, Ck::OrderedSet]);
@@ -699,9 +807,32 @@ impl<'r> Gen<'r> {
     fn numeric_string(&mut self, d: u32) -> E {
         if self.rng.pct(70) {
             let s = *self.rng.pick(&[
-                "0", "12", "-3", "+5", " 7", "2147483647", "2147483648", "-2147483648", "1.5",
-                "1e3", "0x10", "", "abc", "007", "1_000", "\u{0663}", "NaN", "-0", "1.0E10",
-                " 2.5 ", "Infinity", "-Infinity", "1f", "1d", ".5", "5.",
+                "0",
+                "12",
+                "-3",
+                "+5",
+                " 7",
+                "2147483647",
+                "2147483648",
+                "-2147483648",
+                "1.5",
+                "1e3",
+                "0x10",
+                "",
+                "abc",
+                "007",
+                "1_000",
+                "\u{0663}",
+                "NaN",
+                "-0",
+                "1.0E10",
+                " 2.5 ",
+                "Infinity",
+                "-Infinity",
+                "1f",
+                "1d",
+                ".5",
+                "5.",
             ]);
             E::leaf(quote(s), Ty::Str)
         } else {
@@ -742,7 +873,11 @@ impl<'r> Gen<'r> {
             }
             5 => {
                 let s = self.numeric_string(d);
-                E::tpl(self.rng.pick(&["{}.toReal()", "{}.asFloat()"]), vec![s], real)
+                E::tpl(
+                    self.rng.pick(&["{}.toReal()", "{}.asFloat()"]),
+                    vec![s],
+                    real,
+                )
             }
             6 => {
                 let o = self.ex(&Ty::Obj(Cls::Node), d);
@@ -755,7 +890,11 @@ impl<'r> Gen<'r> {
             8 => {
                 let k = *self.rng.pick(&Ck::CONCRETE);
                 let c = self.ex(&Ty::coll(k, real.clone()), d);
-                E::tpl(self.rng.pick(&["{}->sum()", "{}->max()", "{}->min()"]), vec![c], real)
+                E::tpl(
+                    self.rng.pick(&["{}->sum()", "{}->max()", "{}->min()"]),
+                    vec![c],
+                    real,
+                )
             }
             9..=11 => self.ex(&Ty::Int, d + 1).retype(real),
             _ => self.leaf(&real),
@@ -836,7 +975,9 @@ impl<'r> Gen<'r> {
             15 | 16 => {
                 let s = self.ex(&Ty::Str, d);
                 let u = self.ex(&Ty::Str, d);
-                let op = *self.rng.pick(&["startsWith", "endsWith", "equalsIgnoreCase"]);
+                let op = *self
+                    .rng
+                    .pick(&["startsWith", "endsWith", "equalsIgnoreCase"]);
                 E::tpl(&format!("{{}}.{op}({{}})"), vec![s, u], b)
             }
             17 => {
@@ -855,15 +996,27 @@ impl<'r> Gen<'r> {
                 let t = self.any_type(0);
                 let x = self.ex(&t, d);
                 let target = *self.rng.pick(&[
-                    "Integer", "Real", "String", "Boolean", "OclAny", "FZ::Node", "FZ::Leaf",
-                    "FZ::Named", "FZ::Kind", "OclVoid",
+                    "Integer",
+                    "Real",
+                    "String",
+                    "Boolean",
+                    "OclAny",
+                    "FZ::Node",
+                    "FZ::Leaf",
+                    "FZ::Named",
+                    "FZ::Kind",
+                    "OclVoid",
                 ]);
                 let op = *self.rng.pick(&["oclIsKindOf", "oclIsTypeOf"]);
                 E::tpl(&format!("{{}}.{op}({target})"), vec![x], b)
             }
             22 => {
                 let s = self.ex(&Ty::Str, d);
-                E::tpl(self.rng.pick(&["{}.toBoolean()", "{}.asBoolean()"]), vec![s], b)
+                E::tpl(
+                    self.rng.pick(&["{}.toBoolean()", "{}.asBoolean()"]),
+                    vec![s],
+                    b,
+                )
             }
             23 => {
                 let dct = self.ex(&Ty::Dict(Box::new(Ty::Str), Box::new(Ty::Int)), d);
@@ -895,7 +1048,11 @@ impl<'r> Gen<'r> {
                 let a = self.ex(&s, d);
                 let c = self.ex(&s, d);
                 E::tpl(
-                    if self.rng.pct(70) { "({} + {})" } else { "{}.concat({})" },
+                    if self.rng.pct(70) {
+                        "({} + {})"
+                    } else {
+                        "{}.concat({})"
+                    },
                     vec![a, c],
                     s,
                 )
@@ -909,8 +1066,14 @@ impl<'r> Gen<'r> {
             5..=7 => {
                 let a = self.ex(&s, d);
                 let op = *self.rng.pick(&[
-                    "toUpper", "toLower", "toUpperCase", "toLowerCase", "firstToUpper",
-                    "lastToUpper", "trim", "normalizeSpace",
+                    "toUpper",
+                    "toLower",
+                    "toUpperCase",
+                    "toLowerCase",
+                    "firstToUpper",
+                    "lastToUpper",
+                    "trim",
+                    "normalizeSpace",
                 ]);
                 E::tpl(&format!("{{}}.{op}()"), vec![a], s)
             }
@@ -966,11 +1129,23 @@ impl<'r> Gen<'r> {
                 let k = *self.rng.pick(&Ck::CONCRETE);
                 let c = self.ex(&Ty::coll(k, et), d);
                 let sep = quote(self.rng.pick(&[",", ", ", ""]));
-                E::tpl(&format!("{{}}->asList()->joinfields({sep}, '[', ']')"), vec![c], s)
+                E::tpl(
+                    &format!("{{}}->asList()->joinfields({sep}, '[', ']')"),
+                    vec![c],
+                    s,
+                )
             }
             18 => {
                 let o = self.ex(&Ty::Obj(Cls::Node), d);
-                E::tpl(self.rng.pick(&["{}.metaClassName()", "{}.kind.toString()", "{}.tags->first()"]), vec![o], s)
+                E::tpl(
+                    self.rng.pick(&[
+                        "{}.metaClassName()",
+                        "{}.kind.toString()",
+                        "{}.tags->first()",
+                    ]),
+                    vec![o],
+                    s,
+                )
             }
             19 => {
                 let a = self.ex(&s, d);
@@ -999,7 +1174,11 @@ impl<'r> Gen<'r> {
             (Cls::Node | Cls::Named, 1) => {
                 let o = self.ex(&Ty::Obj(Cls::Node), d);
                 E::tpl(
-                    self.rng.pick(&["{}.children->first()", "{}.refs->last()", "{}.refs->any(true)"]),
+                    self.rng.pick(&[
+                        "{}.children->first()",
+                        "{}.refs->last()",
+                        "{}.refs->any(true)",
+                    ]),
                     vec![o],
                     t,
                 )
@@ -1032,9 +1211,18 @@ impl<'r> Gen<'r> {
     fn collection(&mut self, k: Ck, e: &Ty, d: u32) -> E {
         // choose a concrete kind when any will do
         let want_any = k == Ck::Collection;
-        let k = if want_any { *self.rng.pick(&Ck::CONCRETE) } else { k };
+        let k = if want_any {
+            *self.rng.pick(&Ck::CONCRETE)
+        } else {
+            k
+        };
         let ty = Ty::coll(k, e.clone());
-        let fits = |r: &Ty| r.conforms(&Ty::coll(if want_any { Ck::Collection } else { k }, e.clone()));
+        let fits = |r: &Ty| {
+            r.conforms(&Ty::coll(
+                if want_any { Ck::Collection } else { k },
+                e.clone(),
+            ))
+        };
         for _ in 0..4 {
             let r = self.collection_op(k, e, d);
             if fits(&r.ty) {
@@ -1060,8 +1248,16 @@ impl<'r> Gen<'r> {
                 let c = self.ex(&ty, d);
                 let x = self.ex(e, d);
                 let op = *self.rng.pick(&["including", "excluding"]);
-                let rk = if k == Ck::OrderedSet { Ck::Collection } else { k };
-                E::tpl(&format!("{{}}->{op}({{}})"), vec![c, x], Ty::coll(rk, (*e).clone()))
+                let rk = if k == Ck::OrderedSet {
+                    Ck::Collection
+                } else {
+                    k
+                };
+                E::tpl(
+                    &format!("{{}}->{op}({{}})"),
+                    vec![c, x],
+                    Ty::coll(rk, (*e).clone()),
+                )
             }
             3 | 4 => {
                 // union / intersection / difference with Eclipse's result kinds
@@ -1081,7 +1277,11 @@ impl<'r> Gen<'r> {
                 ]);
                 let a = self.ex(&Ty::coll(k1, et.clone()), d);
                 let b = self.ex(&Ty::coll(k2, et.clone()), d);
-                let t = if op == "-" { "({} - {})".to_string() } else { format!("{{}}->{op}({{}})") };
+                let t = if op == "-" {
+                    "({} - {})".to_string()
+                } else {
+                    format!("{{}}->{op}({{}})")
+                };
                 E::tpl(&t, vec![a, b], Ty::coll(rk, et))
             }
             5 | 6 if k.ordered() => {
@@ -1100,7 +1300,11 @@ impl<'r> Gen<'r> {
                 let c = self.ex(&ty, d);
                 let i = self.small_int(d);
                 let j = self.small_int(d);
-                let op = if k == Ck::Sequence { "subSequence" } else { "subOrderedSet" };
+                let op = if k == Ck::Sequence {
+                    "subSequence"
+                } else {
+                    "subOrderedSet"
+                };
                 E::tpl(&format!("{{}}->{op}({{}}, {{}})"), vec![c, i, j], ty)
             }
             8 if k.ordered() => {
@@ -1126,8 +1330,12 @@ impl<'r> Gen<'r> {
                 let x = self.fresh("x");
                 let body = self.with_var(&x.clone(), st, |g| g.ex(e, d));
                 if self.rng.pct(15) {
-                    E::tpl(&format!("{{}}->xcollect({x} | {{}})"), vec![c, body], Ty::coll(Ck::Collection, et))
-                        .binding(&[&x])
+                    E::tpl(
+                        &format!("{{}}->xcollect({x} | {{}})"),
+                        vec![c, body],
+                        Ty::coll(Ck::Collection, et),
+                    )
+                    .binding(&[&x])
                 } else {
                     E::tpl(&format!("{{}}->collect({x} | {{}})"), vec![c, body], ty).binding(&[&x])
                 }
@@ -1159,17 +1367,27 @@ impl<'r> Gen<'r> {
             18 if *e == Ty::Obj(Cls::Node) => {
                 let o = self.ex(&Ty::Obj(Cls::Node), d);
                 match k {
-                    Ck::OrderedSet => E::tpl(self.rng.pick(&["{}.children", "{}.refs"]), vec![o], ty),
+                    Ck::OrderedSet => {
+                        E::tpl(self.rng.pick(&["{}.children", "{}.refs"]), vec![o], ty)
+                    }
                     Ck::Set => {
                         if self.rng.pct(50) {
                             E::leaf("m.objectsOfType(FZ::Node)", ty)
                         } else {
-                            E::tpl("{}->closure(x | x.children)", vec![o.retype(Ty::Obj(Cls::Node))], Ty::coll(Ck::Collection, et))
+                            E::tpl(
+                                "{}->closure(x | x.children)",
+                                vec![o.retype(Ty::Obj(Cls::Node))],
+                                Ty::coll(Ck::Collection, et),
+                            )
                         }
                     }
                     _ => {
                         let c = self.ex(&Ty::coll(Ck::OrderedSet, Ty::Obj(Cls::Node)), d);
-                        E::tpl("{}->collect(x | x.refs)", vec![c], Ty::coll(Ck::Sequence, et))
+                        E::tpl(
+                            "{}->collect(x | x.refs)",
+                            vec![c],
+                            Ty::coll(Ck::Sequence, et),
+                        )
                     }
                 }
             }
@@ -1181,29 +1399,39 @@ impl<'r> Gen<'r> {
                 let o = self.ex(&Ty::Obj(Cls::Node), d);
                 E::tpl("{}.nums", vec![o], ty)
             }
-            20 if e.is_coll() => {
-                self.leaf(&ty)
-            }
+            20 if e.is_coll() => self.leaf(&ty),
             20 => {
                 // flatten of a nested collection
                 let inner_k = *self.rng.pick(&Ck::CONCRETE);
                 let c = self.ex(&Ty::coll(k, Ty::coll(inner_k, et.clone())), d);
                 // OrderedSet::flatten is a Set
-                let rk = if k == Ck::OrderedSet { Ck::Collection } else { k };
+                let rk = if k == Ck::OrderedSet {
+                    Ck::Collection
+                } else {
+                    k
+                };
                 E::tpl("{}->flatten()", vec![c], Ty::coll(rk, et))
             }
             21 => {
                 let c = self.ex(&ty, d);
                 let tp = (*e).clone();
-                E::tpl(&format!("{{}}->selectByKind({})", tp.src()), vec![c], Ty::coll(Ck::Collection, et))
+                E::tpl(
+                    &format!("{{}}->selectByKind({})", tp.src()),
+                    vec![c],
+                    Ty::coll(Ck::Collection, et),
+                )
             }
             22 => {
                 // the [cond] shorthand
                 let c = self.ex(&ty, d);
                 let x = self.fresh("x");
                 let body = self.with_var(&x.clone(), et, |g| g.ex(&Ty::Bool, d));
-                E::tpl(&format!("{{}}->xselect({x} | {{}})"), vec![c, body], Ty::coll(Ck::Collection, (*e).clone()))
-                    .binding(&[&x])
+                E::tpl(
+                    &format!("{{}}->xselect({x} | {{}})"),
+                    vec![c, body],
+                    Ty::coll(Ck::Collection, (*e).clone()),
+                )
+                .binding(&[&x])
             }
             23 if k == Ck::Sequence => {
                 let l = self.ex(&Ty::List(Box::new(et.clone())), d);
@@ -1332,7 +1560,11 @@ pub fn statement(g: &mut Gen, label: &str, depth: u32) -> Stmt {
             let v = "$VAR";
             Stmt {
                 label: label.into(),
-                template: format!("var {v} : {}({}) := {{}}; {v} += {x}; log({q}, {v});", k.name(), t.src()),
+                template: format!(
+                    "var {v} : {}({}) := {{}}; {v} += {x}; log({q}, {v});",
+                    k.name(),
+                    t.src()
+                ),
                 expr: e,
             }
         }

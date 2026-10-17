@@ -20,9 +20,9 @@
 //!
 //! See `docs/simoxide-integration.md` for the integration plan.
 
+pub mod journal;
 mod raw_part;
 pub mod registry;
-pub mod journal;
 mod store;
 mod uuid;
 
