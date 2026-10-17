@@ -3,7 +3,6 @@
 
 use std::collections::BTreeMap;
 use std::fmt::{self, Write as _};
-use std::io::Write as _;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
@@ -13,6 +12,7 @@ use crate::meascmp::MeasMode;
 use crate::modelgen::{self, FEATURE_NAMES, Features, GenConfig, xmi};
 use crate::sim::{RefSim, RngMode, RunOutput, RunRequest, SimError, Simulator, workspace_root};
 use crate::tape::Tape;
+use simoxide_oraclekit::results::write_maybe_gz;
 
 /// Fuzzing parameters.
 #[derive(Clone, Debug)]
@@ -134,20 +134,6 @@ fn feature_diff(f: &Features) -> Vec<String> {
         .filter(|n| f.get(n) != d.get(n))
         .map(|n| format!("{n}={}", f.get(n).unwrap()))
         .collect()
-}
-
-fn write_maybe_gz(path: &Path, text: &str) -> std::io::Result<()> {
-    if text.len() > 256 * 1024 {
-        let mut p = path.as_os_str().to_owned();
-        p.push(".gz");
-        let f = std::fs::File::create(PathBuf::from(p))?;
-        let mut enc = flate2::write::GzEncoder::new(f, flate2::Compression::default());
-        enc.write_all(text.as_bytes())?;
-        enc.finish()?;
-        Ok(())
-    } else {
-        std::fs::write(path, text)
-    }
 }
 
 /// Saves a model with its reference outputs as a corpus entry `<out>/<model name>/` (model

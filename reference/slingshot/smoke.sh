@@ -39,13 +39,9 @@ declare -A SIMT=(
 MODELS=${MODELS:-"spd_minimal spd_scale_in x_ss_minimal x_ss_minimalexample x_ss_minimalexample_open_ps x_ss_delay x_espresso x_ss_mediastore x_sl_mediastore"}
 FILES="trace.jsonl tape.jsonl spd.jsonl measurements.csv"
 
-same() { # dirA dirB files... -> "yes" or the first differing file
-  local a=$1 b=$2; shift 2
-  for f in "$@"; do
-    [ -f "$a/$f" ] || continue
-    cmp -s "$a/$f" "$b/$f" || { echo "no($f)"; return; }
-  done
-  echo yes
+same() { # dirA dirB files... -> "yes" or "no(<first differing file>)"
+  local d; d=$(oraclekit_first_diff "$@")
+  if [ -z "$d" ]; then echo yes; else echo "no($d)"; fi
 }
 field() { python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print(eval(sys.argv[2]))" "$@" 2>/dev/null || echo "?"; }
 median() { sort -n | awk '{a[NR]=$1} END {if (NR==0) print "?"; else print a[int((NR+1)/2)]}'; }

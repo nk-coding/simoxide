@@ -72,7 +72,8 @@ defaults of the optional arguments are absolute paths on the development machine
 elsewhere.
 
 Java 21 (`/usr/bin/java`) runs the reference runner and the oracles. The `det` runner also needs
-the Slingshot seed agent (`reference/slingshot/seed-agent.sh` at the repository root).
+the seed agent of the Slingshot runner's `det` mode, which `simoxide-oraclekit` builds on demand
+(`reference/oraclekit/seed-agent.sh` at the repository root, into `reference/oraclekit/build/`).
 
 ## Test gates
 
@@ -107,6 +108,7 @@ change of the cases or of the runner:
 ```sh
 cargo qvto conform record --suite all          # 5 Java runs per case; marks unstable outputs
 cargo qvto conform record --suite all --det    # the det runner's fixtures (ordered mode)
+cargo qvto conform record --suite all --check  # record again, compare with the committed fixtures (outputs marked unstable excepted); writes nothing
 cargo qvto conform java --suite eclipse --out DIR --save-xmi   # one Java run, full results
 ```
 

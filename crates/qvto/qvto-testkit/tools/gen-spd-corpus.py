@@ -663,9 +663,10 @@ def write_cfg(cid, state, cfg):
 # --------------------------------------------------------------------- chained states (Java)
 
 def run_java(cases_file, out):
-    agent = os.path.abspath("../../reference/slingshot/build/seed-agent.jar")
+    # the shared seed agent (simoxide-oraclekit `java::seed_agent`'s default jar)
+    agent = os.path.abspath("../../reference/oraclekit/build/seed-agent.jar")
     if not os.path.isfile(agent):
-        subprocess.run(["../../reference/slingshot/seed-agent.sh"], check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["../../reference/oraclekit/seed-agent.sh"], check=True, stdout=subprocess.DEVNULL)
     env = dict(os.environ, JVM_OPTS=f"-javaagent:{agent}=ordered,qvto", XMX="-Xmx2g")
     shutil.rmtree(out, ignore_errors=True)
     r = subprocess.run(["reference/runner/qvto-run", "--batch", cases_file, "--out", out, "--base", ".",

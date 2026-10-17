@@ -11,6 +11,7 @@ members = [
     "crates/foundation/simoxide-jcompat-exact",
     "crates/simoxide-cli",
     "crates/simoxide-model",
+    "crates/simoxide-oraclekit",
     "crates/simoxide-random",
     "crates/simoxide-reconf",
     "crates/simoxide-sched",
@@ -47,6 +48,8 @@ simoxide-jcompat = { path = "crates/foundation/simoxide-jcompat", version = "0.1
 # no licence granted, never published (its LICENSE-NOTICE): only behind opt-in features
 simoxide-jcompat-exact = { path = "crates/foundation/simoxide-jcompat-exact" }
 simoxide-model = { path = "crates/simoxide-model", version = "0.1.0" }
+# the reference harnesses' shared driver (test infrastructure, `publish = false`)
+simoxide-oraclekit = { path = "crates/simoxide-oraclekit" }
 simoxide-random = { path = "crates/simoxide-random", version = "0.1.0", default-features = false }
 simoxide-sched = { path = "crates/simoxide-sched", version = "0.1.0" }
 simoxide-sim = { path = "crates/simoxide-sim", version = "0.1.0", default-features = false }

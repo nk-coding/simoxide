@@ -12,3 +12,5 @@ for d in "${SLINGSHOT_INSTALL:-}" "$H/install/sl-install" \
   fi
 done
 JAVA=${JAVA:-java}
+# the harnesses' shared shell helpers (JVM launch, run limits, result comparison)
+source "$H/../oraclekit/lib.sh"

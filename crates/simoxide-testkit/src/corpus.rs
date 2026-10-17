@@ -19,7 +19,6 @@
 //! `TESTKIT_DUMP=dir` writes the actual outputs of failing cases.
 
 use std::fmt::{self, Write as _};
-use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
@@ -37,20 +36,7 @@ pub fn corpus_dir() -> PathBuf {
 }
 
 /// Reads `path`, or `path.gz` transparently. `Ok(None)` if neither exists.
-pub fn read_maybe_gz(path: &Path) -> std::io::Result<Option<String>> {
-    if path.is_file() {
-        return std::fs::read_to_string(path).map(Some);
-    }
-    let mut gz = path.as_os_str().to_owned();
-    gz.push(".gz");
-    let gz = PathBuf::from(gz);
-    if gz.is_file() {
-        let mut s = String::new();
-        flate2::read::GzDecoder::new(std::fs::File::open(gz)?).read_to_string(&mut s)?;
-        return Ok(Some(s));
-    }
-    Ok(None)
-}
+pub use simoxide_oraclekit::results::read_maybe_gz;
 
 /// A corpus entry.
 #[derive(Clone, Debug)]

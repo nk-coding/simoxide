@@ -283,7 +283,7 @@ order): 13 of 13; its unit test runs it with `cargo test-qvto`.
 The Slingshot reference runner's `det` mode makes QVTo's and OCL's `HashSet`/`HashMap`
 `LinkedHashSet`/`LinkedHashMap` (its seed agent, an ASM rewrite at class-load time). `qvto
 conform record --det` and `qvto conform java --det` run the QVTo Java runner with the same agent
-(`-javaagent:seed-agent.jar=ordered,qvto`; `reference/slingshot/seed-agent.sh` builds it,
+(`-javaagent:seed-agent.jar=ordered,qvto`; `reference/oraclekit/seed-agent.sh` builds it,
 `QVTO_DET_AGENT` names another jar) and write `fixtures/java-<suite>-det.txt` and the cache
 `target/qvto-testkit/java-det/<suite>`. `--det` makes the scoreboard compare with those fixtures;
 `--engine qvto-ordered` implies it. Results: every case of every suite equal, 6 of them with

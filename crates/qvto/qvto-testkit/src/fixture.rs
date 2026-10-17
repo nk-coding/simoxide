@@ -15,6 +15,7 @@
 //!
 //! Each content is followed by a newline that is not part of it.
 
+use simoxide_oraclekit::results::{self, CaseFiles, Files};
 use std::collections::BTreeMap;
 use std::path::Path;
 
@@ -42,7 +43,13 @@ pub struct Problem {
 #[derive(Clone, Debug, Default)]
 pub struct JavaResult {
     pub id: String,
-    pub files: BTreeMap<String, String>,
+    pub files: Files,
+}
+
+impl CaseFiles for JavaResult {
+    fn files(&self) -> &Files {
+        &self.files
+    }
 }
 
 impl JavaResult {
@@ -137,27 +144,14 @@ fn unescape(s: &str) -> String {
     out
 }
 
-/// Reads the result directory of a batch run (`<dir>/<id>/...`).
+/// Reads the result directory of a batch run (`<dir>/<id>/...`; [`simoxide_oraclekit::results::read_dir`]).
 pub fn read_result_dir(dir: &Path) -> std::io::Result<BTreeMap<String, JavaResult>> {
-    let mut out = BTreeMap::new();
-    for e in std::fs::read_dir(dir)? {
-        let p = e?.path();
-        if !p.join("result.txt").is_file() {
-            continue;
-        }
-        let id = p.file_name().unwrap().to_string_lossy().to_string();
-        let mut r = JavaResult {
-            id: id.clone(),
-            files: BTreeMap::new(),
-        };
-        for f in FIXTURE_FILES.iter().chain(["idtape.tsv"].iter()) {
-            if let Ok(t) = std::fs::read_to_string(p.join(f)) {
-                r.files.insert(f.to_string(), t);
-            }
-        }
-        out.insert(id, r);
-    }
-    Ok(out)
+    let mut names = FIXTURE_FILES.to_vec();
+    names.push("idtape.tsv");
+    Ok(results::read_dir(dir, "result.txt", &names)?
+        .into_iter()
+        .map(|(id, files)| (id.clone(), JavaResult { id, files }))
+        .collect())
 }
 
 const HEADER: &str = "qvto-testkit java fixture 1\n";

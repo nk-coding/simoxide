@@ -115,6 +115,9 @@ See [Testing](../correctness/testing.md) and [Test kit](../development/testkit.m
 | Crate | Feature | Effect |
 |---|---|---|
 | `simoxide-cli` | `fast` (default) | include the fast mode; `--no-default-features` builds an exact-only binary |
+| `simoxide-cli` (and `simoxide-sim`, `-spd`, `-reconf`, `-testkit`) | `exact` (off) | the SimuLizar-exact mode (`--mode exact`, Java's `HashMap` order through `simoxide-jcompat-exact`); no licence granted, binaries built with it must not be distributed (`LICENSES`, sections 4 and 7) |
+| `simoxide-cli` (and `simoxide-random`, `-stoex`, `-sim`) | `hotspot-math` (off) | HotSpot's `Math.log`/`exp` bit for bit (`simoxide-hotspot-math`, GPL-2.0-only; not distributable); with `exact`, the local exact build (`cargo build-exact`) |
+| `qvto-cli` (and `qvto`, `qvto-runtime`, `-vm`, `-testkit`) | `compat` (off) | QVTo's compat mode (Eclipse's collection orders and identity hashes; `simoxide-jcompat-exact`, not distributable); fast and ordered mode are in every build ([QVTo licensing](../qvto/licensing.md)) |
 | `simoxide-cli` | `profile` | `--profile` on `bench` and `load-bench` |
 | `simoxide-cli` | `mimalloc` | mimalloc as the global allocator |
 | `simoxide-cli` | `reconfiguration` | `--rules`: SimuLizar's reconfiguration rules (`simoxide-reconf` and the QVTo engine) |

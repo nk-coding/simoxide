@@ -733,7 +733,8 @@ The N3a spike corrected and extended this section from the code and real snapsho
   - `spd.jsonl`: per policy evaluation, each filter's result. The filter chain entries are replaced
     in place by recording proxies, through the bus's interceptors. Also the adjustments with model
     summaries before and after, and the QVTo log.
-- `src/seed-agent`: a Java agent that does three things:
+- `src/seed-agent` (since M8 `reference/oraclekit/seed-agent`, shared with refsim and the QVTo
+  runner): a Java agent that does three things:
   - seeds `Math.random()` (a reseedable `java.util.Random` subclass);
   - seeds UUIDs (a seedable `SecureRandom` provider);
   - in `det` mode, rewrites hash-ordered collections to insertion order (ASM, at class-load time:
@@ -1922,7 +1923,7 @@ on a run"):
   for configuration; `RunOptions::id_source` optional); `qvto_runtime::OrderedEnv` for
   runtime-level use; `qvto run --ordered`, `qvto conform --engine qvto-ordered`, `qvto bench
   --modes ordered`.
-- **`det` Java runner.** `reference/slingshot/seed-agent.sh` builds the seed agent alone;
+- **`det` Java runner.** `reference/oraclekit/seed-agent.sh` builds the seed agent alone;
   `qvto conform record --det` runs the QVTo Java runner with `-javaagent:seed-agent.jar=ordered,qvto`
   (fixtures `java-<suite>-det.txt`, cache `target/qvto-testkit/java-det`).
 - **Exit met.** Ordered mode against the `det` runner: all 589 cases (Eclipse 494, corpus 24,

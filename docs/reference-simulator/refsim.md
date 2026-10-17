@@ -56,10 +56,15 @@ P4 to P7), so every batch run equals a fresh-JVM run.
 | `REFSIM_ORDERING=stock` | without the ordering agent of patch P10 (QVTo's and OCL's sets in Java identity-hash order) |
 | `REFSIM_VERBOSE=1` | show SimuLizar and DESMO-J output |
 | `REFSIM_LOG=INFO` | log4j level |
-| `JAVA`, `JVM_OPTS`, `PALLADIO_PLUGINS` | JVM and product location |
+| `JAVA`, `JVM_OPTS`, `PALLADIO_PLUGINS` | JVM and product location (`JVM_OPTS` default `-Xmx2g -XX:+UseSerialGC`) |
+| `ORACLE_NICE` | niceness of the JVM (default 19; `reference/oraclekit/lib.sh`, shared with the other reference harnesses) |
 
 SimuLizar uses one Java thread per simulated user. Do not run refsim under `ulimit -v`: thread
-creation then fails, and SimuLizar silently ends the run early. Cap the heap instead.
+creation then fails, and SimuLizar silently ends the run early. Cap the heap instead. If an
+address-space cap is needed (`prlimit --as=10000000000`), set `MALLOC_ARENA_MAX=2` as well: glibc
+reserves 64 MB of address space per thread arena, and with it the whole corpus runs under a
+10 GB cap (`regen-expected.sh --check`: 66 of 66). `RefSim` reports a batch whose standard error
+shows a failed thread creation as failed.
 
 ## Layout
 

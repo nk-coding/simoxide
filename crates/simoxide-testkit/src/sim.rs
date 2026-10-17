@@ -2,13 +2,14 @@
 //! ([`RefSim`], `reference/refsim batch` in one warm JVM) and adapters.
 
 use std::fmt;
-use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::mpsc;
 use std::time::{Duration, Instant};
+
+use simoxide_oraclekit::batch::{self, Deadlines, Stderr};
+use simoxide_oraclekit::java;
+use simoxide_oraclekit::scratch::Scratch;
 
 use crate::runcfg::RunConfig;
 use crate::tape::Tape;
@@ -187,8 +188,6 @@ pub struct RefSim {
     pub extra_args: Vec<String>,
 }
 
-static STAGE: AtomicU64 = AtomicU64::new(0);
-
 impl Default for RefSim {
     fn default() -> Self {
         RefSim {
@@ -236,30 +235,10 @@ pub fn stage_model(r: &RunRequest, d: &Path) -> std::io::Result<()> {
     std::fs::write(d.join("run.json"), r.config.to_json())
 }
 
-/// The stack trace printed for a failed batch model (its first line equals the status text):
-/// the exception line, every `Caused by:` line and the first frames below each.
+/// The stack trace printed for a failed batch model (its first line equals the status text
+/// without `ERROR `): [`java::stack_excerpt`].
 pub fn stack_excerpt(stderr: &str, status: &str) -> String {
-    let head = status.strip_prefix("ERROR ").unwrap_or(status);
-    let lines: Vec<&str> = stderr.lines().collect();
-    let Some(start) = lines.iter().position(|l| *l == head) else {
-        return String::new();
-    };
-    let mut out = vec![lines[start].to_string()];
-    let mut frames = 0;
-    for l in &lines[start + 1..] {
-        let t = l.trim_start();
-        if !(l.starts_with(char::is_whitespace) || t.starts_with("Caused by:")) {
-            break;
-        }
-        if t.starts_with("Caused by:") {
-            out.push(t.to_string());
-            frames = 0;
-        } else if t.starts_with("at ") && frames < 3 {
-            out.push(format!("    {t}"));
-            frames += 1;
-        }
-    }
-    out.join("\n")
+    java::stack_excerpt(stderr, status.strip_prefix("ERROR ").unwrap_or(status))
 }
 
 #[derive(Debug)]
@@ -291,13 +270,9 @@ impl RefSim {
         Self::default()
     }
 
-    fn stage(&self, reqs: &[&RunRequest]) -> Result<PathBuf, SimError> {
-        let id = STAGE.fetch_add(1, Ordering::Relaxed);
-        let root = self
-            .work_dir
-            .join(format!("b{}-{}", std::process::id(), id));
+    fn stage(&self, reqs: &[&RunRequest]) -> Result<Scratch, SimError> {
         let io = |e: std::io::Error| SimError::Io(e.to_string());
-        let _ = std::fs::remove_dir_all(&root);
+        let root = Scratch::new(&self.work_dir, "b", self.keep).map_err(io)?;
         for r in reqs {
             stage_model(r, &root.join("in").join(&r.name)).map_err(io)?;
         }
@@ -314,7 +289,6 @@ impl RefSim {
             Err(e) => return reqs.iter().map(|_| Some(Err(e.clone()))).collect(),
         };
         let out_dir = root.join("out");
-        let err_path = root.join("stderr.log");
         let trace = reqs.iter().any(|r| r.trace);
         let mut cmd = Command::new(&self.refsim);
         cmd.arg("batch")
@@ -328,8 +302,17 @@ impl RefSim {
         for (k, v) in &self.env {
             cmd.env(k, v);
         }
-        let stderr = match std::fs::File::create(&err_path) {
-            Ok(f) => f,
+        let deadlines = Deadlines {
+            startup: self.startup_timeout,
+            per_result: Some(self.model_timeout),
+        };
+        let run = match batch::run(
+            &mut cmd,
+            Stderr::File(root.join("stderr.log")),
+            deadlines,
+            |l| parse_batch_line(l).is_some(),
+        ) {
+            Ok(r) => r,
             Err(e) => {
                 return reqs
                     .iter()
@@ -337,59 +320,9 @@ impl RefSim {
                     .collect();
             }
         };
-        cmd.stdout(Stdio::piped())
-            .stderr(stderr)
-            .stdin(Stdio::null());
-        let mut child = match cmd.spawn() {
-            Ok(c) => c,
-            Err(e) => {
-                return reqs
-                    .iter()
-                    .map(|_| Some(Err(SimError::Io(format!("{}: {e}", self.refsim.display())))))
-                    .collect();
-            }
-        };
-        let stdout = child.stdout.take().unwrap();
-        let (tx, rx) = mpsc::channel::<String>();
-        let reader = std::thread::spawn(move || {
-            for l in BufReader::new(stdout).lines().map_while(Result::ok) {
-                if tx.send(l).is_err() {
-                    break;
-                }
-            }
-        });
-        let mut last = Instant::now();
-        let mut first = true;
-        let mut timed_out = false;
-        let mut lines: Vec<(Line, Duration)> = Vec::new();
-        loop {
-            let limit = if first {
-                self.startup_timeout + self.model_timeout
-            } else {
-                self.model_timeout
-            };
-            let left = limit.saturating_sub(last.elapsed());
-            match rx.recv_timeout(left.max(Duration::from_millis(1))) {
-                Ok(l) => {
-                    if let Some(p) = parse_batch_line(&l) {
-                        first = false;
-                        lines.push((p, last.elapsed()));
-                        last = Instant::now();
-                    }
-                }
-                Err(mpsc::RecvTimeoutError::Timeout) => {
-                    timed_out = true;
-                    let _ = child.kill();
-                    break;
-                }
-                Err(mpsc::RecvTimeoutError::Disconnected) => break,
-            }
-        }
-        let _ = child.wait();
-        let _ = reader.join();
         let log_tail = || {
-            let s = std::fs::read_to_string(&err_path).unwrap_or_default();
-            let lines: Vec<&str> = s
+            let lines: Vec<&str> = run
+                .stderr
                 .lines()
                 .filter(|l| {
                     !l.starts_with("[refsim] bootstrap") && !l.starts_with("[refsim] warm-up")
@@ -400,15 +333,12 @@ impl RefSim {
         // SimuLizar runs one Java thread per simulated process: when the JVM cannot create a
         // thread (process or address-space limits, memory), the simulation may end early and
         // still report success. Such a batch's results cannot be trusted.
-        let jvm_trouble = std::fs::read_to_string(&err_path)
-            .map(|s| {
-                s.contains("pthread_create failed")
-                    || s.contains("unable to create native thread")
-                    || s.contains("OutOfMemoryError")
-            })
-            .unwrap_or(false);
+        let jvm_trouble = java::jvm_trouble(&run.stderr);
         let mut reached = 0;
-        for (line, wall) in &lines {
+        for l in run.results() {
+            let Some(line) = parse_batch_line(&l.text) else {
+                continue;
+            };
             let Some(i) = reqs.iter().position(|r| r.name == line.name) else {
                 continue;
             };
@@ -425,21 +355,20 @@ impl RefSim {
                         trace: if trace { rd("trace.jsonl").ok() } else { None },
                         tape: if trace { rd("tape.jsonl").ok() } else { None },
                         measurements: m,
-                        wall: line.ms.map(Duration::from_millis).unwrap_or(*wall),
+                        wall: line.ms.map(Duration::from_millis).unwrap_or(l.wait),
                     }),
                     Err(e) => Err(SimError::Io(e.to_string())),
                 }
             } else {
-                let log = std::fs::read_to_string(&err_path).unwrap_or_default();
                 Err(SimError::Failed(format!(
                     "{}\n{}",
                     line.status,
-                    stack_excerpt(&log, &line.status)
+                    stack_excerpt(&run.stderr, &line.status)
                 )))
             };
             res[i] = Some(r);
         }
-        if timed_out {
+        if run.timed_out {
             // the first request without a result line is the one that hung
             if let Some(i) = (0..reqs.len()).find(|&i| res[i].is_none()) {
                 res[i] = Some(Err(SimError::Timeout(self.model_timeout)));
@@ -453,9 +382,6 @@ impl RefSim {
                     ))));
                 }
             }
-        }
-        if !self.keep {
-            let _ = std::fs::remove_dir_all(&root);
         }
         res
     }
@@ -553,11 +479,8 @@ impl Simulator for CmdSim {
         &self.name
     }
     fn run(&mut self, req: &RunRequest) -> Result<RunOutput, SimError> {
-        let id = STAGE.fetch_add(1, Ordering::Relaxed);
-        let d = self
-            .work_dir
-            .join(format!("c{}-{}", std::process::id(), id));
         let io = |e: std::io::Error| SimError::Io(e.to_string());
+        let d = Scratch::new(&self.work_dir, "c", false).map_err(io)?;
         let md = d.join(&req.name);
         stage_model(req, &md).map_err(io)?;
         let run_json = md.join("run.json");
@@ -611,14 +534,14 @@ impl Simulator for CmdSim {
             if t0.elapsed() > self.timeout {
                 let _ = child.kill();
                 let _ = child.wait();
-                let _ = std::fs::remove_dir_all(&d);
                 return Err(SimError::Timeout(self.timeout));
             }
             std::thread::sleep(Duration::from_millis(5));
         };
         let wall = t0.elapsed();
         let err = errs.join().unwrap_or_default();
-        let res = if status.success() {
+        // (the scratch directory `d` is removed after the outputs are read)
+        if status.success() {
             match std::fs::read_to_string(&meas) {
                 Ok(m) => Ok(RunOutput {
                     trace: std::fs::read_to_string(&trace).ok(),
@@ -640,9 +563,7 @@ impl Simulator for CmdSim {
                 "exit {status}\n{}",
                 tail[tail.len().saturating_sub(20)..].join("\n")
             )))
-        };
-        let _ = std::fs::remove_dir_all(&d);
-        res
+        }
     }
 }
 

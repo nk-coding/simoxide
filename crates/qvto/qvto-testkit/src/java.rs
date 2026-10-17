@@ -4,6 +4,8 @@
 use crate::case::Case;
 use crate::engine::{CaseEnv, Engine, Outcome, Outputs, Severity, Status};
 use crate::fixture::{self, JavaResult};
+use simoxide_oraclekit::batch::{self, Deadlines, Stderr};
+use simoxide_oraclekit::{java, results};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -24,46 +26,32 @@ pub struct JavaRun {
     pub jvm_opts: Option<String>,
     /// Per-case deadline in seconds (the runner's default: 120).
     pub timeout: Option<u64>,
-    /// The `det` runner: the Slingshot reference runner's seed agent with its ordering rule
-    /// (`-javaagent:seed-agent.jar=ordered,qvto`, [`det_agent`]), so that QVTo's and OCL's
-    /// `HashSet`/`HashMap` iterate in insertion order.
+    /// The `det` runner: the shared seed agent with its ordering rule
+    /// (`-javaagent:seed-agent.jar=ordered,qvto`, [`det_agent`]; the Slingshot runner's `det`
+    /// mode), so that QVTo's and OCL's `HashSet`/`HashMap` iterate in insertion order.
     pub det: bool,
 }
 
-/// The seed agent of the Slingshot reference runner (`reference/slingshot/seed-agent.sh`,
-/// relative to the repository root, two levels above the QVTo root), built if missing;
-/// `QVTO_DET_AGENT` names another jar.
+/// The seed agent with its ordering rule (the jar of `simoxide_oraclekit::java::seed_agent`,
+/// built from `reference/oraclekit/seed-agent` at the repository root, two levels above the
+/// QVTo root, if missing); `QVTO_DET_AGENT` names another jar.
 pub fn det_agent(base: &Path) -> Result<PathBuf, String> {
     if let Some(p) = std::env::var_os("QVTO_DET_AGENT") {
         return Ok(PathBuf::from(p));
     }
-    let dir = base.join("../../reference/slingshot");
-    let jar = dir.join("build/seed-agent.jar");
-    if !jar.is_file() {
-        let st = Command::new(dir.join("seed-agent.sh"))
-            .stdout(std::process::Stdio::null())
-            .status()
-            .map_err(|e| format!("reference/slingshot/seed-agent.sh: {e}"))?;
-        if !st.success() || !jar.is_file() {
-            return Err("reference/slingshot/seed-agent.sh failed".into());
-        }
-    }
-    Ok(jar)
+    java::seed_agent(&qvto_paths::workspace_root(base))
 }
 
 impl JavaRun {
-    /// Runs `reference/runner/qvto-run --batch` (builds the runner first if needed). Returns the
-    /// runner's console output.
+    /// Runs `reference/runner/qvto-run --batch` (builds the runner first if needed) as an
+    /// oraclekit batch process. Returns the runner's console output (standard output, then
+    /// standard error).
     pub fn run(&self) -> Result<String, String> {
         let runner = self.base.join("reference/runner");
-        if !runner.join("build/classpath.txt").is_file() {
-            let st = Command::new(runner.join("build.sh"))
-                .status()
-                .map_err(|e| format!("build.sh: {e}"))?;
-            if !st.success() {
-                return Err("reference/runner/build.sh failed".into());
-            }
-        }
+        java::ensure_built(
+            &runner.join("build.sh"),
+            &[&runner.join("build/classpath.txt")],
+        )?;
         let mut cmd = Command::new(runner.join("qvto-run"));
         cmd.current_dir(&self.base)
             .arg("--batch")
@@ -91,16 +79,17 @@ impl JavaRun {
         let mut opts: Vec<String> = Vec::new();
         if self.det {
             let jar = det_agent(&self.base)?;
-            opts.push(format!("-javaagent:{}=ordered,qvto", jar.display()));
+            opts.push(java::agent_option(&jar, java::ORDERED_QVTO));
         }
         opts.extend(self.jvm_opts.clone());
         if !opts.is_empty() {
             cmd.env("JVM_OPTS", opts.join(" "));
         }
-        let out = cmd.output().map_err(|e| format!("qvto-run: {e}"))?;
-        let text = String::from_utf8_lossy(&out.stdout).to_string()
-            + &String::from_utf8_lossy(&out.stderr);
-        if !out.status.success() {
+        // the runner enforces its own per-case deadline (`--timeout`)
+        let out = batch::run(&mut cmd, Stderr::Capture, Deadlines::NONE, |_| true)
+            .map_err(|e| format!("qvto-run: {e}"))?;
+        let text = out.stdout() + &out.stderr;
+        if !out.success() {
             return Err(format!("qvto-run failed:\n{text}"));
         }
         Ok(text)
@@ -112,34 +101,83 @@ pub fn unstable_outputs(
     first: &BTreeMap<String, JavaResult>,
     second: &BTreeMap<String, JavaResult>,
 ) -> BTreeMap<String, Vec<&'static str>> {
-    let mut out = BTreeMap::new();
-    for (id, r) in first {
-        let Some(s) = second.get(id) else { continue };
-        let mut u = Vec::new();
-        for (f, name) in [
-            ("out.jsonl", "dump"),
-            ("log.txt", "log"),
-            ("stack.txt", "stack"),
-        ] {
-            if r.file(f) != s.file(f) {
-                u.push(name);
+    let label = |f: &str| match f {
+        "out.jsonl" => "dump",
+        "log.txt" => "log",
+        _ => "stack",
+    };
+    results::differing_files(first, second, &["out.jsonl", "log.txt", "stack.txt"])
+        .into_iter()
+        .map(|(id, fs)| (id, fs.into_iter().map(label).collect()))
+        .collect()
+}
+
+/// The outputs of each result that a fixture check compares: without the files the result marks
+/// unstable (`dump`: `out.jsonl`, `log`: `log.txt`, `stack`: `stack.txt`) and, when the log is
+/// unstable, without the execution diagnostic's lines in `diag.txt` (`exec`, they repeat the log).
+pub fn stable_part(results: &BTreeMap<String, JavaResult>) -> results::ResultSet {
+    results
+        .iter()
+        .map(|(id, r)| {
+            let unstable = r.unstable();
+            let mut files = r.files.clone();
+            for (label, f) in [
+                ("dump", "out.jsonl"),
+                ("log", "log.txt"),
+                ("stack", "stack.txt"),
+            ] {
+                if unstable.contains(&label) {
+                    files.remove(f);
+                }
             }
-        }
-        if !u.is_empty() {
-            out.insert(id.clone(), u);
-        }
-    }
-    out
+            if unstable.contains(&"log")
+                && let Some(d) = files.get_mut("diag.txt")
+            {
+                *d = d
+                    .lines()
+                    .filter(|l| !l.starts_with("exec\t"))
+                    .map(|l| format!("{l}\n"))
+                    .collect();
+            }
+            (id.clone(), files)
+        })
+        .collect()
+}
+
+/// What [`record`] does with the new bundle.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Write {
+    /// Write it (the fixture file is replaced).
+    Write,
+    /// Compare it with the committed fixture and write nothing.
+    Check,
+}
+
+/// The result of [`record`].
+#[derive(Debug)]
+pub struct Recorded {
+    /// The runner's console output and a summary line.
+    pub log: String,
+    /// With [`Write::Check`]: how the new bundle differs from the committed one in its stable
+    /// outputs ([`stable_part`]; empty: unchanged).
+    pub differences: Vec<results::Difference>,
 }
 
 /// Records Java results as a fixture: runs the batch `runs` times (the extra runs without tape,
 /// cycling through constant identity hashes `-XX:hashCode=2`, sequential ones `-XX:hashCode=3`
 /// and the default, so that identity-hash-dependent orders change), marks the outputs that differ in any
-/// rerun as unstable, writes the bundle. The first run's
+/// rerun as unstable, writes the bundle (or, with [`Write::Check`], compares it with the
+/// committed one). The first run's
 /// directory stays as the cache (with tapes and XMI).
 /// With `merge`, the recorded cases replace theirs in an existing bundle (a recording of some
 /// cases, `--only`/`--prefix`).
-pub fn record(run: &JavaRun, bundle: &Path, runs: usize, merge: bool) -> Result<String, String> {
+pub fn record(
+    run: &JavaRun,
+    bundle: &Path,
+    runs: usize,
+    merge: bool,
+    write: Write,
+) -> Result<Recorded, String> {
     let mut log = run.run()?;
     let mut a = fixture::read_result_dir(&run.out).map_err(|e| e.to_string())?;
     let mut flagged = BTreeMap::new();
@@ -175,25 +213,65 @@ pub fn record(run: &JavaRun, bundle: &Path, runs: usize, merge: bool) -> Result<
                 .push_str(&format!("unstable\t{}\n", u.join(",")));
         }
     }
-    if let Some(d) = bundle.parent() {
-        std::fs::create_dir_all(d).map_err(|e| e.to_string())?;
-    }
     let n_recorded = a.len();
-    if merge && bundle.is_file() {
+    let old = std::fs::read_to_string(bundle).ok();
+    if merge && let Some(text) = &old {
         // a partial recording replaces its cases in the existing bundle
-        let text = std::fs::read_to_string(bundle).map_err(|e| e.to_string())?;
-        let mut all = fixture::read_bundle(&text)?;
+        let mut all = fixture::read_bundle(text)?;
         all.extend(std::mem::take(&mut a));
         a = all;
     }
-    std::fs::write(bundle, fixture::write_bundle(&a)).map_err(|e| e.to_string())?;
+    let text = fixture::write_bundle(&a);
+    let mut differences = Vec::new();
+    let mut unstable_skipped = 0;
+    let what = match write {
+        Write::Write => {
+            if let Some(d) = bundle.parent() {
+                std::fs::create_dir_all(d).map_err(|e| e.to_string())?;
+            }
+            std::fs::write(bundle, &text).map_err(|e| e.to_string())?;
+            "recorded in"
+        }
+        Write::Check => {
+            if old.as_deref() != Some(text.as_str()) {
+                // both as bundles (the files and lines a bundle keeps), without what each marks
+                // unstable: that is one run's identity hashes or timings
+                let committed = match &old {
+                    Some(t) => fixture::read_bundle(t)?,
+                    None => BTreeMap::new(),
+                };
+                let new = fixture::read_bundle(&text)?;
+                let all = results::differences(&committed, &new);
+                differences = results::differences(&stable_part(&committed), &stable_part(&new));
+                unstable_skipped = all.len() - differences.len();
+                if all.is_empty() {
+                    // same cases and files, different bytes (an older bundle layout)
+                    differences.push(results::Difference::File {
+                        case: "-".into(),
+                        file: "bundle text".into(),
+                    });
+                }
+            }
+            "checked against"
+        }
+    };
     log.push_str(&format!(
-        "{} cases recorded in {} ({runs} runs), {} with unstable outputs\n",
+        "{} cases {what} {} ({runs} runs), {} with unstable outputs{}\n",
         n_recorded,
         bundle.display(),
-        flagged.len()
+        flagged.len(),
+        match write {
+            Write::Write => String::new(),
+            Write::Check if differences.is_empty() && unstable_skipped == 0 => {
+                ": fixture unchanged".into()
+            }
+            Write::Check if differences.is_empty() => format!(
+                ": fixture unchanged in its stable outputs ({unstable_skipped} unstable outputs differ, not compared)"
+            ),
+            Write::Check => format!(": {} differences", differences.len()),
+        }
     ));
-    Ok(log)
+    Ok(Recorded { log, differences })
 }
 
 /// An engine that replays the Java runner's results (a result directory written with

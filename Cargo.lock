@@ -609,6 +609,7 @@ dependencies = [
  "qvto-vm",
  "simoxide-emf",
  "simoxide-emf-core",
+ "simoxide-oraclekit",
 ]
 
 [[package]]
@@ -656,6 +657,7 @@ dependencies = [
  "simoxide-emf",
  "simoxide-emf-core",
  "simoxide-jcompat-exact",
+ "simoxide-oraclekit",
 ]
 
 [[package]]
@@ -915,6 +917,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "simoxide-oraclekit"
+version = "0.1.0"
+dependencies = [
+ "flate2",
+]
+
+[[package]]
 name = "simoxide-random"
 version = "0.1.0"
 dependencies = [
@@ -1001,6 +1010,7 @@ dependencies = [
  "serde_json",
  "simoxide-jcompat",
  "simoxide-model",
+ "simoxide-oraclekit",
  "simoxide-random",
  "simoxide-sim",
 ]

@@ -39,7 +39,7 @@ reference/slingshot/run.sh [--stock] [--slot N] -model DIR -out DIR -simTime T [
 reference/slingshot/smoke.sh [OUT]      # smoke corpus: determinism and times -> results/smoke.csv
 ```
 
-`run.sh` starts one JVM (`nice -n 19`, `-Xmx2g`; `NICE`, `JVM_OPTS`, `JAVA` override) with the
+`run.sh` starts one JVM (`nice -n 19`, `-Xmx2g`; `NICE` or `ORACLE_NICE`, `JVM_OPTS`, `JAVA` override) with the
 Equinox launcher of the install and a private configuration area `build/osgi/<mode>-<slot>`.
 Slots are locked with `flock`, so concurrent runs never share an area.
 
@@ -102,8 +102,8 @@ classes with 227 sites. Without `qvto`, QVTo's `Set(ResourceContainer)` in
 and each link's connected containers by identity hash. `ORDERING=ordered ./run.sh` keeps QVTo
 unrewritten.
 
-qvto-rs reproduces the rule as its *ordered mode* (EPL, every build): `seed-agent.sh` builds the
-agent alone, and the QVTo Java runner with it is ordered mode's oracle on every QVTo test suite
+qvto-rs reproduces the rule as its *ordered mode* (EPL, every build): `../oraclekit/seed-agent.sh` builds
+the agent alone, and the QVTo Java runner with it is ordered mode's oracle on every QVTo test suite
 (`crates/qvto/qvto-testkit/README.md`, "The `det` Java runner"); `qvto spd-replay` replays the
 adjustments of this runner's `det` runs (`spd.jsonl`) in ordered mode and compares the model
 summaries: 13 of 13 equal.
@@ -271,7 +271,8 @@ Findings from the reference runs, for the Slingshot semantics (S1) and the SPD d
 | `src/stub` | `ProfilesLibrary` stub bundle |
 | `src/runner` | headless application, EDP2 → CSV, seeding |
 | `src/instrument` | behaviour extension: trace, tape, SPD log, keys and aliases |
-| `src/seed-agent` | Java agent: seedable `Math.random()` and UUIDs, ordering rule (ASM 9 from the install) |
+| `../oraclekit/seed-agent`, `seed-agent.sh` | Java agent (shared with refsim and the QVTo runner): seedable `Math.random()` and UUIDs, ordering rule; `seed-agent.sh` builds it into `build/` with the install's ASM 9 |
+| `../oraclekit/lib.sh` | shared shell helpers: the niced JVM launch, time and file-size limits, the comparison of `corpus-ss.sh --check`, `verify-det.sh`, `smoke.sh` |
 | `patches/<bundle>/{orig,src}` | upstream and patched sources of replaced classes |
 | `tools/mkconfig.py` | private Equinox configuration (bundles.info from the install, minus the old bench bundle, plus ours, patched jars) |
 | `models/` | SPD examples (provenance in `models/README.md`) |
