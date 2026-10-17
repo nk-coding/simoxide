@@ -191,6 +191,12 @@ pub enum Insn {
         a: Reg,
         b: Reg,
     },
+    /// Compat mode: `r` becomes a copy of the OCL collection in it (`createNewCollection(kind,
+    /// c)`, the copy constructor), as classic OCL's `coerceValue` copies a collection-typed
+    /// property on every read; fast mode and other values: no-op.
+    CopyColl {
+        r: Reg,
+    },
     /// `<>` likewise.
     NeNum {
         dst: Reg,

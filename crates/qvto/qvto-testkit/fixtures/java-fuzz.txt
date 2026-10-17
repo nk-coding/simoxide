@@ -1,4 +1,53 @@
 qvto-testkit java fixture 1
+@case fuzz_collcopy_interm
+@file result.txt 152
+id	fuzz_collcopy_interm
+load	WARNING
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 900
+o, data: [i14, i5, i0, i15, i7, i3, i1, i2, i4, i6, i8, i9, i10, i11, i12, i13, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44]
+b, data: [i13, i2, i15, i14, i5, i0, i7, i3, i1, i4, i6, i8, i9, i10, i11, i12, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44]
+c, data: [i14, i5, i0, i15, i7, i3, i1, i2, i4, i6, i8, i9, i10, i11, i12, i13, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44]
+d, data: [i13, i2, i15, i14, i5, i0, i7, i3, i1, i4, i6, i8, i9, i10, i11, i12, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44]
+
+@file diag.txt 307
+problem	warning	interm.qvto	6	215	8	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+load	0	WARNING	0	OK
+load	1	WARNING	0	No constructor defined, using implicit constructor (equal to empty inline instantiation)
+exec	1	OK	0	o
+exec	1	OK	0	b
+exec	1	OK	0	c
+exec	1	OK	0	d
+
+@case fuzz_collcopy_props
+@file result.txt 146
+id	fuzz_collcopy_props
+load	OK
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 675
+o, data: [n14, n5, n0, n15, n7, n3, n1, n2, n4, n6, n8, n9, n10, n11, n12, n13, n16, n17, n18, n19, n20, n21, n22, n23, n24, n25, n26, n27, n28, n29, n30, n31, n32, n33, n34, n35, n36, n37, n38, n39, n40, n41, n42, n43, n44]
+b, data: [n13, n2, n15, n14, n5, n0, n7, n3, n1, n4, n6, n8, n9, n10, n11, n12, n16, n17, n18, n19, n20, n21, n22, n23, n24, n25, n26, n27, n28, n29, n30, n31, n32, n33, n34, n35, n36, n37, n38, n39, n40, n41, n42, n43, n44]
+p, data: [n13, n2, n15, n14, n5, n0, n7, n3, n1, n4, n6, n8, n9, n10, n11, n12, n16, n17, n18, n19, n20, n21, n22, n23, n24, n25, n26, n27, n28, n29, n30, n31, n32, n33, n34, n35, n36, n37, n38, n39, n40, n41, n42, n43, n44]
+
+@file diag.txt 42
+exec	1	OK	0	o
+exec	1	OK	0	b
+exec	1	OK	0	p
+
 @case fuzz_floats
 @file result.txt 138
 id	fuzz_floats

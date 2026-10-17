@@ -562,6 +562,11 @@ impl<'a> Builder<'a> {
         self.next = m;
     }
 
+    /// Set, OrderedSet, Bag or Sequence (not `Collection`, `List`, `Dict`).
+    fn is_ocl_collection(&self, t: TypeId) -> bool {
+        matches!(self.types.get(t), Type::Collection(k, _) if *k != CollKind::Collection)
+    }
+
     fn local(&self, l: LocalId) -> Reg {
         l.0 as Reg
     }
@@ -788,6 +793,9 @@ impl<'a> Builder<'a> {
             }
             ExprKind::Global(g) => {
                 self.emit(Insn::LoadGlobal { dst, g: g.0 });
+                if self.is_ocl_collection(e.ty) {
+                    self.emit(Insn::CopyColl { r: dst });
+                }
             }
             ExprKind::ModuleProp(inst, g) => {
                 let m = self.mark();
@@ -811,6 +819,11 @@ impl<'a> Builder<'a> {
                 let m = self.mark();
                 let s = self.expr_reg(src)?;
                 self.get_prop(dst, s, *f)?;
+                // a single-valued feature of an OCL collection type (intermediate classes):
+                // `coerceValue` copies it on every read
+                if !self.ir.meta.feature(*f).is_many() && self.is_ocl_collection(e.ty) {
+                    self.emit(Insn::CopyColl { r: dst });
+                }
                 self.release(m);
             }
             ExprKind::TupleProp(src, name) => {
@@ -825,6 +838,9 @@ impl<'a> Builder<'a> {
                 let s = self.expr_reg(src)?;
                 let site = self.site(Site::Interm(*p))?;
                 self.emit(Insn::GetInterm { dst, obj: s, site });
+                if self.is_ocl_collection(e.ty) {
+                    self.emit(Insn::CopyColl { r: dst });
+                }
                 self.release(m);
             }
             ExprKind::Call(c) => self.call(e, c, dst)?,

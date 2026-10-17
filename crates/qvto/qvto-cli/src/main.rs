@@ -195,11 +195,15 @@ fn conform(args: &[String]) {
                     prefixes: o.prefixes.clone(),
                     tape: true,
                     save_xmi: true,
-                    jvm_opts: None,
+                    // the fuzz regressions run with constant identity hashes on both sides
+                    // (deterministic: no reruns needed to find unstable outputs)
+                    jvm_opts: (name == "fuzz")
+                        .then(|| "-XX:+UnlockExperimentalVMOptions -XX:hashCode=2".to_string()),
                     timeout: None,
                 };
                 let _ = std::fs::remove_dir_all(&run.out);
-                let r = record(&run, fixture, o.runs, partial);
+                let runs = if name == "fuzz" { 1 } else { o.runs };
+                let r = record(&run, fixture, runs, partial);
                 if partial && r.is_ok() {
                     if let Ok(d) = std::fs::read_dir(&run.out) {
                         for e in d.flatten() {
@@ -273,8 +277,14 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
         };
         let mut engine: Box<dyn Engine> = match o.engine.as_deref().unwrap_or("qvto") {
             "stub" => Box::new(StubEngine),
-            "qvto" => Box::new(engine::QvtoEngine::new(root, qvto_runtime::Mode::Compat)),
-            "qvto-fast" => Box::new(engine::QvtoEngine::new(root, qvto_runtime::Mode::Fast)),
+            e @ ("qvto" | "qvto-fast") => {
+                let mode = if e == "qvto" { qvto_runtime::Mode::Compat } else { qvto_runtime::Mode::Fast };
+                let mut q = engine::QvtoEngine::new(root, mode);
+                if name == "fuzz" {
+                    q.constant_identity = Some(1);
+                }
+                Box::new(q)
+            }
             e if e.starts_with("replay:") => {
                 let d = PathBuf::from(&e["replay:".len()..]).join(name);
                 Box::new(

@@ -747,6 +747,15 @@ where
                 Insn::LoadGlobal { dst, g } => {
                     w!(self, base, dst) = self.globals[g as usize].clone();
                 }
+                Insn::CopyColl { r } => {
+                    if self.opts.mode == qvto_runtime::Mode::Compat
+                        && let Value::Coll(c) = &r!(self, base, r)
+                    {
+                        let kind = c.kind();
+                        let v = std::mem::take(&mut w!(self, base, r));
+                        w!(self, base, r) = qvto_runtime::coll::ops::as_same(v, kind, &self.env);
+                    }
+                }
                 Insn::StoreGlobal { src, g } => {
                     self.globals[g as usize] = r!(self, base, src).clone();
                 }

@@ -1,0 +1,12 @@
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation props(in m : FZ);
+property all : Set(FZ::Node) = Set{};
+property bag : Bag(FZ::Node) = Bag{};
+main() {
+	all := m.objectsOfType(FZ::Node);
+	log('o', all->asSequence()->collect(name));
+	bag := m.objectsOfType(FZ::Node)->asBag();
+	log('b', bag->asSequence()->collect(name));
+	all += bag->any(true);
+	log('p', all->asSequence()->collect(name));
+}

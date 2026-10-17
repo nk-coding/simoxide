@@ -118,3 +118,25 @@ in floats.xmi
 mmfile ../fuzz.ecore
 note Float (EFloat) and Long (ELong) values: = with promotion, sortedBy keys by Java class, oclIsTypeOf/oclAsType Real
 end
+
+case fuzz_collcopy_interm
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/collcopy
+qvto interm.qvto
+in interm.xmi
+mmfile ../fuzz.ecore
+note collection-typed module properties, intermediate features and contextual properties are copied on every read (coerceValue): order of identity-hashed sets with colliding hashes
+end
+
+case fuzz_collcopy_props
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/collcopy
+qvto props.qvto
+in props.xmi
+mmfile ../fuzz.ecore
+note collection-typed module properties, intermediate features and contextual properties are copied on every read (coerceValue): order of identity-hashed sets with colliding hashes
+end

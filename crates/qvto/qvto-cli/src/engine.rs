@@ -273,6 +273,13 @@ fn run_case(
                     .any(|&op| p.ir.operations[op.index()].name == "main"));
         if !executable {
             o.load = Some(Severity::Error);
+            if m.kind == qvto_sema::ir::ModuleKind::Transformation && !case.compile_only() {
+                // `InternalTransformationExecutor.execute` returns the load diagnostic
+                o.severity = Some(Severity::Error);
+                o.code = 130;
+                o.message = format!("Transformation '{}' is has no entry point for execution", m.name);
+                return o;
+            }
         }
     }
     if case.compile_only() {
