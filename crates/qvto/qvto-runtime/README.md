@@ -30,13 +30,9 @@ assert_eq!(qvto_runtime::display::to_java_string(&v, &env), "[17, 1, 33, x]"); /
 | `src/strings.rs` | OCL and QVTo string operations on values |
 | `src/display.rs` | `toString` of values (Java's, `CollectionUtil.toString`, tuples, OCL `toString()`) |
 | `src/model.rs` | `Datum` ↔ `Value` |
-| `src/java/hash.rs` | `hashCode` of `String`, boxes; `HashMap.hash` spreading; `Double.compare` |
-| `src/java/hashmap.rs` | `JavaHashMap`: `java.util.HashMap` with Java's iteration order, including tree bins |
-| `src/java/fmt.rs` | `Double.toString`, `Float.toString` (JDK 19+), integers |
-| `src/java/parse.rs` | `Integer.parseInt`, `Long.parseLong`, `Double.valueOf` |
-| `src/java/chars.rs`, `src/java/chars_data.rs` | `Character` data, **generated** from the JDK (`tools/oracle/gen-chars.sh`) |
+| `src/java/` | re-exports of the foundation crates: `hash`, `fmt`, `parse`, `chars` from `simoxide-jcompat` (EPL: what the Java documentation specifies), `hashmap` (`JavaHashMap`, `java.util.HashMap` with Java's iteration order, tree bins) from `simoxide-jcompat-exact` (feature `compat`; no licence granted, see the repository's `LICENSES`) |
 | `src/java/string.rs` | `String` operations with UTF-16 indices, root-locale case mapping, `StringTokenizer` |
-| `tools/oracle/` | the Java oracle (`Oracle.java`, `OclEval.java`, `run.sh`) and the character-table generator |
+| `tools/oracle/` | the Java oracle (`Oracle.java`, `OclEval.java`, `run.sh`) and the character-table generator (writes `simoxide-jcompat`'s `chars_data.rs`) |
 
 ## Values
 

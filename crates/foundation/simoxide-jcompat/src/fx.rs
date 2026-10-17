@@ -1,5 +1,6 @@
-//! A fast, deterministic hasher for the engine's internal maps keyed by small integers (object
-//! handles, feature ids, identity keys): the multiply-rotate hash of rustc's `FxHasher`.
+//! A fast, deterministic hasher for internal maps keyed by small integers and short strings
+//! (object handles, feature ids, identity keys, IDs, URIs): the multiply-rotate hash of rustc's
+//! `FxHasher`.
 //! Not DoS-resistant, which does not matter for keys the engine makes itself; deterministic,
 //! which DESIGN §5.5 asks for anyway.
 
@@ -22,15 +23,19 @@ impl FxHasher {
 
 impl Hasher for FxHasher {
     #[inline]
-    fn write(&mut self, bytes: &[u8]) {
-        let (chunks, rest) = bytes.as_chunks::<8>();
-        for c in chunks {
-            self.add(u64::from_le_bytes(*c));
+    fn write(&mut self, mut b: &[u8]) {
+        // 8-byte words, then one 4-byte word, then single bytes (the loader's variant: the
+        // fastest on its ID and URI keys)
+        while b.len() >= 8 {
+            self.add(u64::from_le_bytes(b[..8].try_into().unwrap()));
+            b = &b[8..];
         }
-        if !rest.is_empty() {
-            let mut b = [0u8; 8];
-            b[..rest.len()].copy_from_slice(rest);
-            self.add(u64::from_le_bytes(b));
+        if b.len() >= 4 {
+            self.add(u32::from_le_bytes(b[..4].try_into().unwrap()) as u64);
+            b = &b[4..];
+        }
+        for &x in b {
+            self.add(x as u64);
         }
     }
     #[inline]
