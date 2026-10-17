@@ -147,6 +147,42 @@ impl ResumeChanges {
     }
 }
 
+impl ResumeChanges {
+    /// [`ResumeChanges::apply`] on any run that takes model changes (`ChangeHost`, e.g. a
+    /// paused Slingshot-exact run); change files go through [`ChangeFile::apply_to`].
+    pub fn apply_to<H: simoxide_sim::ChangeHost + ?Sized>(
+        &self,
+        host: &mut H,
+        qvto: &mut QvtoRun,
+    ) -> Result<Vec<StepReport>, ResumeError> {
+        let mut out = Vec::new();
+        for s in &self.steps {
+            out.push(match s {
+                ChangeStep::File(f) => StepReport {
+                    step: "file".into(),
+                    change: Some(f.apply_to(host).map_err(ResumeError::File)?),
+                    log: String::new(),
+                },
+                ChangeStep::Transform(t, inv) => {
+                    let o = qvto.invoke(host, t, inv).map_err(ResumeError::Transform)?;
+                    if !o.succeeded {
+                        return Err(ResumeError::NotApplied {
+                            transformation: o.transformation,
+                            log: o.log,
+                        });
+                    }
+                    StepReport {
+                        step: o.transformation,
+                        change: o.change,
+                        log: o.log,
+                    }
+                }
+            });
+        }
+        Ok(out)
+    }
+}
+
 /// One variant of an exploration: a name and the changes applied at the fork point.
 #[derive(Clone, Debug)]
 pub struct Variant {

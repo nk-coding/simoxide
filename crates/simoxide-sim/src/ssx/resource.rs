@@ -7,6 +7,8 @@ use simoxide_sched::{Clock, F64Secs, FcfsHead, ProcessorSharing, SchedulingPolic
 use std::collections::VecDeque;
 
 /// The run-time state of a resource of `cm.resources`.
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Clone)]
 pub(crate) enum ResRt {
     Ps(ProcessorSharing<u64, F64Secs>),
     Fcfs(FcfsHead<u64, F64Secs>),

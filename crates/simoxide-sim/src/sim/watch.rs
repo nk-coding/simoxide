@@ -153,10 +153,37 @@ struct SeriesTrack {
 pub struct Watch {
     conds: Vec<Condition>,
     track: Vec<Track>,
-    armed: bool,
+    pub(crate) armed: bool,
     /// Total tuples at the last check (nothing new: the series conditions are not re-read).
     count: u64,
-    fired: Option<Fired>,
+    pub(crate) fired: Option<Fired>,
+}
+
+/// What a [`Watch`] reads from a run between events (the [`RunState`] of a [`Simulation`], or
+/// the Slingshot-exact engine's state).
+pub(crate) trait Watched {
+    /// Current simulation time (ns).
+    fn now_ns(&self) -> i64;
+    /// Events processed so far.
+    fn events(&self) -> u64;
+    /// The measurements so far (rows stored if [`Watched::store_measurements`]).
+    fn measurements(&self) -> &Measurements;
+    fn store_measurements(&self) -> bool;
+}
+
+impl<C: Compat, F: Flavour> Watched for RunState<C, F> {
+    fn now_ns(&self) -> i64 {
+        RunState::now_ns(self)
+    }
+    fn events(&self) -> u64 {
+        RunState::events(self)
+    }
+    fn measurements(&self) -> &Measurements {
+        RunState::measurements(self)
+    }
+    fn store_measurements(&self) -> bool {
+        self.config().store_measurements
+    }
 }
 
 impl Watch {
@@ -184,8 +211,16 @@ impl Watch {
     /// run's model. Errors: series conditions without stored measurements, invalid parameters.
     /// [`Simulation::run_watch`] arms the watch on its first use; arming again re-bases it.
     pub fn arm<C: Compat, F: Flavour>(&mut self, sim: &Simulation<'_, C, F>) -> Result<(), String> {
-        let st = sim.state();
-        let g = sim.model_graph();
+        self.arm_on(sim.state(), sim.model_graph())
+    }
+
+    /// [`Watch::arm`] on a run's view (`st`) and model graph (`g`); also the Slingshot-exact
+    /// engine's (`crate::ssx::SsxRun::run_watch`).
+    pub(crate) fn arm_on<W: Watched + ?Sized>(
+        &mut self,
+        st: &W,
+        g: &simoxide_model::raw::Graph,
+    ) -> Result<(), String> {
         for (c, t) in self.conds.iter().zip(&mut self.track) {
             *t = Track {
                 base_ns: st.now_ns(),
@@ -226,7 +261,7 @@ impl Watch {
                 }
                 _ => continue,
             };
-            if !st.config().store_measurements {
+            if !st.store_measurements() {
                 return Err(
                     "series conditions read the stored measurements (store_measurements is off)"
                         .into(),
@@ -265,9 +300,9 @@ impl Watch {
     }
 
     /// Whether some condition holds; `reached` answers time conditions.
-    fn check<C: Compat, F: Flavour>(
+    pub(crate) fn check<W: Watched + ?Sized>(
         &mut self,
-        st: &RunState<C, F>,
+        st: &W,
         reached: impl Fn(Pause) -> bool,
     ) -> bool {
         debug_assert!(self.armed, "Watch::arm first");

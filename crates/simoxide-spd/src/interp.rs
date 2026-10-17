@@ -37,6 +37,7 @@ pub struct TimeEvent {
 }
 
 /// The metric of a measurement tuple, as far as the triggers distinguish them.
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Metric {
     /// `Response Time Tuple`.

@@ -54,9 +54,9 @@ impl QvtoRun {
     /// Continues this (new, unused) QVTo state from `s`, on the restored simulation `sim`: the
     /// per-run state is created again if it existed; owners of models of other metamodels
     /// rebuild them before (see [`RulesRun::restore_snapshot`]), then the id generator is set.
-    pub fn restore_state<C: Compat, F: Flavour>(
+    pub fn restore_state<H: simoxide_sim::ChangeHost + ?Sized>(
         &mut self,
-        sim: &Simulation<'_, C, F>,
+        sim: &H,
         s: &QvtoState,
     ) -> Result<(), ReconfError> {
         if !s.started {
@@ -72,9 +72,9 @@ impl QvtoRun {
     }
 
     /// [`QvtoRun::restore_state`] from the section `qvto` of `s` (nothing if it has none).
-    pub fn restore_section<C: Compat, F: Flavour>(
+    pub fn restore_section<H: simoxide_sim::ChangeHost + ?Sized>(
         &mut self,
-        sim: &Simulation<'_, C, F>,
+        sim: &H,
         s: &Snapshot,
     ) -> Result<(), SnapshotError> {
         if let Some(sec) = s.section(QVTO) {

@@ -156,25 +156,75 @@ pub fn quirks_of(s: &Snapshot) -> Result<Option<Quirks>, SnapshotError> {
     }
 }
 
+/// The section `spd` of an interpreter's state (`queued`: the requests by handle; SpdRun's
+/// queue or the Slingshot-exact layer's request table).
+pub(crate) fn spd_section(
+    spd: &Spd,
+    st: &SpdState,
+    queued: &[Option<AdjustmentRequest>],
+    adjusted_ok: u64,
+    enc: Encoding,
+) -> Result<Section, SnapshotError> {
+    let img = SpdImage {
+        quirks: spd.quirks(),
+        contexts: spd.contexts().len() as u32,
+        timers: spd.timers().len() as u32,
+        policies: st.policies.clone(),
+        groups: st.groups.clone(),
+        membership: (&st.membership).into(),
+        next_request: st.next_request,
+        evaluations: st.evaluations,
+        requests: st.requests,
+        queued: queued.to_vec(),
+        adjusted_ok,
+    };
+    Section::encode(SPD, &img, enc)
+}
+
+/// The interpreter's state of the section `spd` of `s`, checked against `spd`: the state,
+/// the requests by handle, the successful adjustments.
+pub(crate) fn read_spd_section(
+    s: &Snapshot,
+    spd: &Spd,
+) -> Result<(SpdState, Vec<Option<AdjustmentRequest>>, u64), SnapshotError> {
+    let sec = s
+        .section(SPD)
+        .ok_or_else(|| SnapshotError::Mismatch("the snapshot has no SPD state".into()))?;
+    let img: SpdImage = sec.decode(s.header.encoding)?;
+    if img.quirks != spd.quirks() {
+        return Err(SnapshotError::Mismatch(format!(
+            "the SPD state is of an interpreter with the compat flags {:?}, this one has {:?}",
+            img.quirks,
+            spd.quirks()
+        )));
+    }
+    if img.contexts as usize != spd.contexts().len()
+        || img.timers as usize != spd.timers().len()
+        || img.policies.len() != spd.contexts().len()
+    {
+        return Err(SnapshotError::Mismatch(
+            "the SPD state belongs to another scaling policy definition".into(),
+        ));
+    }
+    Ok((
+        SpdState {
+            policies: img.policies,
+            groups: img.groups,
+            membership: img.membership.into(),
+            next_request: img.next_request,
+            evaluations: img.evaluations,
+            requests: img.requests,
+        },
+        img.queued,
+        img.adjusted_ok,
+    ))
+}
+
 impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
     /// The run's snapshot (the simulation's sections and `spd`), between events: after
     /// [`SpdRun::run_until`] returned, when the SPD work of the last event is done.
     pub fn snapshot_value(&mut self, enc: Encoding) -> Result<Snapshot, SnapshotError> {
-        let st = &self.state;
-        let img = SpdImage {
-            quirks: self.spd.quirks(),
-            contexts: self.spd.contexts().len() as u32,
-            timers: self.spd.timers().len() as u32,
-            policies: st.policies.clone(),
-            groups: st.groups.clone(),
-            membership: (&st.membership).into(),
-            next_request: st.next_request,
-            evaluations: st.evaluations,
-            requests: st.requests,
-            queued: self.requests.clone(),
-            adjusted_ok: self.adjusted_ok,
-        };
-        let sec = Section::encode(SPD, &img, enc)?;
+        let sec = spd_section(self.spd, &self.state, &self.requests, self.adjusted_ok, enc)?;
         self.sim.snapshot_value(enc, vec![sec])
     }
 
@@ -224,40 +274,79 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
         spd: &'s Spd,
         out: Outputs,
     ) -> Result<Self, SnapshotError> {
-        let sec = s
-            .section(SPD)
-            .ok_or_else(|| SnapshotError::Mismatch("the snapshot has no SPD state".into()))?;
-        let img: SpdImage = sec.decode(s.header.encoding)?;
-        if img.quirks != spd.quirks() {
-            return Err(SnapshotError::Mismatch(format!(
-                "the SPD state is of an interpreter with the compat flags {:?}, this one has {:?}",
-                img.quirks,
-                spd.quirks()
-            )));
-        }
-        if img.contexts as usize != spd.contexts().len()
-            || img.timers as usize != spd.timers().len()
-            || img.policies.len() != spd.contexts().len()
-        {
-            return Err(SnapshotError::Mismatch(
-                "the SPD state belongs to another scaling policy definition".into(),
-            ));
-        }
+        let (state, requests, adjusted_ok) = read_spd_section(s, spd)?;
         let sim = Simulation::<C, F>::restore_snapshot(s, base, out)?;
         Ok(SpdRun {
             series: series_points(sim.compiled()),
             sim,
             spd,
-            state: SpdState {
-                policies: img.policies,
-                groups: img.groups,
-                membership: img.membership.into(),
-                next_request: img.next_request,
-                evaluations: img.evaluations,
-                requests: img.requests,
-            },
-            requests: img.queued,
-            adjusted_ok: img.adjusted_ok,
+            state,
+            requests,
+            adjusted_ok,
         })
     }
+}
+
+// ------------------------------------------------------------------------------------------
+// the SPD layer of a Slingshot-exact run (`crate::ssx::SsxSpd`)
+
+/// Name of the section with the Slingshot-exact layer's own state (next to `spd`).
+pub const SPD_SSX: &str = "spd-ssx";
+
+/// A resolved measuring point with object ids as numbers.
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) enum PointImage {
+    ActiveResource(u32),
+    Operation(u32),
+    AssemblyPassiveResource(u32, u32),
+    Container(u32),
+    Environment,
+    Other,
+}
+
+impl From<crate::model::PointKind> for PointImage {
+    fn from(k: crate::model::PointKind) -> Self {
+        use crate::model::PointKind as K;
+        match k {
+            K::ActiveResource { container } => PointImage::ActiveResource(container.0),
+            K::Operation { signature } => PointImage::Operation(signature.0),
+            K::AssemblyPassiveResource { assembly, passive } => {
+                PointImage::AssemblyPassiveResource(assembly.0, passive.0)
+            }
+            K::Container { container } => PointImage::Container(container.0),
+            K::Environment => PointImage::Environment,
+            K::Other => PointImage::Other,
+        }
+    }
+}
+
+impl From<PointImage> for crate::model::PointKind {
+    fn from(k: PointImage) -> Self {
+        use crate::model::PointKind as K;
+        match k {
+            PointImage::ActiveResource(c) => K::ActiveResource {
+                container: ObjId(c),
+            },
+            PointImage::Operation(s) => K::Operation {
+                signature: ObjId(s),
+            },
+            PointImage::AssemblyPassiveResource(a, p) => K::AssemblyPassiveResource {
+                assembly: ObjId(a),
+                passive: ObjId(p),
+            },
+            PointImage::Container(c) => K::Container {
+                container: ObjId(c),
+            },
+            PointImage::Environment => K::Environment,
+            PointImage::Other => K::Other,
+        }
+    }
+}
+
+/// The section `spd-ssx`: the series' resolved measuring points and metrics (resolved on the
+/// model of their first measurement, so kept rather than resolved again).
+#[derive(Serialize, Deserialize)]
+pub(crate) struct SsxSpdImage {
+    /// Per engine series: unresolved, not a policy's, or (point, class, metric).
+    pub points: Vec<Option<Option<(PointImage, String, crate::interp::Metric)>>>,
 }

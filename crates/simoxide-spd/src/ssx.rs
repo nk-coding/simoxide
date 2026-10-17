@@ -256,3 +256,80 @@ impl SpdHooks for SsxSpd<'_, '_> {
         })
     }
 }
+
+#[cfg(feature = "snapshot")]
+mod snap {
+    use super::*;
+    use crate::snapshot::{PointImage, SPD_SSX, SsxSpdImage, read_spd_section, spd_section};
+    use simoxide_sim::snapshot::{Encoding, Section, Snapshot, SnapshotError};
+
+    impl<'s, 'a> SsxSpd<'s, 'a> {
+        /// The layer's state for a snapshot of its run (`SsxRun::snapshot_value`'s extra
+        /// sections): `spd` (the interpreter's state and request table, as an SPD run's) and
+        /// `spd-ssx` (the series' resolved measuring points). The adjuster's QVTo state is the
+        /// adjuster's (`QvtoRun::snapshot_section`).
+        pub fn snapshot_sections(&self, enc: Encoding) -> Result<Vec<Section>, SnapshotError> {
+            let img = SsxSpdImage {
+                points: self
+                    .points
+                    .iter()
+                    .map(|p| {
+                        p.map(|x| {
+                            x.map(|(pt, m)| (PointImage::from(pt.kind), pt.class.to_string(), m))
+                        })
+                    })
+                    .collect(),
+            };
+            Ok(vec![
+                spd_section(self.spd, &self.state, &self.requests, self.adjusted_ok, enc)?,
+                Section::encode(SPD_SSX, &img, enc)?,
+            ])
+        }
+
+        /// The layer of a restored run (`SsxRun::restore_snapshot`) from the sections of
+        /// snapshot `s`, with the interpreter `spd` (built from the same model with the same
+        /// compat flags), the adjuster and the decision log of the continuation.
+        pub fn restore(
+            spd: &'s Spd,
+            s: &Snapshot,
+            adjuster: &'a mut dyn SsxAdjuster,
+            log: &'a mut dyn Log,
+        ) -> Result<SsxSpd<'s, 'a>, SnapshotError> {
+            let (state, requests, adjusted_ok) = read_spd_section(s, spd)?;
+            let sec = s.section(SPD_SSX).ok_or_else(|| {
+                SnapshotError::Mismatch(
+                    "the snapshot has no Slingshot-exact SPD state (section `spd-ssx`)".into(),
+                )
+            })?;
+            let img: SsxSpdImage = sec.decode(s.header.encoding)?;
+            let points = img
+                .points
+                .into_iter()
+                .map(|p| {
+                    p.map(|x| {
+                        x.map(|(k, class, m)| {
+                            (
+                                PointRef {
+                                    kind: k.into(),
+                                    class: simoxide_sim::snapshot::serde_util::intern(&class),
+                                },
+                                m,
+                            )
+                        })
+                    })
+                })
+                .collect();
+            Ok(SsxSpd {
+                spd,
+                state,
+                adjuster,
+                log,
+                // `SpdBehavior`'s registration (the interpreter's, fixed)
+                subs: spd.subscribers().into_iter().map(|(c, _)| c).collect(),
+                requests,
+                points,
+                adjusted_ok,
+            })
+        }
+    }
+}

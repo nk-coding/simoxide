@@ -48,7 +48,7 @@ mod removal;
 mod runmodel;
 mod slingshot;
 #[cfg(feature = "snapshot")]
-mod snapshot;
+pub(crate) mod snapshot;
 mod state;
 pub mod watch;
 

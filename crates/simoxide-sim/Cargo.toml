@@ -47,5 +47,5 @@ simoxide-sim = { path = ".", features = ["exact", "snapshot"] }
 simoxide-random = { path = "../simoxide-random", features = ["hotspot-math"] }
 # the SPD cases of the Slingshot-exact corpus (tests/slingshot_exact.rs): the interpreter and
 # Slingshot's adjustment (a dev-dependency cycle: both depend on this crate)
-simoxide-spd = { path = "../simoxide-spd" }
-simoxide-reconf = { path = "../simoxide-reconf" }
+simoxide-spd = { path = "../simoxide-spd", features = ["snapshot"] }
+simoxide-reconf = { path = "../simoxide-reconf", features = ["snapshot"] }

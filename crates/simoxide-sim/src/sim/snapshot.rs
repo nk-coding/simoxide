@@ -268,7 +268,7 @@ struct TapeImage {
 
 /// The run configuration without the run-time controls (deadline, cancellation flag).
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct ConfigImage {
+pub(crate) struct ConfigImage {
     run_name: String,
     seed: i64,
     max_sim_time: i64,
@@ -441,6 +441,94 @@ fn sorted<K: Ord + Clone + std::hash::Hash, V: Clone>(m: &FxMap<K, V>) -> Vec<(K
     v
 }
 
+/// The section `model` of a run's own compiled model (generation `generation`, typed model
+/// built in `order`), and its line of the header.
+pub(crate) fn model_section(
+    cm: &CompiledModel,
+    order: &[ObjId],
+    generation: u32,
+    enc: Encoding,
+) -> Result<(Section, RunModelInfo), SnapshotError> {
+    let m = ModelOut {
+        generation,
+        order,
+        graph: GraphXmi::save(&cm.model.graph),
+        compiled: cm,
+    };
+    Ok((
+        Section::encode(MODEL, &m, enc)?,
+        RunModelInfo {
+            generation,
+            fingerprint: model_fingerprint(cm),
+        },
+    ))
+}
+
+/// The run's own compiled model of snapshot `s` (section `model`, generation `generation`)
+/// and its build order, checked against the header; for a run created on `base`.
+pub(crate) fn read_model_section(
+    s: &Snapshot,
+    base: &CompiledModel,
+    generation: u32,
+) -> Result<(CompiledModel, Vec<ObjId>), SnapshotError> {
+    let restore = |m: String| SnapshotError::Restore(m);
+    let sec = s
+        .section(MODEL)
+        .ok_or_else(|| SnapshotError::Corrupt("no section `model` after model changes".into()))?;
+    let m: ModelIn = sec.decode(s.header.encoding)?;
+    if m.generation != generation {
+        return Err(SnapshotError::Corrupt("model generation mismatch".into()));
+    }
+    let graph = m.graph.restore().map_err(restore)?;
+    let (typed, order) = simoxide_model::build_from_graph_after(
+        graph,
+        simoxide_model::Diagnostics::default(),
+        &m.order,
+    );
+    if order != m.order {
+        return Err(SnapshotError::Corrupt(
+            "the build order does not match the snapshot's model graph".into(),
+        ));
+    }
+    let mut cm = m.compiled;
+    crate::snapshot::restore_compiled(&mut cm, typed).map_err(restore)?;
+    if cm.flavour != base.flavour {
+        return Err(SnapshotError::Corrupt(
+            "the run's model has another flavour".into(),
+        ));
+    }
+    let fp = model_fingerprint(&cm);
+    match &s.header.run_model {
+        Some(rm) if rm.fingerprint == fp && rm.generation == m.generation => {}
+        _ => {
+            return Err(SnapshotError::Restore(format!(
+                "the restored run model differs from the one saved (fingerprint {fp})"
+            )));
+        }
+    }
+    Ok((cm, order))
+}
+
+/// The section `graph`: a run's model graph that differs from its compiled model's outside
+/// SimOxide's metamodels.
+pub(crate) fn graph_section(
+    g: &simoxide_model::raw::Graph,
+    enc: Encoding,
+) -> Result<Section, SnapshotError> {
+    Section::encode(GRAPH, &GraphXmi::save(g), enc)
+}
+
+/// The graph of the section `graph` of `s`, if it has one.
+pub(crate) fn read_graph_section(
+    s: &Snapshot,
+) -> Result<Option<simoxide_model::raw::Graph>, SnapshotError> {
+    let Some(sec) = s.section(GRAPH) else {
+        return Ok(None);
+    };
+    let x: GraphXmi = sec.decode(s.header.encoding)?;
+    x.restore().map(Some).map_err(SnapshotError::Restore)
+}
+
 impl<C: Compat, F: Flavour> RunState<C, F> {
     fn engine_image(&self) -> Result<EngineImage<F::Clock>, SnapshotError> {
         if self.nesting != 0 || self.direct != 0 {
@@ -529,21 +617,12 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
         let mut sections = vec![Section::encode(ENGINE, &self.engine_image()?, enc)?];
         let mut run_model = None;
         if let (Some(cm), Some(order)) = (self.model.compiled(), self.model.order()) {
-            let graph = GraphXmi::save(&cm.model.graph);
-            let m = ModelOut {
-                generation: self.model.generation(),
-                order,
-                graph,
-                compiled: cm,
-            };
-            sections.push(Section::encode(MODEL, &m, enc)?);
-            run_model = Some(RunModelInfo {
-                generation: self.model.generation(),
-                fingerprint: model_fingerprint(cm),
-            });
+            let (sec, info) = model_section(cm, order, self.model.generation(), enc)?;
+            sections.push(sec);
+            run_model = Some(info);
         }
         if let Some(g) = self.model.graph_override() {
-            sections.push(Section::encode(GRAPH, &GraphXmi::save(g), enc)?);
+            sections.push(graph_section(g, enc)?);
         }
         let header = Header {
             format: FORMAT,
@@ -620,46 +699,12 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
         let model = if img.generation == 0 {
             RunModel::default()
         } else {
-            let sec = s.section(MODEL).ok_or_else(|| {
-                SnapshotError::Corrupt("no section `model` after model changes".into())
-            })?;
-            let m: ModelIn = sec.decode(enc)?;
-            if m.generation != img.generation {
-                return Err(SnapshotError::Corrupt("model generation mismatch".into()));
-            }
-            let graph = m.graph.restore().map_err(restore)?;
-            let (typed, order) = simoxide_model::build_from_graph_after(
-                graph,
-                simoxide_model::Diagnostics::default(),
-                &m.order,
-            );
-            if order != m.order {
-                return Err(SnapshotError::Corrupt(
-                    "the build order does not match the snapshot's model graph".into(),
-                ));
-            }
-            let mut cm = m.compiled;
-            crate::snapshot::restore_compiled(&mut cm, typed).map_err(restore)?;
-            if cm.flavour != base.flavour {
-                return Err(SnapshotError::Corrupt(
-                    "the run's model has another flavour".into(),
-                ));
-            }
-            let fp = model_fingerprint(&cm);
-            match &h.run_model {
-                Some(rm) if rm.fingerprint == fp && rm.generation == m.generation => {}
-                _ => {
-                    return Err(SnapshotError::Restore(format!(
-                        "the restored run model differs from the one saved (fingerprint {fp})"
-                    )));
-                }
-            }
-            RunModel::changed(Arc::new(cm), order.into(), Shape::of(base), m.generation)
+            let (cm, order) = read_model_section(s, base, img.generation)?;
+            RunModel::changed(Arc::new(cm), order.into(), Shape::of(base), img.generation)
         };
         let mut model = model;
-        if let Some(sec) = s.section(GRAPH) {
-            let x: GraphXmi = sec.decode(enc)?;
-            model.set_graph_override(Arc::new(x.restore().map_err(restore)?));
+        if let Some(g) = read_graph_section(s)? {
+            model.set_graph_override(Arc::new(g));
         }
         let cm: &CompiledModel = match model.compiled() {
             Some(a) => a,

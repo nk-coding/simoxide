@@ -39,6 +39,31 @@ impl SsRng {
         })
     }
 
+    /// The MT19937 words and position (a paused run's state, `ssx::state`).
+    pub fn mt_state(&self) -> (Vec<u32>, u32) {
+        let (w, p) = self.mt.state();
+        (w.to_vec(), p as u32)
+    }
+
+    /// The streams of a paused run: MT19937 state, draws so far, `Math.random()`'s generator,
+    /// the projection position; a tape from here on if `tape`.
+    pub fn restore(
+        mt: &(Vec<u32>, u32),
+        stoex: u64,
+        math: JavaRandom,
+        pos: i64,
+        tape: bool,
+    ) -> Result<SsRng, String> {
+        Ok(SsRng {
+            mt: SimuComStream::from_state(&mt.0, mt.1 as usize).ok_or("invalid MT19937 state")?,
+            stoex,
+            math,
+            tape: tape.then(|| String::with_capacity(1 << 16)),
+            site: "?",
+            pos,
+        })
+    }
+
     fn record(&mut self, stream: &str, i: u64, u: f64, site: &str) {
         let pos = self.pos;
         if let Some(b) = self.tape.as_mut() {

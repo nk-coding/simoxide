@@ -478,6 +478,43 @@ impl ChangeFile {
     }
 }
 
+impl ChangeFile {
+    /// [`ChangeFile::apply`] on any run that takes model changes (`ChangeHost`, e.g. a paused
+    /// Slingshot-exact run, `simoxide_sim::ssx::SsxRun`). Such hosts have no change options:
+    /// a file with option lines (`removal`, `in-progress`, `reallocation`, `monitors`) is
+    /// refused.
+    pub fn apply_to<H: simoxide_sim::ChangeHost + ?Sized>(
+        &self,
+        host: &mut H,
+    ) -> Result<ChangeReport, ChangeFileError> {
+        let mut e = Edit::new(host);
+        let types: Vec<(ObjId, Box<str>, Box<str>)> = host
+            .compiled_now()
+            .model
+            .resource_types
+            .iter()
+            .map(|t| (t.obj, t.id.clone(), t.name.clone()))
+            .collect();
+        for (line, op) in &self.ops {
+            if let EditOp::Options(_) = op {
+                return Err(ChangeFileError::Line(
+                    *line,
+                    "change options are not supported by this run (they set the SimuLizar and \
+                     Slingshot flavours' change machinery)"
+                        .into(),
+                ));
+            }
+            let mut cx = Cx {
+                e: &mut e,
+                types: &types,
+            };
+            cx.op(op)
+                .map_err(|m| ChangeFileError::Line(*line, m.to_string()))?;
+        }
+        e.apply(host).map_err(ChangeFileError::Change)
+    }
+}
+
 /// Applies the ops of a file on an [`Edit`].
 struct Cx<'a> {
     e: &'a mut Edit,

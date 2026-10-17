@@ -38,7 +38,9 @@ mod monitor;
 mod pdist;
 mod resource;
 mod rng;
+mod run;
 pub mod spd;
+mod state;
 mod system;
 mod usage;
 
@@ -57,10 +59,14 @@ use std::collections::{BinaryHeap, HashMap};
 use std::rc::Rc;
 
 pub(crate) use rng::SsRng;
+pub use run::{SsxRun, SsxView};
 pub use spd::{
     HandlerError, SpdAdjusted, SpdHooks, SpdMeasurement, SpdRequest, SpdStart, SpdTimeEvent,
     Stimulus,
 };
+#[cfg(feature = "snapshot")]
+pub use state::SSX;
+pub use state::SsxState;
 
 // ------------------------------------------------------------------------------------------
 // entities (Slingshot's objects, with Java's reference semantics where Slingshot shares them)
@@ -86,6 +92,7 @@ pub(crate) struct UBeh {
     pub progression: Cell<i32>,
 }
 
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(crate) enum UBehKind {
     Root,
@@ -113,6 +120,7 @@ pub(crate) struct UserRequest {
 }
 
 /// `SeffBehaviorWrapper`: the cursor over one behaviour.
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone)]
 pub(crate) struct Wrapper {
     pub beh: BehaviourId,
@@ -121,6 +129,8 @@ pub(crate) struct Wrapper {
 }
 
 /// The kind of a `SeffBehaviorContextHolder`.
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Clone)]
 pub(crate) enum HKind {
     Root,
     Branch,
@@ -174,6 +184,7 @@ pub(crate) struct SeffCtx {
 }
 
 /// What a `GeneralEntryRequest` calls.
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy)]
 pub(crate) enum GerKind {
     /// An `ExternalCallAction`.
@@ -465,30 +476,45 @@ impl Ord for Entry {
 pub(crate) type OpKey = (Box<str>, Box<str>, Box<str>);
 
 /// Calculators of the monitors (built from the monitor repository at the start, SS-MEAS).
-#[derive(Default)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Default, Clone)]
 pub(crate) struct Monitors {
     /// Per `cm.scenarios` index: the response-time calculator (the last monitor of a scenario
     /// wins, `userProbesMap.put`).
     pub scenario: Vec<Option<usize>>,
     /// Assembly-operation calculators by (assembly context, provided role, signature) ids.
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub asmop: HashMap<OpKey, usize>,
     /// Per resource: state, utilisation and demand calculators (series), registration order.
     pub state: Vec<Vec<SeriesId>>,
     pub util: Vec<Vec<SeriesId>>,
     pub demand: Vec<Vec<SeriesId>>,
     /// Per passive resource id: the calculators observing each probe, registration order.
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub passive: HashMap<Box<str>, PassiveProbes>,
     /// Start/stop calculators: series and open starts per request context.
     pub calcs: Vec<StartStop>,
     /// The series by (measuring-point key, metric). Two series of created elements can show the
     /// same key (equal aliases): the reference's EDP2 measurements are per measuring point, so
     /// they stay two series, written one after the other (`measurements.csv` sorts stably).
+    #[cfg_attr(feature = "snapshot", serde(with = "crate::ssx::state::keys_map"))]
     pub keys: HashMap<(String, &'static str), SeriesId>,
     /// The key with the model's ids of a series whose shown key has aliases.
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::sorted")
+    )]
     pub raw_keys: HashMap<SeriesId, Box<str>>,
 }
 
-#[derive(Default)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Default, Clone)]
 pub(crate) struct PassiveProbes {
     /// Waiting-time calculators (start: requested, stop: acquired), holding-time calculators
     /// (start: acquired, stop: released), in registration order.
@@ -500,12 +526,15 @@ pub(crate) struct PassiveProbes {
 }
 
 /// A start-stop calculator (`Calculator` with two probes).
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Clone)]
 pub(crate) struct StartStop {
     pub series: SeriesId,
     pub open: Vec<(RequestCtx, f64)>,
 }
 
 /// `RequestContext`: the user id, plus the caller context's identity for SEFF calls.
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(crate) struct RequestCtx {
     pub user: u64,
@@ -558,6 +587,8 @@ pub(crate) struct Engine<'m> {
     pub sys: StructureId,
     pub system: SystemId,
     stopped: bool,
+    /// The run is over (`SimulationFinished` dispatched, the event list empty, or an error).
+    done: bool,
     events: u64,
     /// Finished usage-scenario runs (`UserFinished` events).
     finished: i64,
@@ -623,6 +654,7 @@ impl<'m> Engine<'m> {
             sys,
             system,
             stopped: false,
+            done: false,
             events: 0,
             finished: 0,
             same_instant: 0,
@@ -698,21 +730,50 @@ impl<'m> Engine<'m> {
         }
     }
 
-    fn run(
-        &mut self,
-        cfg: &SimConfig,
-        mut hooks: Option<&mut dyn SpdHooks>,
-    ) -> Result<(), SimError> {
+    /// `ResourceSimulation`'s constructor and the first events (SS-RUN-3): the run before
+    /// t = 0.
+    fn start(&mut self, cfg: &SimConfig) -> Result<(), SimError> {
         self.resources_init()
             .map_err(|t| self.sim_error(format!("{}: {}", t.class, t.message)))?;
         self.schedule(Ev::PreSim, 0.0);
         self.schedule(Ev::SimStarted, 0.0);
         self.schedule_at(Ev::Finished, cfg.max_sim_time as f64);
-        while let Some(e) = self.heap.pop() {
+        Ok(())
+    }
+
+    /// Dispatches events until `p` pauses before the next one (between events) or the run is
+    /// over. An error ends the run.
+    fn advance<P: run::SsxPause>(
+        &mut self,
+        cfg: &SimConfig,
+        mut hooks: Option<&mut dyn SpdHooks>,
+        p: &mut P,
+    ) -> Result<crate::Status, SimError> {
+        if self.done {
+            return Ok(crate::Status::Finished);
+        }
+        if self.stopped {
+            // `ChangeHost::fail_run` between events
+            self.done = true;
+            return match self.failure.take() {
+                Some(f) => Err(f),
+                None => Ok(crate::Status::Finished),
+            };
+        }
+        loop {
+            if !P::NEVER
+                && let Some(top) = self.heap.peek()
+                && p.pause(self, top.t)
+            {
+                return Ok(crate::Status::Paused);
+            }
+            let e = self.heap.pop();
+            let Some(e) = e else { break };
             self.now = e.t;
             if self.now == self.last_t {
                 self.same_instant += 1;
                 if self.max_per_instant > 0 && self.same_instant > self.max_per_instant {
+                    self.done = true;
                     return Err(SimError {
                         message: format!(
                             "livelock guard: more than {} events at t = {}",
@@ -730,12 +791,14 @@ impl<'m> Engine<'m> {
             self.events += 1;
             self.dispatch(e.ev, &mut hooks);
             if self.stopped {
+                self.done = true;
                 if let Some(f) = self.failure.take() {
                     return Err(f);
                 }
                 break;
             }
             if cfg.limits.max_events > 0 && self.events >= cfg.limits.max_events {
+                self.done = true;
                 return Err(SimError {
                     message: format!("event limit {} reached", cfg.limits.max_events),
                     at_ns: simoxide_sched::time::span(self.now),
@@ -743,7 +806,8 @@ impl<'m> Engine<'m> {
                 });
             }
         }
-        Ok(())
+        self.done = true;
+        Ok(crate::Status::Finished)
     }
 
     fn sim_error(&self, message: String) -> SimError {
@@ -1315,43 +1379,8 @@ pub fn run_with_spd(
 fn run_impl(
     cm: &CompiledModel,
     cfg: SimConfig,
-    mut out: Outputs,
+    out: Outputs,
     hooks: Option<&mut dyn SpdHooks>,
 ) -> Result<RunResult, SimError> {
-    if cm.flavour.kind != FlavourKind::SlingshotExact {
-        return Err(SimError {
-            message: format!(
-                "the Slingshot-exact engine needs a model compiled for slingshot-exact, not {}",
-                cm.flavour.kind
-            ),
-            at_ns: 0,
-            kind: SimErrorKind::Model,
-        });
-    }
-    if cfg.max_sim_time <= 0 {
-        return Err(SimError {
-            message: "the Slingshot-exact mode needs a simulation time (Slingshot's simTime is its only stop condition, SS-RUN-5)".into(),
-            at_ns: 0,
-            kind: SimErrorKind::Model,
-        });
-    }
-    let mut e = Engine::new(cm, &cfg, &out)?;
-    let r = e.run(&cfg, hooks);
-    let write = |w: &mut Option<Box<dyn std::io::Write>>, s: Option<String>| {
-        if let (Some(w), Some(s)) = (w.as_mut(), s) {
-            let _ = w.write_all(s.as_bytes());
-            let _ = w.flush();
-        }
-    };
-    write(&mut out.trace, e.proj.take());
-    write(&mut out.tape, e.rng.tape.take());
-    r?;
-    Ok(RunResult {
-        measurements: std::mem::take(&mut e.meas),
-        uniforms: e.rng.stoex,
-        events: e.events,
-        end_ns: simoxide_sched::time::span(cfg.max_sim_time as f64),
-        main_count: e.finished,
-        warnings: std::mem::take(&mut e.errors),
-    })
+    SsxRun::new(cm, cfg, out)?.finish(hooks)
 }

@@ -39,6 +39,7 @@ use std::collections::HashSet;
 use std::sync::Arc;
 
 /// The stimulus a policy subscriber is registered for.
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Stimulus {
     /// `SimulationTimeReached`.
@@ -133,41 +134,44 @@ pub trait SpdHooks {
 }
 
 /// The engine's side of the SPD layer.
-#[derive(Default)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Default, Clone)]
 pub(crate) struct SpdSide {
     /// Per time event: the target group's id.
-    tg: Vec<Box<str>>,
-    subs: Vec<Stimulus>,
-    disposed: Vec<bool>,
+    pub(super) tg: Vec<Box<str>>,
+    pub(super) subs: Vec<Stimulus>,
+    pub(super) disposed: Vec<bool>,
     /// Some subscriber listens to measurements.
     pub measured: bool,
 }
 
 /// A `ModelAdjusted` in the engine's typed ids.
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Clone)]
 pub(crate) struct Adjusted {
-    ok: bool,
-    changes: usize,
-    new: Vec<ContainerId>,
-    deleted: Vec<ContainerId>,
-    new_contexts: Vec<AllocationContextId>,
-    monitors: Vec<MonitorId>,
-    names_new: Vec<Box<str>>,
-    names_deleted: Vec<Box<str>>,
+    pub(super) ok: bool,
+    pub(super) changes: usize,
+    pub(super) new: Vec<ContainerId>,
+    pub(super) deleted: Vec<ContainerId>,
+    pub(super) new_contexts: Vec<AllocationContextId>,
+    pub(super) monitors: Vec<MonitorId>,
+    pub(super) names_new: Vec<Box<str>>,
+    pub(super) names_deleted: Vec<Box<str>>,
 }
 
 /// The model the engine runs after changes (owned; `Engine::cm` points into the last one).
 #[derive(Default)]
 pub(crate) struct OwnModels {
     /// Every compiled model of the run after a change, kept until the run ends.
-    models: Vec<Arc<CompiledModel>>,
+    pub(super) models: Vec<Arc<CompiledModel>>,
     /// Build order of the current typed model.
-    order: Option<Arc<[ObjId]>>,
-    generation: u32,
+    pub(super) order: Option<Arc<[ObjId]>>,
+    pub(super) generation: u32,
     /// The model graph when it differs from the compiled model's outside SimOxide's
     /// metamodels (`ChangeHost::set_model_graph`).
-    graph: Option<Arc<Graph>>,
+    pub(super) graph: Option<Arc<Graph>>,
     /// The ids of the elements present at the start (`Keys.inputIds`).
-    input: Option<HashSet<Box<str>>>,
+    pub(super) input: Option<HashSet<Box<str>>>,
 }
 
 /// The first allocation context of each assembly context, compared by id (SS-ACT-9).
@@ -192,7 +196,7 @@ pub(super) fn first_match(m: &Model) -> Vec<Option<ContainerId>> {
 }
 
 /// The ids of every object of `g`.
-fn ids_of(g: &Graph) -> HashSet<Box<str>> {
+pub(super) fn ids_of(g: &Graph) -> HashSet<Box<str>> {
     (0..g.object_count() as u32)
         .map(ObjId)
         .filter_map(|o| g.id(o).map(Box::from))
@@ -258,7 +262,7 @@ fn alias_of(g: &Graph, o: ObjId, input: &HashSet<Box<str>>, depth: u32) -> Strin
 }
 
 /// The aliases of every element of `g` that is not an input element.
-fn aliases(g: &Graph, input: &HashSet<Box<str>>) -> HashMap<Box<str>, Box<str>> {
+pub(super) fn aliases(g: &Graph, input: &HashSet<Box<str>>) -> HashMap<Box<str>, Box<str>> {
     let mut a = HashMap::new();
     for o in (0..g.object_count() as u32).map(ObjId) {
         if let Some(id) = g.id(o)
@@ -482,6 +486,53 @@ impl<'m> Engine<'m> {
                 l.s.push(']');
             }
         }
+    }
+
+    /// What `ModelAdjusted`'s subscribers do for a change set made between two events
+    /// (`SsxRun`'s [`ChangeHost::apply_changes`], e.g. at a resume), without the event: the
+    /// containers, allocation contexts and monitors of the model now that `before` did not
+    /// have, the containers it had that are gone.
+    pub(super) fn sync_after_change(&mut self, before: &CompiledModel) -> Result<(), Throw> {
+        let m = self.m;
+        let m0 = &before.model;
+        let env = |m: &Model| -> Vec<ContainerId> {
+            m.resource_environments
+                .iter()
+                .flat_map(|r| r.containers.iter().copied())
+                .collect()
+        };
+        let ctxs = |m: &Model| -> Vec<AllocationContextId> {
+            m.allocations
+                .iter()
+                .next()
+                .map(|a| a.contexts.clone())
+                .unwrap_or_default()
+        };
+        let monitors = |m: &Model| -> Vec<MonitorId> {
+            m.monitor_repositories
+                .iter()
+                .next()
+                .map(|r| r.monitors.clone())
+                .unwrap_or_default()
+        };
+        let (c0, c1) = (env(m0), env(m));
+        let (a0, m_0) = (ctxs(m0), monitors(m0));
+        let adj = Adjusted {
+            ok: true,
+            changes: 0,
+            new: c1.iter().copied().filter(|c| !c0.contains(c)).collect(),
+            deleted: c0.iter().copied().filter(|c| !c1.contains(c)).collect(),
+            new_contexts: ctxs(m).into_iter().filter(|c| !a0.contains(c)).collect(),
+            monitors: monitors(m)
+                .into_iter()
+                .filter(|x| !m_0.contains(x))
+                .collect(),
+            names_new: Vec::new(),
+            names_deleted: Vec::new(),
+        };
+        self.rs_model_adjusted(&adj)?;
+        self.mon_model_adjusted(&adj)?;
+        Ok(())
     }
 
     /// The target group of time event `i`.
