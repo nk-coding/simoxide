@@ -56,8 +56,10 @@ values with the index of their first uniform). `tape.replay()` is a cursor:
 - `RunRequest` holds `model_dir`, the parsed `run.json` (`RunConfig`), and `rng`
   (`RngMode::OwnRng` or `RngMode::TapeReplay(Arc<Tape>)`).
 - Implementations:
-  - `RefSim` runs `reference/refsim batch` in one warm JVM per batch. It stages the models with
-    symlinks, applies a timeout per model, and reruns what is left after a hang.
+  - `RefSim` runs `reference/refsim batch` in one warm JVM per batch, through
+    `simoxide-oraclekit`'s batch driver ([Reference harnesses](../correctness/testing.md#reference-harnesses)).
+    It stages the models with symlinks in a scratch directory, applies a timeout per model, and
+    reruns what is left after a hang.
     A batch whose stderr shows a failed thread creation or an `OutOfMemoryError` counts as
     failed: SimuLizar can then end a run early and still report `ok`.
   - `CmdSim` wraps any CLI through placeholders (`{dir} {run_json} {trace} {tape} {measurements}

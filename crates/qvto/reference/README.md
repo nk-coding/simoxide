@@ -140,8 +140,8 @@ inputs' proxies resolved before the run. The identity-hash tape keys the objects
 resources by their path before the run (`pre` lines) and takes the thread's seed first
 (`Tape.java`; `qvto-testkit/README.md`, "Identity-hash tape").
 
-**`det` mode.** `JVM_OPTS=-javaagent:<repository>/reference/slingshot/build/seed-agent.jar=ordered,qvto`
-(built by `reference/slingshot/seed-agent.sh`; `qvto conform record --det` sets it) gives the
+**`det` mode.** `JVM_OPTS=-javaagent:<repository>/reference/oraclekit/build/seed-agent.jar=ordered,qvto`
+(built by `reference/oraclekit/seed-agent.sh`; `qvto conform record --det` sets it) gives the
 Slingshot reference runner's ordering rule: QVTo's and OCL's `HashSet`/`HashMap` become
 `LinkedHashSet`/`LinkedHashMap` at class-load time (also the class: OCL then takes a `Set` for an
 OrderedSet). It is the oracle of qvto-rs's ordered mode.

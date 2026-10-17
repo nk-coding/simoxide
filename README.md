@@ -73,6 +73,7 @@ cd docs && npm install && npm run dev
 | `crates/simoxide-sim` | the simulator: compiler, event core, interpreter, measurements, API |
 | `crates/simoxide-cli` | `simoxide` and `simoxide-bench` |
 | `crates/simoxide-testkit` | differential testing, model generator, `simoxide-fuzz` |
+| `crates/simoxide-oraclekit` | what the Java reference harnesses share: warm-JVM batch driver, seed agent, result directories, comparisons (`reference/oraclekit/` on the Java side) |
 | `crates/foundation/` | shared with the QVTo engine: Java compatibility (`simoxide-jcompat`, opt-in `simoxide-jcompat-exact`), the EMF layer (`simoxide-emf-core`, `simoxide-emf`), `simoxide-hotspot-math` |
 | `crates/qvto/` | the QVTo engine (`crates/qvto/README.md`, [docs/qvto](docs/qvto/index.md)) |
 | `reference/` | `refsim`: deterministic SimuLizar 5.2.2, the oracle |

@@ -332,6 +332,27 @@ branches of the sliding-window arithmetic, and unused convenience APIs.
 | `simoxide-fuzz diff a.jsonl b.jsonl` | first divergence of two traces |
 | `crates/simoxide-testkit/scripts/heavy-tests.sh [--fuzz]` | all slow tests |
 
+## Reference harnesses
+
+Three Java programs serve as oracles: refsim (the patched SimuLizar,
+[refsim](../reference-simulator/refsim.md)), the Eclipse QVTo runner
+([Conformance](../qvto/conformance.md)) and the Slingshot reference runner
+([Slingshot runner](../reference-simulator/slingshot.md)). What their drivers share is in one
+place, `crates/simoxide-oraclekit` (Rust) and `reference/oraclekit/` (Java and shell; the crate's
+`README.md` has the details):
+
+| Piece | Rust (`simoxide-oraclekit`) | Java and shell (`reference/oraclekit/`) |
+|---|---|---|
+| warm-JVM batch process | `batch::run`: result lines read with a deadline each (refsim: 60 s, plus 120 s start-up), the process killed when one passes, standard error to a file or captured; `RefSim` and the QVTo `JavaRun` use it | refsim's `batch`, `qvto-run --batch` (their protocols stay their own) |
+| JVM launch | `java::ensure_built` (a runner's `build.sh` on demand) | `lib.sh`: `oraclekit_exec_java`, the JVM under `nice -n $ORACLE_NICE` (default 19) for refsim, `qvto-run` and `run.sh` |
+| seed and ordering agent | `java::seed_agent`, `agent_option`, `ORDERED_QVTO` | `seed-agent/` and `seed-agent.sh`: one source, built per harness with its product's ASM |
+| results and expectations | `results`: `<dir>/<case>/<file>` result sets, `.gz` expected files, `differing_files`/`differences`; `scratch::Scratch` per batch | `lib.sh`: `oraclekit_first_diff` (the `--check` of `corpus-ss.sh`, `verify-det.sh`, `smoke.sh`), `oraclekit_limited` (time and file-size limits per JVM) |
+
+Every harness has a check mode that runs the reference again and compares with what is committed,
+writing nothing: `reference/regen-expected.sh --check` (the corpus' `expected/`),
+`reference/slingshot/corpus-ss.sh --check` (`corpus-ss/*/expected/`) and
+`cargo qvto conform record --check [--det]` (the fixture bundles; the cache keeps its tapes).
+
 ## QVTo engine and foundation crates
 
 The [QVTo engine](../qvto/) and the [foundation crates](../development/foundation.md) have

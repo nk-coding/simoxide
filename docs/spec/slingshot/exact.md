@@ -94,7 +94,7 @@ From the rules of these pages, the exact mode needs, beyond the fast mode's sema
 with the per-stream index `i` and the trace index `e` of the event being dispatched. The **site** `o`
 (added by S1):
 
-- for `math` draws, from the seed agent's hooks (`[RUN]seed-agent/simoxide/slingshot/seed/SiteTransformer.java`,
+- for `math` draws, from the seed agent's hooks (`reference/oraclekit/seed-agent/simoxide/slingshot/seed/SiteTransformer.java`,
   `Sites.java`): `TransitionDeterminer.determineBranchTransition` and
   `determineProbabilisticBranchTransition` announce their transition list, `SimulatedLinkingResource.onJobProgressed`
   its link; the tape writes `branch:<id of the Branch or BranchAction>` or `link:<linking resource id>`.

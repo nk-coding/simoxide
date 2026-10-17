@@ -24,6 +24,7 @@
 | `crates/simoxide-cli` | `simoxide`, `simoxide-bench`, `bench/golden.sh` |
 | `crates/simoxide-reconf` | runtime model changes: the QVTo host (transformations, SimuLizar's rules, SPD adjustments), journal to change set, direct edits |
 | `crates/simoxide-testkit` | differential testing, model generator, `simoxide-fuzz` |
+| `crates/simoxide-oraclekit` | what the Java reference harnesses share: warm-JVM batch driver, seed agent, result directories, comparisons (`reference/oraclekit/` on the Java side) |
 | `crates/qvto/` | the QVTo engine (`qvto-*` crates, its reference runner and oracles; [QVTo engine](../qvto/), [Development](../qvto/development.md)) |
 | `reference/` | [refsim](../reference-simulator/refsim.md), patches, component oracles |
 | `corpus/`, `corpus-fuzz/` | models with the reference's expected outputs; saved fuzz cases |

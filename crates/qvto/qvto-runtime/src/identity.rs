@@ -36,7 +36,7 @@ pub enum Mode {
     /// compat mode, except that `Set`, `Bag` and `Dict` iterate in insertion order, as in a JVM
     /// whose QVTo and OCL classes create `LinkedHashSet`/`LinkedHashMap` where they create
     /// `HashSet`/`HashMap` (the ordering rule of the Slingshot reference runner's `det` mode,
-    /// `reference/slingshot/src/seed-agent`). It differs from [`Mode::Fast`] in what fast mode
+    /// `reference/oraclekit/seed-agent`). It differs from [`Mode::Fast`] in what fast mode
     /// drops for speed (an effectful `sortedBy` body is evaluated twice, as classic OCL does).
     /// EPL-only: always available, no Java hash order is involved (`DESIGN.md` §6.4).
     Ordered,
