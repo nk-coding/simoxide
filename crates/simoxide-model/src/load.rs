@@ -23,9 +23,6 @@ pub const MODEL_EXTENSIONS: &[&str] = &[
     "resourcetype",
     "monitorrepository",
     "measuringpoint",
-    // scaling policy definitions and their semantic configuration (Slingshot SPD)
-    "spd",
-    "semanticspd",
 ];
 
 /// Default models bundled with the crate (extracted from the 5.2.2 product jars).
