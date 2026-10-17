@@ -1,8 +1,9 @@
 //! Snapshots of runs whose model changes (`DESIGN-SPD.md` N1): after direct edits (F2), with a
 //! run's QVTo state after a rule ran (the id sequence continues), and with SimuLizar's
-//! reconfiguration rules (R1: the six `corpus-rules/` examples, written and restored into a fresh
-//! run and host several times, byte for byte equal to the reference in the exact build and to
-//! the uninterrupted run in fast mode).
+//! reconfiguration rules (R1 and R2: the eleven `corpus-rules/` examples, written and restored into
+//! a fresh run and host several times, byte for byte equal to the reference in the exact build and
+//! to the uninterrupted run in fast mode; the R2 examples create objects without ids, so the
+//! restored id generator must continue the sequence).
 
 mod common;
 
@@ -320,7 +321,7 @@ fn examples() -> Vec<PathBuf> {
         .filter(|p| p.join("run.json").is_file())
         .collect();
     v.sort();
-    assert_eq!(v.len(), 6);
+    assert_eq!(v.len(), 11);
     v
 }
 
@@ -408,8 +409,8 @@ fn rules_runs_continue_from_snapshots() {
             .iter()
             .map(|k| Pause::After(end * k / 100))
             .collect();
-        // exact build: QVTo's compat mode (Auto) for the slow examples' few rules, fast for the
-        // power example's 13 000 runs, as `rules_process.rs`
+        // exact build: the rules' default QVTo mode (Auto: ordered) for the slow examples' few
+        // rules, fast for the power example's 13 000 runs, as `rules_process.rs`
         let qmode = if name == "power_rules_qvto" {
             QvtMode::Fast
         } else {

@@ -22,13 +22,15 @@ modeltype SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.
 modeltype PCM_PARAM uses 'http://palladiosimulator.org/PalladioComponentModel/Parameter/5.2';
 modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
 modeltype PCM_SYSTEM uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+modeltype STOEX uses 'http://sdq.ipd.uka.de/StochasticExpressions/2.2';
 
 transformation wireNewServer(in prm : PRM, inout pcmAllocation : PCM_ALLOC, inout pcmRepository : PCM_REPOSITORY) {
 
 	property instantiatedComponentResourceContainerName = 'InstantiatedComponentResourceContainer';
 	property threshold : Real = 1.2;
-	-- the time-driven aggregation of the response times of the calls to Server2
-	property server2Spec : String = '_5osNEAOzEeWk4qXEVpjV-g';
+	-- the time-driven aggregation of the response times of the calls to Server1 (it takes all
+	-- the load: the second branch has probability 0)
+	property server1Spec : String = '_t9ApEAOzEeWk4qXEVpjV-g';
 
 	main() {
 		var allocation : Allocation := pcmAllocation.rootObjects()[Allocation]->any(true);
@@ -36,8 +38,8 @@ transformation wireNewServer(in prm : PRM, inout pcmAllocation : PCM_ALLOC, inou
 		assert fatal (not env.resourceContainer_ResourceEnvironment->exists(entityName = instantiatedComponentResourceContainerName))
 			with log ('Already scaled');
 		assert fatal (prm.rootObjects()[RuntimeMeasurement]->exists(m |
-				m.measurementSpecification.id = server2Spec and m.measuringValue > threshold))
-			with log ('Server2 is fast enough');
+				m.measurementSpecification.id = server1Spec and m.measuringValue > threshold))
+			with log ('Server1 is fast enough');
 		-- the target node (a role of the action instance in SimuLizar)
 		var node2 : ResourceContainer := env.resourceContainer_ResourceEnvironment->any(entityName = 'ServerNode2');
 		var target : ResourceContainer := object ResourceContainer {

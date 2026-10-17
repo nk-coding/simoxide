@@ -4,15 +4,15 @@
 # reference/slingshot/tools/compare_stat.py per case (Welch, Mann-Whitney, KS, Holm).
 #   tools/rules-stat.sh OUT_DIR SIMOXIDE_BINARY [FROM TO] [case...]
 # SIMOXIDE_BINARY: e.g. a default (EPL) build with `--features reconfiguration`, which runs the
-# fast simulator mode and QVTo's fast mode. The reference runs one JVM at a time, niced.
+# fast simulator mode and QVTo's ordered mode (the rules' default). The reference runs one JVM at a time, niced.
 # With EXACT_BIN (an exact build with `reconfiguration`): also counts the seeds whose measurements
-# equal the reference's byte for byte (exact mode, QVTo fast mode), and a control that compares
+# equal the reference's byte for byte (exact mode, the rules' default QVTo mode: ordered), and a control that compares
 # the reference's seeds with the exact build's next seeds (SimuLizar against itself: the
 # methodology's false-rejection rate).
 set -e
 cd "$(dirname "$0")/.."
 OUT=$(mkdir -p "$1" && cd "$1" && pwd); BIN=$2; FROM=${3:-1}; TO=${4:-30}; shift 4 || shift $#
-CASES=${*:-lb_outsource lb_rules_qvto lb_scaleout power_rules_qvto sl_reconfiguration}
+CASES=${*:-lb_outsource lb_rules_qvto lb_scaleout lb_add_branch lb_scaleout_noid lb_add_branch_noid lb_scaleout_each lb_wire_new_server lb_clone_branch power_rules_qvto sl_reconfiguration}
 for c in $CASES; do
 	d=../corpus-rules/$c
 	mkdir -p "$OUT/ref/$c" "$OUT/sx/$c"
@@ -29,14 +29,14 @@ for c in $CASES; do
 		mkdir -p "$OUT/exact/$c" "$OUT/control/$c"
 		same=0
 		for s in $(seq "$FROM" "$TO"); do
-			nice -n 10 "$EXACT_BIN" run --model "$d" --mode exact --qvto-mode fast --seed "$s" \
+			nice -n 10 "$EXACT_BIN" run --model "$d" --mode exact --seed "$s" \
 				--measurements "$OUT/exact/$c/$s.csv" > /dev/null 2>&1
 			cmp -s "$OUT/exact/$c/$s.csv" "$OUT/ref/$c/$s.csv" && same=$((same + 1))
 		done
 		echo "exact mode: $same of $((TO - FROM + 1)) seeds byte-identical to the reference"
 		n=$((TO - FROM + 1))
 		for s in $(seq $((TO + 1)) $((TO + n))); do
-			nice -n 10 "$EXACT_BIN" run --model "$d" --mode exact --qvto-mode fast --seed "$s" \
+			nice -n 10 "$EXACT_BIN" run --model "$d" --mode exact --seed "$s" \
 				--measurements "$OUT/control/$c/$s.csv" > /dev/null 2>&1
 		done
 		echo -n "control (reference seeds $FROM-$TO vs $((TO + 1))-$((TO + n))): "
