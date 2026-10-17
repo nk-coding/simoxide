@@ -3094,15 +3094,15 @@ unstable	log
 @file log.txt 1475
 null
 <Invalid>
-org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-[org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
-[org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
-[org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+[org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+[org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+[org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
 Dictionary{1=a, 2=b}
 Dictionary{1=a, 2=b}
 Dictionary{1=a, 2=b}
@@ -3164,9 +3164,9 @@ load	1	WARNING	0	'dump' is deprecated
 load	1	WARNING	0	'dump' is deprecated
 load	1	WARNING	0	'dump' is deprecated
 exec	1	OK	0	<Invalid>
-exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-exec	1	OK	0	[org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@2710a218 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+exec	1	OK	0	[org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@1be4ab73 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
 exec	1	OK	0	Dictionary{1=a, 2=b}
 exec	1	OK	0	Dictionary{1=a, 2=b}
 exec	1	OK	0	[a, b]
@@ -3955,8 +3955,8 @@ unstable	log
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"root","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @file log.txt 24
-Elapsed: 71
-Elapsed: 21
+Elapsed: 51
+Elapsed: 32
 
 @file diag.txt 658
 problem	warning	continue_perf.qvto	5	116	17	Import statement must be the first element in compilation unit. Using this location is deprecated.
@@ -4654,31 +4654,31 @@ unstable	dump
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"testRoot","nsURI":null,"nsPrefix":null},"refs":{}}
 {"path":"/0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EParameter::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.1","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.2","type":"http://www.eclipse.org/emf/2002/Ecore#EEnumLiteral","attrs":{"name":"e","value":"0","literal":"e"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.3","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"ENamedElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.4","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EReference::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.5","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.6","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EModelElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.7","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.8","type":"http://www.eclipse.org/emf/2002/Ecore#EParameter","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.9","type":"http://www.eclipse.org/emf/2002/Ecore#EOperation","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.10","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"testGlobalVirtualMapping","nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.11","type":"http://www.eclipse.org/emf/2002/Ecore#EDataType","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"serializable":"true"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.12","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.13","type":"http://www.eclipse.org/emf/2002/Ecore#EParameter","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.14","type":"http://www.eclipse.org/emf/2002/Ecore#EReference","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","containment":"false","resolveProxies":"true"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.15","type":"http://www.eclipse.org/emf/2002/Ecore#EReference","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","containment":"false","resolveProxies":"true"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.16","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"ETypedElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.17","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EStructuralFeature::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.18","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.19","type":"http://www.eclipse.org/emf/2002/Ecore#EEnumLiteral","attrs":{"name":"e","value":"0","literal":"e"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.20","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.21","type":"http://www.eclipse.org/emf/2002/Ecore#EOperation","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.22","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.0","type":"http://www.eclipse.org/emf/2002/Ecore#EReference","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","containment":"false","resolveProxies":"true"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.1","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.2","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.3","type":"http://www.eclipse.org/emf/2002/Ecore#EEnumLiteral","attrs":{"name":"e","value":"0","literal":"e"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.4","type":"http://www.eclipse.org/emf/2002/Ecore#EParameter","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.5","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EModelElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.6","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"ETypedElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.7","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.8","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.9","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.10","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EStructuralFeature::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.11","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.12","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.13","type":"http://www.eclipse.org/emf/2002/Ecore#EOperation","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.14","type":"http://www.eclipse.org/emf/2002/Ecore#EOperation","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.15","type":"http://www.eclipse.org/emf/2002/Ecore#EEnumLiteral","attrs":{"name":"e","value":"0","literal":"e"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.16","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.17","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EParameter::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.18","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"ENamedElement::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.19","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"EReference::globalVirtualMapping","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.20","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"testGlobalVirtualMapping","nsURI":null,"nsPrefix":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.21","type":"http://www.eclipse.org/emf/2002/Ecore#EDataType","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"serializable":"true"},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.22","type":"http://www.eclipse.org/emf/2002/Ecore#EReference","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","containment":"false","resolveProxies":"true"},"refs":{}}
 {"path":"/0/@eAnnotations.0/@contents.23","type":"http://www.eclipse.org/emf/2002/Ecore#EDataType","attrs":{"name":null,"instanceClassName":null,"instanceTypeName":null,"serializable":"true"},"refs":{}}
-{"path":"/0/@eAnnotations.0/@contents.24","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
+{"path":"/0/@eAnnotations.0/@contents.24","type":"http://www.eclipse.org/emf/2002/Ecore#EParameter","attrs":{"name":null,"ordered":"true","unique":"true","lowerBound":"0","upperBound":"1"},"refs":{}}
 {"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"passed","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @file diag.txt 806
@@ -6843,13 +6843,13 @@ unstable	dump
 @file out.jsonl 2161
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"all","nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"resolveAll(ecore::EObject)"},"refs":{"references":["extent1.xmi#/0","extent1.xmi#/0/@eClassifiers.2/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.0/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.2","extent1.xmi#/0/@eClassifiers.0","extent1.xmi#/0/@eClassifiers.1"]}}
-{"path":"/0/@eAnnotations.1","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"resolveAllByRule(toAttribute, ecore::EAttribute)"},"refs":{"references":["extent1.xmi#/0/@eClassifiers.2/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.0/@eStructuralFeatures.0"]}}
+{"path":"/0/@eAnnotations.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"resolveAll(ecore::EObject)"},"refs":{"references":["extent1.xmi#/0","extent1.xmi#/0/@eClassifiers.1/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.0/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.1","extent1.xmi#/0/@eClassifiers.0","extent1.xmi#/0/@eClassifiers.2"]}}
+{"path":"/0/@eAnnotations.1","type":"http://www.eclipse.org/emf/2002/Ecore#EAnnotation","attrs":{"source":"resolveAllByRule(toAttribute, ecore::EAttribute)"},"refs":{"references":["extent1.xmi#/0/@eClassifiers.1/@eStructuralFeatures.0","extent1.xmi#/0/@eClassifiers.0/@eStructuralFeatures.0"]}}
 {"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 {"path":"/0/@eClassifiers.0/@eStructuralFeatures.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"p3","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p3","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.2","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p1","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.2/@eStructuralFeatures.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"p2","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p1","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.1/@eStructuralFeatures.0","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"p2","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.2","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"p3","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @file diag.txt 809
 problem	warning	resolveall.qvto	5	91	56	Declaring entry operation as a mapping is disallowed. 
@@ -6965,7 +6965,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr17812
-@file result.txt 222
+@file result.txt 208
 id	interpret_scr17812
 load	WARNING
 params	in:$model,out:$result
@@ -6977,13 +6977,12 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
-unstable	dump
 
 @file out.jsonl 574
 {"resource":"extent1.xmi","roots":1}
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":null,"nsURI":null,"nsPrefix":null},"refs":{}}
-{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
-{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"1","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.0","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"1","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
+{"path":"/0/@eClassifiers.1","type":"http://www.eclipse.org/emf/2002/Ecore#EClass","attrs":{"name":"2","instanceClassName":null,"instanceTypeName":null,"abstract":"false","interface":"false"},"refs":{}}
 
 @file diag.txt 185
 problem	warning	scr17812.qvto	4	88	56	Declaring entry operation as a mapping is disallowed. 

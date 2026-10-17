@@ -125,8 +125,8 @@ SimuLizar Outsource Rule Transformation started
 Measured value is 5.0
 Threshold is exceeded
 Found 3 AllocationContexts
-Branch1: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@2d8dbd5a (eClass: org.eclipse.emf.ecore.impl.EClassImpl@10ddf175 (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
-Branch2: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@41623394 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@10ddf175 (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
+Branch1: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@73e7c314 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@4a4660ea (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
+Branch2: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@3749568c (eClass: org.eclipse.emf.ecore.impl.EClassImpl@4a4660ea (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
 Balancing Load...
 Set branchProbability to 0.1
 Set branchProbability to 0.9
@@ -136,8 +136,8 @@ exec	1	OK	0	SimuLizar Outsource Rule Transformation started
 exec	1	OK	0	Measured value is 5.0
 exec	1	OK	0	Threshold is exceeded
 exec	1	OK	0	Found 3 AllocationContexts
-exec	1	OK	0	Branch1: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@2d8dbd5a (eClass: org.eclipse.emf.ecore.impl.EClassImpl@10ddf175 (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
-exec	1	OK	0	Branch2: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@41623394 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@10ddf175 (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
+exec	1	OK	0	Branch1: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@73e7c314 (eClass: org.eclipse.emf.ecore.impl.EClassImpl@4a4660ea (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
+exec	1	OK	0	Branch2: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@3749568c (eClass: org.eclipse.emf.ecore.impl.EClassImpl@4a4660ea (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
 exec	1	OK	0	Balancing Load...
 exec	1	OK	0	Set branchProbability to 0.1
 exec	1	OK	0	Set branchProbability to 0.9

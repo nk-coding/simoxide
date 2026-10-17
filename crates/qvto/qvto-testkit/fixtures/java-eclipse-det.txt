@@ -3091,18 +3091,18 @@ check model	pass
 verdict	pass
 unstable	log
 
-@file log.txt 1463
+@file log.txt 1475
 null
 <Invalid>
-org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-[org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
-[org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
-[org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+[org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+[org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+[org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
 Dictionary{1=a, 2=b}
 Dictionary{1=a, 2=b}
 Dictionary{1=a, 2=b}
@@ -3119,7 +3119,7 @@ null
 invalid
 <Invalid>
 
-@file diag.txt 2977
+@file diag.txt 2981
 problem	warning	bug467600.qvto	156	4327	29	'allInstances' is deprecated. Use 'Model::objectsOfKind(OclType)' instead
 problem	warning	bug467600.qvto	166	4542	32	'allInstances' is deprecated. Use 'Element::allSubobjectsOfKind(OclType)' instead
 problem	warning	bug467600.qvto	175	4696	8	'dump' is deprecated
@@ -3164,9 +3164,9 @@ load	1	WARNING	0	'dump' is deprecated
 load	1	WARNING	0	'dump' is deprecated
 load	1	WARNING	0	'dump' is deprecated
 exec	1	OK	0	<Invalid>
-exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
-exec	1	OK	0	[org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@f26dc61 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
+exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+exec	1	OK	0	org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)
+exec	1	OK	0	[org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test), org.eclipse.emf.ecore.impl.EPackageImpl@4a3cb3b1 (name: test) (nsURI: http://test/1.0, nsPrefix: test)]
 exec	1	OK	0	Dictionary{1=a, 2=b}
 exec	1	OK	0	Dictionary{1=a, 2=b}
 exec	1	OK	0	[a, b]
@@ -4015,8 +4015,8 @@ unstable	log
 {"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EPackage","attrs":{"name":"root","nsURI":null,"nsPrefix":null},"refs":{}}
 
 @file log.txt 24
-Elapsed: 36
-Elapsed: 21
+Elapsed: 32
+Elapsed: 22
 
 @file diag.txt 658
 problem	warning	continue_perf.qvto	5	116	17	Import statement must be the first element in compilation unit. Using this location is deprecated.
