@@ -5,7 +5,7 @@
 //! comparison accepts but the strict canonical comparison rejects.
 //!
 //! `tests/data/compare-oracle.tsv` holds the Java verdicts, one per pair. To regenerate:
-//! `QVTO_EMF_WRITE_PAIRS=<file> cargo test -p qvto-emf --test compare`, then
+//! `QVTO_EMF_WRITE_PAIRS=<file> cargo test -p simoxide-emf --test compare`, then
 //! `oracle/run.sh pairs ../foundation/simoxide-emf/tests/data/suite.conf <file> <out>` and copy `<out>`.
 
 use qvto_model::{Datum, FeatureKind, ModelStore, ResourceId};

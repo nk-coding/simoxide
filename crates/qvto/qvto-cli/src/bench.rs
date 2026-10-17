@@ -208,8 +208,8 @@ pub fn bench(args: &[String]) {
         }
         i += 1;
     }
-    let root =
-        find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
+    let root = find_root(Path::new("."))
+        .unwrap_or_else(|| die("not inside the SimOxide repository (its QVTo root, crates/qvto)"));
     generate(&root, gen_only);
     if gen_only {
         return;

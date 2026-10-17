@@ -223,8 +223,8 @@ fn suites(o: &Opts, root: &Path) -> Vec<(String, PathBuf, PathBuf)> {
 
 fn conform(args: &[String]) {
     let o = parse(args);
-    let root =
-        find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
+    let root = find_root(Path::new("."))
+        .unwrap_or_else(|| die("not inside the SimOxide repository (its QVTo root, crates/qvto)"));
     let suites = suites(&o, &root);
     if suites.is_empty() {
         die("no case files");
@@ -416,8 +416,8 @@ fn run_cmd(args: &[String]) {
     let Some(file) = files.first().cloned() else {
         die("usage: qvto run FILE.qvto [MODEL...] [--repeat N] [--fast]")
     };
-    let root =
-        find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
+    let root = find_root(Path::new("."))
+        .unwrap_or_else(|| die("not inside the SimOxide repository (its QVTo root, crates/qvto)"));
     let models = qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), &root)
         .unwrap_or_else(|e| die(&format!("{}: {e}", paths::SUITE_CONF)));
     let path = PathBuf::from(&file);
@@ -519,8 +519,8 @@ fn disasm(args: &[String]) {
     let Some(file) = args.first() else {
         die("usage: qvto disasm FILE.qvto")
     };
-    let root =
-        find_root(Path::new(".")).unwrap_or_else(|| die("not inside the qvto-rs repository"));
+    let root = find_root(Path::new("."))
+        .unwrap_or_else(|| die("not inside the SimOxide repository (its QVTo root, crates/qvto)"));
     let models = qvto_emf::config::Config::read(&root.join(paths::SUITE_CONF), &root)
         .unwrap_or_else(|e| die(&format!("{}: {e}", paths::SUITE_CONF)));
     let path = PathBuf::from(file);

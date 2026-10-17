@@ -39,5 +39,6 @@ mimalloc = ["dep:mimalloc"]
 # distributed, see simoxide-random's `hotspot-math` feature).
 hotspot-math = ["simoxide-sim/hotspot-math"]
 # Runtime model changes (reconfiguration rules, later SPD; DESIGN-SPD.md F2-F4, R1): builds
-# `simoxide-reconf` (and through it the QVTo engine and its adapter, crates/qvto). No command uses it yet. Whether it joins the defaults is open (DESIGN-SPD.md U2).
+# `simoxide-reconf` (and through it the QVTo engine, crates/qvto) for `simoxide run --rules` and
+# `simoxide resume`. Whether it joins the defaults is open (DESIGN-SPD.md U2).
 reconfiguration = ["dep:simoxide-reconf", "simoxide-reconf/snapshot"]

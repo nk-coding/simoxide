@@ -1,4 +1,4 @@
-//! Debugging aid: `cargo run -p qvto-emf --example emf-tool -- <conf> <model> [save|dump|errors]`
+//! Debugging aid: `cargo run -p simoxide-emf --example emf-tool -- <conf> <model> [save|dump|errors]`
 //! (paths relative to the QVTo root (crates/qvto)).
 use simoxide_emf::canon::dump;
 use simoxide_emf::config::Config;

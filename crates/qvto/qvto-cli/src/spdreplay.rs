@@ -64,7 +64,7 @@ pub fn main(args: &[String]) {
         die(&why);
     }
     let root = qvto_testkit::find_root(Path::new("."))
-        .unwrap_or_else(|| die("not inside the qvto-rs repository"));
+        .unwrap_or_else(|| die("not inside the SimOxide repository (its QVTo root, crates/qvto)"));
     // without arguments: the reference runs of the repository
     let runs: Vec<(PathBuf, PathBuf)> = match pos.as_slice() {
         [] => REFERENCE_RUNS

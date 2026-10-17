@@ -6,7 +6,7 @@
 //! and `target/...` for generated material (`target/pcm`, `target/qvto-testkit/java`,
 //! `target/qvto-bench`, ...). `target/` there is a link to the workspace's target directory
 //! (`CARGO_TARGET_DIR`, else `<repository>/target`), kept up to date by [`root`] and
-//! [`find_root`] (and by `tools/qvto-env.sh` for the shell scripts), so the Java runner, the
+//! [`find_root`] (the shell scripts find the QVTo root from their own location), so the Java runner, the
 //! case files and the scripts see the same files as the Rust code.
 
 use std::path::{Path, PathBuf};

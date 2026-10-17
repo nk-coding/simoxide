@@ -91,8 +91,9 @@ fn parse(args: &[String]) -> Opts {
 }
 
 pub fn main(args: &[String]) {
-    let root = qvto_testkit::find_root(Path::new("."))
-        .unwrap_or_else(|| crate::die("not inside the qvto-rs repository"));
+    let root = qvto_testkit::find_root(Path::new(".")).unwrap_or_else(|| {
+        crate::die("not inside the SimOxide repository (its QVTo root, crates/qvto)")
+    });
     match args.first().map(String::as_str) {
         Some("robust") => return crate::robust::main(&root, &args[1..]),
         Some("robust-worker") => return crate::robust::worker(&root, &args[1..]),
