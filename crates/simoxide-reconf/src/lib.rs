@@ -6,7 +6,8 @@
 //!
 //! - QVTo transformations: the host ([`QvtoCore`] shared by all runs, [`QvtoRun`] per run,
 //!   created on first use), SimuLizar's rule folders ([`RuleSet`], [`QvtoRun::run_rules`]) and
-//!   SPD adjustments ([`QvtoAdjuster`], feature `spd`);
+//!   SPD adjustments ([`QvtoAdjuster`]; Slingshot's embedded `MainTransformation`:
+//!   [`QvtoAdjuster::spd`], module [`spd`]; feature `spd`);
 //! - direct edits ([`Edit`]): a small API over the same graph, for tests, snapshots and tools.
 //!
 //! [`change_set`] turns a journal into the simulator's [`ChangeSet`]; [`apply_journal`] and
@@ -51,11 +52,15 @@ mod process;
 mod qvt;
 pub mod resume;
 mod rules;
+#[cfg(feature = "spd")]
+pub mod spd;
 #[cfg(feature = "snapshot")]
 mod snapshot;
 
 #[cfg(feature = "spd")]
 pub use adjust::{AdjustHooks, DefaultAdjustHooks, QvtoAdjuster};
+#[cfg(feature = "spd")]
+pub use spd::{SlingshotHooks, SpdAdjust, SpdVariant, main_transformation};
 pub use edits::{ChangeFile, ChangeFileError, EditOp};
 pub use host::{
     AbortPolicy, Bind, CoreBuilder, FailedRunChanges, IdSourceFn, Imports, Invocation, InvokeHooks,
