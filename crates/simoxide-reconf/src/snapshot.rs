@@ -164,8 +164,40 @@ impl<'m, C: Compat, F: Flavour> RulesRun<'m, C, F> {
     pub fn restore_snapshot(
         s: &Snapshot,
         base: &'m CompiledModel,
+        host: RulesHost,
+        out: Outputs,
+    ) -> Result<Self, SnapshotError> {
+        Self::restore_inner(s, base, host, out, true)
+    }
+
+    /// [`RulesRun::restore_snapshot`] with other rules than the snapshot's (`DESIGN-SPD.md` N2:
+    /// a rule set replaced at the resume): the host's rules run from now on, the saved QVTo
+    /// state, PRM mirror and statistics continue. Equal to the uninterrupted run that calls
+    /// [`RulesHost::replace_rules`] at the snapshot's pause.
+    pub fn restore_snapshot_replacing(
+        s: &Snapshot,
+        base: &'m CompiledModel,
+        host: RulesHost,
+        out: Outputs,
+    ) -> Result<Self, SnapshotError> {
+        Self::restore_inner(s, base, host, out, false)
+    }
+
+    /// The rules' names in the section `rules` of `s`.
+    pub fn snapshot_rules(s: &Snapshot) -> Result<Vec<String>, SnapshotError> {
+        let sec = s.section(RULES).ok_or_else(|| {
+            SnapshotError::Mismatch("the snapshot has no reconfiguration host".into())
+        })?;
+        let img: RulesImage = sec.decode(s.header.encoding)?;
+        Ok(img.rules)
+    }
+
+    fn restore_inner(
+        s: &Snapshot,
+        base: &'m CompiledModel,
         mut host: RulesHost,
         out: Outputs,
+        same_rules: bool,
     ) -> Result<Self, SnapshotError> {
         let sec = s.section(RULES).ok_or_else(|| {
             SnapshotError::Mismatch("the snapshot has no reconfiguration host".into())
@@ -177,7 +209,7 @@ impl<'m, C: Compat, F: Flavour> RulesRun<'m, C, F> {
             .iter()
             .map(|r| r.name().to_string())
             .collect();
-        if names != img.rules {
+        if same_rules && names != img.rules {
             return Err(SnapshotError::Mismatch(format!(
                 "the snapshot's rules are {:?}, the host's {:?}",
                 img.rules, names

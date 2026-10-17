@@ -45,21 +45,29 @@ pub use qvto_emf::{IdPolicy, Journal};
 
 #[cfg(feature = "spd")]
 mod adjust;
+pub mod edits;
 mod host;
 mod process;
 mod qvt;
+pub mod resume;
 mod rules;
 #[cfg(feature = "snapshot")]
 mod snapshot;
 
 #[cfg(feature = "spd")]
 pub use adjust::{AdjustHooks, DefaultAdjustHooks, QvtoAdjuster};
+pub use edits::{ChangeFile, ChangeFileError, EditOp};
 pub use host::{
     AbortPolicy, Bind, CoreBuilder, FailedRunChanges, IdSourceFn, Imports, Invocation, InvokeHooks,
     ModelRef, NsBinding, Outcome, ParamDir, ParamInfo, QvtMode, QvtoCore, QvtoRun, ReconfError,
     RunConfig, Transformation, palladio_metamodels, resolve_mode,
 };
 pub use process::{PRM_URI, ReconfRecord, RuleRecord, RulesHost, RulesRun, RulesStats};
+#[cfg(feature = "snapshot")]
+pub use resume::explore;
+pub use resume::{
+    ChangeStep, ResumeChanges, ResumeError, StepReport, Variant, VariantResult, VariantRun, compare,
+};
 pub use rules::{RuleSet, RulesOutcome};
 #[cfg(feature = "snapshot")]
 pub use snapshot::{QVTO, QvtoState, RULES};

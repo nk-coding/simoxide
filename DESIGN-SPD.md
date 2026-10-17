@@ -694,6 +694,9 @@ the plan:
 
 So in Slingshot, resume ≠ uninterrupted, even without changes.
 
+The N3a spike corrected and extended this section from the code and real snapshot files (5.7,
+"N3a spike": what is not written, what is restored late, what Slingshot cannot read back).
+
 ## 4. Oracles and validation
 
 ### 4.1 Slingshot reference runner (S0, implemented)
@@ -2201,6 +2204,241 @@ together with the immutable `Arc<CompiledModel>`. Then:
   jobs with remaining demands, timers, adjustor states with times), not through the file format.
   The header's mode, flavour and model fingerprint tell an importer what it has.
 
+**N2 as built** (2026-10-17, branch `n2`; guide `docs/guide/snapshots.md`: pause conditions,
+resume with changes, change files, exploration). Done except the P2 part (enforced policies).
+
+- **Pause conditions** (`simoxide-sim/src/sim/watch.rs`, new): `Watch` = a set of `Condition`s
+  (any one pauses): `At(Pause)` (time, events), `Elapsed(ns)`, `ElapsedEvents(n)` (relative to
+  arming: the time of the last event before the pause, the event count), `Series { series:
+  SeriesSel { metric, point }, stat: Value | Mean { window_s }, op, value, sustain_s }` (the
+  trigger: a tuple, or the mean of the last `w` s per series, compared with a value, optionally
+  held for `w` s on every tuple of that series; pauses before the first event at or after the
+  start of the holding plus `w`), `Slo { upper, lower, sensitivity, delay_s }` (the threshold:
+  Slingshot's `SnapshotSLOTriggeringBehavior` range narrowed by the sensitivity). Series are
+  selected by metric (alias, name prefix or `*`) and point (key, part of a key, an element name
+  resolved to its id and its children's ids, or `*`), also series created later. The watch reads
+  the stored rows (`store_measurements` required) with a cursor per series and skips the series
+  work when the tuple count did not change; it writes nothing into the run state, so a watched
+  pause equals `Pause::Events(k)` at the same count, byte for byte (snapshot included).
+  `Simulation::run_watch` checks time conditions with the engine's own `Pause` comparison (the
+  flavour's clock); `Watch::keep_going(&RunState)` is the predicate for `run_while` and for the
+  drivers: `SpdRun::run_while` and `RulesRun::run_while` (new; their `run_until` now delegate to
+  them, behaviour unchanged). The general predicate stays `run_while`. `parse_condition` is the
+  CLI grammar (`--pause-when`, repeatable, ORed with `--pause-at` and the like; the CLI prints
+  `pause condition: <reason>`). Not built: "a policy's trigger fired" as a condition (it needs
+  P2's adjustment requests to snapshot before; a decision-log condition can be added then).
+- **Change files** (`simoxide-reconf/src/edits.rs`, new; format in the guide): one change per
+  line, mapped onto F2's `Edit` (`set_rate`, `set_spec`, `set_double`, `clone_container` +
+  `connect` to the template's links, `clone_assembly`, `allocate`, `remove_from_environment`,
+  `delete`, the graph's `ModelStore::set`), all lines on one graph copy, applied as one change set
+  (`Simulation::apply_changes`). Ops: `rate`, `latency`, `throughput`, `demand`, `probability`,
+  `think-time`, `inter-arrival`, `arrival-rate` (`Exp(rate)`), `population`, `replicas`,
+  `loop-count`, `set` (any single-valued attribute by EMF name, a random variable, a
+  reference), `add-container`, `connect`, `add-assembly`, `allocate`, `remove-container`,
+  `delete`. Elements by id, else by a name unique among the elements of the expected kind;
+  `REF:TYPE` picks a container's resource or an action's demand by resource type. Errors carry
+  the line; `ChangeFileError::Change` wraps the change path's refusal (run unchanged).
+- **Resume change sets** (`simoxide-reconf/src/resume.rs`, new): `ResumeChanges` = ordered
+  steps `File(ChangeFile)` | `Transform(Transformation, Invocation)` (run once through F3's
+  `QvtoRun::invoke`; a transformation that does not complete is `ResumeError::NotApplied`);
+  `apply(&mut sim, &mut QvtoRun)` → `StepReport`s. API pattern: `Simulation::restore_from` (or
+  `restore_snapshot`) → `QvtoRun::restore_section` → `ResumeChanges::apply` → continue. Rule
+  sets (R1): `RulesHost::replace_rules`, `RulesRun::restore_snapshot_replacing` (other rules than
+  the snapshot's; the QVTo state, PRM mirror and statistics continue) and `snapshot_rules`;
+  rules added to a run without rules = `RulesRun::new(restored, host)`. SPD: `SpdRun::
+  model_changed` (membership from the changed model), `SpdRun::enforce_policies(names)`: the
+  hook for Slingshot's incoming policies; it checks the names (`EnforceError::UnknownPolicy`) and
+  returns `EnforceError::Unsupported` until P2 executes adjustments (then: queue a request per
+  policy at `now`, past triggers and constraints, as `SnapshotInitFromBehaviour` does).
+- **CLI.** `simoxide resume FILE --model DIR [--change F.changes]... [--transform X.qvto]...
+  [--rules DIR] [--enforce P,...] [--until T | --pause-when C ...] [--snapshot FILE2]`: the
+  steps run in command-line order after the restore (plain, SPD and rules runs; transformations
+  of a rules run use its host's QVTo state, of other runs a fresh one with the snapshot's `qvto`
+  section, `FailedRunChanges::Discard`, and the next snapshot carries it); `--rules` with other
+  rule names replaces them, on a snapshot without rules adds them; one `--qvto-mode` parser
+  (`auto|ordered|fast|compat`, R2). `--change`/`--transform` need the `reconfiguration` feature
+  (an error names it otherwise). `simoxide explore FILE --model DIR --variant NAME[=F.changes|
+  =X.qvto]... [--until T] [--threads N] [--metrics rt,util,...]`.
+- **Exploration.** `simoxide_reconf::explore::<C, F>(base, &snapshot, &core, &variants, until,
+  threads)`: one restore per variant on a pool of scoped threads (the restores are independent;
+  each thread builds its own simulation and QVTo state from the shared `Snapshot` bytes, the
+  `Sync` compiled model and core), changes applied, run to `until` or the end, the
+  continuation's measurements summarised; results in variant order. `compare` prints the table
+  (means; time-weighted for state and utilisation series; end time, events, finished scenario
+  runs). Example `crates/simoxide-reconf/examples/explore.rs` (MediaStore screencast model,
+  snapshot at 2 000 s, five variants: base, faster disk, twice the load, load plus a faster CPU,
+  the file storage moved to a new faster server; about 10 ms on 4 threads).
+- **What needs F4 (MENTOR-relevant):** population changes of a closed workload (MENTOR's load
+  variation); new or removed usage scenarios; monitors for new containers (a scaled-out
+  container has no utilisation series, so SPD and pause conditions cannot see it; the
+  `Number of Resource Containers` series likewise); the number of replicas (cores), scheduling
+  policy and resource type of a processing resource (ignored as SimuLizar ignores them, MC-1.4:
+  a fixed behaviour needs F4's syncer); scale-in removal policies (a removed container keeps
+  simulating); structural behaviour changes (a branch added to a load balancer's SEFF takes
+  effect for new executions only; an action's kind or demand count cannot change); containers
+  added and removed in one change set; and **every model change in the Slingshot flavour**
+  (`ChangeError::Unsupported` from `change::recompile`: Slingshot's syncers are F4/P3), which
+  also refuses change files, transformations and rules at a resume. Enforced policies need P2.
+- **Tests (exit criterion).** `simoxide-reconf/tests/resume.rs` (7): change files at a resume
+  equal the direct F2 edits in the uninterrupted run byte for byte (result, measurements, trace,
+  tape) on five models (h19 container + allocation + rate; h07 branch probabilities, a demand
+  and a rate; h06 think time and a demand by name; h09 loop count and `set`; MediaStore
+  arrival rate and an HDD rate), exact and fast, and each change has an effect; refused changes
+  (population: `Unsupported`; a removed allocation context: `Abort`; an unknown element; a wrong
+  workload kind) leave the restored run equal to the uninterrupted one; the Slingshot flavour
+  refuses and continues unchanged; QVTo transformations at two resumes (fresh simulation and
+  QVTo state with the section `qvto` each time) equal the in-process invocations, new ids
+  included, exact and fast; a rule set replaced (`lb_scaleout`: `outsource` alone until 300 s,
+  then both rules) and one added to a run without rules equal the in-process runs (R2's
+  settings: QVTo `Auto` = ordered); `RulesRun::run_while` with a watch; exploration on 1 and 3
+  threads and twice gives the same results, equal to a variant run by hand, the refused variant
+  reports its error. `simoxide-sim/tests/watch.rs` (3): time and event conditions pause where
+  `Pause` pauses (same snapshot bytes; SimuLizar exact and fast, Slingshot fast), `Elapsed` and
+  `ElapsedEvents` after a pause; value, mean, held and SLO conditions (with a delay) pause at
+  event k exactly as `Pause::Events(k)` and not at the check before (h06, `t_util`, the
+  Slingshot flavour); a condition that never holds leaves the run unchanged; series conditions
+  without stored measurements are an error. `simoxide-spd/tests/sim.rs` (+2): `SpdRun::
+  run_while` with time and response-time conditions, continuation equal (decision log, state,
+  measurements); `enforce_policies` refuses (unknown name, P2) and the run is unchanged.
+  `simoxide-cli/tests/resume_cli.rs` (2 default, 5 with `reconfiguration`): `--pause-when`
+  (held state, then `elapsed`) across three processes equals the uninterrupted run; change
+  files deterministic and effective, refusals with their messages (wrong workload kind, abort,
+  unknown element, closed population F4, Slingshot flavour, `--enforce` without SPD), two
+  `--transform` hops, rules replaced and added, `explore` on 1 and 3 threads; without the
+  feature `--change` names it.
+- **Shared files touched** (small, delimited): `simoxide-sim/src/sim.rs` (`pub mod watch;`),
+  `simoxide-sim/src/lib.rs` (re-exports `Condition`, `Watch`), `simoxide-spd/src/sim.rs`
+  (`SpdRun::run_while`, `run_until` delegates), `simoxide-spd/src/lib.rs` (`mod resume`),
+  `simoxide-reconf/src/process.rs` (`RulesRun::run_while`, `RulesHost::replace_rules`),
+  `simoxide-reconf/src/snapshot.rs` (`restore_snapshot_replacing`, `snapshot_rules`),
+  `simoxide-reconf/src/lib.rs` (modules, re-exports), `simoxide-cli/src/main.rs` (resume, explore,
+  pause conditions; one `--qvto-mode` parser). New: `simoxide-sim/src/sim/watch.rs`,
+  `simoxide-reconf/src/{edits,resume}.rs`, `simoxide-spd/src/resume.rs`, the tests and the example.
+  Merged with `spd` at 8386d26 (R2) and 49dd1d8 (M4-M6, the shared graph): the change files work
+  on the shared graph through the public `Edit` API (only `edits.rs` and the tests needed the new
+  `Edit::new(&sim)` and graph accessors).
+- **Gates.** After the merge with `spd` 49dd1d8: `golden.sh` identical (312 runs, exact
+  build with `hotspot-math`, against the binary of a3ffa38); `cargo test --release --workspace
+  --features exact` 566 passed, 0 failed (549 on `spd` 49dd1d8; +17: `simoxide-reconf` resume 7
+  and the change-file parser 1, `simoxide-sim` watch 3 and the condition parser 1, `simoxide-spd`
+  +2, `simoxide-cli` resume 2; with `reconfiguration` the CLI has 5 resume and 6 snapshot tests,
+  all passing); the QVTo adapter-parity test needs the Java cache of the merge checkout
+  (`target/qvto-testkit` from `simoxide-merge`, whose identity hashes the recorded data has);
+  `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; fmt and clippy `-D warnings` clean (workspace,
+  all targets, default, `exact,hotspot-math`, `compat`; `simoxide-cli` with `reconfiguration`,
+  `exact,reconfiguration`, without default features, with only `reconfiguration`, with only
+  `fast,spd`; `simoxide-reconf` and `simoxide-spd` without default features; `snapshot` alone on
+  sim, spd, reconf); release check: no opt-in crate in `simoxide-cli` (also with
+  `reconfiguration`) or `qvto-cli`. Runs without conditions or changes do not touch the new code
+  (the watch is a separate `PauseWhen`; `run_until` of the drivers delegates to the same loop);
+  a quick timing of the MediaStore screencast model (exact, 30 runs) is within noise (timing
+  deferred).
+
+**N3a spike** (2026-10-17; Slingshot's `.snapshot`, `.config` and `.state` against SimOxide's
+`RunState`). Sources: the extension `Palladio-Analyzer-Slingshot-Extension-Initialisation`
+(`[INIT]`, bundles `snapshot.data`, `snapshot.serialization`, `snapshot`, `initialisedsimulation`),
+Slingshot core and extensions, `reference/slingshot/`.
+
+**Verdict: go, for the Slingshot fast flavour, export first; lossy by design; not for the
+Slingshot-exact engine yet.** Export (SimOxide → `.snapshot`) is feasible and can be more correct
+than Slingshot's own snapshots; import is feasible for the subset Slingshot can write and read;
+exact SimOxide→SimOxide chains keep using the N1 snapshot (carried alongside, e.g. as an extra
+top-level field, which Slingshot's reader ignores). Slingshot itself reads back only a subset of
+what it writes, so "round trip with Slingshot" is limited to that subset.
+
+- **Formats.**
+  - `.snapshot` = `InitState {id, pointInTime, snapshot: {events, statevalues}}`. Events are the
+    engine's scheduled events (`{"type": class, "event": gson reflection}`: `id`,
+    `scheduledTime`, `delay`, `entity`, generic type token), minus a skip list (snapshot,
+    measurement and `SimulationFinished` events, `ProcessorSharingJobProgressed`), plus recorded
+    `JobInitiated` per job and open response-time calculators (`UsageModelPassedElement<Start>`,
+    `SEFFModelPassedElement<StartAction>` with negative offsets). Entities are
+    `{class, refId, obj}` on first use, then the bare refId (`hashCode$classHash`: collisions
+    alias silently); a closed type list decides what can be read (`SlingshotTypeTokenSets`). PCM
+    elements are `file#fragment` (XMI id or EMF path) or a full pathmap URI; SimOxide's loader
+    resolves both. StoEx frames are plain gson maps (shared frames duplicated; numbers come
+    back as `Double`, INNER proxies as maps). `statevalues` = SPD adjustor states with shifted
+    times; they need MENTOR's SPD branch (another package than Slingshot master).
+  - `.config` = `{incomingPolicies: [policy id], parameters: {Behaviour: {active, ...}}}`:
+    `SnapshotTriggeringBehavior` (`dodrop` — the README's `doDrop` has no effect —,
+    `dropInterval`), `SnapshotSLOTriggeringBehavior` (`sensitivity`, `activationDelay`), the two
+    abortion behaviours (`active`); `minDuration` is read nowhere.
+  - `.state` = `{parentId, id, startTime, duration, reasonsToLeave, utility, outgoingPolicyIds,
+    measurementSets}` (EDP2 measurements with local times; utility from the SLO repository and a
+    cost extension).
+- **Corrections to §3** (from the code, partly verified by runs): pending
+  `ModelAdjustmentRequested` events are not written to `.snapshot` (only to `.state` as outgoing
+  policy ids); only closed-think, inter-arrival and calculator events are rebased: every other
+  scheduled event is restored at its old local `scheduledTime + delay`, so stale FCFS
+  `JobProgressed`, `UserWokeUp` and `SimulationTimeReached` events fire late or twice; FCFS vs PS
+  is decided by the container's first processing resource, not the job's (an HDD head job is
+  written with its full demand); one job record per user (a second concurrent job throws in the
+  recorder); passive-resource holders and waiters are not captured (verified: the waiting user
+  is lost; on restore the capacity inflates); the maximum state duration is the experiment's
+  simulation time; SPD time triggers are rebased by editing the SPD model copy; **Slingshot cannot
+  read its own snapshots that contain usage loops or branches, SEFF loops, forks,
+  infrastructure calls or linking jobs** (verified: `Missing Type mapping
+  …LoopScenarioBehaviorContext` on h09, `…LinkingJob` on h19).
+- **Mapping** (fast flavour / Slingshot-exact engine):
+  - *1:1*: closed users in think time, open arrivals, usage delays; usage and SEFF positions at
+    the root and in branches (SimOxide's instructions carry their action ids, so a program
+    counter maps to Slingshot's cursor, which points past the waiting action); nested external
+    calls with call-over-wire requests; single-demand internal actions; PS remaining demands;
+    the FCFS head's remaining demand and the queue (SimOxide writes a better one than
+    Slingshot); scenario and operation response-time calculators; SPD adjustor counters, cooldown
+    and last enactment; ids (fresh refIds).
+  - *Lossy* (by design, as Slingshot's own): RNG state (reseeded), same-time order (a
+    `HashSet`), sliding windows, monitor buffers and SPD trigger aggregators (reset), absolute
+    time (rebased to 0; import needs the local snapshot time from the parent `.state`), frame
+    identity and number types, FCFS queue order on import, the collection iterator (SimOxide's
+    fixed behaviour pops frames per iteration), queued SPD requests (→ policy ids).
+  - *Semantically 1:1, but unreadable by Slingshot*: usage loops and branches, SEFF loops,
+    infrastructure calls, linking jobs (export only to SimOxide or a fixed reader).
+  - *Impossible*: passive-resource holders and waiters in the native format (an untested
+    workaround: synthetic SEFF-progress events at the acquire action); forks in the fast flavour
+    (Slingshot's fork holder keeps a Java iterator; at ≥ 2 branches it throws, Q23); an internal
+    action with several demands mid-action (concurrent in Slingshot, sequential in SimOxide's
+    fixed behaviour).
+  - *ssx* mirrors Slingshot's entity graph almost 1:1 (users, behaviour contexts, holders, RPCs,
+    requests, jobs), so its mapping is structural, but it has no pause yet (N1 notes).
+- **Effort for N3b** (fast flavour): gson-shaped serde model with envelopes, `Optional`, refId
+  arena, PCM reference writer and resolver, type coercion 3-4 d; export (processes,
+  continuations and frames → entity graph; jobs; timers; calculators; `statevalues`; rebasing; a
+  strict "Slingshot-readable" mode that refuses or warns on loop, branch, fork, infrastructure and
+  link positions) 5-7 d; import (rebuild processes, continuations, frames, jobs, timers,
+  calculators and SPD state; handle Slingshot's artefacts: stale events, absolute times, fake
+  jobs, lost waiters) 5-7 d; `.config` onto N2 (incoming policies = enforced policies, needs P2;
+  SLO trigger = `Condition::Slo`; maximum duration; drop rules) 2 d; tests 3-4 d; a `.state`
+  writer +2-3 d. **Both directions about 4-5 w; export plus `.config` and a lite `.state` about
+  2.5-3 w** (fits the planned 2-3 w); import of Slingshot-written snapshots as a follow-up
+  (+1-1.5 w); ssx: +1 w for its pause and resume, then +1 w. Risks: the format is Slingshot's
+  private field layout through reflection (pin to the S0 nightly); Slingshot's snapshots are partly
+  wrong (choose the intended semantics, document the artefacts); `statevalues` need MENTOR's SPD
+  branch; frame layouts differ; refId collisions.
+- **Round-trip test models** (`corpus-ss/`): `ss_closed_think` (closed, think time, FCFS),
+  `h05_open_workload` (open, FCFS, usage delay), `h03_fcfs_hdd` (PS and FCFS in one container:
+  shows the classification bug), `ss_fifo_ties`, `h01_ps_single`, `h20_ps_multicore` (PS),
+  `ss_passive` (passive: the waiter is lost), `h14_call_chain_3` (nested calls over wires),
+  `h08_guarded_branch_params` (SEFF branch with parameters: frames), `h22_usage_behaviour`;
+  negative cases `h09_loop` and `h19_linking_resource` (Slingshot cannot read them back); SPD
+  `spd_minimal`, `spd_scale_in`, `spd_time_policies` (`reference/slingshot/models`).
+- **MENTOR application (U7): not available locally.** Only sources (`initialisedsimulation.
+  application`, a headless launch configuration); no built jars, no `~/.m2`/`~/.p2`; the S0
+  install lacks gson, jgrapht, the cost extension, ExperimentAutomation (only SimuLizar 5.2.2's
+  jars exist), mdsdprofiles and the SLO metamodel. The branches exist remotely (SPD interpreter
+  `stateexplorationRequirements`, ExperimentAutomation `slingshot-impl`), but building the stack
+  needs a Tycho build and a port of the SPD branch to the nightly's layout (1-3 d). A round trip
+  with the MENTOR app stays an open question for U7.
+- **Evidence.** With the S0 runner and a probe bundle holding verbatim copies of the extension's
+  `snapshot.data` and `snapshot.serialization` classes (SPD state stubbed: MENTOR branch missing),
+  real `.snapshot` files were written and read back by the extension's own deserialiser for 10
+  models (JVMs one at a time, `nice -n 19`, `-Xmx2g`; files in the spike's scratch directory, not
+  committed): 8 read back (closed think, h03, h05, ss_passive, h14, h08, h22, spd_minimal with a
+  `SimulationTimeReached`), 2 failed as above. The restore side was not run: it needs
+  `InitWrapper`/`SnapshotConfiguration` of the `initialisedsimulation` bundle and so
+  ExperimentAutomation (a probe that injects the events as `SnapshotInitFromBehaviour` does: about
+  1-2 d).
+
 ### 5.8 Performance considerations
 
 - Without SPD, rules or snapshots, nothing changes: the overlay is untouched, there are no
@@ -2304,8 +2542,8 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **P3** | SPD in the Slingshot flavour end to end; statistical scenarios; exact SPD runs (with X2, Q2) | P2, S2 | 1.5-2.5 w | V4 on utilisation and response-time scenarios; V3x on the SPD corpus |
 | **Q1** | *Done 2026-10-17* (findings: 5.5 "Q1 as built"). qvto-rs: SPD adjustment corpus for every path (V2) incl. service group, competing consumers, scale-in: 47 cases, 73 of 105 operations (all of `MainTransformation`'s call graph) | — | 3-5 d | met: strict match with the Java runner (47/47, also on identity-hash-dependent outputs); two engine discrepancies and three harness ones fixed |
 | **N1** | *Done 2026-10-17* (findings: 5.7 "N1 as built"). Snapshot serialisation: serde of `RunState`, XMI writer for the overlay, versioned format | F1, F2 | 1.5 w | met: serialize → deserialize → identical continuation, byte for byte, on every model directory in exact and fast mode and both flavours (Slingshot-exact engine: refused, no pause yet), after model changes, with SPD, with SimuLizar rules and a QVTo state; deterministic bytes |
-| **N2** | Pause/resume API with change sets, enforced policies, snapshot conditions (duration, trigger, threshold) | N1, P2 | 1 w | resume-with-change tests; fork-based exploration example |
-| **N3** | Slingshot `.snapshot`/`.config`/`.state` interop: a: spike on the format mapping; b: export/import | N2, S2 | a: 3 d; b: 2-3 w | a: go/no-go report; b: round trip with the MENTOR app on a model (if U7) |
+| **N2** | *Done 2026-10-17 except the P2 part* (findings: 5.7 "N2 as built"; enforced policies: a hook that refuses until P2). Pause/resume API with change sets, enforced policies, snapshot conditions (duration, trigger, threshold) | N1, P2 | 1 w | met: resume-with-change tests (change files, QVTo transformations, rule sets; byte-equal to the in-process change, exact and fast; the Slingshot flavour refuses until F4); pause-condition tests; fork-based exploration example (`explore.rs`, `simoxide explore`), deterministic |
+| **N3** | Slingshot `.snapshot`/`.config`/`.state` interop: a: spike on the format mapping; b: export/import. *a done 2026-10-17: go for the fast flavour, export first, lossy* (5.7 "N3a spike"; real `.snapshot`s written and read back on 8 of 10 models; the MENTOR app is not available locally) | N2, S2 | a: 3 d; b: 2-3 w (export + `.config` + lite `.state`: 2.5-3 w; both directions 4-5 w) | a: met (verdict in 5.7); b: round trip with the MENTOR app on a model (if U7) |
 | **B1** | Benchmarks of §6 (both Slingshot modes) and docs pages | S2, X2, P3, N2 | 1-1.5 w | tables in `docs/performance/` |
 | **D** | Docs: guide pages (SPD, reconfiguration, snapshots, flavours), spec rules, deviations | continuous | +10 % | — |
 
@@ -2363,7 +2601,7 @@ Decided on 2026-10-17 (U3-U6, U12-U14); the others are still open.
 | U4 | *Decided*: **both** a Slingshot-exact mode and a fast mode | exact: the same events, random draws and measurements as the S0 runner's `det` Slingshot (seeded randomness, deterministic same-time order, instrumentation), like the SimuLizar-exact mode against refsim; fast: semantics only, statistically equal. The S0 patches are the basis: minimal, documented, switchable (`--stock`) |
 | U5 | *Decided*: Slingshot bugs are **fixed by default**; a compat flag per documented quirk (Q1-Q37) reproduces it | the exact mode against the patched Slingshot runs with all quirk flags on; the SimuLizar flavour with SPD uses fixed semantics. What "fixed" means: U13 |
 | U6 | *Decided*: SPD in **both flavours** (SimuLizar and Slingshot) | the SimuLizar-flavour SPD has no reference; it is the earliest usable autoscaling and shares all code |
-| U7 | Install the MENTOR initialisation application and branch-only ExperimentAutomation for snapshot interop tests and benchmarks | only if `.snapshot` interop (N3) is wanted |
+| U7 | Install the MENTOR initialisation application and branch-only ExperimentAutomation for snapshot interop tests and benchmarks | only if `.snapshot` interop (N3) is wanted. N3a: not available locally; building it needs a Tycho build of the branch-only bundles and a port of MENTOR's SPD branch (1-3 d) |
 | U8 | `ProfilesLibrary`: stubs only, or real stereotype support (EMF Profiles) for rules that use it | stubs (the S0 runner uses a stub bundle too) |
 | U9 | Usage evolution (DLIM) in SimOxide: needed for realistic autoscaling load curves | yes, as a separate later phase (about 1-2 w); the S0 runner does not load usage evolution yet |
 | U10 | Write changed PCM models as XMI (snapshot model state, MENTOR-like output) with the foundation's XMI writer | yes, in N1 |

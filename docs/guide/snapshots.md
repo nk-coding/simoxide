@@ -107,10 +107,188 @@ let rules_run = RulesRun::<Exact>::restore_from(f, &cm, host, Outputs::default()
   `QvtoRun::snapshot_section(enc)` and comes back with `QvtoRun::restore_section(&sim, &s)`: the
   id generator continues, so objects created after the restore get the ids they would have got.
 
+## Pause conditions
+
+A run can also pause when a condition holds, not only at a time: `--pause-when COND` (repeatable;
+any condition that holds pauses, together with `--pause-at` and the like). The run stops between
+two events, right after the event that made the condition hold; with `--snapshot FILE` the paused
+run is written as above, and the CLI prints `pause condition: ...` with what held.
+
+| Condition | Meaning |
+|---|---|
+| `time T`, `before T`, `events N` | as `--pause-at`, `--pause-before`, `--pause-events` |
+| `elapsed T`, `elapsed-events N` | `T` seconds or `N` events after the start of this run or resume (counted from the time of the last event before the pause) |
+| `METRIC[POINT] OP V` | a tuple of a selected series compares with `V` (`OP`: `>`, `>=`, `<`, `<=`) |
+| `METRIC[POINT] mean W OP V` | the mean of the tuples of the last `W` seconds (per series) compares with `V` |
+| `... for W` | the comparison held for `W` seconds on every tuple of that series (pauses before the first event at or after the time it started to hold plus `W`) |
+| `slo METRIC[POINT] upper U [lower L] [sensitivity S] [delay D]` | closeness to a service-level objective, as Slingshot's `SnapshotSLOTriggeringBehavior`: with `m = (U - L) / 2` (`L` = 0 if absent) a value `>= U - S*m`, or with `lower` a value `<= L + S*m`, pauses; not before `D` seconds |
+
+- `METRIC`: `rt` (response time), `util` (utilisation), `state` (state of an active resource: the
+  queue length), `demand`, `waiting`, `holding`, `passive` (state of a passive resource),
+  `containers`, a metric name of `measurements.csv` (or its beginning, case-insensitive), or `*`.
+- `POINT`: a measuring-point key of `measurements.csv`, a part of it (an element's id), the name
+  of a model element (it selects the keys with its id or the id of an element it contains, e.g. a
+  container's processing resources), or `*`. A condition reads every series that matches, also
+  series created later in the run.
+
+```sh
+simoxide run --model corpus/x_pem_screencast_ms --max-measurements -1 --max-sim-time 20000 \
+    --pause-when 'rt[RealisticUsageScenario] > 5000' \
+    --pause-when 'state[DatabaseServer] >= 3 for 60' --snapshot hot.snap
+simoxide resume hot.snap --model corpus/x_pem_screencast_ms --pause-when 'elapsed 600' \
+    --snapshot later.snap
+```
+
+Series conditions read the stored measurement rows (`store_measurements`, on by default). A
+condition changes nothing in the run: a run paused by a condition is the run paused by
+`--pause-events` at the same event count, and its snapshot has the same bytes.
+
+## Resume with changes
+
+`simoxide resume` can change the model between the restore and the continuation (needs the
+`reconfiguration` feature of `simoxide-cli`):
+
+```sh
+simoxide resume ms-120.snap --model corpus/x_sl_mediastore \
+    --change faster-db.changes --transform scale-out.qvto --until 600 --snapshot ms-600.snap
+```
+
+- `--change FILE`: a change file (below), applied as one change set.
+- `--transform X.qvto`: a QVTo transformation, run once on the run's models (bound as SimuLizar
+  binds rules: every model parameter by its metamodel). A transformation that does not complete
+  (`assert fatal`, an exception) is an error and changes nothing. Its QVTo state (the id
+  generator) goes into the next snapshot (section `qvto`), so a transformation at a later resume
+  gives new objects the ids the uninterrupted run would give them.
+- The steps run in the order given. Each prints what the change path did
+  (`change file: generation 1, rate of ... -> ...`); changes SimuLizar's syncers ignore are
+  warnings.
+- `--rules DIR`: on a snapshot of a run with rules, other rules than the snapshot's replace them
+  (`rules replaced: [...] -> [...]`; the QVTo state, the runtime measurement mirror and the
+  statistics continue); on a snapshot without rules, the rules are added from the resume on.
+- `--enforce POLICY,...`: enforce scaling policies at the resume, past their triggers and
+  constraints (Slingshot's "incoming policies"). This needs the SPD adjustment phase (P2): today
+  the names are checked and the resume stops with an error.
+- The result is deterministic: the same snapshot and the same changes give the same
+  continuation, byte for byte. It equals the uninterrupted run that applies the same changes at
+  the pause (`Simulation::apply_changes`, `QvtoRun::invoke`, `RulesHost::replace_rules`).
+
+Changes the run cannot take are errors that leave it unchanged:
+
+- not supported yet (`unsupported model change`; phase F4): population changes of a closed
+  workload; new or removed usage scenarios; monitor changes (new measurement series, sliding
+  windows, runtime-measurement recorders: a new container gets no monitors); structural changes
+  of a behaviour (an action or branch added to a SEFF); a container added and removed in one
+  change set; **every model change in the Slingshot flavour** (its syncers are F4/P3);
+- SimuLizar aborts on them (`SimuLizar aborts on this model change`): removing an allocation
+  context, `UNSET` or `MOVE` in the allocation or in the link lists;
+- invalid (`invalid model change`): the changed model does not validate or compile.
+
+Changes SimuLizar's syncers ignore are applied to the model but do not change the simulation
+(a warning): the number of replicas (cores), the scheduling policy and the type of a processing
+resource, HDD read and write rates. A removed container keeps simulating.
+
+### Change files
+
+One change per line; `#` starts a comment line. An element (`REF`) is named by its id or, if no
+element has that id, by its name (`entityName`), which must be unique among the elements of the
+kind the change expects (assembly contexts for `allocate`, containers for `add-container`, ...);
+a name with blanks is written in double quotes. `REF:TYPE` selects a container's processing
+resource or an internal action's demand by resource type (`CPU`, `HDD`, `DELAY`, or the type's
+id). The value of a value change (a StoEx or a number) is the rest of the line, as written. All
+lines work on one copy of the run's model (later lines can name elements earlier lines created)
+and are applied together; on any error nothing changes.
+
+| Change | Effect |
+|---|---|
+| `rate REF[:TYPE] STOEX` | processing rate of a processing resource (or of a container's resource) |
+| `latency LINK STOEX`, `throughput LINK STOEX` | of a linking resource |
+| `demand ACTION[:TYPE] STOEX` | a resource demand of an internal action |
+| `probability TRANSITION P` | probability of a branch transition (SEFF or usage model) |
+| `think-time WORKLOAD STOEX` | think time of a closed workload (or of a usage scenario's) |
+| `inter-arrival WORKLOAD STOEX` | inter-arrival time of an open workload (or of a usage scenario's) |
+| `arrival-rate WORKLOAD RATE` | inter-arrival time `Exp(RATE)` |
+| `population WORKLOAD N` | population of a closed workload (not supported before F4) |
+| `replicas REF[:TYPE] N` | number of replicas of a processing resource (ignored by the syncers, MC-1.4) |
+| `loop-count LOOP STOEX` | iteration count of a SEFF loop or a usage-model loop |
+| `set REF FEATURE VALUE` | any single-valued attribute by its EMF name, a random variable (its specification), or a reference (`VALUE` is a `REF`) |
+| `add-container TEMPLATE NEW_ID [NAME]` | a container with copies of the template's processing resources (ids `NEW_ID_0`, ...), connected to the template's linking resources |
+| `connect LINK CONTAINER` | connects a container to a linking resource |
+| `add-assembly TEMPLATE NEW_ID [NAME]` | an assembly context of the template's component |
+| `allocate ASSEMBLY CONTAINER NEW_ID` | a new allocation context |
+| `remove-container CONTAINER` | the container leaves the resource environment (it keeps simulating, MC-1.5) |
+| `delete REF` | `EcoreUtil.delete` |
+
+```text
+# faster database disk, twice the load, a second server for the file storage
+rate          DatabaseServer:HDD  1200 * 1000 * 1000
+arrival-rate  RealisticUsageScenario  0.08
+add-container DatabaseServer _db2 "Database Server 2"
+rate          _db2:HDD  2000 * 1000 * 1000
+allocate      FileStorage _db2 _alloc_fs2
+```
+
+What the changes do to the running simulation (requests in progress, queued jobs, ...) is on
+[Model changes](../spec/model-changes.md).
+
+## Exploration
+
+`simoxide explore` forks one snapshot into variants, each with its own changes, runs them to the
+end (or `--until T`) on parallel threads and prints a table of their metrics (the mean of each
+series of the continuation; for state and utilisation series the time-weighted mean; plus end
+time, events and finished usage-scenario runs):
+
+```sh
+simoxide explore ms.snap --model corpus/x_pem_screencast_ms \
+    --variant base --variant fast-disk=disk.changes --variant scale=scale-out.qvto \
+    --metrics rt,state --threads 4
+```
+
+A variant is `NAME` (no change), `NAME=FILE.changes` or `NAME=X.qvto`. The table is the same
+whatever the number of threads. A runnable library version is
+`crates/simoxide-reconf/examples/explore.rs` (`cargo run --release -p simoxide-reconf --example
+explore`).
+
+## Library
+
+```rust
+use simoxide_reconf::{ChangeFile, Imports, Invocation, QvtoCore, QvtoRun, ResumeChanges, RunConfig};
+use simoxide_sim::{Fast, Outputs, Simulation, Watch, sim::watch::parse_condition};
+
+// restore, change, continue
+let mut sim = Simulation::<Fast>::restore_from(file, &cm, Outputs::default())?;
+let core = QvtoCore::new()?;
+let mut qvto = QvtoRun::new(&core, RunConfig::default())?;
+qvto.restore_section(&sim, &snapshot)?;              // the QVTo state, if the snapshot has one
+let changes = ResumeChanges::new()
+    .file(ChangeFile::load("faster-db.changes".as_ref())?)
+    .transform(core.compile_file("scale.qvto".as_ref(), &Imports::Folder)?, Invocation::simulizar());
+let steps = changes.apply(&mut sim, &mut qvto)?;     // a StepReport per step
+
+// pause when a condition holds
+let mut watch = Watch::new(vec![parse_condition("rt[RealisticUsageScenario] > 5000")?]);
+sim.run_watch(&mut watch)?;                           // Status::Paused or Finished
+if let Some(f) = watch.fired() {
+    println!("{} at {} ns", f.reason, f.at_ns);
+}
+```
+
+- `ChangeFile::{parse, load, apply}` applies a change file to any run (paused or restored);
+  `ResumeChanges` chains change files and transformations (`StepReport`, `ResumeError`).
+- `Watch` (`simoxide_sim::sim::watch`: `Condition`, `SeriesSel`, `Stat`, `Op`, `parse_condition`)
+  is a set of conditions; `Simulation::run_watch` runs until one holds. `Watch::keep_going` is a
+  predicate for `Simulation::run_while`, `SpdRun::run_while` and `RulesRun::run_while`, which
+  also take any predicate of one's own on the `RunState`
+  (`sim.run_while(|s| watch.keep_going(s) && my_predicate(s))`).
+- Rules: `RulesHost::replace_rules`, `RulesRun::restore_snapshot_replacing` (other rules than the
+  snapshot's), `RulesRun::new(restored_sim, host)` (rules added).
+- SPD: `SpdRun::model_changed` (the target groups' membership after a change),
+  `SpdRun::enforce_policies` (P2: returns `EnforceError::Unsupported` until then).
+- `simoxide_reconf::explore` (restores in parallel threads, `Variant`, `VariantResult`) and
+  `compare` (the table).
+
 ## What a snapshot is not (yet)
 
-- No change set is applied at resume time; that is phase N2 (resume with a change set, enforced
-  policies, snapshot conditions). Today a restored run can be changed with `apply_changes` or an
-  `Edit` before it continues.
-- No interchange with Slingshot's `.snapshot` files (phase N3).
+- Enforced scaling policies at a resume wait for the SPD adjustment phase (P2).
+- The Slingshot flavour takes no model changes at a resume (F4).
+- No interchange with Slingshot's `.snapshot` files (phase N3; DESIGN-SPD.md 5.7, "N3a spike").
 - A snapshot holds SimOxide's internal run state: it is read by the same SimOxide version only.

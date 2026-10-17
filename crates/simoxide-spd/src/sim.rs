@@ -27,7 +27,9 @@ use simoxide_model::raw::ObjId;
 use simoxide_sim::compat::Compat;
 use simoxide_sim::flavour::{Flavour, SimuLizar};
 use simoxide_sim::ir::metric_names;
-use simoxide_sim::{CompiledModel, Outputs, RunResult, SimError, SimErrorKind, Simulation, Status};
+use simoxide_sim::{
+    CompiledModel, Outputs, RunResult, RunState, SimError, SimErrorKind, Simulation, Status,
+};
 
 /// Tags of request notes (time events use their timer index).
 const REQUEST: u32 = 1 << 31;
@@ -269,10 +271,24 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
         before_ns: Option<i64>,
     ) -> Result<Status, SimError> {
         let bound = before_ns.unwrap_or(i64::MAX);
+        self.run_while(adjuster, log, |s| {
+            s.next_event_ns().is_none_or(|t| t < bound)
+        })
+    }
+
+    /// Runs like [`SpdRun::run`] while `keep_going` holds, asked between events (as
+    /// [`Simulation::run_while`] asks it) after the SPD work of the last event: e.g. a pause
+    /// condition (`simoxide_sim::Watch::keep_going`).
+    pub fn run_while(
+        &mut self,
+        adjuster: &mut dyn Adjuster<C>,
+        log: &mut dyn Log,
+        mut keep_going: impl FnMut(&RunState<C>) -> bool,
+    ) -> Result<Status, SimError> {
         loop {
             let status = self
                 .sim
-                .run_while(|s| !s.hooks_pending() && s.next_event_ns().is_none_or(|t| t < bound))?;
+                .run_while(|s| !s.hooks_pending() && keep_going(s))?;
             let pending = self.sim.state().hooks_pending();
             self.handle(adjuster, log)?;
             if status == Status::Finished {

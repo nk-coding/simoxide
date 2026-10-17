@@ -145,6 +145,13 @@ impl RulesHost {
         &self.rules
     }
 
+    /// Replaces the rules (e.g. at a resume, `DESIGN-SPD.md` N2): the next run of the
+    /// reconfiguration process runs `rules`; the QVTo state, the PRM mirror and the statistics
+    /// continue. Returns the old rules.
+    pub fn replace_rules(&mut self, rules: RuleSet) -> RuleSet {
+        std::mem::replace(&mut self.rules, rules)
+    }
+
     pub fn stats(&self) -> &RulesStats {
         &self.stats
     }
@@ -389,10 +396,20 @@ impl<'m, C: Compat, F: Flavour> RulesRun<'m, C, F> {
     /// Runs until `p` (between events, as [`Simulation::run_until`]) or the end of the run,
     /// running the reconfiguration rules whenever the reconfiguration process runs.
     pub fn run_until(&mut self, p: Pause) -> Result<Status, SimError> {
+        self.run_while(|s| !reached(p, s))
+    }
+
+    /// Runs while `keep_going` holds (asked between events, as [`Simulation::run_while`] asks
+    /// it), running the rules whenever the reconfiguration process runs: e.g. a pause condition
+    /// (`simoxide_sim::Watch::keep_going`).
+    pub fn run_while(
+        &mut self,
+        mut keep_going: impl FnMut(&RunState<C, F>) -> bool,
+    ) -> Result<Status, SimError> {
         loop {
             let st = self
                 .sim
-                .run_while(|s| !s.reconf_pending() && !reached(p, s))?;
+                .run_while(|s| !s.reconf_pending() && keep_going(s))?;
             if self.host.handle(&mut self.sim)? {
                 continue;
             }
