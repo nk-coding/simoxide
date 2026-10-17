@@ -241,3 +241,8 @@ collected in `RunResult::measurements`:
 | `simoxide-reconf` | runtime model changes: direct edits, the QVTo host (transformations, SimuLizar rule sets, SPD adjustments); QVTo directly on the model graph |
 | `simoxide-cli` | the `simoxide` and `simoxide-bench` binaries |
 | `simoxide-testkit` | differential testing: formats, diff, reference driver, model generator, `simoxide-fuzz`, exact-vs-fast statistics |
+| `simoxide-oraclekit` | the reference harnesses' shared driver: warm-JVM batch processes, the seed agent, scratch and result directories, comparisons (test infrastructure, not published) |
+| `simoxide-jcompat`, `simoxide-jcompat-exact` | Java behaviour (hash codes, `Double.toString`, parsing, insertion order); `-exact` (opt-in, no licence granted): `HashMap` order and HotSpot's identity hashes ([Foundation crates](../development/foundation.md)) |
+| `simoxide-emf-core`, `simoxide-emf` | EMF's metamodel registry and the model graph shared by SimOxide and QVTo: XMI, resource sets, change journal ([Foundation crates](../development/foundation.md)) |
+| `qvto`, `qvto-syntax`, `qvto-types`, `qvto-sema`, `qvto-bytecode`, `qvto-runtime`, `qvto-vm` | the QVTo engine: the facade `qvto` and its pipeline ([QVTo architecture](../qvto/architecture.md)) |
+| `qvto-testkit`, `qvto-cli`, `qvto-paths` | QVTo's conformance harness, the `qvto` command, data paths |
