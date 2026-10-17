@@ -1139,8 +1139,8 @@ fn compile_case(
                         'W'
                     },
                     line,
-                    offset: o as i64,
-                    len: l as i64,
+                    offset: o,
+                    len: l,
                     msg: data.norm(&one_line(&p.message)),
                 });
             }

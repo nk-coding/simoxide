@@ -2536,10 +2536,10 @@ impl<'r> Sema<'r> {
             .filter(|&o| o != ip && modules.contains(&self.interm_props[o.index()].ir.module) && self.interm_props[o.index()].ir.name == name)
             .collect();
         for o in others {
-            if let Some(oc) = self.interm_props[o.index()].context {
-                if self.ts.ck().relationship(oc, c) & qvto_types::rel::RELATED_TYPE != 0 {
-                    return true;
-                }
+            if let Some(oc) = self.interm_props[o.index()].context
+                && self.ts.ck().relationship(oc, c) & qvto_types::rel::RELATED_TYPE != 0
+            {
+                return true;
             }
         }
         false

@@ -455,7 +455,7 @@ fn execute(
         ..
     } = case_models(env, program, mm_uris)?;
     let inc_trace =
-        trace_res.map(|r| qvto::trace::read_incremental_trace(&rs.graph, &rs.graph.roots(r).to_vec()));
+        trace_res.map(|r| qvto::trace::read_incremental_trace(&rs.graph, rs.graph.roots(r)));
     let first_created = rs.graph.object_count() as u32;
     let id_source: Option<Box<dyn IdentityHashSource>> = tape.map(|t| {
         // objects that exist before the run: their recorded hashes by key; objects the run

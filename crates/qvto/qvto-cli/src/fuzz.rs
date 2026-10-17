@@ -31,7 +31,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 /// Identity hashes: by default the Java side runs with `-XX:hashCode=2` (every identity hash
-/// 1) and the engine with a constant source, which makes identity-hash orders reproducible;
+/// is 1) and the engine with a constant source, which makes identity-hash orders reproducible;
 /// `--tape` runs with HotSpot's default hashes and replays the Java run's tape instead.
 static TAPE_MODE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
@@ -225,7 +225,9 @@ fn corpus(root: &Path, args: &[String]) {
             } else {
                 ("problems-differ", s.clone())
             }
-        } else if r.diff.as_ref().is_some_and(|d| !d.equal()) && !r.java.as_ref().unwrap().problems().iter().any(|p| p.error) {
+        } else if r.diff.as_ref().is_some_and(|d| !d.equal())
+            && !r.java.as_ref().is_some_and(|j| j.problems().iter().any(|p| p.error))
+        {
             ("run-differs", r.diff.as_ref().unwrap().first_difference().unwrap_or_default())
         } else {
             ("equal", String::new())

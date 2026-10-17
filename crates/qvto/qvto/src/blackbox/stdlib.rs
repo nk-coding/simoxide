@@ -117,7 +117,7 @@ where
             let details = vm.native_get(&c.self_, "details")?;
             for e in vm.native_items(&details) {
                 if java::string(&vm.native_get(&e, "key")?) == key {
-                    return Ok(vm.native_get(&e, "value")?);
+                    return vm.native_get(&e, "value");
                 }
             }
             Ok(Value::Null)

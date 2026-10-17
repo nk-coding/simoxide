@@ -473,7 +473,7 @@ pub fn worker(root: &Path, args: &[String]) {
                 let _ = std::fs::write(crashes.join(format!("{name}.txt")), format!("{msg}\n{}", last_panic()));
             }
         }
-        if n % 200 == 0 {
+        if n.is_multiple_of(200) {
             let _ = std::fs::write(o.out.join(format!("w{}.stats", o.id)), format!("inputs {n} {counts:?}\n"));
         }
     }

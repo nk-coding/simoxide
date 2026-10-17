@@ -590,7 +590,7 @@ impl<'r> Gen<'r> {
             }
             6 => {
                 let s = self.ex(&Ty::Str, d);
-                E::tpl(*self.rng.pick(&["{}.size()", "{}.length()"]), vec![s], int)
+                E::tpl(self.rng.pick(&["{}.size()", "{}.length()"]), vec![s], int)
             }
             7 => {
                 let s = self.ex(&Ty::Str, d);
@@ -600,7 +600,7 @@ impl<'r> Gen<'r> {
             }
             8 => {
                 let s = self.numeric_string(d);
-                E::tpl(*self.rng.pick(&["{}.toInteger()", "{}.asInteger()"]), vec![s], int)
+                E::tpl(self.rng.pick(&["{}.toInteger()", "{}.asInteger()"]), vec![s], int)
             }
             9 | 10 => {
                 let et = self.elem_type(1);
@@ -616,7 +616,7 @@ impl<'r> Gen<'r> {
             11 => {
                 let k = *self.rng.pick(&Ck::CONCRETE);
                 let c = self.ex(&Ty::coll(k, Ty::Int), d);
-                E::tpl(*self.rng.pick(&["{}->sum()", "{}->max()", "{}->min()"]), vec![c], int)
+                E::tpl(self.rng.pick(&["{}->sum()", "{}->max()", "{}->min()"]), vec![c], int)
             }
             12 => {
                 let k = *self.rng.pick(&[Ck::Sequence, Ck::OrderedSet]);
@@ -742,7 +742,7 @@ impl<'r> Gen<'r> {
             }
             5 => {
                 let s = self.numeric_string(d);
-                E::tpl(*self.rng.pick(&["{}.toReal()", "{}.asFloat()"]), vec![s], real)
+                E::tpl(self.rng.pick(&["{}.toReal()", "{}.asFloat()"]), vec![s], real)
             }
             6 => {
                 let o = self.ex(&Ty::Obj(Cls::Node), d);
@@ -755,7 +755,7 @@ impl<'r> Gen<'r> {
             8 => {
                 let k = *self.rng.pick(&Ck::CONCRETE);
                 let c = self.ex(&Ty::coll(k, real.clone()), d);
-                E::tpl(*self.rng.pick(&["{}->sum()", "{}->max()", "{}->min()"]), vec![c], real)
+                E::tpl(self.rng.pick(&["{}->sum()", "{}->max()", "{}->min()"]), vec![c], real)
             }
             9..=11 => self.ex(&Ty::Int, d + 1).retype(real),
             _ => self.leaf(&real),
@@ -863,7 +863,7 @@ impl<'r> Gen<'r> {
             }
             22 => {
                 let s = self.ex(&Ty::Str, d);
-                E::tpl(*self.rng.pick(&["{}.toBoolean()", "{}.asBoolean()"]), vec![s], b)
+                E::tpl(self.rng.pick(&["{}.toBoolean()", "{}.asBoolean()"]), vec![s], b)
             }
             23 => {
                 let dct = self.ex(&Ty::Dict(Box::new(Ty::Str), Box::new(Ty::Int)), d);
@@ -970,7 +970,7 @@ impl<'r> Gen<'r> {
             }
             18 => {
                 let o = self.ex(&Ty::Obj(Cls::Node), d);
-                E::tpl(*self.rng.pick(&["{}.metaClassName()", "{}.kind.toString()", "{}.tags->first()"]), vec![o], s)
+                E::tpl(self.rng.pick(&["{}.metaClassName()", "{}.kind.toString()", "{}.tags->first()"]), vec![o], s)
             }
             19 => {
                 let a = self.ex(&s, d);
@@ -999,7 +999,7 @@ impl<'r> Gen<'r> {
             (Cls::Node | Cls::Named, 1) => {
                 let o = self.ex(&Ty::Obj(Cls::Node), d);
                 E::tpl(
-                    *self.rng.pick(&["{}.children->first()", "{}.refs->last()", "{}.refs->any(true)"]),
+                    self.rng.pick(&["{}.children->first()", "{}.refs->last()", "{}.refs->any(true)"]),
                     vec![o],
                     t,
                 )
@@ -1159,7 +1159,7 @@ impl<'r> Gen<'r> {
             18 if *e == Ty::Obj(Cls::Node) => {
                 let o = self.ex(&Ty::Obj(Cls::Node), d);
                 match k {
-                    Ck::OrderedSet => E::tpl(*self.rng.pick(&["{}.children", "{}.refs"]), vec![o], ty),
+                    Ck::OrderedSet => E::tpl(self.rng.pick(&["{}.children", "{}.refs"]), vec![o], ty),
                     Ck::Set => {
                         if self.rng.pct(50) {
                             E::leaf("m.objectsOfType(FZ::Node)", ty)

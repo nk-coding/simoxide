@@ -246,7 +246,7 @@ mod tests {
         assert_eq!(java_float_to_string(1.5e10), "1.5E10");
         // two-digit subnormals and ties to even, as Java (Q7 fuzzing)
         assert_eq!(java_double_to_string(1.0e-320 / 100.0), "9.9E-323");
-        assert_eq!(java_float_to_string(3004983.25), "3004983.2");
+        assert_eq!(java_float_to_string(3_004_983.3), "3004983.2"); // the float 3004983.25
         assert_eq!(parse_java_double(" 1.5d "), Some(1.5));
         assert_eq!(parse_java_double("1e3"), Some(1000.0));
         assert_eq!(parse_java_double("inf"), None);
