@@ -701,7 +701,7 @@ mod spd {
 #[cfg(feature = "reconfiguration")]
 mod rules {
     use super::{Args, End, create};
-    use simoxide_reconf::{QvtMode, QvtoCore, RuleSet, RulesHost, RulesRun, RunConfig};
+    use simoxide_reconf::{QvtoCore, RuleSet, RulesHost, RulesRun, RunConfig};
     use simoxide_sim::compat::Compat;
     use simoxide_sim::snapshot::Snapshot;
     use simoxide_sim::{CompiledModel, Mode, Outputs, Pause, SimConfig, Simulation, Status};
@@ -718,17 +718,7 @@ mod rules {
     ) -> Result<End, String> {
         let core = QvtoCore::new().map_err(|e| e.to_string())?;
         let rules = RuleSet::load_dir(&core, dir).map_err(|e| e.to_string())?;
-        let mode = match a.qvto_mode.as_deref() {
-            None | Some("auto") => QvtMode::Auto,
-            Some("fast") => QvtMode::Fast,
-            Some("compat") => QvtMode::Compat,
-            Some("ordered") => QvtMode::InsertionOrderSets,
-            Some(m) => {
-                return Err(format!(
-                    "--qvto-mode: expected auto, ordered, fast or compat, got {m}"
-                ));
-            }
-        };
+        let mode = super::changes::mode(a)?;
         let cfg_q = RunConfig {
             mode,
             ..RunConfig::default()
@@ -962,8 +952,9 @@ mod changes {
             None | Some("auto") => Ok(QvtMode::Auto),
             Some("fast") => Ok(QvtMode::Fast),
             Some("compat") => Ok(QvtMode::Compat),
+            Some("ordered") => Ok(QvtMode::InsertionOrderSets),
             Some(m) => Err(format!(
-                "--qvto-mode: expected auto, fast or compat, got {m}"
+                "--qvto-mode: expected auto, ordered, fast or compat, got {m}"
             )),
         }
     }

@@ -12,8 +12,8 @@ use common::*;
 use simoxide_model::meta::feat as mf;
 use simoxide_model::raw::ObjId;
 use simoxide_reconf::{
-    ChangeFile, ChangeFileError, Edit, Imports, Invocation, QvtMode, QvtoRun, ResumeChanges,
-    RuleSet, RulesHost, RulesRun, RunConfig, Session, Transformation, Variant,
+    ChangeFile, ChangeFileError, Edit, Imports, Invocation, QvtoRun, ResumeChanges, RuleSet,
+    RulesHost, RulesRun, RunConfig, Session, Transformation, Variant,
 };
 use simoxide_sim::snapshot::Snapshot;
 use simoxide_sim::{
@@ -502,16 +502,10 @@ fn transformations_at_resume_equal_the_run_in_process() {
 
 fn rules_host(dir: &Path) -> RulesHost {
     let set = RuleSet::load_dir(core(), dir).unwrap();
-    RulesHost::new(
-        core(),
-        set,
-        RunConfig {
-            mode: QvtMode::Fast,
-            ..RunConfig::default()
-        },
-    )
-    .unwrap()
-    .keep_records()
+    // QVTo's mode `Auto`: the ordered mode of the exact rules (R2)
+    RulesHost::new(core(), set, RunConfig::default())
+        .unwrap()
+        .keep_records()
 }
 
 /// A folder with some of the `lb_scaleout` rules.
