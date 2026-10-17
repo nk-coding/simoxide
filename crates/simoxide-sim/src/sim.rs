@@ -16,7 +16,9 @@
 
 use crate::compat::{Compat, Exact, Mode, SimRng};
 use crate::events::{Ev, EventList};
-use crate::frames::{Binding, Frame, FrameEnv, FramePool, Proxy, eval_proxy, frame_mut};
+use crate::frames::{
+    Binding, Frame, FrameEnv, FramePool, FrameRef, Proxy, ProxyRef, eval_proxy, frame_mut,
+};
 use crate::fxhash::FxMap;
 use crate::ir::*;
 use crate::meas::Measurements;
@@ -34,10 +36,13 @@ use simoxide_stoex::Value;
 use std::collections::HashMap;
 use std::fmt;
 use std::io::Write;
-use std::rc::Rc;
 
 mod calls;
 mod flat;
+mod state;
+
+pub use state::{Detached, Pause, Phase, RunState, Status};
+use state::{NoPause, PauseWhen};
 
 /// Run configuration (the reference's `run.json` plus port options).
 #[derive(Clone, Debug)]
@@ -326,11 +331,11 @@ enum Cont {
     },
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct ProcData {
     conts: Vec<Cont>,
-    frames: Vec<Rc<Frame>>,
-    results: Vec<Rc<Frame>>,
+    frames: Vec<FrameRef>,
+    results: Vec<FrameRef>,
     /// Assembly-context stack: the context and the trie id of the path `acs[1..=i]`.
     acs: Vec<(AcRef, u32)>,
     /// Interpreter levels of the reference that the flat code runs inside the behaviour's own
@@ -340,6 +345,7 @@ struct ProcData {
     elided: u32,
 }
 
+#[derive(Clone)]
 struct Proc {
     generation: u32,
     pid: u64,
@@ -405,6 +411,7 @@ enum Flow {
 // ------------------------------------------------------------------------------------------
 // resources at run time
 
+#[derive(Clone)]
 struct ResRt {
     sched: Option<ActiveResource<u64>>,
     /// DELAY-type resources: `running_processes` (process keys).
@@ -413,6 +420,7 @@ struct ResRt {
     shadow: Vec<u64>,
 }
 
+#[derive(Clone)]
 struct PassiveInst {
     pr: PassiveResourceId,
     ac: AcRef,
@@ -425,6 +433,7 @@ struct PassiveInst {
     hold_start: Vec<(u64, i64)>,
 }
 
+#[derive(Clone)]
 struct CompInst {
     passives: Vec<(PassiveResourceId, u32)>,
 }
@@ -432,6 +441,7 @@ struct CompInst {
 // ------------------------------------------------------------------------------------------
 // measurement sink: recorded tuples plus the sliding windows fed by some series
 
+#[derive(Clone)]
 pub(crate) struct Sink {
     m: Measurements,
     windows: Vec<Window>,
@@ -455,7 +465,7 @@ pub(crate) struct Sink {
 }
 
 /// `Reconfigurator` / `ReconfigurationProcess` state (MEAS-7.2).
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Reconf {
     created: bool,
     /// Its `Resume` note is pending (`isScheduled()`).
@@ -478,13 +488,14 @@ struct Reconf {
 /// is not scheduled, creates the `ReconfigurationProcess` (once: a process id and a `spawn`
 /// line) and schedules its `Resume` at now. Each run reconfigures (successfully, without rules)
 /// and passivates; only a `Reconfiguration Time` monitor makes the runs visible.
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Prm {
     /// Series id -> indices into `recs`.
     series: Vec<Vec<u32>>,
     recs: Vec<PrmState>,
 }
 
+#[derive(Clone)]
 struct PrmState {
     rec: PrmRec,
     /// Tuples until the next aggregation check (`measurementsUntilNextAggregation`).
@@ -752,66 +763,18 @@ fn busy_fraction(shadow: &[u64], instances: u32, per_core: bool) -> f64 {
 // ------------------------------------------------------------------------------------------
 
 /// One simulation run over a [`CompiledModel`], with the simulator policy `C` ([`Exact`] by
-/// default; see [`crate::compat`]).
+/// default; see [`crate::compat`]): the engine, which borrows the compiled model, holds the
+/// output writers and runs one [`RunState`] (which explains pausing, forking and resuming).
 pub struct Simulation<'m, C: Compat = Exact> {
     cm: &'m CompiledModel,
-    /// The behaviours' instructions for this run (with or without the trace instructions).
+    /// The behaviours' instructions for this run (with or without the trace instructions,
+    /// `RunState::traced`).
     code: &'m crate::code::Flat,
-    cfg: SimConfig,
-    now: i64,
-    running: bool,
-    procs: Vec<Proc>,
-    free: Vec<u32>,
-    res: Vec<ResRt>,
-    passives: Vec<PassiveInst>,
-    /// Basic component instances by path id.
-    comps: Vec<Option<CompInst>>,
-    /// Paths missing from the compiled trie (created on first use).
-    dyn_paths: Vec<AcPath>,
-    dyn_path_child: FxMap<(u32, AcRef), u32>,
-    rng: C::Rng,
-    meas: Sink,
-    /// Series created during the run (lazily created passive-resource calculators), by
-    /// measuring-point key (see `CompiledModel::series_by_mp`).
-    run_series: HashMap<Box<str>, Vec<(&'static str, SeriesId)>>,
     trace: Option<TraceOut>,
-    main_count: i64,
-    table_seq: u64,
-    n_events: u64,
-    warnings: Vec<String>,
-    /// The shared empty frame (parameterless calls, fresh result frames).
-    empty: Rc<Frame>,
-    /// Synchronous children of pending fork joins (slots reused through `free_joins`).
-    joins: Vec<Vec<u64>>,
-    free_joins: Vec<u32>,
-    fork_scratch: Vec<u64>,
-    /// Provided-role calls, by id (see `prov_id`).
-    provs: Vec<ProvRes>,
-    prov_ids: FxMap<(AcRef, RoleId, SignatureId), u32>,
-    /// Interpreter steps so far, and the step / event count of the next [`Limits`] check.
-    steps: u64,
-    next_step_check: u64,
-    next_event_check: u64,
-    /// `Limits::max_stack_depth` (`usize::MAX` if unlimited).
-    max_depth: usize,
-    /// Nesting of `run_process` (processes run synchronously after the stop).
-    nesting: u32,
-    /// Livelock guard: consecutive events at `now`, and `main_count` when last reset.
-    same_instant: u64,
-    count_seen: i64,
-    /// Recycled frames (see [`FramePool`]).
-    pool: FramePool,
-    /// Nesting of direct continuation-handler calls (`Simulation::enter`).
-    direct: u32,
-    /// Per external-call site ([`crate::code::SOp::Call`]): its last resolution.
-    call_cache: Vec<CallCache>,
-    /// Per user action: the provided-role call of the entry-level system call (`u32::MAX`:
-    /// not resolved yet).
-    elsc_prov: Vec<u32>,
-    /// Empty stacks that stand in for a running process's (see `run_process`); boxed because
-    /// they are swapped with `Proc::data`.
-    #[allow(clippy::vec_box)]
-    spare_data: Vec<Box<ProcData>>,
+    /// Where the buffered tape records go (`SimRng::tape_buf`).
+    tape: Option<Box<dyn Write>>,
+    /// Everything the run changes.
+    st: RunState<C>,
 }
 
 /// Proxy-depth errors of the evaluator are limits (see `frames::MAX_PROXY_DEPTH`).
@@ -855,7 +818,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         let rng = C::Rng::create(
             &cfg.rng,
             cfg.seed,
-            out.tape,
+            out.tape.is_some(),
             cfg.check_tape_origins,
             cfg.replay_samples,
         )
@@ -864,86 +827,13 @@ impl<'m, C: Compat> Simulation<'m, C> {
             at_ns: 0,
             kind: SimErrorKind::Model,
         })?;
-        let ps = cfg.ps_algorithm;
-        let res = cm
-            .resources
-            .iter()
-            .map(|r| ResRt {
-                sched: match r.policy {
-                    SchedulingPolicy::Delay => None,
-                    SchedulingPolicy::ProcessorSharing => {
-                        Some(ActiveResource::new(r.policy, r.instances, ps))
-                    }
-                    SchedulingPolicy::Fcfs => Some(ActiveResource::new(r.policy, 1, ps)),
-                },
-                delay_set: Vec::new(),
-                shadow: vec![0; r.instances.max(1) as usize],
-            })
-            .collect();
-        let meas = Sink {
-            m: Measurements {
-                series: cm.series.clone(),
-                rows: vec![Vec::new(); cm.series.len()],
-                count: 0,
-            },
-            windows: Vec::new(),
-            series_windows: Vec::new(),
-            next_pid: 0,
-            cur_pid: 0,
-            reconf_pid: 0,
-            error: None,
-            prm_armed: false,
-            prm: Prm::default(),
-            reconf: Reconf {
-                time_series: cm.reconf_time_series.clone(),
-                store: cfg.store_measurements,
-                ..Default::default()
-            },
-            events: EventList::default(),
-        };
-        let max_depth = match cfg.limits.max_stack_depth {
-            0 => usize::MAX,
-            n => n as usize,
-        };
+        let traced = out.trace.is_some();
         Ok(Simulation {
             cm,
-            code: cm.code.get(out.trace.is_some()),
-            cfg,
-            now: 0,
-            running: true,
-            procs: Vec::new(),
-            free: Vec::new(),
-            res,
-            passives: Vec::new(),
-            comps: Vec::new(),
-            dyn_paths: Vec::new(),
-            dyn_path_child: FxMap::default(),
-            rng,
-            meas,
-            run_series: HashMap::new(),
+            code: cm.code.get(traced),
             trace: out.trace.map(TraceOut::new),
-            main_count: 0,
-            table_seq: 0,
-            n_events: 0,
-            warnings: Vec::new(),
-            empty: Rc::new(Frame::default()),
-            joins: Vec::new(),
-            free_joins: Vec::new(),
-            fork_scratch: Vec::new(),
-            provs: Vec::new(),
-            prov_ids: FxMap::default(),
-            steps: 0,
-            next_step_check: 0,
-            next_event_check: 0,
-            max_depth,
-            nesting: 0,
-            same_instant: 0,
-            count_seen: 0,
-            pool: FramePool::default(),
-            direct: 0,
-            call_cache: vec![CallCache::default(); cm.code.traced.call_sites as usize],
-            elsc_prov: vec![u32::MAX; cm.uact.len()],
-            spare_data: Vec::new(),
+            tape: out.tape,
+            st: RunState::new(cm, cfg, traced, rng),
         })
     }
 
@@ -952,7 +842,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn err<T>(&self, msg: impl Into<String>) -> R<T> {
         Err(Box::new(SimError {
             message: msg.into(),
-            at_ns: self.now,
+            at_ns: self.st.now,
             kind: SimErrorKind::Model,
         }))
     }
@@ -962,7 +852,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn limit_err<T>(&self, kind: SimErrorKind, msg: String) -> R<T> {
         Err(Box::new(SimError {
             message: msg,
-            at_ns: self.now,
+            at_ns: self.st.now,
             kind,
         }))
     }
@@ -971,7 +861,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     #[cold]
     #[inline(never)]
     fn check_cancel(&self) -> R<()> {
-        let l = &self.cfg.limits;
+        let l = &self.st.cfg.limits;
         if let Some(c) = &l.cancel
             && c.load(std::sync::atomic::Ordering::Relaxed)
         {
@@ -989,17 +879,18 @@ impl<'m, C: Compat> Simulation<'m, C> {
     #[cold]
     #[inline(never)]
     fn check_steps(&mut self) -> R<()> {
-        let max = self.cfg.limits.max_steps;
-        if max > 0 && self.steps > max {
+        let max = self.st.cfg.limits.max_steps;
+        if max > 0 && self.st.steps > max {
             return self.limit_err(
                 SimErrorKind::Limit,
                 format!("limit exceeded: more than {max} interpreter steps (Limits::max_steps)"),
             );
         }
         self.check_cancel()?;
-        self.next_step_check = self.steps + CHECK_INTERVAL;
+        self.drain_tape();
+        self.st.next_step_check = self.st.steps + CHECK_INTERVAL;
         if max > 0 {
-            self.next_step_check = self.next_step_check.min(max + 1);
+            self.st.next_step_check = self.st.next_step_check.min(max + 1);
         }
         Ok(())
     }
@@ -1008,63 +899,162 @@ impl<'m, C: Compat> Simulation<'m, C> {
     #[cold]
     #[inline(never)]
     fn check_events(&mut self) -> R<()> {
-        let max = self.cfg.limits.max_events;
-        if max > 0 && self.n_events > max {
+        let max = self.st.cfg.limits.max_events;
+        if max > 0 && self.st.n_events > max {
             return self.limit_err(
                 SimErrorKind::Limit,
                 format!("limit exceeded: more than {max} events (Limits::max_events)"),
             );
         }
         self.check_cancel()?;
-        self.next_event_check = self.n_events + CHECK_INTERVAL;
+        self.st.next_event_check = self.st.n_events + CHECK_INTERVAL;
         if max > 0 {
-            self.next_event_check = self.next_event_check.min(max + 1);
+            self.st.next_event_check = self.st.next_event_check.min(max + 1);
         }
         Ok(())
     }
 
     /// Runs the simulation to its end.
+    pub fn run(self) -> Result<RunResult, SimError> {
+        self.finish()
+    }
+
+    /// Runs the simulation to its end, from wherever it is (not started, paused), and returns
+    /// the result.
     #[inline(never)]
-    pub fn run(mut self) -> Result<RunResult, SimError> {
-        let r = self.run_inner();
-        if let Some(t) = self.trace.as_mut() {
-            t.finish();
-        }
-        self.rng.finish();
+    pub fn finish(mut self) -> Result<RunResult, SimError> {
+        let r = self.advance(&mut NoPause);
+        self.flush_outputs();
         r.map_err(|e| *e)?;
-        if let Some(p) = self.rng.take_problem() {
-            self.warnings.push(p);
+        if let Some(p) = self.st.rng.take_problem() {
+            self.st.warnings.push(p);
         }
         Ok(RunResult {
-            measurements: std::mem::take(&mut self.meas.m),
-            uniforms: self.rng.count(),
-            events: self.n_events,
-            end_ns: self.now,
-            main_count: self.main_count,
-            warnings: std::mem::take(&mut self.warnings),
+            measurements: std::mem::take(&mut self.st.meas.m),
+            uniforms: self.st.rng.count(),
+            events: self.st.n_events,
+            end_ns: self.st.now,
+            main_count: self.st.main_count,
+            warnings: std::mem::take(&mut self.st.warnings),
         })
     }
 
-    fn run_inner(&mut self) -> R<()> {
+    /// Runs events until `p` asks for a pause between two events, or to the end of the run
+    /// (stop condition and post-stop drain). An error ends the run ([`Phase::Failed`]).
+    fn advance<P: PauseWhen<C>>(&mut self, p: &mut P) -> R<Status> {
+        match self.st.phase {
+            Phase::Running => {}
+            Phase::NotStarted => {
+                self.st.phase = Phase::Running;
+                if let Err(e) = self.start() {
+                    return self.fail(e);
+                }
+            }
+            Phase::Finished => return Ok(Status::Finished),
+            Phase::Failed => {
+                let e = self.st.failure.clone().expect("failed run without error");
+                return Err(Box::new(e));
+            }
+        }
+        match self.event_loop(p) {
+            Ok(s) => Ok(s),
+            Err(e) => self.fail(e),
+        }
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn fail<T>(&mut self, e: Box<SimError>) -> R<T> {
+        self.st.phase = Phase::Failed;
+        self.st.failure = Some((*e).clone());
+        Err(e)
+    }
+
+    /// The main loop: one event after the other until a stop condition holds or no event is
+    /// left, then the stop (SIM-6); or a pause before an event.
+    fn event_loop<P: PauseWhen<C>>(&mut self, p: &mut P) -> R<Status> {
+        loop {
+            if !P::NEVER
+                && let Some(t) = self.st.meas.events.next_time()
+                && p.pause(&self.st, t)
+            {
+                return Ok(Status::Paused);
+            }
+            let Some((t, ev)) = self.st.meas.events.pop() else {
+                break;
+            };
+            self.count_event(t)?;
+            self.dispatch(ev)?;
+            if let Some(e) = self.st.meas.error {
+                return self.err(e);
+            }
+            if let Some(p) = self.st.rng.exhausted() {
+                return self.err(p.to_string());
+            }
+            self.drain_tape();
+            if self.stop_condition() {
+                break;
+            }
+        }
+        self.finalise()?;
+        self.st.phase = Phase::Finished;
+        Ok(Status::Finished)
+    }
+
+    /// Writes the buffered tape records when there are many (after each event and every
+    /// `CHECK_INTERVAL` steps).
+    #[inline]
+    fn drain_tape(&mut self) {
+        if let Some(b) = self.st.rng.tape_buf()
+            && b.len() > (1 << 16)
+        {
+            self.write_tape();
+        }
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn write_tape(&mut self) {
+        if let Some(b) = self.st.rng.tape_buf() {
+            if let Some(w) = self.tape.as_mut() {
+                let _ = w.write_all(b.as_bytes());
+            }
+            b.clear();
+        }
+    }
+
+    /// Writes the buffered trace lines and tape records.
+    pub(crate) fn flush_outputs(&mut self) {
+        if let Some(t) = self.trace.as_mut() {
+            t.finish();
+        }
+        self.write_tape();
+        if let Some(w) = self.tape.as_mut() {
+            let _ = w.flush();
+        }
+    }
+
+    /// The initialisation at t = 0 (`SimuComModel.init` and the probe framework).
+    fn start(&mut self) -> R<()> {
         let cm = self.cm;
-        if self.cfg.max_sim_time <= 0 && self.cfg.max_measurements <= 0 {
+        if self.st.cfg.max_sim_time <= 0 && self.st.cfg.max_measurements <= 0 {
             return self.err("no stop condition enabled");
         }
         if let Some(t) = self.trace.as_mut() {
             t.header(
-                &self.cfg.run_name,
-                self.cfg.seed,
-                self.cfg.max_sim_time,
-                self.cfg.max_measurements,
+                &self.st.cfg.run_name,
+                self.st.cfg.seed,
+                self.st.cfg.max_sim_time,
+                self.st.cfg.max_measurements,
             );
         }
         // resource environment: initial state tuples
         for r in &cm.resources {
             for &(s, _inst) in &r.initial_states {
                 emit(
-                    &mut self.meas,
+                    &mut self.st.meas,
                     &mut self.trace,
-                    self.cfg.store_measurements,
+                    self.st.cfg.store_measurements,
                     0,
                     s,
                     0.0,
@@ -1090,9 +1080,9 @@ impl<'m, C: Compat> Simulation<'m, C> {
         // usage model syncer created the open-workload generators
         if let Some((s, n)) = cm.container_count {
             emit(
-                &mut self.meas,
+                &mut self.st.meas,
                 &mut self.trace,
-                self.cfg.store_measurements,
+                self.st.cfg.store_measurements,
                 0,
                 s,
                 0.0,
@@ -1102,25 +1092,25 @@ impl<'m, C: Compat> Simulation<'m, C> {
         // probe-framework decorators attach the PRM recorders after the initial state and
         // container-count tuples
         if cm.prm_any {
-            let prm = &mut self.meas.prm;
+            let prm = &mut self.st.meas.prm;
             prm.series = vec![Vec::new(); cm.series.len()];
             for &(s, rec) in &cm.prm_series {
                 prm.series[s as usize].push(prm.recs.len() as u32);
                 prm.recs.push(PrmState::new(rec));
             }
-            self.meas.prm_armed = true;
+            self.st.meas.prm_armed = true;
         }
         // probe-framework decorators: sliding windows, first events at span(length) (MEAS-6.3)
-        self.meas.series_windows = vec![Vec::new(); self.meas.m.series.len()];
+        self.st.meas.series_windows = vec![Vec::new(); self.st.meas.m.series.len()];
         for (i, w) in cm.windows.iter().enumerate() {
-            self.meas.windows.push(Window::new(w.len, w.inc, true));
+            self.st.meas.windows.push(Window::new(w.len, w.inc, true));
             if let Some(inp) = w.input {
-                self.meas.series_windows[inp as usize].push(i as u32);
+                self.st.meas.series_windows[inp as usize].push(i as u32);
             }
             let Some(span) = checked_span(w.len) else {
                 return self.err("invalid sliding window length");
             };
-            self.meas.events.insert(span, Ev::Window(i as u32));
+            self.st.meas.events.insert(span, Ev::Window(i as u32));
         }
         // SimuComModel.init at t = 0: run the drivers in scenario order
         for (i, s) in cm.scenarios.iter().enumerate() {
@@ -1143,50 +1133,36 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 }
             }
         }
-        // main loop
-        self.count_seen = self.main_count;
-        while let Some((t, ev)) = self.meas.events.pop() {
-            self.count_event(t)?;
-            self.dispatch(ev)?;
-            if let Some(e) = self.meas.error {
-                return self.err(e);
-            }
-            if let Some(p) = self.rng.exhausted() {
-                return self.err(p.to_string());
-            }
-            if self.stop_condition() {
-                break;
-            }
-        }
-        self.finalise()
+        self.st.count_seen = self.st.main_count;
+        Ok(())
     }
 
     /// Per-event bookkeeping of an event at `t` (also for an elided hand-off note, see
     /// [`Self::handoff`]): the livelock guard, the event count and the `Limits` checks.
     #[inline]
     fn count_event(&mut self, t: i64) -> R<()> {
-        debug_assert!(t >= self.now);
-        self.same_instant = if t == self.now {
-            self.same_instant + 1
+        debug_assert!(t >= self.st.now);
+        self.st.same_instant = if t == self.st.now {
+            self.st.same_instant + 1
         } else {
             0
         };
-        let limit = match self.cfg.max_events_per_instant {
+        let limit = match self.st.cfg.max_events_per_instant {
             0 => u64::MAX,
             n => n,
         };
-        if self.same_instant >= limit {
+        if self.st.same_instant >= limit {
             // a finished scenario run brings a max-measurements stop closer
-            if self.cfg.max_measurements > 0 && self.main_count != self.count_seen {
-                self.count_seen = self.main_count;
-                self.same_instant = 0;
+            if self.st.cfg.max_measurements > 0 && self.st.main_count != self.st.count_seen {
+                self.st.count_seen = self.st.main_count;
+                self.st.same_instant = 0;
             } else {
-                return self.livelock(self.same_instant, t);
+                return self.livelock(self.st.same_instant, t);
             }
         }
-        self.now = t;
-        self.n_events += 1;
-        if self.n_events >= self.next_event_check {
+        self.st.now = t;
+        self.st.n_events += 1;
+        if self.st.n_events >= self.st.next_event_check {
             self.check_events()?;
         }
         Ok(())
@@ -1203,21 +1179,22 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     #[inline]
     fn stop_condition(&self) -> bool {
-        (self.cfg.max_sim_time > 0 && seconds(self.now) >= self.cfg.max_sim_time as f64)
-            || (self.cfg.max_measurements > 0 && self.main_count >= self.cfg.max_measurements)
+        (self.st.cfg.max_sim_time > 0 && seconds(self.st.now) >= self.st.cfg.max_sim_time as f64)
+            || (self.st.cfg.max_measurements > 0
+                && self.st.main_count >= self.st.cfg.max_measurements)
     }
 
     fn finalise(&mut self) -> R<()> {
         let cm = self.cm;
-        self.running = false;
-        self.meas.reconf.stopped = true;
-        let now = self.now;
+        self.st.running = false;
+        self.st.meas.reconf.stopped = true;
+        let now = self.st.now;
         if let Some(t) = self.trace.as_mut() {
             t.stop(now);
         }
         // simulationStop listeners: final partial windows
-        for i in 0..self.meas.windows.len() {
-            let eff = self.meas.windows[i].effective_length(seconds(now));
+        for i in 0..self.st.meas.windows.len() {
+            let eff = self.st.meas.windows[i].effective_length(seconds(now));
             if eff != 0.0 || eff.is_sign_negative() {
                 self.window_full(i);
             }
@@ -1225,7 +1202,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         // deactivateAllActiveResources: current queue lengths, then overall utilisation
         for &ri in &cm.finalise_order {
             let def = &cm.resources[ri as usize];
-            let rt = &mut self.res[ri as usize];
+            let rt = &mut self.st.res[ri as usize];
             let per_core = def.policy == SchedulingPolicy::ProcessorSharing;
             for inst in 0..def.instances as usize {
                 let q = if per_core {
@@ -1235,9 +1212,9 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 };
                 for &s in &def.state_series[inst] {
                     emit(
-                        &mut self.meas,
+                        &mut self.st.meas,
                         &mut self.trace,
-                        self.cfg.store_measurements,
+                        self.st.cfg.store_measurements,
                         now,
                         s,
                         seconds(now),
@@ -1248,9 +1225,9 @@ impl<'m, C: Compat> Simulation<'m, C> {
             if let Some(s) = def.overall_series {
                 let f = busy_fraction(&rt.shadow, def.instances, per_core);
                 emit(
-                    &mut self.meas,
+                    &mut self.st.meas,
                     &mut self.trace,
-                    self.cfg.store_measurements,
+                    self.st.cfg.store_measurements,
                     now,
                     s,
                     seconds(now),
@@ -1260,12 +1237,13 @@ impl<'m, C: Compat> Simulation<'m, C> {
             if let Some(s) = rt.sched.as_mut() {
                 s.stop();
                 if s.pending_wakeup().is_none() {
-                    self.meas.events.clear_timer(ri);
+                    self.st.meas.events.clear_timer(ri);
                 }
             }
         }
         // ResourceTableManager.waitForProcesses: drain in insertion order
         let mut table: Vec<(u64, u64)> = self
+            .st
             .procs
             .iter()
             .enumerate()
@@ -1278,18 +1256,18 @@ impl<'m, C: Compat> Simulation<'m, C> {
         }
         // SimulatedBasicComponentInstance.cleanUp: processes still waiting at passive resources
         let mut waiting = Vec::new();
-        for p in &self.passives {
+        for p in &self.st.passives {
             waiting.extend(p.res.waiting().map(|(j, _)| j));
         }
         for k in waiting {
             self.activate(k)?;
         }
-        let (u, n) = (self.rng.count(), self.meas.m.count);
+        let (u, n) = (self.st.rng.count(), self.st.meas.m.count);
         if let Some(t) = self.trace.as_mut() {
             t.finish_line(now, u, n);
         }
         // the reconfiguration process died after the stop; the run ends with its error
-        if let Some(e) = self.meas.reconf.error.or(self.meas.error) {
+        if let Some(e) = self.st.meas.reconf.error.or(self.st.meas.error) {
             return self.err(e);
         }
         Ok(())
@@ -1300,18 +1278,18 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// Creates a suspended process running `body`, with empty frame and assembly-context stacks
     /// (a freed slot's stacks are reused, keeping their capacity).
     fn spawn(&mut self, kind: PKind, body: Cont) -> R<u64> {
-        let max = self.cfg.limits.max_processes as usize;
-        if max > 0 && self.procs.len() - self.free.len() >= max {
+        let max = self.st.cfg.limits.max_processes as usize;
+        if max > 0 && self.st.procs.len() - self.st.free.len() >= max {
             return self.limit_err(
                 SimErrorKind::Limit,
                 format!("limit exceeded: more than {max} live processes (Limits::max_processes)"),
             );
         }
-        self.meas.next_pid += 1;
-        let pid = self.meas.next_pid;
-        let slot = match self.free.pop() {
+        self.st.meas.next_pid += 1;
+        let pid = self.st.meas.next_pid;
+        let slot = match self.st.free.pop() {
             Some(s) => {
-                let p = &mut self.procs[s as usize];
+                let p = &mut self.st.procs[s as usize];
                 p.pid = pid;
                 p.state = PState::Suspended;
                 p.kind = kind;
@@ -1326,7 +1304,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             None => {
                 let mut data = Box::<ProcData>::default();
                 data.conts.push(body);
-                self.procs.push(Proc {
+                self.st.procs.push(Proc {
                     generation: 0,
                     pid,
                     state: PState::Suspended,
@@ -1338,7 +1316,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     fork_done: false,
                     rt: Vec::new(),
                 });
-                (self.procs.len() - 1) as u32
+                (self.st.procs.len() - 1) as u32
             }
         };
         if let Some(t) = self.trace.as_mut() {
@@ -1348,16 +1326,17 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 PKind::ClosedUser => ("ClosedWorkloadUser", "ClosedUser"),
                 PKind::Forked { .. } => ("ForkedBehaviourProcess", "Forked Behaviour"),
             };
-            t.spawn(self.now, pid, k, n, self.meas.cur_pid);
+            t.spawn(self.st.now, pid, k, n, self.st.meas.cur_pid);
         }
-        Ok(key(slot, self.procs[slot as usize].generation))
+        Ok(key(slot, self.st.procs[slot as usize].generation))
     }
 
     /// Is the process (still) this incarnation and not terminated?
     #[inline]
     fn alive(&self, k: u64) -> bool {
         let (s, g) = unkey(k);
-        self.procs
+        self.st
+            .procs
             .get(s as usize)
             .is_some_and(|p| p.generation == g && p.state != PState::Terminated)
     }
@@ -1365,7 +1344,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// `p.activate()` = `scheduleAt(0)` (SIM-4.3).
     fn activate(&mut self, k: u64) -> R<()> {
         let (s, g) = unkey(k);
-        let Some(p) = self.procs.get(s as usize) else {
+        let Some(p) = self.st.procs.get(s as usize) else {
             return Ok(());
         };
         if p.generation != g || p.state == PState::Terminated {
@@ -1374,11 +1353,11 @@ impl<'m, C: Compat> Simulation<'m, C> {
         if p.state == PState::Running {
             return self.err("IllegalStateException: activate() of a running process");
         }
-        if !self.running {
+        if !self.st.running {
             // stopped experiment: the process is resumed synchronously
             return self.run_process(s);
         }
-        self.meas.events.insert(self.now, Ev::Resume(k));
+        self.st.meas.events.insert(self.st.now, Ev::Resume(k));
         Ok(())
     }
 
@@ -1394,15 +1373,15 @@ impl<'m, C: Compat> Simulation<'m, C> {
     #[inline]
     fn handoff(&mut self, k: u64) -> R<()> {
         if !C::LITERAL_ENGINE
-            && self.running
-            && self.meas.events.next_time() != Some(self.now)
-            && self.meas.error.is_none()
-            && self.rng.exhausted().is_none()
+            && self.st.running
+            && self.st.meas.events.next_time() != Some(self.st.now)
+            && self.st.meas.error.is_none()
+            && self.st.rng.exhausted().is_none()
             && !self.stop_condition()
         {
             // the checks of `activate` when it schedules the note
             let (s, g) = unkey(k);
-            let Some(p) = self.procs.get(s as usize) else {
+            let Some(p) = self.st.procs.get(s as usize) else {
                 return Ok(());
             };
             if p.generation != g || p.state == PState::Terminated {
@@ -1412,7 +1391,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 return self.err("IllegalStateException: activate() of a running process");
             }
             // the `Resume` note's event
-            self.count_event(self.now)?;
+            self.count_event(self.st.now)?;
             return self.run_process(s);
         }
         self.activate(k)
@@ -1421,26 +1400,26 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn dispatch(&mut self, ev: Ev) -> R<()> {
         match ev {
             Ev::Reconf => {
-                self.meas.reconf.scheduled = false;
-                reconf_run(&mut self.meas, &mut self.trace, self.now);
+                self.st.meas.reconf.scheduled = false;
+                reconf_run(&mut self.st.meas, &mut self.trace, self.st.now);
             }
             Ev::Resume(k) => {
                 let (s, g) = unkey(k);
-                let p = &self.procs[s as usize];
+                let p = &self.st.procs[s as usize];
                 if p.generation == g && p.state == PState::Suspended {
                     self.run_process(s)?;
                 }
             }
             Ev::Think(k) => {
                 let (s, g) = unkey(k);
-                let p = &mut self.procs[s as usize];
+                let p = &mut self.st.procs[s as usize];
                 if p.generation == g && p.state != PState::Terminated && p.in_think {
                     p.in_think = false;
                     self.handoff(k)?;
                 }
             }
             Ev::DelayRes(ri, k) => {
-                let rt = &mut self.res[ri as usize];
+                let rt = &mut self.st.res[ri as usize];
                 if let Some(pos) = rt.delay_set.iter().position(|&x| x == k) {
                     rt.delay_set.swap_remove(pos);
                     let n = rt.delay_set.len() as u64;
@@ -1454,18 +1433,21 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 let Some(span) = checked_span(inc) else {
                     return self.err("invalid sliding window increment");
                 };
-                self.meas.events.insert(self.now + span, Ev::Window(i));
+                self.st
+                    .meas
+                    .events
+                    .insert(self.st.now + span, Ev::Window(i));
             }
             Ev::Wake(ri) => {
                 let cm = self.cm;
                 let def = &cm.resources[ri as usize];
-                let rt = &mut self.res[ri as usize];
+                let rt = &mut self.st.res[ri as usize];
                 let per_core = def.policy == SchedulingPolicy::ProcessorSharing;
                 let mut l = ResListener {
-                    meas: &mut self.meas,
+                    meas: &mut self.st.meas,
                     trace: &mut self.trace,
-                    store: self.cfg.store_measurements,
-                    now: self.now,
+                    store: self.st.cfg.store_measurements,
+                    now: self.st.now,
                     def,
                     shadow: &mut rt.shadow,
                     per_core,
@@ -1473,15 +1455,15 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 let sched = rt.sched.as_mut().expect("scheduler");
                 // the timer slot always holds the resource's current (pending) wake-up
                 let w = sched.pending_wakeup().expect("pending wake-up");
-                debug_assert_eq!(w.at, self.now);
-                let r = sched.on_wakeup(self.now, &w, &mut l);
+                debug_assert_eq!(w.at, self.st.now);
+                let r = sched.on_wakeup(self.st.now, &w, &mut l);
                 let c = match r {
                     Ok(c) => c,
                     Err(e) => return self.err(e.0),
                 };
                 if let Some(c) = c {
                     if let Some(n) = c.next {
-                        self.meas.events.set_timer(ri, n.at);
+                        self.st.meas.events.set_timer(ri, n.at);
                     }
                     self.handoff(c.job)?;
                 }
@@ -1492,35 +1474,35 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     /// `onWindowFullEvent`: aggregate and record, then move the window on.
     fn window_full(&mut self, i: usize) {
-        let now_s = seconds(self.now);
-        let w = &mut self.meas.windows[i];
+        let now_s = seconds(self.st.now);
+        let w = &mut self.st.meas.windows[i];
         let eff = w.effective_length(now_s);
         let res = crate::windows::utilization(&w.data, w.lower, eff);
         w.move_on();
         if let Some(out) = self.cm.windows[i].out {
             emit_out(
-                &mut self.meas,
+                &mut self.st.meas,
                 &mut self.trace,
-                self.cfg.store_measurements,
-                self.now,
+                self.st.cfg.store_measurements,
+                self.st.now,
                 out,
                 res.0,
                 res.1,
             );
         }
         if self.cm.windows[i].prm {
-            prm_write(&mut self.meas, &mut self.trace, self.now);
+            prm_write(&mut self.st.meas, &mut self.trace, self.st.now);
         }
     }
 
     fn delay_state_changed(&mut self, ri: ResIdx, n: u64) {
         let def = &self.cm.resources[ri as usize];
-        let rt = &mut self.res[ri as usize];
+        let rt = &mut self.st.res[ri as usize];
         let mut l = ResListener {
-            meas: &mut self.meas,
+            meas: &mut self.st.meas,
             trace: &mut self.trace,
-            store: self.cfg.store_measurements,
-            now: self.now,
+            store: self.st.cfg.store_measurements,
+            now: self.st.now,
             def,
             shadow: &mut rt.shadow,
             per_core: false,
@@ -1531,24 +1513,24 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// Runs process `s` until it waits or ends.
     fn run_process(&mut self, s: u32) -> R<()> {
         // after the stop, processes (and forked children) run synchronously, nested here
-        if self.nesting >= MAX_NESTING {
+        if self.st.nesting >= MAX_NESTING {
             return self.limit_err(
                 SimErrorKind::Limit,
                 format!("limit exceeded: more than {MAX_NESTING} processes run synchronously inside each other after the stop"),
             );
         }
-        self.nesting += 1;
-        let prev_pid = self.meas.cur_pid;
-        let spare = self.spare_data.pop().unwrap_or_default();
+        self.st.nesting += 1;
+        let prev_pid = self.st.meas.cur_pid;
+        let spare = self.st.spare_data.pop().unwrap_or_default();
         let mut data = {
-            let p = &mut self.procs[s as usize];
+            let p = &mut self.st.procs[s as usize];
             p.state = PState::Running;
-            self.meas.cur_pid = p.pid;
+            self.st.meas.cur_pid = p.pid;
             std::mem::replace(&mut p.data, spare)
         };
         let r = loop {
-            self.steps += 1;
-            if self.steps >= self.next_step_check
+            self.st.steps += 1;
+            if self.st.steps >= self.st.next_step_check
                 && let Err(e) = self.check_steps()
             {
                 break Err(e);
@@ -1556,10 +1538,10 @@ impl<'m, C: Compat> Simulation<'m, C> {
             match self.step(s, &mut data) {
                 Ok(Flow::Continue) => {}
                 Ok(Flow::Wait) => {
-                    let p = &mut self.procs[s as usize];
+                    let p = &mut self.st.procs[s as usize];
                     p.state = PState::Suspended;
                     let spare = std::mem::replace(&mut p.data, data);
-                    self.spare_data.push(spare);
+                    self.st.spare_data.push(spare);
                     break Ok(());
                 }
                 Ok(Flow::Finished) => {
@@ -1569,35 +1551,35 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 Err(e) => break Err(e),
             }
         };
-        self.meas.cur_pid = prev_pid;
-        self.nesting -= 1;
+        self.st.meas.cur_pid = prev_pid;
+        self.st.nesting -= 1;
         r
     }
 
     fn terminate(&mut self, s: u32, mut data: Box<ProcData>) {
-        let p = &mut self.procs[s as usize];
+        let p = &mut self.st.procs[s as usize];
         p.state = PState::Terminated;
         p.table_seq = None;
         let pid = p.pid;
         p.generation = p.generation.wrapping_add(1);
         // keep the stacks' capacity for the next process in this slot
         data.conts.clear();
-        self.pool.recycle_all(&mut data.frames);
-        self.pool.recycle_all(&mut data.results);
+        self.st.pool.recycle_all(&mut data.frames);
+        self.st.pool.recycle_all(&mut data.results);
         data.acs.clear();
         data.elided = 0;
         p.rt.clear();
         let spare = std::mem::replace(&mut p.data, data);
-        self.spare_data.push(spare);
-        self.free.push(s);
+        self.st.spare_data.push(spare);
+        self.st.free.push(s);
         if let Some(t) = self.trace.as_mut() {
-            t.pend(self.now, pid);
+            t.pend(self.st.now, pid);
         }
     }
 
     #[inline]
     fn pkey(&self, s: u32) -> u64 {
-        key(s, self.procs[s as usize].generation)
+        key(s, self.st.procs[s as usize].generation)
     }
 
     // --------------------------------------------------------------------------- evaluation
@@ -1610,7 +1592,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             // a constant draws nothing: no origin, no tape record, no recorded sample
             return Ok(v.clone());
         }
-        if self.rng.plain() {
+        if self.st.rng.plain() {
             let r = match &p.prog {
                 Ok(pr) => pr.eval(
                     &FrameEnv {
@@ -1618,7 +1600,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         cm,
                         depth: 0,
                     },
-                    &mut self.rng,
+                    &mut self.st.rng,
                 ),
                 Err(e) => Err(simoxide_stoex::EvalError::new(
                     simoxide_stoex::EvalErrorKind::Runtime,
@@ -1627,8 +1609,8 @@ impl<'m, C: Compat> Simulation<'m, C> {
             };
             return r.map_err(|e| self.eval_error(prog, e));
         }
-        let prev = self.rng.set_origin(origin);
-        self.rng.eval_begin();
+        let prev = self.st.rng.set_origin(origin);
+        self.st.rng.eval_begin();
         let r = match &p.prog {
             Ok(pr) => pr.eval(
                 &FrameEnv {
@@ -1636,19 +1618,19 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     cm,
                     depth: 0,
                 },
-                &mut self.rng,
+                &mut self.st.rng,
             ),
             Err(e) => Err(simoxide_stoex::EvalError::new(
                 simoxide_stoex::EvalErrorKind::Runtime,
                 e.clone(),
             )),
         };
-        let r = match self.rng.recorded_sample() {
+        let r = match self.st.rng.recorded_sample() {
             Some(v) => Ok(v),
             None => r,
         };
-        self.rng.eval_end(&p.spec, r.as_ref().ok());
-        self.rng.restore_origin(prev);
+        self.st.rng.eval_end(&p.spec, r.as_ref().ok());
+        self.st.rng.restore_origin(prev);
         r.map_err(|e| self.eval_error(prog, e))
     }
 
@@ -1660,7 +1642,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 "Evaluation of expression {} failed: {:?}",
                 self.cm.progs[prog as usize].spec, e
             ),
-            at_ns: self.now,
+            at_ns: self.st.now,
             kind: eval_error_kind(&e),
         })
     }
@@ -1675,7 +1657,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         v.to_f64().map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.now,
+                at_ns: self.st.now,
                 kind: SimErrorKind::Model,
             })
         })
@@ -1686,7 +1668,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         v.to_i32().map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.now,
+                at_ns: self.st.now,
                 kind: SimErrorKind::Model,
             })
         })
@@ -1697,7 +1679,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         v.to_bool().map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.now,
+                at_ns: self.st.now,
                 kind: SimErrorKind::Model,
             })
         })
@@ -1706,18 +1688,19 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// A proxy evaluated as an outermost `evaluateStatic` (tape `s` record).
     fn eval_proxy_top(&mut self, p: &Proxy) -> R<Value> {
         let cm = self.cm;
-        self.rng.eval_begin();
-        let r = eval_proxy(cm, p, &mut self.rng);
-        let r = match self.rng.recorded_sample() {
+        self.st.rng.eval_begin();
+        let r = eval_proxy(cm, p, &mut self.st.rng);
+        let r = match self.st.rng.recorded_sample() {
             Some(v) => Ok(v),
             None => r,
         };
-        self.rng
+        self.st
+            .rng
             .eval_end(&cm.progs[p.prog as usize].spec, r.as_ref().ok());
         r.map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.now,
+                at_ns: self.st.now,
                 kind: eval_error_kind(&e),
             })
         })
@@ -1727,7 +1710,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn fill(
         &mut self,
         usages: &[CChar],
-        ctx: Option<&Rc<Frame>>,
+        ctx: Option<&FrameRef>,
         target: &mut Frame,
         origin: Origin<'_>,
     ) -> R<()> {
@@ -1735,7 +1718,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             if c.inner {
                 target.put(
                     c.key,
-                    Binding::Proxy(Rc::new(Proxy {
+                    Binding::Proxy(ProxyRef::new(Proxy {
                         prog: c.prog,
                         frame: ctx.cloned(),
                     })),
@@ -1753,13 +1736,13 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn input_frame(
         &mut self,
         usages: &[CChar],
-        ctx: Option<&Rc<Frame>>,
+        ctx: Option<&FrameRef>,
         origin: Origin<'_>,
-    ) -> R<Rc<Frame>> {
+    ) -> R<FrameRef> {
         if usages.is_empty() {
-            return Ok(self.empty.clone());
+            return Ok(self.st.empty.clone());
         }
-        let mut f = self.pool.frame(None);
+        let mut f = self.st.pool.frame(None);
         self.fill(usages, ctx, frame_mut(&mut f), origin)?;
         Ok(f)
     }
@@ -1781,45 +1764,45 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     /// `hold(d)` of the running process: returns true if the process now waits.
     fn hold(&mut self, s: u32, d: f64) -> R<bool> {
-        let pid = self.procs[s as usize].pid;
+        let pid = self.st.procs[s as usize].pid;
         if let Some(t) = self.trace.as_mut() {
-            t.hold(self.now, pid, d);
+            t.hold(self.st.now, pid, d);
         }
-        if !self.running {
+        if !self.st.running {
             return Ok(false);
         }
         let k = self.pkey(s);
-        let last = self.procs[s as usize].last_res;
+        let last = self.st.procs[s as usize].last_res;
         if last != LastRes::Think {
             if let LastRes::Active(r) = last {
                 self.dequeue(r, k)?;
             }
-            self.procs[s as usize].in_think = true;
+            self.st.procs[s as usize].in_think = true;
             self.set_last(s, LastRes::Think);
         }
-        let p = &mut self.procs[s as usize];
+        let p = &mut self.st.procs[s as usize];
         if !p.in_think {
             p.in_think = true;
         }
         let Some(span) = checked_span(d) else {
             return self.err(format!("SimAbortedException: invalid delay {d}"));
         };
-        self.meas.events.insert(self.now + span, Ev::Think(k));
+        self.st.meas.events.insert(self.st.now + span, Ev::Think(k));
         Ok(true)
     }
 
     fn set_last(&mut self, s: u32, r: LastRes) {
-        let p = &mut self.procs[s as usize];
+        let p = &mut self.st.procs[s as usize];
         if p.table_seq.is_none() {
-            p.table_seq = Some(self.table_seq);
-            self.table_seq += 1;
+            p.table_seq = Some(self.st.table_seq);
+            self.st.table_seq += 1;
         }
         p.last_res = r;
     }
 
     /// `dequeue` of the previously used resource (only DELAY-type resources act).
     fn dequeue(&mut self, r: ResIdx, k: u64) -> R<()> {
-        let rt = &mut self.res[r as usize];
+        let rt = &mut self.st.res[r as usize];
         if rt.sched.is_none()
             && let Some(pos) = rt.delay_set.iter().position(|&x| x == k)
         {
@@ -1869,10 +1852,10 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 c + add
             }
         };
-        let pid = self.procs[s as usize].pid;
+        let pid = self.st.procs[s as usize].pid;
         if let Some(t) = self.trace.as_mut() {
             t.demand(
-                self.now,
+                self.st.now,
                 pid,
                 &def.type_id,
                 &def.rc,
@@ -1884,38 +1867,38 @@ impl<'m, C: Compat> Simulation<'m, C> {
         }
         if concrete <= 0.0 {
             if let Some(t) = self.trace.as_mut() {
-                t.demand_done(self.now, pid, &def.type_id, &def.rc);
+                t.demand_done(self.st.now, pid, &def.type_id, &def.rc);
             }
             return Ok(false);
         }
         for &sid in &def.demand_series {
             emit(
-                &mut self.meas,
+                &mut self.st.meas,
                 &mut self.trace,
-                self.cfg.store_measurements,
-                self.now,
+                self.st.cfg.store_measurements,
+                self.st.now,
                 sid,
-                seconds(self.now),
+                seconds(self.st.now),
                 concrete,
             );
         }
-        if !self.running {
+        if !self.st.running {
             if let Some(t) = self.trace.as_mut() {
-                t.demand_done(self.now, pid, &def.type_id, &def.rc);
+                t.demand_done(self.st.now, pid, &def.type_id, &def.rc);
             }
             return Ok(false);
         }
         // AbstractActiveResource.process
         let k = self.pkey(s);
-        let last = self.procs[s as usize].last_res;
-        let is_delay = self.res[ri as usize].sched.is_none();
+        let last = self.st.procs[s as usize].last_res;
+        let is_delay = self.st.res[ri as usize].sched.is_none();
         if last != LastRes::Active(ri) {
             match last {
                 LastRes::Active(r) => self.dequeue(r, k)?,
                 LastRes::Think => {
                     // the process's own think-time delay resource
-                    if self.procs[s as usize].in_think {
-                        self.procs[s as usize].in_think = false;
+                    if self.st.procs[s as usize].in_think {
+                        self.st.procs[s as usize].in_think = false;
                         self.activate(k)?;
                     }
                 }
@@ -1927,23 +1910,24 @@ impl<'m, C: Compat> Simulation<'m, C> {
             self.set_last(s, LastRes::Active(ri));
         }
         if is_delay {
-            if !self.res[ri as usize].delay_set.contains(&k) {
+            if !self.st.res[ri as usize].delay_set.contains(&k) {
                 self.delay_enqueue(ri, k);
             }
             let Some(span) = checked_span(concrete) else {
                 return self.err(format!("SimAbortedException: invalid delay {concrete}"));
             };
-            self.meas
+            self.st
+                .meas
                 .events
-                .insert(self.now + span, Ev::DelayRes(ri, k));
+                .insert(self.st.now + span, Ev::DelayRes(ri, k));
         } else {
-            let rt = &mut self.res[ri as usize];
+            let rt = &mut self.st.res[ri as usize];
             let per_core = def.policy == SchedulingPolicy::ProcessorSharing;
             let mut l = ResListener {
-                meas: &mut self.meas,
+                meas: &mut self.st.meas,
                 trace: &mut self.trace,
-                store: self.cfg.store_measurements,
-                now: self.now,
+                store: self.st.cfg.store_measurements,
+                now: self.st.now,
                 def,
                 shadow: &mut rt.shadow,
                 per_core,
@@ -1952,9 +1936,9 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 .sched
                 .as_mut()
                 .expect("scheduler")
-                .process(self.now, k, concrete, &mut l);
+                .process(self.st.now, k, concrete, &mut l);
             match w {
-                Ok(w) => self.meas.events.set_timer(ri, w.at),
+                Ok(w) => self.st.meas.events.set_timer(ri, w.at),
                 Err(e) => return self.err(e.0),
             }
         }
@@ -1962,7 +1946,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     }
 
     fn delay_enqueue(&mut self, ri: ResIdx, k: u64) {
-        let rt = &mut self.res[ri as usize];
+        let rt = &mut self.st.res[ri as usize];
         if !rt.delay_set.contains(&k) {
             rt.delay_set.push(k);
         }
@@ -1974,7 +1958,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         let n = self.cm.ac_paths.len();
         match self.cm.ac_paths.get(id as usize) {
             Some(p) => p,
-            None => &self.dyn_paths[id as usize - n],
+            None => &self.st.dyn_paths[id as usize - n],
         }
     }
 
@@ -2001,19 +1985,19 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     #[cold]
     fn dyn_path_child_slow(&mut self, parent: u32, ac: AcRef) -> u32 {
-        if let Some(&c) = self.dyn_path_child.get(&(parent, ac)) {
+        if let Some(&c) = self.st.dyn_path_child.get(&(parent, ac)) {
             return c;
         }
         let mut path = self.path_of(parent);
         path.push(ac);
         let container = self.cm.alloc.get(&path[..]).copied();
-        let id = (self.cm.ac_paths.len() + self.dyn_paths.len()) as u32;
-        self.dyn_paths.push(AcPath {
+        let id = (self.cm.ac_paths.len() + self.st.dyn_paths.len()) as u32;
+        self.st.dyn_paths.push(AcPath {
             parent,
             ac,
             container,
         });
-        self.dyn_path_child.insert((parent, ac), id);
+        self.st.dyn_path_child.insert((parent, ac), id);
         id
     }
 
@@ -2077,11 +2061,11 @@ impl<'m, C: Compat> Simulation<'m, C> {
         payload: Option<&Frame>,
     ) -> R<Option<ResIdx>> {
         let cm = self.cm;
-        let demand = if self.cfg.simulate_linking_resources {
+        let demand = if self.st.cfg.simulate_linking_resources {
             // MiddlewareCompletionAwareDemandCalculator: the middleware completion is expected to
             // have put the marshalled size on the frame as `stream.BYTESIZE`
             self.eval_f64(cm.stream_bytesize, payload, Origin::Plain("?"))?
-        } else if self.cfg.simulate_throughput_of_linking_resources {
+        } else if self.st.cfg.simulate_throughput_of_linking_resources {
             let mut d = 0.0f64;
             if let Some(f) = payload
                 && f.any_key(|k| cm.keys.bytesize[k as usize])
@@ -2124,7 +2108,12 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     fn component_instance(&mut self, d: &ProcData) -> R<()> {
         let path = cur_path(d);
-        if self.comps.get(path as usize).is_some_and(|c| c.is_some()) {
+        if self
+            .st
+            .comps
+            .get(path as usize)
+            .is_some_and(|c| c.is_some())
+        {
             return Ok(());
         }
         let cm = self.cm;
@@ -2164,12 +2153,12 @@ impl<'m, C: Compat> Simulation<'m, C> {
             };
             if let Some(st) = state {
                 emit(
-                    &mut self.meas,
+                    &mut self.st.meas,
                     &mut self.trace,
-                    self.cfg.store_measurements,
-                    self.now,
+                    self.st.cfg.store_measurements,
+                    self.st.now,
                     st,
-                    seconds(self.now),
+                    seconds(self.st.now),
                     capacity as f64,
                 );
             }
@@ -2181,8 +2170,8 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 true => Some(self.passive_series(&mp, rep, metric_names::HOLDING_TIME)?),
                 false => None,
             };
-            let idx = self.passives.len() as u32;
-            self.passives.push(PassiveInst {
+            let idx = self.st.passives.len() as u32;
+            self.st.passives.push(PassiveInst {
                 pr,
                 ac,
                 res: PassiveResource::new(capacity.max(0) as u64),
@@ -2195,10 +2184,10 @@ impl<'m, C: Compat> Simulation<'m, C> {
             });
             passives.push((pr, idx));
         }
-        if self.comps.len() <= path as usize {
-            self.comps.resize_with(path as usize + 1, || None);
+        if self.st.comps.len() <= path as usize {
+            self.st.comps.resize_with(path as usize + 1, || None);
         }
-        self.comps[path as usize] = Some(CompInst { passives });
+        self.st.comps[path as usize] = Some(CompInst { passives });
         Ok(())
     }
 
@@ -2219,7 +2208,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             if let Some(e) = &p.invalid {
                 return self.err(e.to_string());
             }
-            let prm = &mut self.meas.prm;
+            let prm = &mut self.st.meas.prm;
             if prm.series.len() <= s as usize {
                 prm.series.resize(s as usize + 1, Vec::new());
             }
@@ -2232,14 +2221,14 @@ impl<'m, C: Compat> Simulation<'m, C> {
         }
         if attached {
             // PRMRecorder constructor: the new RuntimeMeasurement is added to the PRM
-            prm_write(&mut self.meas, &mut self.trace, self.now);
+            prm_write(&mut self.st.meas, &mut self.trace, self.st.now);
         }
         Ok(s)
     }
 
     /// The series of measuring point `mp` and `metric`, if it exists.
     fn find_series(&self, mp: &str, metric: &'static str) -> Option<SeriesId> {
-        [self.cm.series_by_mp.get(mp), self.run_series.get(mp)]
+        [self.cm.series_by_mp.get(mp), self.st.run_series.get(mp)]
             .into_iter()
             .flatten()
             .flatten()
@@ -2251,13 +2240,14 @@ impl<'m, C: Compat> Simulation<'m, C> {
         if let Some(s) = self.find_series(mp, metric) {
             return s;
         }
-        let s = self.meas.m.series.len() as SeriesId;
-        self.meas.m.series.push(SeriesDef {
+        let s = self.st.meas.m.series.len() as SeriesId;
+        self.st.meas.m.series.push(SeriesDef {
             mp: mp.into(),
             metric,
         });
-        self.meas.m.rows.push(Vec::new());
-        self.run_series
+        self.st.meas.m.rows.push(Vec::new());
+        self.st
+            .run_series
             .entry(mp.into())
             .or_default()
             .push((metric, s));
@@ -2266,6 +2256,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     fn passive_of(&self, d: &ProcData, pr: Option<PassiveResourceId>) -> R<u32> {
         let inst = self
+            .st
             .comps
             .get(cur_path(d) as usize)
             .and_then(|c| c.as_ref());
@@ -2282,23 +2273,23 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     /// Acquire (ACT-8.2): returns true if the process now waits.
     fn acquire(&mut self, s: u32, d: &ProcData, pr: Option<PassiveResourceId>) -> R<bool> {
-        if !self.running {
+        if !self.st.running {
             return Ok(false);
         }
         let pi = self.passive_of(d, pr)? as usize;
         let k = self.pkey(s);
-        let pid = self.procs[s as usize].pid;
+        let pid = self.st.procs[s as usize].pid;
         let cm = self.cm;
-        let now = self.now;
-        let inst = &mut self.passives[pi];
+        let now = self.st.now;
+        let inst = &mut self.st.passives[pi];
         let avail = inst.res.available();
         let queue = inst.res.waiting().count();
         let mut l = PassiveL {
-            meas: &mut self.meas,
+            meas: &mut self.st.meas,
             trace: &mut self.trace,
-            store: self.cfg.store_measurements,
+            store: self.st.cfg.store_measurements,
             now,
-            procs: &self.procs,
+            procs: &self.st.procs,
             pr_id: &cm.pr_ids[inst.pr.index()],
             ac_id: cm.ac_id(inst.ac),
             state: inst.state,
@@ -2319,20 +2310,20 @@ impl<'m, C: Compat> Simulation<'m, C> {
     }
 
     fn release(&mut self, s: u32, d: &ProcData, pr: Option<PassiveResourceId>) -> R<()> {
-        if !self.running {
+        if !self.st.running {
             return Ok(());
         }
         let pi = self.passive_of(d, pr)? as usize;
         let k = self.pkey(s);
         let cm = self.cm;
-        let now = self.now;
-        let inst = &mut self.passives[pi];
+        let now = self.st.now;
+        let inst = &mut self.st.passives[pi];
         let mut l = PassiveL {
-            meas: &mut self.meas,
+            meas: &mut self.st.meas,
             trace: &mut self.trace,
-            store: self.cfg.store_measurements,
+            store: self.st.cfg.store_measurements,
             now,
-            procs: &self.procs,
+            procs: &self.st.procs,
             pr_id: &cm.pr_ids[inst.pr.index()],
             ac_id: cm.ac_id(inst.ac),
             state: inst.state,
@@ -2359,7 +2350,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     // --------------------------------------------------------------------------- interpreter
 
     fn pid(&self, s: u32) -> u64 {
-        self.procs[s as usize].pid
+        self.st.procs[s as usize].pid
     }
 
     /// Resolves a required role from assembly context `ac` (ACT-2.4..2.7) by pushing the
@@ -2438,7 +2429,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             // ------------------------------------------------------------------ bodies
             Cont::OpenGen { scen, st } => {
                 if *st == 0 {
-                    if !self.running {
+                    if !self.st.running {
                         d.conts.pop();
                         return Ok(Flow::Continue);
                     }
@@ -2468,13 +2459,13 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         st: 0,
                     });
                 } else {
-                    self.main_count += 1;
+                    self.st.main_count += 1;
                     d.conts.pop();
                 }
             }
             Cont::ClosedUser { scen, st } => match *st {
                 0 => {
-                    if !self.running {
+                    if !self.st.running {
                         d.conts.pop();
                         return Ok(Flow::Continue);
                     }
@@ -2500,7 +2491,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 }
                 _ => {
                     *st = 0;
-                    self.main_count += 1;
+                    self.st.main_count += 1;
                 }
             },
             Cont::Forked { beh, st } => {
@@ -2510,11 +2501,11 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     d.conts.push(self.sbeh(beh));
                 } else {
                     d.conts.pop();
-                    self.procs[s as usize].fork_done = true;
-                    if let PKind::Forked { sync: true, parent } = self.procs[s as usize].kind
+                    self.st.procs[s as usize].fork_done = true;
+                    if let PKind::Forked { sync: true, parent } = self.st.procs[s as usize].kind
                         && self.alive(parent)
                         && !self.fork_done_of(parent)
-                        && self.running
+                        && self.st.running
                     {
                         self.activate(parent)?;
                     }
@@ -2554,7 +2545,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             }
             Cont::Coll { .. } => return self.step_coll(d),
             Cont::ForkJoin { a, join } => {
-                let waiting = self.joins[*join as usize]
+                let waiting = self.st.joins[*join as usize]
                     .iter()
                     .any(|&c| self.alive(c) && !self.fork_done_of(c));
                 if waiting {
@@ -2562,11 +2553,11 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 }
                 let (a, join) = (*a, *join);
                 d.conts.pop();
-                self.joins[join as usize].clear();
-                self.free_joins.push(join);
+                self.st.joins[join as usize].clear();
+                self.st.free_joins.push(join);
                 let pid = self.pid(s);
                 if let Some(t) = self.trace.as_mut() {
-                    t.join(self.now, pid, &cm.action_ids[a.index()]);
+                    t.join(self.st.now, pid, &cm.action_ids[a.index()]);
                 }
             }
             Cont::ConsumeDone { res } => {
@@ -2574,7 +2565,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 d.conts.pop();
                 let pid = self.pid(s);
                 if let Some(t) = self.trace.as_mut() {
-                    t.demand_done(self.now, pid, &def.type_id, &def.rc);
+                    t.demand_done(self.st.now, pid, &def.type_id, &def.rc);
                 }
             }
         }
@@ -2593,16 +2584,16 @@ impl<'m, C: Compat> Simulation<'m, C> {
             *st = 1;
             let pid = self.pid(s);
             if let Some(t) = self.trace.as_mut() {
-                t.element(self.now, true, pid, "UsageScenario", sid, None);
+                t.element(self.st.now, true, pid, "UsageScenario", sid, None);
             }
-            if self.running && sc.series.is_some() {
-                *t0 = self.now;
+            if self.st.running && sc.series.is_some() {
+                *t0 = self.st.now;
             }
             // fresh interpreter context: one empty frame (WL-1.2)
             while let Some(f) = d.frames.pop() {
-                self.pool.recycle(Some(f));
+                self.st.pool.recycle(Some(f));
             }
-            d.frames.push(self.pool.frame(None));
+            d.frames.push(self.st.pool.frame(None));
             d.results.clear();
             d.acs.clear();
             let Some(b) = sc.behaviour else {
@@ -2613,18 +2604,18 @@ impl<'m, C: Compat> Simulation<'m, C> {
             let t0 = *t0;
             let pid = self.pid(s);
             if let Some(t) = self.trace.as_mut() {
-                t.element(self.now, false, pid, "UsageScenario", sid, None);
+                t.element(self.st.now, false, pid, "UsageScenario", sid, None);
             }
             if let Some(se) = sc.series
-                && self.running
+                && self.st.running
                 && t0 >= 0
             {
-                let now = seconds(self.now);
+                let now = seconds(self.st.now);
                 emit(
-                    &mut self.meas,
+                    &mut self.st.meas,
                     &mut self.trace,
-                    self.cfg.store_measurements,
-                    self.now,
+                    self.st.cfg.store_measurements,
+                    self.st.now,
                     se,
                     now,
                     now - seconds(t0),
@@ -2638,13 +2629,13 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// Id of the provided-role call `(ac, role, sig)` in `provs` (resolved on first use).
     #[inline]
     fn prov_id(&mut self, ac: AcRef, role: RoleId, sig: SignatureId) -> u32 {
-        if let Some(&id) = self.prov_ids.get(&(ac, role, sig)) {
+        if let Some(&id) = self.st.prov_ids.get(&(ac, role, sig)) {
             return id;
         }
         let r = self.resolve_prov(ac, role, sig);
-        let id = self.provs.len() as u32;
-        self.provs.push(r);
-        self.prov_ids.insert((ac, role, sig), id);
+        let id = self.st.provs.len() as u32;
+        self.st.provs.push(r);
+        self.st.prov_ids.insert((ac, role, sig), id);
         id
     }
 
@@ -2763,7 +2754,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             *st = 0;
             let c = *caller;
             d.acs.push(c);
-            self.pool.recycle(d.frames.pop());
+            self.st.pool.recycle(d.frames.pop());
         }
         Ok(Flow::Continue)
     }
@@ -2772,7 +2763,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// trace line of the completed demand, so it is only needed with a trace.
     #[inline]
     fn wait_consumed(&self, d: &mut ProcData, ri: ResIdx) -> Flow {
-        if self.trace.is_some() {
+        if self.st.traced {
             d.conts.push(Cont::ConsumeDone { res: ri });
         }
         Flow::Wait
@@ -2782,9 +2773,9 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// starts with `prefix`, in the Java `HashMap` order of `getContents()` of the new (empty)
     /// frame's chain. Visited in place (the literal engine copies the contents first; the
     /// proxies do not see the new frame, so both give the same values in the same order).
-    fn eval_inner(&mut self, cur: Option<Rc<Frame>>, prefix: &str) -> R<Rc<Frame>> {
+    fn eval_inner(&mut self, cur: Option<FrameRef>, prefix: &str) -> R<FrameRef> {
         let cm = self.cm;
-        let mut rc = self.pool.frame(cur);
+        let mut rc = self.st.pool.frame(cur);
         let fi = frame_mut(&mut rc);
         if C::LITERAL_ENGINE {
             for (k, b) in fi.contents(&cm.keys) {
@@ -2828,9 +2819,9 @@ impl<'m, C: Compat> Simulation<'m, C> {
             *st = 1;
             let cur = d.frames.last().cloned();
             let aid = &cm.action_ids[a.index()];
-            let prev = self.rng.set_origin(Origin::Elem("inner", aid));
+            let prev = self.st.rng.set_origin(Origin::Elem("inner", aid));
             let fi = self.eval_inner(cur, prefix);
-            self.rng.restore_origin(prev);
+            self.st.rng.restore_origin(prev);
             d.frames.push(fi?);
             let Some(body) = *body else {
                 return self.err("collection iterator without body");
@@ -2838,7 +2829,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             d.conts.push(self.sbeh(body));
         } else {
             *st = 0;
-            self.pool.recycle(d.frames.pop());
+            self.st.pool.recycle(d.frames.pop());
         }
         Ok(Flow::Continue)
     }
@@ -2846,7 +2837,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     #[inline]
     fn fork_done_of(&self, k: u64) -> bool {
         let (s, _) = unkey(k);
-        self.procs[s as usize].fork_done
+        self.st.procs[s as usize].fork_done
     }
 }
 

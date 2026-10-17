@@ -4,7 +4,6 @@
 use crate::javafmt::{push_json_double, push_json_str};
 use simoxide_random::{SimuComStream, UniformSource};
 use simoxide_stoex::Value;
-use std::io::Write;
 use std::sync::Arc;
 
 /// Where the uniforms come from.
@@ -90,14 +89,18 @@ impl Tape {
     }
 }
 
+#[derive(Clone)]
 enum Src {
     Mt(Box<SimuComStream>),
     Replay { tape: Arc<Tape>, pos: usize },
 }
 
 /// The exact mode's uniform source (the reference stream or a replayed tape, with the tape
-/// bookkeeping); internal, public only as `compat::Exact::Rng`.
+/// bookkeeping); internal, public only as `compat::Exact::Rng`. Part of the run state: the tape
+/// records are collected in a buffer, which the simulation writes out (see
+/// `Simulation::drain_tape`), so the state holds no writer.
 #[doc(hidden)]
+#[derive(Clone)]
 pub struct Rng {
     src: Src,
     /// Uniforms drawn so far.
@@ -106,7 +109,8 @@ pub struct Rng {
     origin: String,
     need_origin: bool,
     check_origins: bool,
-    tape: Option<TapeOut>,
+    /// Buffered tape records (`None`: no tape output).
+    tape: Option<String>,
     /// First problem seen (tape exhausted, origin mismatch).
     pub problem: Option<String>,
     depth: u32,
@@ -115,25 +119,6 @@ pub struct Rng {
     /// Own stream without tape output: evaluations need no bookkeeping (origins, `s` records,
     /// recorded samples).
     pub plain: bool,
-}
-
-pub(crate) struct TapeOut {
-    buf: String,
-    out: Box<dyn Write>,
-}
-
-impl TapeOut {
-    fn flush_if_full(&mut self) {
-        if self.buf.len() > (1 << 16) {
-            let _ = self.out.write_all(self.buf.as_bytes());
-            self.buf.clear();
-        }
-    }
-    pub fn finish(&mut self) {
-        let _ = self.out.write_all(self.buf.as_bytes());
-        self.buf.clear();
-        let _ = self.out.flush();
-    }
 }
 
 /// Why a uniform is drawn (`purpose[:elementId]`).
@@ -148,7 +133,7 @@ impl Rng {
     pub fn new(
         mode: &RngMode,
         seed: i64,
-        tape: Option<Box<dyn Write>>,
+        tape: bool,
         check_origins: bool,
         use_samples: bool,
     ) -> Result<Rng, String> {
@@ -165,23 +150,35 @@ impl Rng {
             },
         };
         let check = check_origins && matches!(mode, RngMode::Replay(_));
-        let plain = matches!(mode, RngMode::Own) && tape.is_none();
-        Ok(Rng {
+        let mut r = Rng {
             src,
             count: 0,
             origin: "?".into(),
-            need_origin: tape.is_some() || check,
+            need_origin: false,
             check_origins: check,
-            tape: tape.map(|out| TapeOut {
-                buf: String::with_capacity(1 << 17),
-                out,
-            }),
+            tape: None,
             problem: None,
             depth: 0,
             eval_start: 0,
             use_samples,
-            plain,
-        })
+            plain: false,
+        };
+        r.attach_tape(tape);
+        Ok(r)
+    }
+
+    /// Switches the tape records on or off (at the start of a run, or between two events of a
+    /// resumed one: the origin tag is the default `?` there).
+    pub fn attach_tape(&mut self, on: bool) {
+        self.tape = on.then(|| String::with_capacity(1 << 17));
+        self.need_origin = on || self.check_origins;
+        self.plain = matches!(self.src, Src::Mt(_)) && !on;
+    }
+
+    /// The buffered tape records (`None` without tape output).
+    #[inline]
+    pub fn tape_buf(&mut self) -> Option<&mut String> {
+        self.tape.as_mut()
     }
 
     /// Sets the origin tag; returns the previous one (to restore).
@@ -241,9 +238,8 @@ impl Rng {
         self.depth = self.depth.saturating_sub(1);
         if self.depth == 0
             && self.count > self.eval_start
-            && let (Some(t), Some(v)) = (self.tape.as_mut(), v)
+            && let (Some(b), Some(v)) = (self.tape.as_mut(), v)
         {
-            let b = &mut t.buf;
             b.push_str("{\"k\":\"s\",\"n\":");
             b.push_str(&(self.count - self.eval_start).to_string());
             b.push_str(",\"o\":");
@@ -266,13 +262,6 @@ impl Rng {
                 other => push_json_str(b, &other.to_string()),
             }
             b.push_str("}\n");
-            t.flush_if_full();
-        }
-    }
-
-    pub fn finish(&mut self) {
-        if let Some(t) = self.tape.as_mut() {
-            t.finish();
         }
     }
 }
@@ -310,8 +299,7 @@ impl UniformSource for Rng {
                 }
             }
         };
-        if let Some(t) = self.tape.as_mut() {
-            let b = &mut t.buf;
+        if let Some(b) = self.tape.as_mut() {
             b.push_str("{\"k\":\"u\",\"i\":");
             b.push_str(&i.to_string());
             b.push_str(",\"u\":");
@@ -319,7 +307,6 @@ impl UniformSource for Rng {
             b.push_str(",\"o\":");
             push_json_str(b, &self.origin);
             b.push_str("}\n");
-            t.flush_if_full();
         }
         u
     }
@@ -351,7 +338,7 @@ mod tests {
     #[test]
     fn replay_reports_exhaustion_and_origin_mismatch() {
         let t = Arc::new(Tape::parse(TAPE).unwrap());
-        let mut r = Rng::new(&RngMode::Replay(t), 0, None, true, false).unwrap();
+        let mut r = Rng::new(&RngMode::Replay(t), 0, false, true, false).unwrap();
         let prev = r.set_origin(Origin::Plain("interarrival"));
         assert_eq!(r.next_uniform(), 0.4417607209716412);
         r.restore_origin(prev);
@@ -367,7 +354,7 @@ mod tests {
     #[test]
     fn own_stream_is_seeded_like_refsim() {
         // first uniform of h01_ps_single (seed 1)
-        let mut r = Rng::new(&RngMode::Own, 1, None, false, false).unwrap();
+        let mut r = Rng::new(&RngMode::Own, 1, false, false, false).unwrap();
         assert_eq!(r.next_uniform(), 0.4417607209716412);
         assert_eq!(r.count, 1);
     }

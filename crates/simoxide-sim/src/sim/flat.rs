@@ -42,42 +42,42 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 SOp::Start(start) => {
                     if let Some(t) = self.trace.as_mut() {
                         let ac = cm.ac_id(d.acs.last().map_or(SYSTEM_AC, |e| e.0));
-                        let pid = self.procs[s as usize].pid;
+                        let pid = self.st.procs[s as usize].pid;
                         let id = &cm.action_ids[start.index()];
-                        t.element(self.now, true, pid, "StartAction", id, Some(ac));
-                        t.element(self.now, false, pid, "StartAction", id, Some(ac));
+                        t.element(self.st.now, true, pid, "StartAction", id, Some(ac));
+                        t.element(self.st.now, false, pid, "StartAction", id, Some(ac));
                     }
                 }
                 SOp::NoStart => return self.err("RDSEFF is invalid, it misses a start action"),
                 SOp::Begin(a) => self.seff_element(s, d, a, true),
                 SOp::BeginRt(a, se) => {
                     self.seff_element(s, d, a, true);
-                    if self.running {
+                    if self.st.running {
                         let Some(Cont::SBeh { t0, .. }) = d.conts.last_mut() else {
                             unreachable!()
                         };
-                        let rt = &mut self.procs[s as usize].rt;
+                        let rt = &mut self.st.procs[s as usize].rt;
                         if rt.contains(&se) {
                             return self.err(RT_SAME_CONTEXT);
                         }
                         rt.push(se);
-                        *t0 = self.now;
+                        *t0 = self.st.now;
                     }
                 }
                 SOp::End(a) => self.seff_element(s, d, a, false),
                 SOp::EndRt(a, se) => {
                     let tstart = std::mem::replace(t0, -1);
                     if tstart >= 0 {
-                        self.procs[s as usize].rt.pop();
+                        self.st.procs[s as usize].rt.pop();
                     }
                     self.seff_element(s, d, a, false);
-                    if self.running && tstart >= 0 {
-                        let now = seconds(self.now);
+                    if self.st.running && tstart >= 0 {
+                        let now = seconds(self.st.now);
                         emit(
-                            &mut self.meas,
+                            &mut self.st.meas,
                             &mut self.trace,
-                            self.cfg.store_measurements,
-                            self.now,
+                            self.st.cfg.store_measurements,
+                            self.st.now,
                             se,
                             now,
                             now - seconds(tstart),
@@ -104,9 +104,9 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     let n = self.eval_i32(call.count, cur, Origin::Elem("infra", &call.id))?;
                     if let Some(t) = self.trace.as_mut() {
                         t.count(
-                            self.now,
+                            self.st.now,
                             "infra",
-                            self.procs[s as usize].pid,
+                            self.st.procs[s as usize].pid,
                             &call.id,
                             i64::from(n),
                         );
@@ -158,12 +158,12 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         unreachable!()
                     };
                     *caller = c;
-                    d.results.push(self.empty.clone());
+                    d.results.push(self.st.empty.clone());
                     // (the reference's interpreter level of the call)
                     d.elided += 1;
                     // the resolution depends on the caller's context and the context below it
                     let parent = d.acs.last().map_or(u32::MAX, |e| e.1);
-                    let hit = &self.call_cache[site as usize];
+                    let hit = &self.st.call_cache[site as usize];
                     if let Some(cont) = hit.cont
                         && hit.ac == c.0
                         && hit.parent == parent
@@ -175,7 +175,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         // no required delegation on the way: one continuation, the same
                         // assembly-context stack
                         if d.conts.len() == depth + 1 && d.acs.len() == acs {
-                            self.call_cache[site as usize] = CallCache {
+                            self.st.call_cache[site as usize] = CallCache {
                                 ac: c.0,
                                 parent,
                                 cont: d.conts.last().copied(),
@@ -190,7 +190,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     };
                     d.elided -= 1;
                     d.acs.push(caller);
-                    self.pool.recycle(d.frames.pop());
+                    self.st.pool.recycle(d.frames.pop());
                     let res = d.results.pop();
                     if returns {
                         let CAct::External { returns, .. } = &cm.act[a.index()] else {
@@ -198,7 +198,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         };
                         let aid = &cm.action_ids[a.index()];
                         let mut target = d.frames.pop().unwrap_or_default();
-                        self.pool.unshare(&mut target);
+                        self.st.pool.unshare(&mut target);
                         let r = self.fill(
                             returns,
                             res.as_ref(),
@@ -208,7 +208,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         d.frames.push(target);
                         r?;
                     }
-                    self.pool.recycle(res);
+                    self.st.pool.recycle(res);
                 }
                 SOp::Exec(a) => {
                     let depth = d.conts.len();
@@ -295,10 +295,10 @@ impl<'m, C: Compat> Simulation<'m, C> {
         if let Some(t) = self.trace.as_mut() {
             let cm = self.cm;
             let ac = cm.ac_id(d.acs.last().map_or(SYSTEM_AC, |e| e.0));
-            let pid = self.procs[s as usize].pid;
+            let pid = self.st.procs[s as usize].pid;
             let aid = &cm.action_ids[a.index()];
             t.element(
-                self.now,
+                self.st.now,
                 begin,
                 pid,
                 cm.action_type[a.index()],
@@ -323,14 +323,14 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 behaviours,
                 sels,
             } => {
-                let prev = self.rng.set_origin(Origin::Elem("branch", aid));
-                let u = self.rng.next_uniform();
-                self.rng.restore_origin(prev);
+                let prev = self.st.rng.set_origin(Origin::Elem("branch", aid));
+                let u = self.st.rng.next_uniform();
+                self.st.rng.restore_origin(prev);
                 let Some(i) = simoxide_random::probfn::branch_index(cum, u) else {
                     return self.err("branch: no transition selected");
                 };
                 if let Some(t) = self.trace.as_mut() {
-                    t.branch(self.now, pid, aid, i as i64, Some(&sels[i]));
+                    t.branch(self.st.now, pid, aid, i as i64, Some(&sels[i]));
                 }
                 let Some(b) = behaviours[i] else {
                     return self.err("branch transition without behaviour");
@@ -353,8 +353,8 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 }
                 if let Some(t) = self.trace.as_mut() {
                     match chosen {
-                        Some(i) => t.branch(self.now, pid, aid, i as i64, Some(&sels[i])),
-                        None => t.branch(self.now, pid, aid, -1, None),
+                        Some(i) => t.branch(self.st.now, pid, aid, i as i64, Some(&sels[i])),
+                        None => t.branch(self.st.now, pid, aid, -1, None),
                     }
                 }
                 let Some(i) = chosen else {
@@ -370,7 +370,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 let cur = d.frames.last().map(|f| &**f);
                 let n = self.eval_i32(*count, cur, Origin::Elem("loop", aid))?;
                 if let Some(t) = self.trace.as_mut() {
-                    t.count(self.now, "loop", pid, aid, i64::from(n));
+                    t.count(self.st.now, "loop", pid, aid, i64::from(n));
                 }
                 let Some(body) = *body else {
                     return self.err("loop without body");
@@ -381,7 +381,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 let cur = d.frames.last().map(|f| &**f);
                 let n = self.eval_i32(*count, cur, Origin::Elem("collection", aid))?;
                 if let Some(t) = self.trace.as_mut() {
-                    t.count(self.now, "loop", pid, aid, i64::from(n));
+                    t.count(self.st.now, "loop", pid, aid, i64::from(n));
                 }
                 d.conts.push(Cont::Coll { a, left: n, st: 0 });
             }
@@ -390,14 +390,14 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 synchronous,
             } => {
                 let parent = self.pkey(s);
-                let frame = d.frames.last().unwrap_or(&self.empty).clone();
-                let mut children = std::mem::take(&mut self.fork_scratch);
+                let frame = d.frames.last().unwrap_or(&self.st.empty).clone();
+                let mut children = std::mem::take(&mut self.st.fork_scratch);
                 children.clear();
-                let join = match self.free_joins.pop() {
+                let join = match self.st.free_joins.pop() {
                     Some(j) => j,
                     None => {
-                        self.joins.push(Vec::new());
-                        (self.joins.len() - 1) as u32
+                        self.st.joins.push(Vec::new());
+                        (self.st.joins.len() - 1) as u32
                     }
                 };
                 for (list, sync) in [(asynchronous, false), (synchronous, true)] {
@@ -407,22 +407,22 @@ impl<'m, C: Compat> Simulation<'m, C> {
                             Cont::Forked { beh: b, st: 0 },
                         )?;
                         let (cs, _) = unkey(k);
-                        let cd = &mut self.procs[cs as usize].data;
+                        let cd = &mut self.st.procs[cs as usize].data;
                         cd.frames.push(frame.clone());
                         cd.acs.extend_from_slice(&d.acs);
                         children.push(k);
                         if sync {
-                            self.joins[join as usize].push(k);
+                            self.st.joins[join as usize].push(k);
                         }
                     }
                 }
                 if let Some(t) = self.trace.as_mut() {
-                    t.fork(self.now, pid, aid, asynchronous.len(), synchronous.len());
+                    t.fork(self.st.now, pid, aid, asynchronous.len(), synchronous.len());
                 }
                 // ForkExecutor.run: schedule all children, then join the synchronous ones
                 d.conts.push(Cont::ForkJoin { a, join });
                 // the parent is running: while stopped, children run synchronously here
-                *self.procs[s as usize].data = std::mem::take(d);
+                *self.st.procs[s as usize].data = std::mem::take(d);
                 let mut r = Ok(());
                 for &k in &children {
                     r = self.activate(k);
@@ -430,8 +430,8 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         break;
                     }
                 }
-                self.fork_scratch = children;
-                *d = std::mem::take(&mut *self.procs[s as usize].data);
+                self.st.fork_scratch = children;
+                *d = std::mem::take(&mut *self.st.procs[s as usize].data);
                 r?;
             }
             CAct::Acquire(pr) => {
@@ -447,7 +447,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 let Some(mut target) = d.results.pop() else {
                     return self.err("NullPointerException: no result frame");
                 };
-                self.pool.unshare(&mut target);
+                self.st.pool.unshare(&mut target);
                 let r = self.fill(
                     usages,
                     cur,
@@ -487,10 +487,10 @@ impl<'m, C: Compat> Simulation<'m, C> {
             match op {
                 UOp::Start(start) => {
                     if let Some(t) = self.trace.as_mut() {
-                        let pid = self.procs[s as usize].pid;
+                        let pid = self.st.procs[s as usize].pid;
                         let id = &cm.uaction_ids[start.index()];
-                        t.element(self.now, true, pid, "Start", id, None);
-                        t.element(self.now, false, pid, "Start", id, None);
+                        t.element(self.st.now, true, pid, "Start", id, None);
+                        t.element(self.st.now, false, pid, "Start", id, None);
                     }
                 }
                 UOp::NoStart => {
@@ -498,8 +498,8 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 }
                 UOp::Begin(a) => self.user_element(s, a, true),
                 UOp::BeginRt(a) => {
-                    if self.running {
-                        *t0 = self.now;
+                    if self.st.running {
+                        *t0 = self.st.now;
                     }
                     self.user_element(s, a, true);
                 }
@@ -507,13 +507,13 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 UOp::EndRt(a, se) => {
                     let tstart = std::mem::replace(t0, -1);
                     self.user_element(s, a, false);
-                    if self.running && tstart >= 0 {
-                        let now = seconds(self.now);
+                    if self.st.running && tstart >= 0 {
+                        let now = seconds(self.st.now);
                         emit(
-                            &mut self.meas,
+                            &mut self.st.meas,
                             &mut self.trace,
-                            self.cfg.store_measurements,
-                            self.now,
+                            self.st.cfg.store_measurements,
+                            self.st.now,
                             se,
                             now,
                             now - seconds(tstart),
@@ -544,28 +544,28 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     let pid = self.pid(s);
                     if let Some(t) = self.trace.as_mut() {
                         t.system_op(
-                            self.now,
+                            self.st.now,
                             true,
                             pid,
                             &cm.role_ids[role.index()],
                             &cm.sig_ids[sig.index()],
                         );
                     }
-                    if sysop_series.is_some() && self.running {
+                    if sysop_series.is_some() && self.st.running {
                         let Some(Cont::UBeh { t1, .. }) = d.conts.last_mut() else {
                             unreachable!()
                         };
-                        *t1 = self.now;
+                        *t1 = self.st.now;
                     }
                     let aid = &cm.uaction_ids[a.index()];
                     let fin =
                         self.input_frame(inputs, d.frames.last(), Origin::Elem("param", aid))?;
                     d.frames.push(fin);
-                    d.results.push(self.empty.clone());
-                    let prov = match self.elsc_prov[a.index()] {
+                    d.results.push(self.st.empty.clone());
+                    let prov = match self.st.elsc_prov[a.index()] {
                         u32::MAX => {
                             let p = self.prov_id(SYSTEM_AC, role, sig);
-                            self.elsc_prov[a.index()] = p;
+                            self.st.elsc_prov[a.index()] = p;
                             p
                         }
                         p => p,
@@ -598,12 +598,12 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         unreachable!("checked by the call")
                     };
                     d.elided -= 1;
-                    self.pool.recycle(d.frames.pop());
+                    self.st.pool.recycle(d.frames.pop());
                     let res = d.results.pop();
                     if !outputs.is_empty() {
                         let aid = &cm.uaction_ids[a.index()];
                         let mut target = d.frames.pop().unwrap_or_default();
-                        self.pool.unshare(&mut target);
+                        self.st.pool.unshare(&mut target);
                         let r = self.fill(
                             outputs,
                             res.as_ref(),
@@ -613,11 +613,11 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         d.frames.push(target);
                         r?;
                     }
-                    self.pool.recycle(res);
+                    self.st.pool.recycle(res);
                     let pid = self.pid(s);
                     if let Some(t) = self.trace.as_mut() {
                         t.system_op(
-                            self.now,
+                            self.st.now,
                             false,
                             pid,
                             &cm.role_ids[role.index()],
@@ -625,15 +625,15 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         );
                     }
                     if let Some(se) = sysop_series
-                        && self.running
+                        && self.st.running
                         && tstart >= 0
                     {
-                        let now = seconds(self.now);
+                        let now = seconds(self.st.now);
                         emit(
-                            &mut self.meas,
+                            &mut self.st.meas,
                             &mut self.trace,
-                            self.cfg.store_measurements,
-                            self.now,
+                            self.st.cfg.store_measurements,
+                            self.st.now,
                             *se,
                             now,
                             now - seconds(tstart),
@@ -649,18 +649,21 @@ impl<'m, C: Compat> Simulation<'m, C> {
                             behaviours,
                             sels,
                         } => {
-                            let prev = self.rng.set_origin(Origin::Elem("branch", aid));
+                            let prev = self.st.rng.set_origin(Origin::Elem("branch", aid));
                             let idx = if cum.is_empty() {
                                 None
                             } else {
-                                simoxide_random::probfn::branch_index(cum, self.rng.next_uniform())
+                                simoxide_random::probfn::branch_index(
+                                    cum,
+                                    self.st.rng.next_uniform(),
+                                )
                             };
-                            self.rng.restore_origin(prev);
+                            self.st.rng.restore_origin(prev);
                             let Some(i) = idx else {
                                 return self.err("branch: no transition selected");
                             };
                             if let Some(t) = self.trace.as_mut() {
-                                t.branch(self.now, pid, aid, i as i64, Some(&sels[i]));
+                                t.branch(self.st.now, pid, aid, i as i64, Some(&sels[i]));
                             }
                             let Some(b) = behaviours[i] else {
                                 return self.err("branch transition without behaviour");
@@ -670,7 +673,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         CUAct::Loop { count, body } => {
                             let n = self.eval_i32(*count, None, Origin::Elem("loop", aid))?;
                             if let Some(t) = self.trace.as_mut() {
-                                t.count(self.now, "loop", pid, aid, i64::from(n));
+                                t.count(self.st.now, "loop", pid, aid, i64::from(n));
                             }
                             let Some(body) = *body else {
                                 return self.err("loop without body");
@@ -699,9 +702,16 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn user_element(&mut self, s: u32, a: UserActionId, begin: bool) {
         if let Some(t) = self.trace.as_mut() {
             let cm = self.cm;
-            let pid = self.procs[s as usize].pid;
+            let pid = self.st.procs[s as usize].pid;
             let aid = &cm.uaction_ids[a.index()];
-            t.element(self.now, begin, pid, cm.uaction_type[a.index()], aid, None);
+            t.element(
+                self.st.now,
+                begin,
+                pid,
+                cm.uaction_type[a.index()],
+                aid,
+                None,
+            );
         }
     }
 }

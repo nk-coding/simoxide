@@ -51,7 +51,7 @@ fn order(t: i64, seq: u64) -> u128 {
 }
 
 /// Indexed binary min-heap of resource timer slots keyed by `(t, seq)`.
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Timers {
     heap: Vec<u32>,
     /// Position of each resource in `heap` (`NONE`: no pending timer).
@@ -151,7 +151,7 @@ impl Timers {
 }
 
 /// The pending-event list.
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub(crate) struct EventList {
     heap: Vec<Note>,
     timers: Timers,

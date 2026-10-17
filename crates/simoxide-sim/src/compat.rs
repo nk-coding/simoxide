@@ -35,7 +35,6 @@
 use crate::rng::{Origin, RngMode};
 use simoxide_random::UniformSource;
 use simoxide_stoex::Value;
-use std::io::Write;
 
 /// Which simulator variant a run uses (see the module docs).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -125,15 +124,21 @@ impl<P: Compat> Compat for Literal<P> {
 
 /// What the simulator needs from its random source besides uniforms and samples: the exact
 /// mode's tape bookkeeping (origin tags, `s` records, replayed samples), no-ops in fast mode.
+/// Part of the run state ([`crate::RunState`]): `Clone` continues the same stream; it holds no
+/// writer (the tape records are buffered, see [`SimRng::tape_buf`]).
 #[doc(hidden)]
-pub trait SimRng: UniformSource + Sized {
+pub trait SimRng: UniformSource + Sized + Clone + Send + Sync {
     fn create(
         mode: &RngMode,
         seed: i64,
-        tape: Option<Box<dyn Write>>,
+        tape: bool,
         check_origins: bool,
         use_samples: bool,
     ) -> Result<Self, String>;
+    /// Switches the tape records on or off (start of a run, or a pause).
+    fn attach_tape(&mut self, on: bool) -> Result<(), String>;
+    /// The buffered tape records, written out and cleared by the simulation.
+    fn tape_buf(&mut self) -> Option<&mut String>;
     /// Evaluations need no bookkeeping (no tape output, no replay).
     fn plain(&self) -> bool;
     /// Uniforms (exact) or samples (fast) drawn so far.
@@ -146,18 +151,25 @@ pub trait SimRng: UniformSource + Sized {
     /// The tape ran out (replay): the run must stop.
     fn exhausted(&self) -> Option<&str>;
     fn take_problem(&mut self) -> Option<String>;
-    fn finish(&mut self);
 }
 
 impl SimRng for crate::rng::Rng {
     fn create(
         mode: &RngMode,
         seed: i64,
-        tape: Option<Box<dyn Write>>,
+        tape: bool,
         check_origins: bool,
         use_samples: bool,
     ) -> Result<Self, String> {
         crate::rng::Rng::new(mode, seed, tape, check_origins, use_samples)
+    }
+    fn attach_tape(&mut self, on: bool) -> Result<(), String> {
+        crate::rng::Rng::attach_tape(self, on);
+        Ok(())
+    }
+    #[inline]
+    fn tape_buf(&mut self) -> Option<&mut String> {
+        crate::rng::Rng::tape_buf(self)
     }
     #[inline]
     fn plain(&self) -> bool {
@@ -196,14 +208,12 @@ impl SimRng for crate::rng::Rng {
     fn take_problem(&mut self) -> Option<String> {
         self.problem.take()
     }
-    fn finish(&mut self) {
-        crate::rng::Rng::finish(self)
-    }
 }
 
 /// The fast mode's source: [`simoxide_random::fast::FastSource`] plus a sample counter.
 #[cfg(feature = "fast")]
 #[doc(hidden)]
+#[derive(Clone)]
 pub struct FastSourceRng {
     src: simoxide_random::fast::FastSource,
     count: u64,
@@ -247,20 +257,29 @@ impl SimRng for FastSourceRng {
     fn create(
         mode: &RngMode,
         seed: i64,
-        tape: Option<Box<dyn Write>>,
+        tape: bool,
         _check_origins: bool,
         _use_samples: bool,
     ) -> Result<Self, String> {
         if matches!(mode, RngMode::Replay(_)) {
             return Err("fast mode cannot replay a random tape (use --mode exact)".into());
         }
-        if tape.is_some() {
-            return Err("fast mode writes no random tape (use --mode exact)".into());
-        }
-        Ok(FastSourceRng {
+        let mut r = FastSourceRng {
             src: simoxide_random::fast::FastSource::new(seed as u64),
             count: 0,
-        })
+        };
+        r.attach_tape(tape)?;
+        Ok(r)
+    }
+    fn attach_tape(&mut self, on: bool) -> Result<(), String> {
+        match on {
+            true => Err("fast mode writes no random tape (use --mode exact)".into()),
+            false => Ok(()),
+        }
+    }
+    #[inline(always)]
+    fn tape_buf(&mut self) -> Option<&mut String> {
+        None
     }
     #[inline]
     fn plain(&self) -> bool {
@@ -291,5 +310,4 @@ impl SimRng for FastSourceRng {
     fn take_problem(&mut self) -> Option<String> {
         None
     }
-    fn finish(&mut self) {}
 }

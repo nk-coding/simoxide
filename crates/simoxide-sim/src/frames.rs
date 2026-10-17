@@ -1,9 +1,11 @@
 //! Stack frames (`SimulatedStackframe`, spec ACT-5).
 //!
 //! A frame maps key ids to values or lazily evaluated proxies and has an optional parent. Frames
-//! are shared through `Rc` and treated as immutable snapshots once shared: writing into a shared
-//! frame (`Rc::make_mut`) copies it. This reproduces the reference, where `copyFrame()` makes deep
-//! copies for proxies and fork children and only the top frame of a stack is ever written to.
+//! are shared through [`FrameRef`] and treated as immutable snapshots once shared: writing into a
+//! shared frame ([`FramePool::unshare`]) copies it. This reproduces the reference, where
+//! `copyFrame()` makes deep copies for proxies and fork children and only the top frame of a stack
+//! is ever written to. The same copy on write lets forks of a run share their frames
+//! ([`crate::RunState`]).
 
 use crate::ir::{CompiledModel, KeyId, Keys, ProgId};
 use crate::javahash::{iteration_order, spread};
@@ -11,28 +13,33 @@ use simoxide_random::UniformSource;
 use simoxide_stoex::{Env, EvalError, Value};
 use std::rc::Rc;
 
+/// A shared frame.
+pub(crate) type FrameRef = Rc<Frame>;
+/// A shared evaluation proxy.
+pub(crate) type ProxyRef = Rc<Proxy>;
+
 /// `EvaluationProxy`: a specification evaluated against a frozen frame on every access.
 #[derive(Debug)]
 pub(crate) struct Proxy {
     pub prog: ProgId,
-    pub frame: Option<Rc<Frame>>,
+    pub frame: Option<FrameRef>,
 }
 
 #[derive(Debug, Clone)]
 pub(crate) enum Binding {
     Val(Value),
-    Proxy(Rc<Proxy>),
+    Proxy(ProxyRef),
 }
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct Frame {
     /// Entries in first-insertion order (a `put` of an existing key replaces in place).
     pub entries: Vec<(KeyId, Binding)>,
-    pub parent: Option<Rc<Frame>>,
+    pub parent: Option<FrameRef>,
 }
 
 impl Frame {
-    pub fn with_parent(parent: Option<Rc<Frame>>) -> Frame {
+    pub fn with_parent(parent: Option<FrameRef>) -> Frame {
         Frame {
             entries: Vec::new(),
             parent,
@@ -155,19 +162,19 @@ impl Frame {
 }
 
 /// Recycled frames: a frame whose last reference is popped from a process's frame stack keeps
-/// its allocation (the `Rc` box and the entry vector) for the next frame. Only unshared frames
-/// are recycled (`Rc::get_mut`), so no other reference can observe the reuse; everything else
+/// its allocation (the shared box and the entry vector) for the next frame. Only unshared frames
+/// are recycled (`FrameRef::get_mut`), so no other reference can observe the reuse; everything else
 /// is dropped as before. Values and lookups do not change.
 #[derive(Default)]
 pub(crate) struct FramePool {
-    free: Vec<Rc<Frame>>,
+    free: Vec<FrameRef>,
 }
 
-/// The frame of an unshared `Rc` (a new frame of [`FramePool::frame`], or after
+/// The frame of an unshared [`FrameRef`] (a new frame of [`FramePool::frame`], or after
 /// [`FramePool::unshare`]).
 #[inline]
-pub(crate) fn frame_mut(f: &mut Rc<Frame>) -> &mut Frame {
-    Rc::get_mut(f).expect("unshared frame")
+pub(crate) fn frame_mut(f: &mut FrameRef) -> &mut Frame {
+    FrameRef::get_mut(f).expect("unshared frame")
 }
 
 /// Recycled frames kept at most (a few call levels of a few processes).
@@ -176,23 +183,23 @@ const POOL_CAP: usize = 64;
 impl FramePool {
     /// A new frame with no entries and parent `parent`.
     #[inline]
-    pub fn frame(&mut self, parent: Option<Rc<Frame>>) -> Rc<Frame> {
+    pub fn frame(&mut self, parent: Option<FrameRef>) -> FrameRef {
         match self.free.pop() {
             Some(mut f) => {
                 // pooled frames are unshared, empty and parentless
-                if let Some(m) = Rc::get_mut(&mut f) {
+                if let Some(m) = FrameRef::get_mut(&mut f) {
                     m.parent = parent;
                 }
                 f
             }
-            None => Rc::new(Frame::with_parent(parent)),
+            None => FrameRef::new(Frame::with_parent(parent)),
         }
     }
 
-    /// `Rc::make_mut`: makes `f` unshared (a pooled copy if it is shared), for [`frame_mut`].
+    /// `make_mut`: makes `f` unshared (a pooled copy if it is shared), for [`frame_mut`].
     #[inline]
-    pub fn unshare(&mut self, f: &mut Rc<Frame>) {
-        if Rc::get_mut(f).is_none() {
+    pub fn unshare(&mut self, f: &mut FrameRef) {
+        if FrameRef::get_mut(f).is_none() {
             let mut copy = self.frame(f.parent.clone());
             frame_mut(&mut copy)
                 .entries
@@ -203,7 +210,7 @@ impl FramePool {
 
     /// [`FramePool::recycle`] for every frame of `v` (emptied, capacity kept).
     #[inline(never)]
-    pub fn recycle_all(&mut self, v: &mut Vec<Rc<Frame>>) {
+    pub fn recycle_all(&mut self, v: &mut Vec<FrameRef>) {
         for f in v.drain(..) {
             self.recycle(Some(f));
         }
@@ -212,10 +219,10 @@ impl FramePool {
     /// Drops a frame reference, keeping the frame (and its unshared parents) for reuse when it
     /// was the last reference.
     #[inline(never)]
-    pub fn recycle(&mut self, f: Option<Rc<Frame>>) {
+    pub fn recycle(&mut self, f: Option<FrameRef>) {
         let mut next = f;
         while let Some(mut f) = next.take() {
-            let Some(m) = Rc::get_mut(&mut f) else {
+            let Some(m) = FrameRef::get_mut(&mut f) else {
                 return;
             };
             m.entries.clear();
@@ -223,6 +230,77 @@ impl FramePool {
             if self.free.len() < POOL_CAP {
                 self.free.push(f);
             }
+        }
+    }
+}
+
+/// Deep copy of frame graphs that keeps their sharing: every frame and proxy reachable from the
+/// copied references is allocated anew once, so the copies share nothing with the originals
+/// (`RunState::detach`). Values are unchanged (frames are copy on write, so sharing only
+/// decides when a write copies).
+#[derive(Default)]
+pub(crate) struct FrameCopier {
+    /// Original frame address -> its copy (the originals outlive the copier).
+    frames: std::collections::HashMap<*const Frame, FrameRef>,
+    proxies: std::collections::HashMap<*const Proxy, ProxyRef>,
+}
+
+impl FrameCopier {
+    /// The copy of `f`.
+    pub fn frame(&mut self, f: &FrameRef) -> FrameRef {
+        if let Some(c) = self.frames.get(&Rc::as_ptr(f)) {
+            return c.clone();
+        }
+        // the parent chain without recursion (it is as long as the call depth)
+        let mut chain: Vec<&FrameRef> = vec![f];
+        while let Some(p) = chain[chain.len() - 1].parent.as_ref()
+            && !self.frames.contains_key(&Rc::as_ptr(p))
+        {
+            chain.push(p);
+        }
+        for fr in chain.into_iter().rev() {
+            let parent = fr
+                .parent
+                .as_ref()
+                .map(|p| self.frames[&Rc::as_ptr(p)].clone());
+            let entries = fr
+                .entries
+                .iter()
+                .map(|(k, b)| (*k, self.binding(b)))
+                .collect();
+            self.frames
+                .insert(Rc::as_ptr(fr), FrameRef::new(Frame { entries, parent }));
+        }
+        self.frames[&Rc::as_ptr(f)].clone()
+    }
+
+    /// The copy of an optional frame.
+    pub fn opt(&mut self, f: &Option<FrameRef>) -> Option<FrameRef> {
+        f.as_ref().map(|f| self.frame(f))
+    }
+
+    fn binding(&mut self, b: &Binding) -> Binding {
+        match b {
+            Binding::Val(v) => Binding::Val(v.clone()),
+            Binding::Proxy(p) => {
+                if let Some(c) = self.proxies.get(&Rc::as_ptr(p)) {
+                    return Binding::Proxy(c.clone());
+                }
+                // nested as deep as the proxies (bounded by `MAX_PROXY_DEPTH` when evaluated)
+                let c = ProxyRef::new(Proxy {
+                    prog: p.prog,
+                    frame: self.opt(&p.frame),
+                });
+                self.proxies.insert(Rc::as_ptr(p), c.clone());
+                Binding::Proxy(c)
+            }
+        }
+    }
+
+    /// Copies every frame of `v` in place.
+    pub fn all(&mut self, v: &mut [FrameRef]) {
+        for f in v {
+            *f = self.frame(f);
         }
     }
 }
@@ -310,7 +388,7 @@ mod tests {
         let mut parent = Frame::default();
         parent.put(1, Binding::Val(Value::Int(1)));
         parent.put(2, Binding::Val(Value::Int(2)));
-        let parent = Rc::new(parent);
+        let parent = FrameRef::new(parent);
         let mut child = Frame::with_parent(Some(parent.clone()));
         child.put(2, Binding::Val(Value::Int(20)));
         child.put(2, Binding::Val(Value::Int(21)));
@@ -328,11 +406,61 @@ mod tests {
 
     #[test]
     fn shared_frames_are_copied_on_write() {
-        let mut f = Rc::new(Frame::default());
+        let mut f = FrameRef::new(Frame::default());
         let snapshot = f.clone();
-        Rc::make_mut(&mut f).put(0, Binding::Val(Value::Int(5)));
+        FrameRef::make_mut(&mut f).put(0, Binding::Val(Value::Int(5)));
         assert!(snapshot.entries.is_empty());
         assert_eq!(f.entries.len(), 1);
+    }
+
+    #[test]
+    fn copier_keeps_values_and_sharing_and_shares_nothing_with_the_original() {
+        let mut root = Frame::default();
+        root.put(1, Binding::Val(Value::Int(1)));
+        let root = FrameRef::new(root);
+        let mut a = Frame::with_parent(Some(root.clone()));
+        let proxy = ProxyRef::new(Proxy {
+            prog: 3,
+            frame: Some(root.clone()),
+        });
+        a.put(2, Binding::Proxy(proxy.clone()));
+        let a = FrameRef::new(a);
+        let mut b = Frame::with_parent(Some(root.clone()));
+        b.put(4, Binding::Proxy(proxy));
+        let b = FrameRef::new(b);
+        let mut stack = vec![a.clone(), b.clone(), a.clone()];
+        let mut c = FrameCopier::default();
+        c.all(&mut stack);
+        // shared as before: a twice, root as the parent of both, one proxy
+        assert!(Rc::ptr_eq(&stack[0], &stack[2]));
+        let (ca, cb) = (&stack[0], &stack[1]);
+        let (pa, pb) = (ca.parent.as_ref().unwrap(), cb.parent.as_ref().unwrap());
+        assert!(Rc::ptr_eq(pa, pb));
+        let (Some(Binding::Proxy(x)), Some(Binding::Proxy(y))) = (ca.get(2), cb.get(4)) else {
+            panic!("proxies")
+        };
+        assert!(Rc::ptr_eq(x, y));
+        assert!(Rc::ptr_eq(x.frame.as_ref().unwrap(), pa));
+        // nothing shared with the original
+        assert!(!Rc::ptr_eq(ca, &a) && !Rc::ptr_eq(pa, &root));
+        assert_eq!(Rc::strong_count(&root), 4);
+        assert!(matches!(ca.get(1), Some(Binding::Val(Value::Int(1)))));
+        // a long chain is copied without recursion
+        let mut f = FrameRef::new(Frame::default());
+        for _ in 0..200_000 {
+            f = FrameRef::new(Frame::with_parent(Some(f)));
+        }
+        let g = FrameCopier::default().frame(&f);
+        assert!(!Rc::ptr_eq(&f, &g));
+        // drop the chains iteratively (the default drop recurses)
+        for mut chain in [f, g] {
+            while let Ok(mut fr) = Rc::try_unwrap(chain) {
+                match fr.parent.take() {
+                    Some(p) => chain = p,
+                    None => break,
+                }
+            }
+        }
     }
 
     #[test]
@@ -350,14 +478,14 @@ mod tests {
         let ids: Vec<KeyId> = names.iter().map(|k| keys.intern(k)).collect();
         // chains of frames of several sizes (crossing the 12-entry fast path) with overlaps
         for sizes in [[0usize, 3, 5], [12, 1, 0], [13, 20, 4], [2, 40, 12]] {
-            let mut parent: Option<Rc<Frame>> = None;
+            let mut parent: Option<FrameRef> = None;
             for (lvl, &n) in sizes.iter().enumerate() {
                 let mut f = Frame::with_parent(parent.clone());
                 for j in 0..n {
                     let k = ids[(j * (lvl + 3) + lvl) % ids.len()];
                     f.put(k, Binding::Val(Value::Int(j as i32)));
                 }
-                parent = Some(Rc::new(f));
+                parent = Some(FrameRef::new(f));
             }
             let top = parent.expect("frame");
             let want: Vec<KeyId> = top.contents(&keys).into_iter().map(|(k, _)| k).collect();

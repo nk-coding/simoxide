@@ -21,13 +21,13 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// step), unless the direct calls are nested too deeply already.
     #[inline(always)]
     pub(super) fn enter(&mut self, s: u32, d: &mut ProcData, f: Handler<Self>) -> R<Flow> {
-        if self.direct >= MAX_DIRECT {
+        if self.st.direct >= MAX_DIRECT {
             return Ok(Flow::Continue);
         }
         self.tick()?;
-        self.direct += 1;
+        self.st.direct += 1;
         let r = f(self, s, d);
-        self.direct -= 1;
+        self.st.direct -= 1;
         r
     }
 
@@ -35,8 +35,8 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// deadline and cancellation).
     #[inline(always)]
     pub(super) fn tick(&mut self) -> R<()> {
-        self.steps += 1;
-        if self.steps >= self.next_step_check {
+        self.st.steps += 1;
+        if self.st.steps >= self.st.next_step_check {
             self.check_steps()?;
         }
         Ok(())
@@ -78,30 +78,30 @@ impl<'m, C: Compat> Simulation<'m, C> {
             else {
                 unreachable!()
             };
-            let pr = self.provs[prov as usize];
+            let pr = self.st.provs[prov as usize];
             let (ac, role, sig) = (pr.ac, pr.role, pr.sig);
             if *st == 0 {
                 *st = 1;
                 self.ac_push(&mut d.acs, ac);
                 if let Some(t) = self.trace.as_mut() {
                     t.assembly_op(
-                        self.now,
+                        self.st.now,
                         true,
-                        self.procs[s as usize].pid,
+                        self.st.procs[s as usize].pid,
                         cm.ac_id(ac),
                         &cm.role_ids[role.index()],
                         &cm.sig_ids[sig.index()],
                     );
                 }
                 if let Some(se) = pr.aser
-                    && self.running
+                    && self.st.running
                 {
-                    let rt = &mut self.procs[s as usize].rt;
+                    let rt = &mut self.st.procs[s as usize].rt;
                     if rt.contains(&se) {
                         return self.err(RT_SAME_CONTEXT);
                     }
                     rt.push(se);
-                    *t0 = self.now;
+                    *t0 = self.st.now;
                 }
                 // the providing entity
                 match pr.target {
@@ -110,7 +110,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         let inner = if inner == u32::MAX {
                             let id = self.prov_id(ia, ir, sig);
                             if let ProvTarget::Deleg { inner, .. } =
-                                &mut self.provs[prov as usize].target
+                                &mut self.st.provs[prov as usize].target
                             {
                                 *inner = id;
                             }
@@ -136,12 +136,12 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         let fc = match d.frames.last() {
                             Some(cur) if cparams.is_empty() => cur.clone(),
                             cur => {
-                                let mut fc = self.pool.frame(cur.cloned());
+                                let mut fc = self.st.pool.frame(cur.cloned());
                                 self.fill(cparams, cur, frame_mut(&mut fc), Origin::Plain("?"))?;
                                 fc
                             }
                         };
-                        let mut fa = self.pool.frame(Some(fc.clone()));
+                        let mut fa = self.st.pool.frame(Some(fc.clone()));
                         self.fill(
                             &cm.ac_params[acid.index()],
                             Some(&fc),
@@ -150,12 +150,12 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         )?;
                         // only calls can nest without bound (recursion); behaviours and loops
                         // are bounded by the model
-                        if d.conts.len() + d.elided as usize > self.max_depth {
+                        if d.conts.len() + d.elided as usize > self.st.max_depth {
                             return self.limit_err(
                                 SimErrorKind::Limit,
                                 format!(
                                     "limit exceeded: process stack deeper than {} (Limits::max_stack_depth; unbounded recursion?)",
-                                    self.max_depth
+                                    self.st.max_depth
                                 ),
                             );
                         }
@@ -178,34 +178,34 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 if let ProvTarget::Basic { .. } = pr.target {
                     // the exit of the basic component's SEFF
                     d.elided -= 1;
-                    self.pool.recycle(d.frames.pop());
-                    self.pool.recycle(d.frames.pop());
+                    self.st.pool.recycle(d.frames.pop());
+                    self.st.pool.recycle(d.frames.pop());
                 }
                 d.conts.pop();
                 d.acs.pop();
                 if t0 >= 0 {
-                    self.procs[s as usize].rt.pop();
+                    self.st.procs[s as usize].rt.pop();
                 }
                 if let Some(t) = self.trace.as_mut() {
                     t.assembly_op(
-                        self.now,
+                        self.st.now,
                         false,
-                        self.procs[s as usize].pid,
+                        self.st.procs[s as usize].pid,
                         cm.ac_id(ac),
                         &cm.role_ids[role.index()],
                         &cm.sig_ids[sig.index()],
                     );
                 }
                 if let Some(se) = pr.aser
-                    && self.running
+                    && self.st.running
                     && t0 >= 0
                 {
-                    let now = seconds(self.now);
+                    let now = seconds(self.st.now);
                     emit(
-                        &mut self.meas,
+                        &mut self.st.meas,
                         &mut self.trace,
-                        self.cfg.store_measurements,
-                        self.now,
+                        self.st.cfg.store_measurements,
+                        self.st.now,
                         se,
                         now,
                         now - seconds(t0),

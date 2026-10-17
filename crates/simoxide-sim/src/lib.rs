@@ -10,7 +10,10 @@
 //! ```
 //!
 //! * [`ir`]: compilation of a loaded model into a [`CompiledModel`] (immutable, `Sync`).
-//! * [`sim`]: the event core and interpreter ([`Simulation`]).
+//! * [`sim`]: the event core and interpreter ([`Simulation`]); all mutable state of a run is one
+//!   [`RunState`]: a run can pause between events ([`Simulation::run_until`]), fork
+//!   ([`Simulation::fork`]) and resume ([`Simulation::resume`]), each continuation exactly like
+//!   the uninterrupted run.
 //! * [`run_batch`]: many independent runs on one compiled model, in parallel.
 //! * [`compat`]: exact mode (default, byte-identical to the reference) and fast mode (cargo
 //!   feature `fast`: same semantics and statistics, faster; `SimConfig::mode`, [`run`]).
@@ -42,8 +45,8 @@ pub use ir::{CompileError, CompiledModel};
 pub use meas::{Measurements, SeriesSummary};
 pub use rng::{RngMode, Tape};
 pub use sim::{
-    DEFAULT_MAX_EVENTS_PER_INSTANT, Limits, Outputs, RunResult, SimConfig, SimError, SimErrorKind,
-    Simulation,
+    DEFAULT_MAX_EVENTS_PER_INSTANT, Detached, Limits, Outputs, Pause, Phase, RunResult, RunState,
+    SimConfig, SimError, SimErrorKind, Simulation, Status,
 };
 pub use simoxide_sched::PsAlgorithm;
 
