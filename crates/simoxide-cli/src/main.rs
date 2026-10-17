@@ -796,6 +796,7 @@ mod snap {
     }
 
     /// The pause as the SPD driver's bound: before the first event at or after it (ns).
+    #[cfg_attr(not(feature = "spd"), allow(dead_code))]
     pub fn before_ns(a: &Args) -> Result<Option<i64>, String> {
         Ok(match a.pause {
             None => None,
