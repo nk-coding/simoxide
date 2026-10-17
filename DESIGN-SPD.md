@@ -1267,6 +1267,16 @@ This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these
   `MeasurementMade` stream (instantaneous utilisation, S2) into `on_measurement`, observing the
   lazily created passive-resource series (`QueueLength`), and the exact mode's same-instant
   order and event index (X2).
+- **From Q1/Q2** (5.5): run `MainTransformation` with `qvto::Mode::Ordered` for the
+  Slingshot-exact mode (`Fast` otherwise; compat mode is never needed), `keepModeling=true`, the
+  `ProfilesLibrary` signatures with stub natives; the transformation copies with licence headers
+  are in `crates/qvto/qvto-testkit/corpus/spd/transformations`. The host must give objects that
+  QVTo creates distinct PCM `id`s, as Slingshot's generated classes do (`Wiring`'s `.id`
+  comparisons misbehave on `null` ids, corpus cases `min3_noid_*`), and resolve the models'
+  proxies at load. `qvto spd-replay`'s model summary is the V3 comparison for the adjustment
+  (container, link, allocation and target-group order equal the `det` runs); it also shows two
+  candidates for the quirk list (the parentless `RequiredDelegationConnector`s, duplicate names
+  across adjustments).
 
 ### 5.5 QVTo host for both flavours (`simoxide-reconf`)
 
@@ -1380,8 +1390,9 @@ This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these
   `Class@hash` texts: derived from the key unless the host gives a source.
 - **EPL only.** No Java hash order is involved: `Mode::Ordered.available()` in every build; the
   release check (`cargo tree`) is unchanged.
-- **API** (`crates/qvto/README.md`, "Modes"): `qvto::RunOptions { mode: Mode::Ordered, .. }`
-  (`Mode` from `qvto_runtime`, also `Mode::from_name("ordered")`); `qvto_runtime::OrderedEnv` for
+- **API** (`crates/qvto/README.md`, "Building and testing", modes): `qvto::RunOptions { mode:
+  qvto::Mode::Ordered, .. }` (`qvto::Mode` is `qvto_runtime::Mode`; `Mode::from_name("ordered")`
+  for configuration; `RunOptions::id_source` optional); `qvto_runtime::OrderedEnv` for
   runtime-level use; `qvto run --ordered`, `qvto conform --engine qvto-ordered`, `qvto bench
   --modes ordered`.
 - **`det` Java runner.** `reference/slingshot/seed-agent.sh` builds the seed agent alone;

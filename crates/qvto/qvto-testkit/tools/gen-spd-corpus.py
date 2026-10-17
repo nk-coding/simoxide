@@ -20,7 +20,9 @@ Chained states (consecutive adjustments, as Slingshot runs them on the same in-m
 case's outputs, saved by the Java runner with the det ordering rule (reproducible), become the
 inputs of later cases. Objects the first run created have no `id` (dynamic EMF); Slingshot's
 generated classes give them UUIDs, so the state gets deterministic ids (`_q1_<state>_<n>`) for
-them, except in the `*-noid` state, which keeps the dynamic-EMF null ids.
+them, except in the `*-noid` state, which keeps the dynamic-EMF null ids. Path references are
+rewritten to ids, and IDREFs to objects in no resource (EMF saves a reference to a removed object
+so) are dropped. Every case has `resolve-all` (Palladio resolves the models' proxies at load).
 
 Licence: the models are derived from the SPD example and metamodel, whose licence is pending
 confirmation (DESIGN-SPD U3, LICENSES section 6); every generated file says so. Do not publish.

@@ -1,5 +1,6 @@
 //! QVTo engine facade: compile a transformation (parse, analyse, compile to bytecode), bind
-//! models, run it in compat or fast mode, collect the log and the diagnostics.
+//! models, run it in compat, ordered or fast mode ([`Mode`]), collect the log and the
+//! diagnostics.
 //!
 //! ```ignore
 //! let resolver = qvto::units::FsResolver::folder();
@@ -17,6 +18,10 @@ pub mod units;
 pub use qvto_bytecode::Program;
 pub use qvto_sema::{Compilation, Problem, UnitResolver, UnitResult, UnitSource};
 pub use qvto_vm::{CoveredOp, RunOptions, RunOutcome, Vm};
+/// The run's mode (`RunOptions::mode`): `Compat` (Eclipse's Java orders; cargo feature
+/// `compat`), `Ordered` (Eclipse's semantics, insertion-ordered hash collections, as the
+/// Slingshot reference runner's `det` JVM; every build) or `Fast` (every build).
+pub use qvto_runtime::Mode;
 
 use qvto_model::{MetaOperation, MetaRegistry};
 

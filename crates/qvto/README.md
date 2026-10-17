@@ -87,10 +87,10 @@ distributed (the repository's `LICENSES`, section 7). A run in compat mode witho
 fails with `RunOutcome::code == MODE_UNAVAILABLE`; `qvto conform --engine qvto` and
 `qvto fuzz` refuse with a message.
 
-Choosing a mode (`qvto_runtime::Mode`, re-exported through `qvto::RunOptions`):
+Choosing a mode (`qvto::Mode`, the same as `qvto_runtime::Mode`):
 
 ```rust
-use qvto_runtime::Mode;
+use qvto::Mode;
 // Slingshot-exact (EPL, every build): Eclipse's semantics, Set/Bag/Dict in insertion order
 let opts = qvto::RunOptions { mode: Mode::Ordered, ..qvto::RunOptions::default() };
 // SimuLizar-exact needs Mode::Compat (feature `compat`); Mode::Fast for throughput
