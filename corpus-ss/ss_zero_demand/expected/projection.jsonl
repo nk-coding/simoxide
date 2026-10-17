@@ -1,0 +1,70 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_ss_zero_demand_ua1"}
+{"ev":"pass","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_zero_demand_ua2"}
+{"ev":"call","t":0.0,"u":1,"role":"_ss_zero_demand_sysprov1","sig":"_ss_zero_demand_op"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_ss_zero_demand_ac1","type":"StartAction","el":"_ss_zero_demand_act1"}
+{"ev":"request","t":0.0,"u":1,"ac":"_ss_zero_demand_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_zero_demand_act2"}
+{"ev":"job","t":0.0,"job":1,"u":1,"rc":"_ss_zero_demand_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.0}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.0]}
+{"ev":"job_end","t":1.0E-9,"job":1}
+{"ev":"meas","t":1.0E-9,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0E-9,0.0]}
+{"ev":"meas","t":1.0E-9,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0E-9,0.0]}
+{"ev":"request","t":1.0E-9,"u":1,"ac":"_ss_zero_demand_ac1","kind":"ACTIVE","res":"_BIjHoQ3KEdyouMqirZIhzQ","action":"_ss_zero_demand_act3"}
+{"ev":"job","t":1.0E-9,"job":2,"u":1,"rc":"_ss_zero_demand_rc1","res":"_BIjHoQ3KEdyouMqirZIhzQ","d":0.0}
+{"ev":"meas","t":1.0E-9,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0E-9,1.0]}
+{"ev":"meas","t":1.0E-9,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"Resource Demand Tuple","v":[1.0E-9,0.0]}
+{"ev":"job_end","t":1.0E-9,"job":2}
+{"ev":"meas","t":1.0E-9,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0E-9,0.0]}
+{"ev":"pass","t":1.0E-9,"u":1,"ac":"_ss_zero_demand_ac1","type":"StopAction","el":"_ss_zero_demand_act4"}
+{"ev":"call_end","t":1.0E-9,"u":1,"role":"_ss_zero_demand_sysprov1","sig":"_ss_zero_demand_op"}
+{"ev":"pass","t":1.0E-9,"u":1,"type":"Stop","el":"_ss_zero_demand_ua3"}
+{"ev":"user_end","t":1.0E-9,"u":1}
+{"ev":"meas","t":1.0E-9,"mp":"UsageScenarioMeasuringPoint[_ss_zero_demand_us1]","metric":"Response Time Tuple","v":[1.0E-9,1.0E-9]}
+{"ev":"pass","t":1.0,"u":2,"type":"Start","el":"_ss_zero_demand_ua1"}
+{"ev":"pass","t":1.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_zero_demand_ua2"}
+{"ev":"call","t":1.0,"u":2,"role":"_ss_zero_demand_sysprov1","sig":"_ss_zero_demand_op"}
+{"ev":"pass","t":1.0,"u":2,"ac":"_ss_zero_demand_ac1","type":"StartAction","el":"_ss_zero_demand_act1"}
+{"ev":"request","t":1.0,"u":2,"ac":"_ss_zero_demand_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_zero_demand_act2"}
+{"ev":"job","t":1.0,"job":3,"u":2,"rc":"_ss_zero_demand_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.0}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.0,0.0]}
+{"ev":"job_end","t":1.000000001,"job":3}
+{"ev":"meas","t":1.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.000000001,0.0]}
+{"ev":"meas","t":1.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.000000001,0.0]}
+{"ev":"request","t":1.000000001,"u":2,"ac":"_ss_zero_demand_ac1","kind":"ACTIVE","res":"_BIjHoQ3KEdyouMqirZIhzQ","action":"_ss_zero_demand_act3"}
+{"ev":"job","t":1.000000001,"job":4,"u":2,"rc":"_ss_zero_demand_rc1","res":"_BIjHoQ3KEdyouMqirZIhzQ","d":0.0}
+{"ev":"meas","t":1.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.000000001,1.0]}
+{"ev":"meas","t":1.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"Resource Demand Tuple","v":[1.000000001,0.0]}
+{"ev":"job_end","t":1.000000001,"job":4}
+{"ev":"meas","t":1.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.000000001,0.0]}
+{"ev":"pass","t":1.000000001,"u":2,"ac":"_ss_zero_demand_ac1","type":"StopAction","el":"_ss_zero_demand_act4"}
+{"ev":"call_end","t":1.000000001,"u":2,"role":"_ss_zero_demand_sysprov1","sig":"_ss_zero_demand_op"}
+{"ev":"pass","t":1.000000001,"u":2,"type":"Stop","el":"_ss_zero_demand_ua3"}
+{"ev":"user_end","t":1.000000001,"u":2}
+{"ev":"meas","t":1.000000001,"mp":"UsageScenarioMeasuringPoint[_ss_zero_demand_us1]","metric":"Response Time Tuple","v":[1.000000001,1.000000082740371E-9]}
+{"ev":"pass","t":2.0,"u":3,"type":"Start","el":"_ss_zero_demand_ua1"}
+{"ev":"pass","t":2.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_zero_demand_ua2"}
+{"ev":"call","t":2.0,"u":3,"role":"_ss_zero_demand_sysprov1","sig":"_ss_zero_demand_op"}
+{"ev":"pass","t":2.0,"u":3,"ac":"_ss_zero_demand_ac1","type":"StartAction","el":"_ss_zero_demand_act1"}
+{"ev":"request","t":2.0,"u":3,"ac":"_ss_zero_demand_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_zero_demand_act2"}
+{"ev":"job","t":2.0,"job":5,"u":3,"rc":"_ss_zero_demand_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.0}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.0,0.0]}
+{"ev":"job_end","t":2.000000001,"job":5}
+{"ev":"meas","t":2.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.000000001,0.0]}
+{"ev":"meas","t":2.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.000000001,0.0]}
+{"ev":"request","t":2.000000001,"u":3,"ac":"_ss_zero_demand_ac1","kind":"ACTIVE","res":"_BIjHoQ3KEdyouMqirZIhzQ","action":"_ss_zero_demand_act3"}
+{"ev":"job","t":2.000000001,"job":6,"u":3,"rc":"_ss_zero_demand_rc1","res":"_BIjHoQ3KEdyouMqirZIhzQ","d":0.0}
+{"ev":"meas","t":2.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.000000001,1.0]}
+{"ev":"meas","t":2.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"Resource Demand Tuple","v":[2.000000001,0.0]}
+{"ev":"job_end","t":2.000000001,"job":6}
+{"ev":"meas","t":2.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.000000001,0.0]}
+{"ev":"pass","t":2.000000001,"u":3,"ac":"_ss_zero_demand_ac1","type":"StopAction","el":"_ss_zero_demand_act4"}
+{"ev":"call_end","t":2.000000001,"u":3,"role":"_ss_zero_demand_sysprov1","sig":"_ss_zero_demand_op"}
+{"ev":"pass","t":2.000000001,"u":3,"type":"Stop","el":"_ss_zero_demand_ua3"}
+{"ev":"user_end","t":2.000000001,"u":3}
+{"ev":"meas","t":2.000000001,"mp":"UsageScenarioMeasuringPoint[_ss_zero_demand_us1]","metric":"Response Time Tuple","v":[2.000000001,1.000000082740371E-9]}
+{"ev":"stop","t":3.0}

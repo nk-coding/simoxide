@@ -22,8 +22,10 @@ const USAGE: &str = "usage:
              reference, needs a build with `--features exact`, see LICENSES)
              [--ps-algorithm exact|virtual-time]   (virtual-time: O(log n) processor sharing,
              other float rounding; opt-in in every mode, see docs/correctness/deviations.md)
-             [--flavour simulizar|slingshot]   (default simulizar; slingshot: Slingshot's
-             semantics, fast mode, docs/spec/slingshot)
+             [--flavour simulizar|slingshot|slingshot-exact]   (default simulizar;
+             slingshot: Slingshot's semantics, fast mode; slingshot-exact: Slingshot's event
+             cascade with every quirk, byte-equal to the det reference runner; --trace writes
+             its level-E projection, --tape its tape projection; docs/spec/slingshot)
              [--quirks LIST]   (Slingshot compat flags: Q1..Q37, all, fast, none, -Qn;
              default none = the fixed behaviour; --quirks list prints them)
              [--spd-log spd.jsonl] [--spd-log-all] [--spd-quirks fixed|slingshot|Q2,Q12,...]
@@ -238,6 +240,11 @@ fn setup_with_rules(a: &Args) -> Result<(CompiledModel, SimConfig, Option<PathBu
         }
         FlavourKind::SimuLizar => FlavourConfig::SIMULIZAR,
         FlavourKind::Slingshot => FlavourConfig::slingshot(a.quirks),
+        // the exact mode runs every quirk (U5)
+        FlavourKind::SlingshotExact if !a.quirks.is_empty() && a.quirks != Quirks::all() => {
+            return Err("--flavour slingshot-exact runs with all quirks (--quirks all)".into());
+        }
+        FlavourKind::SlingshotExact => FlavourConfig::slingshot_exact(),
     };
     let cm = CompiledModel::compile_flavour(model, flavour).map_err(|e| e.to_string())?;
     let name = a.name.clone().unwrap_or_else(|| {
@@ -299,7 +306,7 @@ fn run(a: &Args) -> Result<(), String> {
         if spd.is_some() {
             return Err("reconfiguration rules and scaling policies in one run are not supported (use --no-spd)".into());
         }
-        if a.flavour == FlavourKind::Slingshot {
+        if a.flavour.is_slingshot() {
             return Err("reconfiguration rules run in the SimuLizar flavour".into());
         }
         let t0 = Instant::now();
@@ -307,7 +314,7 @@ fn run(a: &Args) -> Result<(), String> {
         return report(a, r, t0);
     }
     let r = match spd {
-        Some(_) if a.flavour == FlavourKind::Slingshot => {
+        Some(_) if a.flavour.is_slingshot() => {
             return Err(
                 "scaling policies in the Slingshot flavour are phase P3 (use --no-spd to ignore the .spd)"
                     .into(),

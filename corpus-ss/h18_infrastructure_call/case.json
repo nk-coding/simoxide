@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h18_infrastructure_call",
+ "sim_time": 13,
+ "seed": 17,
+ "group": "failure"
+}

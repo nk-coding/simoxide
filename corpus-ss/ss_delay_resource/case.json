@@ -1,0 +1,6 @@
+{
+ "model": "reference/slingshot/models/probes/ss_delay_resource",
+ "sim_time": 4,
+ "seed": 1,
+ "group": "probe"
+}

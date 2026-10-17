@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h28_triggers_default",
+ "sim_time": 20,
+ "seed": 27,
+ "group": "failure"
+}

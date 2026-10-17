@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h05_open_workload",
+ "sim_time": 20,
+ "seed": 4,
+ "group": "corpus"
+}

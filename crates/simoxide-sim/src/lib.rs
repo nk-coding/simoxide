@@ -38,6 +38,7 @@ mod javarand;
 pub mod meas;
 pub mod rng;
 pub mod sim;
+pub mod ssx;
 pub mod stats;
 mod trace;
 pub mod windows;
@@ -66,6 +67,8 @@ pub use simoxide_sched::PsAlgorithm;
 /// [`SimErrorKind::ModeUnavailable`] error.
 pub fn run(cm: &CompiledModel, cfg: SimConfig, out: Outputs) -> Result<RunResult, SimError> {
     match (cfg.mode, cm.flavour.kind) {
+        // the Slingshot-exact mode has its own engine and random streams (in every build)
+        (_, FlavourKind::SlingshotExact) => ssx::run(cm, cfg, out),
         #[cfg(feature = "exact")]
         (Mode::Exact, FlavourKind::SimuLizar) => Simulation::<Exact>::create(cm, cfg, out)?.run(),
         #[cfg(feature = "exact")]

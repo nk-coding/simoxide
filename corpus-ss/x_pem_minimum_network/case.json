@@ -1,0 +1,6 @@
+{
+ "model": "corpus/x_pem_minimum_network",
+ "sim_time": 5000,
+ "seed": 1,
+ "group": "corpus"
+}

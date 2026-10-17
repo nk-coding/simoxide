@@ -139,8 +139,10 @@ event (−1 before the first line). The purposes are those of [SS-RNG-2](./rando
 ```sh
 reference/slingshot/run.sh -model DIR -out REF -simTime T -seed N        # det oracle
 reference/slingshot/tools/project.py REF                                 # projection*.jsonl, tape-projection.jsonl
-simoxide --flavour slingshot --exact ... (phase X2)                       # writes the same three files
+simoxide run --model DIR --flavour slingshot-exact --seed N --max-sim-time T \
+    --trace OUT/projection.jsonl --tape OUT/tape-projection.jsonl --measurements OUT/measurements.csv
 cmp REF/measurements.csv OUT/measurements.csv; cmp REF/projection.jsonl OUT/projection.jsonl; ...
+reference/slingshot/tools/compare_exact.sh [NAME...]                      # the same for corpus-ss/
 ```
 
 ## SS-X-6 det verification
@@ -211,4 +213,61 @@ order). `probes.sh` regenerates `expected/`, `probes.sh --check` compares.
 | `ss_usage_delay` | SS-WL-4.1 | usage delay drawn at interpretation; `UserSlept`/`UserWokeUp` |
 | `ss_usage_loop_zero` | SS-WL-4.3, SS-Q19, SS-BUS-7 | usage loop count 0: builder throws; later users stop after their `Start` |
 | `ss_zero_demand` | SS-RES-2.2, SS-RES-3.4, SS-MEAS-3.4 | PS zero demand = 1e-9 s job; FCFS zero demand at once; demand tuple 0 |
+
+## SS-X-8 The Slingshot-exact corpus
+
+`corpus-ss/` (phase X1) is the corpus the Slingshot-exact mode is checked against (V3x). Each case
+is a directory `corpus-ss/<name>/` with
+
+- `case.json`: `model` (the model directory, relative to the repository root), `seed`,
+  `sim_time` (whole seconds) and `group`;
+- `expected/`: the `det` runner's outputs for that seed and simulated time: `measurements.csv`,
+  `projection.jsonl` (level E; level M is the subset of the lines whose `ev` is `job_abort`,
+  `user_abort`, `meas`, `spd_*` or `stop`), `tape-projection.jsonl`, `errors.txt` (the handler
+  exceptions in order, `tools/errors.py`), `summary.json`, `spd.jsonl` (SPD runs),
+  `trace.jsonl.gz` (the full bus trace, for debugging only) and, for runs that end before t = 0,
+  `error.txt`.
+
+`reference/slingshot/corpus-ss.sh` writes `expected/`; `corpus-ss.sh --check` runs every case
+again in a fresh JVM and compares all files. Seeds and simulated times are those of
+`results/det-verify.csv` (SS-X-6).
+
+| Group | Cases | What |
+|---|---|---|
+| `probe` | 20 | the specification probes (SS-X-7); 4 with handler errors |
+| `spd` | 3 | `spd_minimal`, `spd_scale_in`, `spd_time_policies` (`reference/slingshot/models/`) |
+| `corpus` | 38 | the corpus models that run without handler errors, aborts or empty output |
+| `failure` | 25 | the corpus models with handler errors (18), aborts (`h04`, `h25`, `x_sl_elsc_return`) or no output (`h15`, `x_pem_reliability`, `x_pem_subsystem*`) |
+| `setup-error` | 2 | `x_pem_acquire`, `x_sl_runconfigtest`: the run fails before t = 0 (`error.txt`) |
+| `x2` | 2 | `ss_q37_fallback` (a link touching only one of the containers is used), `ss_q37_none` (no link: `IllegalArgumentException` disposes `onCallOverWireRequested`), models in `reference/slingshot/models/x2/`, added in X2 because no corpus model has quirk Q37 |
+
+Left out: `x_pem_fork`, a zero-time livelock without a reference result (SS-RUN-5).
+
+**Reproducibility (X1, 2026-10-17; the two `x2` cases in X2).** `corpus-ss.sh --check` reproduced all 88 cases byte for byte
+in fresh JVMs (projection, tape projection, measurements, SPD log, summary, full trace). The only
+JVM-dependent bytes were identity hash codes inside three exception messages
+(`SEFFInterpretationContext@1b2c3d`, Q31); `tools/errors.py` writes them as `@*`. The 22 cases
+with handler errors are the 4 probes `ss_guard_none`, `ss_loop_zero`, `ss_two_demands`,
+`ss_usage_loop_zero` and the corpus models `h10`, `h11`, `h12`, `h13`, `h18`, `h26`, `h27`, `h28`,
+`x_pem_harddisk`, `x_pem_hdd_infrastructure_calls`, `x_pem_infrastructure`,
+`x_pem_replicated_composite`, `x_pem_screencast_ms*` (3), `x_pem_simple_optimisation_composites`,
+`x_sl_mediastore`, `x_sl_simulizar154`.
+
+## SS-X-9 Exactness limits of the EPL build
+
+Two Java behaviours that change values are defined only by OpenJDK's sources; the default (EPL)
+build of the exact mode does not reproduce them:
+
+- **`java.util.HashMap` iteration order** of SimuCom's stack frames (`getContents()`): the order
+  in which a `CollectionIteratorAction` evaluates several `INNER` characterisations
+  (SS-ACT-6.3) and in which BYTESIZE entries are summed (SS-ACT-7.1). The exact mode iterates in
+  first-insertion order. Only models with two or more such entries in one frame are affected
+  (corpus `h27_collection_inner_multi`).
+- **HotSpot's `Math.log` and `Math.exp` intrinsics**, which Palladio's lognormal distributions
+  (`Math.exp`, `Math.log` in `LognormMoments`) and the StoEx `Log` function call. The EPL build
+  rounds correctly; the intrinsics differ in the last bit for rare arguments (one sample of
+  `h21_stoex_distributions`). Builds with the opt-in `hotspot-math` feature reproduce them.
+
+Everything else the reference computes, including Commons Math 3's `FastMath` (SS-RNG-1.1), is
+pure Java and reproduced bit for bit.
 

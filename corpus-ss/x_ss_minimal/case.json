@@ -1,0 +1,6 @@
+{
+ "model": "corpus/x_ss_minimal",
+ "sim_time": 110,
+ "seed": 1,
+ "group": "corpus"
+}

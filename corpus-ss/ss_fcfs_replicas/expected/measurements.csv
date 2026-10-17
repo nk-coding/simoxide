@@ -1,0 +1,46 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Resource Demand Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Resource Demand Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Resource Demand Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Resource Demand Tuple,1.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Resource Demand Tuple,2.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Resource Demand Tuple,3.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Resource Demand Tuple,4.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Resource Demand Tuple,5.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Resource Demand Tuple,6.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,0.0,2.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,0.0,3.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,1.0,2.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,1.0,3.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,2.0,2.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,2.0,3.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,3.0,2.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,3.0,3.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,4.0,2.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,4.0,3.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,5.0,2.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,5.0,3.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,6.0,2.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],State of Active Resource Tuple,6.0,3.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,1.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,1.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,2.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,2.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,3.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,3.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,4.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,4.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,5.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,5.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,6.0,1.0
+ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0],Utilization of Active Resource Tuple,6.0,1.0
+UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1],Response Time Tuple,1.0,1.0
+UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1],Response Time Tuple,2.0,2.0
+UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1],Response Time Tuple,3.0,3.0
+UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1],Response Time Tuple,4.0,3.0
+UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1],Response Time Tuple,5.0,3.0
+UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1],Response Time Tuple,6.0,3.0

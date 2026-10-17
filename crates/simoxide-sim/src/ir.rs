@@ -575,7 +575,7 @@ impl Builder {
     }
 }
 
-fn action_type(k: &ActionKind) -> &'static str {
+pub(crate) fn action_type(k: &ActionKind) -> &'static str {
     match k {
         ActionKind::Start => "StartAction",
         ActionKind::Stop => "StopAction",
@@ -594,7 +594,7 @@ fn action_type(k: &ActionKind) -> &'static str {
     }
 }
 
-fn uaction_type(k: &UserActionKind) -> &'static str {
+pub(crate) fn uaction_type(k: &UserActionKind) -> &'static str {
     match k {
         UserActionKind::Start => "Start",
         UserActionKind::Stop => "Stop",
@@ -705,7 +705,7 @@ pub fn op_key(owner: &str, role: &str, sig: &str) -> String {
     format!("{owner}::{role}::{sig}")
 }
 
-fn metric_id<'a>(m: &'a Model, spec: &MeasurementSpecification) -> Option<&'a str> {
+pub(crate) fn metric_id<'a>(m: &'a Model, spec: &MeasurementSpecification) -> Option<&'a str> {
     spec.metric.map(|x| &*m.metrics[x].id)
 }
 
@@ -851,7 +851,7 @@ impl CompiledModel {
         let monitors: Vec<&Monitor> = repo
             .map(|r| r.monitors.iter().map(|&x| &m.monitors[x]).collect())
             .unwrap_or_default();
-        let ss = flavour.kind == crate::flavour::FlavourKind::Slingshot;
+        let ss = flavour.kind.is_slingshot();
         let quirks = flavour.quirks;
         // monitors of SimuLizar's probe framework (sliding windows, PRM, reconfiguration time,
         // container count, passive resources): none in the Slingshot flavour, which has its own
@@ -2392,7 +2392,7 @@ pub struct SsTables {
 /// Measuring-point key of the Slingshot flavour: [`mp_key`] plus the points only Slingshot
 /// records (`AssemblyPassiveResourceMeasuringPoint[assembly|passive resource]`, the reference
 /// runner's `Keys.mpKey`).
-fn ss_mp_key(m: &Model, mp: &MeasuringPoint) -> Option<String> {
+pub(crate) fn ss_mp_key(m: &Model, mp: &MeasuringPoint) -> Option<String> {
     match &mp.kind {
         MeasuringPointKind::AssemblyPassiveResource {
             assembly,

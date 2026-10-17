@@ -1,0 +1,6 @@
+{
+ "model": "corpus/x_ss_delay",
+ "sim_time": 110,
+ "seed": 1,
+ "group": "corpus"
+}

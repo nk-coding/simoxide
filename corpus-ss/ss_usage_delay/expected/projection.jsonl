@@ -1,0 +1,83 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_ss_usage_delay_ua1"}
+{"ev":"pass","t":0.0,"u":1,"type":"Delay","el":"_ss_usage_delay_ua2"}
+{"ev":"pass","t":0.14574189826322317,"u":1,"type":"EntryLevelSystemCall","el":"_ss_usage_delay_ua3"}
+{"ev":"call","t":0.14574189826322317,"u":1,"role":"_ss_usage_delay_sysprov1","sig":"_ss_usage_delay_op"}
+{"ev":"pass","t":0.14574189826322317,"u":1,"ac":"_ss_usage_delay_ac1","type":"StartAction","el":"_ss_usage_delay_act1"}
+{"ev":"request","t":0.14574189826322317,"u":1,"ac":"_ss_usage_delay_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_usage_delay_act2"}
+{"ev":"job","t":0.14574189826322317,"job":1,"u":1,"rc":"_ss_usage_delay_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.5}
+{"ev":"meas","t":0.14574189826322317,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.14574189826322317,1.0]}
+{"ev":"meas","t":0.14574189826322317,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.14574189826322317,1.0]}
+{"ev":"meas","t":0.14574189826322317,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.14574189826322317,0.5]}
+{"ev":"job_end","t":0.6457418982632231,"job":1}
+{"ev":"meas","t":0.6457418982632231,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.6457418982632231,0.0]}
+{"ev":"meas","t":0.6457418982632231,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.6457418982632231,0.0]}
+{"ev":"pass","t":0.6457418982632231,"u":1,"ac":"_ss_usage_delay_ac1","type":"StopAction","el":"_ss_usage_delay_act3"}
+{"ev":"call_end","t":0.6457418982632231,"u":1,"role":"_ss_usage_delay_sysprov1","sig":"_ss_usage_delay_op"}
+{"ev":"pass","t":0.6457418982632231,"u":1,"type":"Stop","el":"_ss_usage_delay_ua4"}
+{"ev":"user_end","t":0.6457418982632231,"u":1}
+{"ev":"meas","t":0.6457418982632231,"mp":"UsageScenarioMeasuringPoint[_ss_usage_delay_us1]","metric":"Response Time Tuple","v":[0.6457418982632231,0.6457418982632231]}
+{"ev":"pass","t":0.8957418982632231,"u":1,"type":"Start","el":"_ss_usage_delay_ua1"}
+{"ev":"pass","t":0.8957418982632231,"u":1,"type":"Delay","el":"_ss_usage_delay_ua2"}
+{"ev":"pass","t":1.4147738627591906,"u":1,"type":"EntryLevelSystemCall","el":"_ss_usage_delay_ua3"}
+{"ev":"call","t":1.4147738627591906,"u":1,"role":"_ss_usage_delay_sysprov1","sig":"_ss_usage_delay_op"}
+{"ev":"pass","t":1.4147738627591906,"u":1,"ac":"_ss_usage_delay_ac1","type":"StartAction","el":"_ss_usage_delay_act1"}
+{"ev":"request","t":1.4147738627591906,"u":1,"ac":"_ss_usage_delay_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_usage_delay_act2"}
+{"ev":"job","t":1.4147738627591906,"job":2,"u":1,"rc":"_ss_usage_delay_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.5}
+{"ev":"meas","t":1.4147738627591906,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.4147738627591906,1.0]}
+{"ev":"meas","t":1.4147738627591906,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.4147738627591906,1.0]}
+{"ev":"meas","t":1.4147738627591906,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.4147738627591906,0.5]}
+{"ev":"job_end","t":1.9147738627591906,"job":2}
+{"ev":"meas","t":1.9147738627591906,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.9147738627591906,0.0]}
+{"ev":"meas","t":1.9147738627591906,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.9147738627591906,0.0]}
+{"ev":"pass","t":1.9147738627591906,"u":1,"ac":"_ss_usage_delay_ac1","type":"StopAction","el":"_ss_usage_delay_act3"}
+{"ev":"call_end","t":1.9147738627591906,"u":1,"role":"_ss_usage_delay_sysprov1","sig":"_ss_usage_delay_op"}
+{"ev":"pass","t":1.9147738627591906,"u":1,"type":"Stop","el":"_ss_usage_delay_ua4"}
+{"ev":"user_end","t":1.9147738627591906,"u":1}
+{"ev":"meas","t":1.9147738627591906,"mp":"UsageScenarioMeasuringPoint[_ss_usage_delay_us1]","metric":"Response Time Tuple","v":[1.9147738627591906,1.0190319644959676]}
+{"ev":"pass","t":2.1647738627591906,"u":1,"type":"Start","el":"_ss_usage_delay_ua1"}
+{"ev":"pass","t":2.1647738627591906,"u":1,"type":"Delay","el":"_ss_usage_delay_ua2"}
+{"ev":"pass","t":2.177096532106979,"u":1,"type":"EntryLevelSystemCall","el":"_ss_usage_delay_ua3"}
+{"ev":"call","t":2.177096532106979,"u":1,"role":"_ss_usage_delay_sysprov1","sig":"_ss_usage_delay_op"}
+{"ev":"pass","t":2.177096532106979,"u":1,"ac":"_ss_usage_delay_ac1","type":"StartAction","el":"_ss_usage_delay_act1"}
+{"ev":"request","t":2.177096532106979,"u":1,"ac":"_ss_usage_delay_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_usage_delay_act2"}
+{"ev":"job","t":2.177096532106979,"job":3,"u":1,"rc":"_ss_usage_delay_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.5}
+{"ev":"meas","t":2.177096532106979,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.177096532106979,1.0]}
+{"ev":"meas","t":2.177096532106979,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.177096532106979,1.0]}
+{"ev":"meas","t":2.177096532106979,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.177096532106979,0.5]}
+{"ev":"job_end","t":2.677096532106979,"job":3}
+{"ev":"meas","t":2.677096532106979,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.677096532106979,0.0]}
+{"ev":"meas","t":2.677096532106979,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.677096532106979,0.0]}
+{"ev":"pass","t":2.677096532106979,"u":1,"ac":"_ss_usage_delay_ac1","type":"StopAction","el":"_ss_usage_delay_act3"}
+{"ev":"call_end","t":2.677096532106979,"u":1,"role":"_ss_usage_delay_sysprov1","sig":"_ss_usage_delay_op"}
+{"ev":"pass","t":2.677096532106979,"u":1,"type":"Stop","el":"_ss_usage_delay_ua4"}
+{"ev":"user_end","t":2.677096532106979,"u":1}
+{"ev":"meas","t":2.677096532106979,"mp":"UsageScenarioMeasuringPoint[_ss_usage_delay_us1]","metric":"Response Time Tuple","v":[2.677096532106979,0.5123226693477885]}
+{"ev":"pass","t":2.927096532106979,"u":1,"type":"Start","el":"_ss_usage_delay_ua1"}
+{"ev":"pass","t":2.927096532106979,"u":1,"type":"Delay","el":"_ss_usage_delay_ua2"}
+{"ev":"pass","t":3.0235646715244227,"u":1,"type":"EntryLevelSystemCall","el":"_ss_usage_delay_ua3"}
+{"ev":"call","t":3.0235646715244227,"u":1,"role":"_ss_usage_delay_sysprov1","sig":"_ss_usage_delay_op"}
+{"ev":"pass","t":3.0235646715244227,"u":1,"ac":"_ss_usage_delay_ac1","type":"StartAction","el":"_ss_usage_delay_act1"}
+{"ev":"request","t":3.0235646715244227,"u":1,"ac":"_ss_usage_delay_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_usage_delay_act2"}
+{"ev":"job","t":3.0235646715244227,"job":4,"u":1,"rc":"_ss_usage_delay_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.5}
+{"ev":"meas","t":3.0235646715244227,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0235646715244227,1.0]}
+{"ev":"meas","t":3.0235646715244227,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0235646715244227,1.0]}
+{"ev":"meas","t":3.0235646715244227,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.0235646715244227,0.5]}
+{"ev":"job_end","t":3.5235646715244227,"job":4}
+{"ev":"meas","t":3.5235646715244227,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.5235646715244227,0.0]}
+{"ev":"meas","t":3.5235646715244227,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.5235646715244227,0.0]}
+{"ev":"pass","t":3.5235646715244227,"u":1,"ac":"_ss_usage_delay_ac1","type":"StopAction","el":"_ss_usage_delay_act3"}
+{"ev":"call_end","t":3.5235646715244227,"u":1,"role":"_ss_usage_delay_sysprov1","sig":"_ss_usage_delay_op"}
+{"ev":"pass","t":3.5235646715244227,"u":1,"type":"Stop","el":"_ss_usage_delay_ua4"}
+{"ev":"user_end","t":3.5235646715244227,"u":1}
+{"ev":"meas","t":3.5235646715244227,"mp":"UsageScenarioMeasuringPoint[_ss_usage_delay_us1]","metric":"Response Time Tuple","v":[3.5235646715244227,0.5964681394174436]}
+{"ev":"pass","t":3.7735646715244227,"u":1,"type":"Start","el":"_ss_usage_delay_ua1"}
+{"ev":"pass","t":3.7735646715244227,"u":1,"type":"Delay","el":"_ss_usage_delay_ua2"}
+{"ev":"pass","t":3.832283023368577,"u":1,"type":"EntryLevelSystemCall","el":"_ss_usage_delay_ua3"}
+{"ev":"call","t":3.832283023368577,"u":1,"role":"_ss_usage_delay_sysprov1","sig":"_ss_usage_delay_op"}
+{"ev":"pass","t":3.832283023368577,"u":1,"ac":"_ss_usage_delay_ac1","type":"StartAction","el":"_ss_usage_delay_act1"}
+{"ev":"request","t":3.832283023368577,"u":1,"ac":"_ss_usage_delay_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_usage_delay_act2"}
+{"ev":"job","t":3.832283023368577,"job":5,"u":1,"rc":"_ss_usage_delay_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.5}
+{"ev":"meas","t":3.832283023368577,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.832283023368577,1.0]}
+{"ev":"meas","t":3.832283023368577,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.832283023368577,1.0]}
+{"ev":"meas","t":3.832283023368577,"mp":"ActiveResourceMeasuringPoint[_ss_usage_delay_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.832283023368577,0.5]}
+{"ev":"stop","t":4.0}

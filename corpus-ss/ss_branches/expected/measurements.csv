@@ -1,0 +1,21 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,0.0,0.3
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,0.3,0.05
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,0.5,0.3
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,0.8,0.05
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,1.5,0.3
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,1.8,0.05
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,2.0,0.3
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,2.3,0.05
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,2.5,0.1
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,2.6,0.05
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,3.5,0.3
+ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0],Resource Demand Tuple,3.8,0.05
+UsageScenarioMeasuringPoint[_ss_branches_us1],Response Time Tuple,0.35,0.35
+UsageScenarioMeasuringPoint[_ss_branches_us1],Response Time Tuple,0.8500000000000001,0.3500000000000001
+UsageScenarioMeasuringPoint[_ss_branches_us1],Response Time Tuple,1.2,0.19999999999999996
+UsageScenarioMeasuringPoint[_ss_branches_us1],Response Time Tuple,1.85,0.3500000000000001
+UsageScenarioMeasuringPoint[_ss_branches_us1],Response Time Tuple,2.3499999999999996,0.34999999999999964
+UsageScenarioMeasuringPoint[_ss_branches_us1],Response Time Tuple,2.65,0.1499999999999999
+UsageScenarioMeasuringPoint[_ss_branches_us1],Response Time Tuple,3.2,0.20000000000000018
+UsageScenarioMeasuringPoint[_ss_branches_us1],Response Time Tuple,3.8499999999999996,0.34999999999999964

@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h15_composite",
+ "sim_time": 15,
+ "seed": 14,
+ "group": "failure"
+}

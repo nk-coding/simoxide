@@ -1,0 +1,1 @@
+IllegalArgumentException: null | org.palladiosimulator.analyzer.slingshot.behavior.usagesimulation.UsageSimulationBehavior.onUserRequestFinished(UsageSimulationBehavior.java:331)

@@ -1,0 +1,6 @@
+{
+ "model": "reference/slingshot/models/probes/ss_closed_think",
+ "sim_time": 6,
+ "seed": 1,
+ "group": "probe"
+}

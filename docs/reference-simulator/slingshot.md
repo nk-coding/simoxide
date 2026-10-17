@@ -192,6 +192,9 @@ own errors. In `det` mode, runs with and without it give identical measurements 
 | `tools/probegen.py` | generates the probe models of the [Slingshot semantics](../spec/slingshot/index.md) into `models/probes/` |
 | `probes.sh [--check]` | runs every probe in `det` mode and writes (or compares) `models/probes/<name>/expected/` |
 | `verify-det.sh -o OUT DIR...` | `det` twice in fresh JVMs, once warm, once `stock`, per model; time and file-size limits per JVM; summary `OUT/verify.csv` (`results/det-verify.csv` for probes, SPD examples and corpus) |
+| `corpus-ss.sh [--check] [NAME...]` | the Slingshot-exact corpus `corpus-ss/` (X1): runs each case (`case.json`: model, seed, simulated time) in `det` and writes (or compares) `corpus-ss/<name>/expected/` ([SS-X-8](../spec/slingshot/exact.md#ss-x-8-the-slingshot-exact-corpus)) |
+| `tools/errors.py RUN_LOG` | the handler exceptions of a run (`errors.txt`; identity hashes in messages replaced by `@*`) |
+| `tools/audit_subscribers.py` | static audit of the subscriber order: no Slingshot class subscribes twice to one event type without disjoint reified types ([SS-BUS-2](../spec/slingshot/core.md#ss-bus-the-event-bus)) |
 
 ## Smoke corpus
 
@@ -272,6 +275,7 @@ Findings from the reference runs, for the Slingshot semantics (S1) and the SPD d
 | `patches/<bundle>/{orig,src}` | upstream and patched sources of replaced classes |
 | `tools/mkconfig.py` | private Equinox configuration (bundles.info from the install, minus the old bench bundle, plus ours, patched jars) |
 | `models/` | SPD examples (provenance in `models/README.md`) |
+| `corpus-ss.sh`, `../../corpus-ss/` | the Slingshot-exact corpus and its `det` reference outputs |
 | `results/smoke.csv` | the last smoke run |
 | `build/` | generated (gitignored) |
 
@@ -281,4 +285,5 @@ Findings from the reference runs, for the Slingshot semantics (S1) and the SPD d
   `det` verification beyond the smoke corpus (`verify-det.sh`, `results/det-verify.csv`).
 - `getDeclaredMethods()` order varies between JVMs (observed in `bus.jsonl`); it only reorders
   subscribers of disjoint reified types, so no run changes, but `bus.jsonl` is not byte-stable.
+  X1 checks this statically for every class (`tools/audit_subscribers.py`).
 - Usage evolution (`.usageevolution`, DLIM) is not loaded (design decision U9).

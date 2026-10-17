@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h26_fork_double_resume",
+ "sim_time": 5,
+ "seed": 25,
+ "group": "failure"
+}

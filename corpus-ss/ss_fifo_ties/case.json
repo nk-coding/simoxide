@@ -1,0 +1,6 @@
+{
+ "model": "reference/slingshot/models/probes/ss_fifo_ties",
+ "sim_time": 7,
+ "seed": 1,
+ "group": "probe"
+}

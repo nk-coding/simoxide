@@ -14,11 +14,37 @@ resources, its monitors, its random streams. The rules it follows are the
 ```
 
 This is the flavour's **fast mode** (design phase S2): it reproduces the semantics that change
-results, not Slingshot's event bus. The **Slingshot-exact mode**, which reproduces Slingshot's bus
-cascade and disposed handlers event for event, is a later phase (X2). Both RNG modes work:
+results, not Slingshot's event bus. The **Slingshot-exact mode** (`--flavour slingshot-exact`,
+below) reproduces Slingshot's bus cascade and disposed handlers event for event. In the fast mode
+both RNG modes work:
 `--mode exact` draws StoEx values from the reference's MT19937 stream and branch decisions from
 `java.util.Random(seed + 1000003)`, as the [Slingshot runner](../reference-simulator/slingshot.md)
 seeds them; `--mode fast` draws everything from the fast generator ([Fast mode](./fast-mode.md)).
+
+## The exact mode
+
+```sh
+./target/release/simoxide run --model corpus/x_ss_minimal --flavour slingshot-exact \
+    --seed 1 --max-sim-time 110 --measurements m.csv \
+    --trace projection.jsonl --tape tape-projection.jsonl
+```
+
+`--flavour slingshot-exact` runs Slingshot's event bus handler by handler (design phase X2):
+the same events in the same order at the same `double` times as the
+[reference runner](../reference-simulator/slingshot.md) in its `det` mode, with every quirk
+(`--quirks` must be empty or `all`), including Slingshot's disposed handlers (Q18): a handler
+that throws is logged (`warning: t=…: <exception> in <handler>: …`) and never runs again, the
+run goes on. It needs `--max-sim-time` (Slingshot's `simTime`, its only stop condition) and
+reads the seed; it ignores `--mode` (its random streams are always the reference runner's:
+MT19937 for StoEx, `java.util.Random(seed + 1000003)` for branches and link failures) and
+`--max-measurements` (Q32). `--trace` writes the level-E event projection and `--tape` the tape
+projection of [exact comparison](../spec/slingshot/exact.md#ss-x-2-the-projection), so that both
+can be compared byte for byte with the reference's `tools/project.py` output; the measurements
+are the reference's `measurements.csv`. It works in the default (EPL) build. It is several times
+slower than the fast mode (one step per Slingshot event) and still far faster than Slingshot.
+How close it is: [Slingshot flavour correctness](../correctness/slingshot.md#the-exact-mode).
+In the library: `CompiledModel::compile_flavour(model, FlavourConfig::slingshot_exact())` and
+`simoxide_sim::run` (or `simoxide_sim::ssx::run`).
 
 ## What changes against SimuLizar
 
@@ -53,7 +79,7 @@ handler is a run error. Each documented quirk `Q1`–`Q37` has a compat flag tha
 | `Q26,Q29` | these quirks |
 | `fast` | every quirk the fast mode reproduces (all but Q17 and Q18) |
 | `fast,-Q32` | `fast` without Q32 |
-| `all` | all 37 (refused by the fast mode, which cannot reproduce Q17 and Q18) |
+| `all` | all 37 (refused by the fast mode, which cannot reproduce Q17 and Q18; the exact mode, `--flavour slingshot-exact`, always runs all) |
 
 How far the fast mode reproduces a quirk (`--quirks list` prints it):
 
@@ -62,7 +88,7 @@ How far the fast mode reproduces a quirk (`--quirks list` prints it):
   stops with a run error. What Slingshot does next (it disposes the handler and runs on, Q18) is
   the exact mode's.
 - **Spd**: an SPD quirk (Q1–Q16), read by the SPD interpreter (design phases P1–P3).
-- **ExactOnly** (Q17, Q18): refused in the fast mode.
+- **ExactOnly** (Q17, Q18): refused in the fast mode; the exact mode reproduces them.
 
 ## How close is it?
 

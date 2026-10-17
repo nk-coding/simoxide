@@ -1,0 +1,151 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,0.0,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,0.0,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,0.0,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,1.25,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,1.25,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,1.25,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,2.5,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,2.5,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,2.5,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,3.75,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,3.75,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,3.75,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,5.0,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,5.0,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Resource Demand Tuple,5.0,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,0.0,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,0.0,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,0.5,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,0.5,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,0.75,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,0.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,0.75,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,1.25,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,1.25,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,1.25,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,1.75,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,1.75,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,2.0,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,2.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,2.0,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,2.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,2.5,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,2.5,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,3.0,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,3.0,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,3.25,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,3.25,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,3.25,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,3.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,3.75,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,3.75,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,4.25,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,4.25,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,4.5,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,4.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,4.5,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,5.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,5.0,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,5.0,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,5.5,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,5.5,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,5.75,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,5.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],State of Active Resource Tuple,5.75,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,0.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,0.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,0.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,0.75,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,0.75,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,1.25,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,1.25,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,1.25,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,1.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,1.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,2.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,2.0,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,2.0,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,2.5,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,2.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,2.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,3.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,3.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,3.25,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,3.25,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,3.25,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,3.75,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,3.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,3.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,4.25,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,4.25,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,4.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,4.5,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,4.5,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,5.0,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,5.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,5.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,5.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,5.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,5.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,5.75,0.5
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0],Utilization of Active Resource Tuple,5.75,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,0.0,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,0.0,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,0.5,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,0.5,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,0.75,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,0.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,0.75,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,1.25,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,1.25,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,1.25,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,1.75,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,1.75,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,2.0,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,2.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,2.0,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,2.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,2.5,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,2.5,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,3.0,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,3.0,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,3.25,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,3.25,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,3.25,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,3.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,3.75,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,3.75,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,4.25,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,4.25,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,4.5,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,4.5,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,4.5,0.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,5.0,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,5.0,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,5.0,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,5.5,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,5.5,3.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,5.75,2.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,5.75,1.0
+ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1],State of Active Resource Tuple,5.75,0.0
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,0.75,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,0.75,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,0.75,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,2.0,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,2.0,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,2.0,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,3.25,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,3.25,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,3.25,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,4.5,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,4.5,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,4.5,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,5.75,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,5.75,0.75
+UsageScenarioMeasuringPoint[_ss_ps_multicore_us1],Response Time Tuple,5.75,0.75

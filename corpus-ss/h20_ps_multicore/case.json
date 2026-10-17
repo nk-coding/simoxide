@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h20_ps_multicore",
+ "sim_time": 38,
+ "seed": 19,
+ "group": "corpus"
+}
