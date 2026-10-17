@@ -345,7 +345,9 @@ pub fn run_batch_opts(
         if let Some(c) = &case.conf
             && !confs.contains_key(c)
         {
-            let m = qvto_emf::config::Config::read(&root.join(c), root).map_err(|e| format!("{c}: {e}"))?;
+            let m = qvto_emf::config::Config::read(&root.join(c), root)
+                .map_err(|e| format!("{c}: {e}"))?
+                .with_base(&models);
             confs.insert(c.clone(), m);
         }
         let env = CaseEnv {

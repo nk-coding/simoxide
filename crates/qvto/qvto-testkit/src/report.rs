@@ -172,7 +172,9 @@ fn conf_cache(conf: &str, base: &Path) -> Result<Config, String> {
     if let Some(c) = m.get(conf) {
         return Ok(c.clone());
     }
-    let c = Config::read(&base.join(conf), base).map_err(|e| e.to_string())?;
+    // the Eclipse environment's registrations stay (the Java runner's global registry)
+    let suite = Config::read(&base.join(crate::paths::SUITE_CONF), base).map_err(|e| e.to_string())?;
+    let c = Config::read(&base.join(conf), base).map_err(|e| e.to_string())?.with_base(&suite);
     m.insert(conf.to_string(), c.clone());
     Ok(c)
 }

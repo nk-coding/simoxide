@@ -29,6 +29,17 @@ for top in sorted(os.listdir(EXT)):
         subdirs[:] = [s for s in subdirs if s != '.git']
         dirs_by_name.setdefault(os.path.basename(d), []).append(d)
 
+# platform: URIs the PCM configuration maps (a case's own map of the same key would replace it
+# and, removed after the case, leave the Java runner's JVM without it)
+CONF_MAPS = set()
+try:
+    for line in open('target/pcm/pcm.conf', encoding='utf-8'):
+        f = line.split()
+        if len(f) >= 3 and f[0] == 'map':
+            CONF_MAPS.add(f[1])
+except OSError:
+    pass
+
 PLATFORM = re.compile(r'platform:/(plugin|resource)/([^/"#\s]+)/')
 IMPORT = re.compile(r'^\s*(?:import|access|extends)\s+(?:library\s+|transformation\s+)?([A-Za-z_][\w.]*)\s*[;(]', re.M)
 
@@ -97,14 +108,15 @@ for r in rows:
             continue
         for kind, name in PLATFORM.findall(text):
             key = f'platform:/{kind}/{name}/'
-            if name == 'org.eclipse.emf.ecore':
-                continue  # Ecore itself (the configuration's alias)
+            if name == 'org.eclipse.emf.ecore' or key in CONF_MAPS:
+                continue  # Ecore itself (an alias), or mapped by the configuration
             if key not in maps:
                 b = bundle_dir(name, r['source'])
                 if b:
                     maps[key] = b
-    if pcm:
-        lines.append('conf target/pcm/pcm.conf')
+    # always: the Java runner's configurations are JVM-wide once applied (Env.applyConf), so
+    # every case sees the Palladio metamodels in the global registry on both sides
+    lines.append('conf target/pcm/pcm.conf')
     for k, v in sorted(maps.items()):
         lines.append(f'urimap {k} {v}')
     lines.append(f'imports root {import_root(path, r["source"])}')

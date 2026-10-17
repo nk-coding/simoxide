@@ -27,6 +27,25 @@ fn file_uri(p: &Path) -> String {
 }
 
 impl Config {
+    /// Adds what `other` has and `self` does not (maps of other prefixes, namespace URIs,
+    /// aliases): a configuration on top of a base one.
+    pub fn with_base(mut self, other: &Config) -> Config {
+        for (k, v) in &other.maps {
+            if !self.maps.iter().any(|(a, _)| a == k) {
+                self.maps.push((k.clone(), v.clone()));
+            }
+        }
+        for (k, v) in &other.ns_index {
+            self.ns_index.entry(k.clone()).or_insert_with(|| v.clone());
+        }
+        for (k, v) in &other.aliases {
+            if !self.aliases.iter().any(|(a, _)| a == k) {
+                self.aliases.push((k.clone(), v.clone()));
+            }
+        }
+        self
+    }
+
     pub fn read(conf: &Path, base: &Path) -> std::io::Result<Config> {
         let text = std::fs::read_to_string(conf)?;
         let mut c = Config::default();

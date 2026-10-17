@@ -110,7 +110,14 @@ impl CaseEnv<'_> {
             let root = rs.graph.roots(r).first().and_then(|&o| rs.graph.object_package(o));
             if let Some(root) = root {
                 let ns = rs.graph.meta().package(root).ns_uri.clone();
-                if !keys.iter().any(|k| rs.graph.meta().package(*k).ns_uri == ns) {
+                // `containsKey` also asks the global registry: the index of a case
+                // configuration (`conf`, registered JVM-wide by the Java runner), the EMF jars
+                let global = ns.as_deref().is_some_and(|u| {
+                    u == qvto_emf::ecore::ECORE_NS_URI
+                        || crate::paths::EMF_JAR_MODELS.iter().any(|(k, _)| *k == u)
+                        || (self.case.conf.is_some() && self.models.ns_index.contains_key(u))
+                });
+                if !global && !keys.iter().any(|k| rs.graph.meta().package(*k).ns_uri == ns) {
                     keys.push(root);
                 }
             }
