@@ -1390,6 +1390,15 @@ on a run"):
   `QvtoAdjuster` and a hook setting `enactedPolicy`): `MainTransformation` adds `AppServer_1`
   at t = 50 s, the run model's generation is 1, the target group has 2 elements, as the
   reference runner's `adjust` record.
+- **Gates.** `golden.sh` identical (312 runs, `cargo build-exact`, against b231a95);
+  `cargo test --release --workspace --features exact` 543 passed, 0 failed (524 before; +19 in
+  `simoxide-reconf`); `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; `cargo conform
+  --suite all` 542/542 strictly equal (unchanged); fmt and clippy `-D warnings` clean (workspace,
+  all targets, default and `--features exact`; `simoxide-reconf` without default features;
+  `simoxide-cli --features reconfiguration`); release check: `cargo tree -e normal` of
+  `simoxide-cli` (also with `reconfiguration`) and `qvto-cli` lists no opt-in crate. The hot
+  path is unchanged (`simoxide-sim` gains only `fail_run`); a quick benchmark showed no
+  slowdown (timing deferred).
 - **Found for P2/F4.** In compat mode without Java's identity hashes (HotSpot's generator),
   `MainTransformation`'s wiring *moves* a container within
   `LinkingResource.connectedResourceContainers`; SimuLizar's router throws on that (MC-2.3), so
