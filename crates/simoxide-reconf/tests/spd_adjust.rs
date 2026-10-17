@@ -741,3 +741,34 @@ fn adjustments_equal_slingshot_in_the_slingshot_flavour() {
         );
     }
 }
+
+/// The Slingshot flavour's fixed behaviour on a scale-in: the removed container drains, and its
+/// requests in progress reach the load balancer over a link of the remaining side (the
+/// transformation took the container off its links; Slingshot's fallback, which the fixed Q37
+/// keeps for removed containers). The run ends normally, every request finished.
+#[test]
+fn slingshot_flavour_drains_a_removed_container() {
+    use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
+    let c = case("spd_scale_in");
+    let model = RunSpec::default().load_model(&c.model).unwrap();
+    let q = Quirks::fixed();
+    let spd = spd_of(&model, q).unwrap().unwrap();
+    let cm = CompiledModel::compile_flavour(model, FlavourConfig::SLINGSHOT).unwrap();
+    let mut cfg = RunSpec::default().sim_config("p2");
+    cfg.mode = Mode::Fast;
+    cfg.seed = c.seed;
+    cfg.max_sim_time = c.sim_time;
+    let sim = Simulation::<Fast, Slingshot>::create(&cm, cfg, Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &spd).unwrap();
+    let mut log = VecLog::default();
+    r.run(&mut adjuster(q), &mut log).unwrap();
+    let a = adjust_records(&log.to_jsonl());
+    assert_eq!(a.len(), 2);
+    assert!(a.iter().all(|a| a["ok"] == true));
+    assert_eq!(
+        a[1]["after"]["target_groups"][0]["elements"],
+        serde_json::json!(["AppServer"])
+    );
+    let (res, ..) = r.finish().unwrap();
+    assert!(res.main_count > 0);
+}

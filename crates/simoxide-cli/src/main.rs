@@ -438,12 +438,6 @@ fn run(a: &Args) -> Result<(), String> {
         return report_end(a, r, t0);
     }
     let r = match spd {
-        Some(_) if a.flavour.is_slingshot() => {
-            return Err(
-                "scaling policies in the Slingshot flavour are phase P3 (use --no-spd to ignore the .spd)"
-                    .into(),
-            );
-        }
         Some(s) => spd::run(a, &cm, cfg, out, &s, None)?,
         None if a.pause.is_some() || a.snapshot.is_some() || !a.pause_when.is_empty() => {
             snap::plain(a, &cm, Ok(cfg), out)?
@@ -533,7 +527,7 @@ mod spd {
     use super::{Args, End, create};
     use simoxide_sim::compat::Compat;
     use simoxide_sim::snapshot::Snapshot;
-    use simoxide_sim::{CompiledModel, Mode, Outputs, SimConfig, Simulation, Status};
+    use simoxide_sim::{CompiledModel, Flavour, Mode, Outputs, SimConfig, Simulation, Status};
     use simoxide_spd::log::JsonlLog;
     #[cfg(not(feature = "reconfiguration"))]
     use simoxide_spd::sim::NoAdjustment;
@@ -569,7 +563,7 @@ mod spd {
         Ok(s)
     }
 
-    fn go<C: Compat>(
+    fn go<C: Compat, F: Flavour>(
         a: &Args,
         cm: &CompiledModel,
         cfg: SimConfig,
@@ -585,8 +579,8 @@ mod spd {
         let mut adj = NoAdjustment;
         let mut r = match restore {
             Some(snap) => {
-                let mut r =
-                    SpdRun::<C>::restore_snapshot(snap, cm, spd, out).map_err(|e| e.to_string())?;
+                let mut r = SpdRun::<C, F>::restore_snapshot(snap, cm, spd, out)
+                    .map_err(|e| e.to_string())?;
                 #[cfg(feature = "reconfiguration")]
                 {
                     adj.run
@@ -610,7 +604,7 @@ mod spd {
                 r
             }
             None => {
-                let sim = Simulation::<C>::create(cm, cfg, out).map_err(|e| e.to_string())?;
+                let sim = Simulation::<C, F>::create(cm, cfg, out).map_err(|e| e.to_string())?;
                 SpdRun::new(sim, spd).map_err(|e| e.to_string())?
             }
         };
@@ -689,12 +683,29 @@ mod spd {
         spd: &Spd,
         restore: Option<&Snapshot>,
     ) -> Result<End, String> {
-        match cfg.mode {
+        use simoxide_sim::{FlavourKind, SimuLizar, Slingshot};
+        match (cfg.mode, cm.flavour.kind) {
             #[cfg(feature = "exact")]
-            Mode::Exact => go::<simoxide_sim::Exact>(a, cm, cfg, out, spd, restore),
-            Mode::Fast => go::<simoxide_sim::Fast>(a, cm, cfg, out, spd, restore),
+            (Mode::Exact, FlavourKind::SimuLizar) => {
+                go::<simoxide_sim::Exact, SimuLizar>(a, cm, cfg, out, spd, restore)
+            }
+            #[cfg(feature = "exact")]
+            (Mode::Exact, FlavourKind::Slingshot) => {
+                go::<simoxide_sim::Exact, Slingshot>(a, cm, cfg, out, spd, restore)
+            }
+            (Mode::Fast, FlavourKind::SimuLizar) => {
+                go::<simoxide_sim::Fast, SimuLizar>(a, cm, cfg, out, spd, restore)
+            }
+            (Mode::Fast, FlavourKind::Slingshot) => {
+                go::<simoxide_sim::Fast, Slingshot>(a, cm, cfg, out, spd, restore)
+            }
+            (_, FlavourKind::SlingshotExact) => Err(
+                "scaling policies in the Slingshot-exact engine need DESIGN-SPD.md X2d (use \
+                 --flavour slingshot, or --no-spd)"
+                    .into(),
+            ),
             #[cfg(not(feature = "exact"))]
-            m => Err(m.unavailable_reason().unwrap_or_default()),
+            (m, _) => Err(m.unavailable_reason().unwrap_or_default()),
         }
     }
 }

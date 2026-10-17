@@ -44,7 +44,7 @@ always simulated (SS-ACT-7.2), the release that does not wait (SS-ACT-8.3).
 | Q34 | probes per specification / per passive resource | a monitor for replica *k* gets replica-independent values; passive instances of several assemblies share series | defined: passive series per (passive resource, assembly context) as SimuLizar; an active-resource point with replica *k* gets the per-core values of core *k* ([compat flags](#compat-flags), defined in S2) | `ss_ps_multicore` |
 | Q35 | silent stalls | unsupported actions, `ResourceCall`s, missing connectors or SEFFs end a request without an error | defined: run error; `ResourceCall` as ACT-3.6 | corpus `h23`, `x_pem_reliability` (RecoveryAction: no request completes) |
 | Q36 | infrastructure-call inputs ignored | no input frame for the callee | defined: ACT-3.5 | corpus `h18` |
-| Q37 | calls between unconnected containers | `IllegalArgumentException` disposes `onCallOverWireRequested`: no further transfer anywhere | defined: run error (as SimuLizar ACT-11.2) | – |
+| Q37 | calls between unconnected containers | `IllegalArgumentException` disposes `onCallOverWireRequested`: no further transfer anywhere | defined: run error (as SimuLizar ACT-11.2), except when a side was removed from the environment by a model change (a draining container's requests in progress): then a link touching the other side, as Slingshot's code intends (P3) | – |
 
 ## The exact mode {#exact-mode}
 
