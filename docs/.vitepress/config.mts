@@ -60,6 +60,7 @@ export default defineConfig({
             { text: 'Snapshots', link: '/guide/snapshots' },
             { text: 'Reconfiguration rules', link: '/guide/reconfiguration' },
             { text: 'Scaling policies (SPD)', link: '/guide/spd' },
+            { text: 'Autoscaling (HPA)', link: '/guide/hpa' },
             { text: 'Fast mode', link: '/guide/fast-mode' },
             { text: 'Slingshot flavour', link: '/guide/slingshot' },
             { text: 'Supported models', link: '/guide/scope' },
@@ -98,6 +99,7 @@ export default defineConfig({
             { text: 'Random numbers', link: '/spec/random' },
             { text: 'Schedulers', link: '/spec/scheduler' },
             { text: 'Model changes', link: '/spec/model-changes' },
+            { text: 'HPA autoscaling', link: '/spec/hpa' },
           ],
         },
         {

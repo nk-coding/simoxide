@@ -6,6 +6,9 @@ policy a filter chain of target-group check, trigger, constraints and adjustor. 
 are on [Scaling policies (Slingshot)](../spec/slingshot/spd.md); the design is
 `DESIGN-SPD.md` §5.4.
 
+Kubernetes-style autoscaling (an HPA controller whose rescales are absolute adjustments of a
+target group) is on [Autoscaling (HPA)](./hpa.md).
+
 A policy that fires produces an *adjustment request* (policy, target group, adjustment); the
 adjustment runs Slingshot's own transformation, `MainTransformation.qvto`, on the run's model
 (below, [Adjustments](#adjustments)) and the run continues on the changed model.

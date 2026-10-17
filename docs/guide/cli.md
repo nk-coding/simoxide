@@ -37,6 +37,7 @@ simoxide run --model <dir> [flags]
 | `--spd-log FILE`, `--spd-log-all` | write the decision log of the model's scaling policies ([Scaling policies](./spd.md)) |
 | `--spd-quirks fixed\|slingshot\|Q2,…` | Slingshot SPD quirks to reproduce, default `fixed` |
 | `--no-spd` | ignore a `.spd` file of the model |
+| `--hpa FILE`, `--no-hpa` | Kubernetes-style HPA autoscalers of SPD target groups: `FILE` instead of the model's `*.hpa` / `*.hpa.json` files, or none ([Autoscaling (HPA)](./hpa.md)) |
 | `--rules DIR`, `--rules-log FILE` | run SimuLizar's reconfiguration rules of `DIR` (default: `run.json`'s `reconfiguration_rules`) and log each reconfiguration; feature `reconfiguration` ([Reconfiguration rules](./reconfiguration.md)) |
 | `--qvto-mode auto\|fast\|compat` | QVTo's mode for the rules, default `auto` (compat in builds with `exact` or `compat`) |
 | `--pause-at T`, `--pause-before T`, `--pause-events N` | stop between two events: after every event at or before `T` s, before the first event at or after `T` s, or after `N` events; prints `paused t=...` and writes the measurements so far ([Snapshots](./snapshots.md)) |

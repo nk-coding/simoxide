@@ -142,6 +142,30 @@ runner's `det` outputs, `CORPUS=corpus-spd reference/slingshot/corpus-ss.sh [--c
 `simoxide-cli`'s `tests/spd_cli.rs` (feature `reconfiguration`) runs the minimal example in new
 processes: the scale-out, a resume after it, `--enforce`.
 
+The HPA autoscaler ([Autoscaling (HPA)](../guide/hpa.md)) has no reference to compare with.
+Its tests check Kubernetes' rules directly:
+
+- `simoxide-spd`'s unit tests (`hpa::controller`, `hpa::config`) check the controller's
+  arithmetic against hand-computed Kubernetes behaviour:
+  - the proportional rule and the inclusive tolerance band, on the integer percentage;
+  - unready and missing pods;
+  - both stabilisation paths and both rate-limit paths (`Pods`/`Percent`, `Max`/`Min`/
+    `Disabled`, periods);
+  - the min/max bypass, starting pods, and the defaulting of `behavior`.
+- `simoxide-reconf`'s `tests/hpa.rs` runs the V4 model with an `.hpa.json` and load steps from
+  change files:
+  - a step scales out within four syncs and in no earlier than the 300 s window allows, which
+    every scale-down of the log is checked against, without flapping;
+  - a ramp scales monotonically;
+  - starting pods are unready until their delay;
+  - scaling policies limit the rate;
+  - the Slingshot flavour scales too;
+  - forks and snapshots at nine pauses continue like the uninterrupted run;
+  - the growth is bounded per created pod, with the `maxCreatedPods` guard;
+  - configuration errors, and parameter changes at a pause.
+- `simoxide-cli`'s `tests/hpa_cli.rs` checks run, pause and resume, `--hpa-set`, `hpa` change
+  lines and the refusals.
+
 ## Differential fuzzing
 
 `simoxide_testkit::modelgen` generates random, structurally valid PCM models: composite

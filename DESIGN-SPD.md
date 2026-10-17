@@ -5,7 +5,8 @@ State: 2026-10-17. This is a design. Phases S0 (the Slingshot reference runner,
 `SS-*`), F0, F1, F2, F3 (the QVTo host, `crates/simoxide-reconf`), P1 (the SPD interpreter,
 `crates/simoxide-spd`), S2 (the Slingshot flavour's fast mode), Q1 (the SPD adjustment corpus), Q2
 (QVTo's ordered mode), R1 (SimuLizar's reconfiguration rules), X1 (the Slingshot-exact corpus) and
-X2 a-c, e (the Slingshot-exact mode, without SPD) are implemented; the rest is not.
+X2 a-c, e (the Slingshot-exact mode, without SPD) are implemented, and H1 (Kubernetes-style HPA
+autoscaling, §5.10, 2026-10-18); the rest is not.
 User decisions of §8 are recorded. It is on branch `spd`
 (forked from `qvto-adapter`). It is a plan, so it sits next to the code and not in the VitePress
 site, which describes the current state (`docs/development/contributing.md`). The parts that get
@@ -2933,6 +2934,217 @@ foundation graph. The merge design should treat them as constraints.
 | **Several metamodels in one graph** | PRM, SPD, semanticspd, user metamodels next to PCM, references across them in both directions | removes the Q6 two-homes limitation |
 | **Resources** | QVTo extents, `qvto:/created`, per-file output | resource table part of the graph state |
 | **Fast read path** | the simulator never reads the graph in the hot path (it reads compiled tables); QVTo reads it per adjustment | no locking; `&mut` per run |
+
+### 5.10 HPA autoscaling (Kubernetes-style, phase H1)
+
+The goal: autoscaling as Kubernetes' horizontal pod autoscaler does it, so that architecture
+optimisations (MiSArch, a later separate project) can respect "regular HPA scaling". It builds
+on the SPD and QVTo machinery: P1-P3, F4. The semantics are on `docs/spec/hpa.md` (rules
+`HPA-*`, with sources), the usage on `docs/guide/hpa.md`.
+
+**Why not SPD policies.** SPD's adjustments (step, relative, absolute) and constraints
+(cooldown, thrashing, size) cannot express HPA's rules:
+
+- the proportional rule `⌈ready · utilisation / target⌉`;
+- the tolerance band;
+- the stabilisation window over past *recommendations* (not over enactments);
+- the rate limits per period over past scale events;
+- unready pods counted at 0 %.
+
+A trigger-per-level encoding would need a policy per replica count and still lack the
+stabilisation. An "HPA marker" on an SPD policy would need a second interpreter anyway.
+
+**Design (as recommended, built).**
+
+- A **native controller** in `simoxide-spd/src/hpa/`:
+  - `controller.rs` is a port of Kubernetes' arithmetic (`reconcileAutoscaler`,
+    `GetResourceReplicas`, both stabilisation paths, both rate-limit paths, `storeScaleEvent`).
+    It is plain data and integer arithmetic where Kubernetes uses integers, and testable without
+    a simulator.
+  - `run.rs` runs it inside `SpdRun` (both flavours). Per autoscaler there are three kinds of
+    external notes (tag bit 30): sync, window start, pods ready.
+- A rescale is an **SPD absolute adjustment** of the target group, run by the run's adjuster
+  (`QvtoAdjuster::spd`, Slingshot's `MainTransformation` in QVTo's ordered mode). The structural
+  change is the already validated one: containers, allocations, connectors, load-balancer
+  branches, cloned monitors, drain on removal.
+  - `hpa::attach` adds one inactive `ScalingPolicy` per autoscaler to the SPD before compiling:
+    id `_simoxide_hpa_<name>`, an `AbsoluteAdjustment`.
+  - `SlingshotHooks::before` writes the desired count into its `goalValue` and enacts it.
+  - The request (`AdjustmentRequest::hpa`) commits no SPD constraint state.
+- **Metric without monitors.** The engine gets a generic hook: `Simulation::track_busy`,
+  `busy_integral`.
+  - It integrates a resource's busy fraction at every state change, the value the
+    overall-utilisation probe reports.
+  - SimuLizar flavour: in `ResListener::state_changed`. Slingshot flavour: in
+    `ss_res_samples`.
+  - When no resource is tracked the cost is one predictable branch per state change; runs
+    without HPA are unchanged (golden hashes).
+  - A window-start note reads the integrals, the sync reads them again. Usage is rounded to
+    milli-cores as `MilliValue()` does.
+- **Start-up delay.** New pods count as replicas at once and are unready. Their adjustment runs
+  at the ready time, so they take no traffic before. This is the behaviour HPA's unready-pod
+  rule exists for. Scale-down deletes starting pods first (ReplicaSet order), then the newest
+  ready ones (the transformation's order), which drain.
+- **State.** `HpaState` per autoscaler holds the spec, the recommendations and events, the
+  starting pods, the ready pods with their start and ready times, the readings, the counters and
+  the replica-seconds. It is part of forks and of the snapshot section `hpa`.
+  `SpdRun::hpa_set` changes parameters at a pause.
+
+**Configuration format.** Kubernetes' own `HorizontalPodAutoscaler` (`autoscaling/v2`) objects in
+a JSON file next to the model (`*.hpa.json`, `*.hpa`, or `--hpa FILE`), with a `controller`
+block for the `kube-controller-manager` flags and a `simoxide` block per autoscaler (start-up
+delay, metric window, first sync, CPU request). `scaleTargetRef` names an SPD target group.
+Why this format:
+
+- It is the format HPA users know; real manifests can be pasted, and `behavior` defaulting
+  follows Kubernetes' (`GenerateHPAScaleUpRules`).
+- A generator (the mdeo/MiSArch plugin) writes it from `Autoscaling { targetUtilisation,
+  maxReplicas, ... }` with a string template; it needs no metamodel tables (§5.6), XMI loader
+  or `.ecore`.
+- The structure that is model (containers, load balancer, target groups) stays in PCM and SPD,
+  where Slingshot's transformation needs it.
+- An SPD extension metamodel was the alternative. It would put HPA objects into the graph (and
+  into mdeo as a metamodel), but it needs new generated tables and gains nothing at run time.
+
+**As built (H1, 2026-10-18, branch `hpa`).**
+
+- Files: `simoxide-spd/src/hpa/{mod,config,controller,run}.rs`; `interp.rs`
+  (`AdjustmentRequest::hpa`), `log.rs` (records `hpa`, `hpa_ready`), `sim.rs` (notes,
+  requests, the request table emptied when idle), `snapshot.rs` (section `hpa`,
+  `restore_snapshot_hpa`), `resume.rs`. Also `simoxide-sim/src/sim/hooks.rs` with `sim.rs` and
+  `sim/slingshot.rs` (busy integrals), and `simoxide-reconf/src/spd.rs` (the goal).
+  `simoxide-reconf/src/edits.rs` and `resume.rs` add `hpa NAME KEY VALUE` lines in change files.
+  `simoxide-cli` adds `--hpa`, `--no-hpa`, `resume --hpa-set` and the summary line per
+  autoscaler.
+- Flavours: SimuLizar (exact and fast) and Slingshot fast. The Slingshot-exact engine refuses the
+  HPA. It has its own SPD layer (`SsxSpd`), and the HPA has no reference to be exact against.
+- **Found and fixed** (pre-existing, `simoxide-reconf`): a restored run whose model changed
+  through a change file before its next adjustment lost the restored QVTo state. The id
+  generator restarted and the transformation reused ids ("new resource container ... has the id
+  of a registered container"). `QvtoRun::prepare` now carries the restored session over to the
+  changed model (test `forks_and_snapshots_continue_identically`).
+- Tests:
+  - `simoxide-spd` unit tests (13): the arithmetic by hand against Kubernetes'. They cover
+    tolerance (inclusive band, integer percentage), unready and missing pods, the legacy and
+    behaviour stabilisation, `Pods`/`Percent` policies with `Max`/`Min`/`Disabled` and periods,
+    min/max bypass, per-direction tolerances, starting pods, and configuration parsing and
+    defaulting.
+  - `simoxide-reconf/tests/hpa.rs` (9), on the V4 model with an `.hpa.json`:
+    - a step 0.4 to 4 offered cores: out within four syncs, no rescale while the load holds,
+      scale-in only as the 300 s window allows (checked on every scale-down), up then down;
+    - a ramp: monotone up;
+    - start-up delay: starting pods unready, the adjustment one delay later;
+    - `behavior` policies: at most 1 pod per 15 s;
+    - the Slingshot flavour, deterministic;
+    - forks and snapshots at nine pauses, including while pods start: the same log,
+      measurements and events, and the same bytes rewritten;
+    - bounded growth: 200 oscillations, about 1 000 adjustments, per-pod growth constant,
+      2 000 syncs without a rescale add nothing, `maxCreatedPods`;
+    - configuration errors; parameter changes;
+    - plus the ignored cost measurement.
+  - `simoxide-cli/tests/hpa_cli.rs`: run, pause, resume, `--hpa-set`, `hpa` change lines, the
+    refusals.
+- **Cost** (fast mode, the ignored test `cost_per_scaling_step`, one core of the VM at load
+  about 1): generated models of `k` V4-like services, each with its own load balancer, target
+  group and HPA, step from 0.2 to 2 offered cores per service.
+
+  | Model | Objects | Adjustments | ms per adjustment | of which the change path |
+  |---|---|---|---|---|
+  | k = 1 | 104 | 3 | 0.9-1.3 | 0.4 |
+  | k = 10 | 779 | 36 | 1.3-1.4 | 0.9 |
+  | k = 30 (MiSArch's size) | 2 279 | 114 | 3.2 | 2.8 |
+  | k = 40 | 3 029 | 145 | 3.3-4.3 | 2.1-3.6 |
+
+  - QVTo set-up is about 11 ms once per process (core and `MainTransformation`).
+  - The QVTo transformation itself stays around 1 ms. The change path's rebuild and recompile
+    of the whole model (F2's "rebuild and diff") is most of the cost, linear in the model size.
+  - Whole run at k = 30 (900 s, 380 000 events, 114 adjustments): 0.44 s.
+- **Growth** (HPA-8): every created pod stays as a tombstone (about 22 graph objects with its
+  cloned monitors, one resource, about 8 KB of snapshot, at most about 50 KB of memory). Every later
+  change rebuilds it too. In the oscillation probe the change path went from 0.4 ms to 11 ms at
+  1 200 tombstones, and memory stayed at 73 MB RSS.
+  - Bounded per pod created, with no other growth; `maxCreatedPods` (20 000) guards against a
+    runaway.
+  - With Kubernetes' defaults (300 s down-stabilisation) a flapping autoscaler creates at most
+    `maxReplicas` pods per window: a one-day run of 20 services with 10 replicas each could
+    create about 58 000 pods, past the guard. Realistic profiles create far fewer: the step test
+    creates about ten in 30 minutes.
+- **Proposed next (native fast path for plain replica scaling).** Not needed at MiSArch's size,
+  but it is the way to make long, scale-heavy runs cheap and bounded:
+  1. an incremental syncer for the replica change kind (append a container, its resources,
+     allocation, assembly, connectors and branch; set branch probabilities), with the same model
+     changes as the transformation, checked against it on the corpus;
+  2. reuse of drained tombstones for later scale-outs (a pod pool per group), so the model is
+     bounded by `maxReplicas` instead of the pods created.
+
+**Integration note: the MiSArch architecture optimisation (a later, separate project).**
+
+- **Today's translation** (`palladio-arch-service/src/translate.rs`, rules 3 and 3a) has no
+  per-replica structure.
+  - A `Deployable`'s replicas are cores of its one container (`numberOfReplicas = n·⌈q⌉`,
+    `processingRate = base·q/⌈q⌉`). The multi-core PS CPU is the "ideal load balancer".
+  - `Autoscaling { targetUtilisation, maxReplicas?, levels }` drives the static `n = ⌈need⌉` of
+    the analytic walk (O1, cost at the levels).
+  - The engine (`palladio-sim-service`) runs SimuLizar-exact over in-memory XMI with
+    `simoxide_sim::run`.
+- **Mapping for a dynamic run.** Each autoscaled `Deployable` becomes one replica container plus
+  Slingshot's pattern:
+  - The container gets `⌈q⌉` cores at `base·q/⌈q⌉`: one replica, so `cpuPerReplica` is the
+    request and the default `cpuRequest` is right.
+  - A load-balancer component (one probabilistic branch with the service's external call; one
+    per provided interface, or one branch per operation) on a fast container gets the system's
+    delegation or assembly connectors in front of the service's assembly.
+  - An SPD target group (`ElasticInfrastructure`, unit = the container) and a semantic
+    configuration with its `ElasticInfrastructureCfg` (linking resource) and `ServiceGroupCfg`
+    (the load-balancing assembly).
+  - One `HorizontalPodAutoscaler` item:
+    - `averageUtilization = round(100 · targetUtilisation)`;
+    - `maxReplicas = Autoscaling.maxReplicas` (Kubernetes requires one; take a cap such as the
+      peak level's ideal `n` times 2 when absent);
+    - `minReplicas` 1, or the static ideal `n` at the lowest level;
+    - `startupDelay` from the platform (container start, readiness probe);
+    - the scaled container starts at the ideal `n` of the first level, so the run does not start
+      cold.
+  - Sidecar containers (`<container>_sidecar`, `n·sidecarCores`) do not fit one target group.
+    Fold the sidecar's cores into the replica container for the dynamic run, or give the sidecar
+    its own group and HPA with the same target (they then scale nearly in lock-step).
+  - Quota speeds (rule 4) and node slowdowns are fixed at their initial values in a dynamic
+    run.
+- **Metric**: CPU utilisation relative to the request, `cpuPerReplica`. This is the
+  `targetUtilisation` the static autoscaler sizes for, so the two can be compared directly:
+  the HPA's time-weighted replicas at a level should approach the analytic `n`.
+- **Load profile**: SimOxide's usage model has static open workloads (`Exp(rate)`); there is no
+  time-varying load in the model (usage evolution, DLIM, is U9, not built). Two options:
+  - **today**: a pause-based schedule. `run_until(t_k)`, then a change file with `arrival-rate
+    SCENARIO λ·factor_k` for each of the 36 scenarios, then `model_changed()`. The tests do
+    this; it keeps the run deterministic and snapshot-able. `LoadLevel { factor, weight }`
+    becomes a step profile: levels in a chosen order, each for `weight · T`.
+  - **next** (about a day): a native load profile in SimOxide, a list of `(t, factor)` applied
+    as change sets at external notes inside `SpdRun`, so the plugin passes the profile instead
+    of driving pauses.
+- **Objectives from a dynamic run** (all from `HpaSummary`, the decision log and the
+  measurements):
+  - **cost**: ready-replica-seconds per service, times the price per replica and second (plus
+    starting pods, `replica_seconds`, if the platform bills them); the dynamic counterpart of
+    O1;
+  - **SLO violations**: the share of requests over the latency budget, in total and in the
+    windows after each load step (during scale-up), from the response-time series;
+  - **scaling lag**: per step, the time from the step to the first sync whose `desired` reaches
+    the level's steady count, and to the adjustment that makes it ready (start-up delay
+    included);
+  - **flapping**: direction reversals and rescales per hour (`hpa` records); peak replicas
+    (`max_replicas`).
+- **API for the plugin**:
+  - `HpaConfig::from_json` (in-memory text);
+  - `hpa::attach` on the model before `CompiledModel::compile`;
+  - `spd_of`, `Hpa::new`, `SpdRun::new(..).with_hpa(..)`;
+  - `QvtoAdjuster::spd` (`simoxide-reconf`, EPL in the default build); `hpa_summary()` after
+    the run.
+
+  The ported `palladio-sim-service` engine would add this path next to `simoxide_sim::run` when
+  a model has autoscalers. Estimated evaluation cost at MiSArch's size: about 3 ms per scaling
+  step; a one-hour four-level profile over 20 services is about 100-300 adjustments, so below
+  1 s on top of the simulation.
 
 ## 6. Performance comparison plan
 
