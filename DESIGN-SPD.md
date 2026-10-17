@@ -1004,6 +1004,56 @@ together with the immutable `Arc<CompiledModel>`. Then:
     debug form. The model overlay is written as XMI through `simoxide-model`'s writer. That
     writer comes from the foundation crates (qvto-emf's XMI writer, moved there by the merge).
 
+**F1 as built** (2026-10-17, branch `f1`):
+
+- **Layout.** `Simulation<'m, C>` = `{ cm: &CompiledModel, code (traced or plain variant),
+  trace writer, tape writer, st: RunState<C> }`. `RunState` (`crates/simoxide-sim/src/sim/state.rs`,
+  not a top-level `run.rs`: it holds the engine's private types) has: config, phase, failure,
+  `traced`, model shape; clock, event count, livelock-guard counters, `main_count`; processes
+  (continuation stacks, frames), free slots, table sequence, the shared empty frame, fork joins;
+  `ResRt` per resource (schedulers, delay sets, state shadows), passive instances, component
+  instances, dynamic assembly-context paths; the random source with its tape *buffer*; the
+  measurement sink (rows, sliding windows, PRM recorders, reconfiguration process state, the
+  event list with resource timers); lazily created series; resolution caches (`provs`,
+  `call_cache`, `elsc_prov`); step/event counters of the `Limits` checks. Within-event counters
+  (`nesting`, `direct`) are zero between events. The frame pool and the spare stacks are
+  allocation reuse only; a clone starts with empty ones.
+- **API.** `Simulation::run_until(Pause::{After(t), Before(t), Events(n), Never})`,
+  `run_while(pred)` → `Status::{Paused, Finished}`; `finish()` (= `run()`); `state()`,
+  `snapshot()` (clone, outputs flushed first), `fork(outputs)`, `into_state()`,
+  `Simulation::resume(cm, state, outputs)`, `set_limits`; `RunState::detach()` → `Detached`
+  (`Send`) → `into_state()`. Phases `NotStarted`/`Running`/`Finished`/`Failed` (a failed state
+  returns its error again, also in forks).
+- **Rc vs Arc: Rc stays.** `Arc` frames cost 7.3 % on the benchmark suite (geomean of the long
+  runs), 13 % on MediaStore. A clone shares the frames copy on write (same thread); `detach`
+  deep-copies the frame and proxy graph keeping its sharing (`FrameCopier`), and `Detached` is
+  `Send` through an `unsafe impl` whose argument is that every reference count of the copy is
+  owned by the copy.
+- **Hidden state found.**
+  - The tape writer (`Box<dyn Write>`) lived inside the RNG: moved out. The RNG keeps a
+    buffer; the simulation drains it after events and every 4 096 steps (output unchanged).
+  - Process program counters index into the traced *or* the plain instruction stream, and
+    `ConsumeDone` continuations exist only with a trace: the state records `traced`. A traced
+    state resumes with a trace (discarded without a writer); an untraced one cannot get one.
+    The tape can be attached or dropped at any pause (the origin tag is `?` between events).
+  - The frame pool must not be cloned shallowly (pooled frames must be unshared; a shared one
+    would fail `frame_mut`), so clones get empty pools.
+  - `Limits::cancel` is an `Arc` in the config: forks share the flag unless `set_limits`.
+  - An elided process hand-off counts as an event inside another event, so `Pause::Events(n)`
+    can stop at n + 1.
+  - No static or thread-local state influences results (the `simoxide-random` memos are of
+    pure functions).
+- **Fork cost** (`simoxide-bench fork`, halfway through the long runs): 0.4-12 µs without
+  stored rows (12 µs: PS model with 117 live processes), detach 0.5-30 µs; with stored rows
+  the rows dominate (MediaStore, 1.1 M tuples: 530 µs).
+- **Blockers for N1 (serde):** the `Rc` frame/proxy graph (serialise as an arena with indices,
+  the `FrameCopier` traversal); `&'static str` in the state (`SeriesDef::metric`, the metric
+  keys of lazily created series, `Sink::error`, `Reconf::error`, `ProvTarget::Fail`), which
+  need an interning table or codes; `FastSource`'s `&'static Tables` (rebuild on load);
+  `Limits::{deadline, cancel}` (run-time controls, skip); `RngMode::Replay(Arc<Tape>)`; serde
+  for the MT19937 state (`simoxide-random`) and the schedulers (`simoxide-sched`, generic
+  `J`); `Shape` is only a size check and should become a content hash of the `CompiledModel`.
+
 ### 5.8 Performance considerations
 
 - Without SPD, rules or snapshots, nothing changes: the overlay is untouched, there are no
@@ -1090,7 +1140,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 |---|---|---|---|---|
 | **F0** | Branch hygiene: `reconfiguration` feature; **fix generic supertypes and `PCMBaseClass` in the main tables** (5.6); append SPD/semantic/measuring-point packages. QVTo is used through the Q6 adapter until the merge lands, then through the in-repo `crates/qvto/*` | — | 1-2 d | builds with and without features; golden hashes unchanged; `IntSample` test; SPD files load |
 | **M** | *(merge, designed separately)* QVTo crates and foundation crates in the repo; QVTo on the shared graph; the graph meets 5.9 | — | see the merge design | F3 switches from the adapter to the shared graph without API change |
-| **F1** | `RunState` extraction: all mutable run state in one struct; `Rc` → `Arc` or deep-clone decision; `clone()` | F0 | 1 w | clone at event *k* and run both → equal traces (all corpus, both modes); benchmark within noise |
+| **F1** | *Done 2026-10-17* (findings: 5.7 "F1 as built"). `RunState` extraction: all mutable run state in one struct; `Rc` → `Arc` or deep-clone decision; `clone()` | F0 | 1 w | met: fork, pause/resume and resume of a deep copy on another thread equal the uninterrupted run on every model directory (exact own/replay, fast, literal engine); golden hashes, corpus, fuzz corpus unchanged; benchmark within noise |
 | **F2** | `RunModel` overlay (D1) with rebuild-and-diff syncer; direct-edit API | F0 | 2-3 w (a: overlay; b: rebuild/diff; c: edit API) | a test edit adds a container mid-run and it receives load; runs without changes unchanged (golden) |
 | **F3** | QVTo host `simoxide-reconf`: shared immutable core (registry, metamodel objects, compiled programs), lazy per-run state, journal to syncers, natives; first on the Q6 adapter, then on the shared graph (after M) | F0 | 1 w (+2-3 d to switch after M) | corpus rules run on a `RunModel`; journals equal the corpus results |
 | **F4** | Incremental syncers incl. SEFF recompilation, call-cache invalidation, monitor cloning, removal policies (keep / abort / drain) | F2, F3 | 2-3 w | each change kind has a test; load-balancer branch added mid-run changes routing; scale-in in all three policies |

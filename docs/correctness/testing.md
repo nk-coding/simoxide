@@ -17,6 +17,7 @@ harness are described in [Test kit](../development/testkit.md).
 | Metamorphic properties | `crates/simoxide-sim/tests/metamorphic.rs` | SimOxide itself | same |
 | API properties | `crates/simoxide-sim/tests/api.rs`, `interp.rs` | SimOxide itself | same |
 | Engine shortcuts | `crates/simoxide-sim/tests/literal_engine.rs` | DESMO-J's literal event sequence | same; more: `LITERAL_N=1000` |
+| Pause, fork and resume | `crates/simoxide-sim/tests/fork.rs` | the uninterrupted run | same; `FORK_FILTER=a,b` |
 | Robustness (untrusted input) | `crates/simoxide-sim/tests/robustness.rs` | no panic; errors of the right kind | same; more: `ROBUST_N=100000 ROBUST_SEED=n` |
 | Model generator | `crates/simoxide-testkit/tests/modelgen.rs` | models load without errors; every feature occurs | same |
 | Fast-mode samplers and generator | `crates/simoxide-random/tests/fast.rs`, `crates/simoxide-stoex/tests/fast.rs` | reference CDFs, reference errors | same |
@@ -71,6 +72,17 @@ nothing observable. It runs every model directory, and 60 generated models (1 00
 (`compat::Literal`), and compares traces, tapes, measurements, event counts and errors (message,
 time, trace prefix), including aborting runs, replayed and truncated tapes, and tight livelock and
 event limits.
+
+## Pause, fork and resume
+
+`tests/fork.rs` pauses runs between events, forks them, takes the state out and resumes it (also
+as a deep copy on another thread), and compares the continuations with the uninterrupted run:
+trace, tape, measurements, event, draw and request counts and errors, byte for byte. It runs
+every model directory with its `run.json` and with a longer seed-7 configuration, at 14 pause
+points each (event counts, among them random ones that split same-time instants, and times), in
+exact mode with and without outputs, in tape replay, in fast mode and on the literal engine. It
+also checks attaching a tape and dropping the trace at a pause, failed runs, the model check of
+`resume` and per-fork limits.
 
 ## Differential fuzzing
 

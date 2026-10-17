@@ -56,6 +56,40 @@ functions in `simoxide-random` (`log_gamma`, Poisson CDF values), which cannot c
 `simoxide_model::ParseCache` shares parsed files between loads and threads. It pays off when the
 same files are loaded repeatedly, for example variants of one model that differ in one file.
 
+## Pause, fork and resume
+
+All mutable state of a run is one value, `RunState`; a `Simulation` is that state plus the
+compiled model it borrows and the output writers. A run can stop between two events and go on:
+
+```rust
+use simoxide_sim::{Outputs, Pause, Simulation};
+
+let mut sim = Simulation::new(&cm, cfg, Outputs::default())?;
+sim.run_until(Pause::After(60_000_000_000))?;   // every event up to t = 60 s (ns)
+let fork = sim.fork(Outputs::default())?;       // a copy that goes on independently
+let state = fork.into_state();                  // or keep the state and resume it later
+let resumed = Simulation::resume(&cm, state, Outputs::default())?;
+let (a, b) = (sim.finish()?, resumed.finish()?);
+```
+
+- `run_until` takes `Pause::After(t)`, `Pause::Before(t)` or `Pause::Events(n)`; `run_while`
+  takes a predicate on the `RunState`, asked before each event. Both return `Status::Paused` or
+  `Status::Finished`; `finish` runs to the end and returns the `RunResult`.
+- A fork, a paused and resumed run and the uninterrupted run are identical: the same trace,
+  tape, measurements and counts, in exact and in fast mode. Nothing is rebased: times stay
+  absolute and the random stream, windows and recorders continue where they were.
+- The writers given to `fork` and `resume` receive the continuation only. The writers of the
+  paused run are flushed when a state is taken, so its output so far plus the continuation is
+  the output of the uninterrupted run. A tape can be attached or dropped at any pause; a state
+  created with a trace keeps the trace instructions (without a trace writer the lines are
+  discarded), and one created without cannot get a trace.
+- A fork shares the parameter frames with its origin (copy on write) and copies the rest:
+  processes, jobs and the stored measurement rows. `RunState` stays on its thread;
+  `RunState::detach()` makes a deep copy (`Detached`, `Send`) for another thread.
+  `simoxide-bench fork` measures both.
+- A fork has the `Limits` of its origin, including the same cancellation flag;
+  `Simulation::set_limits` gives it its own.
+
 ## Outputs
 
 `Outputs` takes optional writers for the trace and the random tape; the measurements are always
