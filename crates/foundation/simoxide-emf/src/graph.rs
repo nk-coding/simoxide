@@ -205,8 +205,11 @@ impl std::ops::Index<ObjId> for Graph {
 }
 
 impl Default for Graph {
+    /// [`Graph::new`], without registering Ecore again: a copy of a process-wide empty graph
+    /// (cheap, the registry is shared).
     fn default() -> Self {
-        Self::new()
+        static EMPTY: std::sync::OnceLock<Graph> = std::sync::OnceLock::new();
+        EMPTY.get_or_init(Graph::new).empty_like()
     }
 }
 
