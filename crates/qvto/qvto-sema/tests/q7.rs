@@ -31,12 +31,11 @@ fn problems(name: &str, text: &str) -> Vec<String> {
     let mut out = Vec::new();
     for u in &c.units {
         for p in &u.problems {
-            let (o, l) = p.utf16(&u.source.text);
+            let (line, o, l) = p.eclipse_position(&u.source.text, &u.lines);
             out.push(format!(
-                "problem\t{}\t{}\t{}\t{o}\t{l}\t{}",
+                "problem\t{}\t{}\t{line}\t{o}\t{l}\t{}",
                 if p.is_error() { "error" } else { "warning" },
                 u.source.file_name,
-                p.line(&u.lines),
                 p.message.replace('\n', "\\n")
             ));
         }

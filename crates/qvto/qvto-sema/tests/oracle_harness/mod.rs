@@ -1129,12 +1129,8 @@ fn compile_case(
             }
             let text = &u.source.text;
             for p in &u.problems {
-                let (o, l) = p.utf16(text);
-                let line = if u.source.blackbox.is_some() {
-                    -1
-                } else {
-                    p.line(&u.lines) as i64
-                };
+                let (line, o, l) = p.eclipse_position(text, &u.lines);
+                let line = if u.source.blackbox.is_some() { -1 } else { line };
                 out.push(Prob {
                     unit: u.source.file_name.clone(),
                     sev: if p.severity == Severity::Error {

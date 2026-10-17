@@ -48,6 +48,44 @@ exec	1	OK	0	o
 exec	1	OK	0	b
 exec	1	OK	0	p
 
+@case fuzz_flatten
+@file result.txt 135
+id	fuzz_flatten
+load	OK
+params	
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 170
+a, data: [1, 2, 3]
+b, data: [1, 2]
+c, data: [1]
+d, data: [1, 2, 3]
+e, data: [1, 2]
+f, data: 1
+g, data: 2
+h, data: [1, 1, 2, 2]
+i, data: [1, 2]
+j, data: [1, 2]
+k, data: 4
+
+@file diag.txt 154
+exec	1	OK	0	a
+exec	1	OK	0	b
+exec	1	OK	0	c
+exec	1	OK	0	d
+exec	1	OK	0	e
+exec	1	OK	0	f
+exec	1	OK	0	g
+exec	1	OK	0	h
+exec	1	OK	0	i
+exec	1	OK	0	j
+exec	1	OK	0	k
+
 @case fuzz_floats
 @file result.txt 138
 id	fuzz_floats

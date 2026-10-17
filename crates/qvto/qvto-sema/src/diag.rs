@@ -18,7 +18,28 @@ pub struct Problem {
     pub message: String,
 }
 
+/// The span of a problem Eclipse reports without position (its problem object is not a CST
+/// node): line -1, offset -1, length 1.
+pub const NO_POSITION: Span = Span {
+    start: u32::MAX,
+    end: u32::MAX,
+};
+
 impl Problem {
+    /// Whether the problem has a position in the source ([`NO_POSITION`]).
+    pub fn has_position(&self) -> bool {
+        self.span != NO_POSITION
+    }
+
+    /// Line, UTF-16 offset and length as Eclipse prints them (-1, -1, 1 without position).
+    pub fn eclipse_position(&self, src: &str, lines: &LineIndex) -> (i64, i64, i64) {
+        if !self.has_position() {
+            return (-1, -1, 1);
+        }
+        let (o, l) = self.utf16(src);
+        (self.line(lines) as i64, o as i64, l as i64)
+    }
+
     /// UTF-16 offset and length, as Eclipse reports them.
     pub fn utf16(&self, src: &str) -> (usize, usize) {
         let o = byte_to_utf16(src, self.span.start as usize);

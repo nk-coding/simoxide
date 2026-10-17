@@ -1,0 +1,4 @@
+problem	error	common_t.qvto	-1	-1	1	Type mismatch. No common supertype: (Integer), (Set(Integer))
+problem	error	common_t.qvto	-1	-1	1	Tuple type mismatch: (Real), (Tuple(a : Integer, b : String))
+problem	error	common_t.qvto	-1	-1	1	Type mismatch. No common supertype: (String), (Sequence(String))
+problem	error	common_t.qvto	6	195	37	Type mismatch. No common supertype: (Sequence(Integer)), (Integer)

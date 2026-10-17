@@ -233,7 +233,7 @@ fn run_case(
     for (ui, u) in compiled.units.iter().enumerate() {
         let src: &str = &u.source.text;
         for p in &u.problems {
-            let (offset, length) = p.utf16(src);
+            let (line, offset, length) = p.eclipse_position(src, &u.lines);
             // the executor's load diagnostic has the main unit's warnings only
             if !p.is_error() && ui == 0 {
                 warnings = true;
@@ -242,11 +242,7 @@ fn run_case(
                 error: p.is_error(),
                 unit: u.source.file_name.clone(),
                 // Java units have no lines (Eclipse prints -1)
-                line: if u.source.blackbox.is_some() {
-                    -1
-                } else {
-                    p.line(&u.lines) as i32
-                },
+                line: if u.source.blackbox.is_some() { -1 } else { line as i32 },
                 offset: offset as i32,
                 length: length as i32,
                 message: p.message.clone(),

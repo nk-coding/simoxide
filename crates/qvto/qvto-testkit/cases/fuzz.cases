@@ -140,3 +140,12 @@ in props.xmi
 mmfile ../fuzz.ecore
 note collection-typed module properties, intermediate features and contextual properties are copied on every read (coerceValue): order of identity-hashed sets with colliding hashes
 end
+
+case fuzz_flatten
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/flatten
+qvto flatten.qvto
+note flatten and collect flatten List and Dict values (both are collection types); the static type too
+end

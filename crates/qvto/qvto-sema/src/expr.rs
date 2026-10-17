@@ -1501,9 +1501,11 @@ impl<'r> Sema<'r> {
 
     /// `CollectionUtil.getFlattenedElementType`
     pub fn flattened_element(&self, t: TypeId) -> TypeId {
+        // `List` and `Dict` are collection types too (their values are flattened)
         let mut e = self.ts.types.element(t).unwrap_or(t);
-        while matches!(self.ts.types.get(e), Type::Collection(..)) {
-            e = self.ts.types.element(e).unwrap();
+        while matches!(self.ts.types.get(e), Type::Collection(..) | Type::List(_) | Type::Dict(..)) {
+            let Some(x) = self.ts.types.element(e) else { break };
+            e = x;
         }
         e
     }
@@ -1540,8 +1542,10 @@ impl<'r> Sema<'r> {
             let a = m.iter().find(|(k, _)| *k == TypeId::T).map(|(_, v)| *v);
             let b = m.iter().find(|(k, _)| *k == TypeId::T2).map(|(_, v)| *v);
             if let (Some(a), Some(b)) = (a, b) {
+                // `GenericsResolver`'s problem object is the operation: no position
+                let _ = problem;
                 return self
-                    .common_super_type_at(problem, a, b)
+                    .common_super_type_at(crate::diag::NO_POSITION, a, b)
                     .unwrap_or(TypeId::OCL_ANY);
             }
         }

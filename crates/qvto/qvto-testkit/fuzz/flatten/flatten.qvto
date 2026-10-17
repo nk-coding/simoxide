@@ -1,0 +1,17 @@
+transformation flatten();
+main() {
+	log('a', Sequence{List{1, 2}, List{3}}->flatten());
+	log('b', Sequence{Dict{'a' = 1, 'b' = 2}}->flatten());
+	log('c', Set{Sequence{List{1}}}->flatten());
+	var z0 : Sequence(Integer) := Sequence{List{1, 2}, List{3}}->flatten();
+	log('d', z0);
+	log('e', List{List{1}, List{2}}->flatten());
+	log('f', Sequence{Sequence{Dict{'a' = 1}}}->flatten()->first());
+	log('g', Bag{List{1, 1}}->flatten()->size());
+
+	log('h', Sequence{1, 2}->collect(x | List{x, x}));
+	log('i', Sequence{1, 2}->collect(x | Dict{'a' = x}));
+	var y : Sequence(Integer) := Sequence{1, 2}->collect(x | List{x});
+	log('j', y);
+	log('k', Set{1, 2}->collect(x | List{x, x})->size());
+}
