@@ -2230,7 +2230,7 @@ resume with changes, change files, exploration). Done except the P2 part (enforc
 - **Change files** (`simoxide-reconf/src/edits.rs`, new; format in the guide): one change per
   line, mapped onto F2's `Edit` (`set_rate`, `set_spec`, `set_double`, `clone_container` +
   `connect` to the template's links, `clone_assembly`, `allocate`, `remove_from_environment`,
-  `delete`, the store's `set`), all lines on one graph copy, applied as one change set
+  `delete`, the graph's `ModelStore::set`), all lines on one graph copy, applied as one change set
   (`Simulation::apply_changes`). Ops: `rate`, `latency`, `throughput`, `demand`, `probability`,
   `think-time`, `inter-arrival`, `arrival-rate` (`Exp(rate)`), `population`, `replicas`,
   `loop-count`, `set` (any single-valued attribute by EMF name, a random variable, a
@@ -2306,7 +2306,33 @@ resume with changes, change files, exploration). Done except the P2 part (enforc
   unknown element, closed population F4, Slingshot flavour, `--enforce` without SPD), two
   `--transform` hops, rules replaced and added, `explore` on 1 and 3 threads; without the
   feature `--change` names it.
-- **Gates.** @@GATES@@
+- **Shared files touched** (small, delimited): `simoxide-sim/src/sim.rs` (`pub mod watch;`),
+  `simoxide-sim/src/lib.rs` (re-exports `Condition`, `Watch`), `simoxide-spd/src/sim.rs`
+  (`SpdRun::run_while`, `run_until` delegates), `simoxide-spd/src/lib.rs` (`mod resume`),
+  `simoxide-reconf/src/process.rs` (`RulesRun::run_while`, `RulesHost::replace_rules`),
+  `simoxide-reconf/src/snapshot.rs` (`restore_snapshot_replacing`, `snapshot_rules`),
+  `simoxide-reconf/src/lib.rs` (modules, re-exports), `simoxide-cli/src/main.rs` (resume, explore,
+  pause conditions; one `--qvto-mode` parser). New: `simoxide-sim/src/sim/watch.rs`,
+  `simoxide-reconf/src/{edits,resume}.rs`, `simoxide-spd/src/resume.rs`, the tests and the example.
+  Merged with `spd` at 8386d26 (R2) and 49dd1d8 (M4-M6, the shared graph): the change files work
+  on the shared graph through the public `Edit` API (only `edits.rs` and the tests needed the new
+  `Edit::new(&sim)` and graph accessors).
+- **Gates.** After the merge with `spd` 49dd1d8: `golden.sh` identical (312 runs, exact
+  build with `hotspot-math`, against the binary of a3ffa38); `cargo test --release --workspace
+  --features exact` 566 passed, 0 failed (549 on `spd` 49dd1d8; +17: `simoxide-reconf` resume 7
+  and the change-file parser 1, `simoxide-sim` watch 3 and the condition parser 1, `simoxide-spd`
+  +2, `simoxide-cli` resume 2; with `reconfiguration` the CLI has 5 resume and 6 snapshot tests,
+  all passing); the QVTo adapter-parity test needs the Java cache of the merge checkout
+  (`target/qvto-testkit` from `simoxide-merge`, whose identity hashes the recorded data has);
+  `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; fmt and clippy `-D warnings` clean (workspace,
+  all targets, default, `exact,hotspot-math`, `compat`; `simoxide-cli` with `reconfiguration`,
+  `exact,reconfiguration`, without default features, with only `reconfiguration`, with only
+  `fast,spd`; `simoxide-reconf` and `simoxide-spd` without default features; `snapshot` alone on
+  sim, spd, reconf); release check: no opt-in crate in `simoxide-cli` (also with
+  `reconfiguration`) or `qvto-cli`. Runs without conditions or changes do not touch the new code
+  (the watch is a separate `PauseWhen`; `run_until` of the drivers delegates to the same loop);
+  a quick timing of the MediaStore screencast model (exact, 30 runs) is within noise (timing
+  deferred).
 
 **N3a spike** (2026-10-17; Slingshot's `.snapshot`, `.config` and `.state` against SimOxide's
 `RunState`). Sources: the extension `Palladio-Analyzer-Slingshot-Extension-Initialisation`
