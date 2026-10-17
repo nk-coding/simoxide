@@ -41,10 +41,52 @@ always simulated (SS-ACT-7.2), the release that does not wait (SS-ACT-8.3).
 | Q31 | infrastructure calls break the assembly-operation monitor | no assembly-operation response time after the first infrastructure call | defined: infrastructure SEFFs are not measured, nothing is disposed | corpus `h18` |
 | Q32 | `simTime` the only stop condition, no livelock guard | zero-time loops never end; maximum measurement count ignored | defined: the maximum measurement count is honoured as in SimuLizar (SIM-6); SimOxide's livelock guard (always on, also with the flag) | corpus `x_pem_fork` |
 | Q33 | entry-level assembly-operation key uses the system role | a measuring point with the component's provided role never matches the entry call | defined: the inner (component) role | `ss_role_lookup` |
-| Q34 | probes per specification / per passive resource | a monitor for replica *k* gets replica-independent values; passive instances of several assemblies share series | defined: passive series per (passive resource, assembly context) as SimuLizar; an active-resource point with replica *k* gets SimuLizar's per-core series where SimuLizar has one (details S2d) | `ss_ps_multicore` |
+| Q34 | probes per specification / per passive resource | a monitor for replica *k* gets replica-independent values; passive instances of several assemblies share series | defined: passive series per (passive resource, assembly context) as SimuLizar; an active-resource point with replica *k* gets the per-core values of core *k* ([compat flags](#compat-flags), defined in S2) | `ss_ps_multicore` |
 | Q35 | silent stalls | unsupported actions, `ResourceCall`s, missing connectors or SEFFs end a request without an error | defined: run error; `ResourceCall` as ACT-3.6 | corpus `h23`, `x_pem_reliability` (RecoveryAction: no request completes) |
 | Q36 | infrastructure-call inputs ignored | no input frame for the callee | defined: ACT-3.5 | corpus `h18` |
 | Q37 | calls between unconnected containers | `IllegalArgumentException` disposes `onCallOverWireRequested`: no further transfer anywhere | defined: run error (as SimuLizar ACT-11.2) | – |
+
+## Compat flags in SimOxide {#compat-flags}
+
+SimOxide's Slingshot flavour (fast mode, design phase S2; [Slingshot flavour](../../guide/slingshot.md))
+has one flag per quirk: `--quirks Q26,Q29`, `--quirks fast` (every flag the fast mode supports),
+`--quirks list`; in the library `simoxide_sim::Quirks` / `Quirk::Q26` in
+`FlavourConfig::slingshot(..)`. Without a flag the fixed behaviour of the table above applies.
+"Fast mode" says how far the fast mode reproduces the quirk under its flag:
+
+| # | Fast mode | Notes |
+|---|---|---|
+| Q1–Q16 | SPD | flags defined; read by the SPD interpreter and adjustment (phases P1–P3), which do not exist in S2 |
+| Q17 | refused | concurrent demands with a shared cursor need the exact mode's handler steps (X2); refused for models with an internal action with two or more demands |
+| Q18 | refused | handler disposal is the exact mode's (X2) |
+| Q19 | up to the throw | SEFF loop count 0: body once, then a run error; negative count and usage-loop count ≤ 0: run error at the loop |
+| Q20 | full | entry calls: the first system assembly context whose component provides the inner role (by id); external calls: the first system assembly connector with the required role (by id) |
+| Q21 | up to the throw | the same run error as the fixed behaviour |
+| Q22 | up to the throw | INNER drawn once, the frame left on the stack (with Slingshot's frame misalignment), run error at the end of the entry-level call |
+| Q23 | up to the throw | asynchronous behaviours ignored; no synchronisation point: run error; one synchronous behaviour runs on the user's stack; two or more: run error at the fork |
+| Q24 | up to the throw | run error at an Acquire/Release without demand |
+| Q25 | full | Delay resources (and any other non-FCFS/PS policy) have no resource: the user is aborted |
+| Q26 | full | the superseded completion stays in the event list at its old position and samples state and utilisation |
+| Q27 | full | capacities evaluated without a frame (an unknown variable is a run error before t = 0) |
+| Q28 | full | a `Math.random()` draw at every link completion; a failed transfer stalls the link |
+| Q29 | full | no series for these measuring points |
+| Q30 | up to the throw | entry into a composite stalls the user; inner assembly contexts unallocated, a demand there is a run error |
+| Q31 | up to the throw | run error at the first infrastructure call when an assembly-operation response-time monitor exists |
+| Q32 | full | the maximum measurement count is ignored (`simTime` must be set); the livelock guard stays on |
+| Q33 | full | the entry-level SEFF's assembly-operation key uses the system's role |
+| Q34 | full | every replica's monitor gets the resource totals; passive monitors merged per passive resource |
+| Q35 | full | the request stalls (the process never continues); resource calls are skipped |
+| Q36 | full | the callee gets the shared empty frame |
+| Q37 | up to the throw | a link touching either container is used; none: run error |
+
+"Up to the throw" means: Slingshot throws in a handler at that point, disposes the handler and runs
+on (Q18); the fast mode stops there with a run error. *Provisional:* the fixed behaviours marked
+*proposed* (Q4, Q6, Q7, Q9, Q13, Q14) and *kept* (Q3) above are not confirmed by the user; the SPD
+phases implement them as proposed. The fixed behaviour of Q34 for active resources is defined by
+S2: a measuring point with replica *k* of a processor-sharing resource with several cores records
+core *k* (the jobs `reportCoreUsage` attributes to it, utilisation 1 or 0), FCFS and delay
+resources and single-core resources the resource itself; a replica outside the resource records
+nothing.
 
 ## Details
 

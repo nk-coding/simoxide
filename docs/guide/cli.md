@@ -32,6 +32,8 @@ simoxide run --model <dir> [flags]
 | `--name NAME` | run name in the trace header |
 | `--mode exact\|fast` | simulator mode, default `exact` ([Fast mode](./fast-mode.md)) |
 | `--ps-algorithm exact\|virtual-time` | processor-sharing algorithm, default `exact` ([Deviations](../correctness/deviations.md#virtual-time-processor-sharing)) |
+| `--flavour simulizar\|slingshot` | whose semantics, default `simulizar` ([Slingshot flavour](./slingshot.md)) |
+| `--quirks LIST` | Slingshot compat flags: `Q1`..`Q37`, `fast`, `all`, `none`, `-Qn`; default `none` (the fixed behaviour); `--quirks list` prints them ([Quirks](../spec/slingshot/quirks.md#compat-flags)) |
 
 Limits (see [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)):
 
@@ -68,8 +70,8 @@ Measures XMI loading plus compilation only.
 ## `simoxide-bench`
 
 ```text
-simoxide-bench suite [--filter a,b] [--reps N] [--mode exact|fast]
-simoxide-bench batch [--model DIR] [--max-measurements M] [--runs N] [--threads 1,2,4,8] [--mode exact|fast]
+simoxide-bench suite [--filter a,b] [--reps N] [--mode exact|fast] [--flavour simulizar|slingshot] [--quirks LIST]
+simoxide-bench batch [--model DIR] [--max-measurements M] [--runs N] [--threads 1,2,4,8] [--mode exact|fast] [--flavour ...]
 ```
 
 `suite` runs the benchmark models (load, compile, a short and a long run, allocations, peak heap);

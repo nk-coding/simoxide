@@ -136,6 +136,41 @@ pending at the same instant (it reorders simultaneous events; in tie-heavy model
 passive-resource waiting times and reconfiguration counts systematically) and the virtual-time
 processor sharing (below).
 
+### Slingshot flavour
+
+`--flavour slingshot` ([Slingshot flavour](../guide/slingshot.md)) follows Slingshot's semantics in
+its *fast mode*: the rules of [Slingshot semantics](../spec/slingshot/index.md) that change results,
+not Slingshot's event bus. Its fixed behaviours (decision U13) are listed on
+[Quirks](../spec/slingshot/quirks.md). Against Slingshot itself (the reference runner) the fast mode
+deviates as follows:
+
+- **Same-time order.** Simultaneous steps follow SimOxide's process model (FIFO notes, a process
+  runs until it waits), not Slingshot's breadth-first cascade of bus events (SS-BUS-6). Where
+  several users meet at one instant, samples of one series can come in another order and
+  processor-sharing arrivals can fall before or after other completions of that instant
+  (`x_espresso`: equal response times, different state samples; stock Slingshot's own order is
+  random per run). The exact mode (phase X2) will emulate the cascade.
+- **Draw order within an instant.** The demand's processing rate is drawn with the demand, not one
+  event later; an internal action's demands are drawn one after the other (the fixed Q17);
+  infrastructure-call counts are drawn per call; the think time of a user replacing an aborted one
+  is drawn when that user starts (same instant). Only models with simultaneous draws of several
+  users are affected.
+- **Throws.** Where a Slingshot handler throws, the fast mode stops with a run error; Slingshot
+  disposes the handler and runs on (Q18, exact mode only). Q17 is refused.
+- **Link failures** (probability > 0, no corpus model): the failed transfer is retried with the same
+  payload; Slingshot re-evaluates the input parameters.
+- **Kept Slingshot design choices that are not listed as quirks**: HDD read and write rates are
+  ignored; a demand without allocation context or without a resource of its type aborts the user;
+  scheduling policies other than FCFS, processor sharing and (fixed Q25) delay create no resource.
+- **Not reproduced**: several SEFFs for one signature are a run error (Slingshot starts all of
+  them); a passive resource of an unallocated assembly context is created at first use (Slingshot:
+  the request waits forever); two monitors with the same measuring point and metric share one series;
+  model changes (`Simulation::apply_changes`) are refused (phases F4, P3).
+- **Time** is Slingshot's `double` seconds (the trace and tape print them; `RunState::now_ns` and
+  `SimError::at_ns` convert to nanoseconds). Event counts are SimOxide's notes, not bus events.
+- **Tape**: the `Math.random()` draws of the exact RNG mode are `{"k":"m","i":n,"u":x,"o":"branch:<id>"}`
+  records next to the StoEx records; replaying a tape replays the StoEx stream only.
+
 ### Virtual-time processor sharing
 
 `PsAlgorithm::VirtualTime` (CLI `--ps-algorithm virtual-time`, default `exact`) serves processor
