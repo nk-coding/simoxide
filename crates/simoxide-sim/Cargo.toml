@@ -14,7 +14,11 @@ simoxide-sched = { workspace = true }
 simoxide-jcompat = { workspace = true }
 # no licence granted (LICENSES, section 7): only with the feature `exact`
 simoxide-jcompat-exact = { workspace = true, optional = true }
-serde_json = "1"
+# `float_roundtrip`: the JSON form of snapshots reads doubles back bit for bit
+serde_json = { version = "1", features = ["float_roundtrip"] }
+# snapshots of runs (feature `snapshot`; MIT/Apache-2.0)
+serde = { version = "1", features = ["derive"], optional = true }
+postcard = { version = "1", default-features = false, features = ["use-std"], optional = true }
 
 [features]
 default = []
@@ -31,10 +35,13 @@ jdk-order = ["dep:simoxide-jcompat-exact"]
 # Bit-exact HotSpot Math.log/exp (GPL-2.0-only code; binaries built with it must not be
 # distributed, see simoxide-random's `hotspot-math` feature). Off by default in the libraries.
 hotspot-math = ["simoxide-random/hotspot-math", "simoxide-stoex/hotspot-math"]
+# Snapshots of runs on disk (`Simulation::snapshot_to`, `Simulation::restore_from`;
+# DESIGN-SPD.md N1, docs/formats/snapshot.md): serde of the run state, postcard or JSON.
+snapshot = ["dep:serde", "dep:postcard", "simoxide-sched/serde", "simoxide-model/serde"]
 
 [dev-dependencies]
 simoxide-testkit = { path = "../simoxide-testkit" }
 # the tests check the exact mode (byte-identical to the reference)
-simoxide-sim = { path = ".", features = ["exact"] }
+simoxide-sim = { path = ".", features = ["exact", "snapshot"] }
 # the corpus and replay tests compare with the reference bit for bit
 simoxide-random = { path = "../simoxide-random", features = ["hotspot-math"] }

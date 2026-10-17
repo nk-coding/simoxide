@@ -48,6 +48,28 @@ impl RunModel {
         self.0.as_ref().map(|c| c.base_shape)
     }
 
+    /// The build order of the run's own model (its typed ids).
+    #[cfg(feature = "snapshot")]
+    pub(super) fn order(&self) -> Option<&Arc<[ObjId]>> {
+        self.0.as_ref().map(|c| &c.order)
+    }
+
+    /// A run's own model (restored from a snapshot).
+    #[cfg(feature = "snapshot")]
+    pub(super) fn changed(
+        cm: Arc<CompiledModel>,
+        order: Arc<[ObjId]>,
+        base_shape: Shape,
+        generation: u32,
+    ) -> RunModel {
+        RunModel(Some(Box::new(Changed {
+            cm,
+            order,
+            base_shape,
+            generation,
+        })))
+    }
+
     /// The compiled model in `a` with the simulation's lifetime.
     ///
     /// # Safety
@@ -72,6 +94,11 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
 }
 
 impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
+    /// The compiled model the run was created on (before any model change).
+    pub fn base_model(&self) -> &'m CompiledModel {
+        self.base
+    }
+
     /// The compiled model the run simulates now: the one it was created on, or its own after
     /// model changes ([`Simulation::apply_changes`]).
     pub fn compiled(&self) -> &CompiledModel {

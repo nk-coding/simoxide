@@ -14,6 +14,7 @@ use simoxide_model::model::StatisticalCharacterization;
 
 /// A statistical characterisation with the metric's scope of validity.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct Stat {
     pub kind: StatKind,
     /// `ScopeOfValidity.CONTINUOUS` (else discrete).
@@ -21,6 +22,7 @@ pub struct Stat {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum StatKind {
     ArithmeticMean,
     GeometricMean,

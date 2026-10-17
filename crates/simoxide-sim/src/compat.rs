@@ -45,6 +45,7 @@ use simoxide_stoex::Value;
 
 /// Which simulator variant a run uses (see the module docs).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum Mode {
     /// Byte-identical to the reference (needs the cargo feature `exact`; the default with it).
     Exact,
@@ -206,6 +207,12 @@ pub trait SimRng: UniformSource + Sized + Clone + Send + Sync {
     /// The tape ran out (replay): the run must stop.
     fn exhausted(&self) -> Option<&str>;
     fn take_problem(&mut self) -> Option<String>;
+    /// The state for a snapshot (between events, the tape detached).
+    #[cfg(feature = "snapshot")]
+    fn save(&self) -> crate::snapshot::RngImage;
+    /// The source in a saved state; `cfg` is the run's configuration (its replayed tape).
+    #[cfg(feature = "snapshot")]
+    fn load(img: crate::snapshot::RngImage, cfg: &crate::SimConfig) -> Result<Self, String>;
 }
 
 impl SimRng for crate::rng::Rng {
@@ -262,6 +269,14 @@ impl SimRng for crate::rng::Rng {
     }
     fn take_problem(&mut self) -> Option<String> {
         self.problem.take()
+    }
+    #[cfg(feature = "snapshot")]
+    fn save(&self) -> crate::snapshot::RngImage {
+        crate::rng::Rng::save(self)
+    }
+    #[cfg(feature = "snapshot")]
+    fn load(img: crate::snapshot::RngImage, cfg: &crate::SimConfig) -> Result<Self, String> {
+        crate::rng::Rng::load(img, cfg)
     }
 }
 
@@ -360,5 +375,23 @@ impl SimRng for FastSourceRng {
     }
     fn take_problem(&mut self) -> Option<String> {
         None
+    }
+    #[cfg(feature = "snapshot")]
+    fn save(&self) -> crate::snapshot::RngImage {
+        crate::snapshot::RngImage::Fast {
+            state: self.src.state(),
+            count: self.count,
+        }
+    }
+    #[cfg(feature = "snapshot")]
+    fn load(img: crate::snapshot::RngImage, _: &crate::SimConfig) -> Result<Self, String> {
+        match img {
+            crate::snapshot::RngImage::Fast { state, count } => Ok(FastSourceRng {
+                src: simoxide_random::fast::FastSource::from_state(state)
+                    .ok_or("invalid fast-mode generator state")?,
+                count,
+            }),
+            _ => Err("the snapshot holds the exact mode's random stream".into()),
+        }
     }
 }

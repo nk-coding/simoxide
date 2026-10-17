@@ -510,6 +510,7 @@ pub fn write_xmi(g: &Graph, r: ResId) -> String {
 }
 
 /// A value of the object table that XMI does not carry.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum TableSlot {
     /// A single-valued attribute whose value XMI does not carry (`null`, a value of another type
@@ -524,6 +525,7 @@ pub enum TableSlot {
 }
 
 /// An attribute value of the object table (a copy of [`Value`]; doubles by their bits).
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub enum TableValue {
     Null,
@@ -564,6 +566,7 @@ impl From<&TableValue> for Value {
 }
 
 /// An unresolved proxy that is no element of any document.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct TableProxy {
     pub id: u32,
@@ -575,6 +578,7 @@ pub struct TableProxy {
 }
 
 /// A resource of a [`GraphXmi`].
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct XmiResource {
     pub uri: String,
@@ -588,6 +592,7 @@ pub struct XmiResource {
 }
 
 /// A graph as XMI documents plus the object table (see the module documentation).
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, PartialEq)]
 pub struct GraphXmi {
     pub resources: Vec<XmiResource>,

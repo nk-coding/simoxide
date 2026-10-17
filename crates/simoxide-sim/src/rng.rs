@@ -167,6 +167,76 @@ impl Rng {
         Ok(r)
     }
 
+    /// The state for a snapshot.
+    #[cfg(feature = "snapshot")]
+    pub(crate) fn save(&self) -> crate::snapshot::RngImage {
+        let (mt, replay) = match &self.src {
+            Src::Mt(m) => {
+                let (w, p) = m.state();
+                (Some((w.to_vec(), p as u32)), None)
+            }
+            Src::Replay { pos, .. } => (None, Some(*pos as u64)),
+        };
+        crate::snapshot::RngImage::Exact {
+            mt,
+            replay,
+            count: self.count,
+            origin: self.origin.clone(),
+            check_origins: self.check_origins,
+            problem: self.problem.clone(),
+            depth: self.depth,
+            eval_start: self.eval_start,
+            use_samples: self.use_samples,
+        }
+    }
+
+    /// The source in a saved state (no tape output; `cfg.rng` holds the replayed tape).
+    #[cfg(feature = "snapshot")]
+    pub(crate) fn load(
+        img: crate::snapshot::RngImage,
+        cfg: &crate::SimConfig,
+    ) -> Result<Rng, String> {
+        let crate::snapshot::RngImage::Exact {
+            mt,
+            replay,
+            count,
+            origin,
+            check_origins,
+            problem,
+            depth,
+            eval_start,
+            use_samples,
+        } = img
+        else {
+            return Err("the snapshot holds the fast mode's random stream".into());
+        };
+        let src = match (mt, replay, &cfg.rng) {
+            (Some((w, p)), None, RngMode::Own) => Src::Mt(Box::new(
+                SimuComStream::from_state(&w, p as usize).ok_or("invalid MT19937 state")?,
+            )),
+            (None, Some(pos), RngMode::Replay(t)) => Src::Replay {
+                tape: t.clone(),
+                pos: pos as usize,
+            },
+            _ => return Err("the random stream does not match the run's RNG mode".into()),
+        };
+        let mut r = Rng {
+            src,
+            count,
+            origin,
+            need_origin: false,
+            check_origins,
+            tape: None,
+            problem,
+            depth,
+            eval_start,
+            use_samples,
+            plain: false,
+        };
+        r.attach_tape(false);
+        Ok(r)
+    }
+
     /// Switches the tape records on or off (at the start of a run, or between two events of a
     /// resumed one: the origin tag is the default `?` there).
     pub fn attach_tape(&mut self, on: bool) {

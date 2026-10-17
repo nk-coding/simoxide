@@ -18,6 +18,7 @@ use super::*;
 
 /// A tuple of an observed series (see [`Simulation::observe_series`]).
 #[derive(Clone, Copy, Debug, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct ObservedTuple {
     pub series: SeriesId,
     /// Simulation time of the emission (ns).
@@ -29,6 +30,7 @@ pub struct ObservedTuple {
 
 /// Hook state of a run (in the measurement sink, so that emissions can reach it).
 #[derive(Clone, Default)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct Hooks {
     /// Tags of external notes dispatched since the last [`Simulation::take_external`].
     pub(crate) due: Vec<u32>,
