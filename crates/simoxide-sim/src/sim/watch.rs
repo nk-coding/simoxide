@@ -199,11 +199,11 @@ impl Watch {
                     ..
                 } => {
                     if let Stat::Mean { window_s } = stat
-                        && !(*window_s > 0.0)
+                        && (window_s.is_nan() || *window_s <= 0.0)
                     {
                         return Err(format!("mean window {window_s} s: expected > 0"));
                     }
-                    if sustain_s.is_some_and(|w| !(w >= 0.0)) {
+                    if sustain_s.is_some_and(|w| w.is_nan() || w < 0.0) {
                         return Err("sustain time: expected >= 0 s".into());
                     }
                     series
@@ -407,8 +407,11 @@ fn reached_ns<C: Compat, F: Flavour>(p: Pause, st: &RunState<C, F>, next: Option
     }
 }
 
+/// A test on metric names.
+type MetricMatch = Box<dyn Fn(&str) -> bool>;
+
 /// The metric names an alias or pattern stands for.
-fn metric_matcher(p: &str) -> Result<Box<dyn Fn(&str) -> bool>, String> {
+fn metric_matcher(p: &str) -> Result<MetricMatch, String> {
     use crate::ir::metric_names as n;
     let alias = match p.to_ascii_lowercase().as_str() {
         "*" | "any" => return Ok(Box::new(|_| true)),

@@ -926,6 +926,8 @@ mod changes {
     /// next snapshot (section `qvto`), and whether the model changed.
     pub struct Carry {
         qvto: Option<QvtoRun>,
+        /// Read by SPD runs (membership refresh).
+        #[cfg_attr(not(feature = "spd"), allow(dead_code))]
         pub changed: bool,
     }
 
@@ -1073,6 +1075,8 @@ mod changes {
 
     pub struct Carry {
         raw: Option<(Section, Encoding)>,
+        /// Read by SPD runs (membership refresh).
+        #[cfg_attr(not(feature = "spd"), allow(dead_code))]
         pub changed: bool,
     }
 

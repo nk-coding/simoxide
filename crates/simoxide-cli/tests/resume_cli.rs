@@ -143,7 +143,7 @@ fn a_pause_condition_pauses_and_the_run_resumes() {
         "--measurements",
         &m3,
     ]);
-    assert!(read(&Path::new(&m3).to_path_buf()) == read(Path::new(&m)));
+    assert!(read(Path::new(&m3)) == read(Path::new(&m)));
     let joined = read(Path::new(&t1)) + &read(Path::new(&t2)) + &read(Path::new(&t3));
     assert!(joined == read(Path::new(&t)), "traces differ");
     // a bad condition is a usage error
