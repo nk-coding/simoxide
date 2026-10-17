@@ -79,17 +79,32 @@ impl UniformSource for SsRng {
     }
 
     // Palladio 6.0's samplers (the reference runs on Palladio 6.0's probability-function
-    // library): see `pdist`.
-    fn sample_gamma(&mut self, alpha: f64, theta: f64) -> Result<f64, DistError> {
-        super::pdist::sample_gamma(alpha, theta, self)
+    // library, Commons Math 3): `pdist`
+    fn sample_exp(&mut self, rate: f64) -> Result<f64, DistError> {
+        super::pdist::sample_exp(rate, self)
     }
-    fn sample_gamma_moments(&mut self, mean: f64, coeff_var: f64) -> Result<f64, DistError> {
-        super::pdist::sample_gamma_moments(mean, coeff_var, self)
+    fn sample_norm(&mut self, mean: f64, sd: f64) -> Result<f64, DistError> {
+        super::pdist::sample_norm(mean, sd, self)
     }
     fn sample_lognorm(&mut self, mu: f64, sigma: f64) -> Result<f64, DistError> {
         super::pdist::sample_lognorm(mu, sigma, self)
     }
     fn sample_lognorm_moments(&mut self, mean: f64, stdev: f64) -> Result<f64, DistError> {
         super::pdist::sample_lognorm_moments(mean, stdev, self)
+    }
+    fn sample_gamma(&mut self, alpha: f64, theta: f64) -> Result<f64, DistError> {
+        super::pdist::sample_gamma(alpha, theta, self)
+    }
+    fn sample_gamma_moments(&mut self, mean: f64, coeff_var: f64) -> Result<f64, DistError> {
+        super::pdist::sample_gamma_moments(mean, coeff_var, self)
+    }
+    fn sample_pois(&mut self, mean: f64) -> Result<i32, DistError> {
+        super::pdist::sample_pois(mean, self)
+    }
+    fn sample_unidouble(&mut self, a: f64, b: f64) -> Result<f64, DistError> {
+        super::pdist::sample_unidouble(a, b, self)
+    }
+    fn sample_uniint(&mut self, a: i32, b: i32) -> Result<i32, DistError> {
+        super::pdist::sample_uniint(a, b, self)
     }
 }

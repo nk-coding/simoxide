@@ -1,0 +1,9 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_ss_link_ua1"}
+{"ev":"pass","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_link_ua2"}
+{"ev":"call","t":0.0,"u":1,"role":"_ss_link_sysprov1","sig":"_ss_link_op"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_ss_link_ac1","type":"StartAction","el":"_ss_link_act1"}
+{"ev":"request","t":0.0,"u":1,"ac":"_ss_link_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_link_act2"}
+{"ev":"job","t":0.0,"job":1,"u":1,"rc":"_ss_link_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1}
+{"ev":"job_end","t":0.1,"job":1}
+{"ev":"ext","t":0.1,"u":1,"ac":"_ss_link_ac1","role":"_ss_link_req1","sig":"_ss_link_remote"}
+{"ev":"stop","t":5.0}

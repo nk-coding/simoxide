@@ -139,8 +139,10 @@ event (−1 before the first line). The purposes are those of [SS-RNG-2](./rando
 ```sh
 reference/slingshot/run.sh -model DIR -out REF -simTime T -seed N        # det oracle
 reference/slingshot/tools/project.py REF                                 # projection*.jsonl, tape-projection.jsonl
-simoxide --flavour slingshot --exact ... (phase X2)                       # writes the same three files
+simoxide run --model DIR --flavour slingshot-exact --seed N --max-sim-time T \
+    --trace OUT/projection.jsonl --tape OUT/tape-projection.jsonl --measurements OUT/measurements.csv
 cmp REF/measurements.csv OUT/measurements.csv; cmp REF/projection.jsonl OUT/projection.jsonl; ...
+reference/slingshot/tools/compare_exact.sh [NAME...]                      # the same for corpus-ss/
 ```
 
 ## SS-X-6 det verification
@@ -249,4 +251,22 @@ with handler errors are the 4 probes `ss_guard_none`, `ss_loop_zero`, `ss_two_de
 `x_pem_harddisk`, `x_pem_hdd_infrastructure_calls`, `x_pem_infrastructure`,
 `x_pem_replicated_composite`, `x_pem_screencast_ms*` (3), `x_pem_simple_optimisation_composites`,
 `x_sl_mediastore`, `x_sl_simulizar154`.
+
+## SS-X-9 Exactness limits of the EPL build
+
+Two Java behaviours that change values are defined only by OpenJDK's sources; the default (EPL)
+build of the exact mode does not reproduce them:
+
+- **`java.util.HashMap` iteration order** of SimuCom's stack frames (`getContents()`): the order
+  in which a `CollectionIteratorAction` evaluates several `INNER` characterisations
+  (SS-ACT-6.3) and in which BYTESIZE entries are summed (SS-ACT-7.1). The exact mode iterates in
+  first-insertion order. Only models with two or more such entries in one frame are affected
+  (corpus `h27_collection_inner_multi`).
+- **HotSpot's `Math.log` and `Math.exp` intrinsics**, which Palladio's lognormal distributions
+  (`Math.exp`, `Math.log` in `LognormMoments`) and the StoEx `Log` function call. The EPL build
+  rounds correctly; the intrinsics differ in the last bit for rare arguments (one sample of
+  `h21_stoex_distributions`). Builds with the opt-in `hotspot-math` feature reproduce them.
+
+Everything else the reference computes, including Commons Math 3's `FastMath` (SS-RNG-1.1), is
+pure Java and reproduced bit for bit.
 

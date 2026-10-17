@@ -1047,6 +1047,33 @@ handlers, with Slingshot's side effects up to the throwing statement (SS-X-3.6).
     `action_type`, `uaction_type` now `pub(crate)`), `lib.rs` (module, dispatch),
     `simoxide-cli/src/main.rs` (the flavour name, the SPD refusal for both Slingshot kinds).
 
+- **X2b: resources, monitoring and the samplers.** The resources and monitors of X2a were already
+  equal on every case without other causes (PS with stale-completion samples and the 1e-9 s jiffy,
+  FCFS from the head, links with the failure draw, passive resources with re-evaluated releases,
+  state/utilisation/demand probes per specification, passive probes per passive resource,
+  usage-scenario and assembly-operation calculators with Slingshot's request contexts and the
+  "last monitor of a key wins" maps). What X2b adds are **Palladio 6.0's samplers**, the gap S2
+  had left open ("Gamma/Lognorm 1e-8 differences"): the nightly runs on Palladio 6.0, whose
+  probability-function library wraps Commons Math 3.6.1 instead of SimuLizar 5.2.2's Commons Math
+  2.1. New module `simoxide-random/src/p6/` (EPL Palladio wrappers + Apache-2.0 Commons Math 3,
+  `LICENSES` §1, §2; ported from the 3.6.1 classes of the install with their operation order):
+  `FastMath.log/log1p/exp` with their tables, `Gamma` (logGamma, logGamma1p, invGamma1pm1,
+  regularized P/Q), `Erf.erfInv`, `ContinuedFraction`, `Precision.equals`, `BrentSolver` and the
+  inverse CDFs of `AbstractRealDistribution` (Chebyshev bounds) and
+  `AbstractIntegerDistribution` (bisection); the distribution functions `Exp` (FastMath.log),
+  `Norm` (erfInv), `Lognorm`/`LognormMoments` (Palladio's own: `Math.exp` of the normal inverse,
+  0 at u = 0), `Gamma`/`GammaMoments`, `UniDouble` (Palladio's CDF, generic inversion), `UniInt`
+  (Palladio's CDF with its negative variance), `Pois` (no "−1" of 5.2.2). The exact mode's random
+  source overrides these hooks of `UniformSource`; the SimuLizar flavour is untouched.
+  Result: **86 of 90** cases equal in the test build (h04, h05, h06, h21, the three screencast
+  models and both simple-optimisation models now equal), 83 of 90 in the default EPL build: there
+  `java.lang.Math.exp`/`log` (Lognormal's `Math.exp`, StoEx `Log`) are correctly rounded instead
+  of HotSpot's intrinsics, and one sample of h21 (of 406 draws) differs in the last bit
+  (`hotspot-math` is GPL, so the EPL build stays correctly rounded: a documented, licence-bound
+  deviation). Also two new cases for Q37 (`reference/slingshot/models/x2/ss_q37_*`, `det`
+  reproduced): the "link touching either container" fallback and the `IllegalArgumentException`
+  that disposes `onCallOverWireRequested` (no corpus model had them); both equal.
+
 ### 5.3 The runtime-model-change foundation (shared)
 
 This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these additions:

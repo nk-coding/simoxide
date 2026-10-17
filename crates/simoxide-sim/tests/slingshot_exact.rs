@@ -15,26 +15,8 @@ use std::rc::Rc;
 /// Cases that are not (yet) equal, with the cause.
 const KNOWN: &[(&str, &str)] = &[
     (
-        "h04_delay_resource",
-        "UniDouble: Palladio 6.0 sampler (Commons Math 3 inversion)",
-    ),
-    ("h05_open_workload", "Gamma: Palladio 6.0 sampler"),
-    ("h06_closed_think", "Lognorm: Palladio 6.0 sampler"),
-    ("h21_stoex_distributions", "Palladio 6.0 samplers"),
-    (
         "h27_collection_inner_multi",
         "INNER evaluation order (java.util.HashMap)",
-    ),
-    ("x_pem_screencast_ms", "Norm: Palladio 6.0 sampler"),
-    ("x_pem_screencast_ms_enqueue", "Norm: Palladio 6.0 sampler"),
-    ("x_pem_screencast_ms_instant", "Norm: Palladio 6.0 sampler"),
-    (
-        "x_pem_simple_optimisation",
-        "LognormMoments: Palladio 6.0 sampler",
-    ),
-    (
-        "x_pem_simple_optimisation_composites",
-        "LognormMoments: Palladio 6.0 sampler",
     ),
     ("spd_minimal", "SPD events (X2d)"),
     ("spd_scale_in", "SPD events (X2d)"),

@@ -1,9 +1,10 @@
 # Random numbers (Slingshot)
 
 Rules `SS-RNG-*`. Sampling itself (distributions, PMF and PDF literals, `Pois`, `UniInt`, …) is the
-SimuCom StoEx evaluator, the same as in SimuLizar ([StoEx](../stoex.md),
-[Random numbers](../random.md)); this page covers which streams exist, where they are drawn and in
-which order.
+SimuCom StoEx evaluator ([StoEx](../stoex.md), [Random numbers](../random.md)), but of **Palladio
+6.0**: its probability-function library wraps Commons Math 3.6.1 where SimuLizar 5.2.2 wraps
+Commons Math 2.1, so the named distributions give slightly different values for the same uniform
+(SS-RNG-3). This page covers which streams exist, where they are drawn and in which order.
 
 ## SS-RNG-1 Two streams
 
@@ -68,3 +69,23 @@ names (`o` of [SS-X-4](./exact.md#ss-x-4-tape)) are:
     entry.
 - **SS-RNG-2.2** Model `x_ss_minimal` (one closed user, one demand per request) draws in the same order
   as SimuLizar: its response times equal refsim's up to the nanosecond truncation (S0 finding).
+
+## SS-RNG-3 Palladio 6.0 samplers
+
+Each StoEx distribution function draws exactly one uniform `u` and returns
+`inverseF(u)` of a Palladio 6.0 wrapper (`de.uka.ipd.sdq.probfunction.math.apache`) around a
+Commons Math 3.6.1 distribution (`de.uka.ipd.sdq.simucomframework.variables.functions.*DistFunction`):
+
+| Function | Inverse |
+|---|---|
+| `Exp(rate)` | `-mean · FastMath.log(1 − u)` (`ExponentialDistribution`, mean `1/rate`) |
+| `Norm(mean, sd)` | `mean + sd·√2 · Erf.erfInv(2u − 1)` |
+| `Lognorm(mu, sigma)`, `LognormMoments(mean, sd)` | `0` for `u = 0`, else `Math.exp` of the normal inverse (`LognormalDistributionImpl`; from moments: `σ² = Math.log(var/mean² + 1)`, `μ = Math.log(mean) − σ²/2`) |
+| `Gamma(alpha, theta)`, `GammaMoments(mean, cv)` | `AbstractRealDistribution.inverseCumulativeProbability`: Chebyshev upper bound, Brent's method to 1e-9 on `regularizedGammaP(alpha, x/theta)` (from moments: `theta = var/mean`, `alpha = mean/theta`) |
+| `UniDouble(a, b)` | the same generic inversion (accuracy 1e-6) of Palladio's CDF `(x − a)/(b − a)` |
+| `UniInt(a, b)` | `AbstractIntegerDistribution` bisection of Palladio's CDF `(x − a + 1)/(b − a + 1)` (no Chebyshev bounds: its variance is negative) |
+| `Pois(mean)` | the same bisection with Chebyshev bounds on `regularizedGammaQ(x + 1, mean)` (epsilon 1e-12); no "−1" (SimuLizar's REF-4) |
+
+SimOxide: `simoxide_random::p6`, used by the Slingshot-exact mode. The fast Slingshot flavour
+keeps SimuLizar 5.2.2's samplers (its documented 1e-8 differences).
+

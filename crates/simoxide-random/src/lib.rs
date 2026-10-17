@@ -69,6 +69,7 @@ pub mod dist;
 pub mod fast;
 pub mod jmath;
 pub mod mt;
+pub mod p6;
 pub mod probfn;
 pub mod source;
 pub mod special;
