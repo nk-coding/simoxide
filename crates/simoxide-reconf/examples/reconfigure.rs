@@ -19,10 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::process::exit(2);
     };
     let dir = PathBuf::from(dir);
-    let spec = match RunSpec::load(&dir.join("run.json")) {
-        Ok(s) => s,
-        Err(_) => RunSpec::default(),
-    };
+    let spec = RunSpec::load(&dir.join("run.json")).unwrap_or_default();
     let cm = CompiledModel::compile(spec.load_model(&dir)?)?;
     let at_s: f64 = at.parse()?;
 
