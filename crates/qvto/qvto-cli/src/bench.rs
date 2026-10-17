@@ -51,6 +51,10 @@ struct Opts {
     profile: Option<PathBuf>,
     /// `--java-results FILE`: the Java runner's results of an earlier run (`java.tsv`).
     java_results: Option<PathBuf>,
+    /// `--java-cold-results FILE`: the cold Java results of an earlier run (`java-cold.tsv`).
+    java_cold_results: Option<PathBuf>,
+    /// `--before FILE`: an earlier run's `last.tsv` (the engine before a change).
+    before: Option<PathBuf>,
 }
 
 fn die(msg: &str) -> ! {
@@ -144,6 +148,8 @@ pub fn bench(args: &[String]) {
         report: None,
         profile: None,
         java_results: None,
+        java_cold_results: None,
+        before: None,
     };
     let mut gen_only = false;
     let mut i = 0;
@@ -177,6 +183,8 @@ pub fn bench(args: &[String]) {
             "--report" => o.report = Some(PathBuf::from(next(&mut i))),
             "--profile" => o.profile = Some(PathBuf::from(next(&mut i))),
             "--java-results" => o.java_results = Some(PathBuf::from(next(&mut i))),
+            "--java-cold-results" => o.java_cold_results = Some(PathBuf::from(next(&mut i))),
+            "--before" => o.before = Some(PathBuf::from(next(&mut i))),
             a => die(&format!("unknown argument {a}")),
         }
         i += 1;
@@ -232,6 +240,14 @@ pub fn bench(args: &[String]) {
         java = parse_java(&std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("{}: {e}", f.display()))));
         java.retain(|(id, _)| cases.iter().any(|c| &c.id == id));
     }
+    if let Some(f) = &o.java_cold_results {
+        java_cold = parse_java(&std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("{}: {e}", f.display()))));
+        java_cold.retain(|(id, _)| cases.iter().any(|c| &c.id == id));
+    }
+    let before: Vec<(String, Measured)> = match &o.before {
+        Some(f) => parse_last(&std::fs::read_to_string(f).unwrap_or_else(|e| die(&format!("{}: {e}", f.display())))),
+        None => Vec::new(),
+    };
     if o.java || o.java_cold {
         let dir = root.join(OUT_DIR);
         let _ = std::fs::create_dir_all(&dir);
@@ -254,7 +270,8 @@ pub fn bench(args: &[String]) {
                 print_side("java", id, &m.compile, &m.runs, series, m);
             }
         }
-        if o.java_cold {
+        if o.java_cold && o.java_cold_results.is_none() {
+            let _ = std::fs::remove_file(dir.join("java-cold-all.tsv"));
             for c in &cases {
                 let out = dir.join("java-cold.tsv");
                 let cold = Opts {
@@ -280,7 +297,7 @@ pub fn bench(args: &[String]) {
         }
     }
     let load1 = loadavg();
-    let md = report(&cases, &rust, &java, &java_cold, &load0, &load1);
+    let md = report(&cases, &rust, &java, &java_cold, &before, &load0, &load1);
     println!("\n{md}");
     let dir = root.join(OUT_DIR);
     let _ = std::fs::create_dir_all(&dir);
@@ -307,6 +324,8 @@ fn clone_opts(o: &Opts) -> Opts {
         report: None,
         profile: None,
         java_results: None,
+        java_cold_results: None,
+        before: None,
     }
 }
 
@@ -534,6 +553,30 @@ fn run_java(root: &Path, jobs: &Path, out: &Path, only: Option<&str>, o: &Opts) 
     Ok(parse_java(&text))
 }
 
+/// The compat rows of an earlier run's `last.tsv`.
+fn parse_last(text: &str) -> Vec<(String, Measured)> {
+    let nums = |s: &str| -> Vec<f64> { s.split(',').filter_map(|x| x.parse().ok()).collect() };
+    text.lines()
+        .skip(1)
+        .filter_map(|line| {
+            let f: Vec<&str> = line.split('\t').collect();
+            (f.len() >= 7 && f[1] == "compat").then(|| {
+                (
+                    f[0].to_string(),
+                    Measured {
+                        compile: nums(f[2]),
+                        runs: nums(f[3]),
+                        severity: f[4].into(),
+                        out_objects: f[5].parse().unwrap_or(0),
+                        log_lines: f[6].parse().unwrap_or(0),
+                        ..Measured::default()
+                    },
+                )
+            })
+        })
+        .collect()
+}
+
 /// Rows of the Java runner's `RESULTS.tsv`.
 fn parse_java(text: &str) -> Vec<(String, Measured)> {
     let nums = |s: &str| -> Vec<f64> { s.split(',').filter_map(|x| x.parse().ok()).collect() };
@@ -591,6 +634,7 @@ fn report(
     rust: &[(String, Vec<(Mode, Measured)>)],
     java: &[(String, Measured)],
     cold: &[(String, Measured)],
+    before: &[(String, Measured)],
     load0: &str,
     load1: &str,
 ) -> String {
@@ -602,9 +646,9 @@ fn report(
     let _ = writeln!(s);
     let _ = writeln!(
         s,
-        "| Group | Workload | compat run | fast run | Java run (warm) | Java cold run | compat vs Java | fast vs compat | compile | Java compile (first) | check |"
+        "| Group | Workload | compat before | compat run | speed-up | fast run | Java run (warm) | Java cold run | compat vs Java | fast vs compat | compile | Java compile (first) | check |"
     );
-    let _ = writeln!(s, "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|");
+    let _ = writeln!(s, "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|");
     for c in cases {
         let series = series_of(c) > 0;
         let r = rust.iter().find(|(id, _)| id == &c.id).map(|x| &x.1);
@@ -627,6 +671,7 @@ fn report(
                 _ => ("–".into(), f64::NAN),
             }
         };
+        let (bt, bv) = cell(before.iter().find(|(id, _)| id == &c.id).map(|x| &x.1));
         let (ct, cv) = cell(comp);
         let (ft, fv) = cell(fast);
         let (jt, jv) = cell(j);
@@ -663,9 +708,10 @@ fn report(
         };
         let _ = writeln!(
             s,
-            "| {} | `{}` | {ct} | {ft} | {jt} | {jcold} | {} | {} | {compile} | {jcompile} | {check} |",
+            "| {} | `{}` | {bt} | {ct} | {} | {ft} | {jt} | {jcold} | {} | {} | {compile} | {jcompile} | {check} |",
             group_of(c),
             c.id,
+            ratio(cv, bv),
             ratio(cv, jv),
             ratio(fv, cv),
         );

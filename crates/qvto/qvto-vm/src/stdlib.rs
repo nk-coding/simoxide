@@ -1504,20 +1504,28 @@ where
         if !matches!(&elems, Value::Coll(c) if c.kind().is_set()) {
             match es.iter().map(atom_hash).collect::<Option<Vec<u64>>>() {
                 Some(hs) => {
-                    // buckets of equal hashes, the last index of each equal element
-                    let mut last: std::collections::HashMap<u64, Vec<usize>> =
-                        std::collections::HashMap::with_capacity(es.len());
-                    for (j, h) in hs.iter().enumerate() {
-                        let b = last.entry(*h).or_default();
-                        match b.iter_mut().find(|k| java_equals(&es[**k], &es[j], &self.env)) {
-                            Some(k) => *k = j,
-                            None => b.push(j),
+                    // from the end: the first element of each class of equal elements is its
+                    // last occurrence; classes with the same hash are chained
+                    let n = es.len();
+                    let mut head: qvto_runtime::fxhash::FxHashMap<u64, u32> =
+                        qvto_runtime::fxhash::FxHashMap::with_capacity_and_hasher(n, Default::default());
+                    let mut next: Vec<u32> = vec![u32::MAX; n];
+                    let mut last: Vec<u32> = vec![0; n];
+                    for j in (0..n).rev() {
+                        let mut r = head.get(&hs[j]).copied().unwrap_or(u32::MAX);
+                        while r != u32::MAX && !java_equals(&es[r as usize], &es[j], &self.env) {
+                            r = next[r as usize];
+                        }
+                        if r == u32::MAX {
+                            last[j] = j as u32;
+                            next[j] = head.insert(hs[j], j as u32).unwrap_or(u32::MAX);
+                        } else {
+                            last[j] = last[r as usize];
                         }
                     }
-                    for (i, h) in hs.iter().enumerate() {
-                        if let Some(&j) = last[h].iter().find(|&&k| java_equals(&es[k], &es[i], &self.env))
-                            && j != i
-                        {
+                    for i in 0..n {
+                        let j = last[i] as usize;
+                        if j != i {
                             eff[i] = ks[j].clone();
                         }
                     }
@@ -1618,7 +1626,7 @@ where
 /// hashed values hash by their identity key); `None` for collections, tuples, dictionaries.
 fn atom_hash(v: &Value) -> Option<u64> {
     use std::hash::{Hash, Hasher};
-    let mut h = std::collections::hash_map::DefaultHasher::new();
+    let mut h = qvto_runtime::fxhash::FxHasher::default();
     std::mem::discriminant(v).hash(&mut h);
     match v {
         Value::Null | Value::Invalid => {}
