@@ -11,6 +11,7 @@ store.set(o, name, Datum::Str("a"))?;               // single-valued
 store.add(o, children, Datum::Obj(child), None)?;   // EList.add (Ok(false) on duplicates)
 store.add(o, children, Datum::Obj(c2), Some(0))?;   // EList.add(index, v)
 for i in 0..store.len(o, children) { let d = store.get_at(o, children, i); }
+let mut all = Vec::new(); store.get_list(o, children, &mut all);   // the whole list in one call
 store.set_list(o, tags, &[Datum::Str("x")])?;       // ECollections.setEList
 ```
 
@@ -19,7 +20,7 @@ store.set_list(o, tags, &[Datum::Str("x")])?;       // ECollections.setEList
 | File | Contents |
 |---|---|
 | `src/ids.rs` | `PackageId`, `ClassId`, `FeatureId`, `DataTypeId`, `EnumId`, `ResourceId` (dense `u32`) |
-| `src/meta.rs` | `MetaRegistry`: packages, classes, features, data types, enums; derived class tables as EMF computes them (`eAllSuperTypes`, `eAllStructuralFeatures` = slot order, containments, cross references, ID attribute, supertype bit sets); `DataKind` (the Java class of values) |
+| `src/meta.rs` | `MetaRegistry`: packages, classes, features, data types, enums; derived class tables as EMF computes them (`eAllSuperTypes`, `eAllStructuralFeatures` = slot order, containments, cross references, ID attribute, supertype bit sets); `DataKind` (the Java class of values); `slot` is O(1) for features whose slot is the same in every class (single inheritance, `finish_classes` computes them), else a search of the class's blocks |
 | `src/datum.rs` | `Datum` (borrowed value) and `OwnedDatum`; Java box classes kept apart (`Int`, `Long`, `Short`, `Byte`, `Char`, `Double`, `Float`) with Java `equals` |
 | `src/store.rs` | the `ModelStore` trait with its contract, `ModelError`, provided `set_list`, `contents`, `all_contents`, `resource_contents`; optional metamodel objects (`classifier_object`, `object_classifier`, `feature_object`, `object_feature`, `package_object`, `object_package`: the `EClass`/`EStructuralFeature`/`EPackage` objects of registry entries, for `eClass()` and Ecore's EOperations; default none) |
 | `src/operation.rs` | `MetaOperation`, `MetaMultiplicity`: the `EOperation`s a host gives the analyser (the registry keeps none) |

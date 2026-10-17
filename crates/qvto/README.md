@@ -20,6 +20,7 @@ Status: see `PLAN.md`.
 | `DESIGN.md` | scope, architecture, model API, bytecode and VM, compat vs fast, performance, testing, milestones, licensing |
 | `PLAN.md` | milestones and their status |
 | `docs/simoxide-integration.md` | running the engine inside SimOxide: what exists, SimOxide's work, plan |
+| `crates/qvto-cli/README.md` | the `qvto` command; the benchmark suite (`qvto bench`) and its results against Eclipse QVTo |
 | `reference/README.md` | specifications, Eclipse sources, the Java reference runner |
 | `reference/inventory/` | inventory of the Eclipse QVTo test suite |
 | `reference/notes/` | notes on Eclipse QVTo and OCL semantics |

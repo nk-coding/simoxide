@@ -71,16 +71,26 @@ The mode is a property of the run's `HashEnv` (`CompatEnv`, `FastEnv`, or the VM
 | | compat | fast |
 |---|---|---|
 | Set, Bag, Dict order | `java.util.HashMap` bucket order (port, `JavaHashMap`) | insertion order (`LinkedMap`) |
+| storage of Set, Bag, Dict | `JavaHashMap` (chained buckets, tree bins) | `LinkedMap` (a SwissTable of entry indices, `hashbrown::HashTable`) |
 | OrderedSet, Sequence, List | insertion order | same |
 | identity hashes (objects, enum literals, tuples' types, bag count cells) | memoised per key from an `IdentityHashSource` (HotSpot xor-shift surrogate, tape, sequential) | a fixed mix of the key |
 | everything else (values, Java classes of collections, equality, arithmetic, strings, formatting) | Java's | same |
+
+`LinkedMap` (Java's `LinkedHashMap`/`LinkedHashSet`, OrderedSet in both modes) keeps its
+entries in insertion order with holes for removed ones and finds them through a
+`hashbrown::HashTable` of indices. Java's bucket structure is not observable through a linked
+map; keys are still hashed with `java_hash` on every `put`, `get` and `remove`, so identity hashes
+are drawn exactly when Java draws them (DESIGN §12 Q5b-8). `fxhash` is a deterministic
+multiply-rotate hasher for the engine's internal maps keyed by small integers.
 
 ## Identity hashes and the model API
 
 `IdentityKey::Obj(ObjRef)` keys an object's identity hash. A store handle maps to an `ObjRef`
 through the caller (`model::datum_to_value(d, |o| ObjRef::host(o.0))` for `qvto_emf::ObjId`);
 the VM implements `HashEnv` with the store (Java class names for tree-bin tie-breaks, a tape
-keyed by stable object keys of the Java run for differential tests).
+keyed by stable object keys of the Java run for differential tests). `IdentityHashes` keeps the
+hashes of host objects in a paged table indexed by handle (pages of 512, allocated on first use)
+and all other keys in an `FxHashMap`.
 
 ## Verification
 

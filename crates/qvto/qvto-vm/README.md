@@ -126,21 +126,14 @@ operations, `sortedBy` evaluating an effectful body twice in compat mode (once i
 - `cargo test -p qvto --test run`: end-to-end programs whose expected logs are Eclipse's
   (List mutators, two-argument OCL operations, intermediate classes, OCL annotations,
   incremental update, nested instances, `sortedBy`).
-- Performance (`qvto bench --java`, release build, median of 20 runs; Java: the reference
-  runner, same cases repeated in one JVM, median of the second half):
-
-  | Case | qvto-rs run | Java run (warm) |
-  |---|---:|---:|
-  | `interpret_operation_override` | 0.046 ms | 9.0 ms |
-  | `interpret_overload_multipleParams` | 0.033 ms | 8.2 ms |
-  | `interpret_resolve_resolveoneIn` | 0.035 ms | 2.6 ms |
-  | `interpret_iteratetest` | 0.027 ms | 2.6 ms |
-  | `interpret_bug233984` | 0.036 ms | 3.0 ms |
-  | `simulizar_runconfigtest_scaleUp_high` | 0.052 ms | 7.7 ms |
-  | `simulizar_runconfigtest_addNewServer_high` | 0.073 ms | 6.7 ms |
-  | `simulizar_runconfigtest_addClonedServer_low` | 0.042 ms | 4.7 ms |
-
-  Compiling (parse, analysis, bytecode) takes 0.1–0.5 ms per case. Micro benchmarks
-  (`examples/micro.qvto` through `qvto run --repeat`, Java `qvto-run --repeat`, warm):
-  1M-iteration arithmetic loop 15 ms vs 118 ms, `fib(25)` 12.8 ms vs 51 ms, `select`/`collect`/
-  `sum` over 100 000 integers 5.4 ms vs 12 ms, 20 000 `including`s in a loop 1.7 ms vs 5.1 s.
+- Performance: `qvto bench` (`crates/qvto-cli/README.md`, "Results"; DESIGN §7.2). After Q5b,
+  against the warm Java runner: SimuLizar rule runs 0.09–0.12 ms (4–11×; series on the same
+  model 5–35 µs per run, 4–18×), SPD `MainTransformation` 0.23–0.86 ms (4.5–11×),
+  SimpleUML→RDB 0.2/1.5/21 ms on 64/630/6 300 output objects (13×/9×/2.7×), Ecore copy by
+  mappings 0.24 ms on `Ecore.ecore` (7×), micro benchmarks 2.8–23×; suite cases median 5.8×.
+  Profiling: `cargo build --release -p qvto-cli --features profile` and `qvto bench --profile
+  FILE.svg` (DESIGN §12 Q5b-2). What made the difference (§12 Q5b-3 to Q5b-8): cached Ecore
+  derived lists and O(1) store paths, `+=` as `add`s, hashed `sortedBy` deduplication, Fx
+  hashing, dense identity-hash tables, per-program tables instead of per-call scans (the
+  overriding chain), a reused argument buffer for library calls, loops that read Sequences and
+  OrderedSets in place.

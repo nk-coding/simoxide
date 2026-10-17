@@ -15,7 +15,7 @@ Status values: done, next, open, parked.
 | Q3b | End-to-end pipeline; SimuLizar rule corpus | open | — |
 | Q4 | Full QVTo: mappings with traces, resolve, late resolve, disjuncts, inherits, merges, intermediate data, deepclone, libraries, imports, extends, access, Dict/List, try/raise, configuration properties, `transform()`, blackboxes | done | Q5a |
 | Q5a | Compat hardening: identity hashes, Java HashMap order, error and log texts, stack traces | open | Q4 (late part), Q5b |
-| Q5b | Fast mode and performance: benchmarks, profiling, optimisations | open | Q5a |
+| Q5b | Fast mode and performance: benchmarks, profiling, optimisations | done | Q5a |
 | Q6 | SimOxide integration preparation: adapter over `raw::Graph`, change journal | done | Q5 |
 | Q7 | Hardening: parser fuzzing, resource limits, documentation | open | Q6 |
 
@@ -124,6 +124,23 @@ Status values: done, next, open, parked.
   compat mode, byte-identical output and log against the Java runner on all of them.
 - **Q5b**: fast mode passes the same cases under the order-insensitive comparison; performance
   targets of `DESIGN.md` met.
+  Done 2026-10-17 (`crates/qvto-cli/README.md`, "Benchmark suite" and "Results"; DESIGN §7.2 and
+  §12 Q5b-1 to Q5b-11): `qvto bench` runs 50 workloads (SimuLizar rules on the corpus models
+  ×1/×10/×100 and as series on a changing model, SPD, SimpleUML→RDB ×1/×10/×100, Ecore copies
+  and queries up to 42 500 objects, micro benchmarks; the suite with `--suite`) in both modes and
+  in the reference runner's new benchmark mode (warm: one JVM; cold: a JVM per workload), with
+  sampling profiles (`--profile`, `pprof`). Optimisations: Ecore's derived lists cached and
+  memoised, lists read in one call, O(1) feature slots, `+=` of objects and `sortedBy` without
+  quadratic work, Fx hashing and dense tables in the VM, per-program tables, in-place loops,
+  `LinkedMap` on a SwissTable, operation lookup by name first. Against main before Q5b:
+  `deepclone` workloads 11–21×, `sortedBy` 200×, list building 60×, Ecore queries 2.4–2.6×,
+  copies 1.4–2×, rule runs 1.1–1.4×. Against warm Eclipse: rule runs 4–11× (series 4–18×), SPD
+  4.5–11×, SimpleUML→RDB 13×/9×/2.7×, Ecore copy 7×/2.7×/2.1×, micro 2.8–23×, suite cases median
+  5.8×; against cold Eclipse 100–400× for rule-sized runs; compile 0.1–0.9 ms per rule file and
+  7–8 ms for SPD. Fast mode is 1.0–1.4× compat (hash-heavy workloads) and passes all cases. The
+  ≥ 10× target holds for small models only; realistic targets are in DESIGN §7.2. Conformance
+  unchanged: 518 of 518 runnable cases equal the Java runner strictly in compat and fast mode;
+  the analyser oracle 1 102 of 1 102.
 - **Q6**: SimuLizar rules run on an in-memory SimOxide `raw::Graph` through the adapter, with the
   change journal; the SimOxide-side work list is written down.
   Done 2026-10-17 (`crates/qvto-simoxide/README.md`, `docs/simoxide-integration.md`, DESIGN §12

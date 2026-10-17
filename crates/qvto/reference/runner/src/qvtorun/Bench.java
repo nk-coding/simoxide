@@ -43,7 +43,8 @@ import org.eclipse.m2m.qvt.oml.util.WriterLog;
  * {@code loadTransformation}); the last executor then runs it. Fresh mode (default) loads the
  * inputs into a new resource set before every run (not timed) and runs until N runs or B ms of
  * run time (at least 5 runs); series mode ({@code bench series N}) loads them once and runs N
- * times on the same, changing models (as SimuLizar runs its rules during a simulation). The
+ * times on the same, changing models (as SimuLizar runs its rules during a simulation), in
+ * {@code bench rounds} rounds (default 2) on freshly loaded models of which the last counts. The
  * time of a run is {@code execute(context, extents)}.
  *
  * RESULTS.tsv: id, compile times (ms, comma-separated), run times, severity and code of the last
@@ -97,9 +98,16 @@ public final class Bench {
 
 	static String run(CaseRunner runner, Job job, int compiles, int maxRuns, long budgetMs) throws Exception {
 		org.eclipse.m2m.internal.qvt.oml.blackbox.BlackboxRegistry.INSTANCE.cleanup();
+		// the case's environment as CaseRunner sets it up (blackboxes, session options)
+		List<Env.Bbox> bboxes = new ArrayList<>();
+		if (job.bundleBlackboxes) bboxes.addAll(Env.bundleBlackboxes());
 		for (String[] b : job.blackboxes) {
 			String[] mms = b.length > 3 ? b[3].split(",") : null;
-			Env.register(new Env.Bbox(b[0], b.length > 1 ? b[1] : null, b.length > 2 ? b[2] : null, mms));
+			bboxes.add(new Env.Bbox(b[0], b.length > 1 ? b[1] : null, b.length > 2 ? b[2] : null, mms));
+		}
+		for (Env.Bbox b : bboxes) Env.register(b);
+		for (String c : job.blackboxModules) {
+			org.eclipse.m2m.qvt.oml.TransformationExecutor.BlackboxRegistry.INSTANCE.registerModules(Class.forName(c));
 		}
 		BundleUnitResolverFactory.enabled = !job.importsFromFolder;
 		BundleUnitResolverFactory.caseRoot = job.importRoot == null ? null
@@ -112,6 +120,7 @@ public final class Bench {
 		if (job.conf != null) Env.applyConf(runner.base.resolve(job.conf), runner.base);
 		URI transfUri = runner.fileUri(job.path(job.qvto));
 		int series = job.bench.containsKey("series") ? Integer.parseInt(job.bench.get("series")) : 0;
+		int rounds = series == 0 ? 1 : Math.max(1, job.bench.containsKey("rounds") ? Integer.parseInt(job.bench.get("rounds")) : 2);
 		if (job.bench.containsKey("runs")) maxRuns = Integer.parseInt(job.bench.get("runs"));
 
 		ResourceSet resSet = runner.metamodelResolutionRS(job);
@@ -134,6 +143,10 @@ public final class Bench {
 		ExecutionDiagnostic ed = null;
 		String log = "";
 		List<BasicModelExtent> extents = null;
+		// series: `rounds` rounds on freshly loaded models, the last one counts
+		for (int round = 0; round < rounds; round++) {
+		runMs.clear();
+		inputs = null;
 		double total = 0;
 		int n = series > 0 ? series : maxRuns;
 		for (int r = 0; r < n; r++) {
@@ -155,6 +168,13 @@ public final class Bench {
 			for (Resource res : inputs) extents.add(res == null ? new BasicModelExtent() : new BasicModelExtent(res.getContents()));
 			ExecutionContextImpl ctx = new ExecutionContextImpl();
 			for (Map.Entry<String, String> e : job.config.entrySet()) ctx.setConfigProperty(e.getKey(), e.getValue());
+			if (job.readonlyGuard) ctx.getSessionData().setValue(org.eclipse.m2m.internal.qvt.oml.evaluator.QVTEvaluationOptions.FLAG_READONLY_GUARD_ENABLED, Boolean.TRUE);
+			if (job.maxStackDepth != null) ctx.getSessionData().setValue(org.eclipse.m2m.internal.qvt.oml.evaluator.QVTEvaluationOptions.EVALUATION_MAX_STACK_DEPTH, job.maxStackDepth);
+			if (job.traceIn != null) {
+				Resource tr = resSet.getResource(runner.fileUri(job.path(job.traceIn)), true);
+				ctx.getSessionData().setValue(org.eclipse.m2m.internal.qvt.oml.evaluator.QVTEvaluationOptions.INCREMENTAL_UPDATE_TRACE,
+						new org.eclipse.m2m.qvt.oml.util.Trace(tr.getContents()));
+			}
 			StringWriter logBuf = new StringWriter();
 			ctx.setLog(new WriterLog(logBuf, true));
 			long t1 = System.nanoTime();
@@ -163,6 +183,7 @@ public final class Bench {
 			runMs.add(dt);
 			total += dt;
 			log = logBuf.toString();
+		}
 		}
 		int objects = 0;
 		for (int i = 0; i < kinds.size(); i++) {

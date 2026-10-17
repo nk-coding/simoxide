@@ -20,7 +20,7 @@ Prerequisites: the reference checkout (`reference/README.md`), the runner built
 
 | Path | Contents |
 |---|---|
-| `src/case.rs` | case files: `Case`, `Check`, parser and writer |
+| `src/case.rs` | case files: `Case`, `Check`, parser and writer (`bench` lines for benchmark workloads) |
 | `src/inventory.rs` | `reference/inventory/eclipse-tests.tsv` |
 | `src/fixture.rs` | Java results: result directories, fixture bundles, identity-hash tapes |
 | `src/java.rs` | running the Java runner (`JavaRun`), recording fixtures, `JavaReplay` |
@@ -148,6 +148,12 @@ its order in a rerun with probability 1/2 (`qvto conform record --runs N`). With
 `--prefix`, the recorded cases replace theirs in the existing bundle and cache. The runner runs
 each case on a thread with a 512 MB stack, so that QVTo's own call depth limit (1 000) applies
 before a JVM `StackOverflowError` (a default thread stack overflows at about 740 calls).
+
+The runner also has a benchmark mode (`qvto-run --bench WORKLOADS --out RESULTS.tsv`,
+`Bench.java`) for `qvto bench --java` (`crates/qvto-cli/README.md`): workloads in the case
+format with `bench <key> <value>` lines, compiled K times and run in fresh or series mode with
+the same protocol as the Rust side. `QVTO_NICE` sets the runner's niceness (default 19;
+benchmarks run it at 0, pinned with `taskset`).
 
 ## Engine interface
 

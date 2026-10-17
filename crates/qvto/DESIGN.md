@@ -485,12 +485,44 @@ The Java side runs in the reference runner with `--repeat N` in one JVM (warm, a
 warm-up), `-Xmx2g`, niced. We report compile time and run time separately, cold and warm, and
 peak memory.
 
+As built in Q5b (§12 Q5b-1, `crates/qvto-cli/README.md`): `qvto bench` runs the workloads of
+`crates/qvto-cli/bench/workloads.bench` (B2 on the corpus models ×1/×10/×100 and as series of 50
+runs on the same model, B3 ×1/×10/×100 and a series, B4 on the sample's model and ×1/×10/×100,
+B5 on `Ecore.ecore` and generated `.ecore` files of 425 to 42 500 objects, eleven B6 micro
+benchmarks; B1 is `--suite eclipse|corpus`) in compat and fast mode, and with `--java`/
+`--java-cold` the same workloads in the reference runner's benchmark mode, pinned to cores at
+normal priority. Peak memory is not measured.
+
 ### 7.2 Targets
 
 - Compile: ≤ 10 ms for a typical rule file; Eclipse needs about 400 ms cold.
 - Run, warm: ≥ 10× faster than warm Eclipse on B2, B4 and B5; never slower on any suite case.
 - Memory: models in place, no copy; ≤ 2× the store's own size for traces on B4.
 - Fast mode: ≥ 1.3× over compat on hash-heavy micro benchmarks; otherwise equal.
+
+Results (Q5b, `crates/qvto-cli/README.md`, "Results"; a loaded shared machine, ±20 %):
+
+| | Measured | vs warm Eclipse | vs cold Eclipse |
+|---|---|---:|---:|
+| B2 one rule run (corpus models ×1/×10) | 0.09–0.12 ms | 4–11× | 180–400× |
+| B2 ×100 containers | 0.3–0.45 ms | 2–7× | 80–160× |
+| B2 series (per run, same model) | 5–35 µs | 4–18× | — |
+| B3 SPD `MainTransformation` | 0.23–0.86 ms | 4.5–11× | 125–210× |
+| B4 SimpleUML→RDB (sample, ×10, ×100) | 0.2 / 1.5 / 21 ms | 13× / 9× / 2.7× | 30–250× |
+| B5 Ecore copy (`Ecore.ecore`, 4 250, 42 500 objects) | 0.24 / 8.9 / 181 ms | 7× / 2.7× / 2.1× | 7–290× |
+| B5 deepclone, queries | | 1.4–6× | 5–100× |
+| B6 micro | | 2.8–23× (sets built in loops 200–2 800×) | |
+| B1 suite cases | median 5.8×, p90 14× | 0.3–270× | |
+| compile | 0.1–0.9 ms per rule file, 7–8 ms SPD (18 units) | 3–20× | 100–1 000× |
+| fast vs compat | 1.0–1.4× on hash-heavy workloads, else equal | | |
+
+The 10× target holds for single runs of small rules and small models (B2 ×1, B3, B4 on the sample's
+model, `Ecore.ecore`), and for cold starts by far; it does not hold for large models (B4 ×100, B5
+×10/×100: 2–3×), where the time goes to model access and allocation, which a warm JVM with EMF's
+dynamic objects does well too, nor for trivial suite cases (a few µs on both sides). Realistic
+targets after Q5b: ≥ 5× warm Eclipse for rule-sized runs (B2, B3), ≥ 2× on large models, ≥ 100×
+cold; compile ≤ 10 ms (met). The fast-mode target (1.3×) is met only on part of the hash-heavy
+benchmarks (§12 Q5b-10).
 
 ### 7.3 Key optimisations
 
@@ -502,6 +534,10 @@ peak memory.
 - Interned strings with cached hashes.
 - Trace indexes keyed by object handle; skip trace recording when the program has no
   resolve, re-invocation or trace output (whole-program analysis, same observable behaviour).
+  (Not done: trace records are kept always.)
+- Q5b (§12 Q5b-3 to Q5b-8): Ecore's derived lists cached, lists read in one call, O(1) slots,
+  `+=` and `sortedBy` without quadratic work, Fx hashing and dense tables in the VM, per-program
+  tables, in-place loops, `LinkedMap` on a SwissTable, operation lookup by name first.
 - Compile once, run many: a `Program` is immutable and `Send + Sync`; runs keep their state in a
   separate `Run`.
 
@@ -678,3 +714,14 @@ Decisions taken while implementing, where they refine or deviate from the sectio
 | Q6-6 | The graph part implements EMF's semantics itself (a port of `qvto_emf::Graph`'s operations onto `Obj::slots`), driven by the registry only; SimOxide's loader mutators and `ClassId::def()` are not used. Slots are present exactly when EMF's `eIsSet` holds after a write; values keep SimOxide's representation; a string stays a `Value::Str` whatever the attribute's data kind (as `qvto-emf` keeps the given box). | The loader mutators lack uniqueness, roots, `isSet` and changeability; registry-driven code can run the contract suite on `raw::Graph` storage with the contract metamodel, and SimOxide's own reads stay consistent. |
 | Q6-7 | The journal records effective changes for graph objects (both ends of opposites, old containers, roots) as EMF notifications would, and the operations as called for objects of other metamodels. | Syncers need every change of a PCM object; the other home holds no PCM objects. |
 | Q6-8 | New objects get no `Identifier.id` by default (dynamic EMF, the corpus reference); `IdPolicy::Uuid { seed }` gives EMF-format UUIDs from a seeded generator (generated PCM code). `getSimulationTime`'s registration no longer requires a `'static` store (`SimStore` borrows the graph). | Equality with the Java fixtures and reproducible SimOxide runs; the store is a per-run view. |
+| Q5b-1 | The benchmark suite is a workload file in the case format (`crates/qvto-cli/bench/workloads.bench`, `bench <key> <value>` lines: group, series, rounds, runs) with models generated deterministically into `target/qvto-bench/gen` (SimpleUML: the sample's classes ×N; Ecore: 5N packages of 10 classes; PCM: the corpus directories with (N−1)·k more resource containers, assembly and allocation contexts). The Java runner has a benchmark mode with the same protocol (`qvto-run --bench`, `Bench.java`): K compiles, then fresh runs (inputs loaded before each run, not timed; until N runs or B ms, at least 5) or series runs (one load, N runs on the changing models, the last of `rounds` rounds counts). Reported: median and p10–p90 of the second half (fresh) or of the round (series), the series total, compile medians; Java cold = a fresh JVM per workload. | Realistic workloads (SimuLizar rules during a simulation are series of runs on a mutating model), both sides measured identically, nothing large committed. §7.1's B1 is `--suite eclipse|corpus`. |
+| Q5b-2 | Profiles come from `pprof` (SIGPROF sampling, feature `profile` of `qvto-cli`, `qvto bench --profile FILE.svg`: flame graph plus self/inclusive table of the samples inside the timed runs, `QVTO_PROFILE=compile` for compiles). | `perf` events are not available to users on this machine (`perf_event_paranoid` 4, no root). |
+| Q5b-3 | Store: `ModelStore::get_list` reads a whole list in one call (default: `len` + `get_at`). `qvto-emf` caches Ecore's derived lists per (object, feature) with a generation counter that every write to an object of Ecore's classes bumps (`Graph::touch`), builds the `eAll*` lists from the supertypes' cached lists, reads `eContents` from the slots, answers `contains` of containment lists from the child's container (`EObjectContainmentEList.contains`). `MetaRegistry::slot` is O(1) for features whose slot is the same in every finished class (`fixed_slots`; single inheritance), recomputed by `finish_classes`, dropped by `unfinish_class`. | Q1a's note (derived lists recomputed per `get_at`) made `eAllStructuralFeatures` quadratic per class and uniqueness checks quadratic per list; EMF caches the same lists in `EClassImpl`. |
+| Q5b-4 | `+=` of objects to a many-valued feature adds the values (`add` per value) instead of `ECollections.setEList` with a copy of the list plus the values. | Identical: with the current list as prefix, `setEList` performs exactly these `add`s; a failing `add` leaves the state Eclipse's clear-and-re-add reaches. Building a list in a loop was quadratic (`b6_objects` 497 → 9 ms). |
+| Q5b-5 | `sortedBy`'s "last key of equal elements" (a `HashMap` keyed by element in Eclipse) is computed with hashes consistent with Java `equals` that draw no identity hashes (atoms; collections and tuples keep the pairwise scan); Set sources skip it. | It was a pairwise scan (`b6_sortedby` 1.9 s → 12 ms); drawing identity hashes there would change compat mode's draw order. |
+| Q5b-6 | VM: `FxHashMap`/`FxHashSet` (`qvto_runtime::fxhash`) for internal maps; identity hashes of host objects in a paged table by handle; the primitive table built once per process; per-program tables in `Program` (final overriding operation, library classes) instead of per run or per call (the overriding chain was a scan of all operations per call); constants converted on first use; one reused argument buffer for library calls; loops over Sequences and OrderedSets read the value in place (`IterSlot::Coll`) instead of copying its elements; the copier's map (`clone`/`deepclone`) hashed. | Per-run and per-call overheads dominate small rule runs; all are semantics-free. |
+| Q5b-7 | `LinkedMap` (Java's `LinkedHashMap`/`LinkedHashSet`: OrderedSet in both modes, every hash collection in fast mode) is a `hashbrown::HashTable` of indices into entries kept in insertion order. It still hashes keys with `java_hash` on every `put`, `get` and `remove`. | Java's bucket structure is not observable through a linked map; hashing as before keeps the identity-hash draw order (compat). The JDK differential tests of `qvto-runtime` pass unchanged. |
+| Q5b-8 | The analyser's operation lookup (`findMostSpecificOperationMatching`) filters the candidate list by name before removing duplicates. | Same result (equal candidates have equal names, order kept); Eclipse's algorithm builds the list of all operations of the type for every call (SPD compile 9.3 → 7.5 ms). |
+| Q5b-9 | The VM stays mode-agnostic at run time (Q3a-3 confirmed): the profiles show no cost in mode checks; fast mode's differences are inside the collections and identity hashes, behind `&dyn HashEnv`. | Monomorphising per mode would double the interpreter's code (`run` is 53 KB) for no measurable gain. |
+| Q5b-10 | Fast mode differs from compat only in order (Set, Bag, Dict in insertion order; identity hashes from the key, so `Class@hash` texts differ) and evaluates an effectful `sortedBy` body once. Outputs that depend on the iteration order of a Set, Bag or Dict may differ: `any`, `first`/`at` and `asSequence` of sets, logs of sets, string conversions, ties in `sortedBy`, loops over unordered features (PCM has 312: `allocationContexts_Allocation`, ...) whose effects depend on the order (`b2_rc_addClonedServer_x10` creates a connector per allocation context after the client and the server were seen: 6 log lines in compat, 20 in fast). All are valid QVTo (the order of a Set is unspecified). It is 1.0–1.3× faster than compat; the rest of a run (interpretation, model access, allocation) is common to both modes. | DESIGN §6; measured with `qvto bench` (`b6_hashsets`, `b6_including`, `b6_sets`, `b5_query_*`). |
+| Q5b-11 | Fresh-mode times of small runs are dominated by cold caches: the model is loaded just before the run (as in Java), and a second run on the same model takes a third of the time. Series mode is the realistic case for SimOxide. | Measured (`b2_lb_scaleUp_x1`: 0.06–0.07 ms first run, 0.02 ms second). |

@@ -294,6 +294,8 @@ pub fn bench(args: &[String]) {
                     Err(e) => println!("java cold {}: {e}", c.id),
                 }
             }
+            // all workloads' rows, as `--java-cold-results` reads them
+            let _ = std::fs::write(dir.join("java-cold-all.tsv"), java_tsv(&java_cold));
         }
     }
     let load1 = loadavg();
@@ -551,6 +553,25 @@ fn run_java(root: &Path, jobs: &Path, out: &Path, only: Option<&str>, o: &Opts) 
         )
     })?;
     Ok(parse_java(&text))
+}
+
+/// Rows in the format of the Java runner's `RESULTS.tsv`.
+fn java_tsv(rows: &[(String, Measured)]) -> String {
+    let join = |v: &[f64]| v.iter().map(|x| format!("{x:.4}")).collect::<Vec<_>>().join(",");
+    let mut s = String::from("id\tcompile_ms\trun_ms\tseverity\tcode\tout_objects\tlog_lines\n");
+    for (id, m) in rows {
+        let _ = writeln!(
+            s,
+            "{id}\t{}\t{}\t{}\t{}\t{}\t{}",
+            join(&m.compile),
+            join(&m.runs),
+            m.severity,
+            m.code,
+            m.out_objects,
+            m.log_lines
+        );
+    }
+    s
 }
 
 /// The compat rows of an earlier run's `last.tsv`.

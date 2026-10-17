@@ -14,7 +14,7 @@ print!("{}", qvto_bytecode::disasm::program(&program));
 | File | Contents |
 |---|---|
 | `src/insn.rs` | `Insn` (≤ 8 bytes, checked at compile time), `Reg`, collection kind codes |
-| `src/program.rs` | `Program` (the IR's metadata + chunks), `Chunk`, `Site` (operands that do not fit an instruction), `OpCode` (an operation's chunks), `Const`, `LoopInfo`, `Handler` |
+| `src/program.rs` | `Program` (the IR's metadata + chunks, and tables the VM would otherwise compute per run: the final overriding operation of each operation, the classes of QVTo's library), `Chunk`, `Site` (operands that do not fit an instruction), `OpCode` (an operation's chunks), `Const`, `LoopInfo`, `Handler` |
 | `src/compile.rs` | the compiler |
 | `src/disasm.rs` | listings |
 

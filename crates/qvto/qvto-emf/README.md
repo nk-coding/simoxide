@@ -121,8 +121,12 @@ directories, failing tests print the first differing line.
   types whose instance class is `java.lang.Number` (numbers) or `java.lang.Object` (numbers,
   booleans, characters) accept those boxes, as EMF's `isInstance` check does (e.g. a type
   parameter bounded by a `Number` data type).
-- Ecore's derived lists are recomputed on every `get_at` (fine for tests and metamodel-sized
-  models; the VM should cache).
+- Ecore's derived lists (`eAllStructuralFeatures`, `eAllSuperTypes`, `eAttributes`, ...) are
+  cached per object and feature, as `EClassImpl` caches them; any change of an object of Ecore's
+  classes (`Graph::touch`, called by every slot, container and proxy write) invalidates the
+  cache, and the `eAll*` lists are built from the supertypes' cached lists (DESIGN §12 Q5b-3).
+  `eContents` reads the slots directly; the uniqueness check of a containment list asks the
+  child's container (`EObjectContainmentEList.contains`), other lists scan the slot.
 - The dynamic-subclass anomaly above is not reproduced.
 - A reference whose `eOpposite` is set on one side only (as QVTo declares `opposites` of
   intermediate class features) behaves as in EMF: changing it updates the other end's value;
