@@ -1,6 +1,9 @@
 //! `simoxide`: run a PCM model with simoxide-sim (flags mirror `reference/refsim run`), or benchmark it.
 
-use simoxide_sim::{CompiledModel, Mode, Outputs, RngMode, RunSpec, SimConfig, Tape};
+use simoxide_sim::{
+    CompiledModel, FlavourConfig, FlavourKind, Mode, Outputs, Quirks, RngMode, RunSpec, SimConfig,
+    Tape,
+};
 use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -18,6 +21,10 @@ const USAGE: &str = "usage:
              other random numbers, no tape; needs the `fast` feature)
              [--ps-algorithm exact|virtual-time]   (virtual-time: O(log n) processor sharing,
              other float rounding; opt-in in every mode, see docs/correctness/deviations.md)
+             [--flavour simulizar|slingshot]   (default simulizar; slingshot: Slingshot's
+             semantics, fast mode, docs/spec/slingshot)
+             [--quirks LIST]   (Slingshot compat flags: Q1..Q37, all, fast, none, -Qn;
+             default none = the fixed behaviour; --quirks list prints them)
   simoxide bench --model <dir> [--run-json run.json] [--runs N] [--threads T] [same run flags]
   simoxide load-bench --model <dir> [--run-json run.json] [--runs N]   (load + compile only)
   (with the `profile` feature, bench and load-bench take --profile out.svg|out.folded)";
@@ -44,6 +51,8 @@ struct Args {
     profile: Option<PathBuf>,
     mode: Mode,
     ps_virtual_time: bool,
+    flavour: FlavourKind,
+    quirks: Quirks,
 }
 
 fn parse_args() -> Result<Args, String> {
@@ -71,6 +80,8 @@ fn parse_args() -> Result<Args, String> {
         profile: None,
         mode: Mode::Exact,
         ps_virtual_time: false,
+        flavour: FlavourKind::SimuLizar,
+        quirks: Quirks::NONE,
     };
     while let Some(f) = it.next() {
         let mut val = || it.next().ok_or(format!("{f} needs a value"));
@@ -142,6 +153,27 @@ fn parse_args() -> Result<Args, String> {
                     ));
                 }
             }
+            "--flavour" => {
+                let v = val()?;
+                a.flavour = FlavourKind::parse(&v).ok_or(format!(
+                    "--flavour: expected simulizar or slingshot, got {v}"
+                ))?;
+            }
+            "--quirks" => {
+                let v = val()?;
+                if v == "list" {
+                    let mut s = String::from("Slingshot quirks (docs/spec/slingshot/quirks.md):\n");
+                    for q in simoxide_sim::Quirk::ALL {
+                        s.push_str(&format!(
+                            "  {q:<4} {:<10} {}\n",
+                            format!("{:?}", q.support()),
+                            q.summary()
+                        ));
+                    }
+                    return Err(s);
+                }
+                a.quirks = Quirks::parse(&v).map_err(|e| format!("--quirks: {e}"))?;
+            }
             "-h" | "--help" => return Err(USAGE.into()),
             o => return Err(format!("unknown flag {o}\n{USAGE}")),
         }
@@ -164,7 +196,14 @@ fn setup(a: &Args) -> Result<(CompiledModel, SimConfig), String> {
         None => RunSpec::default(),
     };
     let model = spec.load_model(&dir)?;
-    let cm = CompiledModel::compile(model).map_err(|e| e.to_string())?;
+    let flavour = match a.flavour {
+        FlavourKind::SimuLizar if !a.quirks.is_empty() => {
+            return Err("--quirks needs --flavour slingshot".into());
+        }
+        FlavourKind::SimuLizar => FlavourConfig::SIMULIZAR,
+        FlavourKind::Slingshot => FlavourConfig::slingshot(a.quirks),
+    };
+    let cm = CompiledModel::compile_flavour(model, flavour).map_err(|e| e.to_string())?;
     let name = a.name.clone().unwrap_or_else(|| {
         std::fs::canonicalize(&dir)
             .ok()
