@@ -5,9 +5,12 @@ as the separate repository qvto-rs and imported with its history (`git log -- cr
 
 - **Complete.** Covers the QVTo language of the OMG QVT 1.3 specification and the OCL it embeds,
   as implemented by Eclipse QVTo, the reference implementation.
-- **Two modes.** *Compat mode* behaves like Eclipse QVTo, including its quirks: collection
+- **Three modes.** *Compat mode* behaves like Eclipse QVTo, including its quirks: collection
   iteration order, number and string formatting, null and invalid handling, trace and resolve
   semantics. *Fast mode* keeps the semantics but drops the Java emulation that costs time.
+  *Ordered mode* behaves like Eclipse QVTo in a JVM whose QVTo and OCL hash collections iterate in
+  insertion order (the Slingshot reference runner's `det` mode), for SimOxide's Slingshot-exact
+  mode.
 - **Bytecode.** Transformations compile to a register bytecode that a VM interprets.
 - **Embeddable.** The engine reads and writes models through a trait, so it runs on its own
   Ecore/XMI layer and directly on SimOxide's model graph (`qvto-simoxide`).
@@ -68,19 +71,38 @@ conformance and corpus tests; without them those tests skip.
 | Command | Gate |
 |---|---|
 | `cargo test-qvto` | all tests of the QVTo crates pass (alias in `.cargo/config.toml`; the tests turn `compat` on) |
-| `cargo conform --suite all` | compat: 542 of 542 runnable cases equal the Java runner strictly |
-| `cargo conform --suite all --engine qvto-fast` | fast: 542 pass the Eclipse checks, 537 strictly (the order-insensitive verdict) |
+| `cargo conform --suite all` | compat: 589 of 589 runnable cases equal the Java runner strictly (Eclipse 494, corpus 24, fuzz 24, SPD 47); `--suite spd --compare-unstable` 47 of 47 also on what varies between Java runs |
+| `cargo conform --suite all --engine qvto-fast` | fast: 589 pass the Eclipse checks, 584 strictly (the order-insensitive verdict) |
+| `cargo conform --suite all --engine qvto-ordered` | ordered vs the `det` Java runner: 583 strictly plus 6 `java-fails-equal` (the `det` rule breaks those cases' own assertions in Java too) |
+| `cargo qvto spd-replay` | ordered mode vs the Slingshot reference runner's `det` runs: 13 of 13 recorded adjustments equal (needs `reference/slingshot`) |
 | `cargo run --profile release-unwind -p qvto-cli -- conform --suite all --engine qvto-fast` | the same in the EPL build (no `compat`): identical scoreboard |
 | `cargo run --profile release-unwind -p qvto-sema --example oracle_report` | analyser oracle: 1 102 of 1 102 keys match |
 | `taskset -c 2,3 cargo qvto bench` | the benchmark suite (`qvto-cli/README.md`), against a binary built before the change |
 
-Modes and builds: the default build is EPL-only and has the fast mode only (`Mode::default()` is
-`Fast`). Compat mode (Eclipse's `HashSet`/`HashMap` orders, HotSpot identity hashes) needs the
+Modes and builds: the default build is EPL-only and has the fast and ordered modes
+(`Mode::default()` is `Fast`). Compat mode (Eclipse's `HashSet`/`HashMap` orders, HotSpot identity hashes) needs the
 cargo feature `compat` (qvto-runtime, qvto-vm, qvto, qvto-testkit, qvto-cli, qvto-simoxide),
 which links `simoxide-jcompat-exact`; no licence is granted for it, so such builds must not be
 distributed (the repository's `LICENSES`, section 7). A run in compat mode without the feature
 fails with `RunOutcome::code == MODE_UNAVAILABLE`; `qvto conform --engine qvto` and
 `qvto fuzz` refuse with a message.
+
+Choosing a mode (`qvto_runtime::Mode`, re-exported through `qvto::RunOptions`):
+
+```rust
+use qvto_runtime::Mode;
+// Slingshot-exact (EPL, every build): Eclipse's semantics, Set/Bag/Dict in insertion order
+let opts = qvto::RunOptions { mode: Mode::Ordered, ..qvto::RunOptions::default() };
+// SimuLizar-exact needs Mode::Compat (feature `compat`); Mode::Fast for throughput
+assert!(Mode::Ordered.available());
+let m = Mode::from_name("ordered"); // "compat" | "fast" | "ordered", for configuration files
+```
+
+| Mode | Hash collections | Other Eclipse emulation | Identity hashes (`Class@hash`) | Build |
+|---|---|---|---|---|
+| `Compat` | Java `HashMap` bucket order | all | HotSpot sequence or a tape | feature `compat` (no licence, LICENSES §7) |
+| `Ordered` | insertion order; a `Set` is a `LinkedHashSet` (OCL sees an OrderedSet, as in the `det` JVM) | all | from the key, or `RunOptions::id_source` | every build (EPL) |
+| `Fast` | insertion order | all but the double evaluation of an effectful `sortedBy` | from the key | every build (EPL) |
 
 `qvto conform`, `qvto fuzz` and the oracle report catch panics per case, so they are built with
 the `release-unwind` profile (the workspace's `release` profile aborts on panic).
