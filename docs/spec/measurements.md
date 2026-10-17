@@ -337,8 +337,11 @@ and activated (SIM-7 step 4). Uses the first MonitorRepository; specs of **activ
     (`SlidingWindowProbeFrameWorkListenerDecorator`), utilisation windows (MEAS-6.1 order; the overall
     window of a multi-core resource has its own measurement with the same spec and MP). Recorders of a
     calculator created later (passive resources, MEAS-5.1) append their measurement when the
-    calculator appears (`DeferredMeasurementInitialization`; SimuLizar iterates a `HashSet` of suppliers
-    there, SimOxide the order above). Specs whose calculator never exists have no measurement. The
+    calculator appears (`DeferredMeasurementInitialization`: SimuLizar iterates a `HashMap` of metric
+    descriptions and a `HashSet` of suppliers there, in identity-hash order; the reference keeps both
+    in insertion order, patch P10, which is the order above unless one calculator gets recorders of
+    different metric descriptions, deferred interleaved: the reference groups them by metric
+    description, SimOxide does not). Specs whose calculator never exists have no measurement. The
     `Number of Resource Containers` calculator (MEAS-7.3) takes aggregation and feed-through recorders
     like any other.
   - **Feed-through**: the tuple's value (`getMeasureForMetric(spec metric)`, default unit).

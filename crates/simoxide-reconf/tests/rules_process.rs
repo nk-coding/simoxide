@@ -276,6 +276,61 @@ fn simulizar_examples_power_consumption_and_reconfiguration_test() {
     assert_eq!(rt, (1..=10).map(f64::from).collect::<Vec<_>>());
 }
 
+/// R2: rules that create objects without explicit ids. Their ids come from the run's seeded
+/// generator, which draws only inside rule runs (the PRM mirror draws none), as the reference's
+/// (refsim patch P10); they reach the trace (assembly contexts, containers, actions, branches) and
+/// the stop's deactivation order (container ids).
+#[test]
+fn rules_that_create_objects_without_ids_equal_the_reference() {
+    // the scale-out and the added branch of R1 without ids
+    let (out, _) = example("lb_scaleout_noid", QvtMode::Auto);
+    let n: Vec<f64> = series(&out.csv, "Number of Resource Containers")
+        .iter()
+        .map(|x| x.1)
+        .collect();
+    assert_eq!(n, [3.0, 4.0]);
+    example("lb_add_branch_noid", QvtMode::Auto);
+    // SimuLizar's horizontal-scaling adaptation steps (instantiatecomponent, wirewithloadbalancer)
+    let (_, mut h) = example("lb_wire_new_server", QvtMode::Auto);
+    let wired = h
+        .take_records()
+        .into_iter()
+        .find(|r| r.succeeded)
+        .expect("the wiring");
+    assert!(
+        wired.rules[0]
+            .log
+            .contains("Wiring with load balancer successful")
+    );
+    // deepclone(): every copy draws an id (then takes the original's), the branch the next one
+    let (_, mut h) = example("lb_clone_branch", QvtMode::Auto);
+    let copied = h.take_records().into_iter().find(|r| r.succeeded).unwrap();
+    assert!(
+        copied.rules[0]
+            .log
+            .contains("copied _riehsAEoEeS7FKokKTKFow as _riehsAEoEeS7FKokKTKFow")
+    );
+}
+
+/// R2: a rule whose result depends on the iteration order of a `Set` of model objects. The
+/// reference iterates QVTo's and OCL's sets in insertion order (refsim patch P10, the `det`
+/// ordering rule); so do QVTo's ordered mode (the rules' default, EPL) and its fast mode.
+#[test]
+fn a_rule_over_a_set_of_objects_equals_the_reference_in_insertion_order() {
+    let (_, mut h) = example("lb_scaleout_each", QvtMode::Auto);
+    let moved = h.take_records().into_iter().find(|r| r.succeeded).unwrap();
+    let log = &moved.rules[1].log;
+    assert!(
+        log.contains("1: Server1 moved to ServerNode1_scaled"),
+        "{log}"
+    );
+    assert!(
+        log.contains("2: Server2 moved to ServerNode2_scaled"),
+        "{log}"
+    );
+    example("lb_scaleout_each", QvtMode::Fast);
+}
+
 /// Runs `name` to `pause`, then `f` on the run, then to the end; the outputs of the run that went
 /// on, and of the forks `f` returns (each with its own writers, the continuation only).
 fn forked(

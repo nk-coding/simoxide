@@ -1,0 +1,13 @@
+--- 5.2.2/Palladio-Core-Commons/bundles/de.uka.ipd.sdq.identifier/src/de/uka/ipd/sdq/identifier/impl/IdentifierImpl.java
++++ patched/de/uka/ipd/sdq/identifier/impl/IdentifierImpl.java
+@@ -42,7 +42,9 @@
+      */
+     protected IdentifierImpl() {
+         super();
+-        setId(EcoreUtil.generateUUID());
++        // REFSIM (patch P10, DESIGN-SPD R2): while a reconfiguration rule runs, the id comes from
++        // refsim's seeded generator (SimOxide draws the same sequence); otherwise EMF's UUID.
++        setId(refsim.Ids.generate());
+     }
+ 
+     /**

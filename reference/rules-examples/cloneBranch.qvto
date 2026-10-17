@@ -1,0 +1,33 @@
+/*
+ * SimOxide R2 example (not part of SimuLizar): ids of copied and created objects. At the first
+ * reconfiguration the load balancer's first branch behaviour is copied with deepclone() and
+ * becomes the behaviour of a new third branch; the probabilities become 0.5 / 0.25 / 0.25.
+ * EMF's copier constructs every copy through the generated factory, so each copied Identifier
+ * draws a new id first and then gets the original's id (the copies keep the actions' ids: the
+ * trace shows the copied actions under their originals' ids). The new branch, created after the
+ * copy, gets the next id of the run's seeded generator (DESIGN-SPD R2, refsim patch P10): it is
+ * equal in SimOxide only if the copy drew as many ids as Java's copier.
+ */
+modeltype PRM uses 'http://simulizar.palladiosimulator.org/RuntimeMeasurement/1.0';
+modeltype PCM_REP uses 'http://palladiosimulator.org/PalladioComponentModel/Repository/5.2';
+modeltype PCM_SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+
+transformation cloneBranch(in prm : PRM, inout pcmRepository : PCM_REP) {
+	main() {
+		var branch : BranchAction := pcmRepository.rootObjects()[Repository].components__Repository[BasicComponent]
+			.serviceEffectSpecifications__BasicComponent[ResourceDemandingSEFF].steps_Behaviour[BranchAction]->any(true);
+		assert fatal (branch.branches_Branch->size() = 2) with log ('done');
+		var b1 : ProbabilisticBranchTransition := branch.branches_Branch[ProbabilisticBranchTransition]->any(entityName = 'delegateToServer1');
+		var b2 : ProbabilisticBranchTransition := branch.branches_Branch[ProbabilisticBranchTransition]->any(entityName = 'delegateToServer2');
+		var copy : ResourceDemandingBehaviour := b1.branchBehaviour_BranchTransition.deepclone().oclAsType(ResourceDemandingBehaviour);
+		branch.branches_Branch += object ProbabilisticBranchTransition {
+			entityName := 'delegateToServer1Copy';
+			branchProbability := 0.25;
+			branchBehaviour_BranchTransition := copy;
+		};
+		b1.branchProbability := 0.5;
+		b2.branchProbability := 0.25;
+		log('copied ' + b1.branchBehaviour_BranchTransition.id + ' as ' + copy.id);
+	}
+}

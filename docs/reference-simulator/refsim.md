@@ -53,6 +53,7 @@ P4 to P7), so every batch run equals a fresh-JVM run.
 |---|---|
 | `REFSIM_UNPATCHED=1` | stock 5.2.2 classes, no state fixes |
 | `REFSIM_EXCLUDE=Class,...` | drop individual shadowed classes |
+| `REFSIM_ORDERING=stock` | without the ordering agent of patch P10 (QVTo's and OCL's sets in Java identity-hash order) |
 | `REFSIM_VERBOSE=1` | show SimuLizar and DESMO-J output |
 | `REFSIM_LOG=INFO` | log4j level |
 | `JAVA`, `JVM_OPTS`, `PALLADIO_PLUGINS` | JVM and product location |

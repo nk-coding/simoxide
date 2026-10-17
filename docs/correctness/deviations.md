@@ -215,9 +215,17 @@ differs from SimuLizar 5.2.2 itself:
   without allocation is refused at the change, SimuLizar fails only when a request reaches it.
   Executions in progress inside a changed behaviour finish their old instructions (MC-4.3).
 - **Passive-resource PRM measurements** join the runtime measurement model in the order of the
-  monitors; SimuLizar's order comes from a `HashSet` (MEAS-7.5).
-- **New object ids** come from a seeded generator (reproducible), SimuLizar's from
-  `EcoreUtil.generateUUID()`.
+  monitors. SimuLizar's order comes from a `HashMap` of metric descriptions and a `HashSet` of
+  suppliers (identity hashes; the reference keeps them in insertion order, patch P10). Both orders
+  agree unless one lazily created calculator gets recorders of specifications with different
+  metric descriptions, deferred interleaved (the reference then groups them by metric
+  description); no example has that (MEAS-7.5).
+- **New object ids** come from a seeded generator that draws only while a rule runs
+  (reproducible); SimuLizar's from `EcoreUtil.generateUUID()` (time-based). The reference draws
+  the same sequence (patch P10), so the ids equal it (MC-7.6).
+- **Sets of model objects** in rules iterate in insertion order (QVTo's ordered mode, the rules'
+  default), SimuLizar's in Java identity-hash order, which differs from run to run; the reference
+  is patched to insertion order (P10, MC-7.6).
 
 ### Virtual-time processor sharing
 
