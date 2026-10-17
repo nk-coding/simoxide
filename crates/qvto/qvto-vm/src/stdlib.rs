@@ -13,6 +13,7 @@ use qvto_runtime::IntBox;
 use qvto_runtime::eq::{java_equals, ocl_equal};
 use qvto_runtime::num::{self, NumOp};
 use qvto_runtime::{ObjRef, Str, TypeRef, Value, strings};
+use std::collections::HashMap;
 use qvto_types::{Section, StdOp, StdOwner, TypeId};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -488,9 +489,11 @@ fn index_arg(v: &Value) -> Option<i32> {
     }
 }
 
-fn type_arg(v: &Value) -> Option<TypeId> {
+fn type_arg_of(v: &Value, objs: &HashMap<ObjRef, TypeId>) -> Option<TypeId> {
     match v {
         Value::Type(TypeRef(t)) => Some(TypeId(*t)),
+        // a type literal of a metamodel classifier is its `EClassifier` object
+        Value::Obj(o) => objs.get(o).copied(),
         _ => None,
     }
 }
@@ -644,15 +647,15 @@ where
                     Value::Bool(if matches!(prim, Eq | QEq) { eq } else { !eq })
                 }
             }
-            OclAsType => match type_arg(&a1) {
+            OclAsType => match type_arg_of(&a1, &self.object_types) {
                 Some(t) => self.ocl_as_type(s, t, self.std_src_ty),
                 None => Value::Invalid,
             },
-            OclIsKindOf => match type_arg(&a1) {
+            OclIsKindOf => match type_arg_of(&a1, &self.object_types) {
                 Some(t) => Value::Bool(self.ocl_is_kind_of(&s, t)),
                 None => Value::Invalid,
             },
-            OclIsTypeOf => match type_arg(&a1) {
+            OclIsTypeOf => match type_arg_of(&a1, &self.object_types) {
                 Some(t) => Value::Bool(self.ocl_is_type_of(&s, t)),
                 None => Value::Invalid,
             },
@@ -873,7 +876,7 @@ where
                     _ => Value::Invalid,
                 }
             }
-            AllInstances => match type_arg(&s) {
+            AllInstances => match type_arg_of(&s, &self.object_types) {
                 Some(t) => self.all_instances(t),
                 None => Value::Invalid,
             },
@@ -970,7 +973,7 @@ where
                 out
             }
             SelectByKind | SelectByType | LSelectByKind | LSelectByType => {
-                let Some(t) = type_arg(&a1) else {
+                let Some(t) = type_arg_of(&a1, &self.object_types) else {
                     return Ok(Value::Invalid);
                 };
                 let kind = matches!(prim, SelectByKind | LSelectByKind);
@@ -1319,7 +1322,7 @@ where
                 );
                 let filter = match prim {
                     ESubobjects | EAllSubobjects => None,
-                    _ => match type_arg(&a1) {
+                    _ => match type_arg_of(&a1, &self.object_types) {
                         Some(t) => {
                             Some((t, matches!(prim, ESubobjectsOfKind | EAllSubobjectsOfKind)))
                         }
@@ -1372,7 +1375,7 @@ where
                 };
                 let filter = match prim {
                     MObjects => None,
-                    _ => match type_arg(&a1) {
+                    _ => match type_arg_of(&a1, &self.object_types) {
                         Some(t) => Some((t, prim != MObjectsOfType)),
                         None => return Ok(Value::Invalid),
                     },

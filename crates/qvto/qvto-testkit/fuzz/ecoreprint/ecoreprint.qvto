@@ -1,0 +1,11 @@
+modeltype ECORE uses ecore('http://www.eclipse.org/emf/2002/Ecore');
+transformation ecoreprint(in m : ECORE);
+main() {
+	var p := m.rootObjects()![ECORE::EPackage];
+	log('p', p);
+	p.eClassifiers->forEach(c) { log('c', c); };
+	m.objectsOfType(ECORE::EStructuralFeature)->sortedBy(name)->forEach(f) { log('f', f); };
+	m.objectsOfType(ECORE::EEnumLiteral)->sortedBy(name)->forEach(l) { log('l', l); };
+	m.objectsOfType(ECORE::EAnnotation)->forEach(a) { log('a', a); log('d', a.details); };
+	log('g', p.eClassifiers![ECORE::EClass].eGenericSuperTypes->first());
+}

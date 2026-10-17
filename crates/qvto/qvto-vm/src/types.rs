@@ -184,7 +184,10 @@ where
                 }
                 _ => false,
             },
-            Type::TypeType(_) => matches!(v, Value::Type(_)),
+            Type::TypeType(_) => {
+                matches!(v, Value::Type(_))
+                    || matches!(v, Value::Obj(o) if self.object_types.contains_key(o))
+            }
             _ => false,
         }
     }

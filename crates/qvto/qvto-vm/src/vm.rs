@@ -229,6 +229,9 @@ where
     pub(crate) cur_transf: ModuleId,
     /// Static type of the receiver of the current `CallStdX`.
     pub(crate) std_src_ty: TypeId,
+    /// Type literals that are classifier objects of the store, and back.
+    pub(crate) type_objects: HashMap<TypeId, ObjRef>,
+    pub(crate) object_types: HashMap<ObjRef, TypeId>,
     /// Address of a local of the outermost VM entry (native stack accounting).
     pub(crate) stack_base: std::cell::Cell<usize>,
     /// The static type of that call.
@@ -316,15 +319,15 @@ where
             native: Default::default(),
             std_src_ty: TypeId::OCL_VOID,
             stack_base: std::cell::Cell::new(0),
+            type_objects: HashMap::new(),
+            object_types: HashMap::new(),
             std_res_ty: TypeId::OCL_VOID,
         };
         if let Some(src) = vm.opts.id_source.take() {
             vm.env = RunEnv::new(vm.opts.mode, Some(src));
         }
-        if vm.opts.mode == Mode::Compat {
-            // identity hashes are observable only in compat mode
-            vm.alias_classifier_identities();
-        }
+        // identity aliases (compat mode) and the classifier objects of type literals
+        vm.alias_classifier_identities();
         vm.consts = vec![None; prog.consts.len()];
         vm.interm_info = crate::objects::IntermInfo::new(prog, vm.store);
         vm.class_local = crate::objects::local_classes(prog, vm.interm_info.in_store);
@@ -431,8 +434,10 @@ where
                 _ => continue,
             };
             if let Some(o) = self.store.classifier_object(c) {
-                let target = IdentityKey::Obj(ObjRef::host(o.to_u32()));
-                self.env.alias(IdentityKey::Type(TypeRef(i as u32)), target);
+                let r = ObjRef::host(o.to_u32());
+                self.env.alias(IdentityKey::Type(TypeRef(i as u32)), IdentityKey::Obj(r));
+                self.type_objects.insert(TypeId(i as u32), r);
+                self.object_types.insert(r, TypeId(i as u32));
             }
         }
         // the `eClass` of a printed object (`log.rs`)
@@ -724,7 +729,14 @@ where
                     let v = match &self.consts[k as usize] {
                         Some(v) => v.clone(),
                         None => {
-                            let v = const_value(&prog.consts[k as usize]);
+                            // a type literal of a metamodel classifier is its `EClassifier`
+                            // object (Ecore's OCL environment), when the store has one
+                            let v = match &prog.consts[k as usize] {
+                                Const::Type(t) if self.type_objects.contains_key(t) => {
+                                    Value::Obj(self.type_objects[t])
+                                }
+                                c => const_value(c),
+                            };
                             self.consts[k as usize] = Some(v.clone());
                             v
                         }

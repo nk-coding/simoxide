@@ -1,0 +1,23 @@
+modeltype ECORE uses ecore('http://www.eclipse.org/emf/2002/Ecore');
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation typelit(in m : FZ, out o : ECORE);
+main() {
+	var a := object ECORE::EAttribute { name := 'x'; eType := ECORE::EInt.oclAsType(ECORE::EClassifier); };
+	log('a', a.eType = ECORE::EInt);
+	log('b', a.eType.name);
+	log('c', ECORE::EInt.oclIsKindOf(ECORE::EClassifier));
+	log('d', ECORE::EInt.oclAsType(ECORE::EDataType).name);
+	log('e', Set{ECORE::EInt, a.eType}->size());
+	log('f', FZ::Node.oclAsType(ECORE::EClass).eStructuralFeatures->size());
+	log('g', FZ::Node = m.objectsOfType(FZ::Node)->any(true).oclAsType(ECORE::EObject).eClass());
+	log('h', ECORE::EString.oclAsType(ECORE::EDataType).name);
+
+	log('p', ECORE::EInt);
+	log('q', FZ::Node);
+	log('r', FZ::Kind);
+	log('s', Integer);
+	log('t', FZ::Node.allInstances()->size());
+	log('u', m.objectsOfType(FZ::Node)->size());
+	log('v', Sequence{FZ::Node, FZ::Leaf}->collect(t | t.oclAsType(ECORE::EClass).name));
+	log('x', Set{1}->oclIsKindOf(Set(Integer)));
+}

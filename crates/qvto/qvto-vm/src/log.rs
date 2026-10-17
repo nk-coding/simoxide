@@ -14,6 +14,8 @@ struct Fmt<'a> {
     prog: &'a qvto_bytecode::Program,
     class_of: &'a dyn Fn(ObjRef) -> Option<qvto_model::ClassId>,
     interm: &'a crate::objects::IntermInfo,
+    /// Objects of Ecore's own classes: their generated class and `toString` attributes.
+    ecore: &'a dyn Fn(ObjRef) -> Option<(String, String)>,
 }
 
 impl ObjectFormat for Fmt<'_> {
@@ -26,6 +28,16 @@ impl ObjectFormat for Fmt<'_> {
             return;
         }
         let key = IdentityKey::Obj(o);
+        if let Some((class, attrs)) = (self.ecore)(o) {
+            // the generated `toString` of Ecore's classes (`EClassImpl@hash (name: X) ...`);
+            // an `EEnumLiteral` is an `Enumerator` and prints its literal
+            if class.is_empty() {
+                out.push_str(&attrs);
+            } else {
+                let _ = write!(out, "{class}@{:x}{attrs}", env.identity_hash(key));
+            }
+            return;
+        }
         let _ = write!(out, "{}@{:x}", env.class_name(key), env.identity_hash(key));
         if let Some(c) = (self.class_of)(o) {
             let meta = &self.prog.ir.meta;
@@ -52,10 +64,28 @@ impl ObjectFormat for Fmt<'_> {
         }
     }
     fn type_name(&self, t: TypeRef, out: &mut String) {
-        out.push_str(&crate::types::type_simple_name(
-            self.prog,
-            qvto_types::TypeId(t.0),
-        ));
+        use qvto_types::Type;
+        // classic OCL's primitive type objects (`PrimitiveTypeImpl.toString`)
+        let prim = match self.prog.ir.types.get(qvto_types::TypeId(t.0)) {
+            Type::Integer => Some(("Integer", "java.lang.Integer")),
+            Type::Real => Some(("Real", "java.lang.Double")),
+            Type::String => Some(("String", "java.lang.String")),
+            Type::Boolean => Some(("Boolean", "java.lang.Boolean")),
+            Type::UnlimitedNatural => Some(("UnlimitedNatural", "java.lang.Integer")),
+            _ => None,
+        };
+        match prim {
+            Some((n, c)) => {
+                let _ = write!(
+                    out,
+                    "org.eclipse.ocl.ecore.impl.PrimitiveTypeImpl@1 (name: {n}) (instanceClassName: {c}) (serializable: true)"
+                );
+            }
+            None => out.push_str(&crate::types::type_simple_name(
+                self.prog,
+                qvto_types::TypeId(t.0),
+            )),
+        }
     }
 }
 
@@ -93,12 +123,89 @@ where
             }
         }
         let class_of = |o: ObjRef| self.class_of(&Value::Obj(o));
+        let ecore = |o: ObjRef| self.ecore_to_string(o);
         let f = Fmt {
             prog: self.prog,
             class_of: &class_of,
             interm: &self.interm_info,
+            ecore: &ecore,
         };
         java_to_string(v, &self.env, &f, out);
+    }
+
+    /// The generated `toString` of an object of one of Ecore's classes: its Java class and the
+    /// attribute groups each implementation class in its hierarchy appends.
+    fn ecore_to_string(&self, o: ObjRef) -> Option<(String, String)> {
+        if o.is_local() {
+            return None;
+        }
+        let meta = &self.prog.ir.meta;
+        let c = self.class_of(&Value::Obj(o))?;
+        let ecore = meta.package_by_ns_uri("http://www.eclipse.org/emf/2002/Ecore")?;
+        let ci = meta.class(c);
+        if ci.package != ecore {
+            return None;
+        }
+        let h = S::Obj::from_u32(o.index());
+        let is = |name: &str| {
+            meta.class_by_name(ecore, name)
+                .is_some_and(|x| x == c || meta.is_subclass(c, x))
+        };
+        let val = |name: &str| -> String {
+            let Some(f) = meta.feature_by_name(c, name) else {
+                return "null".into();
+            };
+            match self.store.get(h, f) {
+                qvto_model::Datum::Null => "null".into(),
+                qvto_model::Datum::Bool(b) => b.to_string(),
+                qvto_model::Datum::Int(i) => i.to_string(),
+                qvto_model::Datum::Long(i) => i.to_string(),
+                qvto_model::Datum::Str(s) => s.to_string(),
+                _ => "null".into(),
+            }
+        };
+        let group = |names: &[&str]| -> String {
+            let parts: Vec<String> = names.iter().map(|n| format!("{n}: {}", val(n))).collect();
+            format!(" ({})", parts.join(", "))
+        };
+        if is("EEnumLiteral") {
+            return Some((String::new(), val("literal")));
+        }
+        let mut s = String::new();
+        if is("ENamedElement") {
+            s += &group(&["name"]);
+        }
+        if is("EClassifier") {
+            s += &group(&["instanceClassName"]);
+        }
+        if is("EClass") {
+            s += &group(&["abstract", "interface"]);
+        }
+        if is("EDataType") {
+            s += &group(&["serializable"]);
+        }
+        if is("ETypedElement") {
+            s += &group(&["ordered", "unique", "lowerBound", "upperBound"]);
+        }
+        if is("EStructuralFeature") {
+            s += &group(&["changeable", "volatile", "transient", "defaultValueLiteral", "unsettable", "derived"]);
+        }
+        if is("EAttribute") {
+            s += &group(&["iD"]);
+        }
+        if is("EReference") {
+            s += &group(&["containment", "resolveProxies"]);
+        }
+        if is("EPackage") {
+            s += &group(&["nsURI", "nsPrefix"]);
+        }
+        if is("EAnnotation") {
+            s += &group(&["source"]);
+        }
+        if is("EStringToStringMapEntry") {
+            s += &group(&["key", "value"]);
+        }
+        Some((format!("org.eclipse.emf.ecore.impl.{}Impl", ci.name), s))
     }
 
     /// One record of the transformation's log (`WriterLog`, records end with a newline).

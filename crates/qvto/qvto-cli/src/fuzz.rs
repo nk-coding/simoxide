@@ -159,7 +159,8 @@ fn recheck(root: &Path, dirs: &[String]) {
 /// case file of existing transformations (default `cases/external.cases`); compile problems
 /// compared exactly (severity, unit, line, offset, length, message), run cases also by
 /// outcome, log and output models. Writes `DIR/report.tsv` (one row per case) and prints a
-/// summary. `--reuse` keeps the Java results of a previous run in `DIR/java`.
+/// summary. `--reuse` keeps the Java results of a previous run in `DIR/java`. Identity hashes
+/// are constant on both sides (`--tape`: HotSpot's, replayed from the Java run's tape).
 fn corpus(root: &Path, args: &[String]) {
     let mut cases = root.join("crates/qvto-testkit/cases/external.cases");
     let mut out = root.join("target/qvto-fuzz/corpus");
@@ -181,6 +182,7 @@ fn corpus(root: &Path, args: &[String]) {
                 only.extend(args[i].split(',').map(String::from));
             }
             "--reuse" => reuse = true,
+            "--tape" => TAPE_MODE.store(true, std::sync::atomic::Ordering::Relaxed),
             a => crate::die(&format!("fuzz corpus: unknown argument {a}")),
         }
         i += 1;
@@ -198,7 +200,10 @@ fn corpus(root: &Path, args: &[String]) {
         let _ = std::fs::write(&p, t);
         p
     };
-    let ran = match run_batch_opts(root, &out, &cf, reuse, true) {
+    // constant identity hashes on both sides (`-XX:hashCode=2`), as the fuzz campaigns: object
+    // hashes in logs and identity-hash orders are reproducible (the tape covers only the
+    // objects of the inputs, the outputs and their metamodels)
+    let ran = match run_batch_opts(root, &out, &cf, reuse, false) {
         Ok(r) => r,
         Err(e) => crate::die(&e),
     };

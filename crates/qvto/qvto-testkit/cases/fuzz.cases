@@ -149,3 +149,25 @@ dir crates/qvto-testkit/fuzz/flatten
 qvto flatten.qvto
 note flatten and collect flatten List and Dict values (both are collection types); the static type too
 end
+
+case fuzz_typelit
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/typelit
+qvto typelit.qvto
+in typelit.xmi
+mmfile ../fuzz.ecore
+note a type literal of a metamodel classifier is its EClassifier object (equality, navigation, oclAsType, printing)
+end
+
+case fuzz_ecoreprint
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/ecoreprint
+qvto ecoreprint.qvto
+in ecoreprint.xmi
+mmfile ../fuzz.ecore
+note objects of Ecore's classes print with their generated toString; OCL primitive types as PrimitiveTypeImpl
+end

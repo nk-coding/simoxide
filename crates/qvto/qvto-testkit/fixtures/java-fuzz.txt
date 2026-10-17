@@ -48,6 +48,48 @@ exec	1	OK	0	o
 exec	1	OK	0	b
 exec	1	OK	0	p
 
+@case fuzz_ecoreprint
+@file result.txt 142
+id	fuzz_ecoreprint
+load	OK
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 1040
+p, data: org.eclipse.emf.ecore.impl.EPackageImpl@1 (name: fz) (nsURI: http://qvto-rs/fuzz, nsPrefix: fz)
+c, data: org.eclipse.emf.ecore.impl.EEnumImpl@1 (name: Kind) (instanceClassName: null) (serializable: true)
+c, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Named) (instanceClassName: null) (abstract: true, interface: false)
+c, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Root) (instanceClassName: null) (abstract: false, interface: false)
+c, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Node) (instanceClassName: null) (abstract: false, interface: false)
+c, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Leaf) (instanceClassName: null) (abstract: false, interface: false)
+c, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Item) (instanceClassName: null) (abstract: false, interface: false)
+l, data: A
+l, data: B
+l, data: C
+a, data: org.eclipse.emf.ecore.impl.EAnnotationImpl@1 (source: src)
+d, data: [org.eclipse.emf.ecore.impl.EStringToStringMapEntryImpl@1 (key: k, value: v)]
+g, data: <Invalid>
+
+@file diag.txt 182
+exec	1	OK	0	p
+exec	1	OK	0	c
+exec	1	OK	0	c
+exec	1	OK	0	c
+exec	1	OK	0	c
+exec	1	OK	0	c
+exec	1	OK	0	c
+exec	1	OK	0	l
+exec	1	OK	0	l
+exec	1	OK	0	l
+exec	1	OK	0	a
+exec	1	OK	0	d
+exec	1	OK	0	g
+
 @case fuzz_flatten
 @file result.txt 135
 id	fuzz_flatten
@@ -469,6 +511,64 @@ exec	1	OK	0	r5
 exec	1	OK	0	r6
 exec	1	OK	0	r7
 exec	1	OK	0	r8
+
+@case fuzz_typelit
+@file result.txt 150
+id	fuzz_typelit
+load	WARNING
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 610
+{"resource":"extent1.xmi","roots":1}
+{"path":"/0","type":"http://www.eclipse.org/emf/2002/Ecore#EAttribute","attrs":{"name":"x","ordered":"true","unique":"true","lowerBound":"0","upperBound":"1","changeable":"true","volatile":"false","transient":"false","defaultValueLiteral":null,"unsettable":"false","derived":"false","iD":"false"},"refs":{"eType":"http://www.eclipse.org/emf/2002/Ecore#/0/@eClassifiers.39"},"set":["eType"]}
+{"path":"/0/@eGenericType","type":"http://www.eclipse.org/emf/2002/Ecore#EGenericType","attrs":{},"refs":{"eClassifier":"http://www.eclipse.org/emf/2002/Ecore#/0/@eClassifiers.39"}}
+
+@file log.txt 648
+a, data: true
+b, data: EInt
+c, data: true
+d, data: EInt
+e, data: 1
+f, data: 12
+g, data: true
+h, data: EString
+p, data: org.eclipse.emf.ecore.impl.EDataTypeImpl@1 (name: EInt) (instanceClassName: int) (serializable: true)
+q, data: org.eclipse.emf.ecore.impl.EClassImpl@1 (name: Node) (instanceClassName: null) (abstract: false, interface: false)
+r, data: org.eclipse.emf.ecore.impl.EEnumImpl@1 (name: Kind) (instanceClassName: null) (serializable: true)
+s, data: org.eclipse.ocl.ecore.impl.PrimitiveTypeImpl@1 (name: Integer) (instanceClassName: java.lang.Integer) (serializable: true)
+t, data: 1
+u, data: 1
+v, data: [Node, Leaf]
+x, data: {false=1}
+
+@file diag.txt 681
+problem	warning	typelit.qvto	6	288	21	The type 'ecore::EClassifier' does not conform to the type 'OclType(typelit::EInt)'
+problem	warning	typelit.qvto	12	580	82	The type 'OclType(typelit::Node)' does not conform to the type 'ecore::EClass'
+load	0	WARNING	0	OK
+load	1	WARNING	0	The type 'ecore::EClassifier' does not conform to the type 'OclType(typelit::EInt)'
+load	1	WARNING	0	The type 'OclType(typelit::Node)' does not conform to the type 'ecore::EClass'
+exec	1	OK	0	a
+exec	1	OK	0	b
+exec	1	OK	0	c
+exec	1	OK	0	d
+exec	1	OK	0	e
+exec	1	OK	0	f
+exec	1	OK	0	g
+exec	1	OK	0	h
+exec	1	OK	0	p
+exec	1	OK	0	q
+exec	1	OK	0	r
+exec	1	OK	0	s
+exec	1	OK	0	t
+exec	1	OK	0	u
+exec	1	OK	0	v
+exec	1	OK	0	x
 
 @case fuzz_typematrix
 @file result.txt 142
