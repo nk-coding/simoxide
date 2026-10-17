@@ -1,0 +1,69 @@
+/*
+ * SimOxide R1 example (not part of SimuLizar): when the mean response time of the calls to
+ * Server2 exceeds the threshold, Server2's role moves to a new, twice as fast node: a resource
+ * container (with copies of ServerNode2's processing resources) joins the resource environment
+ * and the LAN, a new assembly context of the server component is allocated to it, and the load
+ * balancer's connector to Server2 is rewired to it. New objects get fixed ids.
+ */
+modeltype PRM uses 'http://simulizar.palladiosimulator.org/RuntimeMeasurement/1.0';
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_COMP uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+modeltype PCM_SYS uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+
+transformation scaleOut(in prm : PRM, inout pcmAllocation : PCM_ALLOC) {
+
+	property threshold : Real = 1.2;
+	-- the time-driven aggregation of the response times of the calls to Server2
+	property server2Spec : String = '_5osNEAOzEeWk4qXEVpjV-g';
+
+	main() {
+		var allocation : Allocation := pcmAllocation.rootObjects()[Allocation]->any(true);
+		var env : ResourceEnvironment := allocation.targetResourceEnvironment_Allocation;
+		assert fatal (not env.resourceContainer_ResourceEnvironment->exists(entityName = 'ServerNode3'))
+			with log ('Already scaled out');
+		assert fatal (prm.rootObjects()[RuntimeMeasurement]->exists(m |
+				m.measurementSpecification.id = server2Spec and m.measuringValue > threshold))
+			with log ('Server2 is fast enough');
+		var node2 : ResourceContainer := env.resourceContainer_ResourceEnvironment->any(entityName = 'ServerNode2');
+		var node3 : ResourceContainer := object ResourceContainer {
+			id := '_scaleout_ServerNode3';
+			entityName := 'ServerNode3';
+		};
+		node2.activeResourceSpecifications_ResourceContainer->forEach(s) {
+			node3.activeResourceSpecifications_ResourceContainer += object ProcessingResourceSpecification {
+				id := s.id + '_ServerNode3';
+				schedulingPolicy := s.schedulingPolicy;
+				activeResourceType_ActiveResourceSpecification := s.activeResourceType_ActiveResourceSpecification;
+				processingRate_ProcessingResourceSpecification := object PCMRandomVariable {
+					specification := (s.processingRate_ProcessingResourceSpecification.specification.toReal() * 2).toString();
+				};
+			};
+		};
+		env.resourceContainer_ResourceEnvironment += node3;
+		env.linkingResources__ResourceEnvironment->forEach(l) {
+			l.connectedResourceContainers_LinkingResource += node3;
+		};
+		var system : System := allocation.system_Allocation;
+		var server2 : AssemblyContext := system.assemblyContexts__ComposedStructure->any(entityName = 'Server2');
+		var server3 : AssemblyContext := object AssemblyContext {
+			id := '_scaleout_Server3';
+			entityName := 'Server3';
+			encapsulatedComponent__AssemblyContext := server2.encapsulatedComponent__AssemblyContext;
+		};
+		system.assemblyContexts__ComposedStructure += server3;
+		allocation.allocationContexts_Allocation += object AllocationContext {
+			id := '_scaleout_Allocation_Server3';
+			entityName := 'Allocation_Server3';
+			resourceContainer_AllocationContext := node3;
+			assemblyContext_AllocationContext := server3;
+		};
+		system.connectors__ComposedStructure[AssemblyConnector]
+			->select(c | c.providingAssemblyContext_AssemblyConnector = server2)
+			->forEach(c) {
+				c.providingAssemblyContext_AssemblyConnector := server3;
+			};
+		log('Server2 moved to ServerNode3');
+	}
+}

@@ -46,6 +46,7 @@ pub use qvto_emf::{IdPolicy, Journal};
 #[cfg(feature = "spd")]
 mod adjust;
 mod host;
+mod process;
 mod qvt;
 mod rules;
 
@@ -56,6 +57,7 @@ pub use host::{
     ModelRef, NsBinding, Outcome, ParamDir, ParamInfo, QvtMode, QvtoCore, QvtoRun, ReconfError,
     RunConfig, Transformation, palladio_metamodels, resolve_mode,
 };
+pub use process::{PRM_URI, ReconfRecord, RuleRecord, RulesHost, RulesRun, RulesStats};
 pub use rules::{RuleSet, RulesOutcome};
 
 /// The simulator's change set of a journal recorded on `g`: the changes of objects of

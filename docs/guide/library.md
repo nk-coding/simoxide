@@ -187,6 +187,9 @@ let all = qvto.run_rules(&mut sim, &rules, &Invocation::simulizar()).map_err(|(_
   `&mut simoxide_model::raw::Graph`, objects as `ObjId`). Outside a simulation,
   `QvtoCore::attach` gives a loaded model graph the core's QVTo state and
   `QvtoCore::load_model` loads other models into it.
+- **SimuLizar's reconfiguration process.** `RulesRun` runs a simulation whose reconfiguration
+  process executes a `RuleSet` with SimuLizar's timing, runtime measurement values and result
+  ([Reconfiguration rules](reconfiguration.md#library)).
 
 ## Outputs
 

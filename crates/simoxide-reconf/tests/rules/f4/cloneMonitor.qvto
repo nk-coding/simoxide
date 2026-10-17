@@ -1,0 +1,19 @@
+-- F4 change kind: a monitor added to the monitor repository (monitor cloning).
+modeltype PRM uses 'http://simulizar.palladiosimulator.org/RuntimeMeasurement/1.0';
+modeltype MON uses 'http://palladiosimulator.org/MonitorRepository/1.0';
+
+transformation cloneMonitor(in prm : PRM, inout monitors : MON) {
+	main() {
+		var repo : MonitorRepository := monitors.rootObjects()[MonitorRepository]->any(true);
+		assert fatal (repo.monitors->size() = 5) with log ('done');
+		var m : Monitor := repo.monitors->any(entityName = 'Server2');
+		repo.monitors += object Monitor {
+			entityName := 'Server2 copy';
+			measuringPoint := m.measuringPoint;
+			measurementSpecifications += object MeasurementSpecification {
+				metricDescription := m.measurementSpecifications->any(true).metricDescription;
+				processingType := object FeedThrough {};
+			};
+		};
+	}
+}

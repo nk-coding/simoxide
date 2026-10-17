@@ -5,7 +5,7 @@
 #   regen-expected.sh --check [--only ..]  re-run and compare with the stored expected outputs (no writes)
 set -e
 cd "$(dirname "$0")"
-CORPUS=../corpus
+CORPUS=${CORPUS:-../corpus}
 if [ "$1" = "--check" ]; then shift; exec ./refsim batch "$CORPUS" --check "$@"; fi
 ONLY=""; [ "$1" = "--only" ] && ONLY="$2"
 for d in "$CORPUS"/*/; do

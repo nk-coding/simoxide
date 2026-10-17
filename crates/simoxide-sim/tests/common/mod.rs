@@ -37,6 +37,7 @@ pub fn run_spec(c: &simoxide_testkit::runcfg::RunConfig) -> RunSpec {
         usagemodel: c.usagemodel.clone(),
         allocation: c.allocation.clone().unwrap_or_default(),
         monitorrepository: c.monitorrepository.clone(),
+        ..RunSpec::default()
     }
 }
 

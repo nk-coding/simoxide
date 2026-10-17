@@ -174,6 +174,30 @@ deviates as follows:
 - **Tape**: the `Math.random()` draws of the exact RNG mode are `{"k":"m","i":n,"u":x,"o":"branch:<id>"}`
   records next to the StoEx records; replaying a tape replays the StoEx stream only.
 
+### Reconfiguration rules
+
+With SimuLizar's reconfiguration rules ([Reconfiguration rules](../guide/reconfiguration.md), the
+`reconfiguration` feature) SimOxide equals the patched reference on every runnable example. Where it
+differs from SimuLizar 5.2.2 itself:
+
+- **Rule order.** File-name order; SimuLizar's is the iteration order of a `HashMap` of the rules'
+  URIs, which depends on where the folder lies (the reference is patched to file-name order, P9).
+- **Changes per rule.** A rule's changes reach the simulation when the rule has finished, not per
+  notification while it runs (MC-7.4); no syncer reads the model in between, so this changes
+  nothing for the supported change kinds.
+- **Runs after the stop** run when the finalisation step that triggered them (a final window, a
+  resource's deactivation, the drain, the passive-resource cleanup) has finished, on the runtime
+  measurement values of the trigger; their tuples can come later in the trace than SimuLizar's,
+  within that step (MEAS-7.2).
+- **Changes SimOxide does not support yet** (monitor, population and usage-scenario changes,
+  structural changes of an action) end the run with an error naming the rule; an assembly context
+  without allocation is refused at the change, SimuLizar fails only when a request reaches it.
+  Executions in progress inside a changed behaviour finish their old instructions (MC-4.3).
+- **Passive-resource PRM measurements** join the runtime measurement model in the order of the
+  monitors; SimuLizar's order comes from a `HashSet` (MEAS-7.5).
+- **New object ids** come from a seeded generator (reproducible), SimuLizar's from
+  `EcoreUtil.generateUUID()`.
+
 ### Virtual-time processor sharing
 
 `PsAlgorithm::VirtualTime` (CLI `--ps-algorithm virtual-time`, default `exact`) serves processor

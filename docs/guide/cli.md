@@ -37,6 +37,8 @@ simoxide run --model <dir> [flags]
 | `--spd-log FILE`, `--spd-log-all` | write the decision log of the model's scaling policies ([Scaling policies](./spd.md)) |
 | `--spd-quirks fixed\|slingshot\|Q2,…` | Slingshot SPD quirks to reproduce, default `fixed` |
 | `--no-spd` | ignore a `.spd` file of the model |
+| `--rules DIR`, `--rules-log FILE` | run SimuLizar's reconfiguration rules of `DIR` (default: `run.json`'s `reconfiguration_rules`) and log each reconfiguration; feature `reconfiguration` ([Reconfiguration rules](./reconfiguration.md)) |
+| `--qvto-mode auto\|fast\|compat` | QVTo's mode for the rules, default `auto` (compat in builds with `exact` or `compat`) |
 
 Limits (see [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)):
 
@@ -101,6 +103,7 @@ See [Testing](../correctness/testing.md) and [Test kit](../development/testkit.m
 | `simoxide-cli` | `fast` (default) | include the fast mode; `--no-default-features` builds an exact-only binary |
 | `simoxide-cli` | `profile` | `--profile` on `bench` and `load-bench` |
 | `simoxide-cli` | `mimalloc` | mimalloc as the global allocator |
+| `simoxide-cli` | `reconfiguration` | `--rules`: SimuLizar's reconfiguration rules (`simoxide-reconf` and the QVTo engine) |
 | `simoxide-sim`, `simoxide-random` | `fast` (off) | the fast mode in the libraries |
 | `simoxide-random` | `rcp-table` | a recorded AMD Zen 5 `rcpss` table instead of the instruction ([Exactness](../correctness/#caveats)) |
 | `simoxide-random` | `fast-bracket` | galloping bracket search for inverse CDFs (not proven exact) |

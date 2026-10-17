@@ -9,12 +9,13 @@
 //! A [`CompiledModel`] is immutable and `Sync`; many simulations can run on it in parallel.
 
 use crate::fxhash::FxMap;
+use crate::stats::{Stat, StatKind};
 use simoxide_jcompat::hash::str_hash as string_hash;
 use simoxide_jcompat::order::{InsertionOrder, MapOrder};
 #[cfg(feature = "exact")]
 use simoxide_jcompat_exact::order::JdkHashOrder;
 use simoxide_model::meta::prelude::*;
-use simoxide_model::raw::PcmGraph;
+use simoxide_model::raw::{ObjId, PcmGraph};
 use simoxide_model::*;
 use simoxide_sched::SchedulingPolicy;
 use simoxide_stoex::Program;
@@ -325,6 +326,25 @@ pub struct CWindow {
     pub out: Option<SeriesId>,
     /// A PRM recorder (`triggersSelfAdaptations`) receives every aggregated value (MEAS-7.2).
     pub prm: bool,
+    /// The runtime measurement it writes ([`CompiledModel::prm_meas`]; `u32::MAX`: none).
+    pub prm_meas: u32,
+    /// `TimeDrivenAggregation`: the statistical characterisation of the window's data (the
+    /// tuples of `input`, the calculator of the specification's metric), MEAS-7.5; `None`: a
+    /// utilisation window.
+    pub stat: Option<Stat>,
+}
+
+/// A runtime measurement of the runtime measurement model (PRM, SimuLizar's
+/// `RuntimeMeasurement`, D2): one per PRM recorder, in the order SimuLizar creates them
+/// (MEAS-7.5). The run state holds its value.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PrmMeas {
+    /// The measuring point of the specification's monitor (graph object).
+    pub mp: Option<ObjId>,
+    /// The measurement specification (graph object).
+    pub spec: ObjId,
+    /// The measuring point's series key and the metric (informational).
+    pub key: Box<str>,
 }
 
 /// A recorder writing into the runtime measurement model (PRM): a measurement specification
@@ -334,15 +354,17 @@ pub struct CWindow {
 pub enum PrmRec {
     /// `FeedThroughRecorder`: every tuple.
     FeedThrough,
-    /// `FixedSizeMeasurementsAggregator`: every `freq`-th tuple once `n` are buffered.
-    Fixed { freq: i64, n: i64 },
+    /// `FixedSizeMeasurementsAggregator`: every `freq`-th tuple once `n` are buffered; the
+    /// value is `stat` of the buffer.
+    Fixed { freq: i64, n: i64, stat: Stat },
     /// `VariableSizeMeasurementAggregator`: every `freq`-th tuple once the buffer spans
     /// `retro` seconds; `continuous`: scope of validity of the metric (eviction keeps the last
-    /// tuple before the interval).
+    /// tuple before the interval); the value is `stat` of the buffer.
     Variable {
         freq: i64,
         retro: f64,
         continuous: bool,
+        stat: Stat,
     },
 }
 
@@ -357,6 +379,8 @@ pub struct PassivePrm {
     pub rec: PrmRec,
     /// The aggregator's constructor fails with this error when the calculator appears.
     pub invalid: Option<Box<str>>,
+    /// The runtime measurement the recorder adds to the PRM when it is created.
+    pub meas: PrmMeas,
 }
 
 /// Aggregating the `Long` values of the passive-resource state fails (`ClassCastException`).
@@ -429,8 +453,13 @@ pub struct CompiledModel {
     /// Assembly-operation response-time series by `op_key(assembly id, role id, signature id)`.
     pub asmop_series: HashMap<String, SeriesId>,
     pub passive_mon: Vec<PassiveMon>,
-    /// PRM recorders on series created at initialisation, in attachment order.
-    pub prm_series: Vec<(SeriesId, PrmRec)>,
+    /// PRM recorders on series created at initialisation, in creation order, with the index
+    /// of their runtime measurement ([`CompiledModel::prm_meas`]).
+    pub prm_series: Vec<(SeriesId, PrmRec, u32)>,
+    /// The runtime measurements of the PRM recorders created at initialisation, in SimuLizar's
+    /// order (MEAS-7.5): fixed-size, variable-size, feed-through, time-driven aggregation,
+    /// utilisation windows. Recorders of lazily created calculators append theirs at run time.
+    pub prm_meas: Vec<PrmMeas>,
     /// PRM recorders waiting for passive-resource calculators.
     pub prm_passive: Vec<PassivePrm>,
     /// Any PRM recorder or PRM window: the run may create the reconfiguration process.
@@ -678,6 +707,66 @@ pub fn op_key(owner: &str, role: &str, sig: &str) -> String {
 
 fn metric_id<'a>(m: &'a Model, spec: &MeasurementSpecification) -> Option<&'a str> {
     spec.metric.map(|x| &*m.metrics[x].id)
+}
+
+/// The scope of validity of the specification's metric is `CONTINUOUS`.
+fn metric_continuous(m: &Model, spec: &MeasurementSpecification) -> bool {
+    spec.metric.is_some_and(|x| {
+        matches!(
+            m.metrics[x].kind,
+            MetricKind::Base {
+                scope_of_validity: "Continuous",
+                ..
+            }
+        )
+    })
+}
+
+/// The tuple metric of the calculator that measures a base metric (by metric id).
+fn tuple_metric_name(id: &str) -> Option<&'static str> {
+    Some(match id {
+        metric_ids::RESPONSE_TIME => metric_names::RESPONSE_TIME,
+        metric_ids::RESOURCE_DEMAND => metric_names::RESOURCE_DEMAND,
+        metric_ids::STATE_OF_ACTIVE_RESOURCE => metric_names::STATE_OF_ACTIVE_RESOURCE,
+        metric_ids::UTILIZATION => metric_names::UTILIZATION,
+        metric_ids::WAITING_TIME => metric_names::WAITING_TIME,
+        metric_ids::HOLDING_TIME => metric_names::HOLDING_TIME,
+        metric_ids::STATE_OF_PASSIVE_RESOURCE => metric_names::STATE_OF_PASSIVE_RESOURCE,
+        metric_ids::RECONFIGURATION_TIME => metric_names::RECONFIGURATION_TIME,
+        metric_ids::NUMBER_OF_RESOURCE_CONTAINERS => metric_names::NUMBER_OF_RESOURCE_CONTAINERS,
+        _ => return None,
+    })
+}
+
+/// Where a sliding window comes from: its specification and measuring point.
+struct WinSrc {
+    mp: Option<ObjId>,
+    spec: ObjId,
+    /// Series key of the measuring point.
+    key: Option<String>,
+    /// Tuple metric of the calculator a time-driven aggregation reads.
+    metric: Option<&'static str>,
+    label: Box<str>,
+}
+
+impl WinSrc {
+    fn of(m: &Model, mon: &Monitor, spec: &MeasurementSpecification) -> WinSrc {
+        let mp = mon.measuring_point.map(|x| &m.measuring_points[x]);
+        let key = mp.and_then(|mp| mp_key(m, mp));
+        let metric = metric_id(m, spec).and_then(tuple_metric_name);
+        WinSrc {
+            mp: mp.map(|x| x.obj),
+            spec: spec.obj,
+            label: format!(
+                "{}|{}",
+                key.as_deref().unwrap_or_default(),
+                metric.unwrap_or(metric_names::UTILIZATION)
+            )
+            .into(),
+            key,
+            metric,
+        }
+    }
 }
 
 /// The interned tables a compilation starts from ([`CompiledModel::compile_seeded`]): frame
@@ -1499,21 +1588,32 @@ impl CompiledModel {
         // sliding windows (probe-framework decorators in extension-registry order:
         // slidingwindow = TimeDrivenAggregation, then utilization = TimeDriven utilisation)
         let mut windows = Vec::new();
+        // per window: its specification, measuring point and (time-driven aggregation) the
+        // metric of the calculator it reads
+        let mut window_src: Vec<WinSrc> = Vec::new();
         for mon in sim_monitors.iter().filter(|x| x.activated) {
             for spec in &mon.specifications {
                 if let ProcessingType::TimeDrivenAggregation {
                     window_length,
                     window_increment,
-                    ..
+                    statistic,
                 } = spec.processing
                 {
+                    // the input (the calculator of the spec's metric) is found after all
+                    // calculators exist, below
                     windows.push(CWindow {
                         len: window_length,
                         inc: window_increment,
                         input: None,
                         out: None,
                         prm: spec.triggers_self_adaptations,
+                        prm_meas: u32::MAX,
+                        stat: Some(Stat {
+                            kind: StatKind::of(statistic).unwrap_or(StatKind::ArithmeticMean),
+                            continuous: metric_continuous(m, spec),
+                        }),
                     });
+                    window_src.push(WinSrc::of(m, mon, spec));
                 }
             }
         }
@@ -1557,7 +1657,10 @@ impl CompiledModel {
                         input: Some(state),
                         out: Some(out),
                         prm: spec.triggers_self_adaptations,
+                        prm_meas: u32::MAX,
+                        stat: None,
                     });
+                    window_src.push(WinSrc::of(m, mon, spec));
                     // replica 0 of a multi-core resource: also a window on the overall utilisation
                     if let Some(MeasuringPointKind::ActiveResource {
                         resource: Some(prid),
@@ -1576,7 +1679,10 @@ impl CompiledModel {
                             input: Some(ov),
                             out: Some(ov),
                             prm: spec.triggers_self_adaptations,
+                            prm_meas: u32::MAX,
+                            stat: None,
                         });
+                        window_src.push(WinSrc::of(m, mon, spec));
                     }
                 }
             }
@@ -1655,132 +1761,165 @@ impl CompiledModel {
                 }
             }
         }
+        // time-driven aggregation windows read the calculator of their spec's metric at their
+        // measuring point (SlidingWindowProbeFrameWorkListenerDecorator), MEAS-7.5
+        for (w, src) in windows.iter_mut().zip(&window_src) {
+            if w.stat.is_some()
+                && let (Some(key), Some(name)) = (&src.key, src.metric)
+            {
+                w.input = series_map.get(&(key.clone(), name)).copied();
+            }
+        }
         // PRM recorders of specs with triggersSelfAdaptations (MEAS-7.2): FeedThrough and the
-        // measurement-driven aggregations attach to the calculator of their MP and base metric
+        // measurement-driven aggregations attach to the calculator of their MP and base metric.
+        // The decorators run in extension-registry order (aggregation: fixed-size, then
+        // variable-size specs; feed-through), each over the specs in monitor order; every
+        // recorder adds its runtime measurement to the PRM when it is created (MEAS-7.5).
         let mut prm_series = Vec::new();
         let mut prm_passive = Vec::new();
+        let mut prm_meas: Vec<PrmMeas> = Vec::new();
+        let mut cands: Vec<(u8, &Monitor, &MeasurementSpecification)> = Vec::new();
         for mon in sim_monitors.iter().filter(|x| x.activated) {
-            let Some(mpid) = mon.measuring_point else {
+            if mon.measuring_point.is_none() {
                 continue;
-            };
-            let mp = &m.measuring_points[mpid];
+            }
             for spec in &mon.specifications {
                 if !spec.triggers_self_adaptations {
                     continue;
                 }
-                let (rec, invalid) = match &spec.processing {
-                    ProcessingType::FeedThrough => (PrmRec::FeedThrough, None),
-                    ProcessingType::FixedSizeAggregation {
-                        frequency,
-                        number_of_measurements,
-                        statistic,
-                    } => (
-                        PrmRec::Fixed {
-                            freq: *frequency,
-                            n: *number_of_measurements,
+                let group = match &spec.processing {
+                    ProcessingType::FixedSizeAggregation { .. } => 0,
+                    ProcessingType::VariableSizeAggregation { .. } => 1,
+                    ProcessingType::FeedThrough => 2,
+                    ProcessingType::Unsupported(_) => 3,
+                    _ => continue,
+                };
+                cands.push((group, mon, spec));
+            }
+        }
+        cands.sort_by_key(|c| c.0);
+        for (_, mon, spec) in cands {
+            let mp = &m.measuring_points[mon.measuring_point.expect("measuring point")];
+            let (rec, invalid) = match &spec.processing {
+                ProcessingType::FeedThrough => (PrmRec::FeedThrough, None),
+                ProcessingType::FixedSizeAggregation {
+                    frequency,
+                    number_of_measurements,
+                    statistic,
+                } => (
+                    PrmRec::Fixed {
+                        freq: *frequency,
+                        n: *number_of_measurements,
+                        stat: Stat {
+                            kind: StatKind::of(*statistic).unwrap_or(StatKind::ArithmeticMean),
+                            continuous: metric_continuous(m, spec),
                         },
-                        prm_aggregation_invalid(spec, *frequency, *statistic).or_else(|| {
-                            (*number_of_measurements < 1).then(|| format!(
-                                "IllegalStateException: Value of 'numberOfMeasurements' attribute of 'FixedSizeAggregation' of specification {} must be positive!",
-                                spec.id
-                            ))
-                        }),
-                    ),
-                    ProcessingType::VariableSizeAggregation {
-                        frequency,
-                        retrospection_length,
-                        statistic,
-                    } => (
-                        PrmRec::Variable {
-                            freq: *frequency,
-                            retro: *retrospection_length,
-                            continuous: spec.metric.is_some_and(|x| {
-                                matches!(
-                                    m.metrics[x].kind,
-                                    MetricKind::Base {
-                                        scope_of_validity: "Continuous",
-                                        ..
-                                    }
-                                )
-                            }),
-                        },
-                        prm_aggregation_invalid(spec, *frequency, *statistic).or_else(|| {
-                            (*retrospection_length <= 0.0 || retrospection_length.is_nan()).then(|| format!(
-                                "IllegalStateException: Value of 'retrospectionLength' attribute of 'VariableSizeAggregation' of specification {} must be positive!",
-                                spec.id
-                            ))
-                        }),
-                    ),
-                    ProcessingType::Unsupported(n) => {
-                        warnings.push(format!(
-                            "measurement specification {} ({n}) triggers self-adaptations: its runtime measurements are not modelled",
+                    },
+                    prm_aggregation_invalid(spec, *frequency, *statistic).or_else(|| {
+                        (*number_of_measurements < 1).then(|| format!(
+                            "IllegalStateException: Value of 'numberOfMeasurements' attribute of 'FixedSizeAggregation' of specification {} must be positive!",
                             spec.id
-                        ));
-                        continue;
-                    }
-                    _ => continue,
-                };
-                let Some(metric) = spec.metric.map(|x| &m.metrics[x]) else {
-                    continue;
-                };
-                if !matches!(
-                    metric.kind,
-                    MetricKind::Base {
-                        numerical: true,
-                        ..
-                    }
-                ) {
-                    return Err(CompileError(format!(
-                        "IllegalStateException: Cannot initialize measurements aggregation defined by MeasurementSpecification with id '{}': So far, only NumericalBaseMetricDescriptions are supported for fixed and variable size aggregation!",
+                        ))
+                    }),
+                ),
+                ProcessingType::VariableSizeAggregation {
+                    frequency,
+                    retrospection_length,
+                    statistic,
+                } => (
+                    PrmRec::Variable {
+                        freq: *frequency,
+                        retro: *retrospection_length,
+                        continuous: metric_continuous(m, spec),
+                        stat: Stat {
+                            kind: StatKind::of(*statistic).unwrap_or(StatKind::ArithmeticMean),
+                            continuous: metric_continuous(m, spec),
+                        },
+                    },
+                    prm_aggregation_invalid(spec, *frequency, *statistic).or_else(|| {
+                        (*retrospection_length <= 0.0 || retrospection_length.is_nan()).then(|| format!(
+                            "IllegalStateException: Value of 'retrospectionLength' attribute of 'VariableSizeAggregation' of specification {} must be positive!",
+                            spec.id
+                        ))
+                    }),
+                ),
+                ProcessingType::Unsupported(n) => {
+                    warnings.push(format!(
+                        "measurement specification {} ({n}) triggers self-adaptations: its runtime measurements are not modelled",
                         spec.id
-                    )));
-                }
-                let name = match &*metric.id {
-                    metric_ids::RESPONSE_TIME => metric_names::RESPONSE_TIME,
-                    metric_ids::RESOURCE_DEMAND => metric_names::RESOURCE_DEMAND,
-                    metric_ids::STATE_OF_ACTIVE_RESOURCE => metric_names::STATE_OF_ACTIVE_RESOURCE,
-                    metric_ids::UTILIZATION => metric_names::UTILIZATION,
-                    metric_ids::WAITING_TIME => metric_names::WAITING_TIME,
-                    metric_ids::HOLDING_TIME => metric_names::HOLDING_TIME,
-                    metric_ids::STATE_OF_PASSIVE_RESOURCE => {
-                        metric_names::STATE_OF_PASSIVE_RESOURCE
-                    }
-                    metric_ids::RECONFIGURATION_TIME => metric_names::RECONFIGURATION_TIME,
-                    _ => continue,
-                };
-                if let MeasuringPointKind::AssemblyPassiveResource {
-                    assembly: Some(a),
-                    passive_resource: Some(p),
-                } = &mp.kind
-                {
-                    let ac_name = &m.assembly_contexts[*a].name;
-                    prm_passive.push(PassivePrm {
-                        rep: format!(
-                            "Passive Resource: {}.{}",
-                            ac_name, m.passive_resources[*p].name
-                        )
-                        .into(),
-                        metric: name,
-                        rec,
-                        invalid: invalid.map(Into::into),
-                    });
+                    ));
                     continue;
                 }
-                let Some(key) = mp_key(m, mp) else { continue };
-                let Some(&s) = series_map.get(&(key, name)) else {
-                    continue;
-                };
-                // utilisation: only the overall-utilisation calculator, not a window's output
-                if name == metric_names::UTILIZATION
-                    && !resources.iter().any(|r| r.overall_series == Some(s))
-                {
-                    continue;
+                _ => continue,
+            };
+            let Some(metric) = spec.metric.map(|x| &m.metrics[x]) else {
+                continue;
+            };
+            if !matches!(
+                metric.kind,
+                MetricKind::Base {
+                    numerical: true,
+                    ..
                 }
-                // the aggregator is created (and checked) when its calculator exists
-                if let Some(e) = invalid {
-                    return Err(CompileError(e));
-                }
-                prm_series.push((s, rec));
+            ) {
+                return Err(CompileError(format!(
+                    "IllegalStateException: Cannot initialize measurements aggregation defined by MeasurementSpecification with id '{}': So far, only NumericalBaseMetricDescriptions are supported for fixed and variable size aggregation!",
+                    spec.id
+                )));
+            }
+            let Some(name) = tuple_metric_name(&metric.id) else {
+                continue;
+            };
+            let meas = PrmMeas {
+                mp: Some(mp.obj),
+                spec: spec.obj,
+                key: format!("{}|{name}", mp_key(m, mp).unwrap_or_default()).into(),
+            };
+            if let MeasuringPointKind::AssemblyPassiveResource {
+                assembly: Some(a),
+                passive_resource: Some(p),
+            } = &mp.kind
+            {
+                let ac_name = &m.assembly_contexts[*a].name;
+                prm_passive.push(PassivePrm {
+                    rep: format!(
+                        "Passive Resource: {}.{}",
+                        ac_name, m.passive_resources[*p].name
+                    )
+                    .into(),
+                    metric: name,
+                    rec,
+                    invalid: invalid.map(Into::into),
+                    meas,
+                });
+                continue;
+            }
+            let Some(key) = mp_key(m, mp) else { continue };
+            let Some(&s) = series_map.get(&(key, name)) else {
+                continue;
+            };
+            // utilisation: only the overall-utilisation calculator, not a window's output
+            if name == metric_names::UTILIZATION
+                && !resources.iter().any(|r| r.overall_series == Some(s))
+            {
+                continue;
+            }
+            // the aggregator is created (and checked) when its calculator exists
+            if let Some(e) = invalid {
+                return Err(CompileError(e));
+            }
+            prm_series.push((s, rec, prm_meas.len() as u32));
+            prm_meas.push(meas);
+        }
+        // then the sliding-window decorators: time-driven aggregation, utilisation
+        for (w, src) in windows.iter_mut().zip(&window_src) {
+            if w.prm {
+                w.prm_meas = prm_meas.len() as u32;
+                prm_meas.push(PrmMeas {
+                    mp: src.mp,
+                    spec: src.spec,
+                    key: src.label.clone(),
+                });
             }
         }
         // execution-result tuples (MEAS-7.4) need an explicit monitor with this metric; they are
@@ -1907,6 +2046,7 @@ impl CompiledModel {
             asmop_series,
             passive_mon,
             prm_series,
+            prm_meas,
             prm_passive,
             prm_any,
             reconf_time_series,
