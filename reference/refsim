@@ -5,18 +5,27 @@
 # Env: REFSIM_UNPATCHED=1 -> run the stock 5.2.2 classes (no determinism patches, no trace hooks)
 #      JAVA, JVM_OPTS, REFSIM_LOG (log4j level, default ERROR)
 D="$(cd "$(dirname "$0")" && pwd)"
-P=${PALLADIO_PLUGINS:-/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins}
+P=${PALLADIO_PLUGINS:-$("$D/tools/palladio-research.sh")/work-simucom/palladio-5.2.2/plugins}
 [ -f "$D/build/classes-base/refsim/Main.class" ] || "$D/build.sh" >&2 || exit 1
 "$D/tools/classpath.sh" > /dev/null || exit 1
 CP="$D/build/classes-patches:$D/build/classes-base:$(cat "$D/build/classpath.txt")"
 UNP=false; [ "$REFSIM_UNPATCHED" = 1 ] && { CP="$D/build/classes-base:$(cat "$D/build/classpath.txt")"; UNP=true; }
+# Patch P10 (DESIGN-SPD R2): QVTo's and OCL's HashSet/HashMap become LinkedHashSet/LinkedHashMap at class
+# load (the det ordering rule of the Slingshot reference, its seed agent with `ordered,qvto`), so that
+# rules over sets of model objects iterate in insertion order instead of Java identity-hash order.
+# REFSIM_ORDERING=stock (or REFSIM_UNPATCHED=1) runs without it.
+AGENT=""
+if [ "$UNP" = false ] && [ "${REFSIM_ORDERING:-det}" != stock ]; then
+  [ -f "$D/build/seed-agent.jar" ] || "$D/build.sh" >&2 || exit 1
+  AGENT="-javaagent:$D/build/seed-agent.jar=ordered,qvto"
+fi
 # REFSIM_EXCLUDE=Class1,Class2: drop these patched classes (simple names, incl. inner classes) - for evidence runs
 if [ -n "$REFSIM_EXCLUDE" ] && [ "$UNP" = false ]; then
   X=$(mktemp -d); cp -r "$D/build/classes-patches/." "$X/"
   for c in $(echo "$REFSIM_EXCLUDE" | tr ',' ' '); do find "$X" \( -name "$c.class" -o -name "$c\$*.class" \) -delete; done
   CP="$X:$D/build/classes-base:$(cat "$D/build/classpath.txt")"
   trap 'rm -rf "$X"' EXIT
-  ${JAVA:-java} ${JVM_OPTS:--Xmx2g -XX:+UseSerialGC} -Drefsim.log=${REFSIM_LOG:-ERROR} -Drefsim.verbose=${REFSIM_VERBOSE:-false} -Drefsim.unpatched=false -cp "$CP" refsim.Main "$P" "$@"
+  ${JAVA:-java} ${JVM_OPTS:--Xmx2g -XX:+UseSerialGC} $AGENT -Drefsim.log=${REFSIM_LOG:-ERROR} -Drefsim.verbose=${REFSIM_VERBOSE:-false} -Drefsim.unpatched=false -cp "$CP" refsim.Main "$P" "$@"
   exit $?
 fi
-exec ${JAVA:-java} ${JVM_OPTS:--Xmx2g -XX:+UseSerialGC} -Drefsim.log=${REFSIM_LOG:-ERROR} -Drefsim.verbose=${REFSIM_VERBOSE:-false} -Drefsim.unpatched=$UNP -cp "$CP" refsim.Main "$P" "$@"
+exec ${JAVA:-java} ${JVM_OPTS:--Xmx2g -XX:+UseSerialGC} $AGENT -Drefsim.log=${REFSIM_LOG:-ERROR} -Drefsim.verbose=${REFSIM_VERBOSE:-false} -Drefsim.unpatched=$UNP -cp "$CP" refsim.Main "$P" "$@"

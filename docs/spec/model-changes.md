@@ -137,3 +137,19 @@ MEAS-7.2; what they see in the runtime measurement model: MEAS-7.5.
   allocation context, which SimuLizar accepts until a request reaches it).
 - **MC-7.5 Simulation time.** No simulation time passes while rules run; `getSimulationTime()` (the
   `SimulationStateLibrary` blackbox of `simulizar.action.repository`) returns the current time.
+- **MC-7.6 New object ids and set order** (`DESIGN-SPD.md` R2). Generated PCM code gives every new
+  `Identifier` an `EcoreUtil.generateUUID()` in its constructor (`IdentifierImpl`), also every copy
+  that `deepclone()` makes (EMF's `Copier` constructs it, then copies the original's id over it), and
+  objects SimuLizar creates outside rules (the runtime measurement model and its measurements, the
+  per-call system assembly contexts). The UUIDs are time-based, so a rule that creates an object
+  without setting its id gives it a new id in every run; ids reach the trace (assembly contexts,
+  containers, actions, branch transitions), the stop's deactivation order (the resource registry's
+  `HashMap` of container ids, MEAS-10.1) and string comparisons in rules. *SimOxide* and the
+  patched reference (patch P10) draw the ids of objects created while a rule runs from one generator
+  per run: SplitMix64 seeded with `0x5EED0F51` (`RunConfig::default()`), two draws per id, in
+  `EcoreUtil.generateUUID`'s encoding (`_` and 22 characters); a copy draws too. Objects created
+  outside rules draw nothing (SimOxide's PRM mirror has no ids). Iteration of a QVTo or OCL `Set`
+  (`asSet`, `->any`, `allInstances`, …) of model objects follows Java identity hashes in SimuLizar
+  (a different order in every run); the reference iterates QVTo's and OCL's hash collections in
+  insertion order (P10, the ordering rule of the Slingshot reference's `det` mode), as QVTo's ordered
+  mode does, which SimOxide uses for rules by default.

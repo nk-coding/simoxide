@@ -21,7 +21,7 @@ directory). Every `.qvto` file of the folder is a rule; they run in file-name or
 |---|---|
 | `--rules DIR` | the rules folder (overrides `run.json`) |
 | `--rules-log FILE` | one JSON line per run of the reconfiguration process (below) |
-| `--qvto-mode auto\|fast\|compat` | QVTo's mode (default `auto`: compat in builds with `exact` or `compat`, else fast) |
+| `--qvto-mode auto\|ordered\|fast\|compat` | QVTo's mode (default `auto`: ordered, below) |
 
 The flags need `simoxide-cli`'s cargo feature `reconfiguration`:
 
@@ -29,6 +29,13 @@ The flags need `simoxide-cli`'s cargo feature `reconfiguration`:
 cargo build --release -p simoxide-cli --features reconfiguration          # EPL build, QVTo fast mode
 cargo build --release -p simoxide-cli --features reconfiguration,exact,hotspot-math   # local exact build
 ```
+
+QVTo's modes for rules: `ordered` (the default) iterates QVTo's and OCL's sets in insertion order,
+as the reference does (patch P10), and is part of every build; `fast` is the same with plain
+insertion-ordered sets (classic OCL's OrderedSet quirks left out); `compat` iterates in Java
+`HashMap` order with identity hashes from HotSpot's generator (not those of a Java run), needs the
+`compat` or `exact` feature and differs from the reference on rules that iterate a `Set` of model
+objects (`corpus-rules/lb_scaleout_each`).
 
 After the run the CLI prints the number of rules, of reconfigurations, of successful ones, of
 those that changed the model, and the time spent in the rules.
@@ -47,7 +54,11 @@ those that changed the model, and the time spent in the rules.
    an `assert error` failed), one that ends in `assert fatal` or an exception does not; what it
    changed until then stays. A successful run records a `Reconfiguration Time` tuple (0 s) and, if
    the number of resource containers changed, a `Number of Resource Containers` tuple.
-4. The changes reach the simulation as SimuLizar's syncers would carry them: processing rates, link
+4. Objects a rule creates get ids as generated PCM code gives them, from a seeded generator of the
+   run (`RunConfig::ids`, the same sequence as the reference's): the n-th object created by rules in
+   a run gets the same id in every run and in the reference, also when the rule sets the id itself
+   or the object is a `deepclone()` copy (each copy draws an id, then takes the original's).
+5. The changes reach the simulation as SimuLizar's syncers would carry them: processing rates, link
    latency and throughput, demands, branch probabilities and other StoEx, new resource containers
    with their resources, linking-resource connections, new allocation contexts, connectors and
    assembly contexts ([Model changes](../spec/model-changes.md)).
@@ -59,9 +70,10 @@ a behaviour (an action or branch added to a SEFF), an assembly context without a
 
 ## Examples
 
-`corpus-rules/` holds SimuLizar's reconfiguration examples (`reference/import-rules-examples.sh`)
-with the outputs of the patched SimuLizar reference. In SimOxide's exact build all of them equal
-the reference byte for byte (trace, random tape, measurements):
+`corpus-rules/` holds SimuLizar's reconfiguration examples and SimOxide's own
+(`reference/import-rules-examples.sh`) with the outputs of the patched SimuLizar reference. In
+SimOxide's exact build (`simoxide-sim`'s `exact` and `hotspot-math`; the QVTo side needs no opt-in
+crate since R2) all of them equal the reference byte for byte (trace, random tape, measurements):
 
 | Case | Model and rules | Changes |
 |---|---|---|
@@ -71,11 +83,20 @@ the reference byte for byte (trace, random tape, measurements):
 | `lb_add_branch` | the load balancer with SimOxide's `addBranch.qvto` | a branch added to the load balancer's SEFF: new requests take it |
 | `power_rules_qvto` | the power-consumption variant with its PCM-only rules (power monitors removed: the power extension is not part of the 5.2.2 product) | processing rates, branch probabilities |
 | `sl_reconfiguration` | SimuLizar's `ReconfigurationSimulationTest`: the n-th user's response time is n | a resource demand |
+| `lb_scaleout_noid` | `lb_scaleout` without explicit ids | as `lb_scaleout`; the new objects' ids from the seeded generator |
+| `lb_add_branch_noid` | `lb_add_branch` without explicit ids | as `lb_add_branch` |
+| `lb_scaleout_each` | outsource and `scaleOutEach.qvto`: every server moves to a new node, in the order of a `Set` of allocation contexts | two containers, assembly and allocation contexts, rewired connectors; their ids and order follow the `Set` |
+| `lb_wire_new_server` | SimuLizar's horizontal-scaling adaptation steps (`instantiatecomponent.qvto`, `wirewithloadbalancer.qvto` of its action repository) as one rule | a container, an assembly and allocation context, a required role, a branch with its actions, a connector; no explicit ids |
+| `lb_clone_branch` | `cloneBranch.qvto`: a branch behaviour copied with `deepclone()` becomes a third branch | a branch whose copied actions keep their originals' ids |
 
-The default (EPL) build, which runs the fast simulator mode and QVTo's fast mode, matches the
-reference statistically (`reference/tools/rules-stat.sh`, 30 seeds per side): no per-run
-statistic differs, except Server2's mean response time in `lb_scaleout` with seeds 1-30, which a
-second set of 30 seeds does not reproduce (the scale-out time is heavy-tailed).
+The default (EPL) build runs the fast simulator mode and QVTo's ordered mode: its rules make the
+same decisions and its new objects get the same ids as the reference's for the same runtime
+measurements, but the fast simulator mode rounds differently, so its runs are not byte-equal. It
+matches the reference statistically (`reference/tools/rules-stat.sh`, 30 seeds per side): no
+per-run statistic differs, except Server2's mean response time in the scale-out cases
+(`lb_scaleout`, `lb_scaleout_noid`, `lb_scaleout_each`) with seeds 1-30, which seeds 31-60 do not
+reproduce (the scale-out time is heavy-tailed). The exact build equals the reference on all 30
+seeds of every case.
 
 Not runnable (also not in SimuLizar 5.2.2 headless): rules that use SimuLizar's action framework
 (`AdaptationBehavior.execute`: the power example's `switchToStandby`, the media store's horizontal
@@ -120,5 +141,7 @@ println!("{:?}", host.stats());
 ## Cost
 
 A run without rules is unchanged (the host is attached only with rules). With rules, the PRM
-mirror costs about 15 µs per reconfiguration; a rule run about 0.1 ms in QVTo's fast mode and about
-1 ms in compat mode on the load balancer example (the compat mode's per-run set-up).
+mirror costs about 15 µs per reconfiguration; a rule run about 0.1 ms in QVTo's ordered (default)
+and fast modes and about 1 ms in compat mode on the load balancer example (the compat mode's per-run
+set-up): the power example's 13 349 reconfigurations take 1.4 s of rules in ordered mode, 42 s in
+compat mode.

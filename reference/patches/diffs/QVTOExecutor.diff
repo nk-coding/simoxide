@@ -1,0 +1,17 @@
+--- 5.2.2/Palladio-Analyzer-SimuLizar/bundles/org.palladiosimulator.simulizar.reconfiguration.qvto/src/org/palladiosimulator/simulizar/reconfiguration/qvto/QVTOExecutor.java
++++ patched/org/palladiosimulator/simulizar/reconfiguration/qvto/QVTOExecutor.java
+@@ -35,7 +35,13 @@
+             IResourceTableManager resourceTableManager, Map<String, Object> configParams) {
+         boolean result = true;
+         for (QvtoModelTransformation transformation : transformations) {
+-            result &= executeTransformation(transformation, resourceTableManager, configParams);
++            // REFSIM (patch P10, DESIGN-SPD R2): new Identifiers draw seeded ids while a rule runs
++            refsim.Ids.open();
++            try {
++                result &= executeTransformation(transformation, resourceTableManager, configParams);
++            } finally {
++                refsim.Ids.close();
++            }
+         }
+         return result;
+     }

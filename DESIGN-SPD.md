@@ -1504,6 +1504,9 @@ This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these
   - *As built (Q2):* the policy is QVTo's **ordered mode** (`qvto_runtime::Mode::Ordered`, below);
     the Slingshot-exact mode uses it, and compat mode is not needed by either Slingshot mode (so
     neither needs the GPL-adjacent `simoxide-jcompat-exact`, decision U12).
+  - *As built (R2):* SimuLizar's rules use the ordered mode too (`RulesHost` maps `Auto` to it):
+    the reference runs QVTo with the same insertion-order rule (refsim patch P10), so rule exactness
+    needs no compat mode either.
 
 
 **F3 as built** (2026-10-17, branch `f3`; guide: `docs/guide/library.md`, "QVTo transformations
@@ -1866,6 +1869,78 @@ MC-7 in `docs/spec/model-changes.md`; guide: `docs/guide/reconfiguration.md`):
   cross-series order of `meas` lines of a run after the stop within its finalisation step. (5) New
   containers' ids decide the resource registry's `HashMap` order at the stop (follows from 1).
 
+**R2 as built** (2026-10-17, branch `r2`; spec: MC-7.6 in `docs/spec/model-changes.md`, MEAS-7.5;
+reference: patch P10 in `docs/reference-simulator/patches.md`; guide: `docs/guide/reconfiguration.md`):
+
+- **Status: done.** All eleven `corpus-rules/` cases (R1's six and five new ones whose rules create
+  objects without explicit ids, one of them depending on the order of a `Set` of model objects)
+  equal the patched reference byte for byte (trace, tape, measurements) in the exact build, on 30 of
+  30 seeds each; R1's six reference outputs did not change.
+- **Id scheme (D5, prerequisites 1 and 5).** *Decision: one seeded generator per run that draws only
+  while a rule runs.* An id is drawn for every new `Identifier` (generated PCM code's constructor:
+  also for objects whose id the rule then sets, and for every `deepclone()` copy, which then takes
+  the original's id); SplitMix64 seeded with `0x5EED0F51` (`RunConfig::default()`), two draws per id,
+  in `EcoreUtil.generateUUID`'s encoding. This is F3's existing generator, unchanged; Java gets a
+  30-line port (`reference/src/refsim/Ids.java`). Why not every draw: SimuLizar draws UUIDs for
+  thousands of objects outside rules (model loading, the PRM at initialisation and at passive
+  registration, a system assembly context per call), which SimOxide would have to replay draw for
+  draw; counting only rule runs needs one window in the reference and nothing outside the QVTo host
+  in SimOxide. The new containers' ids then give the stop's deactivation order (prerequisite 5,
+  `lb_scaleout_noid`).
+- **Set order (prerequisite 2).** *Decision: insertion order in the reference, QVTo's ordered mode in
+  SimOxide.* refsim loads the Slingshot reference's seed agent with `ordered,qvto` (QVTo's and OCL's
+  `HashSet`/`HashMap` become `Linked*`), the rule qvto-rs's `Mode::Ordered` reproduces (Q2). Replayed
+  identity hashes would need a Java run per SimOxide run. `RulesHost` maps `QvtMode::Auto` to the
+  ordered mode, so **every build, the default EPL build included, runs rules in the reference's
+  order**; `--qvto-mode ordered|fast|compat` (CLI) selects otherwise. Compat mode (HotSpot's
+  generator) differs on `lb_scaleout_each` (the servers move in the other order), fast mode does not.
+- **Passive-resource PRM order (prerequisite 3).** The reference's `DeferredMeasurementInitialization`
+  keeps its metric descriptions and suppliers in insertion order (P10). SimOxide's order (monitor
+  order) equals it unless one lazily created calculator gets recorders of different metric
+  descriptions deferred interleaved (the reference groups them by metric description); no case has
+  it, and fixing it would change `PassivePrm`, part of N1's snapshot format: left as a deviation.
+- **Post-stop tuple order (prerequisite 4).** Unchanged: a run after the stop still runs when the
+  finalisation step that triggered it ends, so its tuples can come later in the trace than
+  SimuLizar's within that step (MEAS-7.2). None of the eleven cases hits it; making the deactivation
+  step pausable per tuple changes `FinStep` in the run state (N1's format). Left as a deviation.
+- **Reference (patch P10).** Shadowed `IdentifierImpl` (Core Commons, unsigned: EMF's `EcoreUtil` is
+  in a signed jar) calls `refsim.Ids.generate()`: seeded inside the window, EMF's UUID outside;
+  shadowed `QVTOExecutor` opens the window around each rule; `Statics` resets the generator per run;
+  `build.sh` builds the seed agent with the product's ASM, `refsim` loads it (`REFSIM_ORDERING=stock`
+  without); shadowed `DeferredMeasurementInitialization`. Evidence: R1's six cases and the
+  `tests/prm` dumps unchanged; the 66 corpus models unchanged (`regen-expected.sh --check`); without
+  `IdentifierImpl` `lb_scaleout_noid`'s trace changes, without the agent `lb_scaleout_each`'s.
+- **SimOxide changes** (for the merge agent; small and delimited): `simoxide-reconf/src/process.rs`:
+  the PRM mirror creates its objects inside `without_ids` (the session's generator paused through
+  N1's `Session::id_state`/`set_id_state`: no draw, no id), `RulesHost::new` maps `Auto` to the
+  ordered mode; `simoxide-cli`: `--qvto-mode ordered`. No new run state: the id generator is N1's
+  `SessionState::ids`, and the mirror no longer draws, so a restored host's rebuilt mirror does not
+  disturb it. The adapter, `qvt.rs`, `host.rs` and `simoxide-model` are unchanged. On the shared
+  graph (M6, merged into `qvto-merge`): `without_ids` pauses the run graph's id policy
+  (`Graph::id_state`/`set_id_state`), and a restored host keeps the mirror's objects (the
+  snapshot's QVTo state) instead of rebuilding them.
+- **New cases** (`reference/rules-examples/`, `reference/import-rules-examples.sh`):
+  `lb_scaleout_noid` and `lb_add_branch_noid` (R1's rules without ids), `lb_scaleout_each` (every
+  server to a new node in the order of a `Set` of allocation contexts), `lb_wire_new_server`
+  (SimuLizar's horizontal-scaling adaptation steps `instantiatecomponent.qvto` and
+  `wirewithloadbalancer.qvto` as a rule: container, assembly and allocation context, a required
+  role, a branch with three actions, a connector), `lb_clone_branch` (`deepclone()` of a branch
+  behaviour: the copies draw ids, the new branch gets the next one).
+- **Default EPL build** (fast simulator mode, ordered QVTo): the same rule decisions and ids for the
+  same PRM values, statistically equal (`rules-stat.sh`, 30 seeds per side): on the new cases only
+  the pooled-values KS rejects (invalid here, as the reference-against-itself control shows) and, in
+  the two scale-out cases with seeds 1-30, Server2's mean response time, as R1's `lb_scaleout`; seeds
+  31-60 reject nothing but the pooled KS.
+- **Gates.** `golden.sh` identical (312 runs, `cargo build-exact`, against `spd` a3ffa38);
+  `cargo test --release --workspace --features exact` 588 passed, 0 failed (586 after the N1 merge,
+  +2 in `rules_process`; the snapshot test now continues all eleven cases from snapshots);
+  `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; fmt and clippy `-D warnings` clean (workspace,
+  all targets, default and `--features exact`; `simoxide-cli --features reconfiguration`, also with
+  `exact`); release check: `cargo tree -e normal` of `simoxide-cli` (also with `reconfiguration`) and
+  `qvto-cli` lists no opt-in crate. Timing (quick): rules run as fast as in R1's fast mode; the exact
+  build's default is now the ordered mode instead of compat, so `power_rules_qvto` spends 1.4 s in
+  rules instead of 42 s.
+
 ### 5.6 Metamodel tables and the generic-supertype bug (early fix)
 
 - SimOxide's main tables miss two things:
@@ -2217,7 +2292,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **F3** | *Done 2026-10-17 on the Q6 adapter* (findings: 5.5 "F3 as built"; the switch to the shared graph after M6 is open). QVTo host `simoxide-reconf`: shared immutable core (registry, metamodel objects, compiled programs), lazy per-run state, journal to syncers, natives; first on the Q6 adapter, then on the shared graph (after M) | F0 | 1 w (+2-3 d to switch after M) | met: the 24 corpus cases run on a `RunModel` mid-run; journals equal the standalone runs', models, logs and status the Java runner's |
 | **F4** | Incremental syncers incl. SEFF recompilation, call-cache invalidation, monitor cloning, removal policies (keep / abort / drain) | F2, F3 | 2-3 w | each change kind has a test; load-balancer branch added mid-run changes routing; scale-in in all three policies |
 | **R1** | *Done 2026-10-17* (findings: 5.5 "R1 as built"; F4 remainder listed there: monitor, population and in-progress behaviour changes fail or deviate until F4). SimuLizar rules: PRM values (D2), reconfiguration process runs rules (D3), MEAS-7.3 series | F3, F4 | 1.5-2 w | met: the load balancer and power examples (and SimuLizar's reconfiguration test, a scale-out and an added SEFF branch) run, byte-identical to the patched reference in the exact build; statistical match of the default build (30 seeds) |
-| **R2** | Exact rules: deterministic UUIDs in refsim (D5), byte-exact comparison | R1 | 1 w | byte-equal traces on the examples |
+| **R2** | *Done 2026-10-17* (findings: 5.5 "R2 as built"). Exact rules: deterministic UUIDs in refsim (D5), byte-exact comparison | R1 | 1 w | met: byte-equal trace, tape and measurements on all 11 `corpus-rules/` cases (5 new: objects created without ids, a `Set`-order rule, SimuLizar's adaptation steps, `deepclone`) in the exact build, 30/30 seeds each; the EPL build makes the same rule decisions (ordered QVTo) and matches statistically |
 | **S0** | *Done 2026-10-17.* Slingshot reference runner `reference/slingshot/`: stub bundle, scripts with private config areas, trace/tape/CSV/SPD-log extension, seed agent (StoEx, `Math.random`, UUIDs), `det` ordering rule and PS patch, smoke corpus | — | 1 w | met: SPD minimal example (and 8 more models) byte-reproducible; CSV in SimOxide's format |
 | **S1** | *Done 2026-10-17.* Slingshot semantics spec `docs/spec/slingshot/` (10 pages, rules `SS-*`, quirks Q17–Q37 added to Q1–Q16): event core and bus, usage, SEFF, resources, monitoring, random streams, SPD, quirks, exact comparison (projection, tape mapping); 20 probe models with `det` outputs (`models/probes/`, `probes.sh`); draw sites on the tape; `det` verified on 88 models (`verify-det.sh`, `results/det-verify.csv`) | S0 helps | 1.5-2 w | met: every difference has a rule with a source citation; 20 probes and the corpus runs demonstrate them (§2.1) |
 | **S2** | *Done 2026-10-17* (findings: 5.2 "S2 as built"). Slingshot flavour, fast mode: `Flavour` trait, hooks of 5.2, Slingshot monitors and windows, stop, branch stream, quirk compat flags (U5) | F1, S1 | 4-6 w (a: trait and SimuLizar impl, golden unchanged; b: usage, stop, RNG; c: resources; d: monitoring) | met as sharpened in 5.2 "S2 as built": `x_ss_*` byte-identical to `det` (exact RNG, compat flags; 5 models x 3 seeds), also 16/20 probes and 38/45 corpus models; `x_ss_mediastore` statistically equal to stock (30 seeds, 0/26 tests rejected, both RNG modes); `x_espresso` equal on every order-independent series, its event-sampled state series is order-dependent (Slingshot's own `det` order fails the same test) and left to X2 |

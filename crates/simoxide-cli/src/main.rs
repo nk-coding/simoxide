@@ -31,7 +31,7 @@ const USAGE: &str = "usage:
              [--spd-log spd.jsonl] [--spd-log-all] [--spd-quirks fixed|slingshot|Q2,Q12,...]
              [--no-spd]   (scaling policies of a .spd next to the model; `spd` feature;
              P1: decisions only, adjustments are not executed)
-             [--rules DIR] [--rules-log rules.jsonl] [--qvto-mode auto|fast|compat]
+             [--rules DIR] [--rules-log rules.jsonl] [--qvto-mode auto|ordered|fast|compat]
              (SimuLizar's reconfiguration rules: the .qvto files of DIR in file-name order, or
              run.json's reconfiguration_rules; `reconfiguration` feature; QVTo's compat mode
              needs a build with `exact` or `compat`)
@@ -624,9 +624,10 @@ mod rules {
             None | Some("auto") => QvtMode::Auto,
             Some("fast") => QvtMode::Fast,
             Some("compat") => QvtMode::Compat,
+            Some("ordered") => QvtMode::InsertionOrderSets,
             Some(m) => {
                 return Err(format!(
-                    "--qvto-mode: expected auto, fast or compat, got {m}"
+                    "--qvto-mode: expected auto, ordered, fast or compat, got {m}"
                 ));
             }
         };

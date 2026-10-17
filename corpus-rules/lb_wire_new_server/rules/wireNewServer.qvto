@@ -1,0 +1,171 @@
+/*
+ * SimOxide R2 example: SimuLizar's horizontal-scaling adaptation steps as one reconfiguration rule
+ * for the load balancer example. SimuLizar 5.2.2 runs them only through its action framework
+ * (org.palladiosimulator.simulizar.action.repository/adaptations: instantiatecomponent.qvto and
+ * wirewithloadbalancer.qvto, used by the media store's horizontal scaling; EPL-2.0), which the
+ * headless 5.2.2 runtime cannot run. Taken over: the objects they create, without explicit ids (an
+ * assembly context and its allocation context; a required role of the load balancer, a branch with
+ * its behaviour, start, external call and stop actions, an assembly connector), their names and
+ * wiring. Adapted: the roles of the action instance become the load balancer's names (the target
+ * node is a new container with ServerNode2's processing resources, joining the LAN; the component
+ * is the application server; the copied branch and role are the first server's), stereotype
+ * removal (ProfilesLibrary) is left out, the copied call is named `call<n>` (its source has no
+ * name), and every branch gets 1 / (number of branches) instead of 1 / (number of required roles
+ * before the new one), which would sum to 1.5.
+ */
+modeltype PRM uses 'http://simulizar.palladiosimulator.org/RuntimeMeasurement/1.0';
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_REPOSITORY uses 'http://palladiosimulator.org/PalladioComponentModel/Repository/5.2';
+modeltype PCM_ASSEMBLY uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2';
+modeltype SEFF uses 'http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2';
+modeltype PCM_PARAM uses 'http://palladiosimulator.org/PalladioComponentModel/Parameter/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+modeltype PCM_SYSTEM uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+modeltype STOEX uses 'http://sdq.ipd.uka.de/StochasticExpressions/2.2';
+
+transformation wireNewServer(in prm : PRM, inout pcmAllocation : PCM_ALLOC, inout pcmRepository : PCM_REPOSITORY) {
+
+	property instantiatedComponentResourceContainerName = 'InstantiatedComponentResourceContainer';
+	property threshold : Real = 1.2;
+	-- the time-driven aggregation of the response times of the calls to Server1 (it takes all
+	-- the load: the second branch has probability 0)
+	property server1Spec : String = '_t9ApEAOzEeWk4qXEVpjV-g';
+
+	main() {
+		var allocation : Allocation := pcmAllocation.rootObjects()[Allocation]->any(true);
+		var env : ResourceEnvironment := allocation.targetResourceEnvironment_Allocation;
+		assert fatal (not env.resourceContainer_ResourceEnvironment->exists(entityName = instantiatedComponentResourceContainerName))
+			with log ('Already scaled');
+		assert fatal (prm.rootObjects()[RuntimeMeasurement]->exists(m |
+				m.measurementSpecification.id = server1Spec and m.measuringValue > threshold))
+			with log ('Server1 is fast enough');
+		-- the target node (a role of the action instance in SimuLizar)
+		var node2 : ResourceContainer := env.resourceContainer_ResourceEnvironment->any(entityName = 'ServerNode2');
+		var target : ResourceContainer := object ResourceContainer {
+			entityName := instantiatedComponentResourceContainerName;
+		};
+		node2.activeResourceSpecifications_ResourceContainer->forEach(s) {
+			target.activeResourceSpecifications_ResourceContainer += object ProcessingResourceSpecification {
+				schedulingPolicy := s.schedulingPolicy;
+				activeResourceType_ActiveResourceSpecification := s.activeResourceType_ActiveResourceSpecification;
+				processingRate_ProcessingResourceSpecification := object PCMRandomVariable {
+					specification := s.processingRate_ProcessingResourceSpecification.specification;
+				};
+			};
+		};
+		env.resourceContainer_ResourceEnvironment += target;
+		env.linkingResources__ResourceEnvironment->forEach(l) {
+			l.connectedResourceContainers_LinkingResource += target;
+		};
+		var component : BasicComponent := allocation.system_Allocation.assemblyContexts__ComposedStructure
+			->any(entityName = 'Server2').encapsulatedComponent__AssemblyContext.oclAsType(BasicComponent);
+		allocation.xmap enactComponentInstantiation(target, component);
+		var instantiatedAllocation := allocation.allocationContexts_Allocation[resourceContainer_AllocationContext.id = target.id
+			and assemblyContext_AllocationContext.encapsulatedComponent__AssemblyContext.id = component.id];
+		assert fatal (instantiatedAllocation->size() = 1)
+			with log('Something went wrong, there should only be 1 instantiated allocation!');
+		instantiatedAllocation.xmap wireWithLoadBalancer(allocation);
+		log('Wiring with load balancer successful.');
+	}
+
+	-- instantiatecomponent.qvto
+	mapping inout Allocation::enactComponentInstantiation(targetResourceContainer : ResourceContainer, instantiatedComponent : BasicComponent) {
+		var instantiatedComponentContext = object AssemblyContext {
+			entityName := 'Assembly_' + instantiatedComponent.entityName;
+			encapsulatedComponent__AssemblyContext := instantiatedComponent;
+		};
+		system_Allocation.assemblyContexts__ComposedStructure += instantiatedComponentContext;
+		allocationContexts_Allocation += object AllocationContext {
+			resourceContainer_AllocationContext := targetResourceContainer;
+			assemblyContext_AllocationContext := instantiatedComponentContext;
+		};
+		log("Component " + instantiatedComponent.entityName + " instantiated at " + targetResourceContainer.entityName);
+	}
+
+	-- wirewithloadbalancer.qvto
+	mapping AllocationContext::wireWithLoadBalancer(inout allocation : Allocation) {
+		var lbAssembly : AssemblyContext := allocation.allocationContexts_Allocation.assemblyContext_AllocationContext->any(entityName = 'AC_LoadBalancer');
+		var lbComponent : BasicComponent := lbAssembly.encapsulatedComponent__AssemblyContext.oclAsType(BasicComponent);
+		var operationRequiredRole : OperationRequiredRole := lbComponent.requiredRoles_InterfaceRequiringEntity[OperationRequiredRole]->any(entityName = 'AC_Server1');
+		var number : Integer := lbComponent.requiredRoles_InterfaceRequiringEntity->size();
+		var newOperationRequiredRole := object OperationRequiredRole {
+			entityName := operationRequiredRole.entityName + number.toString();
+			requiredInterface__OperationRequiredRole := operationRequiredRole.requiredInterface__OperationRequiredRole;
+		};
+		lbComponent.requiredRoles_InterfaceRequiringEntity += newOperationRequiredRole;
+		var branchAction := lbComponent.serviceEffectSpecifications__BasicComponent[ResourceDemandingSEFF].steps_Behaviour[BranchAction]->any(true);
+		var tBranchTransition := branchAction.branches_Branch->any(entityName = 'delegateToServer1');
+		var newBranchTransition := object ProbabilisticBranchTransition {
+			entityName := tBranchTransition.entityName + number.toString();
+			branchBehaviour_BranchTransition := object ResourceDemandingBehaviour {
+				var startAction : StartAction := object StartAction{};
+				var copiedCall := tBranchTransition.branchBehaviour_BranchTransition.steps_Behaviour[ExternalCallAction]->any(true);
+				var externalCall := object ExternalCallAction {
+					entityName := 'call' + number.toString();
+					predecessor_AbstractAction := startAction;
+					inputVariableUsages__CallAction := copiedCall.inputVariableUsages__CallAction.xmap copyVariableUsage();
+					returnVariableUsage__CallReturnAction := copiedCall.returnVariableUsage__CallReturnAction.xmap copyVariableUsage();
+					calledService_ExternalService := copiedCall.calledService_ExternalService;
+					role_ExternalService := newOperationRequiredRole;
+				};
+				var stopAction : StopAction := object StopAction {
+					predecessor_AbstractAction := externalCall;
+				};
+				steps_Behaviour += startAction;
+				steps_Behaviour += externalCall;
+				steps_Behaviour += stopAction;
+			};
+		};
+		branchAction.branches_Branch += newBranchTransition;
+		var numberOfBranches : Real := branchAction.branches_Branch[ProbabilisticBranchTransition]->size();
+		branchAction.branches_Branch[ProbabilisticBranchTransition]->forEach(branch) {
+			log("Branch name " + branch.entityName);
+			branch.branchProbability := 1.0 / numberOfBranches;
+		};
+		assert fatal(self.assemblyContext_AllocationContext <> null) with log ("Target assembly context is empty.");
+		allocation.system_Allocation.connectors__ComposedStructure += object AssemblyConnector {
+			entityName := lbAssembly.entityName + "->" + self.assemblyContext_AllocationContext.entityName;
+			providingAssemblyContext_AssemblyConnector := self.assemblyContext_AllocationContext;
+			requiringAssemblyContext_AssemblyConnector := lbAssembly;
+			requiredRole_AssemblyConnector := newOperationRequiredRole;
+			providedRole_AssemblyConnector := self.assemblyContext_AllocationContext.encapsulatedComponent__AssemblyContext.providedRoles_InterfaceProvidingEntity[OperationProvidedRole]->any(true);
+		}
+	}
+
+	mapping VariableUsage::copyVariableUsage() : VariableUsage {
+		variableCharacterisation_VariableUsage := self.variableCharacterisation_VariableUsage.xmap copyVariableCharacterisation();
+		namedReference__VariableUsage := self.namedReference__VariableUsage.xmap copyNamedReference();
+	}
+
+	mapping VariableCharacterisation::copyVariableCharacterisation() : VariableCharacterisation {
+		type := self.type;
+		specification_VariableCharacterisation := object PCMRandomVariable {
+			specification := self.specification_VariableCharacterisation.specification;
+		}
+	}
+
+	mapping AbstractNamedReference::copyNamedReference() : AbstractNamedReference {
+		init {
+			result := null;
+		}
+		assert fatal(false) with log('AbstractNamedReference variant of copyNamedReference() should never be called');
+	}
+
+	mapping VariableReference::copyNamedReference() : AbstractNamedReference {
+		init {
+			result := object VariableReference {
+				referenceName := self.referenceName;
+			}
+		}
+	}
+
+	mapping NamespaceReference::copyNamedReference() : AbstractNamedReference {
+		init {
+			result := object NamespaceReference {
+				referenceName := self.referenceName;
+				innerReference_NamespaceReference := self.innerReference_NamespaceReference.xmap copyNamedReference();
+			}
+		}
+	}
+}

@@ -3,8 +3,8 @@
 # model files flat with relative hrefs and the example's own monitors (`refsim import
 # --keep-monitors`), the rules in <case>/rules/, run.json with `reconfiguration_rules` and the stop
 # conditions of the example's launch configuration. Sources: SimuLizar `releases/5.2.2` (EPL-2.0,
-# palladio-research/src-5.2.2/Palladio-Analyzer-SimuLizar, commit 23dc438); scaleOut.qvto
-# (lb_scaleout) and addBranch.qvto (lb_add_branch) are SimOxide's (rules-examples/). Usage: import-rules-examples.sh [outDir]
+# palladio-research/src-5.2.2/Palladio-Analyzer-SimuLizar, commit 23dc438); the rules in
+# rules-examples/ are SimOxide's (wireNewServer.qvto adapts two of SimuLizar's adaptation steps). Usage: import-rules-examples.sh [outDir]
 # Afterwards: CORPUS=../corpus-rules ./regen-expected.sh (expected outputs of the patched reference).
 set -e
 PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/reference/tools/palladio-research.sh")"
@@ -53,6 +53,20 @@ import lb_scaleout "$LB/overload.usagemodel,$LB/loadbalancer_on_iaas.allocation,
 #     SEFF at the first reconfiguration (a structural behaviour change that routes load).
 import lb_add_branch "$LB/overload.usagemodel,$LB/loadbalancer_on_iaas.allocation,$LB/monitors/monitoring.monitorrepository" \
 	"$(runjson 1 100000 1000)" "$OWN/addBranch.qvto"
+# 3c. R2 (ids without explicit ids, Set order): the scale-out and the added branch without explicit
+#     ids; every server moved to a new node in the order of a Set of allocation contexts; SimuLizar's
+#     horizontal-scaling adaptation steps (instantiatecomponent.qvto, wirewithloadbalancer.qvto) as a
+#     rule; a branch behaviour copied with deepclone().
+import lb_scaleout_noid "$LB/overload.usagemodel,$LB/loadbalancer_on_iaas.allocation,$LB/monitors/monitoring.monitorrepository" \
+	"$(runjson 1 100000 1000)" "$LB/reconfigurations_active/outsource.qvto" "$OWN/scaleOutNoId.qvto"
+import lb_add_branch_noid "$LB/overload.usagemodel,$LB/loadbalancer_on_iaas.allocation,$LB/monitors/monitoring.monitorrepository" \
+	"$(runjson 1 100000 1000)" "$OWN/addBranchNoId.qvto"
+import lb_scaleout_each "$LB/overload.usagemodel,$LB/loadbalancer_on_iaas.allocation,$LB/monitors/monitoring.monitorrepository" \
+	"$(runjson 1 100000 1000)" "$LB/reconfigurations_active/outsource.qvto" "$OWN/scaleOutEach.qvto"
+import lb_wire_new_server "$LB/overload.usagemodel,$LB/loadbalancer_on_iaas.allocation,$LB/monitors/monitoring.monitorrepository" \
+	"$(runjson 1 100000 1000)" "$OWN/wireNewServer.qvto"
+import lb_clone_branch "$LB/overload.usagemodel,$LB/loadbalancer_on_iaas.allocation,$LB/monitors/monitoring.monitorrepository" \
+	"$(runjson 1 100000 1000)" "$OWN/cloneBranch.qvto"
 # 4. The power-consumption variant (TransientEffects) with its PCM-only rules (reconf_qvto: scaleDown,
 #    scaleIn, scaleUp), 2000 s. Its power monitors need the Palladio power extension, which is not
 #    part of the 5.2.2 product: they are removed; its resource-URI measuring points with

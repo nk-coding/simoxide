@@ -19,11 +19,12 @@
 //! model validation refuses also end the run with an error that names the rule, instead of
 //! continuing with a model that differs from SimuLizar's.
 
-use crate::host::{Invocation, ModelRef, QvtoCore, QvtoRun, ReconfError, RunConfig};
+use crate::host::{Invocation, ModelRef, QvtMode, QvtoCore, QvtoRun, ReconfError, RunConfig};
 use crate::qvt::PRM_NS;
 use crate::rules::{RuleSet, RulesOutcome};
-use qvto_emf::ObjId;
+use qvto_emf::{IdPolicy, ObjId};
 use qvto_model::{Datum, ModelStore};
+use simoxide_model::raw::Graph;
 use simoxide_sim::{
     Compat, DefaultCompat, Flavour, Outputs, Pause, RunResult, RunState, SimError, SimuLizar,
     Simulation, Status,
@@ -96,7 +97,20 @@ pub const PRM_URI: &str = "simoxide:/runtime.runtimemeasurement";
 impl RulesHost {
     /// A host running `rules` (bound SimuLizar's way, [`Invocation::simulizar`]) with a run's
     /// QVTo state configured by `cfg`.
-    pub fn new(core: &QvtoCore, rules: RuleSet, cfg: RunConfig) -> Result<RulesHost, ReconfError> {
+    ///
+    /// [`QvtMode::Auto`] means QVTo's ordered mode here ([`QvtMode::InsertionOrderSets`], EPL,
+    /// every build): the reference runs SimuLizar's QVTo with insertion-ordered sets (refsim
+    /// patch P10, the `det` ordering rule; `DESIGN-SPD.md` R2), so a rule that iterates a `Set`
+    /// of model objects makes the same decisions in both. [`QvtMode::Compat`] (Java `HashMap`
+    /// orders, HotSpot's identity hashes) and [`QvtMode::Fast`] stay available.
+    pub fn new(
+        core: &QvtoCore,
+        rules: RuleSet,
+        mut cfg: RunConfig,
+    ) -> Result<RulesHost, ReconfError> {
+        if cfg.mode == QvtMode::Auto {
+            cfg.mode = QvtMode::InsertionOrderSets;
+        }
         Ok(RulesHost {
             run: QvtoRun::new(core, cfg)?,
             rules,
@@ -173,7 +187,7 @@ impl RulesHost {
             };
             let ((), _) = self.run.with_store(sim, |st| {
                 let (model, _) = prm_classes(st);
-                let root = st.create(model).expect("RuntimeMeasurementModel");
+                let root = without_ids(st, |st| st.create(model)).expect("RuntimeMeasurementModel");
                 st.add_root(i, root, None).expect("root");
                 self.prm.model = Some((r, root));
             })?;
@@ -194,7 +208,7 @@ impl RulesHost {
                 )
             };
             for &(mp, spec, _) in &ms[known.min(ms.len())..] {
-                let m = st.create(meas).expect("RuntimeMeasurement");
+                let m = without_ids(st, |st| st.create(meas)).expect("RuntimeMeasurement");
                 if let Some(mp) = mp {
                     st.set(m, f_mp, Datum::Obj(mp)).expect("measuringPoint");
                 }
@@ -288,6 +302,19 @@ impl RulesHost {
 /// (diagnostic code 0).
 fn applied(o: &crate::host::Outcome) -> bool {
     o.code == 0 && o.severity != 8
+}
+
+/// Runs `f` with the run's id generator paused: the PRM mirror's objects get no id and draw
+/// none (`DESIGN-SPD.md` R2). The reference draws seeded ids only while a rule runs (refsim patch
+/// P10); SimuLizar's own runtime measurements, created outside rules, keep EMF's UUIDs there, so
+/// the ids of the objects the rules create continue the same sequence in both. The id policy is
+/// the run graph's (`Graph::id_state`), the generator's state is kept as it was.
+fn without_ids<T>(g: &mut Graph, f: impl FnOnce(&mut Graph) -> T) -> T {
+    let (policy, uuid) = g.id_state();
+    g.set_id_state(IdPolicy::None, None);
+    let t = f(g);
+    g.set_id_state(policy, uuid);
+    t
 }
 
 /// The PRM metamodel's classes: `RuntimeMeasurementModel`, `RuntimeMeasurement`.
