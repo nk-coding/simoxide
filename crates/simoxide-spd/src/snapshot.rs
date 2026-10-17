@@ -17,6 +17,16 @@ use simoxide_sim::{Compat, CompiledModel, Flavour, Outputs, Simulation};
 /// Name of the SPD section.
 pub const SPD: &str = "spd";
 
+/// Name of the HPA section (the autoscalers' run state, `crate::hpa`).
+pub const HPA: &str = "hpa";
+
+/// The section `hpa`: the autoscalers' names (checked on restore) and state.
+#[derive(Serialize, Deserialize)]
+struct HpaImage {
+    names: Vec<String>,
+    state: crate::hpa::run::HpaState,
+}
+
 /// [`GroupCfg`] with object ids as numbers.
 #[derive(Serialize, Deserialize)]
 enum GroupCfgImage {
@@ -224,8 +234,21 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
     /// The run's snapshot (the simulation's sections and `spd`), between events: after
     /// [`SpdRun::run_until`] returned, when the SPD work of the last event is done.
     pub fn snapshot_value(&mut self, enc: Encoding) -> Result<Snapshot, SnapshotError> {
-        let sec = spd_section(self.spd, &self.state, &self.requests, self.adjusted_ok, enc)?;
-        self.sim.snapshot_value(enc, vec![sec])
+        let mut secs = vec![spd_section(
+            self.spd,
+            &self.state,
+            &self.requests,
+            self.adjusted_ok,
+            enc,
+        )?];
+        if let Some(h) = self.hpa {
+            let img = HpaImage {
+                names: h.autoscalers.iter().map(|a| a.cfg.name.clone()).collect(),
+                state: self.hpa_state.clone(),
+            };
+            secs.push(Section::encode(HPA, &img, enc)?);
+        }
+        self.sim.snapshot_value(enc, secs)
     }
 
     /// Writes the run's snapshot to `w` (postcard).
@@ -274,7 +297,43 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
         spd: &'s Spd,
         out: Outputs,
     ) -> Result<Self, SnapshotError> {
+        Self::restore_snapshot_hpa(s, base, spd, None, out)
+    }
+
+    /// [`SpdRun::restore_snapshot`] of a run with autoscalers (`hpa`: built from the same
+    /// configuration as the run's, [`SpdRun::with_hpa`]).
+    pub fn restore_snapshot_hpa(
+        s: &Snapshot,
+        base: &'m CompiledModel,
+        spd: &'s Spd,
+        hpa: Option<&'s crate::hpa::Hpa>,
+        out: Outputs,
+    ) -> Result<Self, SnapshotError> {
         let (state, requests, adjusted_ok) = read_spd_section(s, spd)?;
+        let hpa_state = match (s.section(HPA), hpa) {
+            (None, None) => Default::default(),
+            (Some(_), None) => {
+                return Err(SnapshotError::Mismatch(
+                    "the snapshot is of a run with HPA autoscalers: restore it with their configuration".into(),
+                ));
+            }
+            (None, Some(_)) => {
+                return Err(SnapshotError::Mismatch(
+                    "the snapshot is of a run without HPA autoscalers".into(),
+                ));
+            }
+            (Some(sec), Some(h)) => {
+                let img: HpaImage = sec.decode(s.header.encoding)?;
+                let names: Vec<String> = h.autoscalers.iter().map(|a| a.cfg.name.clone()).collect();
+                if img.names != names || img.state.autoscalers.len() != names.len() {
+                    return Err(SnapshotError::Mismatch(format!(
+                        "the snapshot's autoscalers are {:?}, the configuration has {names:?}",
+                        img.names
+                    )));
+                }
+                img.state
+            }
+        };
         let sim = Simulation::<C, F>::restore_snapshot(s, base, out)?;
         Ok(SpdRun {
             series: series_points(sim.compiled(), &sim.state().measurements().series),
@@ -283,7 +342,14 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             state,
             requests,
             adjusted_ok,
+            hpa,
+            hpa_state,
         })
+    }
+
+    /// Whether snapshot `s` holds autoscalers' state.
+    pub fn has_hpa(s: &Snapshot) -> bool {
+        s.section(HPA).is_some()
     }
 }
 

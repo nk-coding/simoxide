@@ -784,7 +784,24 @@ impl QvtoRun {
         let fp = fingerprint(sim);
         if st.work.as_ref().is_none_or(|(_, f)| *f != fp) {
             let mut g = sim.model_graph().clone();
-            core.0.template.attach(&mut g, ids);
+            match st.work.take() {
+                // A restored run's model holds placeholders where the QVTo state was until the
+                // first transformation hands its working graph to the simulation; a model change
+                // from outside (a change file at the resume) copies that model: the restored
+                // state (id generator, objects of other metamodels) carries over to the copy, or
+                // the next transformation would reuse ids.
+                #[cfg(feature = "snapshot")]
+                Some((old, _))
+                    if g.links().package_obj.is_empty() && !old.links().package_obj.is_empty() =>
+                {
+                    let saved = core.0.template.save_state(&old);
+                    if core.0.template.restore_state(&mut g, &saved, ids).is_err() {
+                        g = sim.model_graph().clone();
+                        core.0.template.attach(&mut g, ids);
+                    }
+                }
+                _ => core.0.template.attach(&mut g, ids),
+            }
             st.work = Some((Arc::new(g), fp));
         }
         st

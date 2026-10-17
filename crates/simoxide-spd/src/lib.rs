@@ -23,6 +23,8 @@
 //!   projection for comparisons.
 //! * `sim` (feature `sim`, default): the driver that runs the interpreter in a `simoxide-sim`
 //!   run.
+//! * [`hpa`]: Kubernetes-style horizontal pod autoscaling of SPD target groups: a native
+//!   controller whose rescales are absolute adjustments through the same adjuster.
 //!
 //! The interpreter is flavour neutral: it sees time events and measurement tuples, whatever
 //! engine produces them.
@@ -30,6 +32,7 @@
 pub mod adjust;
 pub mod adjusted;
 pub mod aggregate;
+pub mod hpa;
 mod interp;
 pub mod jfmt;
 pub mod log;

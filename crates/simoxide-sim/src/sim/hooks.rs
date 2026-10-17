@@ -10,9 +10,16 @@
 //!   tuples and sliding-window outputs) into a buffer ([`Simulation::take_observed`]); the
 //!   driver gets control after the event that emitted it.
 //!
-//! Both are empty and cost one predictable branch per tuple when unused: runs without hooks
-//! are unchanged (golden hashes). The buffers are part of the [`RunState`]: a fork or snapshot
-//! taken between events sees them empty when the driver drains them before.
+//! * A tracked resource ([`Simulation::track_busy`]) accumulates the time integral of its busy
+//!   fraction (the value its overall-utilisation probe reports: busy instances / instances), so
+//!   that a host can read the mean utilisation over any interval between two readings
+//!   ([`Simulation::busy_integral`]) without a monitor in the model (the HPA's CPU metric,
+//!   `simoxide-spd`'s `hpa`).
+//!
+//! All are empty and cost one predictable branch per tuple or resource state change when
+//! unused: runs without hooks are unchanged (golden hashes). The buffers and integrals are part
+//! of the [`RunState`]: a fork or snapshot taken between events sees them empty when the driver
+//! drains them before.
 
 use super::*;
 
@@ -39,6 +46,37 @@ pub(crate) struct Hooks {
     /// Per series: observed.
     pub(crate) observe: Vec<bool>,
     pub(crate) observed: Vec<ObservedTuple>,
+    /// Some resource is tracked ([`Simulation::track_busy`]).
+    pub(crate) busy_on: bool,
+    /// Per resource (index): its busy-time integral, if tracked.
+    pub(crate) busy: Vec<Option<Busy>>,
+}
+
+/// The busy-time integral of a tracked resource.
+#[derive(Clone, Copy, Debug, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+pub(crate) struct Busy {
+    /// Tracked since (s).
+    pub(crate) since: f64,
+    /// Last change (s) and the busy fraction since then.
+    pub(crate) t: f64,
+    pub(crate) frac: f64,
+    /// Integral of the busy fraction from `since` to `t` (s).
+    pub(crate) acc: f64,
+}
+
+/// Resource `ri`'s busy fraction changed to `frac` at `t` (s): extends its integral, if
+/// tracked.
+#[cold]
+#[inline(never)]
+pub(crate) fn busy_changed(h: &mut Hooks, ri: ResIdx, t: f64, frac: f64) {
+    if let Some(Some(b)) = h.busy.get_mut(ri as usize) {
+        if t > b.t {
+            b.acc += b.frac * (t - b.t);
+            b.t = t;
+        }
+        b.frac = frac;
+    }
 }
 
 /// An emission to series `s`: buffered if `s` is observed.
@@ -53,6 +91,15 @@ pub(crate) fn observe_tuple(h: &mut Hooks, now: i64, s: SeriesId, t: f64, v: f64
             v,
         });
     }
+}
+
+/// Slingshot's utilisation sample (SS-MEAS): busy cores / cores (PS), 0 or 1 otherwise.
+pub(crate) fn ss_busy_fraction(policy: SchedulingPolicy, n: u64, cores: u32) -> f64 {
+    let busy = match policy {
+        SchedulingPolicy::ProcessorSharing => n.min(u64::from(cores)),
+        _ => u64::from(n > 0),
+    };
+    busy as f64 / f64::from(cores)
 }
 
 impl<C: Compat, F: Flavour> RunState<C, F> {
@@ -97,6 +144,62 @@ impl<C: Compat, F: Flavour> Simulation<'_, C, F> {
         }
         h.observe[s as usize] = true;
         h.observing = true;
+    }
+
+    /// Tracks resource `ri` (a [`CompiledModel::resources`] index of the run's current model)
+    /// from now on: the time integral of its busy fraction, as its overall-utilisation probe
+    /// would report it (SimuLizar: busy instances / instances; Slingshot: busy cores / cores),
+    /// read with [`Simulation::busy_integral`]. Tracking a tracked resource changes nothing.
+    pub fn track_busy(&mut self, ri: ResIdx) {
+        let i = ri as usize;
+        if i >= self.cm.resources.len() {
+            return;
+        }
+        let h = &self.st.meas.hooks;
+        if h.busy.get(i).is_some_and(Option::is_some) {
+            return;
+        }
+        let frac = self.busy_fraction_now(ri);
+        let t = F::Clock::secs(self.st.now);
+        let h = &mut self.st.meas.hooks;
+        if h.busy.len() <= i {
+            h.busy.resize(i + 1, None);
+        }
+        h.busy[i] = Some(Busy {
+            since: t,
+            t,
+            frac,
+            acc: 0.0,
+        });
+        h.busy_on = true;
+    }
+
+    /// The tracked resource `ri`'s busy-time integral: `(since, integral)`, the time tracking
+    /// started (s) and the integral of its busy fraction from then to now (s). `None` if it is
+    /// not tracked.
+    pub fn busy_integral(&self, ri: ResIdx) -> Option<(f64, f64)> {
+        let b = (*self.st.meas.hooks.busy.get(ri as usize)?)?;
+        let now = F::Clock::secs(self.st.now);
+        Some((b.since, b.acc + b.frac * (now - b.t).max(0.0)))
+    }
+
+    /// The current busy fraction of resource `ri` (its overall-utilisation probe's value).
+    fn busy_fraction_now(&self, ri: ResIdx) -> f64 {
+        let def = &self.cm.resources[ri as usize];
+        let rt = &self.st.res[ri as usize];
+        if F::SLINGSHOT {
+            let (n, cores) = match &rt.sched {
+                Some(s) => (s.jobs(), s.cores()),
+                None => (rt.delay_set.len() as u64, 1),
+            };
+            ss_busy_fraction(def.policy, n, cores)
+        } else {
+            super::busy_fraction(
+                &rt.shadow,
+                def.instances,
+                def.policy == SchedulingPolicy::ProcessorSharing,
+            )
+        }
     }
 
     /// The tags of the external notes dispatched since the last call, in dispatch order.

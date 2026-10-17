@@ -47,6 +47,7 @@ impl<C: Compat, F: Flavour> SpdRun<'_, '_, C, F> {
         self.state.membership =
             Membership::from_graph(&self.sim.compiled().model.graph, self.spd.model());
         self.observe_new_series();
+        self.hpa_model_changed();
     }
 
     /// Enforces the policies `names` (name or id, in this order) at the current time: their

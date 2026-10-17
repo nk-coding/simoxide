@@ -15,7 +15,8 @@
 //!   oracle's insertion-ordered collections; fast mode as an option, never compat), seeded ids
 //!   for every PCM object the transformation creates (Slingshot's generated classes give each a
 //!   UUID; `Wiring` compares ids), and [`SlingshotHooks`]:
-//!   - before the run: `Configuration.enactedPolicy` := the request's policy, the container and
+//!   - before the run: `Configuration.enactedPolicy` := the request's policy (for an HPA
+//!     rescale, `simoxide_spd::hpa`, also the goal of its absolute adjustment), the container and
 //!     allocation lists ([`simoxide_spd::adjusted::Before`]) and the model summary;
 //!   - after it: Slingshot's `ModelAdjusted` ([`ModelAdjusted`]: old, new and deleted
 //!     containers, new allocation contexts, the monitors Slingshot clones), the summary after,
@@ -323,6 +324,16 @@ impl AdjustHooks for SlingshotHooks {
             store
                 .set(cfg, mf::Configuration_enactedPolicy, Datum::Obj(policy))
                 .expect("Configuration.enactedPolicy");
+            // an HPA rescale: the autoscaler's policy enacts the desired replica count
+            if req.hpa.is_some()
+                && let simoxide_spd::model::Adjustment::Absolute { goal } = req.adjustment
+                && let Some(adj) = simoxide_spd::hpa::adjustment_object(store, policy)
+            {
+                let goal = i32::try_from(goal).expect("an HPA goal fits an EInt");
+                store
+                    .set(adj, mf::AbsoluteAdjustment_goalValue, Datum::Int(goal))
+                    .expect("AbsoluteAdjustment.goalValue");
+            }
         }
         self.before = Before::capture(store, model);
         self.summary_before = self

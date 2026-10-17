@@ -18,6 +18,18 @@
 //!   summaries `before` and `after` (`crate::adjusted::summary`, as the reference runner's);
 //!   the target-group size before and after when the host knows them; `enforced` for an
 //!   enforced policy.
+//! * `hpa`: one sync of an HPA autoscaler (`crate::hpa`, `docs/spec/hpa.md`): `t`, `hpa` (its
+//!   name), `metric` (`cpu`), `current` (replicas: `ready` plus `starting`), `unready` and
+//!   `missing` pods of the calculation, the ready pods' `utilization` (percent of their
+//!   requests) against the `target`, the `ratio`, the calculator's `recommended` replicas, the
+//!   `stabilized` recommendation, the bounded `desired` count with its `reason` (Kubernetes'
+//!   condition reasons: `DesiredWithinRange`, `ScaleUpLimit`, `TooManyReplicas`,
+//!   `TooFewReplicas`, `ScaleDownLimit`, …), or the calculator's `error`; what the rescale did:
+//!   pods `started` and starting pods `cancelled`, and the `goal` of the group's absolute
+//!   adjustment, if one runs now. Adjustments of the HPA are `adjust` records of its policy
+//!   (`_simoxide_hpa_<name>`).
+//! * `hpa_ready`: starting pods of an autoscaler became ready: `t`, `hpa`, `ready` (how many)
+//!   and the adjustment's `goal`.
 //!
 //! The reference runner's records carry the bus event index `e`, which does not exist here.
 //! [`project`] maps both logs onto what P1 compared (no model summaries);
@@ -69,6 +81,38 @@ pub enum Record {
         /// An enforced policy's request ([`crate::Spd::enforce`]).
         enforced: bool,
     },
+    /// One sync of an HPA autoscaler.
+    Hpa(Box<HpaRecord>),
+    /// Starting pods of an autoscaler became ready.
+    HpaReady {
+        t: f64,
+        hpa: Box<str>,
+        ready: i32,
+        goal: i32,
+    },
+}
+
+/// The fields of an `hpa` record (see the module documentation).
+#[derive(Clone, Debug, PartialEq)]
+pub struct HpaRecord {
+    pub t: f64,
+    pub hpa: Box<str>,
+    pub current: i32,
+    pub ready: i32,
+    pub starting: i32,
+    pub unready: i32,
+    pub missing: i32,
+    pub utilization: Option<i32>,
+    pub target: i32,
+    pub ratio: Option<f64>,
+    pub recommended: Option<i32>,
+    pub stabilized: Option<i32>,
+    pub desired: i32,
+    pub reason: &'static str,
+    pub error: Option<String>,
+    pub started: i32,
+    pub cancelled: i32,
+    pub goal: Option<i32>,
 }
 
 fn q(s: &str) -> String {
@@ -166,6 +210,46 @@ impl Record {
                 s.push('}');
                 s
             }
+            Record::Hpa(r) => {
+                let opt_i = |o: Option<i32>| o.map_or_else(|| "null".into(), |v| v.to_string());
+                let mut s = format!(
+                    "{{\"k\":\"hpa\",\"t\":{},\"hpa\":{},\"metric\":\"cpu\",\"current\":{},\"ready\":{},\"starting\":{},\"unready\":{},\"missing\":{},\"utilization\":{},\"target\":{},\"ratio\":{},\"recommended\":{},\"stabilized\":{},\"desired\":{},\"reason\":{}",
+                    json_double(r.t),
+                    q(&r.hpa),
+                    r.current,
+                    r.ready,
+                    r.starting,
+                    r.unready,
+                    r.missing,
+                    opt_i(r.utilization),
+                    r.target,
+                    r.ratio.map_or_else(|| "null".into(), json_double),
+                    opt_i(r.recommended),
+                    opt_i(r.stabilized),
+                    r.desired,
+                    q(r.reason),
+                );
+                if let Some(e) = &r.error {
+                    s.push_str(&format!(",\"error\":{}", q(e)));
+                }
+                s.push_str(&format!(
+                    ",\"started\":{},\"cancelled\":{},\"goal\":{}}}",
+                    r.started,
+                    r.cancelled,
+                    opt_i(r.goal)
+                ));
+                s
+            }
+            Record::HpaReady {
+                t,
+                hpa,
+                ready,
+                goal,
+            } => format!(
+                "{{\"k\":\"hpa_ready\",\"t\":{},\"hpa\":{},\"ready\":{ready},\"goal\":{goal}}}",
+                json_double(*t),
+                q(hpa)
+            ),
         }
     }
 }

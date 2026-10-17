@@ -987,6 +987,7 @@ dependencies = [
  "ryu",
  "serde",
  "serde_json",
+ "simoxide-emf-core",
  "simoxide-model",
  "simoxide-sim",
  "simoxide-spd",

@@ -127,6 +127,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// arrival, completion and (Q26) stale completion.
     pub(super) fn ss_res_samples(&mut self, ri: ResIdx) {
         let cm = self.cm;
+        if self.st.meas.hooks.busy_on {
+            self.ss_busy_changed(ri);
+        }
         let Some(mons) = cm.ss.res_mon.get(ri as usize) else {
             return;
         };
@@ -255,6 +258,20 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         }
         self.ss_res_samples(ri);
         Ok(true)
+    }
+
+    /// A tracked resource's busy fraction (`hooks`: the utilisation sample's value).
+    #[cold]
+    #[inline(never)]
+    fn ss_busy_changed(&mut self, ri: ResIdx) {
+        let rt = &self.st.res[ri as usize];
+        let (n, cores) = match &rt.sched {
+            Some(s) => (s.jobs(), s.cores()),
+            None => (rt.delay_set.len() as u64, 1),
+        };
+        let f = hooks::ss_busy_fraction(self.cm.resources[ri as usize].policy, n, cores);
+        let t = F::Clock::secs(self.st.now);
+        hooks::busy_changed(&mut self.st.meas.hooks, ri, t, f);
     }
 
     /// The pending completion of resource `ri` is due (`JobProgressed`, SS-RES-2.4, SS-RES-3.3;

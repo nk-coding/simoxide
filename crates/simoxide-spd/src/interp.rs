@@ -84,6 +84,12 @@ pub struct AdjustmentRequest {
     /// Requested by [`Spd::enforce`] (Slingshot's incoming policies at a resume), past the
     /// policy's chain: its outcome changes no adjustor or group state.
     pub enforced: bool,
+    /// Requested by the HPA controller (`crate::hpa`): the index of its autoscaler. `policy` is
+    /// the autoscaler's inactive policy, `adjustment` the absolute adjustment to its desired
+    /// replica count (written into the policy before the transformation runs); the outcome
+    /// changes no adjustor or group state.
+    #[cfg_attr(feature = "snapshot", serde(default))]
+    pub hpa: Option<u32>,
 }
 
 /// The outcome of an executed adjustment, reported with [`Spd::adjusted_with`].
@@ -858,7 +864,7 @@ impl Spd {
         now: f64,
         log: &mut dyn Log,
     ) {
-        if out.ok && !self.quirks.q2_commit_on_request && !req.enforced {
+        if out.ok && !self.quirks.q2_commit_on_request && !req.enforced && req.hpa.is_none() {
             self.commit(st, req.ctx, req.time);
         }
         if log.enabled() {
@@ -896,6 +902,7 @@ impl Spd {
             adjustment: p.adjustment,
             time: now,
             enforced: true,
+            hpa: None,
         };
         st.next_request += 1;
         st.requests += 1;
@@ -1054,6 +1061,7 @@ impl Spd {
                 adjustment: self.model.policies[ctx.policy].adjustment,
                 time: ev.time(),
                 enforced: false,
+                hpa: None,
             };
             st.next_request += 1;
             host.request(req);

@@ -614,6 +614,10 @@ struct ResListener<'a, K: Clock> {
     def: &'a CRes,
     shadow: &'a mut Vec<u64>,
     per_core: bool,
+    /// The resource (for tracked busy times, `hooks`) and whether the shadow is the flavour's
+    /// state (not in the Slingshot flavour, whose samples read the scheduler).
+    ri: ResIdx,
+    track: bool,
     clock: std::marker::PhantomData<K>,
 }
 
@@ -640,6 +644,10 @@ impl<K: Clock> ResourceListener<u64> for ResListener<'_, K> {
         if let Some(s) = self.def.overall_series {
             let f = busy_fraction(self.shadow, self.def.instances, self.per_core);
             emit(self.meas, self.trace, self.store, self.now, s, t, f);
+        }
+        if self.meas.hooks.busy_on && self.track {
+            let f = busy_fraction(self.shadow, self.def.instances, self.per_core);
+            hooks::busy_changed(&mut self.meas.hooks, self.ri, t, f);
         }
     }
 }
@@ -1511,6 +1519,8 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     def,
                     shadow: &mut rt.shadow,
                     per_core,
+                    ri,
+                    track: !F::SLINGSHOT,
                     clock: std::marker::PhantomData,
                 };
                 let sched = rt.sched.as_mut().expect("scheduler");
@@ -1585,6 +1595,8 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             def,
             shadow: &mut rt.shadow,
             per_core: false,
+            ri,
+            track: !F::SLINGSHOT,
             clock: std::marker::PhantomData,
         };
         l.state_changed(0, n);
@@ -2019,6 +2031,8 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 def,
                 shadow: &mut rt.shadow,
                 per_core,
+                ri,
+                track: !F::SLINGSHOT,
                 clock: std::marker::PhantomData,
             };
             let w = rt

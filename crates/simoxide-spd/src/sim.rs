@@ -187,6 +187,9 @@ pub struct SpdRun<'m, 's, C: Compat, F: Flavour = SimuLizar> {
     /// Requests by note tag (`REQUEST | index`); taken when dispatched.
     pub(crate) requests: Vec<Option<AdjustmentRequest>>,
     pub(crate) adjusted_ok: u64,
+    /// The HPA's autoscalers (`crate::hpa`, [`SpdRun::with_hpa`]) and their run state.
+    pub(crate) hpa: Option<&'s crate::hpa::Hpa>,
+    pub(crate) hpa_state: crate::hpa::run::HpaState,
 }
 
 struct Host<'a, 'm, C: Compat, F: Flavour> {
@@ -240,6 +243,8 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             series,
             requests: Vec::new(),
             adjusted_ok: 0,
+            hpa: None,
+            hpa_state: Default::default(),
         };
         let mut host = Host {
             sim: &mut run.sim,
@@ -312,6 +317,8 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             series: self.series.clone(),
             requests: self.requests.clone(),
             adjusted_ok: self.adjusted_ok,
+            hpa: self.hpa,
+            hpa_state: self.hpa_state.clone(),
         })
     }
 
@@ -364,6 +371,18 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
                 let now = self.sim.state().now_ns() as f64 / 1e9;
                 self.spd
                     .adjusted_with(&mut self.state, &req, &out, now, log);
+                if let Some(i) = req.hpa {
+                    self.hpa_adjusted(i as usize, &out)?;
+                } else if !self.hpa_state.autoscalers.is_empty() {
+                    // an SPD policy may have changed an autoscaler's group
+                    self.hpa_model_changed();
+                }
+                // every request taken: the table starts again (it never grows with the run)
+                if self.requests.iter().all(Option::is_none) {
+                    self.requests.clear();
+                }
+            } else if tag & crate::hpa::run::HPA != 0 {
+                self.hpa_note(tag, log)?;
             } else {
                 let mut host = Host {
                     sim: &mut self.sim,

@@ -8,6 +8,8 @@ license.workspace = true
 
 [dependencies]
 simoxide-model = { workspace = true }
+# the HPA's policies in the model graph (`hpa::attach`)
+simoxide-emf-core = { workspace = true }
 simoxide-sim = { workspace = true, optional = true }
 serde_json = "1"
 ryu = "1"
