@@ -9,8 +9,8 @@ use std::rc::Rc;
 use simoxide_model::meta::feat as mf;
 use simoxide_reconf::Edit;
 use simoxide_sim::{
-    ChangeError, ChangeReport, CompiledModel, Fast, Mode, Outputs, Pause, RunResult, RunSpec,
-    SimConfig, Simulation,
+    ChangeError, ChangeOptions, ChangeReport, CompiledModel, Fast, Mode, Outputs, Pause, RunResult,
+    RunSpec, SimConfig, Simulation,
 };
 
 const S: i64 = 1_000_000_000;
@@ -179,6 +179,8 @@ fn run_with(
 ) -> (Out, Option<Result<ChangeReport, ChangeError>>) {
     let w = W::default();
     let mut sim = Simulation::new(cm, cfg.clone(), w.outputs()).unwrap();
+    // the compat suite: SimuLizar's syncers (keep simulating, the syncers' aborts)
+    sim.set_change_options(ChangeOptions::simulizar());
     sim.run_until(pause).unwrap();
     let report = edit.map(|f| {
         let mut e = Edit::new(&sim);
@@ -430,7 +432,7 @@ fn removed_allocation_context_aborts_and_leaves_the_run_unchanged() {
 }
 
 #[test]
-fn population_change_is_not_supported_yet() {
+fn population_change_applies() {
     let (cm, cfg) = corpus("h06_closed_think");
     let want = run(&cm, &cfg);
     let set = |e: &mut Edit| {
@@ -445,11 +447,13 @@ fn population_change_is_not_supported_yet() {
             .unwrap();
     };
     let (got, report) = run_with(&cm, &cfg, Pause::After(2 * S), Some(&set));
+    let report = report.unwrap().unwrap();
     assert!(
-        matches!(report, Some(Err(ChangeError::Unsupported(_)))),
+        report.applied.iter().any(|m| m.contains("population")),
         "{report:?}"
     );
-    assert_same("refused change", &want, &got);
+    // four more users: the run differs (F4 tests: tests/f4.rs)
+    assert_ne!(want.trace, got.trace);
 }
 
 #[test]
@@ -589,6 +593,7 @@ fn successive_change_sets_add_change_and_remove_a_container() {
     };
     let w = W::default();
     let mut sim = Simulation::new(&cm, cfg, w.outputs()).unwrap();
+    sim.set_change_options(ChangeOptions::simulizar());
     sim.run_until(Pause::After(5 * S)).unwrap();
     let mut e = Edit::new(&sim);
     scale_out(&mut e);

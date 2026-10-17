@@ -62,8 +62,10 @@ The genuine design differences of Slingshot, always on in the flavour:
 | branches | the run's random stream | Slingshot's `Math.random()` stream (SS-RNG-1.2) |
 | monitoring | probe framework, sliding windows, PRM, initial and final tuples | instantaneous state and utilisation samples at every resource event, the resource demand at every job start, Slingshot's passive-resource points; no windows, no processing types, no initial or final tuples (SS-MEAS) |
 
-Model changes (`Simulation::apply_changes`) are refused for Slingshot runs until the Slingshot
-syncers exist (design phases F4, P3).
+Model changes (`Simulation::apply_changes`) follow Slingshot's syncers with the fixed behaviours
+([Model changes](../spec/model-changes.md) MC-9): resources for newly allocated containers, the
+first allocation context of an assembly context read live, passive resources of new allocation
+contexts, new monitors probed, removed containers drained (the Q5 flag: Slingshot's removal).
 
 ## Slingshot bugs: fixed by default, flags to reproduce them
 

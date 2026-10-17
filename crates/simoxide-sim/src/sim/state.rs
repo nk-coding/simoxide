@@ -158,6 +158,8 @@ pub struct RunState<C: Compat = crate::compat::DefaultCompat, F: Flavour = SimuL
     // ------------------------------------------------------------------ model
     /// The run's own model after model changes (`None` until the first one).
     pub(super) model: RunModel,
+    /// How the run takes model changes ([`Simulation::set_change_options`]).
+    pub(super) changes: crate::change::ChangeOptions,
     // ------------------------------------------------------------------ resolution caches
     /// Provided-role calls, by id (see `Simulation::prov_id`).
     pub(super) provs: Vec<ProvRes>,
@@ -225,6 +227,7 @@ impl<C: Compat, F: Flavour> Clone for RunState<C, F> {
             run_series: self.run_series.clone(),
             warnings: self.warnings.clone(),
             model: self.model.clone(),
+            changes: self.changes,
             provs: self.provs.clone(),
             prov_ids: self.prov_ids.clone(),
             call_cache: self.call_cache.clone(),
@@ -305,6 +308,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             run_series: HashMap::new(),
             warnings: Vec::new(),
             model: RunModel::default(),
+            changes: crate::change::ChangeOptions::for_flavour(cm.flavour),
             provs: Vec::new(),
             prov_ids: FxMap::default(),
             call_cache: vec![CallCache::default(); cm.code.traced.call_sites as usize],

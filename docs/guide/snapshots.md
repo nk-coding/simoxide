@@ -174,18 +174,17 @@ simoxide resume ms-120.snap --model corpus/x_sl_mediastore \
 
 Changes the run cannot take are errors that leave it unchanged:
 
-- not supported yet (`unsupported model change`; phase F4): population changes of a closed
-  workload; new or removed usage scenarios; monitor changes (new measurement series, sliding
-  windows, runtime-measurement recorders: a new container gets no monitors); structural changes
-  of a behaviour (an action or branch added to a SEFF); a container added and removed in one
-  change set; **every model change in the Slingshot flavour** (its syncers are F4/P3);
-- SimuLizar aborts on them (`SimuLizar aborts on this model change`): removing an allocation
-  context, `UNSET` or `MOVE` in the allocation or in the link lists;
-- invalid (`invalid model change`): the changed model does not validate or compile.
+- unsupported (`unsupported model change`): kept instructions of executions in progress that
+  no longer fit their changed action (MC-4.3), a new container with a registered id;
+- SimuLizar aborts on them (`SimuLizar aborts on this model change`), under `removal keep` only:
+  removing an allocation context, `UNSET` or `MOVE` in the allocation or in the link lists;
+- invalid (`invalid model change`): the changed model does not validate or compile (e.g. an
+  assembly context left without allocation).
 
 Changes SimuLizar's syncers ignore are applied to the model but do not change the simulation
 (a warning): the number of replicas (cores), the scheduling policy and the type of a processing
-resource, HDD read and write rates. A removed container keeps simulating.
+resource, HDD read and write rates. A removed container drains by default (`removal keep`:
+it keeps simulating as in SimuLizar; [Model changes](../spec/model-changes.md) MC-8).
 
 ### Change files
 
@@ -207,7 +206,7 @@ and are applied together; on any error nothing changes.
 | `think-time WORKLOAD STOEX` | think time of a closed workload (or of a usage scenario's) |
 | `inter-arrival WORKLOAD STOEX` | inter-arrival time of an open workload (or of a usage scenario's) |
 | `arrival-rate WORKLOAD RATE` | inter-arrival time `Exp(RATE)` |
-| `population WORKLOAD N` | population of a closed workload (not supported before F4) |
+| `population WORKLOAD N` | population of a closed workload: new users start at once, the oldest leave after their run (MC-5.2) |
 | `replicas REF[:TYPE] N` | number of replicas of a processing resource (ignored by the syncers, MC-1.4) |
 | `loop-count LOOP STOEX` | iteration count of a SEFF loop or a usage-model loop |
 | `set REF FEATURE VALUE` | any single-valued attribute by its EMF name, a random variable (its specification), or a reference (`VALUE` is a `REF`) |
@@ -215,8 +214,14 @@ and are applied together; on any error nothing changes.
 | `connect LINK CONTAINER` | connects a container to a linking resource |
 | `add-assembly TEMPLATE NEW_ID [NAME]` | an assembly context of the template's component |
 | `allocate ASSEMBLY CONTAINER NEW_ID` | a new allocation context |
-| `remove-container CONTAINER` | the container leaves the resource environment (it keeps simulating, MC-1.5) |
+| `remove-container CONTAINER` | the container leaves the resource environment (drained by default, MC-8) |
 | `delete REF` | `EcoreUtil.delete` |
+| `clone-monitors TEMPLATE CONTAINER` | copies of the template container's monitors for the container (Slingshot's `ResourceContainerMonitorCloner`, MC-6.3) |
+| `add-demand ACTION:TYPE STOEX` | a new resource demand of an internal action (a structural change, MC-4.3) |
+| `removal keep\|drain\|abort\|slingshot-q5` | the run's removal policy from this change set on (MC-8) |
+| `in-progress follow\|finish` | how executions in progress continue in changed behaviours (MC-4.3) |
+| `reallocation ignore\|apply` | whether a re-pointed allocation context moves its lookups (MC-3.2) |
+| `monitors reference\|full` | which new monitors get series (MC-6) |
 
 ```text
 # faster database disk, twice the load, a second server for the file storage
@@ -289,6 +294,5 @@ if let Some(f) = watch.fired() {
 ## What a snapshot is not (yet)
 
 - Enforced scaling policies at a resume wait for the SPD adjustment phase (P2).
-- The Slingshot flavour takes no model changes at a resume (F4).
 - No interchange with Slingshot's `.snapshot` files (phase N3; DESIGN-SPD.md 5.7, "N3a spike").
 - A snapshot holds SimOxide's internal run state: it is read by the same SimOxide version only.

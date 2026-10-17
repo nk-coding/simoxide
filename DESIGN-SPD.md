@@ -1287,6 +1287,112 @@ This follows plan D1-D4 (`history/qvto-simoxide-integration.md` §3), with these
   Slingshot flavour's rules. After M5, port `build_from_graph_after` to the shared graph (the
   order/tombstone scheme carries over) and drop the bridge.
 
+**F4 as built** (2026-10-17, branch `f4`; spec `docs/spec/model-changes.md` MC-4.3, MC-5.2, MC-6,
+MC-8, MC-9; guides `library.md`, `reconfiguration.md`, `snapshots.md` "Change files", `spd.md`,
+`slingshot.md`; tests `simoxide-reconf/tests/f4.rs`):
+
+- **Options** (`simoxide_sim::ChangeOptions`, `Simulation::{change_options, set_change_options}`,
+  part of the run state and of snapshots): `removal` (`Keep` | `Drain` | `Abort` | `SlingshotQ5`),
+  `in_progress` (`Follow` | `Finish`), `reallocation` (`Ignore` | `Apply`), `monitors`
+  (`Reference` | `Full`). Defaults per flavour (`for_flavour`): drain (Q5 flag: `SlingshotQ5`),
+  follow, SimuLizar ignores and Slingshot applies reallocations, the reference's monitors;
+  `ChangeOptions::simulizar()` = SimuLizar 5.2.2's syncers. The public change API is unchanged
+  (`apply_changes`, `ChangeSet`, `ChangeReport`, `Edit`); N2's change files gained `removal`,
+  `in-progress`, `reallocation`, `monitors`, `clone-monitors`, `add-demand` lines.
+- **Removal policies** (`sim/removal.rs`, `Life` per resource, checked where a demand is issued:
+  one predictable branch). Drain: jobs present finish, requests in progress at the change are
+  served (a request = a usage-scenario run, `Proc::epoch` = the model generation at its start,
+  inherited by forks), later requests reaching it are aborted, the resource is gone once idle with
+  no such request (no final deactivation tuples). Abort: jobs aborted at the change
+  (`ActiveResource::job_list`). Q5: the pending completion aborts its job, the others are lost.
+  Keep: SimuLizar, including its aborts (MC-2.3, MC-3.3); under the other policies a removed
+  allocation context keeps its lookup entries for requests in progress and `MOVE`s change nothing
+  (the router's fixed semantics F3 asked for). Aborted requests (MC-8.6) restart closed users
+  after a think time, drop open users, end forked behaviours; they count as finished runs.
+- **Root cause of the OOM** (the first draft took the VM down at 28 GB): under `Drain` every
+  request still allocated to a removed server was aborted, and an aborted request did not count
+  as a finished usage-scenario run, so a run that stops after N runs (h19: 300) never stopped
+  while its trace and tape grew in memory. SimuCom counts failed runs too (`finally {
+  increaseMainMeasurementsCount() }`); aborted requests now count (except Slingshot's Q5
+  `UserAborted`). Regression tests: every policy stops such a run under an event limit; 300
+  change sets on one run keep instructions, series, resources, programs and graph bounded.
+- **Executions in progress** (`sim/runmodel.rs` `plan_code`): instruction streams are rebuilt at
+  every behaviour change; `Follow` (SimuLizar: the successor is read after each action) maps each
+  SEFF and usage-behaviour program counter to the same instruction in the changed behaviour, or
+  to the same place of a structurally changed action (rank: begin < demands < infrastructure calls
+  < resource calls < call/effect < return < end); executions whose action left the behaviour or
+  whose call lost its return keep their old instructions (`Finish` keeps them for all). Kept
+  segments are appended (`Flat::sseg`/`useg`), only those still used survive the next change (the
+  GC: streams never grow with the number of changes). Kept instructions that no longer fit the
+  changed action, and an infrastructure call or collection iterator in progress whose action
+  lost that structure, are refused (`Unsupported`); structural changes are otherwise supported.
+  Call caches and resolutions are dropped at every change (MC-4.4).
+- **Workloads** (MC-5.2): population changes start users at once or let the oldest leave after
+  their run (`STOP_REQUESTED`); new usage scenarios start their drivers, removed ones stop
+  (`CScenario::removed`, indices stable); a changed workload kind is ignored (UMS).
+- **Monitors** (MC-6): new series are accepted per mode (SimuLizar `Reference`: those of new
+  active resources, `attachMonitors`; Slingshot and `Full`: all) and renumbered after the run's
+  series; existing calculators are never removed; new actions use existing series by id (a
+  `deepclone` copy keeps its original's id: `lb_clone_branch`). `Full` also merges sliding
+  windows (first window one length after the change), PRM recorders (`Prm::attach_new`, values by
+  `Prm::value_of`), reconfiguration-time and container-count series. Under `Reference` the
+  recompilation builds windows, PRM and reconfiguration monitors from the start's monitors only
+  (`Seed::start_monitors`, `CompiledModel::start_monitors`): a cloned utilisation monitor no longer
+  makes the SimuLizar compile fail. Monitor cloning: `Edit::clone_monitors(template, container)`
+  and `Edit::clone_monitor(monitor, target, id)` (Slingshot's `ResourceContainerMonitorCloner`);
+  `QvtoAdjuster` creates `ModelAdjusted::monitor_clones` right after the transformation's change
+  set (`clone_monitors`, default on). Container-count tuples at changes outside a reconfiguration
+  process (MC-6.4).
+- **Slingshot flavour** (MC-9; the refusal is gone): resources of allocated containers from the
+  fresh compilation (`res_mon` probes, link failure), first-match allocation read live (removed
+  contexts keep their entries except under Q5, `Reallocation`), live link connections, new links
+  routed, passive resources of new allocation contexts at the change
+  (`ss_create_passives`), passive monitors refreshed, Q14 ignores population changes, Q5 removal.
+  The Slingshot-exact engine is untouched (X2d: `RunModel`'s `Arc` swap and `set_model_graph`).
+- **Other kinds**: re-pointed allocation contexts (`Reallocation::Apply`); a container or link
+  added and removed in one set (`Keep`: its id is registered, MC-8.5; the typed model never sees
+  the object, its resources are unreachable and unmonitored).
+- **Incremental syncers: not needed.** `simoxide-bench change` (fast, 20 reps, one core of the
+  loaded VM): MediaStore graph copy 77 µs, rebuild-recompile-merge 298 µs, rate change 290 µs (F2:
+  303/283), small models 27-46 µs, generated s10 112-132 µs; an SPD adjustment's QVTo run costs
+  milliseconds, so the rebuild is not the bottleneck even for a scale-out every few seconds.
+- **Tests.** `f4.rs` (15): the OOM case; bounded growth over 300 changes; population up and down,
+  before the start equal to the changed model; scale-in under keep/drain/abort in both flavours and
+  Q5 (with and without routing away); cloned monitors measuring a new container (both flavours);
+  `Full` vs `Reference` for a new monitor of an existing element; executions in progress following
+  an inserted action and a structural change (`Follow` vs `Finish`); a load-balancer branch added
+  mid-run plus an action after the branch (routing changes, executions in progress run the new
+  successor); add and remove in one set (container, link); removed usage scenarios; snapshots
+  after each change kind (population, scenario removal, monitors in both flavours and `Full`,
+  every removal policy in both flavours, follow/finish, add+remove) restore and continue byte for
+  byte; N2's change files carry every F4 kind in both flavours. Adjusted: F2/F3 compat tests run
+  with `ChangeOptions::simulizar()`; N2's and R1's refusal tests became applied-change tests; P2's
+  waiting markers flipped (`spd_scale_in` equals Slingshot with its scale-in: 8 records, 2
+  adjustments; the fixed behaviour of `spd_time_policies` scales in; the Slingshot flavour's
+  decision log equals the reference and its new container is probed).
+- **No F4-dependent SimuLizar example for `corpus-rules/`**: the media store's horizontal scaling
+  and `migratecomponent.qvto` both need SimuLizar's action framework (not runnable headless, R1).
+- **Gates.** `golden.sh` identical (312 runs); `cargo test --release --workspace --features exact`
+  589 passed, 0 failed, 38 ignored (574 after the P2 merge, +15 `f4`); corpus 132/132, corpus-fuzz
+  6/6; EMF goldens 165/165; `test-fdn` 93; `test-qvto` 90; `conform` compat 589/589, ordered 583
+  (unchanged); fmt, clippy `-D warnings` (default, `exact,hotspot-math`, `compat`); release check
+  0 opt-in crates. Every test and benchmark process ran under `prlimit --as=10 GB`. Runs without
+  changes (`simoxide-bench suite`, 2 alternating rounds, one core, load about 6, against `spd`
+  553ae1c): events/s geomean −1.4 % exact, −2.4 % fast (models −5.8 % to +1.4 %).
+- **Shared files touched**: `simoxide-sched` (`resource.rs`, `fcfs_head.rs`: job lists);
+  `simoxide-sim` (`change.rs`, `code.rs`, `ir.rs`, `lib.rs`, `sim.rs`, `windows.rs`, `sim/flat.rs`,
+  `sim/reconf.rs`, `sim/runmodel.rs`, `sim/slingshot.rs`, `sim/snapshot.rs`, `sim/state.rs`, new
+  `sim/removal.rs`); `simoxide-reconf` (`lib.rs`, `edits.rs`, `adjust.rs`; tests `changes.rs`,
+  `host.rs`, `resume.rs`, `rules_process.rs`, `spd_adjust.rs`, new `f4.rs`);
+  `corpus-spd/spd_scale_in/case.json`; docs.
+- **What P2, X2d and P3 can rely on**: removal (drain default, Q5 under its flag) and
+  allocation-context removal in both flavours; Slingshot-flavour changes (new containers'
+  resources and probes, passive resources of new allocation contexts, first-match allocation);
+  monitor cloning (`Edit::clone_monitor(s)`, the adjuster's `clone_monitors`); new series appended
+  to `Measurements::series` at the change (an observer keyed by series must look at the tail after
+  each adjustment, `SpdRun` maps series once at the start); container-count tuples; executions in
+  progress following changed behaviours.
+
 ### 5.4 SPD layer (`simoxide-spd`)
 
 - **Loading.**
@@ -2623,7 +2729,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **F1** | *Done 2026-10-17* (findings: 5.7 "F1 as built"). `RunState` extraction: all mutable run state in one struct; `Rc` → `Arc` or deep-clone decision; `clone()` | F0 | 1 w | met: fork, pause/resume and resume of a deep copy on another thread equal the uninterrupted run on every model directory (exact own/replay, fast, literal engine); golden hashes, corpus, fuzz corpus unchanged; benchmark within noise |
 | **F2** | *Done 2026-10-17* (findings: 5.3 "F2 as built"). `RunModel` overlay (D1) with rebuild-and-diff syncer; direct-edit API | F0 | 2-3 w (a: overlay; b: rebuild/diff; c: edit API) | met: a test edit adds a container mid-run and it receives load; changes before the start equal the changed model byte for byte; runs without changes unchanged (golden, corpus, fuzz corpus, fork tests); benchmark within noise |
 | **F3** | *Done 2026-10-17 on the Q6 adapter* (findings: 5.5 "F3 as built"; the switch to the shared graph after M6 is open). QVTo host `simoxide-reconf`: shared immutable core (registry, metamodel objects, compiled programs), lazy per-run state, journal to syncers, natives; first on the Q6 adapter, then on the shared graph (after M) | F0 | 1 w (+2-3 d to switch after M) | met: the 24 corpus cases run on a `RunModel` mid-run; journals equal the standalone runs', models, logs and status the Java runner's |
-| **F4** | Incremental syncers incl. SEFF recompilation, call-cache invalidation, monitor cloning, removal policies (keep / abort / drain) | F2, F3 | 2-3 w | each change kind has a test; load-balancer branch added mid-run changes routing; scale-in in all three policies |
+| **F4** | *Done 2026-10-17* (findings: 5.3 "F4 as built"). Incremental syncers incl. SEFF recompilation, call-cache invalidation, monitor cloning, removal policies (keep / abort / drain) | F2, F3 | 2-3 w | met: each change kind has a test (`f4.rs`); a load-balancer branch added mid-run changes routing, executions in progress run the changed chain; scale-in in all three policies (and Q5) in both flavours; snapshots after each kind continue byte for byte; incremental syncers not needed (a change costs 0.3 ms on MediaStore) |
 | **R1** | *Done 2026-10-17* (findings: 5.5 "R1 as built"; F4 remainder listed there: monitor, population and in-progress behaviour changes fail or deviate until F4). SimuLizar rules: PRM values (D2), reconfiguration process runs rules (D3), MEAS-7.3 series | F3, F4 | 1.5-2 w | met: the load balancer and power examples (and SimuLizar's reconfiguration test, a scale-out and an added SEFF branch) run, byte-identical to the patched reference in the exact build; statistical match of the default build (30 seeds) |
 | **R2** | *Done 2026-10-17* (findings: 5.5 "R2 as built"). Exact rules: deterministic UUIDs in refsim (D5), byte-exact comparison | R1 | 1 w | met: byte-equal trace, tape and measurements on all 11 `corpus-rules/` cases (5 new: objects created without ids, a `Set`-order rule, SimuLizar's adaptation steps, `deepclone`) in the exact build, 30/30 seeds each; the EPL build makes the same rule decisions (ordered QVTo) and matches statistically |
 | **S0** | *Done 2026-10-17.* Slingshot reference runner `reference/slingshot/`: stub bundle, scripts with private config areas, trace/tape/CSV/SPD-log extension, seed agent (StoEx, `Math.random`, UUIDs), `det` ordering rule and PS patch, smoke corpus | — | 1 w | met: SPD minimal example (and 8 more models) byte-reproducible; CSV in SimOxide's format |

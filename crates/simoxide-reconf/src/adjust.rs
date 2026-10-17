@@ -71,6 +71,10 @@ pub struct QvtoAdjuster {
     pub hooks: Box<dyn AdjustHooks + Send>,
     /// The outcome of the last transformation run.
     pub last: Option<Outcome>,
+    /// Create the monitors the adjustment's `ModelAdjusted` lists (Slingshot's
+    /// `ResourceContainerMonitorCloner`, [`crate::Edit::clone_monitor`]) as a change set right
+    /// after the transformation's (default: on).
+    pub clone_monitors: bool,
 }
 
 impl QvtoAdjuster {
@@ -83,6 +87,7 @@ impl QvtoAdjuster {
             invocation: Invocation::slingshot().config("keepModeling", "true"),
             hooks: Box::new(DefaultAdjustHooks),
             last: None,
+            clone_monitors: true,
         }
     }
 
@@ -100,6 +105,7 @@ impl QvtoAdjuster {
             invocation: self.invocation.clone(),
             hooks: Box::new(hooks),
             last: self.last.clone(),
+            clone_monitors: self.clone_monitors,
         }
     }
 }
@@ -139,6 +145,30 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for QvtoAdjuster {
                 at_ns,
                 kind: SimErrorKind::Model,
             });
+        // the monitors Slingshot clones for new containers (F4: the change path attaches them)
+        if self.clone_monitors
+            && let Ok(o) = &out
+            && let Some(adj) = &o.adjusted
+            && !adj.monitor_clones.is_empty()
+        {
+            let generation = sim.state().model().generation();
+            let mut e = crate::Edit::new(sim);
+            let mut made = Ok(());
+            for (k, c) in adj.monitor_clones.iter().enumerate() {
+                if let Err(err) =
+                    e.clone_monitor(c.monitor, c.target, &format!("_spd_g{generation}_mon{k}"))
+                {
+                    made = Err(err.0);
+                    break;
+                }
+            }
+            made.and_then(|()| e.apply(sim).map(|_| ()).map_err(|e| e.to_string()))
+                .map_err(|message| SimError {
+                    message: format!("SPD adjustment: cloning monitors: {message}"),
+                    at_ns,
+                    kind: SimErrorKind::Model,
+                })?;
+        }
         self.last = match r {
             Ok(o) => Some(o),
             Err(ReconfError::Rejected { outcome, .. }) => Some(*outcome),

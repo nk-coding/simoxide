@@ -234,13 +234,13 @@ fn fixed_behaviour_runs_the_patched_transformations() {
     for k in ["containers", "allocation", "target_groups"] {
         assert_eq!(a[0]["after"][k], r[0]["after"][k], "{k}");
     }
-    // F4: the fixed behaviour of spd_time_policies removes an allocation context at its first
-    // scale-in (the change path refuses it until F4); every adjustment before it succeeds
+    // the fixed behaviour of spd_time_policies scales in too (it removes allocation contexts:
+    // F4's drain removal), every adjustment succeeds
     for mode in [QvtMode::InsertionOrderSets, QvtMode::Fast] {
         let (got, err) = run(&case("spd_time_policies"), Quirks::fixed(), mode);
-        assert!(err.is_some_and(|e| e.contains("cannot remove")), "{mode:?}");
+        assert_eq!(err, None, "{mode:?}");
         let a = adjust_records(&got);
-        assert!(!a.is_empty() && a.iter().all(|a| a["ok"] == true));
+        assert!(a.len() > 1 && a.iter().all(|a| a["ok"] == true), "{mode:?}");
     }
 }
 
@@ -508,11 +508,10 @@ fn patched_transformations_fix_their_quirk() {
 }
 
 /// The Slingshot flavour (fast mode): the SPD run drives it too (time events, requests), the
-/// transformation runs, and the change path refuses its changes until F4 lifts the flavour's
-/// refusal of model changes; the SPD run ends with that error. (F4: then the decision log,
-/// measurements included, must equal the reference's.)
+/// transformation runs and the change path applies its changes (F4); the decision log, model
+/// summaries included, equals the reference's. (Measurements: P3.)
 #[test]
-fn slingshot_flavour_waits_for_f4() {
+fn slingshot_flavour_runs_the_adjustment() {
     use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
     let c = case("spd_minimal");
     let model = RunSpec::default().load_model(&c.model).unwrap();
@@ -526,7 +525,18 @@ fn slingshot_flavour_waits_for_f4() {
     let mut r = SpdRun::new(sim, &spd).unwrap();
     let mut adj = adjuster(Quirks::slingshot());
     let mut log = VecLog::default();
-    let e = r.run(&mut adj, &mut log).unwrap_err();
-    assert!(e.message.contains("changes not applied"), "{}", e.message);
-    assert_eq!(r.sim.state().now_ns(), 50_000_000_000);
+    r.run(&mut adj, &mut log).unwrap();
+    let after = r.sim.compiled();
+    assert!(after.resources.len() > cm.resources.len());
+    // the monitors Slingshot clones for the new container probe its resources (F4)
+    assert!(
+        after.ss.res_mon[cm.resources.len()..]
+            .iter()
+            .any(|v| !v.is_empty()),
+        "{:?}",
+        after.ss.res_mon
+    );
+    let refl = std::fs::read_to_string(&c.expected).unwrap();
+    let want = project_with_models(&refl).unwrap();
+    compare("spd_minimal slingshot", &want, &log.to_jsonl());
 }

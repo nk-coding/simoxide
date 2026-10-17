@@ -273,6 +273,14 @@ impl Window {
         }
     }
 
+    /// A window created at time `lower` (seconds; a monitor added by a runtime model change).
+    pub fn new_at(len: f64, inc: f64, keep_last: bool, lower: f64) -> Window {
+        Window {
+            lower,
+            ..Window::new(len, inc, keep_last)
+        }
+    }
+
     /// `addMeasurementInternal`: a measurement before the lower bound flushes the window first.
     pub fn add(&mut self, t: f64, v: f64) {
         if java_compare(self.lower, t) > 0 {

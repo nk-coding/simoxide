@@ -98,6 +98,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     let c = self.container_of(cur_path(d))?;
                     let rtype = (rtype != NO_TYPE).then_some(ResourceTypeId(rtype));
                     let ri = self.resource_of(c, rtype)?;
+                    if self.st.res[ri as usize].life.closed()
+                        && let Some(f) = self.closed_demand(s, d, ri)?
+                    {
+                        return Ok(f);
+                    }
                     if self.consume(s, ri, v, 1)? {
                         return Ok(self.wait_consumed(d, ri));
                     }
@@ -149,6 +154,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     }
                     let c = self.container_of(cur_path(d))?;
                     let ri = self.resource_of(c, rc.resource_type)?;
+                    if self.st.res[ri as usize].life.closed()
+                        && let Some(f) = self.closed_demand(s, d, ri)?
+                    {
+                        return Ok(f);
+                    }
                     if self.consume(s, ri, v, rc.service_id)? {
                         return Ok(self.wait_consumed(d, ri));
                     }

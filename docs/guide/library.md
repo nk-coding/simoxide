@@ -121,10 +121,24 @@ let result = sim.finish()?;
   included, in its journal. `Edit::store()` gives the graph with the full `ModelStore` API; a QVTo
   transformation run on the graph produces the same kind of journal, and
   `simoxide_reconf::apply_journal` applies it.
-- The run continues as SimuLizar 5.2.2 continues after such a change: its syncers' rules, gaps
-  included, are on [Model changes](../spec/model-changes.md). Requests in progress keep their
-  state. Changes SimuLizar aborts on, and changes not supported yet, return an error and leave the
-  run unchanged.
+- The run continues as SimuLizar 5.2.2 continues after such a change (Slingshot's for a
+  Slingshot-flavour run): the syncers' rules, gaps included, are on
+  [Model changes](../spec/model-changes.md). Every change kind is taken: resources, routing,
+  allocation, system and behaviours (executions in progress follow a changed successor chain,
+  as SimuLizar's interpreter does), workloads (population, new and removed usage scenarios),
+  monitors (`Edit::clone_monitors` copies a container's monitors for a new one). Changes
+  SimuLizar aborts on, and the few SimOxide refuses, return an error and leave the run
+  unchanged.
+- `Simulation::set_change_options(ChangeOptions { .. })` chooses the behaviours that differ
+  from SimuLizar's or are options (part of the run state):
+  - `removal`: `Drain` (default: a removed container finishes its jobs and the requests in
+    progress, later requests reaching it are aborted, then it is gone), `Keep` (SimuLizar: it
+    keeps simulating; also SimuLizar's aborts on removed allocation contexts), `Abort` (its jobs
+    are aborted at once), `SlingshotQ5` (Slingshot's quirk, the default with the Q5 flag);
+  - `in_progress`: `Follow` (default) or `Finish` (executions finish their old instructions);
+  - `reallocation`: `Ignore` (SimuLizar) or `Apply` (Slingshot's default);
+  - `monitors`: `Reference` (the flavour's reference) or `Full` (every new monitor as at the
+    start). `ChangeOptions::simulizar()` reproduces SimuLizar's syncers in every respect.
 - The changed model belongs to the run (`RunState::model()`): forks share it, and a fork that
   applies a change equals a run that applies it at the same point. `Simulation::resume` takes the
   compiled model the run was created on, also after changes.
@@ -185,8 +199,8 @@ let all = qvto.run_rules(&mut sim, &rules, &Invocation::simulizar()).map_err(|(_
   `QvtMode::Compat` in other builds is `ReconfError::ModeUnavailable`.
 - **SPD.** `QvtoAdjuster` (feature `spd`) executes the SPD interpreter's adjustment requests
   with a transformation such as Slingshot's `MainTransformation.qvto` ([SPD](spd.md)).
-- **Flavours.** The host works with both flavours; the Slingshot flavour does not take model
-  changes yet (`ChangeError::Unsupported`).
+- **Flavours.** The host works with both flavours; both take model changes (the
+  Slingshot-exact engine `ssx` is not a `Simulation`).
 - `dry_run` runs a transformation on a scratch copy, `with_scratch_store` reads one, and
   `with_store` edits the run's models with any `ModelStore` operation (all on the graph:
   `&mut simoxide_model::raw::Graph`, objects as `ObjId`). Outside a simulation,

@@ -430,19 +430,16 @@ fn a_branch_added_to_a_seff_routes_new_requests() {
 }
 
 #[test]
-fn a_change_simoxide_does_not_support_yet_ends_the_run_naming_the_rule() {
-    // a monitor added to the monitor repository (monitor cloning, DESIGN-SPD F4)
+fn a_monitor_added_by_a_rule_is_ignored_as_simulizar_does() {
+    // a monitor added to the monitor repository for an existing measuring point: SimuLizar
+    // attaches monitors only at the start and for new active resources (MC-6), the run goes on
     let dir = root().join("corpus-rules/lb_outsource");
     let (cm, cfg) = load(&dir);
     let rules = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/rules/f4");
     let sim = Simulation::new(&cm, cfg, Outputs::default()).unwrap();
-    let Err(e) = RulesRun::new(sim, host(&rules, QvtMode::Auto)).finish() else {
-        panic!("the run must fail");
-    };
-    assert_eq!(e.at_ns, 10 * S);
-    assert!(
-        e.message.starts_with("reconfiguration rule cloneMonitor: ") && e.message.contains("F4"),
-        "{}",
-        e.message
-    );
+    let (r, _) = RulesRun::new(sim, host(&rules, QvtMode::Auto))
+        .finish()
+        .unwrap();
+    assert!(r.main_count > 0);
+    assert_eq!(r.measurements.series.len(), cm.series.len());
 }

@@ -371,6 +371,35 @@ impl Prm {
         self.list = (0..cm.prm_meas.len() as u32).collect();
     }
 
+    /// Attaches the recorders `cm.prm_series[first_rec..]` and the runtime measurements
+    /// `cm.prm_meas[first_meas..]` created by a runtime model change (`MonitorSync::Full`).
+    pub(super) fn attach_new(&mut self, cm: &CompiledModel, first_rec: usize, first_meas: usize) {
+        if self.series.len() < cm.series.len() {
+            self.series.resize(cm.series.len(), Vec::new());
+        }
+        for i in first_meas..cm.prm_meas.len() {
+            self.values.push(0.0);
+            self.list.push(i as u32);
+        }
+        for &(s, rec, mi) in &cm.prm_series[first_rec..] {
+            let vi = self.value_of(mi);
+            self.series[s as usize].push(self.recs.len() as u32);
+            self.recs.push(PrmState::new(rec, vi));
+        }
+    }
+
+    /// The index into `values` of runtime measurement `mi` (an index into
+    /// [`CompiledModel::prm_meas`]): equal for those created at initialisation.
+    pub(super) fn value_of(&self, mi: u32) -> u32 {
+        if self.list.get(mi as usize) == Some(&mi) {
+            return mi;
+        }
+        self.list
+            .iter()
+            .position(|&x| x == mi)
+            .map_or(mi, |p| p as u32)
+    }
+
     /// Attaches the recorder `p` (an index into [`CompiledModel::prm_passive`]) to the series
     /// `s` of a lazily created calculator: its runtime measurement joins the PRM.
     pub(super) fn attach_passive(&mut self, s: SeriesId, p: u32, rec: PrmRec) -> &mut PrmState {
