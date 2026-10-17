@@ -73,7 +73,9 @@ let (a, b) = (sim.finish()?, resumed.finish()?);
 ```
 
 - `run_until` takes `Pause::After(t)`, `Pause::Before(t)` or `Pause::Events(n)`; `run_while`
-  takes a predicate on the `RunState`, asked before each event. Both return `Status::Paused` or
+  takes a predicate on the `RunState`, asked before each event; `run_watch` takes a `Watch`, a
+  set of pause conditions (a time, a measurement trigger, closeness to an SLO;
+  [Snapshots](./snapshots.md#pause-conditions)). They return `Status::Paused` or
   `Status::Finished`; `finish` runs to the end and returns the `RunResult`.
 - A fork, a paused and resumed run and the uninterrupted run are identical: the same trace,
   tape, measurements and counts, in exact and in fast mode. Nothing is rebased: times stay
