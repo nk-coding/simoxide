@@ -13,6 +13,7 @@
 use crate::model::Membership;
 use crate::sim::{REQUEST, SpdRun};
 use simoxide_sim::compat::Compat;
+use simoxide_sim::flavour::Flavour;
 use std::fmt;
 
 /// Why policies could not be enforced. The run is unchanged.
@@ -40,7 +41,7 @@ impl fmt::Display for EnforceError {
 
 impl std::error::Error for EnforceError {}
 
-impl<C: Compat> SpdRun<'_, '_, C> {
+impl<C: Compat, F: Flavour> SpdRun<'_, '_, C, F> {
     /// Re-reads the target groups' membership from the run's (changed) model.
     pub fn model_changed(&mut self) {
         self.state.membership =

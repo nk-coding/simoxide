@@ -506,3 +506,27 @@ fn patched_transformations_fix_their_quirk() {
     }
     assert!(seen, "no scale-in emptied a container");
 }
+
+/// The Slingshot flavour (fast mode): the SPD run drives it too (time events, requests), the
+/// transformation runs, and the change path refuses its changes until F4 lifts the flavour's
+/// refusal of model changes; the SPD run ends with that error. (F4: then the decision log,
+/// measurements included, must equal the reference's.)
+#[test]
+fn slingshot_flavour_waits_for_f4() {
+    use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
+    let c = case("spd_minimal");
+    let model = RunSpec::default().load_model(&c.model).unwrap();
+    let spd = spd_of(&model, Quirks::slingshot()).unwrap().unwrap();
+    let cm = CompiledModel::compile_flavour(model, FlavourConfig::SLINGSHOT).unwrap();
+    let mut cfg = RunSpec::default().sim_config("p2");
+    cfg.mode = Mode::Fast;
+    cfg.seed = c.seed;
+    cfg.max_sim_time = c.sim_time;
+    let sim = Simulation::<Fast, Slingshot>::create(&cm, cfg, Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &spd).unwrap();
+    let mut adj = adjuster(Quirks::slingshot());
+    let mut log = VecLog::default();
+    let e = r.run(&mut adj, &mut log).unwrap_err();
+    assert!(e.message.contains("changes not applied"), "{}", e.message);
+    assert_eq!(r.sim.state().now_ns(), 50_000_000_000);
+}

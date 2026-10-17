@@ -172,8 +172,8 @@ pub struct SpdSummary {
 }
 
 /// A simulation with an SPD interpreter.
-pub struct SpdRun<'m, 's, C: Compat> {
-    pub sim: Simulation<'m, C>,
+pub struct SpdRun<'m, 's, C: Compat, F: Flavour = SimuLizar> {
+    pub sim: Simulation<'m, C, F>,
     pub(crate) spd: &'s Spd,
     pub state: SpdState,
     pub(crate) series: Vec<Option<(PointRef, Metric)>>,
@@ -182,13 +182,13 @@ pub struct SpdRun<'m, 's, C: Compat> {
     pub(crate) adjusted_ok: u64,
 }
 
-struct Host<'a, 'm, C: Compat> {
-    sim: &'a mut Simulation<'m, C>,
+struct Host<'a, 'm, C: Compat, F: Flavour> {
+    sim: &'a mut Simulation<'m, C, F>,
     requests: &'a mut Vec<Option<AdjustmentRequest>>,
     error: Option<SimError>,
 }
 
-impl<C: Compat> SpdHost for Host<'_, '_, C> {
+impl<C: Compat, F: Flavour> SpdHost for Host<'_, '_, C, F> {
     fn now(&self) -> f64 {
         self.sim.state().now_ns() as f64 / 1e9
     }
@@ -211,10 +211,10 @@ impl<C: Compat> SpdHost for Host<'_, '_, C> {
     }
 }
 
-impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
+impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
     /// Attaches `spd` to `sim` (not started): observes the series its triggers read and
     /// schedules the set-up's time events.
-    pub fn new(mut sim: Simulation<'m, C>, spd: &'s Spd) -> Result<Self, SimError> {
+    pub fn new(mut sim: Simulation<'m, C, F>, spd: &'s Spd) -> Result<Self, SimError> {
         let cm = sim.compiled();
         let membership = Membership::from_graph(&cm.model.graph, spd.model());
         let series = series_points(cm);
@@ -250,7 +250,7 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
     /// `adjuster`).
     pub fn run(
         &mut self,
-        adjuster: &mut dyn Adjuster<C>,
+        adjuster: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
     ) -> Result<(), SimError> {
         self.run_until(adjuster, log, None).map(|_| ())
@@ -261,7 +261,7 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
     /// forked ([`SpdRun::fork`]) or continued.
     pub fn run_until(
         &mut self,
-        adjuster: &mut dyn Adjuster<C>,
+        adjuster: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
         before_ns: Option<i64>,
     ) -> Result<Status, SimError> {
@@ -276,9 +276,9 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
     /// condition (`simoxide_sim::Watch::keep_going`).
     pub fn run_while(
         &mut self,
-        adjuster: &mut dyn Adjuster<C>,
+        adjuster: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
-        mut keep_going: impl FnMut(&RunState<C>) -> bool,
+        mut keep_going: impl FnMut(&RunState<C, F>) -> bool,
     ) -> Result<Status, SimError> {
         loop {
             let status = self
@@ -297,7 +297,7 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
 
     /// A fork between events: the simulation's fork (outputs `out`) with a copy of the SPD
     /// state and the queued requests. Both continue like the uninterrupted run.
-    pub fn fork(&mut self, out: Outputs) -> Result<SpdRun<'m, 's, C>, SimError> {
+    pub fn fork(&mut self, out: Outputs) -> Result<SpdRun<'m, 's, C, F>, SimError> {
         Ok(SpdRun {
             sim: self.sim.fork(out)?,
             spd: self.spd,
@@ -341,7 +341,7 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
 
     fn handle(
         &mut self,
-        adjuster: &mut dyn Adjuster<C>,
+        adjuster: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
     ) -> Result<(), SimError> {
         for tag in self.sim.take_external() {
