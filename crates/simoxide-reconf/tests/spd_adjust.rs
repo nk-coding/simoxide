@@ -772,3 +772,49 @@ fn slingshot_flavour_drains_a_removed_container() {
     let (res, ..) = r.finish().unwrap();
     assert!(res.main_count > 0);
 }
+
+/// A V4 scenario in the Slingshot flavour (`reference/slingshot/models/spd_v4_cpu`: stochastic
+/// arrivals and demands, CPU-utilisation policies out above 80 % and in below 60 %, group size
+/// 1..4): requests at non-integral double times (Slingshot's clock), scale-outs and scale-ins
+/// (Q5 with Slingshot's quirks, drain with the fixed behaviour), the same log for the same seed.
+#[test]
+fn slingshot_flavour_runs_a_stochastic_cpu_scenario() {
+    use simoxide_sim::flavour::Quirks as SsQuirks;
+    use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
+    let dir = root().join("reference/slingshot/models/spd_v4_cpu");
+    for (sq, q) in [
+        (SsQuirks::all_fast(), Quirks::slingshot()),
+        (SsQuirks::NONE, Quirks::fixed()),
+    ] {
+        let model = RunSpec::default().load_model(&dir).unwrap();
+        let spd = spd_of(&model, q).unwrap().unwrap();
+        let cm = CompiledModel::compile_flavour(model, FlavourConfig::slingshot(sq)).unwrap();
+        let run = |seed: i64| {
+            let mut cfg = RunSpec::default().sim_config("p3");
+            cfg.mode = Mode::Fast;
+            cfg.seed = seed;
+            cfg.max_sim_time = 600;
+            let sim = Simulation::<Fast, Slingshot>::create(&cm, cfg, Outputs::default()).unwrap();
+            let mut r = SpdRun::new(sim, &spd).unwrap();
+            let mut log = VecLog::default();
+            r.run(&mut adjuster(q), &mut log).unwrap();
+            log.to_jsonl()
+        };
+        let (mut outs, mut ins) = (0, 0);
+        for seed in 1..=3 {
+            let l = run(seed);
+            assert_eq!(l, run(seed), "seed {seed}");
+            for a in adjust_records(&l) {
+                let n = |k: &str| {
+                    a[k]["target_groups"][0]["elements"]
+                        .as_array()
+                        .unwrap()
+                        .len()
+                };
+                outs += usize::from(n("after") > n("before"));
+                ins += usize::from(n("after") < n("before"));
+            }
+        }
+        assert!(outs > 0 && ins > 0, "{q:?}: {outs} out, {ins} in");
+    }
+}
