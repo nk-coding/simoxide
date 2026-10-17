@@ -1370,7 +1370,9 @@ on a run"):
 - **Tests.** `tests/corpus.rs` (exit criterion): the 24 SimuLizar/SPD corpus cases run on the
   `RunModel` of a simulation of the case's models at t = 100 s; a dry run's models (dump of the
   Java runner's resources), log and status equal the Java runner's (with the Java run's identity
-  hashes when cached; the SPD dump is marked unstable in the fixture, as in the adapter's test);
+  hashes, `target/qvto-testkit/java`; without them only the journals and the change path are
+  checked, and the SPD case aborts, see below; the SPD dump is marked unstable in the fixture,
+  as in the adapter's test);
   the run's journal equals the dry run's and the journal of the same transformation on the
   case's models loaded on their own (the adapter's set-up), object by object; the change path:
   10 cases applied, 12 change nothing, `addNewServer_high` and `addClonedServer_high` refused
