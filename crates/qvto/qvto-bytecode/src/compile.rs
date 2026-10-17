@@ -2617,6 +2617,10 @@ fn has_side_effects(e: &Expr) -> bool {
                     d.name,
                     "at" | "first" | "last" | "size" | "includes" | "excludes" | "get" | "hasKey"
                         | "keys" | "values" | "isEmpty" | "notEmpty" | "indexOf" | "count"
+                ) || (
+                    // QVTo's string counters (`StringOperations.StringCounter`, session state)
+                    d.owner == qvto_types::StdOwner::String
+                        && (d.name == "addSuffixNumber" || d.name.ends_with("StrCounter"))
                 )
             }
             _ => true,

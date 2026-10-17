@@ -215,3 +215,14 @@ in d.xmi
 mmfile ../fuzz.ecore
 note objects added to the in-memory extent resource are roots at the end when they have no container, even if a purge dropped them (ResourceModificationAdapter)
 end
+
+case fuzz_strops
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/strops
+qvto strops.qvto
+in strops.xmi
+mmfile ../fuzz.ecore
+note string counters evaluated twice by sortedBy; Long boxes are no Integer index (substring, at)
+end

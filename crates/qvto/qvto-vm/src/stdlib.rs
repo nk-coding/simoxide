@@ -783,8 +783,9 @@ where
                 (Value::Str(x), Value::Str(y)) => strings::concat(x, y),
                 _ => Value::Invalid,
             },
-            Substring => match (&s, int_arg(&a1), args.get(2).and_then(int_arg)) {
-                (Value::Str(x), Some(l), Some(u)) => strings::substring(x, l, u),
+            // `(Integer) arg`: a Long (or Short, Byte) argument fails the cast
+            Substring => match (&s, index_arg(&a1), args.get(2).and_then(index_arg)) {
+                (Value::Str(x), Some(l), Some(u)) => strings::substring(x, l as i64, u as i64),
                 _ => Value::Invalid,
             },
             ToInteger => str_fn(&s, strings::to_integer),
@@ -795,8 +796,8 @@ where
             Trim => str_fn(&s, strings::trim),
             ToBoolean => str_fn(&s, strings::to_boolean),
             At => match &s {
-                Value::Str(x) => match int_arg(&a1) {
-                    Some(i) => strings::at(x, i),
+                Value::Str(x) => match index_arg(&a1) {
+                    Some(i) => strings::at(x, i as i64),
                     None => Value::Invalid,
                 },
                 Value::Coll(c) => match index_arg(&a1) {

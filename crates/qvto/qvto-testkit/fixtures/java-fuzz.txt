@@ -603,6 +603,40 @@ exec	1	OK	0	r6
 exec	1	OK	0	r7
 exec	1	OK	0	r8
 
+@case fuzz_strops
+@file result.txt 138
+id	fuzz_strops
+load	OK
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 137
+a, data: [x, y, z]
+b, data: k5
+c, data: <Invalid>
+d, data: <Invalid>
+e, data: abc
+f, data: <Invalid>
+g, data: 
+h, data: 0
+i, data: Hello
+
+@file diag.txt 126
+exec	1	OK	0	a
+exec	1	OK	0	b
+exec	1	OK	0	c
+exec	1	OK	0	d
+exec	1	OK	0	e
+exec	1	OK	0	f
+exec	1	OK	0	g
+exec	1	OK	0	h
+exec	1	OK	0	i
+
 @case fuzz_typelit
 @file result.txt 150
 id	fuzz_typelit
