@@ -876,7 +876,7 @@ impl QvtoRun {
             profile_keys: &core.0.profile_keys,
         };
         let st = self.prepare(sim);
-        let mut t0 = Instant::now();
+        let t0;
         let raw = match scratch {
             None => {
                 st.invocations += 1;
