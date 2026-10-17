@@ -1,0 +1,10 @@
+{
+  "name": "ss_monitors",
+  "seed": 1,
+  "sim_time": 4,
+  "rules": [
+    "SS-MEAS-2.2",
+    "SS-Q29"
+  ],
+  "description": "response-time monitors on a usage scenario and an AssemblyOperationMeasuringPoint record; those on an EntryLevelSystemCallMeasuringPoint and a SystemOperationMeasuringPoint are ignored."
+}

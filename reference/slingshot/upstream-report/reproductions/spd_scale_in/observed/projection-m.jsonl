@@ -1,0 +1,185 @@
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,2.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,3.0]}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,1.0]}
+{"ev":"meas","t":9.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.0,2.0]}
+{"ev":"meas","t":9.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[9.0,1.0]}
+{"ev":"meas","t":9.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[9.0,9.0]}
+{"ev":"meas","t":9.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[9.0,9.0]}
+{"ev":"meas","t":9.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.0,3.0]}
+{"ev":"meas","t":9.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[9.0,1.0]}
+{"ev":"meas","t":12.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.0,4.0]}
+{"ev":"meas","t":12.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[12.0,1.0]}
+{"ev":"meas","t":15.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.0,5.0]}
+{"ev":"meas","t":15.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[15.0,1.0]}
+{"ev":"meas","t":18.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.0,4.0]}
+{"ev":"meas","t":18.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[18.0,1.0]}
+{"ev":"meas","t":18.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[18.0,15.0]}
+{"ev":"meas","t":18.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[18.0,15.0]}
+{"ev":"meas","t":18.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.0,5.0]}
+{"ev":"meas","t":18.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[18.0,1.0]}
+{"ev":"meas","t":21.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[21.0,6.0]}
+{"ev":"meas","t":21.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[21.0,1.0]}
+{"ev":"meas","t":24.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[24.0,7.0]}
+{"ev":"meas","t":24.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[24.0,1.0]}
+{"ev":"meas","t":27.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[27.0,6.0]}
+{"ev":"meas","t":27.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[27.0,1.0]}
+{"ev":"meas","t":27.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[27.0,21.0]}
+{"ev":"meas","t":27.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[27.0,21.0]}
+{"ev":"meas","t":27.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[27.0,7.0]}
+{"ev":"meas","t":27.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[27.0,1.0]}
+{"ev":"meas","t":30.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[30.0,8.0]}
+{"ev":"meas","t":30.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[30.0,1.0]}
+{"ev":"meas","t":33.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[33.0,9.0]}
+{"ev":"meas","t":33.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[33.0,1.0]}
+{"ev":"meas","t":36.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[36.0,8.0]}
+{"ev":"meas","t":36.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[36.0,1.0]}
+{"ev":"meas","t":36.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[36.0,27.0]}
+{"ev":"meas","t":36.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[36.0,27.0]}
+{"ev":"meas","t":36.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[36.0,9.0]}
+{"ev":"meas","t":36.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[36.0,1.0]}
+{"ev":"meas","t":39.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[39.0,10.0]}
+{"ev":"meas","t":39.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[39.0,1.0]}
+{"ev":"meas","t":42.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[42.0,11.0]}
+{"ev":"meas","t":42.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[42.0,1.0]}
+{"ev":"meas","t":45.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[45.0,10.0]}
+{"ev":"meas","t":45.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[45.0,1.0]}
+{"ev":"meas","t":45.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[45.0,33.0]}
+{"ev":"meas","t":45.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[45.0,33.0]}
+{"ev":"meas","t":45.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[45.0,11.0]}
+{"ev":"meas","t":45.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[45.0,1.0]}
+{"ev":"meas","t":48.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[48.0,12.0]}
+{"ev":"meas","t":48.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[48.0,1.0]}
+{"ev":"spd_time","t":50.0,"tg":"_DC8fM8pgEe6u3p81um7oyQ"}
+{"ev":"spd_request","t":50.0,"policy":"_7VIU0MAgEe6AcKIPVXJsSw"}
+{"ev":"spd_adjusted","t":50.0,"ok":true,"changes":4,"new":["AppServer_1"],"deleted":[]}
+{"ev":"meas","t":51.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"State of Active Resource Tuple","v":[51.0,1.0]}
+{"ev":"meas","t":51.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[51.0,1.0]}
+{"ev":"meas","t":54.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[54.0,11.0]}
+{"ev":"meas","t":54.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[54.0,1.0]}
+{"ev":"meas","t":54.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[54.0,39.0]}
+{"ev":"meas","t":54.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[54.0,39.0]}
+{"ev":"meas","t":54.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"State of Active Resource Tuple","v":[54.0,2.0]}
+{"ev":"meas","t":54.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[54.0,1.0]}
+{"ev":"meas","t":57.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"State of Active Resource Tuple","v":[57.0,3.0]}
+{"ev":"meas","t":57.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[57.0,1.0]}
+{"ev":"meas","t":60.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"State of Active Resource Tuple","v":[60.0,2.0]}
+{"ev":"meas","t":60.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[60.0,1.0]}
+{"ev":"meas","t":60.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[60.0,9.0]}
+{"ev":"meas","t":60.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[60.0,9.0]}
+{"ev":"meas","t":60.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[60.0,12.0]}
+{"ev":"meas","t":60.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[60.0,1.0]}
+{"ev":"meas","t":63.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[63.0,11.0]}
+{"ev":"meas","t":63.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[63.0,1.0]}
+{"ev":"meas","t":63.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[63.0,45.0]}
+{"ev":"meas","t":63.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[63.0,45.0]}
+{"ev":"meas","t":63.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[63.0,12.0]}
+{"ev":"meas","t":63.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[63.0,1.0]}
+{"ev":"meas","t":66.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"State of Active Resource Tuple","v":[66.0,3.0]}
+{"ev":"meas","t":66.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[66.0,1.0]}
+{"ev":"meas","t":69.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"State of Active Resource Tuple","v":[69.0,2.0]}
+{"ev":"meas","t":69.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[69.0,1.0]}
+{"ev":"meas","t":69.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[69.0,15.0]}
+{"ev":"meas","t":69.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[69.0,15.0]}
+{"ev":"meas","t":69.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"State of Active Resource Tuple","v":[69.0,3.0]}
+{"ev":"meas","t":69.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[69.0,1.0]}
+{"ev":"meas","t":72.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[72.0,11.0]}
+{"ev":"meas","t":72.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[72.0,1.0]}
+{"ev":"meas","t":72.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[72.0,51.0]}
+{"ev":"meas","t":72.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[72.0,51.0]}
+{"ev":"meas","t":72.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"State of Active Resource Tuple","v":[72.0,4.0]}
+{"ev":"meas","t":72.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[72.0,1.0]}
+{"ev":"meas","t":75.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[75.0,12.0]}
+{"ev":"meas","t":75.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[75.0,1.0]}
+{"ev":"meas","t":78.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"State of Active Resource Tuple","v":[78.0,3.0]}
+{"ev":"meas","t":78.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[78.0,1.0]}
+{"ev":"meas","t":78.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[78.0,21.0]}
+{"ev":"meas","t":78.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[78.0,21.0]}
+{"ev":"meas","t":78.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"State of Active Resource Tuple","v":[78.0,4.0]}
+{"ev":"meas","t":78.0,"mp":"ActiveResourceMeasuringPoint[~ResourceContainer:AppServer_1/activeResourceSpecifications_ResourceContainer.0|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[78.0,1.0]}
+{"ev":"spd_time","t":80.0,"tg":"_DC8fM8pgEe6u3p81um7oyQ"}
+{"ev":"spd_request","t":80.0,"policy":"_simoxideScaleInPolicy0001"}
+{"ev":"spd_adjusted","t":80.0,"ok":true,"changes":2,"new":[],"deleted":["AppServer_1"]}
+{"ev":"meas","t":81.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[81.0,11.0]}
+{"ev":"meas","t":81.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[81.0,1.0]}
+{"ev":"meas","t":81.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[81.0,57.0]}
+{"ev":"meas","t":81.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[81.0,57.0]}
+{"ev":"meas","t":81.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[81.0,12.0]}
+{"ev":"meas","t":81.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[81.0,1.0]}
+{"ev":"meas","t":84.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[84.0,13.0]}
+{"ev":"meas","t":84.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[84.0,1.0]}
+{"ev":"job_abort","t":87.0,"job":54}
+{"ev":"user_abort","t":87.0,"u":23}
+{"ev":"meas","t":87.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[87.0,14.0]}
+{"ev":"meas","t":87.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[87.0,1.0]}
+{"ev":"meas","t":90.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[90.0,13.0]}
+{"ev":"meas","t":90.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[90.0,1.0]}
+{"ev":"meas","t":90.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[90.0,63.0]}
+{"ev":"meas","t":90.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[90.0,63.0]}
+{"ev":"meas","t":90.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[90.0,14.0]}
+{"ev":"meas","t":90.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[90.0,1.0]}
+{"ev":"meas","t":93.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[93.0,15.0]}
+{"ev":"meas","t":93.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[93.0,1.0]}
+{"ev":"meas","t":96.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[96.0,16.0]}
+{"ev":"meas","t":96.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[96.0,1.0]}
+{"ev":"meas","t":99.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[99.0,15.0]}
+{"ev":"meas","t":99.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[99.0,1.0]}
+{"ev":"meas","t":99.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[99.0,69.0]}
+{"ev":"meas","t":99.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[99.0,69.0]}
+{"ev":"meas","t":99.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[99.0,16.0]}
+{"ev":"meas","t":99.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[99.0,1.0]}
+{"ev":"meas","t":102.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[102.0,17.0]}
+{"ev":"meas","t":102.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[102.0,1.0]}
+{"ev":"meas","t":105.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[105.0,18.0]}
+{"ev":"meas","t":105.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[105.0,1.0]}
+{"ev":"meas","t":108.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[108.0,17.0]}
+{"ev":"meas","t":108.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[108.0,1.0]}
+{"ev":"meas","t":108.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[108.0,75.0]}
+{"ev":"meas","t":108.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[108.0,75.0]}
+{"ev":"meas","t":108.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[108.0,18.0]}
+{"ev":"meas","t":108.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[108.0,1.0]}
+{"ev":"meas","t":111.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[111.0,19.0]}
+{"ev":"meas","t":111.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[111.0,1.0]}
+{"ev":"meas","t":114.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[114.0,20.0]}
+{"ev":"meas","t":114.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[114.0,1.0]}
+{"ev":"meas","t":117.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[117.0,19.0]}
+{"ev":"meas","t":117.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[117.0,1.0]}
+{"ev":"meas","t":117.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[117.0,81.0]}
+{"ev":"meas","t":117.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[117.0,81.0]}
+{"ev":"meas","t":117.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[117.0,20.0]}
+{"ev":"meas","t":117.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[117.0,1.0]}
+{"ev":"meas","t":120.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[120.0,21.0]}
+{"ev":"meas","t":120.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[120.0,1.0]}
+{"ev":"meas","t":123.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[123.0,22.0]}
+{"ev":"meas","t":123.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[123.0,1.0]}
+{"ev":"meas","t":126.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[126.0,21.0]}
+{"ev":"meas","t":126.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[126.0,1.0]}
+{"ev":"meas","t":126.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[126.0,87.0]}
+{"ev":"meas","t":126.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[126.0,87.0]}
+{"ev":"meas","t":126.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[126.0,22.0]}
+{"ev":"meas","t":126.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[126.0,1.0]}
+{"ev":"meas","t":129.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[129.0,23.0]}
+{"ev":"meas","t":129.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[129.0,1.0]}
+{"ev":"meas","t":132.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[132.0,24.0]}
+{"ev":"meas","t":132.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[132.0,1.0]}
+{"ev":"meas","t":135.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[135.0,23.0]}
+{"ev":"meas","t":135.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[135.0,1.0]}
+{"ev":"meas","t":135.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[135.0,93.0]}
+{"ev":"meas","t":135.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[135.0,93.0]}
+{"ev":"meas","t":135.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[135.0,24.0]}
+{"ev":"meas","t":135.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[135.0,1.0]}
+{"ev":"meas","t":138.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[138.0,25.0]}
+{"ev":"meas","t":138.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[138.0,1.0]}
+{"ev":"meas","t":141.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[141.0,26.0]}
+{"ev":"meas","t":141.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[141.0,1.0]}
+{"ev":"meas","t":144.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[144.0,25.0]}
+{"ev":"meas","t":144.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[144.0,1.0]}
+{"ev":"meas","t":144.0,"mp":"AssemblyOperationMeasuringPoint[_-r1fUCHcEd6lJo4DCALHMw|_KjhikgzkEeCFg86gxKwVPw|_zHLRgLwmEe6cUu5aSZDYJA]","metric":"Response Time Tuple","v":[144.0,99.0]}
+{"ev":"meas","t":144.0,"mp":"UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw]","metric":"Response Time Tuple","v":[144.0,99.0]}
+{"ev":"meas","t":144.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[144.0,26.0]}
+{"ev":"meas","t":144.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[144.0,1.0]}
+{"ev":"meas","t":147.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"State of Active Resource Tuple","v":[147.0,27.0]}
+{"ev":"meas","t":147.0,"mp":"ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[147.0,1.0]}
+{"ev":"stop","t":150.0}

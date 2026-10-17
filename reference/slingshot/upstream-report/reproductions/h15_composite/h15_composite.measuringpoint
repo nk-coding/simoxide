@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
+    xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_h15_composite_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: Scenario"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h15_composite/h15_composite.usagemodel#_h15_composite_us1">
+    <usageScenario href="h15_composite.usagemodel#_h15_composite_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall callOp to h15_composite->Provided_IService->op [_h15_composite_ua1]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h15_composite/h15_composite.usagemodel#_h15_composite_ua1">
+    <entryLevelSystemCall href="h15_composite.usagemodel#_h15_composite_ua1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="h15_composite.Provided_IService.op"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h15_composite/h15_composite.repository#_h15_composite_sig1">
+    <role xsi:type="repository:OperationProvidedRole" href="h15_composite.system#_h15_composite_prov4"/>
+    <operationSignature href="h15_composite.repository#_h15_composite_sig1"/>
+    <system href="h15_composite.system#_h15_composite_system1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall callBack from Front to Required_IBack->back [_h15_composite_act2]"
+      resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h15_composite/h15_composite.repository#_h15_composite_act2">
+    <externalCall href="h15_composite.repository#_h15_composite_act2"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Node" resourceURIRepresentation="file:/home/devbox/workspace/simoxide/corpus/h15_composite/h15_composite.resourceenvironment#_h15_composite_prs1">
+    <activeResource href="h15_composite.resourceenvironment#_h15_composite_prs1"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

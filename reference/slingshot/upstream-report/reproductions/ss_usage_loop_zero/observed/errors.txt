@@ -1,0 +1,1 @@
+IllegalArgumentException: InitialLoopCount must be in [0,0] (maximalLoopCount) but is 0 | org.palladiosimulator.analyzer.slingshot.behavior.usagemodel.entities.scenariobehavior.LoopScenarioBehaviorContext.<init>(LoopScenarioBehaviorContext.java:39)

@@ -1,0 +1,9 @@
+{
+  "name": "ss_usage_delay",
+  "seed": 1,
+  "sim_time": 4,
+  "rules": [
+    "SS-WL-4.1"
+  ],
+  "description": "usage Delay -> UserSlept (delay 0) and UserWokeUp (delay d), draw at interpretation; the scenario response time includes the delay."
+}

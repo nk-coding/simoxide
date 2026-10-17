@@ -1,0 +1,7 @@
+{
+  "seed": 11,
+  "max_measurements": 50,
+  "max_sim_time": -1,
+  "simulate_linking_resources": false,
+  "simulate_throughput_of_linking_resources": true
+}

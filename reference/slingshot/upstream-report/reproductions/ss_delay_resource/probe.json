@@ -1,0 +1,11 @@
+{
+  "name": "ss_delay_resource",
+  "seed": 1,
+  "sim_time": 4,
+  "rules": [
+    "SS-RES-1.2",
+    "SS-WL-5.1",
+    "SS-Q25"
+  ],
+  "description": "a demand on a Delay-scheduled resource has no simulated resource: JobAborted at initiation, ResourceDemandRequestAborted, UserAborted; the closed user restarts with a new User after a fresh think time."
+}

@@ -1,0 +1,1 @@
+IllegalArgumentException: The resource containers of the assembly contexts are not directly connected by a linking resource | org.palladiosimulator.analyzer.slingshot.behavior.resourcesimulation.ResourceSimulation.lambda$12(ResourceSimulation.java:396)

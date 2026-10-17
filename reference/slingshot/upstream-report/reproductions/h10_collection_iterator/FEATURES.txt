@@ -1,0 +1,1 @@
+CollectionIteratorAction over a collection parameter (NUMBER_OF_ELEMENTS and INNER.VALUE from the usage model)

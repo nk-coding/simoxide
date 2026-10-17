@@ -1,0 +1,11 @@
+{
+  "name": "ss_branches",
+  "seed": 1,
+  "sim_time": 4,
+  "rules": [
+    "SS-ACT-5.1",
+    "SS-WL-4.2",
+    "SS-RNG-2"
+  ],
+  "description": "a usage-model Branch and a SEFF probabilistic BranchAction: one Math.random() draw each (tape sites branch:<id>), cumulative-probability selection; a guarded branch takes the first true guard."
+}

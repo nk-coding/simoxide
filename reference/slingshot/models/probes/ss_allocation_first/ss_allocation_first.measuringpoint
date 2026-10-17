@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mp:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mp="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_ss_allocation_first_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: us1">
+    <usageScenario href="ss_allocation_first.usagemodel#_ss_allocation_first_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="cpu_fast [0]" replicaID="0">
+    <activeResource href="ss_allocation_first.resourceenvironment#_ss_allocation_first_cpu_fast"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="cpu_slow [0]" replicaID="0">
+    <activeResource href="ss_allocation_first.resourceenvironment#_ss_allocation_first_cpu_slow"/>
+  </measuringPoints>
+</mp:MeasuringPointRepository>

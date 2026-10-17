@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_ss_async_fork_repository" entityName="ss_async_fork">
+  <components__Repository xsi:type="repository:BasicComponent" id="_ss_async_fork_comp1" entityName="Server">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_async_fork_prov1" entityName="prov1" providedInterface__OperationProvidedRole="_ss_async_fork_if1"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_ss_async_fork_seff1" describedService__SEFF="_ss_async_fork_op">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_ss_async_fork_act1" entityName="start" successor_AbstractAction="_ss_async_fork_act2"/>
+      <steps_Behaviour xsi:type="seff:ForkAction" id="_ss_async_fork_act2" entityName="fork" predecessor_AbstractAction="_ss_async_fork_act1" successor_AbstractAction="_ss_async_fork_act3">
+        <asynchronousForkedBehaviours_ForkAction id="_ss_async_fork_fb1">
+          <steps_Behaviour xsi:type="seff:StartAction" id="_ss_async_fork_act4" entityName="start" successor_AbstractAction="_ss_async_fork_act5"/>
+          <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_async_fork_act5" entityName="async" predecessor_AbstractAction="_ss_async_fork_act4" successor_AbstractAction="_ss_async_fork_act6">
+            <resourceDemand_Action>
+              <specification_ParametericResourceDemand specification="5.0"/>
+              <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+            </resourceDemand_Action>
+          </steps_Behaviour>
+          <steps_Behaviour xsi:type="seff:StopAction" id="_ss_async_fork_act6" entityName="stop" predecessor_AbstractAction="_ss_async_fork_act5"/>
+        </asynchronousForkedBehaviours_ForkAction>
+        <synchronisingBehaviours_ForkAction id="_ss_async_fork_sp1">
+          <synchronousForkedBehaviours_SynchronisationPoint id="_ss_async_fork_fb2">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_ss_async_fork_act7" entityName="start" successor_AbstractAction="_ss_async_fork_act8"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_async_fork_act8" entityName="sync" predecessor_AbstractAction="_ss_async_fork_act7" successor_AbstractAction="_ss_async_fork_act9">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.2"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_ss_async_fork_act9" entityName="stop" predecessor_AbstractAction="_ss_async_fork_act8"/>
+          </synchronousForkedBehaviours_SynchronisationPoint>
+        </synchronisingBehaviours_ForkAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_ss_async_fork_act3" entityName="stop" predecessor_AbstractAction="_ss_async_fork_act2"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_ss_async_fork_if1" entityName="IService">
+    <signatures__OperationInterface id="_ss_async_fork_op" entityName="op"/>
+  </interfaces__Repository>
+</repository:Repository>

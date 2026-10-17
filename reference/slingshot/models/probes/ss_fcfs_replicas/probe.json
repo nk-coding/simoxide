@@ -1,0 +1,10 @@
+{
+  "name": "ss_fcfs_replicas",
+  "seed": 1,
+  "sim_time": 7,
+  "rules": [
+    "SS-RES-3.1",
+    "SS-RES-3.4"
+  ],
+  "description": "FCFS with numberOfReplicas = 2 is one server; the service time is the whole demand, scheduled when the job reaches the head (no remaining-demand update, no lost time)."
+}

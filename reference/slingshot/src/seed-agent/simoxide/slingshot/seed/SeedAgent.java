@@ -24,7 +24,8 @@ import java.util.function.DoubleConsumer;
  * ({@code Job.hashCode}, {@code User.hashCode}), so their iteration order follows the UUIDs.</li>
  * </ol>
  *
- * With the agent argument {@code ordered} it also rewrites Slingshot's hash-ordered collections to
+ * It always hooks the draw sites of {@code Math.random()} for the tape ({@link SiteTransformer},
+ * {@link Sites}); that changes nothing but a static reference. With the agent argument {@code ordered} it also rewrites Slingshot's hash-ordered collections to
  * insertion order ({@link OrderingTransformer}).
  *
  * The runner bundle reaches {@link #reseed(long)} and {@link #reseedMath(long)} through the system class loader by reflection.
@@ -34,6 +35,7 @@ public final class SeedAgent {
 	static volatile TapeRandom math;
 	static volatile boolean installed;
 	static volatile OrderingTransformer ordering;
+	static volatile SiteTransformer sites;
 
 	private SeedAgent() {
 	}
@@ -45,6 +47,8 @@ public final class SeedAgent {
 	public static void premain(final String args, final Instrumentation inst) throws Exception {
 		Security.insertProviderAt(new DetProvider(), 1);
 		installMathRandom();
+		sites = new SiteTransformer();
+		inst.addTransformer(sites);
 		final java.util.List<String> a = args == null ? java.util.List.of() : java.util.Arrays.asList(args.split(","));
 		if (a.contains("ordered")) {
 			ordering = new OrderingTransformer(a.contains("qvto"));
@@ -74,6 +78,12 @@ public final class SeedAgent {
 			throw new IllegalStateException("Math.random holder has an unexpected type");
 		}
 		math = r;
+	}
+
+	/** Number of draw-site hooks inserted so far ({@link SiteTransformer}). */
+	public static int siteHooks() {
+		final SiteTransformer s = sites;
+		return s == null ? 0 : s.hooked;
 	}
 
 	/** True when the agent was loaded (premain ran). */

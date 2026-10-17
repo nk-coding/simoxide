@@ -1,0 +1,25 @@
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,0.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0,0.0]}
+{"ev":"meas","t":1.0,"mp":"UsageScenarioMeasuringPoint[_ss_stop_time_us1]","metric":"Response Time Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.5,1.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.5,1.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.5,1.0]}
+{"ev":"meas","t":3.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.5,0.0]}
+{"ev":"meas","t":3.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.5,0.0]}
+{"ev":"meas","t":3.5,"mp":"UsageScenarioMeasuringPoint[_ss_stop_time_us1]","metric":"Response Time Tuple","v":[3.5,1.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[5.0,1.0]}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,0.0]}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,0.0]}
+{"ev":"meas","t":6.0,"mp":"UsageScenarioMeasuringPoint[_ss_stop_time_us1]","metric":"Response Time Tuple","v":[6.0,1.0]}
+{"ev":"meas","t":7.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.5,1.0]}
+{"ev":"meas","t":7.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[7.5,1.0]}
+{"ev":"meas","t":7.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[7.5,1.0]}
+{"ev":"meas","t":8.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.5,0.0]}
+{"ev":"meas","t":8.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[8.5,0.0]}
+{"ev":"meas","t":8.5,"mp":"UsageScenarioMeasuringPoint[_ss_stop_time_us1]","metric":"Response Time Tuple","v":[8.5,1.0]}
+{"ev":"stop","t":10.0}

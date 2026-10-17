@@ -1,0 +1,46 @@
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,2.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,3.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,2.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1]","metric":"Response Time Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,3.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,2.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1]","metric":"Response Time Tuple","v":[2.0,2.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,3.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,2.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"meas","t":3.0,"mp":"UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1]","metric":"Response Time Tuple","v":[3.0,3.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,3.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.0,1.0]}
+{"ev":"meas","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.0,2.0]}
+{"ev":"meas","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.0,1.0]}
+{"ev":"meas","t":4.0,"mp":"UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1]","metric":"Response Time Tuple","v":[4.0,3.0]}
+{"ev":"meas","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.0,3.0]}
+{"ev":"meas","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.0,1.0]}
+{"ev":"meas","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[4.0,1.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.0,2.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"meas","t":5.0,"mp":"UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1]","metric":"Response Time Tuple","v":[5.0,3.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.0,3.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[5.0,1.0]}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,2.0]}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,1.0]}
+{"ev":"meas","t":6.0,"mp":"UsageScenarioMeasuringPoint[_ss_fcfs_replicas_us1]","metric":"Response Time Tuple","v":[6.0,3.0]}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,3.0]}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,1.0]}
+{"ev":"meas","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fcfs_replicas_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[6.0,1.0]}
+{"ev":"stop","t":7.0}

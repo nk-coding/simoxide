@@ -41,6 +41,7 @@ public class InstrumentBehavior implements SimulationBehaviorExtension {
 		if (r != null) {
 			try {
 				r.dispatched(event);
+				r.subscriber(info, event);
 				if (r.spd != null) {
 					r.spd.pre(info, event);
 				}

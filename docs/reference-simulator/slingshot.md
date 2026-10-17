@@ -123,7 +123,8 @@ Per run, in the output directory:
 |---|---|
 | `measurements.csv` | EDP2's raw measurements in SimOxide's format ([formats](../guide/formats.md) §4): `measuring_point,metric,time,value`, series sorted by key, rows in EDP2 order |
 | `trace.jsonl` | every dispatched DES event, in dispatch order (`slingshot-trace/1`, below) |
-| `tape.jsonl` | every uniform draw: `{"k":"u","s":"stoex"\|"math","i":n,"u":x,"e":event}`; `e` is the trace index of the event being dispatched. Only with `-seed`: the draws are taped by the seeded generators |
+| `tape.jsonl` | every uniform draw: `{"k":"u","s":"stoex"\|"math","i":n,"u":x,"e":event,"o":site}`; `e` is the trace index of the event being dispatched; `o` the draw site (below). Only with `-seed`: the draws are taped by the seeded generators |
+| `bus.jsonl` | for the first event of each type, its subscribers in call order (`Class.method<reified>`), from the bus's per-subscriber pre-interception |
 | `spd.jsonl` | SPD decision log (below) |
 | `summary.json` | event count, rows, draws, SPD counts, errors |
 | `timings.csv` | per run: `load_ms` (blackboard, EDP2, seeding), `init_ms` (driver and Guice), `sim_ms`, `collect_ms`, `wall_ms`, events, rows; `jvm` = cold for the first run of the JVM |
@@ -147,6 +148,17 @@ There are no UUIDs and no identity hashes. Ids of elements that an SPD adjustmen
 (`~ResourceContainer:AppServer_1`), or the parent's alias plus `/feature.index` for unnamed
 elements. The same aliases are used in `measurements.csv` and `spd.jsonl`.
 
+**Draw sites.** For `math` draws the seed agent hooks the two methods that call `Math.random()`
+(`SiteTransformer`, ASM at class-load time, installed whenever the agent is loaded):
+`TransitionDeterminer.determineBranchTransition` / `determineProbabilisticBranchTransition` announce
+their transition list and `SimulatedLinkingResource.onJobProgressed` its link (`Sites.set`, a static
+reference, nothing else); the tape writes `branch:<id of the Branch or BranchAction>` or
+`link:<linking resource id>`. For `stoex` draws `o` is the innermost Slingshot frame on the stack
+(`Class.method`, skipping `AbstractStoExProxy` and `SimulatedStackHelper`), e.g.
+`ResourceSimulation.initiateActiveResource`. `tools/project.py` maps them to SimOxide's origin
+purposes ([Slingshot semantics: exact comparison](../spec/slingshot/exact.md)). Trace, measurements
+and draws are unchanged by the hooks.
+
 **SPD log.** It is built without changing Slingshot's code. Each policy's subscriber is found
 through the bus's interceptors, and the entries of its `FilterChain` are replaced in place by
 recording proxies.
@@ -161,6 +173,15 @@ recording proxies.
 The instrumentation is passive. It schedules nothing, never vetoes an interception and catches its
 own errors. In `det` mode, runs with and without it give identical measurements (smoke column
 `instrumentation_neutral`).
+
+## Projection, probes and det verification
+
+| Script | Purpose |
+|---|---|
+| `tools/project.py RUN_DIR` | event projection for the Slingshot-exact comparison: `projection.jsonl` (level E), `projection-m.jsonl` (level M), `tape-projection.jsonl` ([SS-X-2](../spec/slingshot/exact.md#ss-x-2-the-projection)) |
+| `tools/probegen.py` | generates the probe models of the [Slingshot semantics](../spec/slingshot/index.md) into `models/probes/` |
+| `probes.sh [--check]` | runs every probe in `det` mode and writes (or compares) `models/probes/<name>/expected/` |
+| `verify-det.sh -o OUT DIR...` | `det` twice in fresh JVMs, once warm, once `stock`, per model; time and file-size limits per JVM; summary `OUT/verify.csv` (`results/det-verify.csv` for probes, SPD examples and corpus) |
 
 ## Smoke corpus
 
@@ -204,7 +225,7 @@ Findings from the reference runs, for the Slingshot semantics (S1) and the SPD d
   not installed. The stub bundle (`src/stub`) registers the blackbox; it is never called.
 - **Q5 confirmed (scale-in loses jobs).** `models/spd_scale_in` removes `AppServer_1` at t = 80
   while four jobs run on it. The job with the pending `JobProgressed` (the shortest) is aborted at
-  its next event (t = 83): `JobAborted`, then `ResourceDemandRequestAborted`, then `UserAborted`,
+  its next event (t = 87): `JobAborted`, then `ResourceDemandRequestAborted`, then `UserAborted`,
   and the open-workload user is dropped. The other three jobs are lost without any event, and
   their users never finish.
 - **Q15 confirmed.** Policies of one target group evaluate each other's `SimulationTimeReached`:
@@ -246,10 +267,8 @@ Findings from the reference runs, for the Slingshot semantics (S1) and the SPD d
 
 ## Open issues
 
-- The trace has one line per bus event, about 20 per request. The exact comparison (design U4)
-  needs a projection of it that SimOxide's Slingshot-exact mode reproduces; S1 defines it.
-- Tape records carry the event index, not the draw site (`branch:<id>` as in refsim). Adding draw
-  sites needs a patch of `TransitionDeterminer`.
-- `det` is checked only on the smoke corpus. Other hash-dependent orders may remain, for example in
-  EMF or the SimuCom framework. `smoke.sh` on new models is the check.
+- Resolved in S1: the trace projection (`tools/project.py`), draw sites on the tape (seed-agent hooks),
+  `det` verification beyond the smoke corpus (`verify-det.sh`, `results/det-verify.csv`).
+- `getDeclaredMethods()` order varies between JVMs (observed in `bus.jsonl`); it only reorders
+  subscribers of disjoint reified types, so no run changes, but `bus.jsonl` is not byte-stable.
 - Usage evolution (`.usageevolution`, DLIM) is not loaded (design decision U9).

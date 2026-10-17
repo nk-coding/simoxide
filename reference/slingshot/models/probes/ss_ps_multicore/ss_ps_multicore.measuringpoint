@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mp:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mp="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_ss_ps_multicore_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: us1">
+    <usageScenario href="ss_ps_multicore.usagemodel#_ss_ps_multicore_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="cpu [0]" replicaID="0">
+    <activeResource href="ss_ps_multicore.resourceenvironment#_ss_ps_multicore_cpu"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="cpu [1]" replicaID="1">
+    <activeResource href="ss_ps_multicore.resourceenvironment#_ss_ps_multicore_cpu"/>
+  </measuringPoints>
+</mp:MeasuringPointRepository>

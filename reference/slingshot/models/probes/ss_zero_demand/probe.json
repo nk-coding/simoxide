@@ -1,0 +1,11 @@
+{
+  "name": "ss_zero_demand",
+  "seed": 1,
+  "sim_time": 3,
+  "rules": [
+    "SS-RES-2.2",
+    "SS-RES-3.4",
+    "SS-MEAS-3.4"
+  ],
+  "description": "a zero demand on PS becomes a 1e-9 s job (JIFFY) with its own events and samples; on FCFS a zero demand is a job with service time 0."
+}

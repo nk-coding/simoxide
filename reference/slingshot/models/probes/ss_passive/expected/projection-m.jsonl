@@ -1,0 +1,42 @@
+{"ev":"meas","t":0.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"Waiting Time Tuple","v":[0.0,0.0]}
+{"ev":"meas","t":0.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"State of Passive Resource Tuple","v":[0.0,0.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,0.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0,0.0]}
+{"ev":"meas","t":1.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"Holding Time Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"Waiting Time Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"State of Passive Resource Tuple","v":[1.0,0.0]}
+{"ev":"meas","t":1.0,"mp":"UsageScenarioMeasuringPoint[_ss_passive_us1]","metric":"Response Time Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,0.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.0,0.0]}
+{"ev":"meas","t":2.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"Holding Time Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"Waiting Time Tuple","v":[2.0,0.5]}
+{"ev":"meas","t":2.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"State of Passive Resource Tuple","v":[2.0,0.0]}
+{"ev":"meas","t":2.0,"mp":"UsageScenarioMeasuringPoint[_ss_passive_us1]","metric":"Response Time Tuple","v":[2.0,2.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,0.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,0.0]}
+{"ev":"meas","t":3.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"Holding Time Tuple","v":[3.0,1.0]}
+{"ev":"meas","t":3.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"Waiting Time Tuple","v":[3.0,0.5]}
+{"ev":"meas","t":3.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"State of Passive Resource Tuple","v":[3.0,0.0]}
+{"ev":"meas","t":3.0,"mp":"UsageScenarioMeasuringPoint[_ss_passive_us1]","metric":"Response Time Tuple","v":[3.0,1.5]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.0,1.0]}
+{"ev":"meas","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.0,0.0]}
+{"ev":"meas","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.0,0.0]}
+{"ev":"meas","t":4.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"Holding Time Tuple","v":[4.0,1.0]}
+{"ev":"meas","t":4.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"Waiting Time Tuple","v":[4.0,0.5]}
+{"ev":"meas","t":4.0,"mp":"AssemblyPassiveResourceMeasuringPoint[_ss_passive_ac1|_ss_passive_pool]","metric":"State of Passive Resource Tuple","v":[4.0,0.0]}
+{"ev":"meas","t":4.0,"mp":"UsageScenarioMeasuringPoint[_ss_passive_us1]","metric":"Response Time Tuple","v":[4.0,1.5]}
+{"ev":"meas","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.0,1.0]}
+{"ev":"meas","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.0,1.0]}
+{"ev":"meas","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_passive_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[4.0,1.0]}
+{"ev":"stop","t":5.0}

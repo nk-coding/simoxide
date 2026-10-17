@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mp:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mp="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" id="_ss_monitors_mpr">
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: us1">
+    <usageScenario href="ss_monitors.usagemodel#_ss_monitors_us1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyOperationMeasuringPoint" stringRepresentation="ac1.prov1.op">
+    <role xsi:type="repository:OperationProvidedRole" href="ss_monitors.repository#_ss_monitors_prov1"/>
+    <operationSignature href="ss_monitors.repository#_ss_monitors_op"/>
+    <assembly href="ss_monitors.system#_ss_monitors_ac1"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:EntryLevelSystemCallMeasuringPoint" stringRepresentation="SystemCall ua2">
+    <entryLevelSystemCall href="ss_monitors.usagemodel#_ss_monitors_ua2"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:SystemOperationMeasuringPoint" stringRepresentation="sysprov1.op">
+    <role xsi:type="repository:OperationProvidedRole" href="ss_monitors.system#_ss_monitors_sysprov1"/>
+    <operationSignature href="ss_monitors.repository#_ss_monitors_op"/>
+    <system href="ss_monitors.system#_ss_monitors_system"/>
+  </measuringPoints>
+</mp:MeasuringPointRepository>

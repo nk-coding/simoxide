@@ -1,0 +1,15 @@
+{"ev":"PreSimulationConfigurationStarted","subs":["MonitorRepositoryInterpreterBehavior.onPreSimulationConfigurationStarted","InstrumentBehavior.onEvent"]}
+{"ev":"SimulationStarted","subs":["UsageSimulationBehavior.onSimulationStart","InstrumentBehavior.onEvent"]}
+{"ev":"MonitorModelVisited","subs":["MeasurementsAggregatorBehavior.onFixedSizeAggregationVisited<FixedSizeAggregation>","MeasurementsAggregatorBehavior.onVariableSizeAggregationVisited<VariableSizeAggregation>","FeedThroughRecorderBehavior.onFeedThroughProcessingTypeVisited<FeedThrough>","InstrumentBehavior.onEvent"]}
+{"ev":"MeasurementSpecificationVisited","subs":["ActiveResourceMonitorBehavior.onMeasurementSpecification","PassiveResourceMonitoringBehavior.onMeasurementSpecification","OperationCallActionResponseTimeMonitoringBehavior.onMeasurementSpecificationVisited","UsageScenarioResponseTimeMonitoringBehavior.onMeasurementSpecificationVisited","MeasurementsAggregatorBehavior.onFixedSizeAggregationVisited<FixedSizeAggregation>","MeasurementsAggregatorBehavior.onVariableSizeAggregationVisited<VariableSizeAggregation>","FeedThroughRecorderBehavior.onFeedThroughProcessingTypeVisited<FeedThrough>","InstrumentBehavior.onEvent"]}
+{"ev":"UsageModelPassedElement","subs":["UsageScenarioResponseTimeMonitoringBehavior.onUsageScenarioStarted<Start>","UsageScenarioResponseTimeMonitoringBehavior.onUsageScenarioFinished<Stop>","InstrumentBehavior.onEvent"]}
+{"ev":"UserStarted","subs":["UsageSimulationBehavior.onUserStarted","InstrumentBehavior.onEvent"]}
+{"ev":"ProcessingTypeRevealed","subs":["DeferredCalculatorMeasurementInitializationBehavior.onProcessingTypeRevealed","InstrumentBehavior.onEvent"]}
+{"ev":"CalculatorRegistered","subs":["DeferredCalculatorMeasurementInitializationBehavior.onCalculatorRegistered","InstrumentBehavior.onEvent"]}
+{"ev":"ProbeTaken","subs":["InstrumentBehavior.onEvent"]}
+{"ev":"UserEntryRequested","subs":["SystemSimulationBehavior.onUserEntryRequested","InstrumentBehavior.onEvent"]}
+{"ev":"UsageScenarioStarted","subs":["InstrumentBehavior.onEvent"]}
+{"ev":"SEFFInterpretationProgressed","subs":["SeffSimulationBehavior.onSeffInterpretationProgressed","InstrumentBehavior.onEvent"]}
+{"ev":"SEFFModelPassedElement","subs":["OperationCallActionResponseTimeMonitoringBehavior.onOperationCallStarted<StartAction>","OperationCallActionResponseTimeMonitoringBehavior.onOperationCallStopped<StopAction>","InstrumentBehavior.onEvent"]}
+{"ev":"InterArrivalUserInitiated","subs":["UsageSimulationBehavior.onInterArrivalUserInitiated","InstrumentBehavior.onEvent"]}
+{"ev":"SimulationFinished","subs":["ResourceSimulation.onSimulationFinished","InstrumentBehavior.onEvent","CoreBehavior.onSimulationFinished"]}

@@ -1,0 +1,139 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_ss_role_lookup_ua1"}
+{"ev":"pass","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_role_lookup_ua2"}
+{"ev":"call","t":0.0,"u":1,"role":"_ss_role_lookup_sysprov1","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_ss_role_lookup_acC","type":"StartAction","el":"_ss_role_lookup_act1"}
+{"ev":"ext","t":0.0,"u":1,"ac":"_ss_role_lookup_acC","role":"_ss_role_lookup_req_front","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_ss_role_lookup_acB","type":"StartAction","el":"_ss_role_lookup_act4"}
+{"ev":"request","t":0.0,"u":1,"ac":"_ss_role_lookup_acB","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act5"}
+{"ev":"job","t":0.0,"job":1,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.1]}
+{"ev":"job_end","t":0.1,"job":1}
+{"ev":"ext","t":0.1,"u":1,"ac":"_ss_role_lookup_acB","role":"_ss_role_lookup_req_back","sig":"_ss_role_lookup_work"}
+{"ev":"pass","t":0.1,"u":1,"ac":"_ss_role_lookup_acF","type":"StartAction","el":"_ss_role_lookup_act8"}
+{"ev":"request","t":0.1,"u":1,"ac":"_ss_role_lookup_acF","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act9"}
+{"ev":"job","t":0.1,"job":2,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2}
+{"ev":"meas","t":0.1,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.1,0.2]}
+{"ev":"job_end","t":0.30000000000000004,"job":2}
+{"ev":"pass","t":0.30000000000000004,"u":1,"ac":"_ss_role_lookup_acF","type":"StopAction","el":"_ss_role_lookup_act10"}
+{"ev":"pass","t":0.30000000000000004,"u":1,"ac":"_ss_role_lookup_acB","type":"StopAction","el":"_ss_role_lookup_act7"}
+{"ev":"meas","t":0.30000000000000004,"mp":"AssemblyOperationMeasuringPoint[_ss_role_lookup_prov_front|_ss_role_lookup_op|_ss_role_lookup_acB]","metric":"Response Time Tuple","v":[0.30000000000000004,0.30000000000000004]}
+{"ev":"pass","t":0.30000000000000004,"u":1,"ac":"_ss_role_lookup_acC","type":"StopAction","el":"_ss_role_lookup_act3"}
+{"ev":"call_end","t":0.30000000000000004,"u":1,"role":"_ss_role_lookup_sysprov1","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":0.30000000000000004,"u":1,"type":"EntryLevelSystemCall","el":"_ss_role_lookup_ua3"}
+{"ev":"call","t":0.30000000000000004,"u":1,"role":"_ss_role_lookup_sysprov2","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":0.30000000000000004,"u":1,"ac":"_ss_role_lookup_acA","type":"StartAction","el":"_ss_role_lookup_act4"}
+{"ev":"request","t":0.30000000000000004,"u":1,"ac":"_ss_role_lookup_acA","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act5"}
+{"ev":"job","t":0.30000000000000004,"job":3,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1}
+{"ev":"meas","t":0.30000000000000004,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.30000000000000004,0.1]}
+{"ev":"job_end","t":0.4,"job":3}
+{"ev":"ext","t":0.4,"u":1,"ac":"_ss_role_lookup_acA","role":"_ss_role_lookup_req_back","sig":"_ss_role_lookup_work"}
+{"ev":"pass","t":0.4,"u":1,"ac":"_ss_role_lookup_acF","type":"StartAction","el":"_ss_role_lookup_act8"}
+{"ev":"request","t":0.4,"u":1,"ac":"_ss_role_lookup_acF","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act9"}
+{"ev":"job","t":0.4,"job":4,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2}
+{"ev":"meas","t":0.4,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.4,0.2]}
+{"ev":"job_end","t":0.6000000000000001,"job":4}
+{"ev":"pass","t":0.6000000000000001,"u":1,"ac":"_ss_role_lookup_acF","type":"StopAction","el":"_ss_role_lookup_act10"}
+{"ev":"pass","t":0.6000000000000001,"u":1,"ac":"_ss_role_lookup_acA","type":"StopAction","el":"_ss_role_lookup_act7"}
+{"ev":"call_end","t":0.6000000000000001,"u":1,"role":"_ss_role_lookup_sysprov2","sig":"_ss_role_lookup_op"}
+{"ev":"meas","t":0.6000000000000001,"mp":"AssemblyOperationMeasuringPoint[_ss_role_lookup_sysprov2|_ss_role_lookup_op|_ss_role_lookup_acA]","metric":"Response Time Tuple","v":[0.6000000000000001,0.30000000000000004]}
+{"ev":"pass","t":0.6000000000000001,"u":1,"type":"Stop","el":"_ss_role_lookup_ua4"}
+{"ev":"user_end","t":0.6000000000000001,"u":1}
+{"ev":"meas","t":0.6000000000000001,"mp":"UsageScenarioMeasuringPoint[_ss_role_lookup_us1]","metric":"Response Time Tuple","v":[0.6000000000000001,0.6000000000000001]}
+{"ev":"pass","t":0.6000000000000001,"u":1,"type":"Start","el":"_ss_role_lookup_ua1"}
+{"ev":"pass","t":0.6000000000000001,"u":1,"type":"EntryLevelSystemCall","el":"_ss_role_lookup_ua2"}
+{"ev":"call","t":0.6000000000000001,"u":1,"role":"_ss_role_lookup_sysprov1","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":0.6000000000000001,"u":1,"ac":"_ss_role_lookup_acC","type":"StartAction","el":"_ss_role_lookup_act1"}
+{"ev":"ext","t":0.6000000000000001,"u":1,"ac":"_ss_role_lookup_acC","role":"_ss_role_lookup_req_front","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":0.6000000000000001,"u":1,"ac":"_ss_role_lookup_acB","type":"StartAction","el":"_ss_role_lookup_act4"}
+{"ev":"request","t":0.6000000000000001,"u":1,"ac":"_ss_role_lookup_acB","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act5"}
+{"ev":"job","t":0.6000000000000001,"job":5,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1}
+{"ev":"meas","t":0.6000000000000001,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.6000000000000001,0.1]}
+{"ev":"job_end","t":0.7000000000000001,"job":5}
+{"ev":"ext","t":0.7000000000000001,"u":1,"ac":"_ss_role_lookup_acB","role":"_ss_role_lookup_req_back","sig":"_ss_role_lookup_work"}
+{"ev":"pass","t":0.7000000000000001,"u":1,"ac":"_ss_role_lookup_acF","type":"StartAction","el":"_ss_role_lookup_act8"}
+{"ev":"request","t":0.7000000000000001,"u":1,"ac":"_ss_role_lookup_acF","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act9"}
+{"ev":"job","t":0.7000000000000001,"job":6,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2}
+{"ev":"meas","t":0.7000000000000001,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.7000000000000001,0.2]}
+{"ev":"job_end","t":0.9000000000000001,"job":6}
+{"ev":"pass","t":0.9000000000000001,"u":1,"ac":"_ss_role_lookup_acF","type":"StopAction","el":"_ss_role_lookup_act10"}
+{"ev":"pass","t":0.9000000000000001,"u":1,"ac":"_ss_role_lookup_acB","type":"StopAction","el":"_ss_role_lookup_act7"}
+{"ev":"meas","t":0.9000000000000001,"mp":"AssemblyOperationMeasuringPoint[_ss_role_lookup_prov_front|_ss_role_lookup_op|_ss_role_lookup_acB]","metric":"Response Time Tuple","v":[0.9000000000000001,0.30000000000000004]}
+{"ev":"pass","t":0.9000000000000001,"u":1,"ac":"_ss_role_lookup_acC","type":"StopAction","el":"_ss_role_lookup_act3"}
+{"ev":"call_end","t":0.9000000000000001,"u":1,"role":"_ss_role_lookup_sysprov1","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":0.9000000000000001,"u":1,"type":"EntryLevelSystemCall","el":"_ss_role_lookup_ua3"}
+{"ev":"call","t":0.9000000000000001,"u":1,"role":"_ss_role_lookup_sysprov2","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":0.9000000000000001,"u":1,"ac":"_ss_role_lookup_acA","type":"StartAction","el":"_ss_role_lookup_act4"}
+{"ev":"request","t":0.9000000000000001,"u":1,"ac":"_ss_role_lookup_acA","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act5"}
+{"ev":"job","t":0.9000000000000001,"job":7,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1}
+{"ev":"meas","t":0.9000000000000001,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.9000000000000001,0.1]}
+{"ev":"job_end","t":1.0000000000000002,"job":7}
+{"ev":"ext","t":1.0000000000000002,"u":1,"ac":"_ss_role_lookup_acA","role":"_ss_role_lookup_req_back","sig":"_ss_role_lookup_work"}
+{"ev":"pass","t":1.0000000000000002,"u":1,"ac":"_ss_role_lookup_acF","type":"StartAction","el":"_ss_role_lookup_act8"}
+{"ev":"request","t":1.0000000000000002,"u":1,"ac":"_ss_role_lookup_acF","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act9"}
+{"ev":"job","t":1.0000000000000002,"job":8,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2}
+{"ev":"meas","t":1.0000000000000002,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.0000000000000002,0.2]}
+{"ev":"job_end","t":1.2000000000000002,"job":8}
+{"ev":"pass","t":1.2000000000000002,"u":1,"ac":"_ss_role_lookup_acF","type":"StopAction","el":"_ss_role_lookup_act10"}
+{"ev":"pass","t":1.2000000000000002,"u":1,"ac":"_ss_role_lookup_acA","type":"StopAction","el":"_ss_role_lookup_act7"}
+{"ev":"call_end","t":1.2000000000000002,"u":1,"role":"_ss_role_lookup_sysprov2","sig":"_ss_role_lookup_op"}
+{"ev":"meas","t":1.2000000000000002,"mp":"AssemblyOperationMeasuringPoint[_ss_role_lookup_sysprov2|_ss_role_lookup_op|_ss_role_lookup_acA]","metric":"Response Time Tuple","v":[1.2000000000000002,0.30000000000000004]}
+{"ev":"pass","t":1.2000000000000002,"u":1,"type":"Stop","el":"_ss_role_lookup_ua4"}
+{"ev":"user_end","t":1.2000000000000002,"u":1}
+{"ev":"meas","t":1.2000000000000002,"mp":"UsageScenarioMeasuringPoint[_ss_role_lookup_us1]","metric":"Response Time Tuple","v":[1.2000000000000002,0.6000000000000001]}
+{"ev":"pass","t":1.2000000000000002,"u":1,"type":"Start","el":"_ss_role_lookup_ua1"}
+{"ev":"pass","t":1.2000000000000002,"u":1,"type":"EntryLevelSystemCall","el":"_ss_role_lookup_ua2"}
+{"ev":"call","t":1.2000000000000002,"u":1,"role":"_ss_role_lookup_sysprov1","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":1.2000000000000002,"u":1,"ac":"_ss_role_lookup_acC","type":"StartAction","el":"_ss_role_lookup_act1"}
+{"ev":"ext","t":1.2000000000000002,"u":1,"ac":"_ss_role_lookup_acC","role":"_ss_role_lookup_req_front","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":1.2000000000000002,"u":1,"ac":"_ss_role_lookup_acB","type":"StartAction","el":"_ss_role_lookup_act4"}
+{"ev":"request","t":1.2000000000000002,"u":1,"ac":"_ss_role_lookup_acB","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act5"}
+{"ev":"job","t":1.2000000000000002,"job":9,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1}
+{"ev":"meas","t":1.2000000000000002,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.2000000000000002,0.1]}
+{"ev":"job_end","t":1.3000000000000003,"job":9}
+{"ev":"ext","t":1.3000000000000003,"u":1,"ac":"_ss_role_lookup_acB","role":"_ss_role_lookup_req_back","sig":"_ss_role_lookup_work"}
+{"ev":"pass","t":1.3000000000000003,"u":1,"ac":"_ss_role_lookup_acF","type":"StartAction","el":"_ss_role_lookup_act8"}
+{"ev":"request","t":1.3000000000000003,"u":1,"ac":"_ss_role_lookup_acF","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act9"}
+{"ev":"job","t":1.3000000000000003,"job":10,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2}
+{"ev":"meas","t":1.3000000000000003,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.3000000000000003,0.2]}
+{"ev":"job_end","t":1.5000000000000002,"job":10}
+{"ev":"pass","t":1.5000000000000002,"u":1,"ac":"_ss_role_lookup_acF","type":"StopAction","el":"_ss_role_lookup_act10"}
+{"ev":"pass","t":1.5000000000000002,"u":1,"ac":"_ss_role_lookup_acB","type":"StopAction","el":"_ss_role_lookup_act7"}
+{"ev":"meas","t":1.5000000000000002,"mp":"AssemblyOperationMeasuringPoint[_ss_role_lookup_prov_front|_ss_role_lookup_op|_ss_role_lookup_acB]","metric":"Response Time Tuple","v":[1.5000000000000002,0.30000000000000004]}
+{"ev":"pass","t":1.5000000000000002,"u":1,"ac":"_ss_role_lookup_acC","type":"StopAction","el":"_ss_role_lookup_act3"}
+{"ev":"call_end","t":1.5000000000000002,"u":1,"role":"_ss_role_lookup_sysprov1","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":1.5000000000000002,"u":1,"type":"EntryLevelSystemCall","el":"_ss_role_lookup_ua3"}
+{"ev":"call","t":1.5000000000000002,"u":1,"role":"_ss_role_lookup_sysprov2","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":1.5000000000000002,"u":1,"ac":"_ss_role_lookup_acA","type":"StartAction","el":"_ss_role_lookup_act4"}
+{"ev":"request","t":1.5000000000000002,"u":1,"ac":"_ss_role_lookup_acA","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act5"}
+{"ev":"job","t":1.5000000000000002,"job":11,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1}
+{"ev":"meas","t":1.5000000000000002,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.5000000000000002,0.1]}
+{"ev":"job_end","t":1.6000000000000003,"job":11}
+{"ev":"ext","t":1.6000000000000003,"u":1,"ac":"_ss_role_lookup_acA","role":"_ss_role_lookup_req_back","sig":"_ss_role_lookup_work"}
+{"ev":"pass","t":1.6000000000000003,"u":1,"ac":"_ss_role_lookup_acF","type":"StartAction","el":"_ss_role_lookup_act8"}
+{"ev":"request","t":1.6000000000000003,"u":1,"ac":"_ss_role_lookup_acF","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act9"}
+{"ev":"job","t":1.6000000000000003,"job":12,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2}
+{"ev":"meas","t":1.6000000000000003,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.6000000000000003,0.2]}
+{"ev":"job_end","t":1.8000000000000003,"job":12}
+{"ev":"pass","t":1.8000000000000003,"u":1,"ac":"_ss_role_lookup_acF","type":"StopAction","el":"_ss_role_lookup_act10"}
+{"ev":"pass","t":1.8000000000000003,"u":1,"ac":"_ss_role_lookup_acA","type":"StopAction","el":"_ss_role_lookup_act7"}
+{"ev":"call_end","t":1.8000000000000003,"u":1,"role":"_ss_role_lookup_sysprov2","sig":"_ss_role_lookup_op"}
+{"ev":"meas","t":1.8000000000000003,"mp":"AssemblyOperationMeasuringPoint[_ss_role_lookup_sysprov2|_ss_role_lookup_op|_ss_role_lookup_acA]","metric":"Response Time Tuple","v":[1.8000000000000003,0.30000000000000004]}
+{"ev":"pass","t":1.8000000000000003,"u":1,"type":"Stop","el":"_ss_role_lookup_ua4"}
+{"ev":"user_end","t":1.8000000000000003,"u":1}
+{"ev":"meas","t":1.8000000000000003,"mp":"UsageScenarioMeasuringPoint[_ss_role_lookup_us1]","metric":"Response Time Tuple","v":[1.8000000000000003,0.6000000000000001]}
+{"ev":"pass","t":1.8000000000000003,"u":1,"type":"Start","el":"_ss_role_lookup_ua1"}
+{"ev":"pass","t":1.8000000000000003,"u":1,"type":"EntryLevelSystemCall","el":"_ss_role_lookup_ua2"}
+{"ev":"call","t":1.8000000000000003,"u":1,"role":"_ss_role_lookup_sysprov1","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":1.8000000000000003,"u":1,"ac":"_ss_role_lookup_acC","type":"StartAction","el":"_ss_role_lookup_act1"}
+{"ev":"ext","t":1.8000000000000003,"u":1,"ac":"_ss_role_lookup_acC","role":"_ss_role_lookup_req_front","sig":"_ss_role_lookup_op"}
+{"ev":"pass","t":1.8000000000000003,"u":1,"ac":"_ss_role_lookup_acB","type":"StartAction","el":"_ss_role_lookup_act4"}
+{"ev":"request","t":1.8000000000000003,"u":1,"ac":"_ss_role_lookup_acB","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act5"}
+{"ev":"job","t":1.8000000000000003,"job":13,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1}
+{"ev":"meas","t":1.8000000000000003,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.8000000000000003,0.1]}
+{"ev":"job_end","t":1.9000000000000004,"job":13}
+{"ev":"ext","t":1.9000000000000004,"u":1,"ac":"_ss_role_lookup_acB","role":"_ss_role_lookup_req_back","sig":"_ss_role_lookup_work"}
+{"ev":"pass","t":1.9000000000000004,"u":1,"ac":"_ss_role_lookup_acF","type":"StartAction","el":"_ss_role_lookup_act8"}
+{"ev":"request","t":1.9000000000000004,"u":1,"ac":"_ss_role_lookup_acF","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_role_lookup_act9"}
+{"ev":"job","t":1.9000000000000004,"job":14,"u":1,"rc":"_ss_role_lookup_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2}
+{"ev":"meas","t":1.9000000000000004,"mp":"ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.9000000000000004,0.2]}
+{"ev":"stop","t":2.0}

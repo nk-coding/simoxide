@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monitorrepository:MonitorRepository xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:metricspec="http://palladiosimulator.org/MetricSpec/1.0" xmlns:monitorrepository="http://palladiosimulator.org/MonitorRepository/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" id="_ss_role_lookup_monrepo" entityName="probe monitors">
+  <monitors id="_ss_role_lookup_mon1" entityName="scenario us1">
+    <measurementSpecifications id="_ss_role_lookup_ms1_rt" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_ss_role_lookup_ft1_rt"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" href="ss_role_lookup.measuringpoint#//@measuringPoints.0"/>
+  </monitors>
+  <monitors id="_ss_role_lookup_mon2" entityName="assemblyop acB">
+    <measurementSpecifications id="_ss_role_lookup_ms2_rt" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_ss_role_lookup_ft2_rt"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:AssemblyOperationMeasuringPoint" href="ss_role_lookup.measuringpoint#//@measuringPoints.1"/>
+  </monitors>
+  <monitors id="_ss_role_lookup_mon3" entityName="assemblyop acA">
+    <measurementSpecifications id="_ss_role_lookup_ms3_rt" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_ss_role_lookup_ft3_rt"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:AssemblyOperationMeasuringPoint" href="ss_role_lookup.measuringpoint#//@measuringPoints.2"/>
+  </monitors>
+  <monitors id="_ss_role_lookup_mon4" entityName="assemblyop acA">
+    <measurementSpecifications id="_ss_role_lookup_ms4_rt" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_6rYmYs7nEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_ss_role_lookup_ft4_rt"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:AssemblyOperationMeasuringPoint" href="ss_role_lookup.measuringpoint#//@measuringPoints.3"/>
+  </monitors>
+  <monitors id="_ss_role_lookup_mon5" entityName="resource cpu">
+    <measurementSpecifications id="_ss_role_lookup_ms5_demand" triggersSelfAdaptations="false">
+      <metricDescription xsi:type="metricspec:NumericalBaseMetricDescription" href="pathmap://METRIC_SPEC_MODELS/models/commonMetrics.metricspec#_eg_F0s7qEeOX_4BzImuHbA"/>
+      <processingType xsi:type="monitorrepository:FeedThrough" id="_ss_role_lookup_ft5_demand"/>
+    </measurementSpecifications>
+    <measuringPoint xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" href="ss_role_lookup.measuringpoint#//@measuringPoints.4"/>
+  </monitors>
+</monitorrepository:MonitorRepository>

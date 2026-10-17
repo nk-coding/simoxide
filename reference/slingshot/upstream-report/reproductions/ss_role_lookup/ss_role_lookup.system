@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_ss_role_lookup_system" entityName="ss_role_lookup">
+  <assemblyContexts__ComposedStructure id="_ss_role_lookup_acC" entityName="Client">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="ss_role_lookup.repository#_ss_role_lookup_client"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ss_role_lookup_acA" entityName="FrontA">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="ss_role_lookup.repository#_ss_role_lookup_front"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ss_role_lookup_acB" entityName="FrontB">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="ss_role_lookup.repository#_ss_role_lookup_front"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ss_role_lookup_acF" entityName="Fast">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="ss_role_lookup.repository#_ss_role_lookup_fast"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ss_role_lookup_acS" entityName="Slow">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="ss_role_lookup.repository#_ss_role_lookup_slow"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_ss_role_lookup_connA" entityName="connA" requiringAssemblyContext_AssemblyConnector="_ss_role_lookup_acA" providingAssemblyContext_AssemblyConnector="_ss_role_lookup_acF">
+    <providedRole_AssemblyConnector href="ss_role_lookup.repository#_ss_role_lookup_prov_fast"/>
+    <requiredRole_AssemblyConnector href="ss_role_lookup.repository#_ss_role_lookup_req_back"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_ss_role_lookup_connB" entityName="connB" requiringAssemblyContext_AssemblyConnector="_ss_role_lookup_acB" providingAssemblyContext_AssemblyConnector="_ss_role_lookup_acS">
+    <providedRole_AssemblyConnector href="ss_role_lookup.repository#_ss_role_lookup_prov_slow"/>
+    <requiredRole_AssemblyConnector href="ss_role_lookup.repository#_ss_role_lookup_req_back"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_ss_role_lookup_connC" entityName="connC" requiringAssemblyContext_AssemblyConnector="_ss_role_lookup_acC" providingAssemblyContext_AssemblyConnector="_ss_role_lookup_acB">
+    <providedRole_AssemblyConnector href="ss_role_lookup.repository#_ss_role_lookup_prov_front"/>
+    <requiredRole_AssemblyConnector href="ss_role_lookup.repository#_ss_role_lookup_req_front"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_ss_role_lookup_deleg1" entityName="deleg1" outerProvidedRole_ProvidedDelegationConnector="_ss_role_lookup_sysprov1" assemblyContext_ProvidedDelegationConnector="_ss_role_lookup_acC">
+    <innerProvidedRole_ProvidedDelegationConnector href="ss_role_lookup.repository#_ss_role_lookup_prov_client"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_ss_role_lookup_deleg2" entityName="deleg2" outerProvidedRole_ProvidedDelegationConnector="_ss_role_lookup_sysprov2" assemblyContext_ProvidedDelegationConnector="_ss_role_lookup_acB">
+    <innerProvidedRole_ProvidedDelegationConnector href="ss_role_lookup.repository#_ss_role_lookup_prov_front"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_role_lookup_sysprov1" entityName="sysprov1">
+    <providedInterface__OperationProvidedRole href="ss_role_lookup.repository#_ss_role_lookup_if1"/>
+  </providedRoles_InterfaceProvidingEntity>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_role_lookup_sysprov2" entityName="sysprov2">
+    <providedInterface__OperationProvidedRole href="ss_role_lookup.repository#_ss_role_lookup_if1"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>

@@ -1,0 +1,151 @@
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,0.5]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.5]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,2.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.0,2.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.5]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,3.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.0,3.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.5]}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.5,3.0]}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.5,3.0]}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.5,1.0]}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.5,3.0]}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.5,3.0]}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.5,1.0]}
+{"ev":"meas","t":0.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.75,2.0]}
+{"ev":"meas","t":0.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.75,2.0]}
+{"ev":"meas","t":0.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.75,1.0]}
+{"ev":"meas","t":0.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.75,1.0]}
+{"ev":"meas","t":0.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.75,1.0]}
+{"ev":"meas","t":0.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.75,0.5]}
+{"ev":"meas","t":0.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.75,0.0]}
+{"ev":"meas","t":0.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[0.75,0.0]}
+{"ev":"meas","t":0.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.75,0.0]}
+{"ev":"meas","t":0.75,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[0.75,0.75]}
+{"ev":"meas","t":0.75,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[0.75,0.75]}
+{"ev":"meas","t":0.75,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[0.75,0.75]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.25,1.0]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[1.25,1.0]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.25,0.5]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.25,0.5]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.25,2.0]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[1.25,2.0]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.25,1.0]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.25,0.5]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.25,3.0]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[1.25,3.0]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.25,1.0]}
+{"ev":"meas","t":1.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.25,0.5]}
+{"ev":"meas","t":1.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.75,3.0]}
+{"ev":"meas","t":1.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[1.75,3.0]}
+{"ev":"meas","t":1.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.75,1.0]}
+{"ev":"meas","t":1.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.75,3.0]}
+{"ev":"meas","t":1.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[1.75,3.0]}
+{"ev":"meas","t":1.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.75,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,2.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[2.0,2.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.0,0.5]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,0.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[2.0,0.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.0,0.0]}
+{"ev":"meas","t":2.0,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[2.0,0.75]}
+{"ev":"meas","t":2.0,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[2.0,0.75]}
+{"ev":"meas","t":2.0,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[2.0,0.75]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.5,1.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[2.5,1.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.5,0.5]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.5,0.5]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.5,2.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[2.5,2.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.5,1.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.5,0.5]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.5,3.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[2.5,3.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.5,1.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.5,0.5]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,3.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[3.0,3.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,3.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[3.0,3.0]}
+{"ev":"meas","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"meas","t":3.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.25,2.0]}
+{"ev":"meas","t":3.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[3.25,2.0]}
+{"ev":"meas","t":3.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.25,1.0]}
+{"ev":"meas","t":3.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.25,1.0]}
+{"ev":"meas","t":3.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[3.25,1.0]}
+{"ev":"meas","t":3.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.25,0.5]}
+{"ev":"meas","t":3.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.25,0.0]}
+{"ev":"meas","t":3.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[3.25,0.0]}
+{"ev":"meas","t":3.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.25,0.0]}
+{"ev":"meas","t":3.25,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[3.25,0.75]}
+{"ev":"meas","t":3.25,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[3.25,0.75]}
+{"ev":"meas","t":3.25,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[3.25,0.75]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.75,1.0]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[3.75,1.0]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.75,0.5]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.75,0.5]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.75,2.0]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[3.75,2.0]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.75,1.0]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.75,0.5]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.75,3.0]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[3.75,3.0]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.75,1.0]}
+{"ev":"meas","t":3.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.75,0.5]}
+{"ev":"meas","t":4.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.25,3.0]}
+{"ev":"meas","t":4.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[4.25,3.0]}
+{"ev":"meas","t":4.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.25,1.0]}
+{"ev":"meas","t":4.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.25,3.0]}
+{"ev":"meas","t":4.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[4.25,3.0]}
+{"ev":"meas","t":4.25,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.25,1.0]}
+{"ev":"meas","t":4.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.5,2.0]}
+{"ev":"meas","t":4.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[4.5,2.0]}
+{"ev":"meas","t":4.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.5,1.0]}
+{"ev":"meas","t":4.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.5,1.0]}
+{"ev":"meas","t":4.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[4.5,1.0]}
+{"ev":"meas","t":4.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.5,0.5]}
+{"ev":"meas","t":4.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.5,0.0]}
+{"ev":"meas","t":4.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[4.5,0.0]}
+{"ev":"meas","t":4.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.5,0.0]}
+{"ev":"meas","t":4.5,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[4.5,0.75]}
+{"ev":"meas","t":4.5,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[4.5,0.75]}
+{"ev":"meas","t":4.5,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[4.5,0.75]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.0,0.5]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[5.0,0.5]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.0,2.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[5.0,2.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[5.0,0.5]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.0,3.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[5.0,3.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"meas","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[5.0,0.5]}
+{"ev":"meas","t":5.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.5,3.0]}
+{"ev":"meas","t":5.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[5.5,3.0]}
+{"ev":"meas","t":5.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.5,1.0]}
+{"ev":"meas","t":5.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.5,3.0]}
+{"ev":"meas","t":5.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[5.5,3.0]}
+{"ev":"meas","t":5.5,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.5,1.0]}
+{"ev":"meas","t":5.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.75,2.0]}
+{"ev":"meas","t":5.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[5.75,2.0]}
+{"ev":"meas","t":5.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.75,1.0]}
+{"ev":"meas","t":5.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.75,1.0]}
+{"ev":"meas","t":5.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[5.75,1.0]}
+{"ev":"meas","t":5.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.75,0.5]}
+{"ev":"meas","t":5.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.75,0.0]}
+{"ev":"meas","t":5.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=1]","metric":"State of Active Resource Tuple","v":[5.75,0.0]}
+{"ev":"meas","t":5.75,"mp":"ActiveResourceMeasuringPoint[_ss_ps_multicore_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.75,0.0]}
+{"ev":"meas","t":5.75,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[5.75,0.75]}
+{"ev":"meas","t":5.75,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[5.75,0.75]}
+{"ev":"meas","t":5.75,"mp":"UsageScenarioMeasuringPoint[_ss_ps_multicore_us1]","metric":"Response Time Tuple","v":[5.75,0.75]}
+{"ev":"stop","t":6.0}

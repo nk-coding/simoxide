@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_ss_allocation_first_allocation" entityName="ss_allocation_first">
+  <targetResourceEnvironment_Allocation href="ss_allocation_first.resourceenvironment#/"/>
+  <system_Allocation href="ss_allocation_first.system#_ss_allocation_first_system"/>
+  <allocationContexts_Allocation id="_ss_allocation_first_alc1" entityName="alc1">
+    <resourceContainer_AllocationContext href="ss_allocation_first.resourceenvironment#_ss_allocation_first_rc_fast"/>
+    <assemblyContext_AllocationContext href="ss_allocation_first.system#_ss_allocation_first_ac1"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_ss_allocation_first_alc2" entityName="alc2">
+    <resourceContainer_AllocationContext href="ss_allocation_first.resourceenvironment#_ss_allocation_first_rc_slow"/>
+    <assemblyContext_AllocationContext href="ss_allocation_first.system#_ss_allocation_first_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

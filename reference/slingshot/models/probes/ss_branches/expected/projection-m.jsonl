@@ -1,0 +1,21 @@
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.3]}
+{"ev":"meas","t":0.3,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.3,0.05]}
+{"ev":"meas","t":0.35,"mp":"UsageScenarioMeasuringPoint[_ss_branches_us1]","metric":"Response Time Tuple","v":[0.35,0.35]}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.5,0.3]}
+{"ev":"meas","t":0.8,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.8,0.05]}
+{"ev":"meas","t":0.8500000000000001,"mp":"UsageScenarioMeasuringPoint[_ss_branches_us1]","metric":"Response Time Tuple","v":[0.8500000000000001,0.3500000000000001]}
+{"ev":"meas","t":1.2,"mp":"UsageScenarioMeasuringPoint[_ss_branches_us1]","metric":"Response Time Tuple","v":[1.2,0.19999999999999996]}
+{"ev":"meas","t":1.5,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.5,0.3]}
+{"ev":"meas","t":1.8,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.8,0.05]}
+{"ev":"meas","t":1.85,"mp":"UsageScenarioMeasuringPoint[_ss_branches_us1]","metric":"Response Time Tuple","v":[1.85,0.3500000000000001]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.0,0.3]}
+{"ev":"meas","t":2.3,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.3,0.05]}
+{"ev":"meas","t":2.3499999999999996,"mp":"UsageScenarioMeasuringPoint[_ss_branches_us1]","metric":"Response Time Tuple","v":[2.3499999999999996,0.34999999999999964]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.5,0.1]}
+{"ev":"meas","t":2.6,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.6,0.05]}
+{"ev":"meas","t":2.65,"mp":"UsageScenarioMeasuringPoint[_ss_branches_us1]","metric":"Response Time Tuple","v":[2.65,0.1499999999999999]}
+{"ev":"meas","t":3.2,"mp":"UsageScenarioMeasuringPoint[_ss_branches_us1]","metric":"Response Time Tuple","v":[3.2,0.20000000000000018]}
+{"ev":"meas","t":3.5,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.5,0.3]}
+{"ev":"meas","t":3.8,"mp":"ActiveResourceMeasuringPoint[_ss_branches_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.8,0.05]}
+{"ev":"meas","t":3.8499999999999996,"mp":"UsageScenarioMeasuringPoint[_ss_branches_us1]","metric":"Response Time Tuple","v":[3.8499999999999996,0.34999999999999964]}
+{"ev":"stop","t":4.0}

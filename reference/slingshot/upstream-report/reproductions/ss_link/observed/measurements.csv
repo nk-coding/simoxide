@@ -1,0 +1,5 @@
+measuring_point,metric,time,value
+AssemblyOperationMeasuringPoint[_ss_link_prov2|_ss_link_remote|_ss_link_ac2],Response Time Tuple,0.81,0.20000000000000007
+AssemblyOperationMeasuringPoint[_ss_link_prov2|_ss_link_remote|_ss_link_ac2],Response Time Tuple,2.3800000000000003,0.20000000000000018
+UsageScenarioMeasuringPoint[_ss_link_us1],Response Time Tuple,1.07,1.07
+UsageScenarioMeasuringPoint[_ss_link_us1],Response Time Tuple,2.6400000000000006,1.0700000000000005

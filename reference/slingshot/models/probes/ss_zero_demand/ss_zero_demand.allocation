@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_ss_zero_demand_allocation" entityName="ss_zero_demand">
+  <targetResourceEnvironment_Allocation href="ss_zero_demand.resourceenvironment#/"/>
+  <system_Allocation href="ss_zero_demand.system#_ss_zero_demand_system"/>
+  <allocationContexts_Allocation id="_ss_zero_demand_alc1" entityName="alc1">
+    <resourceContainer_AllocationContext href="ss_zero_demand.resourceenvironment#_ss_zero_demand_rc1"/>
+    <assemblyContext_AllocationContext href="ss_zero_demand.system#_ss_zero_demand_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

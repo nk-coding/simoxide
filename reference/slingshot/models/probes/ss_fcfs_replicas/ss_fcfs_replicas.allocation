@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_ss_fcfs_replicas_allocation" entityName="ss_fcfs_replicas">
+  <targetResourceEnvironment_Allocation href="ss_fcfs_replicas.resourceenvironment#/"/>
+  <system_Allocation href="ss_fcfs_replicas.system#_ss_fcfs_replicas_system"/>
+  <allocationContexts_Allocation id="_ss_fcfs_replicas_alc1" entityName="alc1">
+    <resourceContainer_AllocationContext href="ss_fcfs_replicas.resourceenvironment#_ss_fcfs_replicas_rc1"/>
+    <assemblyContext_AllocationContext href="ss_fcfs_replicas.system#_ss_fcfs_replicas_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

@@ -1,0 +1,1 @@
+NoSuchElementException: There is no action after StopAction, or a successor action was not defined. | org.palladiosimulator.analyzer.slingshot.behavior.systemsimulation.entities.seff.behaviorcontext.SeffBehaviorWrapper.next(SeffBehaviorWrapper.java:128)

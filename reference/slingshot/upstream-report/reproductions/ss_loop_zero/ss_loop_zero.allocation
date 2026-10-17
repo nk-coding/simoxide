@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_ss_loop_zero_allocation" entityName="ss_loop_zero">
+  <targetResourceEnvironment_Allocation href="ss_loop_zero.resourceenvironment#/"/>
+  <system_Allocation href="ss_loop_zero.system#_ss_loop_zero_system"/>
+  <allocationContexts_Allocation id="_ss_loop_zero_alc1" entityName="alc1">
+    <resourceContainer_AllocationContext href="ss_loop_zero.resourceenvironment#_ss_loop_zero_rc1"/>
+    <assemblyContext_AllocationContext href="ss_loop_zero.system#_ss_loop_zero_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

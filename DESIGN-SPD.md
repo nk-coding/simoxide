@@ -1,7 +1,8 @@
 # SimOxide: runtime reconfiguration, a Slingshot mode, SPD and snapshots (design)
 
 State: 2026-10-17. This is a design. Phases S0 (the Slingshot reference runner,
-`reference/slingshot/`), F0, F1 and F2 are implemented; the rest is not. User decisions of §8 are recorded. It is on branch `spd`
+`reference/slingshot/`), S1 (the Slingshot semantics specification, `docs/spec/slingshot/`, rules
+`SS-*`), F0, F1 and F2 are implemented; the rest is not. User decisions of §8 are recorded. It is on branch `spd`
 (forked from `qvto-adapter`). It is a plan, so it sits next to the code and not in the VitePress
 site, which describes the current state (`docs/development/contributing.md`). The parts that get
 built move into `docs/spec/` and `docs/guide/`.
@@ -39,8 +40,11 @@ The design in one paragraph:
     deterministic Slingshot (the S0 runner's `det` mode: seeded randomness, insertion-ordered
     same-time events, instrumentation);
   - **fast**: only the semantics count; statistically equal to Slingshot.
-- Slingshot bugs are fixed by default. A compat flag per documented quirk reproduces it, and the
-  exact mode runs with all quirk flags on (U5).
+- Slingshot bugs are fixed by default. A compat flag per documented quirk (Q1-Q37) reproduces it,
+  and the exact mode runs with all quirk flags on (U5). The fixed behaviour is SimuLizar's
+  (SimOxide's) semantics; only genuine Slingshot design differences stay Slingshot-specific (U13).
+- The exact mode targets **level E directly**: the full projected event trace, including the
+  per-handler cascade and handler disposal (U14).
 - SPD works in both flavours (U6).
 - The oracle is the headless Slingshot reference runner `reference/slingshot/` (S0, §4.1).
 
@@ -342,7 +346,7 @@ context has one allocation context; the lookup takes the first match
     disappear and their response times are never recorded.
   - **Confirmed by S0** (`reference/slingshot/models/spd_scale_in`). `AppServer_1` is removed at
     t = 80 while four jobs run on it:
-    - the shortest job is aborted at its next `JobProgressed` (t = 83), and its open-workload user
+    - the shortest job is aborted at its next `JobProgressed` (t = 87), and its open-workload user
       is dropped;
     - the other three jobs produce no further event, and their users never finish.
   - SimuLizar instead keeps simulating removed containers.
@@ -375,6 +379,9 @@ context has one allocation context; the lookup takes the first match
 - There is no cost or duration of reconfiguration (no cold start). Containers are usable at once.
 
 ### 1.5 Quirks (fixed by default; a compat flag reproduces each one, U5)
+
+Q1-Q16 are the SPD quirks; S1 added Q17-Q37 (`docs/spec/slingshot/quirks.md`, which also gives the
+fixed behaviour of each, following U13).
 
 | # | Quirk | Source |
 |---|---|---|
@@ -416,8 +423,9 @@ distribution or in detail. The points that matter for a Slingshot flavour:
       (`[CORE]behavior/CoreBehavior.java:36-52`). Results therefore run after the events already
       queued for the same time (FIFO, which is SSJ's event-list behaviour).
     - A handler that throws is disposed for the rest of the run (RxJava `LambdaObserver`).
-    - The order of registration comes from the extension and Guice set-up. S1 checks whether it
-      is stable across runs.
+    - The order of registration comes from the extension and Guice set-up. S1: the extension order
+      was the same in every run; `getDeclaredMethods()` order varies between JVMs, but only for
+      reified subscribers of disjoint types, so it never changes a run (SS-BUS-2).
   - **Same-time order.**
     - SSJ's `SplayTree` keeps equal times FIFO by insertion, as SIM-3.1 does.
     - But the result events of one handler sit in a `HashSet` ordered by identity hash
@@ -520,8 +528,10 @@ distribution or in detail. The points that matter for a Slingshot flavour:
     and closely on the others;
   - it aborts on acquire/release without a `ParametricResourceDemand`;
   - it fails on synchronous forks (`h11_fork_sync`, `x_pem_fork`) (`docs/performance/comparison.md`).
-- Phase S1 writes all this down as rules `SS-*`, like SimOxide's `SIM-*`/`MEAS-*`, each with a
-  source citation and, where possible, a probe run.
+- Phase S1 wrote all this down as rules `SS-*` (`docs/spec/slingshot/`), each with a source citation
+  and, where possible, a probe run; findings in §2.1. Two statements above are refined there: composites
+  reached through a connector are entered (but their demands abort, Q30), and the "exact match on
+  `x_ss_*`" holds for the deterministic E2E models only.
 - **QVTo in Slingshot.**
   - The only QVTo use is the SPD adjustment (`[ADJ]adjustment/qvto/*`), which is a port of
     SimuLizar's QVTo executor and model cache.
@@ -539,7 +549,7 @@ What the exact mode needs, and where S0 left it:
 
 1. **A patched reference.** Done in S0:
    - seeded `Math.random()` and StoEx;
-   - a draw tape (`tape.jsonl`, with the event index);
+   - a draw tape (`tape.jsonl`, with the event index and, since S1, the draw site);
    - deterministic UUIDs.
 2. **A deterministic order of everything that iterates hash-based collections.** Done in S0 for the
    smoke corpus:
@@ -547,13 +557,13 @@ What the exact mode needs, and where S0 left it:
      `Set.of` in Slingshot, QVTo and OCL);
    - patch S0-P2 (PS job table).
    - Extension registration and `getDeclaredMethods` order were stable in all runs.
-   - Other hash-dependent orders may remain in code that the smoke corpus does not reach.
+   - S1 extended the check to the probes and the corpus (SS-X-6); no further hash-dependent order was found.
 3. **The same same-time order as Slingshot's bus cascade.** This is the main cost. The exact mode
    does not have to emit every bus event, but it must reproduce the order consequences:
    - result events are scheduled FIFO in insertion order after the events already queued;
    - stale PS events still produce state samples.
    - The comparison runs on a **projection** of the bus trace (user, job, measurement and SPD
-     events), plus the tape and the measurements byte for byte. S1 defines the projection.
+     events), plus the tape and the measurements byte for byte. S1 defined the projection (SS-X-2).
 4. **Java identity order in QVTo `Set`s (Q8, Q16).** In the `det` oracle these Sets iterate in
    insertion order. In the exact mode qvto-rs therefore needs an **insertion-order policy** for
    `Set`s (phase Q2).
@@ -562,6 +572,42 @@ What the exact mode needs, and where S0 left it:
 
 Effort: see §7 (X1, X2, Q2). Exactness on deterministic models (constant demands, no branches,
 deterministic arrivals) remains the first milestone of the exact mode.
+
+### 2.1 Findings of S1 (Slingshot semantics specification)
+
+The specification is `docs/spec/slingshot/` (10 pages, rule families `SS-ENG`, `SS-BUS`, `SS-RUN`,
+`SS-ND`, `SS-WL`, `SS-ACT`, `SS-RES`, `SS-MEAS`, `SS-RNG`, `SS-SPD`, `SS-X`, quirks `SS-Q1`–`SS-Q37`),
+with 20 probe models in `reference/slingshot/models/probes/` (`probes.sh`, `expected/`). What changes
+the plan:
+
+- **A throwing handler is disposed and the run goes on** (SS-BUS-7, Q18). One exception (loop count 0,
+  no true guard, two demands in one internal action, an acquire without demand, a collection
+  iterator, a fork with two branches, an infrastructure call with assembly-operation monitors, an
+  unconnected pair of containers) silently freezes that stage for every user; the run "succeeds".
+  22 of the 88 verified models have such exceptions; of the 66 corpus models only 38 run without
+  handler errors, aborts or empty output (`results/det-verify.csv`). The exact mode must
+  emulate per-handler disposal; the fixed default aborts with an error.
+- **Exact mode needs `f64` time** (SS-ENG-2): event times are `now + delay` double sums, response
+  times their differences (e.g. `0.30000000000000004`). §5.2 corrected.
+- **Role lookup by role id alone** (Q20): entry calls go to the first assembly of the component, not
+  the delegation connector's; external calls take the first system connector with the required role,
+  whatever the caller. Harmless for single assemblies and for SPD's load balancer (new roles per
+  replica).
+- **Several demands of one internal action** run concurrently and each completion advances the
+  cursor (Q17): actions are skipped or overlap, the request can end before its demands, then a
+  handler is disposed. Fixed default: sequential demands as SimuLizar (ACT-3.1; U13).
+- New semantics to implement in S2 (not bugs): JIFFY jobs for zero PS demands with a demand tuple of
+  0; FCFS serves each job for its whole demand from the head (no lost time, no re-scheduling); stale
+  PS completions sample state and utilisation (Q26, kept in the exact mode); a link-failure
+  `Math.random()` draw on every transfer (Q28); links always simulated with BYTESIZE payloads in both
+  directions; probes per specification (replicaID ignored) and passive probes per passive resource;
+  assembly-operation monitors keyed by the system role for entry calls (Q33); passive capacity
+  without frame (Q27); infrastructure-call inputs ignored (Q36).
+- **The event projection** for exact comparison (SS-X-2): level M (measurements, aborts, SPD events,
+  stop) and level E (plus passed elements, calls, requests, jobs, grants, user ends), produced from
+  the bus trace by `reference/slingshot/tools/project.py`; **draw sites are on the tape** (seed-agent
+  hooks in `TransitionDeterminer` and `SimulatedLinkingResource`, stack frames for StoEx), mapped to
+  SimOxide's origin purposes (SS-X-4).
 
 ## 3. Snapshots in Slingshot (initialisation extension)
 
@@ -713,10 +759,10 @@ So in Slingshot, resume ≠ uninterrupted, even without changes.
 - Its `default.experiments` stops at 10 s; the runner takes `-simTime`.
 
 **Open:**
-- the trace projection for exact comparison (S1);
-- draw sites on the tape (needs a `TransitionDeterminer` patch);
-- `det` coverage beyond the smoke corpus;
 - usage evolution (U9).
+- Done in S1: the trace projection (`tools/project.py`, SS-X-2); draw sites on the tape (seed-agent
+  hooks, no source patch needed; SS-X-4); `det` verification beyond the smoke corpus
+  (`verify-det.sh`, `results/det-verify.csv`, SS-X-6); the subscriber order per event (`bus.jsonl`).
 
 ### 4.2 Validation levels
 
@@ -725,7 +771,7 @@ So in Slingshot, resume ≠ uninterrupted, even without changes.
 | V1 unit | filters, constraints, aggregators, comparator, adjustment arithmetic: edge cases from §1.2 (`==` at `coolDownEnd`, `t % delta == 0`, EMA emit rule, 10-value window) | hand-computed, from the Java code |
 | V2 QVTo | every adjustment path (EI step ±, relative, absolute, size clamp, service group top-down and bottom-up, competing consumers, scale-in) on SimOxide-loaded models | qvto-rs Java runner, strict (extends the one SPD corpus case, `qvto-testkit/cases/corpus.cases:347-366`) |
 | V3 deterministic runs | SimulationTime triggers, constant demands, deterministic arrivals: same adjustment times, container and assembly names, model after each step, response times | Slingshot reference runner: exact on these values |
-| V3x Slingshot-exact | any model the `det` runner reproduces: trace projection, tape and measurements byte-equal | S0 runner, `det` mode, same seed |
+| V3x Slingshot-exact | any model the `det` runner reproduces: level-E trace projection, tape and measurements byte-equal, also on models with handler errors (U14) | S0 runner, `det` mode, same seed |
 | V4 statistical runs | utilisation, response-time and task-count triggers on stochastic models: distribution of scale-event times, container-count trajectory, mean response time per window, over 30 or more seeds | Slingshot reference runner: confidence-interval overlap of per-run summaries and two-sample KS tests |
 | V5 SimuLizar flavour | QVTo rule runs in SimuLizar mode | refsim with deterministic UUIDs: byte-exact (plan step 6) |
 | V6 snapshots | resume equals uninterrupted run (§5.7) | SimOxide itself |
@@ -794,21 +840,26 @@ simoxide-snapshot  (new, feature `snapshot`) serde of RunState,            share
 
 | Concern | SimuLizar flavour | Slingshot flavour | Shape of the hook |
 |---|---|---|---|
-| time, event list | i64 ns, FIFO `(t, seq)` (SIM-2, SIM-3) | the same list; double time converted at the edges | none: shared |
+| time, event list | i64 ns, FIFO `(t, seq)` (SIM-2, SIM-3) | fast: the same list, double times converted at the edges (≤ 1 ns per delay, a deviation); exact: **`f64` time**, `t = now + delay` as SSJ (SS-ENG-2) | time type per flavour and mode |
 | process model | DESMO-J processes, `Resume` notes, elided hand-offs | the same machinery; Slingshot's same-instant order only where SS-* says it changes results | a few ordering hooks |
 | branch draws | the reference stream (exact) or fast | exact: `java.util.Random(seed + 1000003)`, as the S0 runner seeds `Math.random()`; fast: any stream | `F::branch_rng` |
 | StoEx draws | as now | exact: MT19937 `{seed..seed+5}` (S0 `-stoex mt`, the SimuLizar stream); fast: fast RNG | `C` |
-| resources | SimuLizar schedulers (`simoxide-sched`) | PS as SimuCom's plus zero-demand jiffy and the extra stale-event samples; no delay resources; no HDD rates | scheduler variant enum |
-| actions | ACT-* | several demands of one InternalAction run concurrently; async forks ignored; first allocation match | hooks in the action interpreter |
+| resources | SimuLizar schedulers (`simoxide-sched`) | PS as SimuCom's plus zero-demand jiffy; FCFS from the head without lost time; no HDD rates; delay resources as SimuLizar. Compat: stale-event samples (Q26), no delay resources (Q25) | scheduler variant enum |
+| actions | ACT-* | first allocation match, links always simulated (design); otherwise ACT-* where Slingshot has a bug: sequential demands, async forks run, loop count 0 skips. Compat: concurrent demands with a cursor step per completion (Q17), async forks ignored (Q23), … | hooks in the action interpreter |
 | usage | WL-* | Slingshot's draw order for inter-arrival and think times; aborted closed users restart; usage evolution later (decision U9) | hook per workload kind |
-| monitoring | probe framework, MEAS-6 windows, PRM | instantaneous utilisation samples, no windows; processing types not recorded; `MeasurementMade` stream | `F::Monitors` |
-| stop | stop conditions, post-stop drain (SIM-6) | `SimulationFinished` at `simTime` before other events at that time; queues cleared; no measurement count | `F::stop` |
-| removed container | keeps simulating (SimuLizar gap); "fixed" option drains | one job aborted, the rest lost (Q5); "fixed" option drains | syncer policy |
+| monitoring | probe framework, MEAS-6 windows, PRM | instantaneous utilisation samples, no windows; processing types not recorded; `MeasurementMade` stream; ELSC, system-operation and external-call monitors honoured. Compat: ignored (Q29) | `F::Monitors` |
+| stop | stop conditions, post-stop drain (SIM-6) | `SimulationFinished` at `simTime` before other events at that time; queues cleared; maximum measurement count honoured. Compat: ignored (Q32) | `F::stop` |
+| removed container | keeps simulating (SimuLizar gap); "fixed" option drains | drain (default); compat: one job aborted, the rest lost (Q5) | syncer policy |
 | reconfiguration trigger | PRM writes → reconfiguration process (MEAS-7.2) | SPD filter chain on measurements and time events | `F::Reconf` |
-| exactness | byte-exact with `C = Exact` | exact mode: byte-exact against the S0 `det` runner (trace projection, tape, measurements); fast mode: statistical | `C` |
+| exactness | byte-exact with `C = Exact` | exact mode: byte-exact against the S0 `det` runner (level-E trace projection, tape, measurements; U14); fast mode: statistical | `C` |
+| handler errors | run error | fixed: run error at the event (Q18); exact mode: the throwing Slingshot handler is disposed, the run goes on | handler table with a disposed bit per handler (exact only) |
 
-The aim is that the Slingshot flavour does **not** emulate Slingshot's bus events. It emulates
-the timing and ordering rules that change results. S1 decides which ones those are.
+The fast mode does **not** emulate Slingshot's bus events. It emulates the timing and ordering rules
+that change results (S1). The exact mode targets level E (U14), so it reproduces the order of every
+projected step: it runs a FIFO queue of **handler steps**, one per Slingshot handler that can produce
+a projected line, a draw or a measurement (SS-X-3.1). Internal events with nothing projected between
+them may be merged. Handler disposal (Q18) needs these steps to be the same units as Slingshot's
+handlers, with Slingshot's side effects up to the throwing statement (SS-X-3.6).
 
 ### 5.3 The runtime-model-change foundation (shared)
 
@@ -839,8 +890,9 @@ This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these
     per-site call caches (`call_cache`, `elsc_prov`, `prov_ids`).
   - **Monitor cloning** like `ResourceContainerMonitorCloner`: new monitor and measuring-point
     objects in the graph, then new series through the same code as at initialisation.
-  - **Removal policy** per flavour: keep simulating (SimuLizar), Slingshot's (abort the job with a
-    pending event, lose the others, Q5), or drain (fixed, the default for SPD in the SimuLizar flavour).
+  - **Removal policy**: drain (fixed, the default in both flavours), keep simulating (SimuLizar's
+    behaviour, an option), or Slingshot's (abort the job with a pending event, lose the others; the
+    Q5 compat flag, on in the Slingshot-exact mode).
   - **Linking-resource rewiring** (Q6): the route table is rebuilt.
 
 **F2 as built** (2026-10-17, branch `f2`; rules: `docs/spec/model-changes.md`, MC-*):
@@ -986,6 +1038,9 @@ This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these
   - `ProfilesLibrary` is registered with stub implementations that report an error if called.
     The main path never calls them.
   - The user's own transformations can replace `MainTransformation` (an option).
+  - The fixed behaviours of Q4, Q6 and Q7 (proposed, P2; U13) need a patched copy of a few
+    transformation files. The unchanged set runs when those flags are on, so always in the exact
+    mode.
 
 ### 5.5 QVTo host for both flavours (`simoxide-reconf`)
 
@@ -1253,10 +1308,10 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **R1** | SimuLizar rules: PRM values (D2), reconfiguration process runs rules (D3), MEAS-7.3 series | F3, F4 | 1.5-2 w | SimuLizar's load-balancer and power examples run; statistical match vs SimuLizar |
 | **R2** | Exact rules: deterministic UUIDs in refsim (D5), byte-exact comparison | R1 | 1 w | byte-equal traces on the examples |
 | **S0** | *Done 2026-10-17.* Slingshot reference runner `reference/slingshot/`: stub bundle, scripts with private config areas, trace/tape/CSV/SPD-log extension, seed agent (StoEx, `Math.random`, UUIDs), `det` ordering rule and PS patch, smoke corpus | — | 1 w | met: SPD minimal example (and 8 more models) byte-reproducible; CSV in SimOxide's format |
-| **S1** | Slingshot semantics spec `docs/spec/slingshot/` (rules `SS-*`): event core, usage, SEFF, resources, monitoring, stop, model changes; differences to SIM/WL/ACT/MEAS rules | S0 helps | 1.5-2 w | every difference has a rule with a source citation and, where possible, a probe run |
+| **S1** | *Done 2026-10-17.* Slingshot semantics spec `docs/spec/slingshot/` (10 pages, rules `SS-*`, quirks Q17–Q37 added to Q1–Q16): event core and bus, usage, SEFF, resources, monitoring, random streams, SPD, quirks, exact comparison (projection, tape mapping); 20 probe models with `det` outputs (`models/probes/`, `probes.sh`); draw sites on the tape; `det` verified on 88 models (`verify-det.sh`, `results/det-verify.csv`) | S0 helps | 1.5-2 w | met: every difference has a rule with a source citation; 20 probes and the corpus runs demonstrate them (§2.1) |
 | **S2** | Slingshot flavour, fast mode: `Flavour` trait, hooks of 5.2, Slingshot monitors and windows, stop, branch stream, quirk compat flags (U5) | F1, S1 | 4-6 w (a: trait and SimuLizar impl, golden unchanged; b: usage, stop, RNG; c: resources; d: monitoring) | `x_ss_*` exact on deterministic models; `x_espresso`, `x_ss_mediastore` statistically equal (30 seeds) |
-| **X1** | Slingshot-exact oracle hardening: trace projection (with S1), draw sites on the tape (`TransitionDeterminer` patch), `det` audit beyond the smoke corpus (identity-hash orders in EMF/SimuCom framework), corpus `corpus-ss/` with `det` reference outputs | S0, S1 | 1-1.5 w | every Slingshot corpus model byte-reproducible in `det`; projection documented |
-| **X2** | Slingshot-exact mode: same-time order of Slingshot's handler cascade (insertion-ordered results, FIFO after queued events), double time, PS stale-event samples and zero-demand jiffy, `java.util.Random` branch stream, `SimulationFinished` order, quirk flags all on | S2, X1 | 4-6 w (a: event order and time; b: resources and monitoring; c: SPD events) | V3x: trace projection, tape and measurements byte-equal with `det` on the Slingshot corpus |
+| **X1** | Slingshot-exact oracle hardening. Done in S1: trace projection (`tools/project.py`), draw sites on the tape (agent hooks, no patch), `det` verification on probes and corpus. Remaining: corpus `corpus-ss/` with `det` reference outputs (probes, SPD examples, the 38 corpus models without failures, chosen failure models), a static audit that no class subscribes twice to one event type without disjoint reification, SPD corpus runs in `det` (P2 models) | S0, S1 | 0.5-1 w | every Slingshot corpus model byte-reproducible in `det`; projection documented |
+| **X2** | Slingshot-exact mode, **level E directly** (U14): the per-handler cascade as a FIFO queue of handler steps (insertion-ordered results, FIFO after queued events, direct `MeasurementMade`), double time, PS stale-event samples and zero-demand jiffy, `java.util.Random` branch stream, `SimulationFinished` order, all 37 quirk flags on, **handler disposal** (Q18: a disposed bit per handler, Slingshot's partial side effects up to each throw: Q17, Q19, Q21-Q24, Q30, Q31, Q37), level-E projection writer | S2, X1 | 7-10 w (a: handler-step queue, event order and time, 2-3 w; b: resources and monitoring, 1.5-2 w; c: handler disposal and the throwing quirks, 1.5-2.5 w; d: SPD events, 1 w; e: level-E projection and corpus debugging, 1-1.5 w) | V3x: level-E projection, tape (with positions) and measurements byte-equal with `det` on the Slingshot corpus, including the 22 models with handler errors |
 | **Q2** | qvto-rs insertion-order policy for `Set`s (the `det` oracle's QVTo/OCL rule), opt-in for the Slingshot-exact mode | Q1 | 3-5 d | SPD corpus adjustments equal the `det` Java runner's, including container and link order (Q16) |
 | **P1** | SPD interpreter: model view, filters, aggregators, state, stimulus observers, time events | F0 (F1 for state) | 1.5-2 w | V1 unit tests; decision log equals the reference runner's on time-triggered models |
 | **P2** | SPD adjustment via `MainTransformation`; `ModelAdjusted` diff; corpus `corpus-spd/` with reference outputs | P1, F3, F4 | 2 w | minimal example: same scale time, container and assembly names, models as Slingshot's (V3) |
@@ -1284,9 +1339,11 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 
 **Totals**:
 
-- about 32-45 weeks of work: 26-36 before, plus about 6-9 for the Slingshot-exact mode (X1, X2,
-  Q2 and the extra share of P3 and B1);
-- with three agents in parallel, about 12-17 weeks of calendar time;
+- about 35-49 weeks of work: 26-36 before, plus about 9-13 for the Slingshot-exact mode (X1, X2,
+  Q2 and the extra share of P3 and B1). X2 grew from 4-6 to 7-10 weeks with U14 (level E directly,
+  handler disposal);
+- with three agents in parallel, about 13-18 weeks of calendar time (the exact mode is off the
+  critical path, so the calendar grows less than the work);
 - SimuLizar rules (F0-F4, R1, R2) alone: 9-12 weeks of work, matching plan steps 1-6;
 - SPD on the SimuLizar flavour without a Slingshot flavour (F0-F4, P1, P2): about 10-13 weeks;
   this is the earliest usable autoscaling.
@@ -1301,6 +1358,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | Slingshot moves (nightly only) | pinned: `reference/slingshot/install.lock` (SHA-256 of 47 jars) and source commits; `setup.sh` warns on change |
 | Slingshot-exact needs more ordering fixes than the smoke corpus shows | X1 audit; the ordering rule is generic (all Slingshot, QVTo, OCL classes); new models go through `smoke.sh` first |
 | Exact emulation of the bus cascade costs speed | exact mode is opt-in; the fast mode stays the default and is benchmarked separately |
+| Level E with handler disposal (U14) needs Slingshot's partial side effects at each throw | one throw site per quirk, each with a probe or corpus model (`results/det-verify.csv`, column `handler_errors`); level M stays available as a debugging aid |
 | Reference SPD runs need the stub bundle; the real `ProfilesLibrary` might behave differently | the main path never calls it (checked in qvto-rs and by grep) |
 | `Rc` → `Arc` cost in the hot path | measure; fall back to deep copy on fork |
 | `.snapshot` mapping infeasible for some actions | N3a spike decides; interop can be export-only |
@@ -1309,7 +1367,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 
 ## 8. Decisions for the user
 
-Decided on 2026-10-17 (U3-U6 and the licensing structure); the others are still open.
+Decided on 2026-10-17 (U3-U6, U12-U14); the others are still open.
 
 | # | Decision | Recommendation / decision |
 |---|---|---|
@@ -1317,7 +1375,7 @@ Decided on 2026-10-17 (U3-U6 and the licensing structure); the others are still 
 | U2 | *Decided*: QVTo moves into the SimOxide repository with shared foundation crates. Still open: whether `reconfiguration`/`spd`/`snapshot` stay optional cargo features (smaller default builds) or are always on | optional features, on in the CLI build |
 | U3 | *Decided*: the user discusses licensing of Slingshot's transformations and the SPD `.ecore` files with the Palladio maintainers personally. Development proceeds | embedded `.qvto`/`.ecore` files (and the SPD example models in `reference/slingshot/models`) are marked with source repository, revision and "licence pending confirmation"; nothing is published until confirmed |
 | U4 | *Decided*: **both** a Slingshot-exact mode and a fast mode | exact: the same events, random draws and measurements as the S0 runner's `det` Slingshot (seeded randomness, deterministic same-time order, instrumentation), like the SimuLizar-exact mode against refsim; fast: semantics only, statistically equal. The S0 patches are the basis: minimal, documented, switchable (`--stock`) |
-| U5 | *Decided*: Slingshot bugs are **fixed by default**; a compat flag per documented quirk (Q1-Q16) reproduces it | the exact mode against the patched Slingshot runs with all quirk flags on; the SimuLizar flavour with SPD uses fixed semantics |
+| U5 | *Decided*: Slingshot bugs are **fixed by default**; a compat flag per documented quirk (Q1-Q37) reproduces it | the exact mode against the patched Slingshot runs with all quirk flags on; the SimuLizar flavour with SPD uses fixed semantics. What "fixed" means: U13 |
 | U6 | *Decided*: SPD in **both flavours** (SimuLizar and Slingshot) | the SimuLizar-flavour SPD has no reference; it is the earliest usable autoscaling and shares all code |
 | U7 | Install the MENTOR initialisation application and branch-only ExperimentAutomation for snapshot interop tests and benchmarks | only if `.snapshot` interop (N3) is wanted |
 | U8 | `ProfilesLibrary`: stubs only, or real stereotype support (EMF Profiles) for rules that use it | stubs (the S0 runner uses a stub bundle too) |
@@ -1325,3 +1383,5 @@ Decided on 2026-10-17 (U3-U6 and the licensing structure); the others are still 
 | U10 | Write changed PCM models as XMI (snapshot model state, MENTOR-like output) with the foundation's XMI writer | yes, in N1 |
 | U11 | Scope of the Slingshot flavour's monitors and EDP2-like output | CSV as now; MENTOR's `.state` measurement sets only with N3 |
 | U12 | *Decided*: licensing structure for GPL-derived exactness code | "exact-mode crates with the GPL+EPL constraints, fast mode without": GPL-derived code for exact or compat modes (qvto-runtime's OpenJDK-`HashMap` port, the existing `hotspot-math` feature, …) lives in separate opt-in crates or features; the default (fast) build stays EPL-only (§5.1) |
+| U13 | *Decided*: the **fixed (default) behaviour principle** | wherever Slingshot's behaviour is a bug, the fixed behaviour is SimuLizar's (SimOxide's) semantics: asynchronous forks run (detached, ACT-9), delay resources work, no handler is disposed (a handler exception is a run error), several demands of one internal action are served one after the other (ACT-3.1), the response-time monitors are honoured, the maximum measurement count is honoured, … Only genuine Slingshot design differences stay Slingshot-specific (double time, FIFO cascade, stop at `simTime` without drain, instantaneous utilisation, first allocation match, `Math.random()` branches, links always simulated, …; `docs/spec/slingshot/quirks.md`). For SPD quirks without a SimuLizar counterpart the fixed behaviour is the evident intent of Slingshot's code or of the SPD metamodel. Every quirk Q1-Q37 keeps a compat flag that reproduces it; the exact mode turns all of them on. The fixed behaviours are listed in `quirks.md` |
+| U14 | *Decided*: the Slingshot-exact mode targets **level E directly** | full projected event-trace equality (SS-X-2, level E: passed elements, calls, requests, jobs, grants, user ends, plus level M), the tape with positions, and the measurements, including the per-handler cascade and handler disposal (Q18). Level M is not a separate milestone; it stays as a subset for debugging. X2 re-estimated to 7-10 w (§7) |

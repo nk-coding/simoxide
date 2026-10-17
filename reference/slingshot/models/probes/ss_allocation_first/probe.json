@@ -1,0 +1,9 @@
+{
+  "name": "ss_allocation_first",
+  "seed": 1,
+  "sim_time": 3,
+  "rules": [
+    "SS-ACT-9.1"
+  ],
+  "description": "one assembly context allocated twice (first on Fast with rate 2, then on Slow with rate 1): Slingshot uses the first allocation context in list order for demands; SimuLizar the last."
+}

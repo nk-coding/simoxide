@@ -1,0 +1,377 @@
+{"ev":"header","t":0.0,"format":"slingshot-trace/1","run":{"simulator":"slingshot","seed":"1","stoex":"mt","ordered":true,"sim_time":7.0,"linking_resources":false}}
+{"ev":"PreSimulationConfigurationStarted","t":0.0}
+{"ev":"SimulationStarted","t":0.0}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_fifo_ties_ft1_rt"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_fifo_ties_ms1_rt"}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_fifo_ties_ft2_state"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_fifo_ties_ms2_state"}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_fifo_ties_ft2_demand"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_fifo_ties_ms2_demand"}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_fifo_ties_ft2_util"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_fifo_ties_ms2_util"}
+{"ev":"UsageModelPassedElement","t":0.0,"type":"Start","el":"_ss_fifo_ties_ua1","u":1}
+{"ev":"UserStarted","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"UsageModelPassedElement","t":0.0,"type":"Start","el":"_ss_fifo_ties_ua1","u":2}
+{"ev":"UserStarted","t":0.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"UsageModelPassedElement","t":0.0,"type":"Start","el":"_ss_fifo_ties_ua1","u":3}
+{"ev":"UserStarted","t":0.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"UsageModelPassedElement","t":0.0,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2","u":1}
+{"ev":"UserEntryRequested","t":0.0,"u":1,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageScenarioStarted","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"UsageModelPassedElement","t":0.0,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2","u":2}
+{"ev":"UserEntryRequested","t":0.0,"u":2,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageScenarioStarted","t":0.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"UsageModelPassedElement","t":0.0,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2","u":3}
+{"ev":"UserEntryRequested","t":0.0,"u":3,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageScenarioStarted","t":0.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":0.0,"u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":0.0,"u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":0.0,"u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":0.0,"u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":0.0,"type":"StartAction","el":"_ss_fifo_ties_act1","u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":0.0,"u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":0.0,"type":"StartAction","el":"_ss_fifo_ties_act1","u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":0.0,"u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":0.0,"type":"StartAction","el":"_ss_fifo_ties_act1","u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ResourceDemandRequested","t":0.0,"u":1,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"ResourceDemandRequested","t":0.0,"u":2,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"ResourceDemandRequested","t":0.0,"u":3,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"JobInitiated","t":0.0,"job":1,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"JobInitiated","t":0.0,"job":2,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"JobInitiated","t":0.0,"job":3,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ActiveResourceStateUpdated","t":0.0,"job":1,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ResourceDemandCalculated","t":0.0,"job":1,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ActiveResourceStateUpdated","t":0.0,"job":2,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ResourceDemandCalculated","t":0.0,"job":2,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ActiveResourceStateUpdated","t":0.0,"job":3,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ResourceDemandCalculated","t":0.0,"job":3,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,1.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,2.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,1.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,3.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,1.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"ProcessorSharingJobProgressed","t":1.0,"job":1,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ActiveResourceStateUpdated","t":1.0,"job":1,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"MeasurementMade","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,3.0]}
+{"ev":"MeasurementUpdated","t":1.0}
+{"ev":"MeasurementMade","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"MeasurementUpdated","t":1.0}
+{"ev":"ProbeTaken","t":1.0}
+{"ev":"ProbeTaken","t":1.0}
+{"ev":"ProcessorSharingJobProgressed","t":2.0,"job":1,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ActiveResourceStateUpdated","t":2.0,"job":1,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"MeasurementMade","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,3.0]}
+{"ev":"MeasurementUpdated","t":2.0}
+{"ev":"MeasurementMade","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"MeasurementUpdated","t":2.0}
+{"ev":"ProbeTaken","t":2.0}
+{"ev":"ProbeTaken","t":2.0}
+{"ev":"ProcessorSharingJobProgressed","t":3.0,"job":1,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"JobFinished","t":3.0,"job":1,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ProcessorSharingJobProgressed","t":3.0,"job":2,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ActiveResourceStateUpdated","t":3.0,"job":1,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ActiveResourceFinished","t":3.0,"u":1,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"JobFinished","t":3.0,"job":2,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ProcessorSharingJobProgressed","t":3.0,"job":3,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ActiveResourceStateUpdated","t":3.0,"job":2,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,2.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"SEFFInterpretationProgressed","t":3.0,"u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ActiveResourceFinished","t":3.0,"u":2,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"JobFinished","t":3.0,"job":3,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ActiveResourceStateUpdated","t":3.0,"job":3,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"SEFFInterpretationFinished","t":3.0,"u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":3.0,"type":"StopAction","el":"_ss_fifo_ties_act3","u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":3.0,"u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ActiveResourceFinished","t":3.0,"u":3,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,0.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,0.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"UserRequestFinished","t":3.0,"u":1,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"SEFFInterpretationFinished","t":3.0,"u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":3.0,"type":"StopAction","el":"_ss_fifo_ties_act3","u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":3.0,"u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"Stop","el":"_ss_fifo_ties_ua3","u":1}
+{"ev":"UserFinished","t":3.0,"u":1,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UserRequestFinished","t":3.0,"u":2,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"SEFFInterpretationFinished","t":3.0,"u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":3.0,"type":"StopAction","el":"_ss_fifo_ties_act3","u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"MeasurementMade","t":3.0,"mp":"UsageScenarioMeasuringPoint[_ss_fifo_ties_us1]","metric":"Response Time Tuple","v":[3.0,3.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ClosedWorkloadUserInitiated","t":3.0,"u":1,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UsageScenarioFinished","t":3.0,"u":1,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"Stop","el":"_ss_fifo_ties_ua3","u":2}
+{"ev":"UserFinished","t":3.0,"u":2,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UserRequestFinished","t":3.0,"u":3,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"Start","el":"_ss_fifo_ties_ua1","u":1}
+{"ev":"UserStarted","t":3.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"MeasurementMade","t":3.0,"mp":"UsageScenarioMeasuringPoint[_ss_fifo_ties_us1]","metric":"Response Time Tuple","v":[3.0,3.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ClosedWorkloadUserInitiated","t":3.0,"u":2,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UsageScenarioFinished","t":3.0,"u":2,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"Stop","el":"_ss_fifo_ties_ua3","u":3}
+{"ev":"UserFinished","t":3.0,"u":3,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2","u":1}
+{"ev":"UserEntryRequested","t":3.0,"u":1,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageScenarioStarted","t":3.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"Start","el":"_ss_fifo_ties_ua1","u":2}
+{"ev":"UserStarted","t":3.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"MeasurementMade","t":3.0,"mp":"UsageScenarioMeasuringPoint[_ss_fifo_ties_us1]","metric":"Response Time Tuple","v":[3.0,3.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ClosedWorkloadUserInitiated","t":3.0,"u":3,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UsageScenarioFinished","t":3.0,"u":3,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"SEFFInterpretationProgressed","t":3.0,"u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2","u":2}
+{"ev":"UserEntryRequested","t":3.0,"u":2,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageScenarioStarted","t":3.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"Start","el":"_ss_fifo_ties_ua1","u":3}
+{"ev":"UserStarted","t":3.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":3.0,"u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":3.0,"type":"StartAction","el":"_ss_fifo_ties_act1","u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":3.0,"u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2","u":3}
+{"ev":"UserEntryRequested","t":3.0,"u":3,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageScenarioStarted","t":3.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"ResourceDemandRequested","t":3.0,"u":1,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"SEFFInterpretationProgressed","t":3.0,"u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":3.0,"type":"StartAction","el":"_ss_fifo_ties_act1","u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":3.0,"u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"JobInitiated","t":3.0,"job":4,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ResourceDemandRequested","t":3.0,"u":2,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"SEFFInterpretationProgressed","t":3.0,"u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":3.0,"type":"StartAction","el":"_ss_fifo_ties_act1","u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ActiveResourceStateUpdated","t":3.0,"job":4,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ResourceDemandCalculated","t":3.0,"job":4,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"JobInitiated","t":3.0,"job":5,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ResourceDemandRequested","t":3.0,"u":3,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.0,1.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ActiveResourceStateUpdated","t":3.0,"job":5,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ResourceDemandCalculated","t":3.0,"job":5,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"JobInitiated","t":3.0,"job":6,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,2.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.0,1.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ActiveResourceStateUpdated","t":3.0,"job":6,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ResourceDemandCalculated","t":3.0,"job":6,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.0,3.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.0,1.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"MeasurementMade","t":3.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.0,1.0]}
+{"ev":"MeasurementUpdated","t":3.0}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"ProcessorSharingJobProgressed","t":4.0,"job":4,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ActiveResourceStateUpdated","t":4.0,"job":4,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"MeasurementMade","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.0,3.0]}
+{"ev":"MeasurementUpdated","t":4.0}
+{"ev":"MeasurementMade","t":4.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.0,1.0]}
+{"ev":"MeasurementUpdated","t":4.0}
+{"ev":"ProbeTaken","t":4.0}
+{"ev":"ProbeTaken","t":4.0}
+{"ev":"ProcessorSharingJobProgressed","t":5.0,"job":4,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ActiveResourceStateUpdated","t":5.0,"job":4,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"MeasurementMade","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.0,3.0]}
+{"ev":"MeasurementUpdated","t":5.0}
+{"ev":"MeasurementMade","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"MeasurementUpdated","t":5.0}
+{"ev":"ProbeTaken","t":5.0}
+{"ev":"ProbeTaken","t":5.0}
+{"ev":"ProcessorSharingJobProgressed","t":6.0,"job":4,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"JobFinished","t":6.0,"job":4,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ProcessorSharingJobProgressed","t":6.0,"job":5,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ActiveResourceStateUpdated","t":6.0,"job":4,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ActiveResourceFinished","t":6.0,"u":1,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"JobFinished","t":6.0,"job":5,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ProcessorSharingJobProgressed","t":6.0,"job":6,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ActiveResourceStateUpdated","t":6.0,"job":5,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,2.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"SEFFInterpretationProgressed","t":6.0,"u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ActiveResourceFinished","t":6.0,"u":2,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"JobFinished","t":6.0,"job":6,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ActiveResourceStateUpdated","t":6.0,"job":6,"d":0.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"SEFFInterpretationFinished","t":6.0,"u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":6.0,"type":"StopAction","el":"_ss_fifo_ties_act3","u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":6.0,"u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ActiveResourceFinished","t":6.0,"u":3,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,0.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,0.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"UserRequestFinished","t":6.0,"u":1,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"SEFFInterpretationFinished","t":6.0,"u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":6.0,"type":"StopAction","el":"_ss_fifo_ties_act3","u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":6.0,"u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"UsageModelPassedElement","t":6.0,"type":"Stop","el":"_ss_fifo_ties_ua3","u":1}
+{"ev":"UserFinished","t":6.0,"u":1,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UserRequestFinished","t":6.0,"u":2,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"SEFFInterpretationFinished","t":6.0,"u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":6.0,"type":"StopAction","el":"_ss_fifo_ties_act3","u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"MeasurementMade","t":6.0,"mp":"UsageScenarioMeasuringPoint[_ss_fifo_ties_us1]","metric":"Response Time Tuple","v":[6.0,3.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ClosedWorkloadUserInitiated","t":6.0,"u":1,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UsageScenarioFinished","t":6.0,"u":1,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UsageModelPassedElement","t":6.0,"type":"Stop","el":"_ss_fifo_ties_ua3","u":2}
+{"ev":"UserFinished","t":6.0,"u":2,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UserRequestFinished","t":6.0,"u":3,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageModelPassedElement","t":6.0,"type":"Start","el":"_ss_fifo_ties_ua1","u":1}
+{"ev":"UserStarted","t":6.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"MeasurementMade","t":6.0,"mp":"UsageScenarioMeasuringPoint[_ss_fifo_ties_us1]","metric":"Response Time Tuple","v":[6.0,3.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ClosedWorkloadUserInitiated","t":6.0,"u":2,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UsageScenarioFinished","t":6.0,"u":2,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UsageModelPassedElement","t":6.0,"type":"Stop","el":"_ss_fifo_ties_ua3","u":3}
+{"ev":"UserFinished","t":6.0,"u":3,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"UsageModelPassedElement","t":6.0,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2","u":1}
+{"ev":"UserEntryRequested","t":6.0,"u":1,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageScenarioStarted","t":6.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"UsageModelPassedElement","t":6.0,"type":"Start","el":"_ss_fifo_ties_ua1","u":2}
+{"ev":"UserStarted","t":6.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"MeasurementMade","t":6.0,"mp":"UsageScenarioMeasuringPoint[_ss_fifo_ties_us1]","metric":"Response Time Tuple","v":[6.0,3.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ClosedWorkloadUserInitiated","t":6.0,"u":3,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"UsageScenarioFinished","t":6.0,"u":3,"type":"Stop","el":"_ss_fifo_ties_ua3"}
+{"ev":"SEFFInterpretationProgressed","t":6.0,"u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"UsageModelPassedElement","t":6.0,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2","u":2}
+{"ev":"UserEntryRequested","t":6.0,"u":2,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageScenarioStarted","t":6.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"UsageModelPassedElement","t":6.0,"type":"Start","el":"_ss_fifo_ties_ua1","u":3}
+{"ev":"UserStarted","t":6.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":6.0,"u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":6.0,"type":"StartAction","el":"_ss_fifo_ties_act1","u":1,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":6.0,"u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"UsageModelPassedElement","t":6.0,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2","u":3}
+{"ev":"UserEntryRequested","t":6.0,"u":3,"role":"_ss_fifo_ties_sysprov1","sig":"_ss_fifo_ties_op"}
+{"ev":"UsageScenarioStarted","t":6.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_fifo_ties_ua2"}
+{"ev":"ResourceDemandRequested","t":6.0,"u":1,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"SEFFInterpretationProgressed","t":6.0,"u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":6.0,"type":"StartAction","el":"_ss_fifo_ties_act1","u":2,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":6.0,"u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"JobInitiated","t":6.0,"job":7,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ResourceDemandRequested","t":6.0,"u":2,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"SEFFInterpretationProgressed","t":6.0,"u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"SEFFModelPassedElement","t":6.0,"type":"StartAction","el":"_ss_fifo_ties_act1","u":3,"ac":"_ss_fifo_ties_ac1"}
+{"ev":"ActiveResourceStateUpdated","t":6.0,"job":7,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ResourceDemandCalculated","t":6.0,"job":7,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"JobInitiated","t":6.0,"job":8,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ResourceDemandRequested","t":6.0,"u":3,"ac":"_ss_fifo_ties_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_fifo_ties_act2"}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ActiveResourceStateUpdated","t":6.0,"job":8,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ResourceDemandCalculated","t":6.0,"job":8,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"JobInitiated","t":6.0,"job":9,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,2.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ActiveResourceStateUpdated","t":6.0,"job":9,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ResourceDemandCalculated","t":6.0,"job":9,"d":1.0,"rc":"_ss_fifo_ties_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,3.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_fifo_ties_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"SimulationFinished","t":7.0}
+{"ev":"finish","t":7.0,"events":375,"measurements_made":53,"stoex":0,"math":0}

@@ -1,0 +1,14 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_ss_guard_none_ua1"}
+{"ev":"pass","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"call","t":0.0,"u":1,"role":"_ss_guard_none_sysprov1","sig":"_ss_guard_none_op"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_ss_guard_none_ac1","type":"StartAction","el":"_ss_guard_none_act1"}
+{"ev":"pass","t":1.0,"u":2,"type":"Start","el":"_ss_guard_none_ua1"}
+{"ev":"pass","t":1.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"call","t":1.0,"u":2,"role":"_ss_guard_none_sysprov1","sig":"_ss_guard_none_op"}
+{"ev":"pass","t":2.0,"u":3,"type":"Start","el":"_ss_guard_none_ua1"}
+{"ev":"pass","t":2.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"call","t":2.0,"u":3,"role":"_ss_guard_none_sysprov1","sig":"_ss_guard_none_op"}
+{"ev":"pass","t":3.0,"u":4,"type":"Start","el":"_ss_guard_none_ua1"}
+{"ev":"pass","t":3.0,"u":4,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"call","t":3.0,"u":4,"role":"_ss_guard_none_sysprov1","sig":"_ss_guard_none_op"}
+{"ev":"stop","t":4.0}
