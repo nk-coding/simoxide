@@ -95,8 +95,15 @@ impl CaseEnv<'_> {
         let mut keys: Vec<qvto_model::PackageId> = Vec::new();
         let mut loaded: Vec<qvto_model::PackageId> = Vec::new();
         for mm in &self.case.mmfiles {
-            let p = self.path(mm);
-            let r = rs.load_file(&p)?;
+            // `a/../b.ecore` as `b.ecore`: the same resource as references resolved against
+            // another metamodel of the folder (EMF finds it by its normalised URI)
+            let p = lexically_normal(&self.path(mm));
+            let abs = std::path::absolute(&p).map_err(|e| e.to_string())?;
+            let uri = qvto_emf::uri::Uri::file(&abs.to_string_lossy()).to_string();
+            let r = match rs.get_resource(&uri, false) {
+                Some(r) => r,
+                None => rs.load_file(&p)?,
+            };
             // EMF registers the packages with unresolved proxies (types of features,
             // supertypes, opposites in metamodels that are not there); `register` defaults them
             let before = rs.graph.meta().package_count();
@@ -132,6 +139,24 @@ impl CaseEnv<'_> {
         }
         Ok(rs)
     }
+}
+
+/// The path with `.` and `..` segments removed (without touching the file system).
+fn lexically_normal(p: &Path) -> PathBuf {
+    use std::path::Component;
+    let mut out = PathBuf::new();
+    for c in p.components() {
+        match c {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                if !out.pop() {
+                    out.push("..");
+                }
+            }
+            c => out.push(c),
+        }
+    }
+    out
 }
 
 /// How far an engine got with a case.
