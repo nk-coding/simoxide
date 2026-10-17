@@ -249,3 +249,47 @@ pub fn first_difference(want: &[Value], got: &[Value]) -> Option<String> {
     }
     None
 }
+
+/// A log written as JSON lines to `W` (write errors are kept and reported by
+/// [`JsonlLog::finish`]).
+pub struct JsonlLog<W: std::io::Write> {
+    out: W,
+    /// Keep evaluations the target-group check rejected.
+    pub all: bool,
+    error: Option<std::io::Error>,
+}
+
+impl<W: std::io::Write> JsonlLog<W> {
+    pub fn new(out: W) -> Self {
+        JsonlLog {
+            out,
+            all: false,
+            error: None,
+        }
+    }
+
+    /// Flushes; the first write error, if any.
+    pub fn finish(mut self) -> std::io::Result<W> {
+        if let Some(e) = self.error.take() {
+            return Err(e);
+        }
+        self.out.flush()?;
+        Ok(self.out)
+    }
+}
+
+impl<W: std::io::Write> Log for JsonlLog<W> {
+    fn enabled(&self) -> bool {
+        self.error.is_none()
+    }
+    fn all(&self) -> bool {
+        self.all
+    }
+    fn record(&mut self, r: Record) {
+        let mut line = r.to_json();
+        line.push('\n');
+        if let Err(e) = self.out.write_all(line.as_bytes()) {
+            self.error = Some(e);
+        }
+    }
+}

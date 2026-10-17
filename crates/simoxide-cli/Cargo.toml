@@ -14,6 +14,7 @@ path = "src/main.rs"
 simoxide-sim = { workspace = true }
 simoxide-model = { workspace = true }
 simoxide-reconf = { workspace = true, optional = true }
+simoxide-spd = { workspace = true, optional = true, features = ["sim"] }
 mimalloc = { version = "0.1", optional = true, default-features = false }
 pprof = { version = "0.15", optional = true, default-features = false, features = ["flamegraph"] }
 
@@ -21,8 +22,11 @@ pprof = { version = "0.15", optional = true, default-features = false, features 
 # Compile the fast mode (`--mode fast`); the default mode stays exact.
 # `--no-default-features --features hotspot-math` builds an exact-only binary;
 # `--no-default-features --features fast` a distributable one (no GPL code).
-default = ["fast", "hotspot-math"]
-fast = ["simoxide-sim/fast"]
+default = ["fast", "hotspot-math", "spd"]
+fast = ["simoxide-sim/fast", "simoxide-spd?/fast"]
+# Scaling policy definitions (`.spd` next to the model): the SPD interpreter runs with the
+# simulation (`--spd-log`, `--spd-quirks`); adjustments are not executed yet (DESIGN-SPD.md P2).
+spd = ["dep:simoxide-spd"]
 # `simoxide bench --profile out.svg`: in-process sampling profiler (SIGPROF), flame graph output.
 profile = ["dep:pprof"]
 # Use mimalloc as the global allocator of `simoxide` and `simoxide-bench`.

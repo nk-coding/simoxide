@@ -727,6 +727,7 @@ dependencies = [
  "simoxide-model",
  "simoxide-reconf",
  "simoxide-sim",
+ "simoxide-spd",
 ]
 
 [[package]]
