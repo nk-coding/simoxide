@@ -4,7 +4,8 @@ The engine's facade: `compile`/`compile_with_operations` (parse, analyse with `q
 compile to bytecode) and the VM (`Vm`, `RunOptions`, `RunOutcome` from `qvto-vm`);
 `units::FsResolver` finds imported units on the file system (relative to the importing file, or
 in the source containers of bundle directories, as the Eclipse test environment does);
-`blackbox` provides native blackbox libraries. Status: Q4a (see `PLAN.md`).
+`blackbox` provides native blackbox libraries. Usage: `docs/qvto/usage.md` (the QVTo section of
+the documentation site).
 
 ```rust
 let resolver = qvto::units::FsResolver::folder();

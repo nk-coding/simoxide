@@ -5,7 +5,8 @@ queries, constructors and mappings with Eclipse's protocol, virtual dispatch, ob
 extents, QVTo's assignment semantics, traces and the `resolve` family, late resolve, `log`,
 `assert`, `raise`/`try`, and the standard library over `qvto-runtime`. Generic over the model
 store (`qvto_model::ModelStore` whose handle is a dense `u32`, `ObjHandle`; `qvto-emf`'s
-`ObjId` with the default feature `emf`). Status: Q3a (see `PLAN.md`).
+`ObjId` with the default feature `emf`). Overview and `RunOptions`: `docs/qvto/architecture.md` and
+`docs/qvto/usage.md` (the QVTo section of the documentation site).
 
 ```rust
 let program = qvto_bytecode::compile(ir)?;

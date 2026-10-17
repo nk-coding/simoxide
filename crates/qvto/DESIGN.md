@@ -1,5 +1,11 @@
 # qvto-rs design
 
+> The engine's design and decision log (§12), written in qvto-rs from phase Q0 on and kept for
+> developers; it names the crates as they were then (`qvto-model`, `qvto-emf` are now
+> `crates/foundation/simoxide-emf-core` and `simoxide-emf`; the adapter `qvto-simoxide` was
+> replaced by SimOxide's own graph). The current documentation for users and contributors is the
+> QVTo section of the site, `docs/qvto/`.
+
 State: phase Q0, 2026-10-16. Sources are in `reference/` (see `reference/README.md`).
 "Eclipse" means Eclipse QVTo 3.11 on classic Eclipse OCL, the reference implementation.
 
@@ -280,7 +286,8 @@ generated static metamodel tables (`meta/generated.rs`). The integration:
      `getSimulationTime` and the stereotype library;
    - rule loading and order: SimuLizar loads every `*.qvto` of the rules folder in file-system
      order; SimOxide fixes the order explicitly.
-   The work list with estimates is `docs/simoxide-integration.md`.
+   The work list with estimates was `docs/simoxide-integration.md` (now
+   `history/qvto-simoxide-integration.md`).
 3. **Determinism.** New PCM objects need ids. The adapter generates EMF-like UUIDs from a seeded
    generator (`IdPolicy::Uuid`) so runs are reproducible; byte equality with SimuLizar is only possible against a
    patched reference (as the options doc notes).
@@ -596,7 +603,7 @@ records them in `reference/runner/patches/`.
 
 ## 9. Milestones
 
-See `PLAN.md` for the status. Each milestone ends with its exit criteria met and documented.
+See `PLAN.md` (now `history/qvto-plan.md`) for the status. Each milestone ends with its exit criteria met and documented.
 
 | | Milestone | Exit criteria | Parallel |
 |---|---|---|---|

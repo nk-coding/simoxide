@@ -1,5 +1,11 @@
 # Integrating qvto-rs into SimOxide
 
+> History: the integration plan written at milestone Q6 of qvto-rs (formerly
+> `crates/qvto/docs/simoxide-integration.md`), superseded by `DESIGN-SPD.md` and
+> `crates/qvto/docs/merge-into-simoxide.md`; not maintained. The adapter it describes
+> (`qvto-simoxide`) was deleted in merge step M6: QVTo now runs on SimOxide's model graph
+> (`docs/qvto/simoxide.md`).
+
 State: 2026-10-17, after milestone Q6. This is the plan for running SimuLizar's reconfiguration
 rules (and Slingshot's SPD transformations) inside SimOxide, option D of
 `SIMOXIDE-self-adaptation-options.md` plus the engine that option A/B needed. The QVTo side is

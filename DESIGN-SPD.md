@@ -65,7 +65,7 @@ Sources (all read-only):
 | `[TR]` | `[MM]org.palladiosimulator.spd.semantic.transformations/transformations/` |
 | `[INIT]` | `old/palladio-research/repos/Palladio-Analyzer-Slingshot-Extension-Initialisation/` (commit `1d8b41b`), bundles `…snapshot`, `…snapshot.data` |
 | install | `old/palladio-research/work-slingshot/sl-install`: Slingshot nightly `1.0.0.202609010045`, Palladio 6.0.0 nightly, Eclipse 2025-12, QVTo 3.11.0 |
-| plan | `qvto-rs/docs/simoxide-integration.md` (steps 1-7, D1-D6); `qvto-rs/crates/qvto-simoxide/README.md` |
+| plan | `history/qvto-simoxide-integration.md` (steps 1-7, D1-D6; formerly `qvto-rs/docs/simoxide-integration.md`); the adapter `qvto-simoxide` it describes was deleted in merge step M6 |
 
 Abbreviated paths below drop the prefixes; line numbers refer to those commits.
 
@@ -815,7 +815,7 @@ built: `corpus-spd/` (phase P2).
 ### 5.1 Layers
 
 The QVTo engine moves into this repository (user decision; merge design in
-`qvto-rs/docs/merge-into-simoxide.md`, written separately). The design below assumes:
+`crates/qvto/docs/merge-into-simoxide.md`, written separately). The design below assumes:
 
 - QVTo crates under `crates/qvto/*`, as workspace crates;
 - foundation crates shared by QVTo and SimOxide: Java compatibility (hashing, number formatting,
@@ -1145,7 +1145,7 @@ handlers, with Slingshot's side effects up to the throwing statement (SS-X-3.6).
 
 ### 5.3 The runtime-model-change foundation (shared)
 
-This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these additions:
+This follows plan D1-D4 (`history/qvto-simoxide-integration.md` §3), with these additions:
 
 - **`RunModel`** = `Arc<CompiledModel>` plus a copy-on-write overlay:
   - its own `raw::Graph` (cloned lazily on the first change);

@@ -1,6 +1,12 @@
-# Plan
+# Plan (qvto-rs)
 
-Milestones with exit criteria. Details and rationale are in `DESIGN.md`, "Milestones".
+> History: the milestone log of the QVTo engine while it was the separate repository qvto-rs
+> (formerly `crates/qvto/PLAN.md`), not maintained. Paths are qvto-rs's: `crates/qvto-x` is now
+> `crates/qvto/qvto-x`, `qvto-model` and `qvto-emf` are `crates/foundation/simoxide-emf-core` and
+> `simoxide-emf`, and the adapter `qvto-simoxide` was replaced by SimOxide's own graph (merge step
+> M6). The current documentation is the QVTo section of the site (`docs/qvto/`).
+
+Milestones with exit criteria. Details and rationale are in `DESIGN.md` (now `crates/qvto/DESIGN.md`), "Milestones".
 Status values: done, next, open, parked.
 
 | | Milestone | Status | Can run in parallel with |

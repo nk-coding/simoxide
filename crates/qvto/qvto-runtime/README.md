@@ -4,8 +4,9 @@ Runtime values of the QVTo engine and the Java-compatible building blocks of com
 OCL values with null and invalid, Java's number classes, strings, the four OCL collection kinds
 with the Java classes Eclipse uses for them, tuples, QVTo's `Dict` and `List`, Java hashing and
 `equals`, a port of `java.util.HashMap` iteration order, `Double.toString`, Java's number parsers,
-`String` operations and character data. Status: Q1c (see `PLAN.md`); the standard library and the
-VM come with Q2/Q3.
+`String` operations and character data. The modes it implements: `docs/qvto/index.md` (the QVTo
+section of the documentation site); the Java behaviour shared with SimOxide is in
+`crates/foundation/simoxide-jcompat` and `simoxide-jcompat-exact`.
 
 ```rust
 use qvto_runtime::{coll::ops, CompatEnv, Coll, CollKind, Value};

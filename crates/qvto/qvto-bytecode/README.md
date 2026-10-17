@@ -1,8 +1,8 @@
 # qvto-bytecode
 
 The bytecode of the engine: a register instruction set (`Insn`, at most 8 bytes), the compiler
-from `qvto-sema`'s typed IR, constant pools and side tables, and a disassembler. Status: Q3a
-(see `PLAN.md`).
+from `qvto-sema`'s typed IR, constant pools and side tables, and a disassembler. Where it sits in the engine:
+`docs/qvto/architecture.md` (the QVTo section of the documentation site).
 
 ```rust
 let program = qvto_bytecode::compile(ir_program)?;   // qvto_sema::ir::Program
