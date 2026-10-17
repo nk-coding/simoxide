@@ -1,1 +1,4 @@
-spd_basic	/home/devbox/workspace/simoxide/crates/simoxide-model/tests/spd-cases/basic
+# name TAB directory (relative to this directory); used by run-spd.sh and crates/simoxide-model/tests/spd.rs
+spd_basic	../../../crates/simoxide-model/tests/spd-cases/basic
+slingshot_spd_minimal	../../slingshot/models/spd_minimal
+slingshot_spd_scale_in	../../slingshot/models/spd_scale_in

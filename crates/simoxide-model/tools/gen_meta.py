@@ -11,15 +11,18 @@ stays the same.
 Usage: tools/gen_meta.py [PLUGINS_DIR [SPD_PLUGINS_DIR]]   (run from crates/simoxide-model),
 then `rustfmt --edition 2024 src/meta/generated.rs src/meta/generated_ext.rs`.
 """
-import os, re, sys, zipfile, glob
+import os, re, subprocess, sys, zipfile, glob
 import xml.etree.ElementTree as ET
 
+PRDIR = subprocess.run([os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                     '../../../reference/tools/palladio-research.sh')],
+                       capture_output=True, text=True, check=True).stdout.strip()
 PLUGINS = sys.argv[1] if len(sys.argv) > 1 else os.environ.get(
-    'PALLADIO_PLUGINS', '/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins')
+    'PALLADIO_PLUGINS', PRDIR + '/work-simucom/palladio-5.2.2/plugins')
 # Slingshot install (org.palladiosimulator.spd* 1.0.0.202609010039; the .ecore files are identical
 # to Palladio-Addons-SPD-Metamodel commit 95cdb0b6, see LICENSES)
 SPD_PLUGINS = sys.argv[2] if len(sys.argv) > 2 else os.environ.get(
-    'SPD_PLUGINS', '/home/devbox/workspace/old/palladio-research/work-slingshot/sl-install/plugins')
+    'SPD_PLUGINS', PRDIR + '/work-slingshot/sl-install/plugins')
 XSI = '{http://www.w3.org/2001/XMLSchema-instance}type'
 
 # (bundle symbolic name, path of the .ecore inside the jar[, plugins directory])

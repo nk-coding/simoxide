@@ -154,7 +154,8 @@ Used in:
 - crates/simoxide-model/src/meta/generated.rs, generated_ext.rs: the packages spd (with its 8
   subpackages), semanticspd and spdmeasuringpoint, appended after the 5.2.2 packages.
 - reference/oracles/pcm-model/golden-spd/: canonical dumps written by EMF with the generated SPD
-  packages of the Slingshot jars (run-spd.sh); the models themselves are SimOxide's own.
+  packages of the Slingshot jars (run-spd.sh), of SimOxide's own test model and of the models
+  in reference/slingshot/models (licence status in their README).
 
 
 Open issues

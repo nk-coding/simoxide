@@ -54,8 +54,7 @@ impl Entry {
 
 /// Where an entry's directory is in this checkout: `models.txt` records absolute paths of the
 /// checkout that generated it, so the in-tree directories (`corpus_*`, `case_*`) are taken from
-/// this checkout (a worktree tests its own files); `$PALLADIO_RESEARCH`, if set, replaces the
-/// `/home/devbox/workspace/palladio-research` prefix of the Palladio repositories.
+/// this checkout (a worktree tests its own files).
 fn local_dir(name: &str, dir: &str) -> String {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     for (prefix, marker, base) in [
@@ -67,13 +66,6 @@ fn local_dir(name: &str, dir: &str) -> String {
         {
             return base.join(rest).to_string_lossy().into_owned();
         }
-    }
-    const RESEARCH: &str = "/home/devbox/workspace/palladio-research/";
-    if let (Some(rest), Ok(r)) = (
-        dir.strip_prefix(RESEARCH),
-        std::env::var("PALLADIO_RESEARCH"),
-    ) {
-        return Path::new(&r).join(rest).to_string_lossy().into_owned();
     }
     dir.to_string()
 }

@@ -2,11 +2,13 @@
 # Regenerates the SPD goldens of crates/simoxide-model: ./run-spd.sh [list] [out dir]
 # Like run.sh, plus the generated SPD packages from the Slingshot jars (org.palladiosimulator.spd,
 # .spd.semantic, .spd.measuringpoint 1.0.0.202609010039; licence pending confirmation, see LICENSES).
-# The list (spd-models.txt: name TAB directory) names directories with .spd/.semanticspd files.
+# The list (spd-models.txt: name TAB directory relative to this one) names directories with
+# .spd/.semanticspd files.
 set -e
 cd "$(dirname "$0")"
-P=${PALLADIO_PLUGINS:-/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins}
-SPD=${SPD_PLUGINS:-/home/devbox/workspace/old/palladio-research/work-slingshot/sl-install/plugins}
+PRDIR="$(../../tools/palladio-research.sh)"
+P=${PALLADIO_PLUGINS:-$PRDIR/work-simucom/palladio-5.2.2/plugins}
+SPD=${SPD_PLUGINS:-$PRDIR/work-slingshot/sl-install/plugins}
 [ -d build/classes ] || ./build.sh
 CP=build/classes:$(cat build/classpath.txt)
 for b in org.palladiosimulator.spd_1 org.palladiosimulator.spd.semantic_1 org.palladiosimulator.spd.measuringpoint_1; do

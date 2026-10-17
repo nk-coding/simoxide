@@ -37,7 +37,7 @@ public class SpdOracle {
             if (line.isBlank() || line.startsWith("#")) continue;
             String[] kv = line.split("\t");
             try {
-                String dump = PcmModelOracle.dumpDir(new File(kv[1]), ext);
+                String dump = PcmModelOracle.dumpDir(new File(kv[1]).getCanonicalFile(), ext);
                 Files.write(out.resolve(kv[0] + ".jsonl"), dump.getBytes(StandardCharsets.UTF_8));
             } catch (Throwable t) {
                 System.out.println("FAILED " + kv[0] + ": " + t);
