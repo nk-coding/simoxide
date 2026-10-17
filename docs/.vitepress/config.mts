@@ -30,6 +30,7 @@ export default defineConfig({
           { text: 'Getting started', link: '/guide/getting-started' },
           { text: 'Command line', link: '/guide/cli' },
           { text: 'Library API', link: '/guide/library' },
+          { text: 'Scaling policies (SPD)', link: '/guide/spd' },
           { text: 'Fast mode', link: '/guide/fast-mode' },
           { text: 'Supported models', link: '/guide/scope' },
           { text: 'Output formats', link: '/guide/formats' },

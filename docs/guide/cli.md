@@ -32,6 +32,9 @@ simoxide run --model <dir> [flags]
 | `--name NAME` | run name in the trace header |
 | `--mode exact\|fast` | simulator mode, default `exact` ([Fast mode](./fast-mode.md)) |
 | `--ps-algorithm exact\|virtual-time` | processor-sharing algorithm, default `exact` ([Deviations](../correctness/deviations.md#virtual-time-processor-sharing)) |
+| `--spd-log FILE`, `--spd-log-all` | write the decision log of the model's scaling policies ([Scaling policies](./spd.md)) |
+| `--spd-quirks fixed\|slingshot\|Q2,…` | Slingshot SPD quirks to reproduce, default `fixed` |
+| `--no-spd` | ignore a `.spd` file of the model |
 
 Limits (see [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)):
 
