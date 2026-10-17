@@ -1024,6 +1024,7 @@ impl<'r> Sema<'r> {
             let iter_ex = self.var_ex(VarRef::Local(it), cs.span);
             // Eclipse generates the call on the collection source, then substitutes the iterator
             self.call_msg_src = Some(st);
+            let arg_tys: Vec<TypeId> = args.iter().map(|a| a.ty()).collect();
             let (mut call, op) = self.gen_operation_call(cs, name, Some(iter_ex), owner, args);
             if is_static && !self.is_static_ok(op) {
                 self.error(cs.span, bind(om::NonStaticOperation_ERROR_, &[name]));
@@ -1034,12 +1035,17 @@ impl<'r> Sema<'r> {
             let mut r = self.implicit_collect(src, it, call, cs.span);
             r.err |= src_err;
             // oclExpressionCS: validateOperationCall on the collect's body
-            if let Some(o) = op {
-                self.validate_operation_call(cs, &probe, o, Some(VarRef::Local(it)));
+            match op {
+                Some(o) => self.validate_operation_call(cs, &probe, o, Some(VarRef::Local(it))),
+                None => self.validate_equality_types(cs, Some(owner), &arg_tys),
             }
             return r;
         }
+        let arg_tys: Vec<TypeId> = args.iter().map(|a| a.ty()).collect();
         let (mut r, op) = self.gen_operation_call(cs, name, Some(src), owner, args);
+        if op.is_none() {
+            self.validate_equality_types(cs, Some(st), &arg_tys);
+        }
         if is_static && !self.is_static_ok(op) {
             self.error(cs.span, bind(om::NonStaticOperation_ERROR_, &[name]));
         }
@@ -1576,6 +1582,22 @@ impl<'r> Sema<'r> {
 
     // ---- validation of calls -------------------------------------------------------------------
 
+    /// `validateOperationCall`'s check of `=` and `<>`: also for a call whose operation was not
+    /// found (classic OCL still makes an `OperationCallExp` of its source and arguments).
+    fn validate_equality_types(&mut self, cs: &CallCs, src_ty: Option<TypeId>, arg_tys: &[TypeId]) {
+        let cs_name = cs.name_span.text(&self.src()).to_string();
+        if (cs_name == "=" || cs_name == "<>" || cs_name == "!=")
+            && let (Some(st), [at]) = (src_ty, arg_tys)
+        {
+            let at = *at;
+            if !self.ts.ck().assignable(st, at) && !self.ts.ck().assignable(at, st) {
+                let a = self.full_name(at);
+                let b = self.full_name(st);
+                self.warning(cs.span, bind(vm::TypesDoNotConform, &[&a, &b]));
+            }
+        }
+    }
+
     /// `validateOperationCall`
     pub(crate) fn validate_operation_call(
         &mut self,
@@ -1599,17 +1621,7 @@ impl<'r> Sema<'r> {
         {
             self.warning(cs.span, vm::incorrectCastWarning);
         }
-        let cs_name = cs.name_span.text(&self.src()).to_string();
-        if (cs_name == "=" || cs_name == "<>" || cs_name == "!=")
-            && let (Some(st), [at]) = (src_ty, arg_tys.as_slice())
-        {
-            let at = *at;
-            if !self.ts.ck().assignable(st, at) && !self.ts.ck().assignable(at, st) {
-                let a = self.full_name(at);
-                let b = self.full_name(st);
-                self.warning(cs.span, bind(vm::TypesDoNotConform, &[&a, &b]));
-            }
-        }
+        self.validate_equality_types(cs, src_ty, &arg_tys);
         if self.op_is_mapping(o) && cs.mapping.is_none() {
             self.warning(
                 cs.span,

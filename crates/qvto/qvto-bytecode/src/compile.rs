@@ -1454,6 +1454,12 @@ impl<'a> Builder<'a> {
             }
             _ => {}
         }
+        if let Some(guard) = undefined_source_guard(op)
+            && c.source.is_some()
+            && c.args.iter().any(has_side_effects)
+        {
+            return self.call_std_guarded(e, op, c, dst, guard);
+        }
         if let Some(()) = self.fast_op(e, op, c, dst)? {
             return Ok(());
         }
@@ -1479,6 +1485,62 @@ impl<'a> Builder<'a> {
             });
         }
         self.ip = e.span.start;
+        self.release(m);
+        Ok(())
+    }
+
+    /// A predefined OCL operation whose arguments have effects, evaluated as classic OCL's
+    /// `EvaluationVisitorImpl.visitOperationCallExp`: an undefined source (only `invalid` for
+    /// `=` and `<>`) gives `invalid` before any argument is evaluated, and an `invalid` first
+    /// argument of a two-argument operation before the second one is.
+    fn call_std_guarded(
+        &mut self,
+        e: &Expr,
+        op: StdOp,
+        c: &ir::Call,
+        dst: Reg,
+        guard: Guard,
+    ) -> CResult<()> {
+        let m = self.mark();
+        let base = self.alloc_n(1 + c.args.len() as u32)?;
+        self.expr(c.source.as_ref().unwrap(), base)?;
+        let mut skips = vec![match guard {
+            Guard::Undefined => self.jump(Insn::JumpIfUndef { r: base, target: 0 }),
+            Guard::Invalid => self.jump(Insn::JumpIfInvalid { r: base, target: 0 }),
+        }];
+        for (i, a) in c.args.iter().enumerate() {
+            let r = base + 1 + i as Reg;
+            self.expr(a, r)?;
+            if c.args.len() == 2 && i == 0 && has_side_effects(&c.args[1]) {
+                skips.push(self.jump(Insn::JumpIfInvalid { r, target: 0 }));
+            }
+        }
+        let src_unlimited = c.source.as_ref().is_some_and(|s| self.is_unlimited(s));
+        let arg_unlimited = c.args.first().is_some_and(|a| self.is_unlimited(a));
+        let needs_type = matches!(op.name(), "sum" | "product" | "oclAsType");
+        if src_unlimited || arg_unlimited || needs_type {
+            let site = self.site(Site::Std {
+                op,
+                src_unlimited,
+                arg_unlimited,
+                src_ty: c.source.as_ref().map(|s| s.ty).unwrap_or(TypeId::OCL_VOID),
+                res_ty: e.ty,
+            })?;
+            self.emit(Insn::CallStdX { dst, base, site });
+        } else {
+            self.emit(Insn::CallStd {
+                dst,
+                base,
+                op: op as u16,
+            });
+        }
+        self.ip = e.span.start;
+        let end = self.jump(Insn::Jump { target: 0 });
+        for j in skips {
+            self.patch(j);
+        }
+        self.emit(Insn::LoadInvalid { dst });
+        self.patch(end);
         self.release(m);
         Ok(())
     }
@@ -2600,6 +2662,29 @@ impl<'a> Builder<'a> {
 
 /// Whether evaluating the expression can have an effect beyond its value: calls of imperative
 /// or metamodel operations, imperative expressions, mutating library operations.
+/// Which undefined source makes a predefined OCL operation `invalid` before its arguments are
+/// evaluated (`EvaluationVisitorImpl.visitOperationCallExp`); `None` for QVTo's operations
+/// (their call handlers get evaluated arguments) and for the operations classic OCL defines on
+/// undefined values or evaluates lazily.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+enum Guard {
+    Undefined,
+    Invalid,
+}
+
+fn undefined_source_guard(op: StdOp) -> Option<Guard> {
+    let d = op.desc();
+    if d.section != qvto_types::Section::Ocl {
+        return None;
+    }
+    match d.name {
+        "=" | "<>" => Some(Guard::Invalid),
+        "toString" | "oclAsSet" | "oclIsUndefined" | "oclIsInvalid" | "oclIsTypeOf"
+        | "oclIsKindOf" | "oclAsType" | "and" | "or" | "xor" | "implies" => None,
+        _ => Some(Guard::Undefined),
+    }
+}
+
 fn has_side_effects(e: &Expr) -> bool {
     use qvto_sema::ir::Callee;
     let own = match &e.kind {

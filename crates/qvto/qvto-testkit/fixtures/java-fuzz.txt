@@ -1,4 +1,124 @@
 qvto-testkit java fixture 1
+@case fuzz_argeval_ae1
+@file result.txt 139
+id	fuzz_argeval_ae1
+load	OK
+params	
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 298
+a, data: <Invalid>
+a2, data: 
+b, data: <Invalid>
+b2, data: q
+c, data: <Invalid>
+c2, data: r
+d, data: <Invalid>
+d2, data: t
+e, data: <Invalid>
+e2, data: u
+f, data: false
+f2, data: v0
+g, data: true
+g2, data: w
+h, data: <Invalid>
+h2, data: y0
+i, data: [k]
+i2, data: k0
+j, data: <Invalid>
+j2, data: m0
+
+@file diag.txt 290
+exec	1	OK	0	a
+exec	1	OK	0	a2
+exec	1	OK	0	b
+exec	1	OK	0	b2
+exec	1	OK	0	c
+exec	1	OK	0	c2
+exec	1	OK	0	d
+exec	1	OK	0	d2
+exec	1	OK	0	e
+exec	1	OK	0	e2
+exec	1	OK	0	f
+exec	1	OK	0	f2
+exec	1	OK	0	g
+exec	1	OK	0	g2
+exec	1	OK	0	h
+exec	1	OK	0	h2
+exec	1	OK	0	i
+exec	1	OK	0	i2
+exec	1	OK	0	j
+exec	1	OK	0	j2
+
+@case fuzz_argeval_ae2
+@file result.txt 139
+id	fuzz_argeval_ae2
+load	OK
+params	
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 440
+a, data: <Invalid>
+b, data: <Invalid>
+c, data: <Invalid>
+d, data: <Invalid>
+q called, data: e
+e, data: <Invalid>
+f, data: <Invalid>
+q called, data: g
+g, data: [1, 2, 1]
+h, data: <Invalid>
+i, data: <Invalid>
+q called, data: j
+j, data: false
+k, data: <Invalid>
+l, data: <Invalid>
+m, data: <Invalid>
+n, data: <Invalid>
+o, data: <Invalid>
+p, data: <Invalid>
+r, data: <Invalid>
+s, data: <Invalid>
+t, data: <Invalid>
+q called, data: u
+u, data: 2
+
+@file diag.txt 364
+exec	1	OK	0	a
+exec	1	OK	0	b
+exec	1	OK	0	c
+exec	1	OK	0	d
+exec	1	OK	0	q called
+exec	1	OK	0	e
+exec	1	OK	0	f
+exec	1	OK	0	q called
+exec	1	OK	0	g
+exec	1	OK	0	h
+exec	1	OK	0	i
+exec	1	OK	0	q called
+exec	1	OK	0	j
+exec	1	OK	0	k
+exec	1	OK	0	l
+exec	1	OK	0	m
+exec	1	OK	0	n
+exec	1	OK	0	o
+exec	1	OK	0	p
+exec	1	OK	0	r
+exec	1	OK	0	s
+exec	1	OK	0	t
+exec	1	OK	0	q called
+exec	1	OK	0	u
+
 @case fuzz_collcopy_interm
 @file result.txt 152
 id	fuzz_collcopy_interm

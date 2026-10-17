@@ -1,0 +1,2 @@
+problem	error	eq_unresolved_cf.qvto	4	165	82	Cannot find operation (=(Real)) for the type (OrderedSet(Real))
+problem	warning	eq_unresolved_cf.qvto	4	165	82	The type 'eq_unresolved_cf::OrderedSet(Real)' does not conform to the type 'oclstdlib::Real'

@@ -237,3 +237,23 @@ in floatsave.xmi
 mmfile ../fuzz.ecore
 note EMF's float and double serialisation as Java's Double/Float.toString (two-digit subnormals, ties)
 end
+
+case fuzz_argeval_ae1
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/argeval
+qvto ae1.qvto
+mmfile ../fuzz.ecore
+note predefined OCL operations give invalid for an undefined source before evaluating their arguments (EvaluationVisitorImpl)
+end
+
+case fuzz_argeval_ae2
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/argeval
+qvto ae2.qvto
+mmfile ../fuzz.ecore
+note predefined OCL operations give invalid for an undefined source before evaluating their arguments (EvaluationVisitorImpl)
+end

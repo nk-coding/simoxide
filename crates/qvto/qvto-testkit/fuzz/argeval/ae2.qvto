@@ -1,0 +1,27 @@
+transformation ae2();
+query q(s : String) : Integer { log('q called', s); return 1; }
+main() {
+  var n : String := null;
+  var i : Integer := null;
+  log('a', i + q('a'));
+  log('b', i < q('b'));
+  log('c', invalid.oclAsType(Integer) * q('c'));
+  log('d', 'abc'.substring(invalid.oclAsType(Integer), q('d')));
+  log('e', 'abc'.substring(i, q('e')));
+  log('f', Sequence{1, 2}->subSequence(invalid.oclAsType(Integer), q('f')));
+  log('g', Sequence{1, 2}->including(q('g')));
+  var sq : Sequence(Integer) := null;
+  log('h', sq->including(q('h')));
+  log('i', sq->excluding(q('i')));
+  log('j', n = q('j').toString());
+  log('k', invalid.oclAsType(String) = q('k').toString());
+  log('l', invalid.oclAsType(String) <> q('l').toString());
+  log('m', i.max(q('m')));
+  log('n', n.indexOf(q('n').toString()));
+  log('o', 'abc'.replaceAll(invalid.oclAsType(String), q('o').toString()));
+  log('p', n.tokenize(q('p').toString()));
+  log('r', sq->includes(q('r')));
+  log('s', sq->union(Sequence{q('s')}));
+  log('t', i.oclAsType(Real) / q('t'));
+  log('u', 1 + q('u'));
+}
