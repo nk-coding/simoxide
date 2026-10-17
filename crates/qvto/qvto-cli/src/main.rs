@@ -45,6 +45,10 @@ usage:
   qvto fuzz expr|prog [--seed N] [--minutes M | --batches B] [--cases C] [--stmts S] [--depth D] [--out DIR] [--keep]
       Differential fuzzing against the Java runner: random expressions or programs over the fuzz
       metamodel; findings (minimised) in DIR/findings.tsv and DIR/findings/.
+  qvto fuzz recheck DIR...
+      Runs saved findings of a campaign again.
+  qvto fuzz corpus --cases FILE [--out DIR] [--only ID,...] [--reuse] [--tape]
+      Compares compile problems (and runs) of a case file with the Java runner (report.tsv).
   qvto fuzz robust [--workers N] [--minutes M] [--seed N] [--out DIR] [--mem-mb MB]
       Robustness fuzzing of parser, analyser, compiler and VM (no panics, hangs or aborts).
   qvto fuzz robust-replay FILE.qvto...

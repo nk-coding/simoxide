@@ -1,0 +1,2 @@
+problem	error	common_elems_g.qvto	4	107	55	Type mismatch. No common supertype: (Sequence(Integer)), (Integer)
+problem	error	common_elems_g.qvto	4	192	1	Type mismatch: can not convert from 'oclstdlib::T' to 'oclstdlib::Integer' type

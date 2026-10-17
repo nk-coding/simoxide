@@ -14,10 +14,10 @@ Status values: done, next, open, parked.
 | Q3a | Bytecode and VM core: expressions, imperative OCL, helpers, queries, mappings, objects, log, assert; the engine under the harness | done | Q2 (on hand-written IR) |
 | Q3b | End-to-end pipeline; SimuLizar rule corpus | open | — |
 | Q4 | Full QVTo: mappings with traces, resolve, late resolve, disjuncts, inherits, merges, intermediate data, deepclone, libraries, imports, extends, access, Dict/List, try/raise, configuration properties, `transform()`, blackboxes | done | Q5a |
-| Q5a | Compat hardening: identity hashes, Java HashMap order, error and log texts, stack traces | open | Q4 (late part), Q5b |
+| Q5a | Compat hardening: identity hashes, Java HashMap order, error and log texts, stack traces | done | Q4 (late part), Q5b |
 | Q5b | Fast mode and performance: benchmarks, profiling, optimisations | done | Q5a |
 | Q6 | SimOxide integration preparation: adapter over `raw::Graph`, change journal | done | Q5 |
-| Q7 | Hardening: parser fuzzing, resource limits, documentation | open | Q6 |
+| Q7 | Hardening: external corpora, differential and robustness fuzzing, resource limits, documentation | done | Q6 |
 
 ## Exit criteria
 
@@ -122,6 +122,10 @@ Status values: done, next, open, parked.
   Q5a's case criterion.
 - **Q5a**: at least 95 % of the runnable cases (excluding JDT/PDE, Ant, debugger cases) pass in
   compat mode, byte-identical output and log against the Java runner on all of them.
+  Done with Q4b (2026-10-17): all 494 runnable Eclipse cases and all 24 corpus cases equal the
+  Java runner strictly in compat mode; Q7's differential fuzzing (with identity hashes made
+  constant on both sides) found and fixed the remaining value and order differences it could
+  reach (DESIGN §12 Q7-6).
 - **Q5b**: fast mode passes the same cases under the order-insensitive comparison; performance
   targets of `DESIGN.md` met.
   Done 2026-10-17 (`crates/qvto-cli/README.md`, "Benchmark suite" and "Results"; DESIGN §7.2 and
@@ -158,3 +162,22 @@ Status values: done, next, open, parked.
   (option D) is planned at 6-9 weeks. SimOxide changes on `qvto-adapter`: extension tables in
   `gen_meta.py`/`meta/generated_ext.rs`, `raw::Graph::add_object`.
 - **Q7**: 24 h of parser fuzzing without a crash; step and memory limits enforced.
+  Done 2026-10-17 (DESIGN §12 Q7-1 to Q7-7; `crates/qvto-testkit/README.md`, "Fuzzing"):
+  - External corpora: 2 402 `.qvto` files of 233 sources (Palladio repositories, Eclipse
+    samples, GitHub), 1 809 not in the suite, in `reference/external/` (not committed; sources,
+    revisions and licences in its `SOURCES.tsv`). 1 516 compile cases (`cases/external.cases`):
+    compile problems equal to Eclipse's on 392 at first, 1 263 after the fixes (11 with another
+    verdict, the rest LPG repair messages and cascades in broken files); 410 run cases
+    (`cases/external-run.cases`, inputs found in the sources), 76 of them runnable in Java,
+    71 equal.
+  - Differential fuzzing (`qvto fuzz expr|prog`, bounded niced campaigns, 4 workers): about
+    1.5 M generated expression statements and 30 000 generated transformations over generated
+    models; discrepancies found and fixed by class: type tests and casts, numeric promotion and
+    conversion, strings and regular expressions, collection copies and aliasing, extents and
+    roots, printing of objects and types, iteration scoping, inheritance, analyser problems on
+    unknown types; each minimised and kept (`cases/fuzz.cases`, 29 cases;
+    `qvto-sema/tests/data/q7`).
+  - Robustness fuzzing (`qvto fuzz robust`, own mutational fuzzer; `cargo fuzz` needs nightly):
+    campaigns of several hours over the corpora, panics fixed (`crates/qvto/tests/robust.rs`);
+    limits on collection size, string length and native stack besides the step budget (Q7-4).
+    The 24 h criterion was replaced by these campaigns on the shared machine.

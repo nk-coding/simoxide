@@ -548,85 +548,108 @@ impl<'a> Checker<'a> {
         self.relationship(var, init) & SUPERTYPE != 0
     }
 
-    /// `AbstractTypeChecker.commonSuperType`.
-    pub fn common_super_type(&mut self, t1: TypeId, t2: TypeId) -> Result<TypeId, SuperTypeError> {
-        let t1 = self.ocl_type(t1);
-        let t2 = self.ocl_type(t2);
+    /// `AbstractTypeChecker.commonSuperType`: `None` where Eclipse returns `null`. Errors go to
+    /// `errors` (Eclipse reports them and goes on): a collection whose element types have no
+    /// common supertype is the common collection kind of an unknown (`TypeId::NULL`) element
+    /// type, a tuple part without one has an unknown type.
+    pub fn common_super_type(
+        &mut self,
+        t1: TypeId,
+        t2: TypeId,
+        errors: &mut Vec<SuperTypeError>,
+    ) -> Option<TypeId> {
+        if t1 == TypeId::NULL || t2 == TypeId::NULL {
+            // `asOCLType(null)` is null; `null == null` is the only equal case
+            if t1 == t2 {
+                return Some(t1);
+            }
+        }
+        let t1 = if t1 == TypeId::NULL { t1 } else { self.ocl_type(t1) };
+        let t2 = if t2 == TypeId::NULL { t2 } else { self.ocl_type(t2) };
         if t1 == t2 {
-            return Ok(t2);
+            return Some(t2);
         }
         if t1 == TypeId::T {
-            return Ok(t2);
+            return Some(t2);
         } else if t2 == TypeId::T {
-            return Ok(t1);
+            return Some(t1);
         }
         if t1 == TypeId::OCL_VOID || t1 == TypeId::OCL_INVALID {
-            return Ok(t2);
+            return Some(t2);
         }
         if t2 == TypeId::OCL_VOID || t2 == TypeId::OCL_INVALID {
-            return Ok(t1);
+            return Some(t1);
         }
         if t1 == TypeId::OCL_ANY && !self.is_collection_like(t2) {
-            return Ok(t1);
+            return Some(t1);
         }
         if t2 == TypeId::OCL_ANY && !self.is_collection_like(t1) {
-            return Ok(t2);
+            return Some(t2);
         }
         if (t1 == TypeId::INTEGER || t1 == TypeId::UNLIMITED_NATURAL) && t2 == TypeId::REAL {
-            return Ok(t2);
+            return Some(t2);
         }
         if (t2 == TypeId::INTEGER || t2 == TypeId::UNLIMITED_NATURAL) && t1 == TypeId::REAL {
-            return Ok(t1);
+            return Some(t1);
         }
         if self.is_collection_like(t1) && self.is_collection_like(t2) {
             let (k1, e1) = self.coll_parts(t1);
             let (k2, e2) = self.coll_parts(t2);
             let kind = common_kind(k1, k2);
-            let elem = self.common_super_type(e1, e2)?;
-            return Ok(self.types.collection(kind, elem));
+            let elem = self
+                .common_super_type(e1, e2, errors)
+                .unwrap_or(TypeId::NULL);
+            return Some(self.types.collection(kind, elem));
         }
         if matches!(self.ty(t1), Type::TypeType(_)) && matches!(self.ty(t2), Type::TypeType(_)) {
-            return Ok(TypeId::OCL_TYPE);
+            return Some(TypeId::OCL_TYPE);
         }
         let tup1 = matches!(self.ty(t1), Type::Tuple(_));
         let tup2 = matches!(self.ty(t2), Type::Tuple(_));
         if tup1 || tup2 {
             if !(tup1 && tup2) {
-                return Err(SuperTypeError::TupleTypeMismatch(
+                errors.push(SuperTypeError::TupleTypeMismatch(
                     self.name(t1),
                     self.name(t2),
                 ));
+                return None;
             }
             let (Type::Tuple(p1), Type::Tuple(p2)) = (self.ty(t1).clone(), self.ty(t2).clone())
             else {
                 unreachable!()
             };
             if p1.len() != p2.len() {
-                return Err(SuperTypeError::TupleFieldNumMismatch(
+                errors.push(SuperTypeError::TupleFieldNumMismatch(
                     self.name(t1),
                     self.name(t2),
                 ));
+                return None;
             }
             let mut parts = Vec::with_capacity(p1.len());
             for (n, a) in p1.iter() {
                 let Some((_, b)) = p2.iter().find(|(m, _)| m == n) else {
-                    return Err(SuperTypeError::TupleFieldNotFound(
+                    errors.push(SuperTypeError::TupleFieldNotFound(
                         self.name(t1),
                         n.to_string(),
                         self.name(t2),
                     ));
+                    return None;
                 };
-                let c = self.common_super_type(*a, *b)?;
+                let c = self
+                    .common_super_type(*a, *b, errors)
+                    .unwrap_or(TypeId::NULL);
                 parts.push((n.clone(), c));
             }
-            return Ok(self.types.tuple(parts));
+            return Some(self.types.tuple(parts));
         }
         if self.is_collection_like(t1) || self.is_collection_like(t2) {
-            return Err(SuperTypeError::TypeMismatch(self.name(t1), self.name(t2)));
+            errors.push(SuperTypeError::TypeMismatch(self.name(t1), self.name(t2)));
+            return None;
         }
-        Ok(self
-            .uml_common_super_type(t1, t2)
-            .unwrap_or(TypeId::OCL_ANY))
+        Some(
+            self.uml_common_super_type(t1, t2)
+                .unwrap_or(TypeId::OCL_ANY),
+        )
     }
 
     /// `QVTUMLReflection.getCommonSuperType` over `UMLReflectionImpl`'s.

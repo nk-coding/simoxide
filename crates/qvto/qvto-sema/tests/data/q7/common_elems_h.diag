@@ -1,0 +1,2 @@
+problem	error	common_elems_h.qvto	4	107	55	Type mismatch. No common supertype: (Sequence(Integer)), (Integer)
+problem	error	common_elems_h.qvto	4	194	1	Type mismatch: can not convert from 'common_elems_h::Sequence(unknown)' to 'oclstdlib::Integer' type

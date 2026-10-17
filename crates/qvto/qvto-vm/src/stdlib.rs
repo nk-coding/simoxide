@@ -470,17 +470,6 @@ pub(crate) fn prims() -> &'static [Prim] {
     PRIMS.get_or_init(prim_table)
 }
 
-fn int_arg(v: &Value) -> Option<i64> {
-    match v {
-        Value::Int(i) => Some(*i),
-        Value::Boxed(
-            qvto_runtime::IntBox::Long | qvto_runtime::IntBox::Short | qvto_runtime::IntBox::Byte,
-            i,
-        ) => Some(*i as i64),
-        _ => None,
-    }
-}
-
 /// A `java.lang.Integer` index (a Long index fails the cast in Eclipse).
 fn index_arg(v: &Value) -> Option<i32> {
     match v {

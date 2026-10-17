@@ -1,0 +1,13 @@
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation floatsave(in m : FZ, out o : FZ);
+main() {
+  var r := object FZ::Root {
+    nodes += object FZ::Node { weight := 1.0E-320 / 100; };
+    nodes += object FZ::Node { weight := 4.9E-324; };
+    nodes += object FZ::Node { weight := 2.0E-322; };
+    items += object FZ::Item { ratio := 65536 + (123456789.125 / 42); };
+    items += object FZ::Item { ratio := 1.4E-45; };
+    items += object FZ::Item { ratio := 3004983.25; };
+  };
+  log('w', r.nodes.weight); log('r', r.items.ratio);
+}

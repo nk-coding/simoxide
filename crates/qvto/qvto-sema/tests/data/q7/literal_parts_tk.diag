@@ -1,0 +1,3 @@
+problem	error	literal_parts_tk.qvto	5	198	1	Tuple type mismatch: (Tuple(a : Integer)), (Integer)
+problem	error	literal_parts_tk.qvto	5	218	1	Tuple type mismatch: (Tuple(a : Integer)), (Integer)
+problem	error	literal_parts_tk.qvto	-1	-1	1	Tuple type mismatch: (Tuple(a : Integer)), (Integer)

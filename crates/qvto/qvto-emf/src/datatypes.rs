@@ -219,57 +219,14 @@ fn normalize_big_integer(s: &str) -> Option<String> {
     Some(if neg { format!("-{d}") } else { d.to_string() })
 }
 
-/// Java `Double.toString` (JDK 19+: shortest digits that round-trip).
+/// Java `Double.toString` (JDK 19 and later), from `qvto_runtime::java::fmt`.
 pub fn java_double_to_string(d: f64) -> String {
-    if d.is_nan() {
-        return "NaN".into();
-    }
-    if d.is_infinite() {
-        return if d > 0.0 { "Infinity" } else { "-Infinity" }.into();
-    }
-    if d == 0.0 {
-        return if d.is_sign_negative() { "-0.0" } else { "0.0" }.into();
-    }
-    java_layout(&format!("{:e}", d.abs()), d < 0.0, d.abs())
+    qvto_runtime::java::fmt::double_to_string(d)
 }
 
-/// Java `Float.toString` (shortest digits that round-trip as `float`).
+/// Java `Float.toString` (JDK 19 and later), from `qvto_runtime::java::fmt`.
 pub fn java_float_to_string(f: f32) -> String {
-    if f.is_nan() {
-        return "NaN".into();
-    }
-    if f.is_infinite() {
-        return if f > 0.0 { "Infinity" } else { "-Infinity" }.into();
-    }
-    if f == 0.0 {
-        return if f.is_sign_negative() { "-0.0" } else { "0.0" }.into();
-    }
-    java_layout(&format!("{:e}", f.abs()), f < 0.0, f.abs() as f64)
-}
-
-fn java_layout(sci: &str, negative: bool, a: f64) -> String {
-    let (mant, exp) = sci.split_once('e').unwrap();
-    let exp: i32 = exp.parse().unwrap();
-    let digits: String = mant.chars().filter(|c| *c != '.').collect();
-    let sign = if negative { "-" } else { "" };
-    if (1e-3..1e7).contains(&a) {
-        let point = exp + 1;
-        let s = if point <= 0 {
-            format!("0.{}{}", "0".repeat((-point) as usize), digits)
-        } else if point as usize >= digits.len() {
-            format!("{}{}.0", digits, "0".repeat(point as usize - digits.len()))
-        } else {
-            format!(
-                "{}.{}",
-                &digits[..point as usize],
-                &digits[point as usize..]
-            )
-        };
-        format!("{sign}{s}")
-    } else {
-        let frac = if digits.len() > 1 { &digits[1..] } else { "0" };
-        format!("{sign}{}.{}E{}", &digits[..1], frac, exp)
-    }
+    qvto_runtime::java::fmt::float_to_string(f)
 }
 
 #[cfg(test)]
@@ -287,6 +244,9 @@ mod tests {
         assert_eq!(java_double_to_string(-2.5e-10), "-2.5E-10");
         assert_eq!(java_float_to_string(0.1), "0.1");
         assert_eq!(java_float_to_string(1.5e10), "1.5E10");
+        // two-digit subnormals and ties to even, as Java (Q7 fuzzing)
+        assert_eq!(java_double_to_string(1.0e-320 / 100.0), "9.9E-323");
+        assert_eq!(java_float_to_string(3004983.25), "3004983.2");
         assert_eq!(parse_java_double(" 1.5d "), Some(1.5));
         assert_eq!(parse_java_double("1e3"), Some(1000.0));
         assert_eq!(parse_java_double("inf"), None);

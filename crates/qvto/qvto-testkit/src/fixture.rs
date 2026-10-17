@@ -110,11 +110,31 @@ impl JavaResult {
                     line: f[3].parse().ok()?,
                     offset: f[4].parse().ok()?,
                     length: f[5].parse().ok()?,
-                    message: f[6..].join("\t"),
+                    message: unescape(&f[6..].join("\t")),
                 })
             })
             .collect()
     }
+}
+
+/// Undoes the runner's `oneLine` (`\\`, `\r`, `\n`, `\t` escapes of a problem message).
+fn unescape(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut it = s.chars();
+    while let Some(c) = it.next() {
+        if c != '\\' {
+            out.push(c);
+            continue;
+        }
+        match it.next() {
+            Some('n') => out.push('\n'),
+            Some('r') => out.push('\r'),
+            Some('t') => out.push('\t'),
+            Some(x) => out.push(x),
+            None => out.push('\\'),
+        }
+    }
+    out
 }
 
 /// Reads the result directory of a batch run (`<dir>/<id>/...`).
@@ -263,7 +283,7 @@ mod tests {
         files.insert("log.txt".to_string(), "@file x 3\nline\n".to_string());
         files.insert(
             "diag.txt".to_string(),
-            "problem\terror\ta.qvto\t3\t10\t4\tmsg\twith tab\n".to_string(),
+            "problem\terror\ta.qvto\t3\t10\t4\tmsg\\twith tab \\\\ and\\nline\n".to_string(),
         );
         m.insert(
             "a".to_string(),
@@ -284,6 +304,6 @@ mod tests {
         assert_eq!(r.len(), 2);
         assert_eq!(r["a"].files, m["a"].files);
         assert_eq!(r["a"].verdict(), "pass");
-        assert_eq!(r["a"].problems()[0].message, "msg\twith tab");
+        assert_eq!(r["a"].problems()[0].message, "msg\twith tab \\ and\nline");
     }
 }

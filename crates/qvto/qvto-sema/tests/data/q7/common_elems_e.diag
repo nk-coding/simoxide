@@ -1,0 +1,2 @@
+problem	error	common_elems_e.qvto	4	107	52	Type mismatch. No common supertype: (String), (Bag(Integer))
+problem	error	common_elems_e.qvto	4	107	66	Cannot find operation (including(Integer)) neither for the type (Sequence()) nor for its element type (<null>)

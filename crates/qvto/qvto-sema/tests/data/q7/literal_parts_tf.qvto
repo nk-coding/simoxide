@@ -1,0 +1,5 @@
+transformation literal_parts_tf();
+main() {
+	var b0 : Boolean := true; var s0 := 'x'; var i0 := 1; var t := Tuple{a = 1};
+	var c := OrderedSet{1, t, 2}->size();
+}

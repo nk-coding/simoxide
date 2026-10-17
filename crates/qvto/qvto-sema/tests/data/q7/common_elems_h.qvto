@@ -1,0 +1,5 @@
+transformation common_elems_h();
+main() {
+	var b0 : Boolean := true; var s0 := 'x'; var i0 := 1;
+	var a := if b0 then Sequence{Sequence{1}} else Sequence{1} endif->flatten(); var z : Integer := a;
+}

@@ -632,6 +632,21 @@ impl<'r> Sema<'r> {
             ExprKind::New(n) => {
                 self.validate_instantiation(e, n, ctx);
             }
+            ExprKind::Coll(_, parts) if !parts.is_empty() => {
+                // `ValidationVisitor.visitCollectionLiteralExp`: the parts' common supertype
+                // again, with no problem object (problems without position, not dropped: a
+                // utility problem, not a validator one)
+                let part_ty = |p: &ir::CollPart| match p {
+                    ir::CollPart::Item(x) | ir::CollPart::Range(x, _) => x.ty,
+                };
+                let mut t = part_ty(&parts[0]);
+                for p in parts.iter() {
+                    match self.common_super_type_at(crate::diag::NO_POSITION, t, part_ty(p)) {
+                        Some(c) => t = c,
+                        None => break,
+                    }
+                }
+            }
             ExprKind::NewTransformation(m, args) => {
                 self.validate_new_transformation(e, *m, args);
             }

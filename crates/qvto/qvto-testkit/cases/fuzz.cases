@@ -226,3 +226,14 @@ in strops.xmi
 mmfile ../fuzz.ecore
 note string counters evaluated twice by sortedBy; Long boxes are no Integer index (substring, at)
 end
+
+case fuzz_floatsave
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/floatsave
+qvto floatsave.qvto
+in floatsave.xmi
+mmfile ../fuzz.ecore
+note EMF's float and double serialisation as Java's Double/Float.toString (two-digit subnormals, ties)
+end

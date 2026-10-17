@@ -79,6 +79,13 @@ print!("{}", vm.log);                                              // WriterLog'
   `QvtRuntimeException`s with Eclipse's text, cancellation interrupts. A `blackbox
   transformation` is run by the implementation registered under its name with its model
   extents, its configuration properties as the context's.
+- **Resource limits** (`RunOptions`, DESIGN §12 Q7-4): `step_limit` (none by default; library
+  operations that build collections or strings charge a step per 256 elements or characters),
+  `max_collection_size` and `max_string_length` (2^27 by default; exceeding them interrupts the
+  run with `QvtInterruptedExecutionException`, "resource limit exceeded"), `max_native_stack`
+  (1 MB below the run's entry by default; a deeper call fails as a stack overflow, like the
+  depth limit of 1 000). Hosts running on small threads set it to their stack size minus a
+  margin.
 - **Mode**: `RunOptions::mode` (compat: Java `HashMap` orders and identity hashes from a source;
   fast: insertion order). The VM is not monomorphised per mode (DESIGN §12, Q3a-3).
 

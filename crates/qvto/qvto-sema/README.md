@@ -85,6 +85,11 @@ type and of `a-b` in qualified names (`missingObjectType`, `exec_erroneous`); a 
 loads only with the importing module's packages (`bug565747`, alternative signatures in
 `blackboxes.tsv`).
 
+`tests/q7.rs` checks the analyser regressions of Q7's fuzz campaigns and external corpora
+(`tests/data/q7/*.qvto` with Eclipse's problems in `.diag`, recorded by `tools/q7-record.sh`):
+operations on unknown types, generic `CommonT` problems without position, unknown result and
+context types.
+
 `tools/probe/probe.sh` asks Eclipse about single files (problems, AST, the operation each call
 refers to) for comparisons on small programs.
 

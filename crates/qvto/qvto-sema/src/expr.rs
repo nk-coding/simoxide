@@ -533,19 +533,28 @@ impl<'r> Sema<'r> {
         }
     }
 
+    /// The parts of a collection or `List` literal and their common supertype; problems of the
+    /// common supertype are reported at the first part (Eclipse's `colPart`).
     fn literal_parts(
         &mut self,
         parts: &[ast::CollectionPart],
-        cst: Span,
+        _cst: Span,
     ) -> (Vec<CollPart>, Option<TypeId>, bool) {
         let mut out = Vec::new();
         let mut elem: Option<TypeId> = None;
         let mut err = false;
+        let first = parts.first().map(|p| match p {
+            ast::CollectionPart::Item(e) => e.span,
+            ast::CollectionPart::Range(a, b) => Span {
+                start: a.span.start,
+                end: b.span.end,
+            },
+        });
         for p in parts {
             let (cp, t, e) = self.collection_part(p);
             elem = Some(match elem {
                 None => t,
-                Some(prev) => self.common_super_type_or_void(cst, prev, t),
+                Some(prev) => self.common_super_type_or_void(first.unwrap(), prev, t),
             });
             err |= e;
             out.push(cp);
@@ -576,23 +585,20 @@ impl<'r> Sema<'r> {
     /// none.
     pub fn common_super_type_at(&mut self, cst: Span, a: TypeId, b: TypeId) -> Option<TypeId> {
         use qvto_types::SuperTypeError as E;
-        match self.ts.ck().common_super_type(a, b) {
-            Ok(t) => Some(t),
-            Err(e) => {
-                let msg = match e {
-                    E::TypeMismatch(x, y) => bind(om::TypeMismatch_ERROR_, &[&x, &y]),
-                    E::TupleTypeMismatch(x, y) => bind(om::TupleTypeMismatch_ERROR_, &[&x, &y]),
-                    E::TupleFieldNumMismatch(x, y) => {
-                        bind(om::TupleFieldNumMismatch_ERROR_, &[&x, &y])
-                    }
-                    E::TupleFieldNotFound(x, f, y) => {
-                        bind(om::TupleFieldNotFound_ERROR_, &[&x, &f, &y])
-                    }
-                };
-                self.error(cst, msg);
-                None
-            }
+        let mut errors = Vec::new();
+        let t = self.ts.ck().common_super_type(a, b, &mut errors);
+        for e in errors {
+            let msg = match e {
+                E::TypeMismatch(x, y) => bind(om::TypeMismatch_ERROR_, &[&x, &y]),
+                E::TupleTypeMismatch(x, y) => bind(om::TupleTypeMismatch_ERROR_, &[&x, &y]),
+                E::TupleFieldNumMismatch(x, y) => bind(om::TupleFieldNumMismatch_ERROR_, &[&x, &y]),
+                E::TupleFieldNotFound(x, f, y) => {
+                    bind(om::TupleFieldNotFound_ERROR_, &[&x, &f, &y])
+                }
+            };
+            self.error(cst, msg);
         }
+        t
     }
 
     /// `listLiteralExpCS`

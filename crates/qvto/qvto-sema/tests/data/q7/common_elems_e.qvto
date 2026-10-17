@@ -1,0 +1,5 @@
+transformation common_elems_e();
+main() {
+	var b0 : Boolean := true; var s0 := 'x'; var i0 := 1;
+	var a := if b0 then Sequence{'a'} else Sequence{Bag{1}} endif->including(1);
+}

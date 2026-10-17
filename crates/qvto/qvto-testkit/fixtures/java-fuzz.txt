@@ -313,6 +313,36 @@ exec	1	OK	0	t1
 exec	1	OK	0	t2
 exec	1	OK	0	t3
 
+@case fuzz_floatsave
+@file result.txt 147
+id	fuzz_floatsave
+load	OK
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 1012
+{"resource":"extent1.xmi","roots":1}
+{"path":"/0","type":"http://qvto-rs/fuzz#Root","attrs":{"name":null},"refs":{}}
+{"path":"/0/@nodes.0","type":"http://qvto-rs/fuzz#Node","attrs":{"name":null,"value":"0","big":"0","weight":"9.9E-323","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/0/@nodes.1","type":"http://qvto-rs/fuzz#Node","attrs":{"name":null,"value":"0","big":"0","weight":"4.9E-324","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/0/@nodes.2","type":"http://qvto-rs/fuzz#Node","attrs":{"name":null,"value":"0","big":"0","weight":"2.0E-322","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/0/@items.0","type":"http://qvto-rs/fuzz#Item","attrs":{"name":null,"count":null,"ratio":"3004983.2"},"refs":{}}
+{"path":"/0/@items.1","type":"http://qvto-rs/fuzz#Item","attrs":{"name":null,"count":null,"ratio":"1.4E-45"},"refs":{}}
+{"path":"/0/@items.2","type":"http://qvto-rs/fuzz#Item","attrs":{"name":null,"count":null,"ratio":"3004983.2"},"refs":{}}
+
+@file log.txt 81
+w, data: [9.9E-323, 4.9E-324, 2.0E-322]
+r, data: [3004983.2, 1.4E-45, 3004983.2]
+
+@file diag.txt 28
+exec	1	OK	0	w
+exec	1	OK	0	r
+
 @case fuzz_inherit_ip_a
 @file result.txt 218
 id	fuzz_inherit_ip_a

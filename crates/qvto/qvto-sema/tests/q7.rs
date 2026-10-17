@@ -36,7 +36,12 @@ fn problems(name: &str, text: &str) -> Vec<String> {
                 "problem\t{}\t{}\t{line}\t{o}\t{l}\t{}",
                 if p.is_error() { "error" } else { "warning" },
                 u.source.file_name,
-                p.message.replace('\n', "\\n")
+                // the runner's `oneLine`
+                p.message
+                    .replace('\\', "\\\\")
+                    .replace('\r', "\\r")
+                    .replace('\n', "\\n")
+                    .replace('\t', "\\t")
             ));
         }
     }
