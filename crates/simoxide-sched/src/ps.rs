@@ -16,6 +16,7 @@ use crate::common::{Completion, JIFFY, ResourceListener, Wakeup, mathtools_less}
 use crate::time::{Clock, Nanos, SimTime};
 use std::marker::PhantomData;
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug)]
 struct Entry<J> {
     job: J,
@@ -24,6 +25,14 @@ struct Entry<J> {
 
 /// Processor-sharing resource with `cores` cores (`numberOfReplicas`); `K`: the time encoding
 /// ([`Nanos`]: SimuLizar's, truncated delays; [`crate::time::F64Secs`]: Slingshot's double time).
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    serde(bound(
+        serialize = "J: serde::Serialize",
+        deserialize = "J: serde::Deserialize<'de>"
+    ))
+)]
 #[derive(Clone, Debug)]
 pub struct ProcessorSharing<J, K: Clock = Nanos> {
     cores: u32,

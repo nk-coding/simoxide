@@ -7,6 +7,12 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
+# snapshots of a run's state (`serde` feature, MIT/Apache-2.0)
+serde = { version = "1", features = ["derive"], optional = true }
+
+[features]
+# Serialize/Deserialize for the resource models (run-state snapshots, DESIGN-SPD.md N1).
+serde = ["dep:serde"]
 
 [dev-dependencies]
 proptest = { version = "1", default-features = false, features = ["std"] }

@@ -9,6 +9,7 @@ use crate::ps_vt::VirtualTimeProcessorSharing;
 use crate::time::{Clock, Nanos, SimTime};
 
 /// Scheduling policy of a processing resource, from the PCM `SchedulingPolicy` id.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum SchedulingPolicy {
     /// `ProcessorSharing` -> `SimProcessorSharingResource` with `numberOfReplicas` cores.
@@ -36,6 +37,7 @@ impl SchedulingPolicy {
 }
 
 /// Which processor-sharing implementation to use.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum PsAlgorithm {
     /// Bit-exact port of the reference (O(n) per event). Default.
@@ -47,6 +49,14 @@ pub enum PsAlgorithm {
 
 /// Any active resource model, dispatching statically on the variant (`K`: the time encoding,
 /// see [`Clock`]).
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    serde(bound(
+        serialize = "J: serde::Serialize",
+        deserialize = "J: serde::Deserialize<'de>"
+    ))
+)]
 #[derive(Clone, Debug)]
 pub enum ActiveResource<J, K: Clock = Nanos> {
     /// Exact processor sharing.

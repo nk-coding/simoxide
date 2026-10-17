@@ -33,6 +33,7 @@ pub fn mathtools_less(d1: f64, d2: f64) -> bool {
 /// every reschedule bumps the resource's generation, so an older wake-up that is still in the
 /// event core's queue is *stale* and `on_wakeup` ignores it (returns `None`) without any side
 /// effect. The core therefore never has to cancel anything.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Wakeup<J> {
     /// Absolute time of the wake-up (`now + span(delay)`).
