@@ -523,6 +523,7 @@ fn fork(a: &Args) -> Result<(), String> {
 /// A copy of `g` with the processing rate of the first processing resource specification
 /// multiplied by 1 (a new StoEx string, the same value), and its change set.
 fn rate_edit(g: &simoxide_model::raw::Graph) -> Option<(simoxide_model::raw::Graph, ChangeSet)> {
+    use simoxide_model::meta::prelude::*;
     use simoxide_model::meta::{class, feat};
     use simoxide_model::raw::{ObjId, Slot, Value};
     let mut g = g.clone();

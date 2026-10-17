@@ -24,6 +24,7 @@
 
 use crate::fxhash::FxMap;
 use crate::ir::*;
+use simoxide_model::meta::prelude::*;
 use simoxide_model::meta::{ClassId, FeatureId, class as mc, feat as mf};
 use simoxide_model::raw::{Graph, ObjId};
 use simoxide_model::*;

@@ -4,6 +4,7 @@ resolver = "3"
 # crates/foundation/; see the qvto-rs merge design, step M0).
 members = [
     # shared by SimOxide and the QVTo engine (crates/foundation/README.md)
+    "crates/foundation/simoxide-emf-core",
     "crates/foundation/simoxide-hotspot-math",
     "crates/foundation/simoxide-jcompat",
     "crates/foundation/simoxide-jcompat-exact",
@@ -21,7 +22,6 @@ members = [
     "crates/qvto/qvto-bytecode",
     "crates/qvto/qvto-cli",
     "crates/qvto/qvto-emf",
-    "crates/qvto/qvto-model",
     "crates/qvto/qvto-paths",
     "crates/qvto/qvto-runtime",
     "crates/qvto/qvto-sema",
@@ -41,6 +41,7 @@ rust-version = "1.88"
 
 # Internal crates: a path for the workspace, a version for packaging (crates.io resolves by version).
 [workspace.dependencies]
+simoxide-emf-core = { path = "crates/foundation/simoxide-emf-core", version = "0.1.0" }
 simoxide-hotspot-math = { path = "crates/foundation/simoxide-hotspot-math", version = "0.1.0" }
 simoxide-jcompat = { path = "crates/foundation/simoxide-jcompat", version = "0.1.0" }
 # no licence granted, never published (its LICENSE-NOTICE): only behind opt-in features
@@ -56,7 +57,8 @@ simoxide-stoex = { path = "crates/simoxide-stoex", version = "0.1.0", default-fe
 qvto = { path = "crates/qvto/qvto" }
 qvto-bytecode = { path = "crates/qvto/qvto-bytecode" }
 qvto-emf = { path = "crates/qvto/qvto-emf" }
-qvto-model = { path = "crates/qvto/qvto-model" }
+# the QVTo crates keep their name for the EMF core (merge step M4)
+qvto-model = { path = "crates/foundation/simoxide-emf-core", package = "simoxide-emf-core" }
 qvto-paths = { path = "crates/qvto/qvto-paths" }
 qvto-runtime = { path = "crates/qvto/qvto-runtime" }
 qvto-sema = { path = "crates/qvto/qvto-sema" }

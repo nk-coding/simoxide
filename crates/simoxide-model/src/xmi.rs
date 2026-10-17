@@ -14,6 +14,7 @@
 
 use crate::diag::{Diagnostics, Level};
 use crate::fxhash::{FxHashMap, StrMap};
+use crate::meta::prelude::*;
 use crate::meta::{self, ClassId, DataKind, FeatureId, FeatureKind};
 use crate::raw::{Graph, Obj, ObjId, ResId, Slot, parse_value};
 use quick_xml::events::{BytesStart, Event};
@@ -761,7 +762,7 @@ impl<'a> Parser<'a> {
         v: Option<ObjId>,
         position: i32,
     ) -> bool {
-        if !meta::FEATURE_EXT[f.0 as usize].changeable {
+        if !f.def().changeable {
             // derived features without a setter (`RandomVariable.expression`,
             // `ElasticInfrastructure.PCM_ResourceEnvironment`): the reflective eSet throws
             let msg = format!("feature {} is not changeable", f.name());

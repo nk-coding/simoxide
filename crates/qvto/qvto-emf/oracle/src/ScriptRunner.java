@@ -11,7 +11,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 /**
  * Runs model-API scripts on dynamic EMF objects of the contract metamodel
- * (qvto-model/src/contract.ecore) and prints each operation's result and the final state,
+ * (../foundation/simoxide-emf-core/src/contract.ecore) and prints each operation's result and the final state,
  * in the format of qvto-emf/tests/common/script.rs.
  *
  * Script lines (values: s:<text> i:<int> l:<long> d:<double> b:<bool> e:<literal> o:<var> null):

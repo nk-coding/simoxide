@@ -145,9 +145,11 @@ impl Graph {
     }
 
     /// An empty graph whose registry is `meta` followed by Ecore: for hosts whose metamodel
-    /// ids are fixed (generated tables) and come first. `meta` must not hold Ecore.
+    /// ids are fixed (generated tables, `MetaRegistry::from_static`) and come first. `meta` must
+    /// not hold Ecore; the static tables' Ecore references are resolved here.
     pub fn with_registry(mut meta: MetaRegistry) -> Graph {
         let ecore = register_ecore(&mut meta);
+        meta.resolve_static_ecore(ecore.package);
         let hooks = ecore_hooks::hook_table(&meta, &ecore);
         Graph {
             meta,

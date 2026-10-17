@@ -47,18 +47,7 @@ fn ids_are_simoxides() {
             .map(|f| f.0)
             .collect();
         let sim: Vec<u32> = c.all_features.iter().map(|f| f.0).collect();
-        // SimOxide's main tables miss generic supertypes (`IntSample extends Sample<Integer>`)
-        let generic = sm::CLASS_EXT[i]
-            .supers
-            .iter()
-            .filter(|t| matches!(t, sm::TypeRef::Class(_)))
-            .count()
-            != c.supers.len();
-        if generic {
-            assert!(all.len() > sim.len(), "{}", c.name);
-        } else {
-            assert_eq!(all, sim, "eAllStructuralFeatures of {}", c.name);
-        }
+        assert_eq!(all, sim, "eAllStructuralFeatures of {}", c.name);
     }
 }
 

@@ -1,0 +1,10 @@
+[package]
+name = "simoxide-emf-core"
+description = "EMF core shared by SimOxide and its QVTo engine: metamodel ids and registry (dynamic, or seeded from generated tables), feature values, the ModelStore trait and its contract tests"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]

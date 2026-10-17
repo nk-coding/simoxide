@@ -7,6 +7,7 @@
 
 use crate::diag::{Diagnostics, Level};
 use crate::fxhash::{FxHashMap, StrMap};
+use crate::meta::prelude::*;
 use crate::raw::{Graph, Obj, ObjId, ResId, Resource, Slot};
 use crate::xmi::{ParseOptions, Parser, navigate_path};
 use std::collections::HashMap;

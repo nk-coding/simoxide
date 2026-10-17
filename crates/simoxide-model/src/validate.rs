@@ -15,6 +15,7 @@
 
 use crate::diag::Level;
 use crate::fxhash::FxHashMap;
+use crate::meta::prelude::*;
 use crate::model::*;
 use crate::raw::{ObjId, ResId};
 use std::collections::HashSet;

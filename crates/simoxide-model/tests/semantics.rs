@@ -2,6 +2,7 @@
 //! loading is also compared with EMF by `golden.rs`). These document EMF behaviours the
 //! simulator inherits.
 
+use simoxide_model::meta::prelude::*;
 use simoxide_model::*;
 use std::path::PathBuf;
 

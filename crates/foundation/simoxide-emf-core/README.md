@@ -1,8 +1,17 @@
-# qvto-model
+# simoxide-emf-core
 
-The model API of the engine: metamodels resolved to dense ids and the `ModelStore` trait through
-which the VM reads and writes models with EMF's semantics. No dependencies. Implementations:
-`qvto-emf` (own Ecore/XMI store) and `qvto-simoxide` (SimOxide's `raw::Graph`).
+The EMF core shared by SimOxide and its QVTo engine (formerly `qvto-model`; the QVTo crates
+import it as `qvto_model` through a package rename): metamodels resolved to dense ids, the
+`ModelStore` trait through which the QVTo VM reads and writes models with EMF's semantics, and
+the static seed of generated tables. No dependencies. Implementations of `ModelStore`: `qvto-emf`
+(own Ecore/XMI store) and `qvto-simoxide` (SimOxide's `raw::Graph`).
+
+SimOxide's generated PCM tables (`simoxide-model/src/meta/generated.rs`, written by
+`simoxide-model/tools/gen_meta.py`) are a `seed::StaticPackages`. `MetaRegistry::from_static`
+registers them first, so every table index is the registry id (`simoxide_model::meta::ClassId`
+*is* `simoxide_emf_core::ClassId`); the graph crate registers Ecore after them and resolves the
+tables' Ecore references (`MetaRegistry::resolve_static_ecore`). `static_operations` and
+`static_top_packages` give the tables' `EOperation`s and package locations.
 
 ```rust
 use qvto_model::{Datum, ModelStore};
@@ -23,6 +32,7 @@ store.set_list(o, tags, &[Datum::Str("x")])?;       // ECollections.setEList
 | `src/meta.rs` | `MetaRegistry`: packages, classes, features, data types, enums; derived class tables as EMF computes them (`eAllSuperTypes`, `eAllStructuralFeatures` = slot order, containments, cross references, ID attribute, supertype bit sets); `DataKind` (the Java class of values); `slot` is O(1) for features whose slot is the same in every class (single inheritance, `finish_classes` computes them), else a search of the class's blocks |
 | `src/datum.rs` | `Datum` (borrowed value) and `OwnedDatum`; Java box classes kept apart (`Int`, `Long`, `Short`, `Byte`, `Char`, `Double`, `Float`) with Java `equals` |
 | `src/store.rs` | the `ModelStore` trait with its contract, `ModelError`, provided `set_list`, `contents`, `all_contents`, `resource_contents`; optional metamodel objects (`classifier_object`, `object_classifier`, `feature_object`, `object_feature`, `package_object`, `object_package`: the `EClass`/`EStructuralFeature`/`EPackage` objects of registry entries, for `eClass()` and Ecore's EOperations; default none) |
+| `src/seed.rs` | static tables (`StaticPackages`, `StaticClass`, `StaticFeature`, ...) and their ingestion (`MetaRegistry::from_static`, `resolve_static_ecore`, `static_operations`, `static_top_packages`) |
 | `src/operation.rs` | `MetaOperation`, `MetaMultiplicity`: the `EOperation`s a host gives the analyser (the registry keeps none) |
 | `src/contract.rs`, `src/contract.ecore` | the contract test suite (20 checks) and its metamodel; `contract_tests!` generates one `#[test]` per check for a store |
 

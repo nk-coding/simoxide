@@ -3,6 +3,7 @@
 //! golden of `reference/oracles/pcm-model/run-spd.sh`.
 
 use simoxide_model::meta::class;
+use simoxide_model::meta::prelude::*;
 use simoxide_model::{Level, LoadOptions, Loader, canon, load::MODEL_EXTENSIONS};
 use std::path::{Path, PathBuf};
 

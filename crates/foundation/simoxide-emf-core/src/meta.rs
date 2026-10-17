@@ -7,6 +7,7 @@
 //! EMF's `eAllStructuralFeatures`.
 
 use crate::ids::{ClassId, DataTypeId, EnumId, FeatureId, PackageId};
+use crate::seed::{PendingEcore, StaticPackages};
 use std::collections::HashMap;
 use std::fmt;
 
@@ -244,6 +245,10 @@ pub struct MetaRegistry {
     /// Per feature: its slot when it is the same in every finished class that has it (single
     /// inheritance), else `u32::MAX`; recomputed by `finish_classes`.
     fixed_slots: Vec<u32>,
+    /// The static tables the registry was seeded from ([`MetaRegistry::from_static`]).
+    seed: Option<&'static StaticPackages>,
+    /// Their Ecore references until [`MetaRegistry::resolve_static_ecore`].
+    pending: Option<PendingEcore>,
 }
 
 impl MetaRegistry {
@@ -426,6 +431,26 @@ impl MetaRegistry {
         let i = sup.index();
         bits.get(i / 64)
             .is_some_and(|w| w & (1u64 << (i % 64)) != 0)
+    }
+
+    /// The static tables the registry was seeded from, if any (their entries come first).
+    pub fn static_seed(&self) -> Option<&'static StaticPackages> {
+        self.seed
+    }
+
+    /// Whether Ecore references of the static tables wait for
+    /// [`MetaRegistry::resolve_static_ecore`].
+    pub fn has_pending_static(&self) -> bool {
+        self.pending.is_some()
+    }
+
+    pub(crate) fn set_static(&mut self, seed: &'static StaticPackages, pending: PendingEcore) {
+        self.seed = Some(seed);
+        self.pending = Some(pending);
+    }
+
+    pub(crate) fn take_static_pending(&mut self) -> Option<PendingEcore> {
+        self.pending.take()
     }
 
     /// Ecore's `EObject`, if Ecore is registered.

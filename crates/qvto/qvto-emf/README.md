@@ -86,7 +86,7 @@ qvto-emf/oracle/build.sh
 qvto-emf/oracle/run.sh models qvto-emf/tests/data/suite.conf qvto-emf/tests/data/suite-models.txt $O/suite
 cp $O/suite/results.tsv qvto-emf/tests/data/suite-oracle.tsv
 QVTO_EMF_WRITE_SCRIPTS=$O/scripts-in cargo test -p qvto-emf --test scripts   # writes the scripts
-qvto-emf/oracle/run.sh scripts /dev/null qvto-model/src/contract.ecore $O/scripts-in $O/scripts
+qvto-emf/oracle/run.sh scripts /dev/null ../foundation/simoxide-emf-core/src/contract.ecore $O/scripts-in $O/scripts
 cp $O/scripts/results.tsv qvto-emf/tests/data/scripts-oracle.tsv
 QVTO_EMF_WRITE_PAIRS=$O/pairs.txt cargo test -p qvto-emf --test compare     # writes the pairs
 qvto-emf/oracle/run.sh pairs qvto-emf/tests/data/suite.conf $O/pairs.txt qvto-emf/tests/data/compare-oracle.tsv

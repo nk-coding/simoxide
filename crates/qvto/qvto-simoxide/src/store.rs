@@ -82,11 +82,12 @@ impl Session {
     /// SimOxide's), Ecore, and the metamodel objects of every SimOxide package, created under
     /// the packages' `platform:/plugin` locations so that `.ecore` files referring to them load.
     pub fn new() -> Session {
-        let mut meta = MetaRegistry::new();
-        let pending = registry::add_sim_packages(&mut meta);
-        let mut rs = ResourceSet::with_graph(qvto_emf::Graph::with_registry(meta));
-        let ops = registry::finish(rs.graph.meta_mut(), &pending);
-        rs.materialize(&registry::sim_top_packages(), &ops)
+        let mut rs =
+            ResourceSet::with_graph(qvto_emf::Graph::with_registry(registry::sim_registry()));
+        let meta = rs.graph.meta();
+        let ops = meta.static_operations(rs.graph.ecore().package);
+        let tops = meta.static_top_packages();
+        rs.materialize(&tops, &ops)
             .expect("metamodel objects of SimOxide's packages");
         Session::from_parts(rs, SimTables::get().classes)
     }

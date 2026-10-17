@@ -543,22 +543,22 @@ version = "0.1.0"
 dependencies = [
  "qvto-bytecode",
  "qvto-emf",
- "qvto-model",
  "qvto-runtime",
  "qvto-sema",
  "qvto-syntax",
  "qvto-types",
  "qvto-vm",
+ "simoxide-emf-core",
 ]
 
 [[package]]
 name = "qvto-bytecode"
 version = "0.1.0"
 dependencies = [
- "qvto-model",
  "qvto-sema",
  "qvto-syntax",
  "qvto-types",
+ "simoxide-emf-core",
 ]
 
 [[package]]
@@ -569,12 +569,12 @@ dependencies = [
  "qvto",
  "qvto-bytecode",
  "qvto-emf",
- "qvto-model",
  "qvto-runtime",
  "qvto-sema",
  "qvto-syntax",
  "qvto-testkit",
  "qvto-vm",
+ "simoxide-emf-core",
 ]
 
 [[package]]
@@ -583,15 +583,11 @@ version = "0.1.0"
 dependencies = [
  "memchr",
  "quick-xml 0.38.4",
- "qvto-model",
  "qvto-paths",
  "qvto-runtime",
+ "simoxide-emf-core",
  "simoxide-jcompat",
 ]
-
-[[package]]
-name = "qvto-model"
-version = "0.1.0"
 
 [[package]]
 name = "qvto-paths"
@@ -603,9 +599,9 @@ version = "0.1.0"
 dependencies = [
  "hashbrown",
  "proptest",
- "qvto-model",
  "qvto-runtime",
  "qvto-types",
+ "simoxide-emf-core",
  "simoxide-jcompat",
  "simoxide-jcompat-exact",
 ]
@@ -615,11 +611,11 @@ name = "qvto-sema"
 version = "0.1.0"
 dependencies = [
  "qvto-emf",
- "qvto-model",
  "qvto-paths",
  "qvto-syntax",
  "qvto-testkit",
  "qvto-types",
+ "simoxide-emf-core",
 ]
 
 [[package]]
@@ -628,12 +624,12 @@ version = "0.1.0"
 dependencies = [
  "qvto",
  "qvto-emf",
- "qvto-model",
  "qvto-paths",
  "qvto-runtime",
  "qvto-sema",
  "qvto-testkit",
  "qvto-vm",
+ "simoxide-emf-core",
  "simoxide-model",
 ]
 
@@ -649,9 +645,9 @@ name = "qvto-testkit"
 version = "0.1.0"
 dependencies = [
  "qvto-emf",
- "qvto-model",
  "qvto-paths",
  "qvto-testkit",
+ "simoxide-emf-core",
  "simoxide-jcompat-exact",
 ]
 
@@ -659,7 +655,7 @@ dependencies = [
 name = "qvto-types"
 version = "0.1.0"
 dependencies = [
- "qvto-model",
+ "simoxide-emf-core",
 ]
 
 [[package]]
@@ -668,12 +664,12 @@ version = "0.1.0"
 dependencies = [
  "qvto-bytecode",
  "qvto-emf",
- "qvto-model",
  "qvto-runtime",
  "qvto-sema",
  "qvto-syntax",
  "qvto-types",
  "regex",
+ "simoxide-emf-core",
 ]
 
 [[package]]
@@ -862,6 +858,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "simoxide-emf-core"
+version = "0.1.0"
+
+[[package]]
 name = "simoxide-hotspot-math"
 version = "0.1.0"
 
@@ -887,6 +887,7 @@ dependencies = [
  "pprof",
  "quick-xml 0.38.4",
  "serde_json",
+ "simoxide-emf-core",
  "simoxide-jcompat",
 ]
 
@@ -903,9 +904,9 @@ dependencies = [
 name = "simoxide-reconf"
 version = "0.1.0"
 dependencies = [
- "qvto-model",
  "qvto-simoxide",
  "serde_json",
+ "simoxide-emf-core",
  "simoxide-model",
  "simoxide-sim",
 ]

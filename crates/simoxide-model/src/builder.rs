@@ -2,6 +2,7 @@
 
 use crate::diag::{Diagnostics, Level};
 use crate::fxhash::FxHashMap;
+use crate::meta::prelude::*;
 use crate::meta::{ClassId, FeatureId, class as c, feat as f};
 use crate::model::*;
 use crate::raw::{Graph, ObjId, ResId, Value};

@@ -38,6 +38,7 @@
 use qvto_model::{
     ClassId as QClass, Datum, FeatureId as QFeature, ModelError, ModelStore, OwnedDatum,
 };
+use simoxide_model::meta::prelude::*;
 use simoxide_model::meta::{ClassId, FeatureId, class as mc, feat as mf};
 use simoxide_model::raw::{Graph, ObjId, Value};
 use simoxide_sim::{Change, ChangeError, ChangeKind, ChangeReport, ChangeSet, Compat, Simulation};

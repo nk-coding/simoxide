@@ -3,206 +3,106 @@
 //! the SPD, semanticspd and spdmeasuringpoint packages of Slingshot (appended, so the ids of the
 //! 5.2.2 part do not depend on them).
 //!
-//! The generic XMI layer ([`crate::raw`]) is driven entirely by these tables, which is what makes
-//! it reproduce EMF's behaviour (feature lookup, defaults, containment order, opposites, IDs) for
-//! every class, not just the typed v1 subset.
+//! The tables are the static seed of the EMF registry (`simoxide_emf_core::seed`): the ids here are
+//! the registry's ids. The generic XMI layer ([`crate::raw`]) is driven entirely by these tables,
+//! which is what makes it reproduce EMF's behaviour (feature lookup, defaults, containment order,
+//! opposites, IDs) for every class, not just the typed v1 subset. The lookups on the ids are
+//! extension traits ([`prelude`]).
 
 use crate::fxhash::FxHashMap as HashMap;
 use std::sync::OnceLock;
 
 mod generated;
-mod generated_ext;
-pub use generated::{CLASSES, ENUMS, FEATURES, PACKAGES, class, enums, feat};
-pub use generated_ext::{CLASS_EXT, DATA_TYPES, FEATURE_EXT, OPERATIONS, PACKAGE_EXT};
+pub use generated::{
+    CLASSES, DATA_TYPES, ENUMS, FEATURES, OPERATIONS, PACKAGES, SEED, class, enums, feat,
+};
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
-pub struct PackageId(pub u32);
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
-pub struct ClassId(pub u32);
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
-pub struct FeatureId(pub u32);
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
-pub struct EnumId(pub u32);
+/// The table types are the EMF core's static seed types, under the names SimOxide uses.
+pub use simoxide_emf_core::seed::{
+    LexicalKind as DataKind, StaticClass as ClassDef, StaticDataType as DataTypeDef,
+    StaticEnum as EnumDef, StaticFeature as FeatureDef, StaticFeatureKind as FeatureKind,
+    StaticLiteral as EnumLiteral, StaticOperation as OperationDef, StaticPackage as PackageDef,
+    StaticPackages, StaticParam as ParamDef, StaticType as TypeRef, StaticTyped as TypedDef,
+};
+/// The ids are the EMF core's: a registry seeded with [`SEED`] gives every entry of the tables
+/// the same id.
+pub use simoxide_emf_core::{ClassId, Classifier, DataTypeId, EnumId, FeatureId, PackageId};
 
-pub struct PackageDef {
-    /// Qualified name, e.g. `pcm.repository`.
-    pub name: &'static str,
-    pub ns_uri: &'static str,
-    pub prefix: &'static str,
+/// The extension traits that give the ids their static lookups (`c.def()`, `c.is_a(..)`,
+/// `f.is_containment()`, ...): `use simoxide_model::meta::prelude::*;`.
+pub mod prelude {
+    pub use super::{PcmClass, PcmEnum, PcmFeature, PcmMeta, PcmPackage};
 }
 
-pub struct EnumLiteral {
-    pub name: &'static str,
-    pub value: i32,
-    pub literal: &'static str,
+/// The static definition of an id (`def()`) and its name.
+pub trait PcmMeta: Copy {
+    type Def: 'static;
+    fn def(self) -> &'static Self::Def;
+    fn name(self) -> &'static str;
 }
 
-pub struct EnumDef {
-    pub name: &'static str,
-    pub package: PackageId,
-    pub literals: &'static [EnumLiteral],
-}
-
-pub struct ClassDef {
-    pub name: &'static str,
-    pub package: PackageId,
-    pub is_abstract: bool,
-    /// EMF `eSuperTypes` (generic supertypes by their class), without Ecore's classes (the
-    /// explicit `EObject` of `PCMBaseClass`; see [`ClassExt::supers`]).
-    pub supers: &'static [ClassId],
-    /// EMF `eAllSuperTypes` order.
-    pub all_supers: &'static [ClassId],
-    /// EMF `eAllStructuralFeatures` order (determines containment traversal order).
-    pub all_features: &'static [FeatureId],
-    /// EMF `eIDAttribute`.
-    pub id_attribute: Option<FeatureId>,
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum DataKind {
-    Str,
-    Int,
-    Long,
-    Double,
-    Bool,
-    Enum(EnumId),
-    /// Any other data type (kept as the raw lexical string).
-    Other,
-    /// An attribute typed by a type parameter (`Sample<T>.value`), whose erasure is
-    /// `EJavaObject`. EMF converts its literals by Java deserialisation of a hex string and
-    /// rejects anything else; no model file carries such a stream, so every literal is rejected.
-    JavaObject,
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum FeatureKind {
-    Attribute {
-        data: DataKind,
-    },
-    Reference {
-        /// `ClassId(u32::MAX)` if the target type is outside the known metamodels.
-        target: ClassId,
-        containment: bool,
-        /// The opposite is a containment reference (i.e. this is the `eContainer` side).
-        container: bool,
-        opposite: Option<FeatureId>,
-        resolve_proxies: bool,
-    },
-}
-
-pub struct FeatureDef {
-    pub name: &'static str,
-    pub owner: ClassId,
-    pub kind: FeatureKind,
-    pub many: bool,
-    pub lower: i32,
-    pub transient: bool,
-    pub derived: bool,
-    pub volatile: bool,
-    pub is_id: bool,
-    pub default: Option<&'static str>,
-}
-
-/// Extension tables (`generated_ext.rs`): the EMF facts the loader does not need but a complete
-/// metamodel registry does, e.g. for a QVTo engine running on [`crate::raw::Graph`]. Indexed like
-/// the main tables (`PACKAGE_EXT[p]`, `CLASS_EXT[c]`, `FEATURE_EXT[f]`); data types defined by the
-/// metamodels are in [`DATA_TYPES`], `EOperation` signatures in [`OPERATIONS`].
-pub struct PackageExt {
-    pub super_package: Option<PackageId>,
-    /// `platform:/plugin/<bundle>/<path>` of the `.ecore` file (top-level packages only).
-    pub location: Option<&'static str>,
-    /// `eClassifiers` in declaration order.
-    pub classifiers: &'static [ClassifierRef],
-}
-
-/// A classifier of the tables: a class, an enum, or an index into [`DATA_TYPES`].
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum ClassifierRef {
-    Class(ClassId),
-    Enum(EnumId),
-    DataType(u32),
-}
-
-pub struct ClassExt {
-    /// The `abstract` attribute (`ClassDef::is_abstract` also covers interfaces).
-    pub is_abstract: bool,
-    pub is_interface: bool,
-    pub instance_class_name: Option<&'static str>,
-    /// `eSuperTypes` in order, including Ecore classes (`EObject`), which `ClassDef::supers`
-    /// leaves out. Generic supertypes (`Sample<Integer>`) appear as their class.
-    pub supers: &'static [TypeRef],
-}
-
-/// The type of a feature, parameter or operation.
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum TypeRef {
-    Class(ClassId),
-    Enum(EnumId),
-    /// Index into [`DATA_TYPES`].
-    DataType(u32),
-    /// A classifier of Ecore itself, by name (`EString`, `EObject`, ...).
-    Ecore(&'static str),
-    /// No classifier (a type parameter).
-    Unknown,
-}
-
-pub struct FeatureExt {
-    /// `upperBound` (`-1` unbounded).
-    pub upper: i32,
-    pub ordered: bool,
-    pub unique: bool,
-    pub changeable: bool,
-    pub unsettable: bool,
-    pub ty: TypeRef,
-}
-
-pub struct DataTypeDef {
-    pub name: &'static str,
-    pub package: PackageId,
-    pub instance_class_name: Option<&'static str>,
-    pub serializable: bool,
-}
-
-/// A typed element (operation result or parameter): type and multiplicity.
-pub struct TypedDef {
-    pub ty: TypeRef,
-    pub upper: i32,
-    pub ordered: bool,
-    pub unique: bool,
-}
-
-pub struct ParamDef {
-    pub name: &'static str,
-    pub ty: TypedDef,
-}
-
-/// An `EOperation` (signature only).
-pub struct OperationDef {
-    pub owner: ClassId,
-    pub name: &'static str,
-    /// `None` for `void`.
-    pub result: Option<TypedDef>,
-    pub params: &'static [ParamDef],
-}
-
-impl PackageId {
-    pub fn def(self) -> &'static PackageDef {
+impl PcmMeta for PackageId {
+    type Def = PackageDef;
+    fn def(self) -> &'static PackageDef {
         &PACKAGES[self.0 as usize]
     }
-    /// Unqualified package name (EMF `EPackage.getName()`).
-    pub fn short_name(self) -> &'static str {
-        let n = self.def().name;
-        n.rsplit('.').next().unwrap_or(n)
+    /// Qualified name, e.g. `pcm.repository`.
+    fn name(self) -> &'static str {
+        self.def().name
     }
 }
 
-impl EnumId {
-    pub fn def(self) -> &'static EnumDef {
+impl PcmMeta for EnumId {
+    type Def = EnumDef;
+    fn def(self) -> &'static EnumDef {
         &ENUMS[self.0 as usize]
     }
-    pub fn literal_by_name(self, s: &str) -> Option<u32> {
+    fn name(self) -> &'static str {
+        self.def().name
+    }
+}
+
+impl PcmMeta for ClassId {
+    type Def = ClassDef;
+    fn def(self) -> &'static ClassDef {
+        &CLASSES[self.0 as usize]
+    }
+    fn name(self) -> &'static str {
+        self.def().name
+    }
+}
+
+impl PcmMeta for FeatureId {
+    type Def = FeatureDef;
+    fn def(self) -> &'static FeatureDef {
+        &FEATURES[self.0 as usize]
+    }
+    fn name(self) -> &'static str {
+        self.def().name
+    }
+}
+
+/// Static lookups of a package.
+pub trait PcmPackage {
+    /// Unqualified package name (EMF `EPackage.getName()`).
+    fn short_name(self) -> &'static str;
+}
+
+impl PcmPackage for PackageId {
+    fn short_name(self) -> &'static str {
+        self.def().short_name()
+    }
+}
+
+/// Static lookups of an enumeration.
+pub trait PcmEnum {
+    /// EMF `EEnum.getEEnumLiteralByLiteral` first, then by name (`EFactoryImpl.createFromString`).
+    fn literal_by_name(self, s: &str) -> Option<u32>;
+}
+
+impl PcmEnum for EnumId {
+    fn literal_by_name(self, s: &str) -> Option<u32> {
         let d = self.def();
-        // EMF `EEnum.getEEnumLiteralByLiteral` first, then by name (EFactoryImpl.createFromString)
         d.literals
             .iter()
             .position(|l| l.literal == s)
@@ -211,53 +111,70 @@ impl EnumId {
     }
 }
 
-impl ClassId {
-    pub fn def(self) -> &'static ClassDef {
-        &CLASSES[self.0 as usize]
-    }
-    pub fn name(self) -> &'static str {
-        self.def().name
-    }
+/// Static lookups of a class.
+pub trait PcmClass: Copy {
     /// `package:Class`, the type name used in dumps and diagnostics.
-    pub fn qualified_name(self) -> String {
+    fn qualified_name(self) -> String;
+    /// `self` is `other` or a subtype of it.
+    fn is_a(self, other: ClassId) -> bool;
+    /// EMF `getEStructuralFeature(name)`.
+    fn feature(self, name: &str) -> Option<FeatureId>;
+    /// `eAllStructuralFeatures`.
+    fn features(self) -> std::iter::Copied<std::slice::Iter<'static, FeatureId>>;
+    /// Containment features in EMF `eContents` order.
+    fn containments(self) -> std::iter::Copied<std::slice::Iter<'static, FeatureId>>;
+    /// Containment features in EMF `eContents` order (precomputed).
+    fn containment_features(self) -> &'static [FeatureId];
+    /// Persisted references with a lower bound of at least 1, in feature order (precomputed).
+    #[doc(hidden)]
+    fn required_references(self) -> &'static [FeatureId];
+}
+
+impl PcmClass for ClassId {
+    fn qualified_name(self) -> String {
         format!("{}:{}", self.def().package.short_name(), self.def().name)
     }
-    /// `self` is `other` or a subtype of it.
-    pub fn is_a(self, other: ClassId) -> bool {
+    fn is_a(self, other: ClassId) -> bool {
         self == other || self.def().all_supers.contains(&other)
     }
-    /// EMF `getEStructuralFeature(name)`.
-    pub fn feature(self, name: &str) -> Option<FeatureId> {
+    fn feature(self, name: &str) -> Option<FeatureId> {
         index().features.get(&(self, name)).copied()
     }
-    pub fn features(self) -> impl Iterator<Item = FeatureId> {
+    fn features(self) -> std::iter::Copied<std::slice::Iter<'static, FeatureId>> {
         self.def().all_features.iter().copied()
     }
-    /// Containment features in EMF `eContents` order.
-    pub fn containments(self) -> impl Iterator<Item = FeatureId> {
+    fn containments(self) -> std::iter::Copied<std::slice::Iter<'static, FeatureId>> {
         self.containment_features().iter().copied()
     }
-    /// Containment features in EMF `eContents` order (precomputed).
-    pub fn containment_features(self) -> &'static [FeatureId] {
+    fn containment_features(self) -> &'static [FeatureId] {
         &index().containments[self.0 as usize]
     }
-    /// Persisted references with a lower bound of at least 1, in feature order (precomputed).
-    pub(crate) fn required_references(self) -> &'static [FeatureId] {
+    fn required_references(self) -> &'static [FeatureId] {
         &index().required_refs[self.0 as usize]
     }
 }
 
-impl FeatureId {
-    pub fn def(self) -> &'static FeatureDef {
-        &FEATURES[self.0 as usize]
-    }
-    pub fn name(self) -> &'static str {
-        self.def().name
-    }
-    pub fn is_attribute(self) -> bool {
+/// Static lookups of a feature.
+pub trait PcmFeature: Copy {
+    fn is_attribute(self) -> bool;
+    fn is_containment(self) -> bool;
+    /// The opposite is a containment (this is the `eContainer` side).
+    fn is_container(self) -> bool;
+    fn opposite(self) -> Option<FeatureId>;
+    /// The target class of a reference (`None` if not a class of the tables).
+    fn target(self) -> Option<ClassId>;
+    fn data_kind(self) -> Option<DataKind>;
+    /// Plain cross reference as EMF serialises and `eCrossReferences` reports it.
+    fn is_cross_reference(self) -> bool;
+    /// `true` if the value is persisted (non-transient, non-derived).
+    fn is_persistent(self) -> bool;
+}
+
+impl PcmFeature for FeatureId {
+    fn is_attribute(self) -> bool {
         matches!(self.def().kind, FeatureKind::Attribute { .. })
     }
-    pub fn is_containment(self) -> bool {
+    fn is_containment(self) -> bool {
         matches!(
             self.def().kind,
             FeatureKind::Reference {
@@ -266,7 +183,7 @@ impl FeatureId {
             }
         )
     }
-    pub fn is_container(self) -> bool {
+    fn is_container(self) -> bool {
         matches!(
             self.def().kind,
             FeatureKind::Reference {
@@ -275,26 +192,25 @@ impl FeatureId {
             }
         )
     }
-    pub fn opposite(self) -> Option<FeatureId> {
+    fn opposite(self) -> Option<FeatureId> {
         match self.def().kind {
             FeatureKind::Reference { opposite, .. } => opposite,
             _ => None,
         }
     }
-    pub fn target(self) -> Option<ClassId> {
+    fn target(self) -> Option<ClassId> {
         match self.def().kind {
             FeatureKind::Reference { target, .. } if target.0 != u32::MAX => Some(target),
             _ => None,
         }
     }
-    pub fn data_kind(self) -> Option<DataKind> {
+    fn data_kind(self) -> Option<DataKind> {
         match self.def().kind {
             FeatureKind::Attribute { data } => Some(data),
             _ => None,
         }
     }
-    /// Plain cross reference as EMF serialises and `eCrossReferences` reports it.
-    pub fn is_cross_reference(self) -> bool {
+    fn is_cross_reference(self) -> bool {
         let d = self.def();
         matches!(
             d.kind,
@@ -306,8 +222,7 @@ impl FeatureId {
         ) && !d.transient
             && !d.derived
     }
-    /// `true` if the value is persisted (non-transient, non-derived).
-    pub fn is_persistent(self) -> bool {
+    fn is_persistent(self) -> bool {
         let d = self.def();
         !d.transient && !d.derived && !self.is_container()
     }

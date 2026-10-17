@@ -3,6 +3,7 @@
 //! ([`crate::model`]) is built from this graph; the canonical dump ([`crate::canon`]) is produced
 //! from it and compared with a dump made by real EMF.
 
+use crate::meta::prelude::*;
 use crate::meta::{ClassId, DataKind, FeatureId, FeatureKind};
 use std::fmt;
 use std::path::PathBuf;

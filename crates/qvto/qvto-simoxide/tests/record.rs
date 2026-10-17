@@ -24,7 +24,10 @@ fn record_adapter_corpus() {
             std::fs::write(d.join(format!("{}.dump", case.id)), renumber(&a.dump)).unwrap();
             std::fs::write(
                 d.join(format!("{}.status", case.id)),
-                format!("{} {}\n{}\n--log--\n{}", a.severity, a.code, a.message, a.log),
+                format!(
+                    "{} {}\n{}\n--log--\n{}",
+                    a.severity, a.code, a.message, a.log
+                ),
             )
             .unwrap();
         }

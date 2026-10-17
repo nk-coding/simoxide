@@ -11,6 +11,7 @@
 //! - `refs`: every set, persisted, non-containment reference; targets as `resource#fragment`
 //!   (fragment = ID or EMF path), unresolved proxies as `?file#fragment`.
 
+use crate::meta::prelude::*;
 use crate::meta::{DataKind, FeatureId};
 use crate::raw::{Graph, ObjId, ResId, Value};
 use std::fmt::Write;

@@ -42,7 +42,7 @@ it (`qvto-paths`), so make it by hand only before running a Java tool first:
 | Crate | Contents |
 |---|---|
 | `qvto-syntax` | lexer, parser, AST, spans, error recovery |
-| `qvto-model` | model API: metamodel registry, `ModelStore` trait, contract tests |
+| `qvto-model` | the model API is `crates/foundation/simoxide-emf-core` (metamodel registry, static seed, `ModelStore` trait, contract tests), imported as `qvto_model` |
 | `qvto-emf` | own Ecore/XMI store: EMF semantics, `.ecore` metamodels, XMI load/save as EMF, canonical dump, the suite's comparer |
 | `qvto-types` | type system, standard library signatures |
 | `qvto-sema` | semantic analysis and type checking |

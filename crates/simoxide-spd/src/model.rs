@@ -8,6 +8,7 @@
 //! Metamodel: `SPD.ecore` and `semantic.ecore` of Palladio-Addons-SPD-Metamodel
 //! (`DESIGN-SPD.md` §1.1), in the generated tables of `simoxide-model`.
 
+use simoxide_model::meta::prelude::*;
 use simoxide_model::meta::{ClassId, FeatureId, class, feat};
 use simoxide_model::raw::{Graph, ObjId, Value};
 
