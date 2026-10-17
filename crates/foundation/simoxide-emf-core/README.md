@@ -3,8 +3,10 @@
 The EMF core shared by SimOxide and its QVTo engine (formerly `qvto-model`; the QVTo crates
 import it as `qvto_model` through a package rename): metamodels resolved to dense ids, the
 `ModelStore` trait through which the QVTo VM reads and writes models with EMF's semantics, and
-the static seed of generated tables. No dependencies. Implementations of `ModelStore`: `qvto-emf`
-(the EMF graph shared by SimOxide and QVTo).
+the static seed of generated tables. No dependencies. Implementations of `ModelStore`:
+`simoxide-emf` (the EMF graph shared by SimOxide and QVTo, imported by the QVTo crates as
+`qvto_emf`). Overview: `docs/development/foundation.md` (the documentation site's "Foundation
+crates" page).
 
 SimOxide's generated PCM tables (`simoxide-model/src/meta/generated.rs`, written by
 `simoxide-model/tools/gen_meta.py`) are a `seed::StaticPackages`. `MetaRegistry::from_static`
@@ -57,8 +59,8 @@ suite on that graph covers it.
 
 ## Verification
 
-- `contract_tests!` runs on `qvto-emf`'s `Graph` twice: with the contract metamodel built in code
+- `contract_tests!` runs on `simoxide-emf`'s `Graph` twice: with the contract metamodel built in code
   and loaded from `contract.ecore` (40 tests).
-- The same semantics are checked against real EMF by `qvto-emf`'s differential script test (300
-  random scripts, 15 321 operations, every result and the final state equal; see
-  `qvto-emf/README.md`).
+- The same semantics are checked against real EMF by `simoxide-emf`'s differential script test
+  (300 random scripts, 15 321 operations, every result and the final state equal; see
+  `../simoxide-emf/README.md`).

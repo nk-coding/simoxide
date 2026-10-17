@@ -57,7 +57,8 @@ cd docs && npm install && npm run dev
 | [Correctness](docs/correctness/index.md) | the exactness claim and its evidence, testing, deviations, reference bugs |
 | [Semantics](docs/spec/index.md) | SimuLizar 5.2.2's semantics as numbered rules with source references |
 | [Reference simulator](docs/reference-simulator/refsim.md) | `refsim`, its patches, the model corpus |
-| [Development](docs/development/contributing.md) | conventions, guardrails, benchmarking, test kit |
+| [QVTo](docs/qvto/index.md) | the QVTo engine: usage, architecture, conformance, performance, its use in SimOxide, licensing |
+| [Development](docs/development/contributing.md) | conventions, guardrails, benchmarking, test kit, foundation crates |
 
 `history/` keeps the development log and the original plan.
 
@@ -72,8 +73,8 @@ cd docs && npm install && npm run dev
 | `crates/simoxide-sim` | the simulator: compiler, event core, interpreter, measurements, API |
 | `crates/simoxide-cli` | `simoxide` and `simoxide-bench` |
 | `crates/simoxide-testkit` | differential testing, model generator, `simoxide-fuzz` |
-| `crates/foundation/` | shared with the QVTo engine: Java compatibility (`simoxide-jcompat`, opt-in `simoxide-jcompat-exact`), `simoxide-hotspot-math` |
-| `crates/qvto/` | the QVTo engine (`crates/qvto/README.md`) |
+| `crates/foundation/` | shared with the QVTo engine: Java compatibility (`simoxide-jcompat`, opt-in `simoxide-jcompat-exact`), the EMF layer (`simoxide-emf-core`, `simoxide-emf`), `simoxide-hotspot-math` |
+| `crates/qvto/` | the QVTo engine (`crates/qvto/README.md`, [docs/qvto](docs/qvto/index.md)) |
 | `reference/` | `refsim`: deterministic SimuLizar 5.2.2, the oracle |
 | `corpus/`, `corpus-fuzz/` | models with the reference's expected outputs |
 | `bench/compare/` | the comparison with the other Palladio simulators |

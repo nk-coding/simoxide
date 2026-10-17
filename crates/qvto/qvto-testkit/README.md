@@ -17,7 +17,9 @@ qvto conform --engine qvto-ordered            # ordered mode against the det fix
 
 Prerequisites: the reference checkout (`reference/README.md`), the runner built
 (`reference/runner/build.sh`; `record` builds it), and for the corpus the PCM metamodels:
-`qvto-emf/tools/pcm-setup.sh target/pcm`.
+`../foundation/simoxide-emf/tools/pcm-setup.sh target/pcm` (run here; its `pcm.conf` holds
+absolute paths, so once per target directory). Overview of the oracles and the current results:
+`docs/qvto/conformance.md` (the documentation site).
 
 ## Layout
 

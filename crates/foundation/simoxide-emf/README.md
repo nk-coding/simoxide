@@ -1,10 +1,16 @@
-# qvto-emf
+# simoxide-emf
 
-The engine's own Ecore/XMI layer: a model store (`Graph`) with EMF's dynamic-object semantics,
+The EMF graph shared by SimOxide and its QVTo engine (formerly qvto-rs's `qvto-emf`; the QVTo
+crates and `simoxide-reconf` import it as `qvto_emf` through a package rename, and SimOxide's
+`simoxide_model::raw::Graph` is this `Graph`). Overview: `docs/development/foundation.md` (the
+documentation site's "Foundation crates" page).
+
+A model store (`Graph`) with EMF's dynamic-object semantics,
 Ecore built in (with the behaviour of its generated classes), `.ecore` metamodels registered
 from loaded resources, XMI load and save byte for byte like EMF 2.41, resource sets with URI
 maps and proxy resolution, the canonical dump (strict comparison) and the Eclipse suite's
-lenient comparer. Depends on `qvto-model`, `quick-xml`, `memchr`.
+lenient comparer; the change journal and id policies. Depends on `simoxide-emf-core`
+(imported as `qvto_model`), `simoxide-jcompat`, `quick-xml`, `memchr`.
 
 A host with fixed metamodel ids (SimOxide's generated tables) builds its registry first and
 lets Ecore follow (`Graph::with_registry(meta)`, `ResourceSet::with_graph`); `materialize`
@@ -38,6 +44,10 @@ let canonical = dump(&rs.graph, &[r]);                 // strict comparison text
 | `src/xmi_save.rs` | XMI writer (port of `XMLSaveImpl`, `XMISaveImpl`, `XMLString`, `Escape`, parts of `XMLHelperImpl`): feature kinds, `xsi:type` rules, `href`/IDREF, namespace prefixes, line width and late namespace declarations, schema locations |
 | `src/resource_set.rs` | `ResourceSet`: URI prefix maps, namespace locations, aliases, demand loading, proxy resolution, metamodel registration (with the metamodels it depends on) |
 | `src/config.rs` | resource-set configuration file shared with the Java oracle (`map`, `mmroot`, `alias`) |
+| `src/chunks.rs` | object storage in chunks with a shared frozen prefix (`Graph::freeze`; copy on write for forks) |
+| `src/journal.rs` | the change journal (`Journal`, `Change`, `ChangeKind`, `Summary`), recorded inside the EMF operations |
+| `src/ids.rs` | id policies (`IdPolicy`): EMF-like UUIDs from a seeded generator for new objects of a target class |
+| `src/load_ops.rs` | loader-level writes (not recorded in the journal) and plain reads, used by SimOxide's PCM loader |
 | `src/canon.rs` | canonical dump, first difference, FNV-64 |
 | `src/compare.rs` | port of the suite's `TreeComparator` (verdict) |
 | `oracle/` | the EMF oracle (Java, reference runner's jars): saves, dumps, scripts, pairs (`run.sh`) |
@@ -70,7 +80,7 @@ All against EMF 2.41 (standalone, the reference runner's jars) through `oracle/`
 | same, `pcm_models` | 640 PCM-side files: SimOxide's corpus (66 directories, 7 models each), Palladio's default models, Slingshot/SPD examples and the SPD and SimuLizar metamodels | 640 equal (needs `tools/pcm-setup.sh target/pcm` and the oracle run; skipped otherwise) |
 | `tests/scripts.rs` | 300 random scripts (15 321 operations: set, unset, add, insert, remove, move, set at index, clear, `setEList`, roots, delete, with wrong types, nulls and bad indexes) on dynamic EMF objects, then each resource saved with default options and with the runner's options (UTF-8, schema location) | every result, the final state and all 1 200 saves equal |
 | `tests/compare.rs` | the suite's lenient comparer on 1 663 pairs: `in`/`expected` per test folder, each model with itself, each model with a perturbed copy (list reversed, attribute changed, object deleted, reference retargeted) | 1 662 verdicts as Java's `TreeComparator`, 1 skipped (Java's comparer throws); of 721 lenient-equal pairs, 174 differ strictly |
-| `tests/contract.rs` | `qvto-model`'s contract suite, with the metamodel built in code and loaded from `.ecore` | 40 tests |
+| `tests/contract.rs` | `simoxide-emf-core`'s contract suite, with the metamodel built in code and loaded from `.ecore` | 40 tests |
 | `tests/materialize.rs` | the contract suite with Ecore registered after the contract package; materialized objects saved and registered again give the original registry (and that of `contract.ecore`); `.ecore` files referring to materialized packages register | pass |
 | `tests/registry.rs` | registering `contract.ecore` gives the entries `build_metamodel` builds; built-in Ecore entries linked to Ecore's objects; derived `eAllStructuralFeatures` equals the registry | pass |
 
@@ -79,19 +89,20 @@ metamodel, whose classes are dynamic subclasses of Ecore's generated classes (`L
 EClass`); EMF itself stores their features in the wrong slots, so its save and dump are not
 meaningful (in Eclipse these classes are generated).
 
-Regenerating the oracle data (from the QVTo root `crates/qvto`, `O=target/emf-oracle`):
+Regenerating the oracle data (from the QVTo root `crates/qvto`, where the reference runner's
+jars and `target/` are; `O=target/emf-oracle`, `F=../foundation/simoxide-emf`):
 
 ```sh
-qvto-emf/oracle/build.sh
-qvto-emf/oracle/run.sh models qvto-emf/tests/data/suite.conf qvto-emf/tests/data/suite-models.txt $O/suite
-cp $O/suite/results.tsv qvto-emf/tests/data/suite-oracle.tsv
-QVTO_EMF_WRITE_SCRIPTS=$O/scripts-in cargo test -p qvto-emf --test scripts   # writes the scripts
-qvto-emf/oracle/run.sh scripts /dev/null ../foundation/simoxide-emf-core/src/contract.ecore $O/scripts-in $O/scripts
-cp $O/scripts/results.tsv qvto-emf/tests/data/scripts-oracle.tsv
-QVTO_EMF_WRITE_PAIRS=$O/pairs.txt cargo test -p qvto-emf --test compare     # writes the pairs
-qvto-emf/oracle/run.sh pairs qvto-emf/tests/data/suite.conf $O/pairs.txt qvto-emf/tests/data/compare-oracle.tsv
-qvto-emf/tools/pcm-setup.sh target/pcm
-qvto-emf/oracle/run.sh models target/pcm/pcm.conf target/pcm/pcm-models.txt $O/pcm
+$F/oracle/build.sh
+$F/oracle/run.sh models $F/tests/data/suite.conf $F/tests/data/suite-models.txt $O/suite
+cp $O/suite/results.tsv $F/tests/data/suite-oracle.tsv
+QVTO_EMF_WRITE_SCRIPTS=$O/scripts-in cargo test -p simoxide-emf --test scripts   # writes the scripts
+$F/oracle/run.sh scripts /dev/null ../foundation/simoxide-emf-core/src/contract.ecore $O/scripts-in $O/scripts
+cp $O/scripts/results.tsv $F/tests/data/scripts-oracle.tsv
+QVTO_EMF_WRITE_PAIRS=$O/pairs.txt cargo test -p simoxide-emf --test compare     # writes the pairs
+$F/oracle/run.sh pairs $F/tests/data/suite.conf $O/pairs.txt $F/tests/data/compare-oracle.tsv
+$F/tools/pcm-setup.sh target/pcm      # pcm.conf holds absolute paths: once per target directory
+$F/oracle/run.sh models target/pcm/pcm.conf target/pcm/pcm-models.txt $O/pcm
 ```
 
 With `QVTO_EMF_ORACLE`, `QVTO_EMF_ORACLE_PCM`, `QVTO_EMF_ORACLE_SCRIPTS` pointing at the oracle
