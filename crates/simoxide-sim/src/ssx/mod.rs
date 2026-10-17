@@ -515,6 +515,8 @@ pub(crate) struct Engine<'m> {
     pub system: SystemId,
     stopped: bool,
     events: u64,
+    /// Finished usage-scenario runs (`UserFinished` events).
+    finished: i64,
     same_instant: u64,
     last_t: f64,
     max_per_instant: u64,
@@ -586,6 +588,7 @@ impl<'m> Engine<'m> {
             system,
             stopped: false,
             events: 0,
+            finished: 0,
             same_instant: 0,
             last_t: 0.0,
             max_per_instant: cfg.max_events_per_instant,
@@ -729,7 +732,10 @@ impl<'m> Engine<'m> {
             Ev::ReqFinished(r, c) => {
                 self.call(H::ReqFinished, |e| e.on_user_request_finished(&r, &c))
             }
-            Ev::UserFinished(c) => self.call(H::UserFinished, |e| e.on_user_finished(&c)),
+            Ev::UserFinished(c) => {
+                self.finished += 1;
+                self.call(H::UserFinished, |e| e.on_user_finished(&c))
+            }
             Ev::UserAborted(c) => self.call(H::UserAborted, |e| e.on_user_aborted(&c)),
             Ev::ClosedInit(c) => self.call(H::ClosedInit, |e| e.on_closed_initiated(&c)),
             Ev::InnerInit(c) => self.call(H::InnerInit, |e| e.do_switch_user(&c, c.action)),
@@ -1237,7 +1243,7 @@ pub fn run(cm: &CompiledModel, cfg: SimConfig, mut out: Outputs) -> Result<RunRe
         uniforms: e.rng.stoex,
         events: e.events,
         end_ns: simoxide_sched::time::span(cfg.max_sim_time as f64),
-        main_count: 0,
+        main_count: e.finished,
         warnings: std::mem::take(&mut e.errors),
     })
 }
