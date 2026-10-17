@@ -18,7 +18,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
  * base64 alphabet). Objects created outside rules (model loading, the runtime measurement model
  * and its measurements, SimuLizar's per-call system assembly contexts) keep EMF's UUIDs and do not
  * advance the generator. SimOxide's QVTo host draws the same sequence for the objects a rule
- * creates ({@code qvto-simoxide}'s seeded generator, {@code RunConfig::default()}).
+ * creates (the seeded generator of {@code simoxide_emf::IdPolicy}, {@code RunConfig::default()}).
  */
 public final class Ids {
     /** SimOxide's default seed ({@code simoxide_reconf::RunConfig::default()}). */

@@ -1186,7 +1186,7 @@ This follows plan D1-D4 (`history/qvto-simoxide-integration.md` §3), with these
   edits over the adapter's `SimStore` (`Edit`: `set_spec`/`set_rate`, `clone_container`,
   `connect`, `allocate`, `clone_assembly`, `set_ref`, `set_double`, `remove_from_environment`,
   `delete`, or any `ModelStore` operation through `Edit::store`). F2 runs no QVTo.
-- **Adapter in the build (temporary until M1/M2).** `crates/qvto-simoxide-bridge` is a package
+- **Adapter in the build (temporary until M1/M2; gone since M2/M6, record only).** `crates/qvto-simoxide-bridge` is a package
   named `qvto-simoxide` whose `[lib] path` is `../qvto-rs/crates/qvto-simoxide/src/lib.rs`,
   built against this workspace's `simoxide-model`, with `qvto-model` and `qvto-emf` by path. A
   plain path dependency on the adapter fails: its manifest points at the `qvto-adapter`
