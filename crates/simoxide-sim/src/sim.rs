@@ -49,8 +49,8 @@ mod slingshot;
 mod state;
 
 pub use hooks::ObservedTuple;
-pub use reconf::{PrmMeasurement, ReconfDue};
 use reconf::{FinStep, Prm, Reconf, prm_tuple, prm_write, reconf_resume};
+pub use reconf::{PrmMeasurement, ReconfDue};
 pub use runmodel::RunModel;
 pub use state::{Detached, Pause, Phase, RunState, Status};
 use state::{NoPause, PauseWhen};
@@ -1013,7 +1013,10 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         for (i, w) in cm.windows.iter().enumerate() {
             // time-driven aggregation of a discrete metric: DiscardAllElementsPriorToLowerBound
             let keep_last = w.stat.is_none_or(|x| x.continuous);
-            self.st.meas.windows.push(Window::new(w.len, w.inc, keep_last));
+            self.st
+                .meas
+                .windows
+                .push(Window::new(w.len, w.inc, keep_last));
             if let Some(inp) = w.input {
                 self.st.meas.series_windows[inp as usize].push(i as u32);
             }

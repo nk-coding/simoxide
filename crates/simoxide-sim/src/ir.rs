@@ -10,11 +10,11 @@
 
 use crate::fxhash::FxMap;
 use crate::stats::{Stat, StatKind};
-use simoxide_model::raw::ObjId;
 use simoxide_jcompat::hash::str_hash as string_hash;
 use simoxide_jcompat::order::{InsertionOrder, MapOrder};
 #[cfg(feature = "exact")]
 use simoxide_jcompat_exact::order::JdkHashOrder;
+use simoxide_model::raw::ObjId;
 use simoxide_model::*;
 use simoxide_sched::SchedulingPolicy;
 use simoxide_stoex::Program;

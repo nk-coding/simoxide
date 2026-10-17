@@ -20,6 +20,7 @@ fn simoxide_sim()
             usagemodel: c.usagemodel.clone(),
             allocation: c.allocation.clone().unwrap_or_default(),
             monitorrepository: c.monitorrepository.clone(),
+            ..RunSpec::default()
         };
         let rng = match &req.rng {
             simoxide_testkit::sim::RngMode::OwnRng => RngMode::Own,

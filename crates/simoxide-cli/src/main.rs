@@ -228,11 +228,10 @@ fn setup_with_rules(a: &Args) -> Result<(CompiledModel, SimConfig, Option<PathBu
         None => RunSpec::default(),
     };
     let model = spec.load_model(&dir)?;
-    let rules = a.rules.clone().or_else(|| {
-        spec.reconfiguration_rules
-            .as_ref()
-            .map(|r| dir.join(r))
-    });
+    let rules = a
+        .rules
+        .clone()
+        .or_else(|| spec.reconfiguration_rules.as_ref().map(|r| dir.join(r)));
     let flavour = match a.flavour {
         FlavourKind::SimuLizar if !a.quirks.is_empty() => {
             return Err("--quirks needs --flavour slingshot".into());
@@ -467,7 +466,11 @@ mod rules {
             None | Some("auto") => QvtMode::Auto,
             Some("fast") => QvtMode::Fast,
             Some("compat") => QvtMode::Compat,
-            Some(m) => return Err(format!("--qvto-mode: expected auto, fast or compat, got {m}")),
+            Some(m) => {
+                return Err(format!(
+                    "--qvto-mode: expected auto, fast or compat, got {m}"
+                ));
+            }
         };
         let cfg_q = RunConfig {
             mode,

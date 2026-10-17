@@ -112,7 +112,10 @@ impl RulesHost {
 
     /// The records kept so far (oldest first), and empties them.
     pub fn take_records(&mut self) -> Vec<ReconfRecord> {
-        self.records.as_mut().map(std::mem::take).unwrap_or_default()
+        self.records
+            .as_mut()
+            .map(std::mem::take)
+            .unwrap_or_default()
     }
 
     pub fn rules(&self) -> &RuleSet {
@@ -184,7 +187,8 @@ impl RulesHost {
             }
             let handles: Vec<u32> = self.prm.meas.iter().chain(&created).copied().collect();
             for (&h, &(_, _, v)) in handles.iter().zip(&ms) {
-                st.set(h, f_value, Datum::Double(v)).expect("measuringValue");
+                st.set(h, f_value, Datum::Double(v))
+                    .expect("measuringValue");
             }
         })?;
         self.prm.meas.extend(created);

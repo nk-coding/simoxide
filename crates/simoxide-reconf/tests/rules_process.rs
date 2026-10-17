@@ -179,7 +179,11 @@ fn the_rules_see_the_prm_values_simulizar_writes() {
 #[test]
 fn runs_with_an_empty_rule_set_equal_runs_without_rules() {
     let mut models = reconf_models();
-    for m in ["h28_triggers_default", "h29_triggers_late", "h13_passive_contention"] {
+    for m in [
+        "h28_triggers_default",
+        "h29_triggers_late",
+        "h13_passive_contention",
+    ] {
         models.push(root().join("corpus").join(m));
     }
     for dir in models {
@@ -211,7 +215,7 @@ fn example(name: &str, mode: QvtMode) -> (Out, RulesHost) {
     (out, host)
 }
 
-fn series<'a>(csv: &'a str, metric: &str) -> Vec<(f64, f64)> {
+fn series(csv: &str, metric: &str) -> Vec<(f64, f64)> {
     csv.lines()
         .filter(|l| l.contains(metric))
         .map(|l| {
@@ -265,7 +269,10 @@ fn simulizar_examples_power_consumption_and_reconfiguration_test() {
     assert!(h.stats().runs > 10_000 && h.stats().changed > 100);
     // SimuLizar's ReconfigurationSimulationTest: the n-th user's response time is n
     let (out, _) = example("sl_reconfiguration", QvtMode::Auto);
-    let rt: Vec<f64> = series(&out.csv, "Response Time").iter().map(|x| x.1).collect();
+    let rt: Vec<f64> = series(&out.csv, "Response Time")
+        .iter()
+        .map(|x| x.1)
+        .collect();
     assert_eq!(rt, (1..=10).map(f64::from).collect::<Vec<_>>());
 }
 

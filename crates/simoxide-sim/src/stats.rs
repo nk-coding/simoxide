@@ -74,7 +74,13 @@ fn java_compare_zero(a: f64) -> bool {
 /// `StatisticalCharacterizationAggregator.aggregateData`: the characterisation of `data`
 /// (`(point in time, value)` in seconds and the metric's default unit, in the order given) over
 /// the interval `[left, right]` of length `length`.
-pub fn aggregate(stat: Stat, data: &[(f64, f64)], left: Amount, right: Amount, length: Amount) -> f64 {
+pub fn aggregate(
+    stat: Stat,
+    data: &[(f64, f64)],
+    left: Amount,
+    right: Amount,
+    length: Amount,
+) -> f64 {
     if !stat.continuous {
         let values = data.iter().map(|&(_, v)| v);
         return match stat.kind {
@@ -100,7 +106,7 @@ pub fn aggregate(stat: Stat, data: &[(f64, f64)], left: Amount, right: Amount, l
                     0.0
                 } else {
                     let mid = v.len() / 2;
-                    if v.len() % 2 == 0 {
+                    if v.len().is_multiple_of(2) {
                         0.5 * (v[mid] + v[mid - 1])
                     } else {
                         v[mid]
@@ -221,8 +227,14 @@ mod tests {
         let h = aggregate(s(StatKind::HarmonicMean), &d, l, r, r.minus(&l));
         assert!((h - 3.0 / (1.0 + 0.25 + 0.0625)).abs() < 1e-12);
         assert_eq!(aggregate(s(StatKind::Median), &d, l, r, r.minus(&l)), 4.0);
-        assert_eq!(aggregate(s(StatKind::Median), &d[..2], l, r, r.minus(&l)), 2.5);
-        assert_eq!(aggregate(s(StatKind::ArithmeticMean), &[], l, r, r.minus(&l)), 0.0);
+        assert_eq!(
+            aggregate(s(StatKind::Median), &d[..2], l, r, r.minus(&l)),
+            2.5
+        );
+        assert_eq!(
+            aggregate(s(StatKind::ArithmeticMean), &[], l, r, r.minus(&l)),
+            0.0
+        );
     }
 
     #[test]

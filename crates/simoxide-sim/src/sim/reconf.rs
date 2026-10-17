@@ -411,7 +411,14 @@ impl<C: Compat, F: Flavour> Simulation<'_, C, F> {
     /// write that triggered it), otherwise the current ones.
     pub fn prm_measurements(&self) -> Vec<PrmMeasurement<'_>> {
         let prm = &self.st.meas.prm;
-        let values = match self.st.meas.reconf.due.as_ref().and_then(|d| d.values.as_ref()) {
+        let values = match self
+            .st
+            .meas
+            .reconf
+            .due
+            .as_ref()
+            .and_then(|d| d.values.as_ref())
+        {
             Some(v) => v.as_slice(),
             None => prm.values.as_slice(),
         };
