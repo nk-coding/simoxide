@@ -186,25 +186,7 @@ pub fn register_resources(
                     match ty_obj {
                         // EMF keeps the proxy: a classifier without name (`null`), package,
                         // supertypes or features, one per proxy URI
-                        Some(t) => {
-                            let uri = g.proxy_uri(t).unwrap_or("").to_string();
-                            let key = (uri, is_ref);
-                            match proxies.get(&key) {
-                                Some(&k) => k,
-                                None => {
-                                    let pp = *proxy_pkg.get_or_insert_with(|| {
-                                        g.meta_mut().add_package("", None, None, None)
-                                    });
-                                    let k = if is_ref {
-                                        Classifier::Class(g.meta_mut().add_class(pp, "null", false, false))
-                                    } else {
-                                        Classifier::DataType(g.meta_mut().add_data_type(pp, "null", None, true))
-                                    };
-                                    proxies.insert(key, k);
-                                    k
-                                }
-                            }
-                        }
+                        Some(t) => proxy_classifier(g, t, is_ref, &mut proxies, &mut proxy_pkg),
                         None if is_ref => eobject,
                         None => ejava_object,
                     }
@@ -259,6 +241,23 @@ pub fn register_resources(
             }
         }
     }
+    // unresolved types of operations and parameters: the same placeholders (the operations
+    // themselves are read later, `operations::meta_operations`)
+    for &(c, _) in &new_classes {
+        for op in objs(g, c, e.class_operations) {
+            let mut typed = vec![op];
+            typed.extend(objs(g, op, e.operation_parameters));
+            for x in typed {
+                if let Some(t) = g.get(x, e.typed_type).as_obj()
+                    && !g.links().obj_classifier.contains_key(&t)
+                    && g.is_proxy(t)
+                {
+                    let is_class = g.meta().is_subclass(g.class_of(t), e.eclass);
+                    let _ = proxy_classifier(g, t, is_class, &mut proxies, &mut proxy_pkg);
+                }
+            }
+        }
+    }
     for (fid, o) in opposites {
         match g.links().obj_feature.get(&o) {
             Some(&of) => g.meta_mut().feature_mut(fid).opposite = Some(of),
@@ -290,6 +289,35 @@ pub fn register_resources(
         // leave proxies
         Err(errors.join("; "))
     }
+}
+
+/// The placeholder classifier of an unresolved proxy (EMF keeps the proxy: a classifier without
+/// name (`null`), package, supertypes or features), one per proxy URI and kind; the proxy object
+/// is linked to it.
+fn proxy_classifier(
+    g: &mut Graph,
+    t: ObjId,
+    is_class: bool,
+    proxies: &mut std::collections::HashMap<(String, bool), Classifier>,
+    proxy_pkg: &mut Option<PackageId>,
+) -> Classifier {
+    let uri = g.proxy_uri(t).unwrap_or("").to_string();
+    let key = (uri, is_class);
+    let k = match proxies.get(&key) {
+        Some(&k) => k,
+        None => {
+            let pp = *proxy_pkg.get_or_insert_with(|| g.meta_mut().add_package("", None, None, None));
+            let k = if is_class {
+                Classifier::Class(g.meta_mut().add_class(pp, "null", false, false))
+            } else {
+                Classifier::DataType(g.meta_mut().add_data_type(pp, "null", None, true))
+            };
+            proxies.insert(key, k);
+            k
+        }
+    };
+    g.links_mut().obj_classifier.insert(t, k);
+    k
 }
 
 /// The registry classifier for an Ecore classifier object, if registered.
