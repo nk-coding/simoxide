@@ -1,9 +1,10 @@
 #!/bin/bash
 # Builds the headless.simucom OSGi bundle against the Palladio 5.2.2 product and creates its OSGi configuration area.
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
 set -e
 H="$(cd "$(dirname "$0")" && pwd)"
-P=${PALLADIO:-/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2}
-JDK=${JDK:-/home/devbox/workspace/palladio-research/work-simucom/jre17}
+P=${PALLADIO:-$PRDIR/work-simucom/palladio-5.2.2}
+JDK=${JDK:-$PRDIR/work-simucom/jre17}
 JAVAC=${JAVAC:-javac}
 W=${SIMUCOM_WORK:-$H/work}; mkdir -p $W   # SIMUCOM_WORK: another work dir, e.g. for the SSJ engine (../SSJ.md)
 cd $H/bundle

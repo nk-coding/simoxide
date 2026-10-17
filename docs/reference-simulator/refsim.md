@@ -9,7 +9,9 @@ a few shadowed classes that remove nondeterminism and add the trace and tape hoo
 
 - Java 17 or later (Java 21 is used).
 - The Palladio 5.2.2 product plugins. Set `PALLADIO_PLUGINS` to their directory; the default is
-  `/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins`.
+  `<palladio-research>/work-simucom/palladio-5.2.2/plugins`. `<palladio-research>` is
+  `PALLADIO_RESEARCH`, otherwise `/home/devbox/workspace/palladio-research`, otherwise its new location
+  `/home/devbox/workspace/old/palladio-research` (`reference/tools/palladio-research.sh`).
 
 ## Commands
 

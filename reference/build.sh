@@ -5,9 +5,10 @@
 #                          ordered like the OSGi wiring (tools/classpath.sh; docs/reference-simulator/patches.md "Classpath")
 #  - build/classes       : refsim + patched (shadowing) classes; this dir comes FIRST on the classpath
 # Env: PALLADIO_PLUGINS (default: palladio-research/work-simucom/palladio-5.2.2/plugins), JAVAC
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
 set -e
 cd "$(dirname "$0")"
-P=${PALLADIO_PLUGINS:-/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins}
+P=${PALLADIO_PLUGINS:-$PRDIR/work-simucom/palladio-5.2.2/plugins}
 mkdir -p build
 tools/classpath.sh > /dev/null
 CP=$(cat build/classpath.txt)
