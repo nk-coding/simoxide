@@ -8,6 +8,8 @@ use crate::time::{Clock, Nanos, SimTime};
 use std::marker::PhantomData;
 
 /// Delay resource.
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(bound = ""))]
 #[derive(Clone, Debug, Default)]
 pub struct Delay<K: Clock = Nanos> {
     /// `running_processes.size()`.

@@ -33,6 +33,8 @@ pub mod model;
 mod quirks;
 #[cfg(feature = "sim")]
 pub mod sim;
+#[cfg(feature = "snapshot")]
+pub mod snapshot;
 
 pub use interp::{
     AdjustmentRequest, AdjustorState, Check, Cmp, FRes, Filter, GroupState, Measurement, Metric,

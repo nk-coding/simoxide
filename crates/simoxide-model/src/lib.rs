@@ -33,6 +33,7 @@ mod fxhash;
 pub mod load;
 pub mod meta;
 pub mod model;
+pub mod persist;
 pub mod raw;
 pub mod validate;
 mod xmi;

@@ -6,6 +6,7 @@
 
 /// The `java.util.Random` LCG.
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct JavaRandom {
     seed: u64,
     /// Doubles drawn so far.

@@ -7,6 +7,7 @@ use std::io::Write;
 
 /// Recorded measurements of one run.
 #[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct Measurements {
     /// Series definitions (measuring point key, tuple metric name).
     pub series: Vec<SeriesDef>,

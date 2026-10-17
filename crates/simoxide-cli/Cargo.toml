@@ -11,7 +11,8 @@ name = "simoxide"
 path = "src/main.rs"
 
 [dependencies]
-simoxide-sim = { workspace = true }
+# snapshots (`--snapshot`, `simoxide resume`): always on in the CLI
+simoxide-sim = { workspace = true, features = ["snapshot"] }
 simoxide-model = { workspace = true }
 simoxide-reconf = { workspace = true, optional = true }
 simoxide-spd = { workspace = true, optional = true, features = ["sim"] }
@@ -28,7 +29,7 @@ fast = ["simoxide-sim/fast", "simoxide-spd?/fast"]
 exact = ["simoxide-sim/exact", "simoxide-reconf?/exact", "simoxide-spd?/exact"]
 # Scaling policy definitions (`.spd` next to the model): the SPD interpreter runs with the
 # simulation (`--spd-log`, `--spd-quirks`); adjustments are not executed yet (DESIGN-SPD.md P2).
-spd = ["dep:simoxide-spd"]
+spd = ["dep:simoxide-spd", "simoxide-spd/snapshot"]
 # `simoxide bench --profile out.svg`: in-process sampling profiler (SIGPROF), flame graph output.
 profile = ["dep:pprof"]
 # Use mimalloc as the global allocator of `simoxide` and `simoxide-bench`.
@@ -38,4 +39,4 @@ mimalloc = ["dep:mimalloc"]
 hotspot-math = ["simoxide-sim/hotspot-math"]
 # Runtime model changes (reconfiguration rules, later SPD; DESIGN-SPD.md F2-F4, R1): builds
 # `simoxide-reconf` (and through it the QVTo engine and its adapter, crates/qvto). No command uses it yet. Whether it joins the defaults is open (DESIGN-SPD.md U2).
-reconfiguration = ["dep:simoxide-reconf"]
+reconfiguration = ["dep:simoxide-reconf", "simoxide-reconf/snapshot"]

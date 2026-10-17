@@ -46,6 +46,8 @@ mod hooks;
 mod reconf;
 mod runmodel;
 mod slingshot;
+#[cfg(feature = "snapshot")]
+mod snapshot;
 mod state;
 
 pub use hooks::ObservedTuple;
@@ -181,6 +183,7 @@ pub struct Outputs {
 
 /// Error that aborts a run (the reference sets status ERROR and stops).
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct SimError {
     pub message: String,
     /// Simulation time of the error (ns).
@@ -190,6 +193,7 @@ pub struct SimError {
 
 /// Why a run stopped with an error.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum SimErrorKind {
     /// The model or the run configuration: the reference aborts too (at the same event, for the
     /// errors reproduced from it), or the model is outside what the port supports.
@@ -239,6 +243,7 @@ fn unkey(k: u64) -> (u32, u32) {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 enum PState {
     Suspended,
     Running,
@@ -246,6 +251,7 @@ enum PState {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 enum LastRes {
     None,
     Think,
@@ -253,6 +259,7 @@ enum LastRes {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 enum PKind {
     OpenGen,
     OpenUser,
@@ -262,6 +269,7 @@ enum PKind {
 
 /// Interpreter continuation (one level of the reference's recursive interpreter).
 #[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 enum Cont {
     OpenGen {
         scen: u32,
@@ -391,6 +399,7 @@ const SS_LINK_FAILED: u8 = 2;
 /// context `ac`, with `parent` the path id of the context below it): the continuation it
 /// pushed. Only calls that resolve without a required delegation are kept.
 #[derive(Clone, Copy, Default)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 struct CallCache {
     ac: AcRef,
     parent: u32,
@@ -399,6 +408,7 @@ struct CallCache {
 
 /// A resolved provided-role call (`Simulation::provs`).
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 struct ProvRes {
     ac: AcRef,
     role: RoleId,
@@ -409,20 +419,23 @@ struct ProvRes {
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 enum ProvTarget {
     /// The providing structure delegates to `ir` of `ia` (call id `inner`, `u32::MAX` until
     /// first used).
-    Deleg {
-        ia: AcRef,
-        ir: RoleId,
-        inner: u32,
-    },
+    Deleg { ia: AcRef, ir: RoleId, inner: u32 },
     /// A basic component and its SEFF behaviour (`None`: not exactly one SEFF).
     Basic {
         comp: ComponentId,
         seff: Option<BehaviourId>,
     },
-    Fail(&'static str),
+    Fail(
+        #[cfg_attr(
+            feature = "snapshot",
+            serde(with = "crate::snapshot::serde_util::interned")
+        )]
+        StaticStr,
+    ),
 }
 
 enum Flow {
@@ -435,6 +448,8 @@ enum Flow {
 // resources at run time
 
 #[derive(Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "snapshot", serde(bound = ""))]
 struct ResRt<K: Clock> {
     sched: Option<ActiveResource<u64, K>>,
     /// DELAY-type resources: `running_processes` (process keys).
@@ -464,6 +479,7 @@ impl<K: Clock> ResRt<K> {
 }
 
 #[derive(Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 struct PassiveInst {
     pr: PassiveResourceId,
     ac: AcRef,
@@ -479,6 +495,7 @@ struct PassiveInst {
 }
 
 #[derive(Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 struct CompInst {
     passives: Vec<(PassiveResourceId, u32)>,
 }
@@ -487,6 +504,7 @@ struct CompInst {
 // measurement sink: recorded tuples plus the sliding windows fed by some series
 
 #[derive(Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct Sink {
     m: Measurements,
     windows: Vec<Window>,
@@ -499,7 +517,11 @@ pub(crate) struct Sink {
     /// pid of the reconfiguration process (once created).
     reconf_pid: u64,
     /// An error raised inside a measurement emission (reported after the current event).
-    error: Option<&'static str>,
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(with = "crate::snapshot::serde_util::opt_interned")
+    )]
+    error: Option<StaticStr>,
     /// PRM recorders exist (MEAS-7.2).
     prm_armed: bool,
     prm: Prm,
@@ -627,6 +649,8 @@ fn busy_fraction(shadow: &[u64], instances: u32, per_core: bool) -> f64 {
 /// [`crate::compat`]): the engine, which borrows the compiled model, holds the
 /// output writers and runs one [`RunState`] (which explains pausing, forking and resuming).
 pub struct Simulation<'m, C: Compat = DefaultCompat, F: Flavour = SimuLizar> {
+    /// The compiled model the run was created on (snapshots name it by its fingerprint).
+    base: &'m CompiledModel,
     /// The compiled model the run simulates: the one it was created on, or after model changes
     /// the one in `st.model` (see `RunModel`; the reference then lives as long as that `Arc`,
     /// which only `Simulation::apply_changes` replaces).
@@ -716,6 +740,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         })?;
         let traced = out.trace.is_some();
         Ok(Simulation {
+            base: cm,
             cm,
             code: cm.code.get(traced),
             trace: out.trace.map(|w| TraceOut::new(w, F::Clock::secs)),

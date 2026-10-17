@@ -21,6 +21,18 @@ impl std::fmt::Debug for MersenneTwister {
 }
 
 impl MersenneTwister {
+    /// The generator state: the 624 words and the position in them (snapshots of a run).
+    pub fn state(&self) -> (&[u32], usize) {
+        (&self.mt, self.mti)
+    }
+
+    /// A generator in the state `words`/`pos` of [`MersenneTwister::state`] (`None`: not a
+    /// state).
+    pub fn from_state(words: &[u32], pos: usize) -> Option<Self> {
+        let mt: [u32; N] = words.try_into().ok()?;
+        (pos <= N).then_some(MersenneTwister { mt, mti: pos })
+    }
+
     /// `new MersenneTwister(int seed)` / `setSeed(int)`.
     pub fn from_int(seed: i32) -> Self {
         let mut mt = MersenneTwister { mt: [0; N], mti: N };

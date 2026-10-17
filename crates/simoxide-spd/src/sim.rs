@@ -90,7 +90,7 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for NoAdjustment {
 }
 
 /// The measuring point and metric of each compiled series, as far as SPD reads them.
-fn series_points(cm: &CompiledModel) -> Vec<Option<(PointRef, Metric)>> {
+pub(crate) fn series_points(cm: &CompiledModel) -> Vec<Option<(PointRef, Metric)>> {
     let m = &cm.model;
     cm.series
         .iter()
@@ -177,12 +177,12 @@ pub struct SpdSummary {
 /// A simulation with an SPD interpreter.
 pub struct SpdRun<'m, 's, C: Compat> {
     pub sim: Simulation<'m, C>,
-    spd: &'s Spd,
+    pub(crate) spd: &'s Spd,
     pub state: SpdState,
-    series: Vec<Option<(PointRef, Metric)>>,
+    pub(crate) series: Vec<Option<(PointRef, Metric)>>,
     /// Requests by note tag (`REQUEST | index`); taken when dispatched.
-    requests: Vec<Option<AdjustmentRequest>>,
-    adjusted_ok: u64,
+    pub(crate) requests: Vec<Option<AdjustmentRequest>>,
+    pub(crate) adjusted_ok: u64,
 }
 
 struct Host<'a, 'm, C: Compat> {

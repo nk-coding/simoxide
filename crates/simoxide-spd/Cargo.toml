@@ -11,6 +11,8 @@ simoxide-model = { workspace = true }
 simoxide-sim = { workspace = true, optional = true }
 serde_json = "1"
 ryu = "1"
+# snapshots of SPD runs (feature `snapshot`; MIT/Apache-2.0)
+serde = { version = "1", features = ["derive"], optional = true }
 
 [features]
 default = ["sim"]
@@ -18,8 +20,13 @@ default = ["sim"]
 # measurement observers, decision log). Without it the crate is host independent.
 sim = ["dep:simoxide-sim"]
 fast = ["sim", "simoxide-sim/fast"]
+# Snapshots of SPD runs (`SpdRun::snapshot_to`, `SpdRun::restore_from`; DESIGN-SPD.md N1): the
+# interpreter's state as the section `spd` of a simoxide-sim snapshot.
+snapshot = ["sim", "dep:serde", "simoxide-sim/snapshot"]
 # SimuLizar-exact runs (simoxide-sim `exact`; no licence covers builds with it, LICENSES section 7)
 exact = ["sim", "simoxide-sim/exact"]
 
 [dev-dependencies]
-simoxide-sim = { workspace = true, features = ["fast", "exact"] }
+simoxide-sim = { workspace = true, features = ["fast", "exact", "snapshot"] }
+# the snapshot tests
+simoxide-spd = { path = ".", features = ["snapshot"] }

@@ -627,10 +627,10 @@ pub struct QvtoRun {
     core: QvtoCore,
     cfg: RunConfig,
     mode: Mode,
-    state: Option<Box<PerRun>>,
+    pub(crate) state: Option<Box<PerRun>>,
 }
 
-struct PerRun {
+pub(crate) struct PerRun {
     /// Shared copy on write between the clones of a run's state (a fork pays for the copy of
     /// the session, about 0.3-0.8 ms, only when it uses it).
     session: Arc<Mutex<RunSession>>,
@@ -638,7 +638,7 @@ struct PerRun {
     /// simulation's model it equals (generation and address of the compiled model). Dropped by
     /// a clone and whenever it may differ; copied again when needed.
     work: Option<(Graph, (u32, usize))>,
-    invocations: u64,
+    pub(crate) invocations: u64,
 }
 
 impl Clone for PerRun {
@@ -653,7 +653,7 @@ impl Clone for PerRun {
 
 impl PerRun {
     /// The session, unshared.
-    fn session(&mut self) -> &mut RunSession {
+    pub(crate) fn session(&mut self) -> &mut RunSession {
         if Arc::get_mut(&mut self.session).is_none() {
             let copy = lock(&self.session).clone();
             self.session = Arc::new(Mutex::new(copy));
@@ -663,6 +663,12 @@ impl PerRun {
             .get_mut()
             .unwrap_or_else(|e| e.into_inner())
     }
+}
+
+/// The session of a run's QVTo state (snapshots).
+#[cfg(feature = "snapshot")]
+pub(crate) fn lock_session(st: &PerRun) -> std::sync::MutexGuard<'_, RunSession> {
+    lock(&st.session)
 }
 
 fn lock<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
@@ -713,7 +719,10 @@ impl QvtoRun {
     }
 
     /// The per-run state with a working graph equal to `sim`'s model graph.
-    fn prepare<C: Compat, F: Flavour>(&mut self, sim: &Simulation<'_, C, F>) -> &mut PerRun {
+    pub(crate) fn prepare<C: Compat, F: Flavour>(
+        &mut self,
+        sim: &Simulation<'_, C, F>,
+    ) -> &mut PerRun {
         let core = &self.core;
         let ids = self.cfg.ids;
         let st = self.state.get_or_insert_with(|| {

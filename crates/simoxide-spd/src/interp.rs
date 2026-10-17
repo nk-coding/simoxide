@@ -67,6 +67,7 @@ pub struct Measurement {
 /// events already queued for that time, executes it (P2: `MainTransformation.qvto`) and reports
 /// the outcome with [`Spd::adjusted`].
 #[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct AdjustmentRequest {
     pub id: u64,
     /// Index into [`SpdModel::policies`].
@@ -226,6 +227,7 @@ pub struct PolicyCtx {
 
 /// `SPDAdjustorState` of one policy (the scaling counters and the cooldown).
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct AdjustorState {
     pub latest_adjustment: f64,
     pub scales: u64,
@@ -235,6 +237,7 @@ pub struct AdjustorState {
 
 /// `TargetGroupState`: the last enacted policy of the group and its time.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct GroupState {
     /// (time, policy index) of the last enactment.
     pub last: Option<(f64, usize)>,
@@ -244,6 +247,7 @@ pub struct GroupState {
 /// Per trigger node: aggregation windows (leaves) or the iterator position of a compound
 /// filter (Q12 compat).
 #[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum NodeState {
     Leaf {
         /// Slingshot's single window (Q13 compat).
@@ -261,6 +265,7 @@ pub enum NodeState {
 
 /// The state of one policy context.
 #[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct PolicyState {
     pub adjustor: AdjustorState,
     /// The outer chain's iterator: `Some(i)` = parked before filter `i` (Q12 compat).

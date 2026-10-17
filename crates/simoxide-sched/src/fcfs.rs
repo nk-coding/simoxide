@@ -36,6 +36,14 @@ const NPE_TO_NOW: SchedError = SchedError(
 /// the next lookup of the job (`scheduleNextEvent` or `toNow` with it at the head) throws a
 /// `NullPointerException` that aborts the run. This is reproduced: all queue entries of a job
 /// share one value (`None` once removed), and the lookups return [`SchedError`].
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    serde(bound(
+        serialize = "J: serde::Serialize",
+        deserialize = "J: serde::Deserialize<'de>"
+    ))
+)]
 #[derive(Clone, Debug)]
 pub struct Fcfs<J, K: Clock = Nanos> {
     /// `processQ` together with the `running_processes` value of each job.

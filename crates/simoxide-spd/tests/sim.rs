@@ -231,3 +231,86 @@ fn fork_equals_uninterrupted_run() {
         }
     }
 }
+
+/// A snapshot written at several points, restored into a fresh run each time (the same
+/// interpreter), continues like the uninterrupted run: decision log, SPD state, measurements,
+/// events (`DESIGN-SPD.md` N1).
+#[test]
+fn snapshot_equals_uninterrupted_run() {
+    use simoxide_sim::snapshot::{Encoding, SnapshotOptions};
+    for q in [Quirks::fixed(), Quirks::slingshot()] {
+        let (cm, spd, rc) = setup(q);
+        let mut whole = spd_run(&cm, &spd, rc);
+        let mut wlog = VecLog::default();
+        whole.run(&mut NoAdjustment, &mut wlog).unwrap();
+        let (wres, wst, wsum) = whole.finish().unwrap();
+        for enc in [Encoding::Postcard, Encoding::Json] {
+            let mut r = spd_run(&cm, &spd, rc);
+            let mut log = VecLog::default();
+            for t in [
+                0,
+                1_500_000_000,
+                3_000_000_000,
+                3_000_000_001,
+                4_200_000_000,
+            ] {
+                r.run_until(&mut NoAdjustment, &mut log, Some(t)).unwrap();
+                let mut bytes = Vec::new();
+                r.snapshot_with(&mut bytes, &SnapshotOptions { encoding: enc })
+                    .unwrap();
+                let state = r.state.clone();
+                drop(r);
+                r = SpdRun::restore_from(&bytes[..], &cm, &spd, Outputs::default()).unwrap();
+                assert_eq!(r.state, state);
+                // deterministic and lossless
+                let mut again = Vec::new();
+                r.snapshot_with(&mut again, &SnapshotOptions { encoding: enc })
+                    .unwrap();
+                assert!(again == bytes, "{q:?} {enc:?} at {t}");
+            }
+            r.run(&mut NoAdjustment, &mut log).unwrap();
+            let (res, st, sum) = r.finish().unwrap();
+            assert_eq!(log.records, wlog.records, "{q:?} {enc:?}");
+            assert_eq!(st, wst);
+            assert_eq!(sum, wsum);
+            assert_eq!(res.measurements.to_csv(), wres.measurements.to_csv());
+            assert_eq!(res.events, wres.events);
+        }
+        // another interpreter is refused
+        let (cm2, spd2, _) = setup(q);
+        let mut r = spd_run(&cm, &spd, rc);
+        r.run_until(
+            &mut NoAdjustment,
+            &mut VecLog::default(),
+            Some(1_000_000_000),
+        )
+        .unwrap();
+        let mut bytes = Vec::new();
+        r.snapshot_to(&mut bytes).unwrap();
+        assert!(SpdRun::<Exact>::restore_from(&bytes[..], &cm2, &spd2, Outputs::default()).is_ok());
+        let other = Spd::new(
+            SpdModel {
+                obj: ObjId(0),
+                id: "x".into(),
+                policies: vec![],
+                groups: vec![],
+                configuration: None,
+            },
+            q,
+        )
+        .unwrap();
+        let e = SpdRun::<Exact>::restore_from(&bytes[..], &cm, &other, Outputs::default())
+            .err()
+            .expect("other SPD");
+        assert!(e.to_string().contains("scaling policy"), "{e}");
+        // a plain simulation snapshot has no SPD state
+        let mut sim = Simulation::<Exact>::new(&cm, cfg(), Outputs::default()).unwrap();
+        sim.run_until(simoxide_sim::Pause::Events(10)).unwrap();
+        let mut plain = Vec::new();
+        sim.snapshot_to(&mut plain).unwrap();
+        let e = SpdRun::<Exact>::restore_from(&plain[..], &cm, &spd, Outputs::default())
+            .err()
+            .expect("no SPD state");
+        assert!(e.to_string().contains("no SPD state"), "{e}");
+    }
+}

@@ -116,7 +116,32 @@ pub(crate) struct RunSession {
     session: Session,
 }
 
+/// What a snapshot keeps of a run's session (`DESIGN-SPD.md` N1). The adapter's session (its
+/// `qvto_emf` resource set) has no serialisation, so a restored run starts from the template
+/// again: the run's model graph comes with the simulation's snapshot (XMI), the models of other
+/// metamodels are rebuilt by their owners (the PRM mirror, `RulesHost`), the journal is empty
+/// between events, and this carries the id generator, so that new objects get the ids they
+/// would have got. After M6 (QVTo on the shared graph) the graph's own serialisation (journal
+/// position, id policy state, resources of other metamodels) replaces it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+pub(crate) struct SessionState {
+    pub(crate) ids: Option<u64>,
+}
+
 impl RunSession {
+    /// The state a snapshot keeps (see [`SessionState`]).
+    pub(crate) fn save(&self) -> SessionState {
+        SessionState {
+            ids: self.session.id_state(),
+        }
+    }
+
+    /// Continues from a saved state (after the owners rebuilt their models).
+    pub(crate) fn restore(&mut self, s: &SessionState) {
+        self.session.set_id_state(s.ids);
+    }
+
     /// Loads a model of another metamodel (e.g. a PRM file) next to the graph, linking its
     /// references into the graph.
     pub(crate) fn load_model(&mut self, g: &mut Graph, path: &Path) -> Result<ModelRef, String> {

@@ -13,6 +13,7 @@ use crate::ir::ResIdx;
 
 /// A due note.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) enum Ev {
     /// `Resume(p)`: continue the process from its current wait point.
     Resume(u64),
@@ -34,6 +35,7 @@ pub(crate) enum Ev {
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 struct Note {
     t: i64,
     seq: u64,
@@ -57,6 +59,7 @@ fn order(t: i64, seq: u64) -> u128 {
 
 /// Indexed binary min-heap of resource timer slots keyed by `(t, seq)`.
 #[derive(Default, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 struct Timers {
     heap: Vec<u32>,
     /// Position of each resource in `heap` (`NONE`: no pending timer).
@@ -157,6 +160,7 @@ impl Timers {
 
 /// The pending-event list.
 #[derive(Default, Clone)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct EventList {
     heap: Vec<Note>,
     timers: Timers,
