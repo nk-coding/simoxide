@@ -15,6 +15,9 @@ pub struct RunSpec {
     pub usagemodel: Option<String>,
     pub allocation: Vec<String>,
     pub monitorrepository: Option<String>,
+    /// SimuLizar's reconfiguration rules folder (`.qvto` files), relative to the model
+    /// directory (`reconfiguration_rules`); the rules run with the `reconfiguration` feature.
+    pub reconfiguration_rules: Option<String>,
 }
 
 impl Default for RunSpec {
@@ -28,6 +31,7 @@ impl Default for RunSpec {
             usagemodel: None,
             allocation: Vec::new(),
             monitorrepository: None,
+            reconfiguration_rules: None,
         }
     }
 }
@@ -50,6 +54,10 @@ impl RunSpec {
             .map(String::from);
         r.monitorrepository = v
             .get("monitorrepository")
+            .and_then(|x| x.as_str())
+            .map(String::from);
+        r.reconfiguration_rules = v
+            .get("reconfiguration_rules")
             .and_then(|x| x.as_str())
             .map(String::from);
         match v.get("allocation") {

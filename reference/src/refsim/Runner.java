@@ -74,7 +74,10 @@ public final class Runner {
         if (spec.monitorRepository != null) {
             cfg.setMonitorRepositoryFile(URI.createFileURI(spec.monitorRepository.getCanonicalPath()).toString());
         }
-        cfg.setReconfigurationRulesFolder("");
+        // SimuLizar's reconfiguration rules (QVTo): the folder as a file URI; the shadowed
+        // QVTOReconfigurationLoader (patch P9) lists it in file-name order
+        cfg.setReconfigurationRulesFolder(spec.rulesFolder == null ? ""
+                : URI.createFileURI(spec.rulesFolder.getCanonicalPath()).toString());
         cfg.setServiceLevelObjectivesFile("");
         cfg.setUsageEvolutionFile("");
         cfg.setRMIMiddlewareFile("pathmap://PCM_MODELS/Glassfish.repository");

@@ -21,6 +21,8 @@ public final class RunSpec {
     public boolean simulateLinkingResources = false;
     /** SimuComConfig.SIMULATE_THROUGHPUT_OF_LINKING_RESOURCES (sum of BYTESIZE; UI default true). */
     public boolean simulateThroughputOfLinkingResources = true;
+    /** SimuLizar's reconfiguration rules folder (`.qvto` files); null = no rules. */
+    public File rulesFolder;
 
     /** The 6 MT19937 seed words: seed+0 .. seed+5 (SimuLizar UI default is 0..5, i.e. seed 0). */
     public long[] seedWords() {
@@ -119,6 +121,9 @@ public final class RunSpec {
         }
         if (m.get("simulate_throughput_of_linking_resources") != null) {
             r.simulateThroughputOfLinkingResources = (Boolean) m.get("simulate_throughput_of_linking_resources");
+        }
+        if (m.get("reconfiguration_rules") != null) {
+            r.rulesFolder = new File(dir, (String) m.get("reconfiguration_rules")).getCanonicalFile();
         }
         return r;
     }

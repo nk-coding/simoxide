@@ -88,7 +88,7 @@ public final class Main {
 
     private static void usage() {
         ERR.println("usage: refsim run --model <dir|files> [--seed N] [--max-sim-time T] "
-                + "[--max-measurements M] [--trace F] [--tape F] [--measurements F] [--linking]\n"
+                + "[--max-measurements M] [--trace F] [--tape F] [--measurements F] [--linking] [--rules DIR]\n"
                 + "       refsim run --run-json corpus/<m>/run.json [--trace F] [--tape F] [--measurements F]\n"
                 + "       refsim batch <corpusDir> [--out DIR | --in-place] [--only a,b] [--repeat N] [--check]");
         System.exit(2);
@@ -122,8 +122,12 @@ public final class Main {
                 spec.maxMeasurements = r.maxMeasurements;
                 spec.simulateLinkingResources = r.simulateLinkingResources;
                 spec.simulateThroughputOfLinkingResources = r.simulateThroughputOfLinkingResources;
+                spec.rulesFolder = r.rulesFolder;
                 break;
             }
+            case "--rules":
+                spec.rulesFolder = new File(a[++i]).getCanonicalFile();
+                break;
             case "--seed":
                 spec.seed = Long.parseLong(a[++i]);
                 break;
