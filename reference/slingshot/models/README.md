@@ -8,6 +8,7 @@
 | `x2/ss_q37_*` | `probes/ss_link` | X2 cases of quirk Q37 for `corpus-ss/`: the link connects only one of the two containers (`ss_q37_fallback`) or does not exist (`ss_q37_none`) |
 | `spd_scale_in` | `spd_minimal` | S0 probe of quirk Q5: second policy "Scale in at 80" (`StepAdjustment -1` at t = 80); the accounting demand raised from 2.0 to 9.0 so that several jobs are on `AppServer_1` when it is removed |
 | `spd_service_group` | `spd_minimal` | P2 corpus model (`corpus-spd/`): a service-group target group on the accounting assembly with time-triggered top-down scale-outs (+1 at 20 s, +2 at 40 s; one replica per container, so each adds containers) and the elastic infrastructure's bottom-up +1 at 60 s |
+| `spd_same_instant` | `spd_minimal` | P2 corpus model: a scale-out by two and a scale-in by one at the same instant (t = 50 s, two time-triggered policies; with Q15 each also reacts to the other's time event) |
 
 Licence: the Palladio example models are distributed with the Palladio documentation; their
 licence (EPL-2.0 by Palladio convention) is pending confirmation with the maintainers (DESIGN-SPD

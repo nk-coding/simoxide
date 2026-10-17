@@ -709,3 +709,35 @@ fn measurement_triggers_see_new_containers() {
             .any(|a| a["policy_name"] == "cpu" && a["ok"] == true)
     );
 }
+
+/// V3 in the Slingshot flavour (fast mode with the fast mode's Slingshot quirks, so scale-in
+/// follows Q5 and calls over a removed container's link Q37, as in the reference): the decision
+/// logs of every `corpus-spd/` case equal the reference's, model summaries included.
+#[test]
+fn adjustments_equal_slingshot_in_the_slingshot_flavour() {
+    use simoxide_sim::flavour::Quirks as SsQuirks;
+    use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
+    for c in cases() {
+        let model = RunSpec::default().load_model(&c.model).unwrap();
+        let q = Quirks::slingshot();
+        let spd = spd_of(&model, q).unwrap().unwrap();
+        let cm =
+            CompiledModel::compile_flavour(model, FlavourConfig::slingshot(SsQuirks::all_fast()))
+                .unwrap();
+        let mut cfg = RunSpec::default().sim_config("p2");
+        cfg.mode = Mode::Fast;
+        cfg.seed = c.seed;
+        cfg.max_sim_time = c.sim_time;
+        let sim = Simulation::<Fast, Slingshot>::create(&cm, cfg, Outputs::default()).unwrap();
+        let mut r = SpdRun::new(sim, &spd).unwrap();
+        let mut log = VecLog::default();
+        r.run(&mut adjuster(q), &mut log)
+            .unwrap_or_else(|e| panic!("{}: {e:?}", c.name));
+        let refl = std::fs::read_to_string(&c.expected).unwrap();
+        compare(
+            &format!("{} slingshot", c.name),
+            &project_with_models(&refl).unwrap(),
+            &log.to_jsonl(),
+        );
+    }
+}
