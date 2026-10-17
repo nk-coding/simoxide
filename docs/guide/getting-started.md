@@ -8,24 +8,25 @@ SimOxide needs Rust stable 1.88 or later (edition 2024). It is tested with 1.98.
 cargo build --release
 ```
 
-This builds the `simoxide` command line tool into `target/release/`, with both the exact and the
-[fast mode](./fast-mode.md). The release profile uses fat LTO and `panic = "abort"`.
+This builds the `simoxide` command line tool into `target/release/` with the
+[fast mode](./fast-mode.md) (the default mode). This is the **EPL build**: it contains only EPL-2.0
+and Apache-2.0 code and can be distributed. The release profile uses fat LTO and
+`panic = "abort"`.
 
-This is the **exact build**. Its feature `hotspot-math` makes `Math.log` and `Math.exp`
-bit-identical to HotSpot by linking a port of OpenJDK code licensed under GPL-2.0-only. That
-licence is incompatible with the EPL-2.0 and Apache-2.0 code in the rest of SimOxide, so the
-binary is for your own use and must not be distributed.
-
-The **EPL build** leaves the feature out and can be distributed:
+The **exact build** adds `--mode exact`, which reproduces SimuLizar bit for bit:
 
 ```sh
-cargo build --release -p simoxide-cli --no-default-features --features fast
+cargo build --release -p simoxide-cli --features exact,hotspot-math   # or: cargo build-exact
 ```
 
-Use it in [fast mode](./fast-mode.md). Its exact mode uses SimOxide's own correctly rounded `log`
-and `exp`, which differ from HotSpot by one ulp on about 0.25 % of `exp` and 1e-5 of `log`
-arguments, so it matches the reference only until the first such draw (see
-[Deviations](../correctness/deviations.md#math-log-and-math-exp-without-hotspot-math)).
+The feature `exact` links Java `HashMap` iteration order (`simoxide-jcompat-exact`, for which no
+licence is granted), and `hotspot-math` makes `Math.log` and `Math.exp` bit-identical to HotSpot
+by linking a port of OpenJDK code licensed under GPL-2.0-only. The binary is for your own use and
+must not be distributed (`LICENSES`). With `exact` but without `hotspot-math`, the exact mode uses
+SimOxide's own correctly rounded `log` and `exp`, which differ from HotSpot by one ulp on about
+0.25 % of `exp` and 1e-5 of `log` arguments, so it matches the reference only until the first
+such draw (see [Deviations](../correctness/deviations.md#math-log-and-math-exp-without-hotspot-math)).
+A build without `exact` answers `--mode exact` with an error.
 
 ## Run a model
 

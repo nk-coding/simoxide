@@ -18,8 +18,10 @@ Status: `PLAN.md` (the qvto-rs milestone log, Q0-Q7, all done). The merge into S
 Paths in the QVTo documents, case files and tools are relative to this directory
 (`crates/qvto/`, the *QVTo root*): `reference/...`, `qvto-testkit/cases/...`, and `target/...`
 for generated material. `target` here is a link to the workspace's target directory
-(`$CARGO_TARGET_DIR`, else `<repository>/target`); the Rust tools create it (`qvto-paths`), so do
-it by hand only before running a Java tool first: `ln -s ../../target target`.
+(`$CARGO_TARGET_DIR` at run time, else `<repository>/target`); the Rust tools create and re-point
+it (`qvto-paths`), so make it by hand only before running a Java tool first:
+`ln -s ../../target target`. Generated material (`target/pcm`, `target/qvto-testkit/java`,
+`target/emf-oracle`) therefore belongs to one target directory.
 
 ## Documents
 
@@ -65,11 +67,20 @@ conformance and corpus tests; without them those tests skip.
 
 | Command | Gate |
 |---|---|
-| `cargo test-qvto` | all tests of the QVTo crates pass (alias in `.cargo/config.toml`) |
-| `cargo conform -- --suite all` | compat: 542 of 542 runnable cases equal the Java runner strictly |
-| `cargo conform -- --suite all --engine qvto-fast` | fast: 542 pass the Eclipse checks, 537 strictly (the order-insensitive verdict) |
+| `cargo test-qvto` | all tests of the QVTo crates pass (alias in `.cargo/config.toml`; the tests turn `compat` on) |
+| `cargo conform --suite all` | compat: 542 of 542 runnable cases equal the Java runner strictly |
+| `cargo conform --suite all --engine qvto-fast` | fast: 542 pass the Eclipse checks, 537 strictly (the order-insensitive verdict) |
+| `cargo run --profile release-unwind -p qvto-cli -- conform --suite all --engine qvto-fast` | the same in the EPL build (no `compat`): identical scoreboard |
 | `cargo run --profile release-unwind -p qvto-sema --example oracle_report` | analyser oracle: 1 102 of 1 102 keys match |
 | `taskset -c 2,3 cargo qvto bench` | the benchmark suite (`qvto-cli/README.md`), against a binary built before the change |
+
+Modes and builds: the default build is EPL-only and has the fast mode only (`Mode::default()` is
+`Fast`). Compat mode (Eclipse's `HashSet`/`HashMap` orders, HotSpot identity hashes) needs the
+cargo feature `compat` (qvto-runtime, qvto-vm, qvto, qvto-testkit, qvto-cli, qvto-simoxide),
+which links `simoxide-jcompat-exact`; no licence is granted for it, so such builds must not be
+distributed (the repository's `LICENSES`, section 7). A run in compat mode without the feature
+fails with `RunOutcome::code == MODE_UNAVAILABLE`; `qvto conform --engine qvto` and
+`qvto fuzz` refuse with a message.
 
 `qvto conform`, `qvto fuzz` and the oracle report catch panics per case, so they are built with
 the `release-unwind` profile (the workspace's `release` profile aborts on panic).

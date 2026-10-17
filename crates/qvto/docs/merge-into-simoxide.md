@@ -1,8 +1,29 @@
 # Merging qvto-rs into SimOxide (design)
 
-State: 2026-10-17. qvto-rs at `9459e5e` (main, after Q5b and Q6; Q7 still running on `q7`).
-SimOxide at `bdd8046` (main), plus the branches `qvto-adapter` (2 commits) and `spd` (design
-only, `DESIGN-SPD.md`, uncommitted). This is a plan. Nothing here has been done yet.
+State: 2026-10-17. Written as a plan at qvto-rs `9459e5e`; this copy lives in SimOxide
+(`crates/qvto/docs/`) since the import.
+
+**Status (2026-10-17, branch `qvto-merge` from `spd`, not merged into `main`):** M0-M3 done, M4-M8
+open (M4: the user).
+
+| Step | As built |
+|---|---|
+| M0 | worktree `simoxide-merge`, branch `qvto-merge` from `spd` (explicit members, `release-unwind`) |
+| M1 | qvto-rs `439d3ab` imported with its 194 commits by `git filter-repo` path renames (`crates/qvto/...`) and one `--allow-unrelated-histories` merge; `git log -- crates/qvto/qvto-vm` has its 69 commits |
+| M2 | QVTo crates are workspace members; `qvto-paths` (one helper crate instead of a module of `qvto-testkit`: the lower crates' tests need it too) gives the QVTo root (`crates/qvto`) and keeps `crates/qvto/target` a link to the target directory, so case files, scripts and the Java runner keep their `target/...` and `reference/...` paths; data paths `crates/qvto-x/...` became `qvto-x/...`; adapter on in-repo `simoxide-model`; F2's `qvto-simoxide-bridge` replaced by it; aliases `test-sim`, `test-fdn`, `test-qvto`, `build-exact`, `conform`, `qvto`; QVTo crates rustfmt- and clippy-clean; debug-info profiles left as SimOxide's (D9 not adopted: disk is plentiful) |
+| M3a | `crates/foundation/`: `simoxide-jcompat` (hash codes, `Double.toString` with an allocation-free byte buffer, `Integer`/`Double` parsing incl. `&str` entry points, `Character` data, `Math.round/max/min`, Fx hasher, `MapOrder`/`InsertionOrder`), `simoxide-jcompat-exact` (`JavaHashMap` generic over the hashing environment, `JdkHashOrder` closed form tested against it, one `HotSpotXorShift` for both former copies), `simoxide-hotspot-math` moved. Replaced: qvto-runtime `java/*`, `fxhash`, HotSpot generator, qvto-testkit `idhash`, qvto-emf parsers, SimOxide's `javahash.rs`, both `javafmt.rs`, `canon.rs`'s formatter (now with the subnormal rule; EMF goldens unchanged), `raw.rs` parsers, both `fxhash.rs` (the loader's byte hashing kept: the other variant cost 4 % in `load-bench`), `jmath` round/max/min. `java/string.rs` stays in qvto-runtime (it works on qvto's `Str`); `java.util.Random` is S2's `javarand.rs` in simoxide-sim (EPL), not yet in jcompat |
+| M3b | features: simoxide-sim `exact` (= `jdk-order`), fast always compiled (`fast` kept as a no-op); `Compat::Order` (`JdkHashOrder` / `InsertionOrder`) for `INNER`, BYTESIZE sums and finalisation; `DefaultCompat`; `SimErrorKind::ModeUnavailable`; qvto `compat` in qvto-runtime/-vm/qvto/-testkit/-cli/-simoxide with an uninhabited `JavaHashMap` stand-in in EPL builds; `MODE_UNAVAILABLE` run outcome; `exact` in simoxide-testkit/-reconf/-spd/-cli. Defaults EPL-only, CLI default mode fast. Tests enable `exact`/`compat` through dev-dependencies (so no `test-sim-epl` alias); EPL check by builds, `cargo tree` and the EPL `conform --engine qvto-fast` scoreboard. `LICENSES` sections 7 (no licence for the exact crate) and 8 (Eclipse QVTo/OCL) |
+| merge | `spd` merged twice (F2; then P1+S2 at `c8ee1d9`) |
+
+**M4 resumes here:** create `crates/foundation/simoxide-emf-core` from `crates/qvto/qvto-model`
+(`git mv`, package `simoxide-emf-core`, workspace dependency
+`qvto-model = { path = "crates/foundation/simoxide-emf-core", package = "simoxide-emf-core" }`),
+add `MetaRegistry::from_static` (move the logic of `crates/qvto/qvto-simoxide/src/registry.rs`),
+make `tools/gen_meta.py` write the static seed (main and ext tables merged), switch
+`simoxide-model`'s `meta` ids to the foundation ids with a `PcmMeta` extension trait, and gate on
+the adapter's registry test, unchanged `generated.rs` ids, the EMF goldens, golden hashes and the
+QVTo counts (5.2).
+
 
 User decision (2026-10-17): all QVTo crates move into the SimOxide repository, nested in their
 own directory, with a QVTo section in SimOxide's VitePress docs ("the wiki"). A set of

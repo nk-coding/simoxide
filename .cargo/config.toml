@@ -1,12 +1,21 @@
 # Test gates per area (docs/development/contributing.md, "Guardrails"; crates/qvto/README.md).
 # Run niced on shared machines: CARGO_BUILD_JOBS=4 nice -n 19 cargo test-sim -- --test-threads=4
+#
+# Default builds are EPL-only (fast modes). The exact/compat gates need the opt-in features
+# `exact`, `compat`, `hotspot-math`, whose builds must not be distributed (LICENSES, sections 4
+# and 7). The tests turn them on through their dev-dependencies.
 [alias]
 # SimOxide's crates, release (the corpus and golden tests compare bit for bit)
-test-sim = "test --release -p simoxide-hotspot-math -p simoxide-model -p simoxide-stoex -p simoxide-random -p simoxide-sched -p simoxide-sim -p simoxide-testkit -p simoxide-cli"
+test-sim = "test --release -p simoxide-hotspot-math -p simoxide-model -p simoxide-stoex -p simoxide-random -p simoxide-sched -p simoxide-sim -p simoxide-testkit -p simoxide-cli -p simoxide-reconf -p simoxide-spd"
+# the foundation crates
+test-fdn = "test --release -p simoxide-jcompat -p simoxide-jcompat-exact"
 # the QVTo crates (debug build, as in qvto-rs)
 test-qvto = "test -p qvto -p qvto-bytecode -p qvto-cli -p qvto-emf -p qvto-model -p qvto-paths -p qvto-runtime -p qvto-sema -p qvto-simoxide -p qvto-syntax -p qvto-testkit -p qvto-types -p qvto-vm"
-# the conformance scoreboard: `cargo conform -- --suite all` (compat), `-- --suite all --engine qvto-fast`
-# (catches panics per case, so it needs the unwinding release profile)
-conform = "run --profile release-unwind -p qvto-cli --bin qvto -- conform"
-# the qvto command line tool (`cargo qvto bench ...`)
-qvto = "run --profile release-unwind -p qvto-cli --bin qvto --"
+# the exact build of the command line tools (for bench/golden.sh and simoxide-fuzz corpus)
+build-exact = "build --release -p simoxide-cli -p simoxide-testkit --bins --features simoxide-cli/exact,simoxide-cli/hotspot-math,simoxide-testkit/exact"
+# the conformance scoreboard in compat mode: `cargo conform --suite all`;
+# `cargo conform --suite all --engine qvto-fast` for fast mode (it catches panics per case, so it needs the
+# unwinding release profile)
+conform = "run --profile release-unwind -p qvto-cli --features compat --bin qvto -- conform"
+# the qvto command line tool with compat mode (`cargo qvto bench ...`)
+qvto = "run --profile release-unwind -p qvto-cli --features compat --bin qvto --"

@@ -30,7 +30,7 @@ simoxide run --model <dir> [flags]
 | `--replay-tape FILE` | take the uniforms from a recorded tape instead of the generator |
 | `--check-origins` | with `--replay-tape`: fail at the first draw made at a different place |
 | `--name NAME` | run name in the trace header |
-| `--mode exact\|fast` | simulator mode, default `exact` ([Fast mode](./fast-mode.md)) |
+| `--mode exact\|fast` | simulator mode, default `fast` ([Fast mode](./fast-mode.md)); `exact` needs the exact build ([Getting started](./getting-started.md)) |
 | `--ps-algorithm exact\|virtual-time` | processor-sharing algorithm, default `exact` ([Deviations](../correctness/deviations.md#virtual-time-processor-sharing)) |
 | `--flavour simulizar\|slingshot` | whose semantics, default `simulizar` ([Slingshot flavour](./slingshot.md)) |
 | `--quirks LIST` | Slingshot compat flags: `Q1`..`Q37`, `fast`, `all`, `none`, `-Qn`; default `none` (the fixed behaviour); `--quirks list` prints them ([Quirks](../spec/slingshot/quirks.md#compat-flags)) |

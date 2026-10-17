@@ -48,10 +48,11 @@ Run after every change to the simulator:
 
 1. `cargo test --release --workspace` (includes the corpus in both modes, `tests/bugs.rs` and
    `tests/literal_engine.rs`).
-2. `crates/simoxide-cli/bench/golden.sh > after.txt`: a hash of the trace, tape, measurements
+2. `cargo build-exact`, then `crates/simoxide-cli/bench/golden.sh > after.txt` (exact mode; the
+   default build has only the fast mode): a hash of the trace, tape, measurements
    and event count of every model directory under three run configurations. Compare with the
    list from before the change; the hashes must not change.
-3. `simoxide-fuzz corpus --corpus corpus --sim "cmd:…simoxide run …"` (both RNG modes, against the
+3. `simoxide-fuzz corpus --corpus corpus --sim "cmd:…simoxide run --mode exact …"` (both RNG modes, against the
    reference's expected outputs), and the same with `--corpus corpus-fuzz`.
 4. For work on aborting runs: `reference/reffail-cmp.sh`.
 5. For optimisations: hashes of the outputs of generated models (for example 1 000 with default
@@ -59,18 +60,20 @@ Run after every change to the simulator:
    against a binary built before the change.
 
 Cargo aliases (`.cargo/config.toml`) run the test gates per area: `cargo test-sim` (SimOxide's
-crates, release) and `cargo test-qvto` (the QVTo crates). After changes to the QVTo crates, also
+crates, release), `cargo test-fdn` (the foundation crates) and `cargo test-qvto` (the QVTo
+crates); the tests turn the opt-in features `exact`/`compat` on through their dev-dependencies. After changes to the QVTo crates, also
 the conformance scoreboard and the analyser oracle (`crates/qvto/README.md`, "Building and
-testing"): `cargo conform -- --suite all` (542 of 542 strictly equal to Eclipse QVTo),
-`cargo conform -- --suite all --engine qvto-fast` and the `oracle_report` example (1 102 of
+testing"): `cargo conform --suite all` (542 of 542 strictly equal to Eclipse QVTo),
+`cargo conform --suite all --engine qvto-fast` and the `oracle_report` example (1 102 of
 1 102). They catch panics per case and therefore use the profile `release-unwind`.
 
 ## Releases
 
 Only the EPL build may be distributed as a binary: release binaries, container images and packages
-are built with `cargo build --release -p simoxide-cli --no-default-features --features fast`
-(`cargo tree -p simoxide-cli -e normal --no-default-features --features fast` must not list
-`simoxide-hotspot-math`). Source releases may contain everything; every crate package includes
+are built with the default features (`cargo build --release -p simoxide-cli`, `-p qvto-cli`).
+`cargo tree -e normal -p simoxide-cli` and `-p qvto-cli` must list neither
+`simoxide-hotspot-math` nor `simoxide-jcompat-exact` (no licence granted, `LICENSES` section 7),
+which only the opt-in features `exact`, `compat` and `hotspot-math` pull in. Source releases may contain everything; every crate package includes
 its licence texts (`LICENSE`, and `LICENSES` for the EPL crates).
 
 ## Documentation site

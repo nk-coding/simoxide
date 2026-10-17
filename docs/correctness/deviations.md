@@ -102,6 +102,7 @@ What changes:
 | `Pois` | bisection over `[0, 2^31)` on `regularizedGammaQ(k+1, m)` | inversion by sequential search for `m < 10`, PTRS (Hörmann 1993) otherwise; **minus 1** as in the reference ([REF-4](./reference-bugs.md#ref-4-pois-m-is-poisson-1)) | exact algorithms for Poisson(m) − 1, the reference's distribution |
 | `UniDouble` | Brent inversion, accuracy 1e-6 | `a + u·(b − a)` | exact; the reference's value is within 1e-6 of it |
 | `UniInt` | bisection over the CDF | Lemire's unbiased multiply-shift | the same uniform distribution on `a..=b` |
+| Java `HashMap` iteration order | `INNER` characterisations visited in `getContents()` order (ND-12/13), BYTESIZE payload sums and `deactivateAllActiveResources` in `HashMap` bucket order | insertion order of the keys (`InsertionOrder`); the `HashMap` emulation (`simoxide-jcompat-exact`) is only in exact builds | a different, fixed evaluation order of independent characterisations and of the end-of-run resource finalisation; it changes which draw goes where, not any distribution |
 | Parameter checks and errors | `checkParameters`, distribution constructors | the same code, no draw on an error; NaN or infinite parameters, `UniDouble(a, a)`, an overflowing `UniInt` range and `Pois` means above 1e9 fall back to the reference algorithm | identical error behaviour on all 154 parameter sets of the Java oracle |
 
 Not changed, on purpose:

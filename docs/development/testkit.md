@@ -116,7 +116,7 @@ one reference batch per round.
 
 ## Statistical equivalence of two modes (`equiv`)
 
-`equiv` runs models in two `simoxide_sim::Mode`s (default exact and fast) with many seeds, in
+`equiv` runs models in two `simoxide_sim::Mode`s (default exact and fast; exact needs the feature `exact`) with many seeds, in
 process and in parallel, and tests per measuring point and metric whether the results have the
 same distribution ([Testing](../correctness/testing.md#fast-mode) describes the tests).
 

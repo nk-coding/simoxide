@@ -21,26 +21,26 @@ Rust stable 1.88 or later:
 
 ```sh
 cargo build --release
-./target/release/simoxide run --model corpus/x_sl_mediastore --measurements m.csv
-./target/release/simoxide run --model DIR --seed 7 --max-measurements 10000 \
+./target/release/simoxide run --model corpus/x_sl_mediastore --measurements m.csv   # fast mode
+./target/release/simoxide run --mode exact --model DIR --seed 7 --max-measurements 10000 \   # exact build
     --trace trace.jsonl --tape tape.jsonl --measurements m.csv
 ./target/release/simoxide bench --model DIR --runs 20 --threads 8
 ```
 
 SimOxide comes in two builds:
 
-- **Exact build** (the default of `simoxide-cli`): reproduces the reference bit for bit. This needs
-  HotSpot's `Math.log` and `Math.exp`, which SimOxide ports from GPL-2.0-only OpenJDK code (crate
-  `simoxide-hotspot-math`, cargo feature `hotspot-math`). The GPL-2.0 is incompatible with the
-  EPL-2.0 and Apache-2.0 code in SimOxide, so build it from source for your own use. **Its
-  binaries must not be distributed.**
-- **EPL build** (`cargo build --release -p simoxide-cli --no-default-features --features fast`):
-  contains no GPL code and can be distributed; use its fast mode. Its exact mode uses correctly
-  rounded `log` and `exp`, which differ from HotSpot by one ulp on rare inputs, so it can drift
-  from the reference (see `docs/correctness/deviations.md`).
+- **EPL build** (the default, `cargo build --release`): the fast mode (`--mode fast`, the
+  default): the reference's semantics and statistics, other random numbers. It contains only
+  EPL-2.0 (and Apache-2.0) code and may be distributed.
+- **Exact build** (`cargo build --release -p simoxide-cli --features exact,hotspot-math`, or
+  `cargo build-exact`): adds `--mode exact`, which reproduces the reference bit for bit. It needs
+  Java `HashMap` iteration order (crate `simoxide-jcompat-exact`, for which no licence is granted)
+  and HotSpot's `Math.log`/`Math.exp` (crate `simoxide-hotspot-math`, GPL-2.0-only). **Its
+  binaries must not be distributed**; build it from source for your own use. Without
+  `hotspot-math` the exact mode uses correctly rounded `log`/`exp`, which differ from HotSpot by
+  one ulp on rare inputs (see `docs/correctness/deviations.md`).
 
-The libraries (`simoxide-sim`, `simoxide-random`, `simoxide-stoex`) leave `hotspot-math` off by
-default, so a program that embeds SimOxide contains no GPL code unless it enables the feature.
+The libraries leave all of these features off by default.
 
 ## Documentation
 
@@ -72,13 +72,15 @@ cd docs && npm install && npm run dev
 | `crates/simoxide-sim` | the simulator: compiler, event core, interpreter, measurements, API |
 | `crates/simoxide-cli` | `simoxide` and `simoxide-bench` |
 | `crates/simoxide-testkit` | differential testing, model generator, `simoxide-fuzz` |
+| `crates/foundation/` | shared with the QVTo engine: Java compatibility (`simoxide-jcompat`, opt-in `simoxide-jcompat-exact`), `simoxide-hotspot-math` |
+| `crates/qvto/` | the QVTo engine (`crates/qvto/README.md`) |
 | `reference/` | `refsim`: deterministic SimuLizar 5.2.2, the oracle |
 | `corpus/`, `corpus-fuzz/` | models with the reference's expected outputs |
 | `bench/compare/` | the comparison with the other Palladio simulators |
 
 ## Licence
 
-Eclipse Public License 2.0 (`LICENSE`), except `crates/foundation/simoxide-hotspot-math`, which is
-GPL-2.0-only and linked only through the feature `hotspot-math` (the exact build, see Quick
-start). SimOxide contains code and data derived from Palladio, Apache Commons Math, JScience and
+Eclipse Public License 2.0 (`LICENSE`), except two crates that only the exact build links:
+`crates/foundation/simoxide-hotspot-math` (GPL-2.0-only, feature `hotspot-math`) and
+`crates/foundation/simoxide-jcompat-exact` (no licence granted, features `exact`/`compat`). SimOxide contains code and data derived from Palladio, Apache Commons Math, JScience and
 OpenJDK; `LICENSES` lists them with their licences and the open licensing issues.

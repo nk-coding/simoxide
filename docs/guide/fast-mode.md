@@ -51,12 +51,12 @@ See [Engine performance](../performance/engine.md#fast-mode) for the per-model n
 
 ## Using it
 
-- The CLI includes both modes (cargo feature `fast`, on by default for `simoxide-cli`;
-  `--no-default-features` builds an exact-only binary).
-- The libraries have the feature off by default; enable `simoxide-sim/fast`.
+- The fast mode is always compiled and is the CLI's default mode; the exact mode needs the
+  feature `exact` (see [Getting started](./getting-started.md)).
+- In the libraries `Mode::default()` is `Exact` with the feature `exact`, else `Fast`.
 - Library: `SimConfig { mode: Mode::Fast, .. }` with `simoxide_sim::run`, `run_batch` or
   `simulate_memory_mode`, or the typed `Simulation::<simoxide_sim::Fast>::create`.
-  `Simulation::new` is exact-only.
+  `Simulation::new` is exact-only (feature `exact`).
 - The mode is a compile-time policy (`simoxide_sim::compat`): the simulator is monomorphized per
   mode, and the choice costs nothing per event.
 - `RunResult::uniforms` counts samples in fast mode, not uniforms.
