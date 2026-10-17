@@ -187,8 +187,12 @@ runner's `det` mode ([correctness](./slingshot.md#the-exact-mode)), with these d
 - **`Math.log`/`Math.exp`** of Palladio's lognormal distributions and of StoEx `Log` are correctly
   rounded in the default build, HotSpot's intrinsics only with the opt-in `hotspot-math` (GPL):
   rare last-bit differences (one sample of `h21`).
-- **SPD** is not supported yet (design phase X2d; the CLI refuses a `.spd` next to the model, use
-  `--no-spd`).
+- **SPD** (X2d): the policies, the adjustments (Slingshot's `MainTransformation` in QVTo's
+  ordered mode; the CLI needs the `reconfiguration` feature, else decisions only) and the
+  `ModelAdjusted` subscribers run on Slingshot's bus. The cloned monitors' calculators are
+  registered at `ModelAdjusted` instead of a few same-instant generations later;
+  `NumberOfElementsMonitorBehavior` has no probe (elastic-infrastructure measuring points are
+  ignored).
 - **Bookkeeping events** without a subscriber or a projected line (`ProbeTaken`, `UserSlept`,
   `MeasurementUpdated`, …) are not created; the event count is the count of the remaining
   Slingshot events. Processing types (FeedThrough, aggregators) do not change measurements.

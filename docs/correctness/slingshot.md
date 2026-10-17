@@ -92,15 +92,24 @@ from the shell).
 
 | Result | Cases |
 |---|---|
-| byte-equal (86) | all 20 probes, all 38 clean corpus models, 24 of the 25 failure models (so 21 of the 22 handler-error cases, with their disposed handlers and partial side effects: Q17, Q19, Q21-Q24, Q30, Q31), x_pem_acquire and x_sl_runconfigtest (the run fails before t = 0, as in Slingshot), the two Q37 cases |
+| byte-equal (89) | all 20 probes, all 38 clean corpus models, 24 of the 25 failure models (so 21 of the 22 handler-error cases, with their disposed handlers and partial side effects: Q17, Q19, Q21-Q24, Q30, Q31), x_pem_acquire and x_sl_runconfigtest (the run fails before t = 0, as in Slingshot), the two Q37 cases, and the 3 SPD examples (spd_minimal: 1 adjustment, spd_scale_in: 2, scale-out and scale-in with Q5; spd_time_policies: 8), with Slingshot's adjustment run by QVTo's ordered mode inside the engine (X2d) |
 | `java.util.HashMap` order (1) | h27: two `INNER` characterisations are evaluated in the iteration order of SimuCom's `HashMap` frame, which only OpenJDK's sources define; the EPL build iterates in insertion order (a licence-bound deviation) |
-| SPD (3) | spd_minimal, spd_scale_in, spd_time_policies: SPD in the exact mode is design phase X2d |
 
 These counts hold for builds with `hotspot-math` (the tests). The default EPL build computes
 `java.lang.Math.log`/`exp` correctly rounded instead of with HotSpot's intrinsics (the
 `hotspot-math` code is GPL); there `h21_stoex_distributions` differs in the last digit of one of
-its 406 samples (Palladio's lognormal uses `Math.exp`), so 85 of 90. Palladio 6.0's own
-`FastMath` (Commons Math 3) is ported exactly and needs no opt-in.
+its 406 samples (Palladio's lognormal uses `Math.exp`), so 88 of 90. Palladio 6.0's own
+`FastMath` (Commons Math 3) is ported exactly and needs no opt-in. The SPD cases need no opt-in
+either: the adjustments run in QVTo's ordered mode, which every build has.
+
+The SPD cases are also checked beyond level E: the decision log (`spd.jsonl`: evaluations,
+requests, adjustments with their change counts and model summaries) equals the reference's, and
+the four cases of the SPD corpus `corpus-spd/` (with `spd_service_group`: three service-group
+adjustments) are byte-equal too (`spd_decision_logs_match_the_reference`,
+`corpus_spd_is_byte_equal_at_level_e`). Ids of elements an adjustment creates appear under the
+reference runner's aliases (`~EClass:entityName`, else the container's key plus
+`/feature.index`); two created elements with equal aliases keep separate series, written one
+after the other, as the reference's EDP2 measurements.
 
 ## Reproducing
 
