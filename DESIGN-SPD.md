@@ -1,7 +1,8 @@
 # SimOxide: runtime reconfiguration, a Slingshot mode, SPD and snapshots (design)
 
 State: 2026-10-17. This is a design. Phase S0 (the Slingshot reference runner, `reference/slingshot/`) is
-implemented; the rest is not. User decisions of §8 are recorded. It is on branch `spd`
+implemented, and phase S1 (the Slingshot semantics specification, `docs/spec/slingshot/`, rules
+`SS-*`); the rest is not. User decisions of §8 are recorded. It is on branch `spd`
 (forked from `qvto-adapter`). It is a plan, so it sits next to the code and not in the VitePress
 site, which describes the current state (`docs/development/contributing.md`). The parts that get
 built move into `docs/spec/` and `docs/guide/`.
@@ -416,8 +417,9 @@ distribution or in detail. The points that matter for a Slingshot flavour:
       (`[CORE]behavior/CoreBehavior.java:36-52`). Results therefore run after the events already
       queued for the same time (FIFO, which is SSJ's event-list behaviour).
     - A handler that throws is disposed for the rest of the run (RxJava `LambdaObserver`).
-    - The order of registration comes from the extension and Guice set-up. S1 checks whether it
-      is stable across runs.
+    - The order of registration comes from the extension and Guice set-up. S1: the extension order
+      was the same in every run; `getDeclaredMethods()` order varies between JVMs, but only for
+      reified subscribers of disjoint types, so it never changes a run (SS-BUS-2).
   - **Same-time order.**
     - SSJ's `SplayTree` keeps equal times FIFO by insertion, as SIM-3.1 does.
     - But the result events of one handler sit in a `HashSet` ordered by identity hash
@@ -520,8 +522,10 @@ distribution or in detail. The points that matter for a Slingshot flavour:
     and closely on the others;
   - it aborts on acquire/release without a `ParametricResourceDemand`;
   - it fails on synchronous forks (`h11_fork_sync`, `x_pem_fork`) (`docs/performance/comparison.md`).
-- Phase S1 writes all this down as rules `SS-*`, like SimOxide's `SIM-*`/`MEAS-*`, each with a
-  source citation and, where possible, a probe run.
+- Phase S1 wrote all this down as rules `SS-*` (`docs/spec/slingshot/`), each with a source citation
+  and, where possible, a probe run; findings in §2.1. Two statements above are refined there: composites
+  reached through a connector are entered (but their demands abort, Q30), and the "exact match on
+  `x_ss_*`" holds for the deterministic E2E models only.
 - **QVTo in Slingshot.**
   - The only QVTo use is the SPD adjustment (`[ADJ]adjustment/qvto/*`), which is a port of
     SimuLizar's QVTo executor and model cache.
@@ -539,7 +543,7 @@ What the exact mode needs, and where S0 left it:
 
 1. **A patched reference.** Done in S0:
    - seeded `Math.random()` and StoEx;
-   - a draw tape (`tape.jsonl`, with the event index);
+   - a draw tape (`tape.jsonl`, with the event index and, since S1, the draw site);
    - deterministic UUIDs.
 2. **A deterministic order of everything that iterates hash-based collections.** Done in S0 for the
    smoke corpus:
@@ -547,13 +551,13 @@ What the exact mode needs, and where S0 left it:
      `Set.of` in Slingshot, QVTo and OCL);
    - patch S0-P2 (PS job table).
    - Extension registration and `getDeclaredMethods` order were stable in all runs.
-   - Other hash-dependent orders may remain in code that the smoke corpus does not reach.
+   - S1 extended the check to the probes and the corpus (SS-X-6); no further hash-dependent order was found.
 3. **The same same-time order as Slingshot's bus cascade.** This is the main cost. The exact mode
    does not have to emit every bus event, but it must reproduce the order consequences:
    - result events are scheduled FIFO in insertion order after the events already queued;
    - stale PS events still produce state samples.
    - The comparison runs on a **projection** of the bus trace (user, job, measurement and SPD
-     events), plus the tape and the measurements byte for byte. S1 defines the projection.
+     events), plus the tape and the measurements byte for byte. S1 defined the projection (SS-X-2).
 4. **Java identity order in QVTo `Set`s (Q8, Q16).** In the `det` oracle these Sets iterate in
    insertion order. In the exact mode qvto-rs therefore needs an **insertion-order policy** for
    `Set`s (phase Q2).
@@ -562,6 +566,42 @@ What the exact mode needs, and where S0 left it:
 
 Effort: see §7 (X1, X2, Q2). Exactness on deterministic models (constant demands, no branches,
 deterministic arrivals) remains the first milestone of the exact mode.
+
+### 2.1 Findings of S1 (Slingshot semantics specification)
+
+The specification is `docs/spec/slingshot/` (10 pages, rule families `SS-ENG`, `SS-BUS`, `SS-RUN`,
+`SS-ND`, `SS-WL`, `SS-ACT`, `SS-RES`, `SS-MEAS`, `SS-RNG`, `SS-SPD`, `SS-X`, quirks `SS-Q1`–`SS-Q37`),
+with 20 probe models in `reference/slingshot/models/probes/` (`probes.sh`, `expected/`). What changes
+the plan:
+
+- **A throwing handler is disposed and the run goes on** (SS-BUS-7, Q18). One exception (loop count 0,
+  no true guard, two demands in one internal action, an acquire without demand, a collection
+  iterator, a fork with two branches, an infrastructure call with assembly-operation monitors, an
+  unconnected pair of containers) silently freezes that stage for every user; the run "succeeds".
+  22 of the 88 verified models have such exceptions; of the 66 corpus models only 38 run without
+  handler errors, aborts or empty output (`results/det-verify.csv`). The exact mode must
+  emulate per-handler disposal; the fixed default aborts with an error.
+- **Exact mode needs `f64` time** (SS-ENG-2): event times are `now + delay` double sums, response
+  times their differences (e.g. `0.30000000000000004`). §5.2 corrected.
+- **Role lookup by role id alone** (Q20): entry calls go to the first assembly of the component, not
+  the delegation connector's; external calls take the first system connector with the required role,
+  whatever the caller. Harmless for single assemblies and for SPD's load balancer (new roles per
+  replica).
+- **Several demands of one internal action** run concurrently and each completion advances the
+  cursor (Q17): actions are skipped or overlap, the request can end before its demands, then a
+  handler is disposed. Fixed default: concurrent with a join.
+- New semantics to implement in S2 (not bugs): JIFFY jobs for zero PS demands with a demand tuple of
+  0; FCFS serves each job for its whole demand from the head (no lost time, no re-scheduling); stale
+  PS completions sample state and utilisation (Q26, kept in the exact mode); a link-failure
+  `Math.random()` draw on every transfer (Q28); links always simulated with BYTESIZE payloads in both
+  directions; probes per specification (replicaID ignored) and passive probes per passive resource;
+  assembly-operation monitors keyed by the system role for entry calls (Q33); passive capacity
+  without frame (Q27); infrastructure-call inputs ignored (Q36).
+- **The event projection** for exact comparison (SS-X-2): level M (measurements, aborts, SPD events,
+  stop) and level E (plus passed elements, calls, requests, jobs, grants, user ends), produced from
+  the bus trace by `reference/slingshot/tools/project.py`; **draw sites are on the tape** (seed-agent
+  hooks in `TransitionDeterminer` and `SimulatedLinkingResource`, stack frames for StoEx), mapped to
+  SimOxide's origin purposes (SS-X-4).
 
 ## 3. Snapshots in Slingshot (initialisation extension)
 
@@ -713,10 +753,10 @@ So in Slingshot, resume ≠ uninterrupted, even without changes.
 - Its `default.experiments` stops at 10 s; the runner takes `-simTime`.
 
 **Open:**
-- the trace projection for exact comparison (S1);
-- draw sites on the tape (needs a `TransitionDeterminer` patch);
-- `det` coverage beyond the smoke corpus;
 - usage evolution (U9).
+- Done in S1: the trace projection (`tools/project.py`, SS-X-2); draw sites on the tape (seed-agent
+  hooks, no source patch needed; SS-X-4); `det` verification beyond the smoke corpus
+  (`verify-det.sh`, `results/det-verify.csv`, SS-X-6); the subscriber order per event (`bus.jsonl`).
 
 ### 4.2 Validation levels
 
@@ -794,7 +834,7 @@ simoxide-snapshot  (new, feature `snapshot`) serde of RunState,            share
 
 | Concern | SimuLizar flavour | Slingshot flavour | Shape of the hook |
 |---|---|---|---|
-| time, event list | i64 ns, FIFO `(t, seq)` (SIM-2, SIM-3) | the same list; double time converted at the edges | none: shared |
+| time, event list | i64 ns, FIFO `(t, seq)` (SIM-2, SIM-3) | fast: the same list, double times converted at the edges (≤ 1 ns per delay, a deviation); exact: **`f64` time**, `t = now + delay` as SSJ (SS-ENG-2) | time type per flavour and mode |
 | process model | DESMO-J processes, `Resume` notes, elided hand-offs | the same machinery; Slingshot's same-instant order only where SS-* says it changes results | a few ordering hooks |
 | branch draws | the reference stream (exact) or fast | exact: `java.util.Random(seed + 1000003)`, as the S0 runner seeds `Math.random()`; fast: any stream | `F::branch_rng` |
 | StoEx draws | as now | exact: MT19937 `{seed..seed+5}` (S0 `-stoex mt`, the SimuLizar stream); fast: fast RNG | `C` |
@@ -1147,9 +1187,9 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **R1** | SimuLizar rules: PRM values (D2), reconfiguration process runs rules (D3), MEAS-7.3 series | F3, F4 | 1.5-2 w | SimuLizar's load-balancer and power examples run; statistical match vs SimuLizar |
 | **R2** | Exact rules: deterministic UUIDs in refsim (D5), byte-exact comparison | R1 | 1 w | byte-equal traces on the examples |
 | **S0** | *Done 2026-10-17.* Slingshot reference runner `reference/slingshot/`: stub bundle, scripts with private config areas, trace/tape/CSV/SPD-log extension, seed agent (StoEx, `Math.random`, UUIDs), `det` ordering rule and PS patch, smoke corpus | — | 1 w | met: SPD minimal example (and 8 more models) byte-reproducible; CSV in SimOxide's format |
-| **S1** | Slingshot semantics spec `docs/spec/slingshot/` (rules `SS-*`): event core, usage, SEFF, resources, monitoring, stop, model changes; differences to SIM/WL/ACT/MEAS rules | S0 helps | 1.5-2 w | every difference has a rule with a source citation and, where possible, a probe run |
+| **S1** | *Done 2026-10-17.* Slingshot semantics spec `docs/spec/slingshot/` (10 pages, rules `SS-*`, quirks Q17–Q37 added to Q1–Q16): event core and bus, usage, SEFF, resources, monitoring, random streams, SPD, quirks, exact comparison (projection, tape mapping); 20 probe models with `det` outputs (`models/probes/`, `probes.sh`); draw sites on the tape; `det` verified on 88 models (`verify-det.sh`, `results/det-verify.csv`) | S0 helps | 1.5-2 w | met: every difference has a rule with a source citation; 20 probes and the corpus runs demonstrate them (§2.1) |
 | **S2** | Slingshot flavour, fast mode: `Flavour` trait, hooks of 5.2, Slingshot monitors and windows, stop, branch stream, quirk compat flags (U5) | F1, S1 | 4-6 w (a: trait and SimuLizar impl, golden unchanged; b: usage, stop, RNG; c: resources; d: monitoring) | `x_ss_*` exact on deterministic models; `x_espresso`, `x_ss_mediastore` statistically equal (30 seeds) |
-| **X1** | Slingshot-exact oracle hardening: trace projection (with S1), draw sites on the tape (`TransitionDeterminer` patch), `det` audit beyond the smoke corpus (identity-hash orders in EMF/SimuCom framework), corpus `corpus-ss/` with `det` reference outputs | S0, S1 | 1-1.5 w | every Slingshot corpus model byte-reproducible in `det`; projection documented |
+| **X1** | Slingshot-exact oracle hardening. Done in S1: trace projection (`tools/project.py`), draw sites on the tape (agent hooks, no patch), `det` verification on probes and corpus. Remaining: corpus `corpus-ss/` with `det` reference outputs (probes, SPD examples, the 38 corpus models without failures, chosen failure models), a static audit that no class subscribes twice to one event type without disjoint reification, SPD corpus runs in `det` (P2 models) | S0, S1 | 0.5-1 w | every Slingshot corpus model byte-reproducible in `det`; projection documented |
 | **X2** | Slingshot-exact mode: same-time order of Slingshot's handler cascade (insertion-ordered results, FIFO after queued events), double time, PS stale-event samples and zero-demand jiffy, `java.util.Random` branch stream, `SimulationFinished` order, quirk flags all on | S2, X1 | 4-6 w (a: event order and time; b: resources and monitoring; c: SPD events) | V3x: trace projection, tape and measurements byte-equal with `det` on the Slingshot corpus |
 | **Q2** | qvto-rs insertion-order policy for `Set`s (the `det` oracle's QVTo/OCL rule), opt-in for the Slingshot-exact mode | Q1 | 3-5 d | SPD corpus adjustments equal the `det` Java runner's, including container and link order (Q16) |
 | **P1** | SPD interpreter: model view, filters, aggregators, state, stimulus observers, time events | F0 (F1 for state) | 1.5-2 w | V1 unit tests; decision log equals the reference runner's on time-triggered models |

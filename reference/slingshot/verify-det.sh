@@ -85,6 +85,7 @@ for d in "$@"; do
   ma=$(field "$o/det-a/summary.json" "d['instrument']['math_draws']")
   err=$(field "$o/det-a/summary.json" "d.get('error') or (d['instrument'] or {}).get('error') or ''" | tr ',\n' ';;')
   [ -f "$o/det-a.limit" ] && err="time or size limit (livelock?)"
+  [ "$err" = "?" ] && err=""
   [ -f "$o/det-a/summary.json" ] || [ -n "$err" ] || err="no result: $(grep -m1 -E 'Caused by|Exception' "$o/det-a.log" | cut -c1-150 | tr ',' ';')"
   he=$(grep -c "An error occurred" "$o/det-a.log"; true)
   [ "$he" -gt 0 ] && he="$he: $(grep -m1 "An error occurred" "$o/det-a.log" | sed 's/.*An error occurred: //' | cut -c1-120 | tr ',' ';')"

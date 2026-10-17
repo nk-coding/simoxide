@@ -243,7 +243,9 @@ public final class Instrument {
 		} else if (o instanceof final Job job) {
 			j.integer("job", seq(jobs, job.getId())).num("d", job.getDemand());
 			if (job instanceof final ActiveJob a) {
-				j.str("rc", Keys.id(a.getAllocationContext().getResourceContainer_AllocationContext()))
+				// a job without allocation context (assembly not allocated) is aborted at once
+				j.str("rc", a.getAllocationContext() == null ? null
+						: Keys.id(a.getAllocationContext().getResourceContainer_AllocationContext()))
 						.str("res", Keys.id(a.getProcessingResourceType()));
 				if (a.getRequest() != null) {
 					user(j, a.getRequest().getUser());

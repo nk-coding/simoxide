@@ -67,6 +67,22 @@ export default defineConfig({
         ],
       },
       {
+        text: 'Semantics (Slingshot)',
+        collapsed: true,
+        items: [
+          { text: 'Overview', link: '/spec/slingshot/' },
+          { text: 'Event core', link: '/spec/slingshot/core' },
+          { text: 'Usage model', link: '/spec/slingshot/usage' },
+          { text: 'SEFF interpretation', link: '/spec/slingshot/seff' },
+          { text: 'Resources', link: '/spec/slingshot/resources' },
+          { text: 'Monitoring', link: '/spec/slingshot/monitoring' },
+          { text: 'Random numbers', link: '/spec/slingshot/random' },
+          { text: 'Scaling policies (SPD)', link: '/spec/slingshot/spd' },
+          { text: 'Quirks', link: '/spec/slingshot/quirks' },
+          { text: 'Exact comparison', link: '/spec/slingshot/exact' },
+        ],
+      },
+      {
         text: 'Reference simulator',
         collapsed: true,
         items: [

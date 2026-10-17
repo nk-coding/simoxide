@@ -18,3 +18,6 @@ code comments cite the rule identifiers.
 
 Deliberate differences are on [Deviations](../correctness/deviations.md); SimuLizar's bugs, which
 SimOxide reproduces, on [Reference bugs](../correctness/reference-bugs.md).
+
+The planned Slingshot flavour has its own specification: [Semantics of Slingshot](./slingshot/index.md)
+(rules `SS-*`).
