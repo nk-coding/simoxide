@@ -18,6 +18,8 @@ harness are described in [Test kit](../development/testkit.md).
 | API properties | `crates/simoxide-sim/tests/api.rs`, `interp.rs` | SimOxide itself | same |
 | Engine shortcuts | `crates/simoxide-sim/tests/literal_engine.rs` | DESMO-J's literal event sequence | same; more: `LITERAL_N=1000` |
 | Pause, fork and resume | `crates/simoxide-sim/tests/fork.rs` | the uninterrupted run | same; `FORK_FILTER=a,b` |
+| Model changes, no-op | `crates/simoxide-sim/tests/model_change.rs` | the uninterrupted run | same |
+| Model changes | `crates/simoxide-reconf/tests/changes.rs` | the changed model run from the start; SimuLizar's syncer rules | same |
 | Robustness (untrusted input) | `crates/simoxide-sim/tests/robustness.rs` | no panic; errors of the right kind | same; more: `ROBUST_N=100000 ROBUST_SEED=n` |
 | Model generator | `crates/simoxide-testkit/tests/modelgen.rs` | models load without errors; every feature occurs | same |
 | Fast-mode samplers and generator | `crates/simoxide-random/tests/fast.rs`, `crates/simoxide-stoex/tests/fast.rs` | reference CDFs, reference errors | same |
@@ -83,6 +85,21 @@ points each (event counts, among them random ones that split same-time instants,
 exact mode with and without outputs, in tape replay, in fast mode and on the literal engine. It
 also checks attaching a tape and dropping the trace at a pause, failed runs, the model check of
 `resume` and per-fork limits.
+
+## Model changes
+
+`tests/model_change.rs` applies, on every model directory and at four pause points, a change set
+whose graph is unchanged: the whole change path runs (typed rebuild with stable ids,
+recompilation, merge, run-state adoption), and the continuation, a fork of it, a resumed state
+and a deep copy on another thread must equal the uninterrupted run byte for byte, in exact and
+fast mode. `simoxide-reconf/tests/changes.rs` edits models through the QVTo adapter's store:
+changes before the start (rates, latencies, demands, branch probabilities) give exactly the run
+of the model changed on disk; changes at pause points (an added container with an allocation, a
+composite moved to a new container, a rewired connector, rate and demand changes, a new route)
+move the load as the [model change rules](../spec/model-changes.md) say; a removed container
+keeps simulating (the run equals the uninterrupted one); changes SimuLizar aborts on, and
+unsupported ones, leave the run unchanged; forks with changes equal their counterparts, also in
+fast mode.
 
 ## Differential fuzzing
 

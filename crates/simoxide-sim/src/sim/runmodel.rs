@@ -19,25 +19,33 @@ use std::sync::Arc;
 /// A run without model changes never reads or writes this (one `None` per state); its clone is
 /// a reference count.
 #[derive(Clone, Default)]
-pub struct RunModel {
-    /// The compiled model after changes (`None`: the base model).
-    pub(super) cur: Option<Arc<CompiledModel>>,
-    /// Build order of `cur`'s typed model (the typed ids of its elements).
-    pub(super) order: Option<Arc<[ObjId]>>,
-    /// The shape of the base model (set with `cur`).
-    pub(super) base_shape: Option<Shape>,
+pub struct RunModel(Option<Box<Changed>>);
+
+/// A run's own model (behind one pointer, so that runs without changes carry 8 bytes).
+#[derive(Clone)]
+pub(super) struct Changed {
+    /// The compiled model after the changes.
+    pub(super) cm: Arc<CompiledModel>,
+    /// Build order of `cm`'s typed model (the typed ids of its elements).
+    pub(super) order: Arc<[ObjId]>,
+    /// The shape of the base model.
+    pub(super) base_shape: Shape,
     pub(super) generation: u32,
 }
 
 impl RunModel {
     /// Number of applied change sets that changed the model (0: the base model).
     pub fn generation(&self) -> u32 {
-        self.generation
+        self.0.as_ref().map_or(0, |c| c.generation)
     }
 
     /// The run's own compiled model, if its model changed.
     pub fn compiled(&self) -> Option<&Arc<CompiledModel>> {
-        self.cur.as_ref()
+        self.0.as_ref().map(|c| &c.cm)
+    }
+
+    pub(super) fn base_shape(&self) -> Option<Shape> {
+        self.0.as_ref().map(|c| c.base_shape)
     }
 
     /// The compiled model in `a` with the simulation's lifetime.
@@ -96,12 +104,12 @@ impl<'m, C: Compat> Simulation<'m, C> {
         }
         if changes.is_empty() {
             return Ok(ChangeReport {
-                generation: self.st.model.generation,
+                generation: self.st.model.generation(),
                 ..ChangeReport::default()
             });
         }
-        let order: Arc<[ObjId]> = match &self.st.model.order {
-            Some(o) => o.clone(),
+        let order: Arc<[ObjId]> = match &self.st.model.0 {
+            Some(c) => c.order.clone(),
             None => simoxide_model::build_order(&self.cm.model.graph).into(),
         };
         let rec = crate::change::recompile(
@@ -116,29 +124,29 @@ impl<'m, C: Compat> Simulation<'m, C> {
         )?;
         let mut report = rec.report;
         let cm = Arc::new(rec.cm);
-        self.adopt(&cm);
-        let m = &mut self.st.model;
-        if m.base_shape.is_none() {
-            m.base_shape = Some(self.st.shape);
-        }
-        m.generation += 1;
-        m.order = Some(rec.order.into());
-        m.cur = Some(cm.clone());
-        self.st.shape = Shape::of(&cm);
-        // SAFETY: `cm` is the `Arc` just stored in the state (see `RunModel::compiled_ref`);
-        // the previous run model's `Arc` may be dropped here, and no reference into it is live
+        self.adopt(&cm, &rec.path_extra);
+        let changed = Changed {
+            base_shape: self.st.model.base_shape().unwrap_or(self.st.shape),
+            generation: self.st.model.generation() + 1,
+            order: rec.order.into(),
+            cm,
+        };
+        self.st.shape = Shape::of(&changed.cm);
+        report.generation = changed.generation;
+        self.st.model = RunModel(Some(Box::new(changed)));
+        // SAFETY: the `Arc` just stored in the state (see `RunModel::compiled_ref`); the
+        // previous run model's `Arc` may be dropped here, and no reference into it is live
         // (this runs between events, outside the interpreter).
-        self.cm = unsafe { RunModel::compiled_ref(self.st.model.cur.as_ref().expect("model")) };
+        self.cm = unsafe { RunModel::compiled_ref(self.st.model.compiled().expect("model")) };
         self.code = self.cm.code.get(self.st.traced);
-        report.generation = self.st.model.generation;
         Ok(report)
     }
 
     /// Fits the run state to the recompiled model `cm` (which keeps every index of the current
     /// one): runtime state for new resources, the resolution caches dropped (calls resolve again
     /// on the changed system), the assembly-context paths created during the run moved into
-    /// `cm` (same ids).
-    fn adopt(&mut self, cm: &CompiledModel) {
+    /// `cm` (same ids; those outside its per-assembly-context table stay in the state's map).
+    fn adopt(&mut self, cm: &CompiledModel, path_extra: &[((u32, AcRef), u32)]) {
         let st = &mut self.st;
         let ps = st.cfg.ps_algorithm;
         for r in &cm.resources[st.res.len()..] {
@@ -147,6 +155,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         debug_assert_eq!(cm.series.len(), st.meas.m.series.len());
         st.dyn_paths.clear();
         st.dyn_path_child.clear();
+        st.dyn_path_child.extend(path_extra.iter().copied());
         st.prov_ids.clear();
         st.call_cache.clear();
         st.call_cache

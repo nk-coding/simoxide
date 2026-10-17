@@ -64,6 +64,7 @@ export default defineConfig({
           { text: 'Stochastic expressions', link: '/spec/stoex' },
           { text: 'Random numbers', link: '/spec/random' },
           { text: 'Schedulers', link: '/spec/scheduler' },
+          { text: 'Model changes', link: '/spec/model-changes' },
         ],
       },
       {

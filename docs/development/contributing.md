@@ -21,6 +21,8 @@
 | `crates/simoxide-sched` | processor sharing, FCFS, delay and passive resources |
 | `crates/simoxide-sim` | IR compiler, event core, interpreter, measurements, batch and embedding API |
 | `crates/simoxide-cli` | `simoxide`, `simoxide-bench`, `bench/golden.sh` |
+| `crates/simoxide-reconf` | runtime model changes from the QVTo side: journal to change set, direct edits |
+| `crates/qvto-simoxide-bridge` | builds the qvto-rs adapter `qvto-simoxide` from `../qvto-rs` (until the qvto-rs merge) |
 | `crates/simoxide-testkit` | differential testing, model generator, `simoxide-fuzz` |
 | `reference/` | [refsim](../reference-simulator/refsim.md), patches, component oracles |
 | `corpus/`, `corpus-fuzz/` | models with the reference's expected outputs; saved fuzz cases |
@@ -30,7 +32,9 @@
 
 ## Conventions
 
-- Rust stable, edition 2024, one cargo workspace.
+- Rust stable, edition 2024, one cargo workspace. `simoxide-reconf` and `qvto-simoxide-bridge`
+  are not default members: they build qvto-rs crates from a checkout at `../qvto-rs` (until the
+  qvto-rs merge), and `--workspace` needs it.
 - `cargo fmt`, and `cargo clippy --all-targets -- -D warnings` must pass, for the workspace and
   for `simoxide-sim` and `simoxide-random` with and without the `fast` feature.
 - No `unsafe` without a comment explaining why and a test.

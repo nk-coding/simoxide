@@ -785,15 +785,13 @@ fn busy_fraction(shadow: &[u64], instances: u32, per_core: bool) -> f64 {
 /// default; see [`crate::compat`]): the engine, which borrows the compiled model, holds the
 /// output writers and runs one [`RunState`] (which explains pausing, forking and resuming).
 pub struct Simulation<'m, C: Compat = Exact> {
-    /// The compiled model the run simulates: `base`, or after model changes the one in
-    /// `st.model` (see `RunModel`; the reference then lives as long as that `Arc`, which only
-    /// `Simulation::set_model` replaces).
+    /// The compiled model the run simulates: the one it was created on, or after model changes
+    /// the one in `st.model` (see `RunModel`; the reference then lives as long as that `Arc`,
+    /// which only `Simulation::apply_changes` replaces).
     cm: &'m CompiledModel,
     /// The behaviours' instructions for this run (with or without the trace instructions,
     /// `RunState::traced`), of `cm`.
     code: &'m crate::code::Flat,
-    /// The compiled model the run was created on.
-    base: &'m CompiledModel,
     trace: Option<TraceOut>,
     /// Where the buffered tape records go (`SimRng::tape_buf`).
     tape: Option<Box<dyn Write>>,
@@ -855,7 +853,6 @@ impl<'m, C: Compat> Simulation<'m, C> {
         Ok(Simulation {
             cm,
             code: cm.code.get(traced),
-            base: cm,
             trace: out.trace.map(TraceOut::new),
             tape: out.tape,
             st: RunState::new(cm, cfg, traced, rng),
@@ -2013,9 +2010,6 @@ impl<'m, C: Compat> Simulation<'m, C> {
         if let Some(&c) = self.st.dyn_path_child.get(&(parent, ac)) {
             return c;
         }
-        if let Some(&c) = self.cm.ac_path_extra.get(&(parent, ac)) {
-            return c;
-        }
         let mut path = self.path_of(parent);
         path.push(ac);
         let container = self.cm.alloc.get(&path[..]).copied();
@@ -2117,18 +2111,10 @@ impl<'m, C: Compat> Simulation<'m, C> {
             Some(&r) => (r != u32::MAX).then_some(r),
             None => {
                 let m = &cm.model;
-                let link = match &cm.route_links {
-                    None => cm.links.iter().copied().find(|&l| {
-                        let c = &m.linking_resources[l].connected;
-                        c.contains(&src) && c.contains(&dst)
-                    }),
-                    Some(rl) => cm
-                        .links
-                        .iter()
-                        .zip(rl)
-                        .find(|(_, c)| c.contains(&src) && c.contains(&dst))
-                        .map(|(l, _)| *l),
-                };
+                let link = cm.links.iter().copied().find(|&l| {
+                    let c = &m.linking_resources[l].connected;
+                    c.contains(&src) && c.contains(&dst)
+                });
                 link.map(|l| cm.link_res[&l])
             }
         };

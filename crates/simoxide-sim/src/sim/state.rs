@@ -473,7 +473,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             at_ns: state.now,
             kind: SimErrorKind::Model,
         };
-        let base_shape = state.model.base_shape.unwrap_or(state.shape);
+        let base_shape = state.model.base_shape().unwrap_or(state.shape);
         if base_shape != Shape::of(cm) {
             return Err(fail(
                 "the run state belongs to another compiled model".to_string(),
@@ -482,7 +482,8 @@ impl<'m, C: Compat> Simulation<'m, C> {
         Self::resume_on(cm, state, out)
     }
 
-    /// [`Simulation::resume`] on the base model `base` (checked by the caller).
+    /// [`Simulation::resume`] on the base model `base` (checked by the caller; after model
+    /// changes the state's own compiled model is used).
     pub(super) fn resume_on(
         base: &'m CompiledModel,
         mut state: RunState<C>,
@@ -495,7 +496,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         };
         // SAFETY: see `RunModel::compiled_ref`: the reference points into the `Arc` that the
         // state, and so the simulation, owns.
-        let cm: &'m CompiledModel = match state.model.cur.as_ref() {
+        let cm: &'m CompiledModel = match state.model.compiled() {
             Some(a) => unsafe { RunModel::compiled_ref(a) },
             None => base,
         };
@@ -514,7 +515,6 @@ impl<'m, C: Compat> Simulation<'m, C> {
         Ok(Simulation {
             cm,
             code: cm.code.get(state.traced),
-            base,
             trace: trace.map(TraceOut::new),
             tape: out.tape,
             st: state,
@@ -540,7 +540,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// `out` (see [`Simulation::resume`]); this one goes on unchanged.
     pub fn fork(&mut self, out: Outputs) -> Result<Simulation<'m, C>, SimError> {
         let st = self.snapshot();
-        Simulation::resume_on(self.base, st, out)
+        Simulation::resume_on(self.cm, st, out)
     }
 
     /// Ends this simulation and returns its state (outputs flushed and detached).

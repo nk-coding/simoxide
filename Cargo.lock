@@ -535,11 +535,22 @@ dependencies = [
  "memchr",
  "quick-xml 0.38.4",
  "qvto-model",
+ "qvto-runtime",
 ]
 
 [[package]]
 name = "qvto-model"
 version = "0.1.0"
+
+[[package]]
+name = "qvto-runtime"
+version = "0.1.0"
+dependencies = [
+ "hashbrown",
+ "qvto-model",
+ "qvto-types",
+ "ryu",
+]
 
 [[package]]
 name = "qvto-simoxide"
@@ -548,6 +559,13 @@ dependencies = [
  "qvto-emf",
  "qvto-model",
  "simoxide-model",
+]
+
+[[package]]
+name = "qvto-types"
+version = "0.1.0"
+dependencies = [
+ "qvto-model",
 ]
 
 [[package]]

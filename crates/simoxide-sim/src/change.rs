@@ -156,6 +156,9 @@ pub(crate) struct Recompiled {
     pub cm: CompiledModel,
     /// Build order of `cm.model` (for the next change set).
     pub order: Vec<ObjId>,
+    /// Trie nodes of `cm.ac_paths` outside `ac_path_children` (references to the system
+    /// assembly context): the run state looks them up with its own paths.
+    pub path_extra: Vec<((u32, AcRef), u32)>,
     pub report: ChangeReport,
 }
 
@@ -555,18 +558,15 @@ pub(crate) fn recompile(
     // the router's removal is a no-op)
     let container_of: FxMap<ObjId, ContainerId> =
         m2.containers.iter_ids().map(|(i, c)| (c.obj, i)).collect();
-    let old_conn = |k: usize, l: LinkingResourceId| -> Vec<ContainerId> {
-        match &old.route_links {
-            Some(rl) => rl[k].to_vec(),
-            None => m1.linking_resources[l].connected.clone(),
-        }
-    };
+    // the old model's `connected` lists are the router's view (see below)
+    let old_conn =
+        |l: LinkingResourceId| -> Vec<ContainerId> { m1.linking_resources[l].connected.clone() };
     let env2_links: Vec<LinkingResourceId> = env2
         .map(|e| m2.resource_environments[e].linking_resources.clone())
         .unwrap_or_default();
     let mut links = Vec::new();
     let mut route_links: Vec<Box<[ContainerId]>> = Vec::new();
-    for (k, &l) in old.links.iter().enumerate() {
+    for &l in &old.links {
         if !env2_links.contains(&l) {
             report.applied.push(format!(
                 "linking resource {} left the routing",
@@ -574,7 +574,7 @@ pub(crate) fn recompile(
             ));
             continue;
         }
-        let mut c = old_conn(k, l);
+        let mut c = old_conn(l);
         let lobj = m2.linking_resources[l].obj;
         let added_now: Vec<ContainerId> = changes
             .changes
@@ -717,14 +717,12 @@ pub(crate) fn recompile(
         ac_paths[i].container = alloc.get(&path[..]).copied();
     }
     let mut ac_path_children: Vec<Vec<(u32, u32)>> = vec![Vec::new(); m2.assembly_contexts.len()];
-    let mut ac_path_extra = old.ac_path_extra.clone();
+    let mut path_extra = Vec::new();
     for (i, p) in ac_paths.iter().enumerate().skip(1) {
         match ac_path_children.get_mut(p.ac as usize) {
             Some(c) if !c.iter().any(|e| e.0 == p.parent) => c.push((p.parent, i as u32)),
             Some(_) => {}
-            None => {
-                ac_path_extra.entry((p.parent, p.ac)).or_insert(i as u32);
-            }
+            None => path_extra.push(((p.parent, p.ac), i as u32)),
         }
     }
 
@@ -754,6 +752,11 @@ pub(crate) fn recompile(
     }
     let container_res_dense = dense_container_res(&container_res, n_cont, m2.resource_types.len());
     let finalise_order = finalise_order(&registry);
+    // the router's view goes into the typed model (`transmit` without a route table reads it)
+    let mut fresh = fresh;
+    for (&l, c) in links.iter().zip(&route_links) {
+        fresh.model.linking_resources[l].connected = c.to_vec();
+    }
     let CompiledModel {
         model,
         keys,
@@ -812,9 +815,7 @@ pub(crate) fn recompile(
         route_res,
         finalise_order,
         links,
-        route_links: Some(route_links),
         registry,
-        ac_path_extra,
         series,
         series_by_mp,
         windows: old.windows.clone(),
@@ -842,7 +843,12 @@ pub(crate) fn recompile(
         warnings,
     };
     report.micros = t0.elapsed().as_micros() as u64;
-    Ok(Recompiled { cm, order, report })
+    Ok(Recompiled {
+        cm,
+        order,
+        path_extra,
+        report,
+    })
 }
 
 /// The new graph must be the run's graph with changes: objects are only ever appended and keep

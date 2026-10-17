@@ -405,18 +405,14 @@ pub struct CompiledModel {
     pub route_res: Vec<ResIdx>,
     /// `deactivateAllActiveResources` order (ResourceRegistry / container HashMap order).
     pub finalise_order: Vec<ResIdx>,
-    /// Linking resources in resource-environment order (routing).
+    /// Linking resources in resource-environment order (routing; after model changes the
+    /// router's order, and the typed model's `connected` lists are the router's view,
+    /// `crate::change`).
     pub links: Vec<LinkingResourceId>,
-    /// Containers per entry of `links` as the router sees them after model changes (`None`:
-    /// the typed model's `connected` lists; see `crate::change`).
-    pub route_links: Option<Vec<Box<[ContainerId]>>>,
     /// The resource registry (`ResourceRegistry`) in insertion order: container or linking
     /// resource id, with its resources by resource type id (`finalise_order` is its Java
     /// `HashMap` iteration order).
     pub registry: Vec<RegistryEntry>,
-    /// Trie nodes for assembly-context references outside `ac_path_children` (the system
-    /// assembly context), kept from runs whose model changed (`crate::change`).
-    pub ac_path_extra: FxMap<(u32, AcRef), u32>,
     pub series: Vec<SeriesDef>,
     /// The series by measuring-point key: `(metric, series)` pairs.
     pub series_by_mp: HashMap<Box<str>, Vec<(&'static str, SeriesId)>>,
@@ -1808,9 +1804,7 @@ impl CompiledModel {
             route_res,
             finalise_order,
             links,
-            route_links: None,
             registry,
-            ac_path_extra: FxMap::default(),
             series,
             series_by_mp,
             windows,
