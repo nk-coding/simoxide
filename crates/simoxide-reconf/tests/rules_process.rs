@@ -297,11 +297,19 @@ fn rules_that_create_objects_without_ids_equal_the_reference() {
         .into_iter()
         .find(|r| r.succeeded)
         .expect("the wiring");
-    assert!(wired.rules[0].log.contains("Wiring with load balancer successful"));
+    assert!(
+        wired.rules[0]
+            .log
+            .contains("Wiring with load balancer successful")
+    );
     // deepclone(): every copy draws an id (then takes the original's), the branch the next one
     let (_, mut h) = example("lb_clone_branch", QvtMode::Auto);
     let copied = h.take_records().into_iter().find(|r| r.succeeded).unwrap();
-    assert!(copied.rules[0].log.contains("copied _riehsAEoEeS7FKokKTKFow as _riehsAEoEeS7FKokKTKFow"));
+    assert!(
+        copied.rules[0]
+            .log
+            .contains("copied _riehsAEoEeS7FKokKTKFow as _riehsAEoEeS7FKokKTKFow")
+    );
 }
 
 /// R2: a rule whose result depends on the iteration order of a `Set` of model objects. The
@@ -312,8 +320,14 @@ fn a_rule_over_a_set_of_objects_equals_the_reference_in_insertion_order() {
     let (_, mut h) = example("lb_scaleout_each", QvtMode::Auto);
     let moved = h.take_records().into_iter().find(|r| r.succeeded).unwrap();
     let log = &moved.rules[1].log;
-    assert!(log.contains("1: Server1 moved to ServerNode1_scaled"), "{log}");
-    assert!(log.contains("2: Server2 moved to ServerNode2_scaled"), "{log}");
+    assert!(
+        log.contains("1: Server1 moved to ServerNode1_scaled"),
+        "{log}"
+    );
+    assert!(
+        log.contains("2: Server2 moved to ServerNode2_scaled"),
+        "{log}"
+    );
     example("lb_scaleout_each", QvtMode::Fast);
 }
 
