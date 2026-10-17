@@ -20,6 +20,7 @@
 //!   - after it: Slingshot's `ModelAdjusted` ([`ModelAdjusted`]: old, new and deleted
 //!     containers, new allocation contexts, the monitors Slingshot clones), the summary after,
 //!     the target-group membership read from the changed model, the group sizes.
+//!
 //!   The journal goes through the change path ([`crate::QvtoRun::invoke`]); a change the
 //!   simulator refuses ends the SPD run with its error.
 
@@ -324,10 +325,10 @@ impl AdjustHooks for SlingshotHooks {
                 .expect("Configuration.enactedPolicy");
         }
         self.before = Before::capture(store, model);
-        self.summary_before = match &self.input {
-            Some(input) => Some(summary(store, input).into()),
-            None => None,
-        };
+        self.summary_before = self
+            .input
+            .as_ref()
+            .map(|input| summary(store, input).into());
     }
 
     fn after(
