@@ -1,0 +1,11 @@
+{
+  "name": "ss_two_demands",
+  "seed": 1,
+  "sim_time": 12,
+  "rules": [
+    "SS-ACT-3.2",
+    "SS-Q17",
+    "SS-BUS-7"
+  ],
+  "description": "one InternalAction with a CPU and an HDD demand, then two more actions. Both demands run concurrently; each completion advances the SEFF cursor, so the next actions run while the HDD demand is still served and the request ends before it; the HDD completion after the Stop throws, which disposes SystemSimulationBehavior.onActiveResourceFinished for the rest of the run."
+}

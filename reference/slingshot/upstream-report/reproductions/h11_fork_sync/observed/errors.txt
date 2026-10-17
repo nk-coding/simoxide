@@ -1,0 +1,1 @@
+NoSuchElementException: null | org.palladiosimulator.analyzer.slingshot.behavior.systemsimulation.entities.seff.behaviorcontext.ForkBehaviorContextHolder.updateCurrentBehaviorIndex(ForkBehaviorContextHolder.java:66)

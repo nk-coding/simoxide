@@ -1,0 +1,37 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Resource Demand Tuple,0.0,0.2
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Resource Demand Tuple,0.7,0.2
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Resource Demand Tuple,1.4,0.2
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Resource Demand Tuple,2.0999999999999996,0.2
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Resource Demand Tuple,2.8,0.2
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Resource Demand Tuple,3.5,0.2
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,0.2,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,0.7,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,0.8999999999999999,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,1.4,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,1.5999999999999999,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,2.0999999999999996,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,2.3,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,2.8,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,3.0,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,3.5,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],State of Active Resource Tuple,3.7,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,0.2,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,0.7,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,0.8999999999999999,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,1.4,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,1.5999999999999999,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,2.0999999999999996,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,2.3,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,2.8,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,3.0,0.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,3.5,1.0
+ActiveResourceMeasuringPoint[_ss_async_fork_cpu|replicaID=0],Utilization of Active Resource Tuple,3.7,0.0
+UsageScenarioMeasuringPoint[_ss_async_fork_us1],Response Time Tuple,0.2,0.2
+UsageScenarioMeasuringPoint[_ss_async_fork_us1],Response Time Tuple,0.8999999999999999,0.19999999999999996
+UsageScenarioMeasuringPoint[_ss_async_fork_us1],Response Time Tuple,1.5999999999999999,0.19999999999999996
+UsageScenarioMeasuringPoint[_ss_async_fork_us1],Response Time Tuple,2.3,0.20000000000000018
+UsageScenarioMeasuringPoint[_ss_async_fork_us1],Response Time Tuple,3.0,0.20000000000000018
+UsageScenarioMeasuringPoint[_ss_async_fork_us1],Response Time Tuple,3.7,0.20000000000000018

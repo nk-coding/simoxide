@@ -225,7 +225,7 @@ Findings from the reference runs, for the Slingshot semantics (S1) and the SPD d
   not installed. The stub bundle (`src/stub`) registers the blackbox; it is never called.
 - **Q5 confirmed (scale-in loses jobs).** `models/spd_scale_in` removes `AppServer_1` at t = 80
   while four jobs run on it. The job with the pending `JobProgressed` (the shortest) is aborted at
-  its next event (t = 83): `JobAborted`, then `ResourceDemandRequestAborted`, then `UserAborted`,
+  its next event (t = 87): `JobAborted`, then `ResourceDemandRequestAborted`, then `UserAborted`,
   and the open-workload user is dropped. The other three jobs are lost without any event, and
   their users never finish.
 - **Q15 confirmed.** Policies of one target group evaluate each other's `SimulationTimeReached`:

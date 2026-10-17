@@ -1,0 +1,24 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,0.0,0.1
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,0.1,0.2
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,0.30000000000000004,0.1
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,0.4,0.2
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,0.6000000000000001,0.1
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,0.7000000000000001,0.2
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,0.9000000000000001,0.1
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,1.0000000000000002,0.2
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,1.2000000000000002,0.1
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,1.3000000000000003,0.2
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,1.5000000000000002,0.1
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,1.6000000000000003,0.2
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,1.8000000000000003,0.1
+ActiveResourceMeasuringPoint[_ss_role_lookup_cpu|replicaID=0],Resource Demand Tuple,1.9000000000000004,0.2
+AssemblyOperationMeasuringPoint[_ss_role_lookup_prov_front|_ss_role_lookup_op|_ss_role_lookup_acB],Response Time Tuple,0.30000000000000004,0.30000000000000004
+AssemblyOperationMeasuringPoint[_ss_role_lookup_prov_front|_ss_role_lookup_op|_ss_role_lookup_acB],Response Time Tuple,0.9000000000000001,0.30000000000000004
+AssemblyOperationMeasuringPoint[_ss_role_lookup_prov_front|_ss_role_lookup_op|_ss_role_lookup_acB],Response Time Tuple,1.5000000000000002,0.30000000000000004
+AssemblyOperationMeasuringPoint[_ss_role_lookup_sysprov2|_ss_role_lookup_op|_ss_role_lookup_acA],Response Time Tuple,0.6000000000000001,0.30000000000000004
+AssemblyOperationMeasuringPoint[_ss_role_lookup_sysprov2|_ss_role_lookup_op|_ss_role_lookup_acA],Response Time Tuple,1.2000000000000002,0.30000000000000004
+AssemblyOperationMeasuringPoint[_ss_role_lookup_sysprov2|_ss_role_lookup_op|_ss_role_lookup_acA],Response Time Tuple,1.8000000000000003,0.30000000000000004
+UsageScenarioMeasuringPoint[_ss_role_lookup_us1],Response Time Tuple,0.6000000000000001,0.6000000000000001
+UsageScenarioMeasuringPoint[_ss_role_lookup_us1],Response Time Tuple,1.2000000000000002,0.6000000000000001
+UsageScenarioMeasuringPoint[_ss_role_lookup_us1],Response Time Tuple,1.8000000000000003,0.6000000000000001

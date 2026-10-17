@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2"
+    id="_h10_collection_iterator_allocation1" entityName="h10_collection_iterator">
+  <targetResourceEnvironment_Allocation href="h10_collection_iterator.resourceenvironment#/"/>
+  <system_Allocation href="h10_collection_iterator.system#_h10_collection_iterator_system1"/>
+  <allocationContexts_Allocation id="_h10_collection_iterator_alc1" entityName="Allocation_Assembly_Server">
+    <resourceContainer_AllocationContext href="h10_collection_iterator.resourceenvironment#_h10_collection_iterator_rc1"/>
+    <assemblyContext_AllocationContext href="h10_collection_iterator.system#_h10_collection_iterator_ac1"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

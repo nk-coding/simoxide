@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" id="_ss_role_lookup_allocation" entityName="ss_role_lookup">
+  <targetResourceEnvironment_Allocation href="ss_role_lookup.resourceenvironment#/"/>
+  <system_Allocation href="ss_role_lookup.system#_ss_role_lookup_system"/>
+  <allocationContexts_Allocation id="_ss_role_lookup_alc_acC" entityName="alc_acC">
+    <resourceContainer_AllocationContext href="ss_role_lookup.resourceenvironment#_ss_role_lookup_rc1"/>
+    <assemblyContext_AllocationContext href="ss_role_lookup.system#_ss_role_lookup_acC"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_ss_role_lookup_alc_acA" entityName="alc_acA">
+    <resourceContainer_AllocationContext href="ss_role_lookup.resourceenvironment#_ss_role_lookup_rc1"/>
+    <assemblyContext_AllocationContext href="ss_role_lookup.system#_ss_role_lookup_acA"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_ss_role_lookup_alc_acB" entityName="alc_acB">
+    <resourceContainer_AllocationContext href="ss_role_lookup.resourceenvironment#_ss_role_lookup_rc1"/>
+    <assemblyContext_AllocationContext href="ss_role_lookup.system#_ss_role_lookup_acB"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_ss_role_lookup_alc_acF" entityName="alc_acF">
+    <resourceContainer_AllocationContext href="ss_role_lookup.resourceenvironment#_ss_role_lookup_rc1"/>
+    <assemblyContext_AllocationContext href="ss_role_lookup.system#_ss_role_lookup_acF"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_ss_role_lookup_alc_acS" entityName="alc_acS">
+    <resourceContainer_AllocationContext href="ss_role_lookup.resourceenvironment#_ss_role_lookup_rc1"/>
+    <assemblyContext_AllocationContext href="ss_role_lookup.system#_ss_role_lookup_acS"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

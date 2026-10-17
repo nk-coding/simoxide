@@ -1,0 +1,3 @@
+run aborted before t = 0 (no event dispatched):
+java.lang.RuntimeException: Architecture specification incomplete. Stackframe is missing id lockCount.VALUE
+  at org.palladiosimulator.analyzer.slingshot.behavior.resourcesimulation.resources.passive.PassiveResourceTable.lambda$3(PassiveResourceTable.java:59)

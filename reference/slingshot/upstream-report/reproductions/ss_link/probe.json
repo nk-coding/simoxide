@@ -1,0 +1,12 @@
+{
+  "name": "ss_link",
+  "seed": 1,
+  "sim_time": 3,
+  "rules": [
+    "SS-ACT-7",
+    "SS-RES-5",
+    "SS-RNG-1.2",
+    "SS-Q28"
+  ],
+  "description": "a remote call over a linking resource (latency 0.01, throughput 1000, BYTESIZE 500 in, 250 back). Both directions are FCFS jobs on the link with demand BYTESIZE / throughput + latency; every link-job completion draws Math.random() for the failure check (tape site link:<id>)."
+}

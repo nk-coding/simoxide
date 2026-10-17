@@ -1,0 +1,1 @@
+two usage scenarios (open + closed) sharing one FCFS CPU; stop by max sim time

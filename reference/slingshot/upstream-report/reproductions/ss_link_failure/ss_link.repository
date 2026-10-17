@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_ss_link_repository" entityName="ss_link">
+  <components__Repository xsi:type="repository:BasicComponent" id="_ss_link_client" entityName="Client">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_link_prov1" entityName="prov1" providedInterface__OperationProvidedRole="_ss_link_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_ss_link_req1" entityName="req1" requiredInterface__OperationRequiredRole="_ss_link_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_ss_link_seff1" describedService__SEFF="_ss_link_op">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_ss_link_act1" entityName="start" successor_AbstractAction="_ss_link_act2"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_link_act2" entityName="prepare" predecessor_AbstractAction="_ss_link_act1" successor_AbstractAction="_ss_link_act3">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.1"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_ss_link_act3" entityName="callRemote" predecessor_AbstractAction="_ss_link_act2" successor_AbstractAction="_ss_link_act4" calledService_ExternalService="_ss_link_remote" role_ExternalService="_ss_link_req1">
+        <inputVariableUsages__CallAction>
+          <variableCharacterisation_VariableUsage type="BYTESIZE">
+            <specification_VariableCharacterisation specification="500"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="data"/>
+        </inputVariableUsages__CallAction>
+        <returnVariableUsage__CallReturnAction>
+          <variableCharacterisation_VariableUsage type="BYTESIZE">
+            <specification_VariableCharacterisation specification="RETURN.BYTESIZE"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="result"/>
+        </returnVariableUsage__CallReturnAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_ss_link_act4" entityName="stop" predecessor_AbstractAction="_ss_link_act3"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_ss_link_server" entityName="RemoteServer">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_link_prov2" entityName="prov2" providedInterface__OperationProvidedRole="_ss_link_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_ss_link_seff2" describedService__SEFF="_ss_link_remote">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_ss_link_act5" entityName="start" successor_AbstractAction="_ss_link_act6"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_link_act6" entityName="serve" predecessor_AbstractAction="_ss_link_act5" successor_AbstractAction="_ss_link_act7">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.2"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:SetVariableAction" id="_ss_link_act7" entityName="reply" predecessor_AbstractAction="_ss_link_act6" successor_AbstractAction="_ss_link_act8">
+        <localVariableUsages_SetVariableAction>
+          <variableCharacterisation_VariableUsage type="BYTESIZE">
+            <specification_VariableCharacterisation specification="250"/>
+          </variableCharacterisation_VariableUsage>
+          <namedReference__VariableUsage xsi:type="stoex:VariableReference" referenceName="RETURN"/>
+        </localVariableUsages_SetVariableAction>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_ss_link_act8" entityName="stop" predecessor_AbstractAction="_ss_link_act7"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_ss_link_if1" entityName="IService">
+    <signatures__OperationInterface id="_ss_link_op" entityName="op"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_ss_link_if2" entityName="IRemote">
+    <signatures__OperationInterface id="_ss_link_remote" entityName="remote"/>
+  </interfaces__Repository>
+</repository:Repository>

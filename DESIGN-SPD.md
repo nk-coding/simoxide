@@ -346,7 +346,7 @@ context has one allocation context; the lookup takes the first match
     disappear and their response times are never recorded.
   - **Confirmed by S0** (`reference/slingshot/models/spd_scale_in`). `AppServer_1` is removed at
     t = 80 while four jobs run on it:
-    - the shortest job is aborted at its next `JobProgressed` (t = 83), and its open-workload user
+    - the shortest job is aborted at its next `JobProgressed` (t = 87), and its open-workload user
       is dropped;
     - the other three jobs produce no further event, and their users never finish.
   - SimuLizar instead keeps simulating removed containers.

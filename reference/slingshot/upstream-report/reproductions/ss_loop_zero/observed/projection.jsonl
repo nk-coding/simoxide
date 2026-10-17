@@ -1,0 +1,36 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_ss_loop_zero_ua1"}
+{"ev":"pass","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_loop_zero_ua2"}
+{"ev":"call","t":0.0,"u":1,"role":"_ss_loop_zero_sysprov1","sig":"_ss_loop_zero_op"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_ss_loop_zero_ac1","type":"StartAction","el":"_ss_loop_zero_act1"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_ss_loop_zero_ac1","type":"StartAction","el":"_ss_loop_zero_act4"}
+{"ev":"request","t":0.0,"u":1,"ac":"_ss_loop_zero_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_loop_zero_act5"}
+{"ev":"job","t":0.0,"job":1,"u":1,"rc":"_ss_loop_zero_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_loop_zero_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_loop_zero_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_loop_zero_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.1]}
+{"ev":"job_end","t":0.1,"job":1}
+{"ev":"meas","t":0.1,"mp":"ActiveResourceMeasuringPoint[_ss_loop_zero_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.1,0.0]}
+{"ev":"meas","t":0.1,"mp":"ActiveResourceMeasuringPoint[_ss_loop_zero_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.1,0.0]}
+{"ev":"pass","t":0.1,"u":1,"ac":"_ss_loop_zero_ac1","type":"StopAction","el":"_ss_loop_zero_act6"}
+{"ev":"pass","t":1.0,"u":2,"type":"Start","el":"_ss_loop_zero_ua1"}
+{"ev":"pass","t":1.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_loop_zero_ua2"}
+{"ev":"call","t":1.0,"u":2,"role":"_ss_loop_zero_sysprov1","sig":"_ss_loop_zero_op"}
+{"ev":"pass","t":2.0,"u":3,"type":"Start","el":"_ss_loop_zero_ua1"}
+{"ev":"pass","t":2.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_loop_zero_ua2"}
+{"ev":"call","t":2.0,"u":3,"role":"_ss_loop_zero_sysprov1","sig":"_ss_loop_zero_op"}
+{"ev":"pass","t":3.0,"u":4,"type":"Start","el":"_ss_loop_zero_ua1"}
+{"ev":"pass","t":3.0,"u":4,"type":"EntryLevelSystemCall","el":"_ss_loop_zero_ua2"}
+{"ev":"call","t":3.0,"u":4,"role":"_ss_loop_zero_sysprov1","sig":"_ss_loop_zero_op"}
+{"ev":"pass","t":4.0,"u":5,"type":"Start","el":"_ss_loop_zero_ua1"}
+{"ev":"pass","t":4.0,"u":5,"type":"EntryLevelSystemCall","el":"_ss_loop_zero_ua2"}
+{"ev":"call","t":4.0,"u":5,"role":"_ss_loop_zero_sysprov1","sig":"_ss_loop_zero_op"}
+{"ev":"pass","t":5.0,"u":6,"type":"Start","el":"_ss_loop_zero_ua1"}
+{"ev":"pass","t":5.0,"u":6,"type":"EntryLevelSystemCall","el":"_ss_loop_zero_ua2"}
+{"ev":"call","t":5.0,"u":6,"role":"_ss_loop_zero_sysprov1","sig":"_ss_loop_zero_op"}
+{"ev":"pass","t":6.0,"u":7,"type":"Start","el":"_ss_loop_zero_ua1"}
+{"ev":"pass","t":6.0,"u":7,"type":"EntryLevelSystemCall","el":"_ss_loop_zero_ua2"}
+{"ev":"call","t":6.0,"u":7,"role":"_ss_loop_zero_sysprov1","sig":"_ss_loop_zero_op"}
+{"ev":"pass","t":7.0,"u":8,"type":"Start","el":"_ss_loop_zero_ua1"}
+{"ev":"pass","t":7.0,"u":8,"type":"EntryLevelSystemCall","el":"_ss_loop_zero_ua2"}
+{"ev":"call","t":7.0,"u":8,"role":"_ss_loop_zero_sysprov1","sig":"_ss_loop_zero_op"}
+{"ev":"stop","t":8.0}

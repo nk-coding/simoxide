@@ -1,0 +1,12 @@
+{
+  "name": "ss_ps_multicore",
+  "seed": 1,
+  "sim_time": 6,
+  "rules": [
+    "SS-RES-2.7",
+    "SS-MEAS-3.1",
+    "SS-MEAS-3.3",
+    "SS-Q34"
+  ],
+  "description": "PS with 2 cores, 3 closed users with think time 0.5: the state is the total number of jobs (one series, at the monitored replicaID), the utilisation is busy cores / cores, sampled at every resource event including stale ones."
+}

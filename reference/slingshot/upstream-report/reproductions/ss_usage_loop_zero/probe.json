@@ -1,0 +1,11 @@
+{
+  "name": "ss_usage_loop_zero",
+  "seed": 1,
+  "sim_time": 8,
+  "rules": [
+    "SS-WL-4.3",
+    "SS-Q19",
+    "SS-BUS-7"
+  ],
+  "description": "a usage-model Loop with count 0 throws in its LoopScenarioBehaviorContext builder (precondition initial < maximal), which disposes the subscriber that interpreted it."
+}
