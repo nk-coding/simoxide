@@ -1,0 +1,7 @@
+4 0
+Transformation execution completed
+--log--
+SimuLizar Outsource Rule Transformation started
+Measured value is 0.5
+No measurements match the condition. Number of measurements is 1
+ASSERT [error] failed at (outsource.qvto:61) : No reconfiguration required

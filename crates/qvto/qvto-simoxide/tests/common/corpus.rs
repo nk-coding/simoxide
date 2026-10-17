@@ -49,6 +49,98 @@ pub struct Result {
     pub run_time: Duration,
     /// Adapter only.
     pub journal: Option<Journal>,
+    /// Adapter only: the keys (`<label>#<path>`) of the objects that existed before the run.
+    pub keys_before: HashMap<u32, String>,
+    /// Adapter only: the journal with objects as keys (see [`journal_text`]).
+    pub journal_text: String,
+}
+
+/// A journal as text, one change per line, independent of handle and id numbering: objects that
+/// existed before the run by their key (`<label>#<path>`), created objects as `new<k>` (in the
+/// order of their `Created` entries), features as `Class.feature`, resources by label.
+pub fn journal_text(
+    j: &Journal,
+    meta: &qvto_model::MetaRegistry,
+    keys: &HashMap<u32, String>,
+    resource_label: impl Fn(ResourceId) -> String,
+) -> String {
+    use qvto_model::OwnedDatum;
+    use qvto_simoxide::ChangeKind as K;
+    use std::fmt::Write;
+    let mut created: HashMap<u32, usize> = HashMap::new();
+    for c in &j.changes {
+        if let K::Created(_) = c.kind {
+            let n = created.len();
+            created.entry(c.obj).or_insert(n);
+        }
+    }
+    let obj = |o: u32| match keys.get(&o) {
+        Some(k) => k.clone(),
+        None => match created.get(&o) {
+            Some(n) => format!("new{n}"),
+            None => format!("?{o}"),
+        },
+    };
+    let feat = |f: qvto_model::FeatureId| {
+        let fi = meta.feature(f);
+        format!("{}.{}", meta.qualified_name(fi.owner), fi.name)
+    };
+    let val = |d: &OwnedDatum<u32>| match d {
+        OwnedDatum::Obj(o) => obj(*o),
+        OwnedDatum::Enum(e, i) => format!(
+            "{}::{}",
+            meta.enumeration(*e).name,
+            meta.enumeration(*e).literals[*i as usize].name
+        ),
+        d => format!("{d:?}"),
+    };
+    let mut out = String::new();
+    for c in &j.changes {
+        let o = obj(c.obj);
+        let line = match &c.kind {
+            K::Created(class) => format!("created {}", meta.qualified_name(*class)),
+            K::Set { feature, old, new } => {
+                format!("set {} {} -> {}", feat(*feature), val(old), val(new))
+            }
+            K::Unset { feature, old } => format!("unset {} {}", feat(*feature), val(old)),
+            K::Added {
+                feature,
+                index,
+                value,
+            } => format!("added {} [{index}] {}", feat(*feature), val(value)),
+            K::Removed {
+                feature,
+                index,
+                value,
+            } => format!("removed {} [{index}] {}", feat(*feature), val(value)),
+            K::Replaced {
+                feature,
+                index,
+                old,
+                new,
+            } => format!(
+                "replaced {} [{index}] {} -> {}",
+                feat(*feature),
+                val(old),
+                val(new)
+            ),
+            K::Moved { feature, from, to } => format!("moved {} {from} -> {to}", feat(*feature)),
+            K::Container { old, new } => {
+                let c = |x: &Option<(u32, qvto_model::FeatureId)>| match x {
+                    Some((p, f)) => format!("{} {}", obj(*p), feat(*f)),
+                    None => "-".into(),
+                };
+                format!("container {} -> {}", c(old), c(new))
+            }
+            K::RootAdded { resource, index } => {
+                format!("root-added {} [{index}]", resource_label(*resource))
+            }
+            K::RootRemoved { resource } => format!("root-removed {}", resource_label(*resource)),
+            K::Deleted => "deleted".into(),
+        };
+        let _ = writeln!(out, "{o} {line}");
+    }
+    out
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -436,6 +528,10 @@ pub fn run_adapter(root: &Path, case: &Case) -> Result {
             i < graph_objs || (i >= EXT_BASE && i - EXT_BASE < ext_objs)
         })
     });
+    res.keys_before = object_keys(&store)
+        .into_iter()
+        .map(|(k, o)| (o, k))
+        .collect();
     let args = bind(&program, &store, &setup.inputs);
     let t1 = Instant::now();
     let (out, log) = {
@@ -445,6 +541,17 @@ pub fn run_adapter(root: &Path, case: &Case) -> Result {
     };
     res.run_time = t1.elapsed();
     let journal = store.session().take_journal();
+    res.journal_text = {
+        let labels: Vec<String> = (0..store.resource_count())
+            .map(|r| qvto_emf::canon::label(store.resource_uri(ResourceId(r as u32))))
+            .collect();
+        journal_text(&journal, store.meta(), &res.keys_before, |r| {
+            labels
+                .get(r.index())
+                .cloned()
+                .unwrap_or_else(|| format!("?{}", r.0))
+        })
+    };
     res.dump = outputs(&mut store, &out, case.dump_models);
     res.severity = out.severity;
     res.code = out.code;

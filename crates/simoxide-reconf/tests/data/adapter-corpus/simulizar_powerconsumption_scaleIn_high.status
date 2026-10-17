@@ -1,0 +1,8 @@
+0 0
+Transformation execution completed
+--log--
+SimuLizar Outsource Rule Transformation started
+Measured value is 5.0
+Found 3 AllocationContexts
+found load balancer: AC_LoadBalancer
+Set branchProbability to 0.4

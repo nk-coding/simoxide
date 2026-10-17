@@ -1,0 +1,12 @@
+0 0
+Transformation execution completed
+--log--
+SimuLizar Outsource Rule Transformation started
+Measured value is 5.0
+Threshold is exceeded
+Found 3 AllocationContexts
+Branch1: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@654c379a (eClass: org.eclipse.emf.ecore.impl.EClassImpl@300482a3 (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
+Branch2: org.eclipse.emf.ecore.impl.DynamicEObjectImpl@550bd16b (eClass: org.eclipse.emf.ecore.impl.EClassImpl@300482a3 (name: ProbabilisticBranchTransition) (instanceClassName: null) (abstract: false, interface: false))
+Balancing Load...
+Set branchProbability to 0.1
+Set branchProbability to 0.9

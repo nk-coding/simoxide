@@ -1,0 +1,97 @@
+new0 created pcm.resourceenvironment::ResourceContainer
+new0 root-added extent:/1 [0]
+new0 set pcm.core.entity::NamedElement.entityName Str("aName") -> Str("AppServer_1")
+My.resourceenvironment#/0 added pcm.resourceenvironment::ResourceEnvironment.resourceContainer_ResourceEnvironment [2] new0
+new0 container - -> My.resourceenvironment#/0 pcm.resourceenvironment::ResourceEnvironment.resourceContainer_ResourceEnvironment
+new1 created pcm.resourceenvironment::ProcessingResourceSpecification
+new1 root-added extent:/1 [1]
+new1 set pcm.resourceenvironment::ProcessingResourceSpecification.MTTF Double(0.0) -> Double(0.0)
+new1 set pcm.resourceenvironment::ProcessingResourceSpecification.MTTR Double(0.0) -> Double(0.0)
+new1 set pcm.resourceenvironment::ProcessingResourceSpecification.schedulingPolicy Null -> pathmap://PCM_MODELS/Palladio.resourcetype#/0/@schedulingPolicies__ResourceRepository.1
+new1 set pcm.resourceenvironment::ProcessingResourceSpecification.requiredByContainer Bool(false) -> Bool(false)
+new2 created pcm.core::PCMRandomVariable
+new2 root-added extent:/1 [2]
+new2 set stoex::RandomVariable.specification Null -> Str("1.0")
+new2 container - -> new1 pcm.resourceenvironment::ProcessingResourceSpecification.processingRate_ProcessingResourceSpecification
+new1 set pcm.resourceenvironment::ProcessingResourceSpecification.processingRate_ProcessingResourceSpecification Null -> new2
+new1 set pcm.resourceenvironment::ProcessingResourceSpecification.numberOfReplicas Int(1) -> Int(1)
+new1 set pcm.resourceenvironment::ProcessingResourceSpecification.activeResourceType_ActiveResourceSpecification Null -> pathmap://PCM_MODELS/Palladio.resourcetype#/0/@availableResourceTypes_ResourceRepository.0
+new0 added pcm.resourceenvironment::ResourceContainer.activeResourceSpecifications_ResourceContainer [0] new1
+new1 container - -> new0 pcm.resourceenvironment::ResourceContainer.activeResourceSpecifications_ResourceContainer
+default.semanticspd#/0/@targetCfgs.0 added semanticspd::ElasticInfrastructureCfg.elements [1] new0
+default.semanticspd#/0/@targetCfgs.0 added semanticspd::TargetGroupCfg.enactedPolicies [0] default.spd#/0/@scalingPolicies.0
+My.resourceenvironment#/0 moved pcm.resourceenvironment::ResourceEnvironment.resourceContainer_ResourceEnvironment 2 -> 1
+My.resourceenvironment#/0/@linkingResources__ResourceEnvironment.0 added pcm.resourceenvironment::LinkingResource.connectedResourceContainers_LinkingResource [1] new0
+new3 created pcm.core.composition::AssemblyContext
+new3 root-added extent:/1 [3]
+new3 set pcm.core.entity::NamedElement.entityName Str("aName") -> Str("EspressoAccountingComponent_AssemblyContext_2")
+new3 set pcm.core.composition::AssemblyContext.encapsulatedComponent__AssemblyContext Null -> default.repository#/0/@components__Repository.0
+default.system#/0 added pcm.core.composition::ComposedStructure.assemblyContexts__ComposedStructure [2] new3
+new3 container - -> default.system#/0 pcm.core.composition::ComposedStructure.assemblyContexts__ComposedStructure
+new4 created pcm.allocation::AllocationContext
+new4 root-added extent:/1 [4]
+new4 set pcm.core.entity::NamedElement.entityName Str("aName") -> Str("AssemblyContext_EspressoAccountingComponent_AssemblyContext_2")
+new4 set pcm.allocation::AllocationContext.assemblyContext_AllocationContext Null -> new3
+default.allocation#/0 added pcm.allocation::Allocation.allocationContexts_Allocation [2] new4
+new4 container - -> default.allocation#/0 pcm.allocation::Allocation.allocationContexts_Allocation
+new4 set pcm.allocation::AllocationContext.resourceContainer_AllocationContext Null -> new0
+default.semanticspd#/0/@targetCfgs.1 added semanticspd::ServiceGroupCfg.elements [1] new3
+new5 created pcm.repository::OperationRequiredRole
+new5 root-added extent:/1 [5]
+new5 set pcm.core.entity::NamedElement.entityName Str("aName") -> Str("Required_AccountingInterface_LoadBalancer_1")
+new5 set pcm.repository::OperationRequiredRole.requiredInterface__OperationRequiredRole Null -> default.repository#/0/@interfaces__Repository.0
+default.repository#/0/@components__Repository.1 added pcm.core.entity::InterfaceRequiringEntity.requiredRoles_InterfaceRequiringEntity [1] new5
+new5 container - -> default.repository#/0/@components__Repository.1 pcm.core.entity::InterfaceRequiringEntity.requiredRoles_InterfaceRequiringEntity
+new6 created pcm.seff::ProbabilisticBranchTransition
+new6 root-added extent:/1 [6]
+new6 set pcm.core.entity::NamedElement.entityName Str("aName") -> Str("Branch for Required_AccountingInterface_LoadBalancer_1")
+new6 set pcm.seff::ProbabilisticBranchTransition.branchProbability Double(0.0) -> Double(1.0)
+new7 created pcm.seff::ResourceDemandingBehaviour
+new7 root-added extent:/1 [7]
+new8 created pcm.seff::StartAction
+new8 root-added extent:/1 [8]
+new9 created pcm.seff::ExternalCallAction
+new9 root-added extent:/1 [9]
+new8 set pcm.seff::AbstractAction.successor_AbstractAction Null -> new9
+new9 set pcm.seff::AbstractAction.predecessor_AbstractAction Null -> new8
+new9 set pcm.core.entity::NamedElement.entityName Str("aName") -> Str("Call chargeForEspresso")
+new9 set pcm.seff::ExternalCallAction.role_ExternalService Null -> new5
+new9 set pcm.seff::ExternalCallAction.calledService_ExternalService Null -> default.repository#/0/@interfaces__Repository.0/@signatures__OperationInterface.0
+new10 created pcm.seff::StopAction
+new10 root-added extent:/1 [10]
+new9 set pcm.seff::AbstractAction.successor_AbstractAction Null -> new10
+new10 set pcm.seff::AbstractAction.predecessor_AbstractAction Null -> new9
+new7 added pcm.seff::ResourceDemandingBehaviour.steps_Behaviour [0] new8
+new8 container - -> new7 pcm.seff::ResourceDemandingBehaviour.steps_Behaviour
+new7 added pcm.seff::ResourceDemandingBehaviour.steps_Behaviour [1] new9
+new9 container - -> new7 pcm.seff::ResourceDemandingBehaviour.steps_Behaviour
+new7 added pcm.seff::ResourceDemandingBehaviour.steps_Behaviour [2] new10
+new10 container - -> new7 pcm.seff::ResourceDemandingBehaviour.steps_Behaviour
+new7 container - -> new6 pcm.seff::AbstractBranchTransition.branchBehaviour_BranchTransition
+new6 set pcm.seff::AbstractBranchTransition.branchBehaviour_BranchTransition Null -> new7
+default.repository#/0/@components__Repository.1/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.2 added pcm.seff::BranchAction.branches_Branch [1] new6
+new6 container - -> default.repository#/0/@components__Repository.1/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.2 pcm.seff::BranchAction.branches_Branch
+default.repository#/0/@components__Repository.1/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.2/@branches_Branch.0 set pcm.seff::ProbabilisticBranchTransition.branchProbability Double(1.0) -> Double(0.5)
+new6 set pcm.seff::ProbabilisticBranchTransition.branchProbability Double(1.0) -> Double(0.5)
+new11 created pcm.core.composition::AssemblyConnector
+new11 root-added extent:/1 [11]
+new11 set pcm.core.entity::NamedElement.entityName Str("aName") -> Str("Assembly_LoadBalancer_EspressoAccountingComponent_AssemblyContext_2")
+new11 set pcm.core.composition::AssemblyConnector.providingAssemblyContext_AssemblyConnector Null -> new3
+new11 set pcm.core.composition::AssemblyConnector.requiringAssemblyContext_AssemblyConnector Null -> default.system#/0/@assemblyContexts__ComposedStructure.1
+new11 set pcm.core.composition::AssemblyConnector.providedRole_AssemblyConnector Null -> default.repository#/0/@components__Repository.0/@providedRoles_InterfaceProvidingEntity.0
+new11 set pcm.core.composition::AssemblyConnector.requiredRole_AssemblyConnector Null -> new5
+default.system#/0 added pcm.core.composition::ComposedStructure.connectors__ComposedStructure [2] new11
+new11 container - -> default.system#/0 pcm.core.composition::ComposedStructure.connectors__ComposedStructure
+default.semanticspd#/0/@targetCfgs.1 added semanticspd::TargetGroupCfg.enactedPolicies [0] default.spd#/0/@scalingPolicies.0
+new0 root-removed extent:/1
+new1 root-removed extent:/1
+new2 root-removed extent:/1
+new3 root-removed extent:/1
+new4 root-removed extent:/1
+new5 root-removed extent:/1
+new6 root-removed extent:/1
+new7 root-removed extent:/1
+new8 root-removed extent:/1
+new9 root-removed extent:/1
+new10 root-removed extent:/1
+new11 root-removed extent:/1
