@@ -29,8 +29,9 @@ const USAGE: &str = "usage:
              [--quirks LIST]   (Slingshot compat flags: Q1..Q37, all, fast, none, -Qn;
              default none = the fixed behaviour; --quirks list prints them)
              [--spd-log spd.jsonl] [--spd-log-all] [--spd-quirks fixed|slingshot|Q2,Q12,...]
-             [--no-spd]   (scaling policies of a .spd next to the model; `spd` feature;
-             P1: decisions only, adjustments are not executed)
+             [--no-spd]   (scaling policies of a .spd next to the model; `spd` feature; the
+             adjustments run Slingshot's MainTransformation with the `reconfiguration`
+             feature, QVTo ordered by default (--qvto-mode), else decisions only)
              [--rules DIR] [--rules-log rules.jsonl] [--qvto-mode auto|ordered|fast|compat]
              (SimuLizar's reconfiguration rules: the .qvto files of DIR in file-name order, or
              run.json's reconfiguration_rules; `reconfiguration` feature; QVTo's compat mode
@@ -51,7 +52,8 @@ const USAGE: &str = "usage:
              continues, in the given order: a change file, a QVTo transformation run once;
              `reconfiguration` feature; --rules DIR with other rules than the snapshot's replaces
              them, on a snapshot without rules adds them)
-             [--enforce POLICY,...]   (enforce scaling policies at the resume: needs P2)
+             [--enforce POLICY,...]   (adjust by these scaling policies at the resume, past
+             their triggers and constraints: Slingshot's incoming policies)
   simoxide explore FILE --model <dir> --variant NAME=FILE.changes|NAME=X.qvto|NAME ...
              [--until T] [--threads N] [--metrics rt,util,...]   (fork the snapshot into one
              run per variant, each with its changes, to the end or T; compare their measurements;
@@ -533,7 +535,9 @@ mod spd {
     use simoxide_sim::snapshot::Snapshot;
     use simoxide_sim::{CompiledModel, Mode, Outputs, SimConfig, Simulation, Status};
     use simoxide_spd::log::JsonlLog;
-    use simoxide_spd::sim::{NoAdjustment, SpdRun, spd_of};
+    #[cfg(not(feature = "reconfiguration"))]
+    use simoxide_spd::sim::NoAdjustment;
+    use simoxide_spd::sim::{SpdRun, spd_of};
     use simoxide_spd::{Quirks, Spd};
 
     pub fn of(a: &Args, cm: &CompiledModel) -> Result<Option<Spd>, String> {
@@ -573,18 +577,35 @@ mod spd {
         spd: &Spd,
         restore: Option<&Snapshot>,
     ) -> Result<End, String> {
+        #[cfg(not(feature = "reconfiguration"))]
         let mut carry = super::changes::Carry::none();
+        #[cfg(feature = "reconfiguration")]
+        let mut adj = super::changes::spd_adjuster(a, &spd.quirks())?;
+        #[cfg(not(feature = "reconfiguration"))]
+        let mut adj = NoAdjustment;
         let mut r = match restore {
             Some(snap) => {
                 let mut r =
                     SpdRun::<C>::restore_snapshot(snap, cm, spd, out).map_err(|e| e.to_string())?;
+                #[cfg(feature = "reconfiguration")]
+                {
+                    adj.run
+                        .restore_section(&r.sim, snap)
+                        .map_err(|e| e.to_string())?;
+                    if super::changes::with_qvto(a, &mut r.sim, &mut adj.run)? {
+                        r.model_changed();
+                    }
+                }
+                #[cfg(not(feature = "reconfiguration"))]
+                {
+                    carry = super::changes::plain(a, &mut r.sim, Some(snap))?;
+                    if carry.changed {
+                        r.model_changed();
+                    }
+                }
                 if !a.enforce.is_empty() {
                     let names: Vec<&str> = a.enforce.iter().map(String::as_str).collect();
                     r.enforce_policies(&names).map_err(|e| e.to_string())?;
-                }
-                carry = super::changes::plain(a, &mut r.sim, Some(snap))?;
-                if carry.changed {
-                    r.model_changed();
                 }
                 r
             }
@@ -602,14 +623,14 @@ mod spd {
             Some(w) => {
                 w.arm(&r.sim)?;
                 let st = r
-                    .run_while(&mut NoAdjustment, &mut log, |s| w.keep_going(s))
+                    .run_while(&mut adj, &mut log, |s| w.keep_going(s))
                     .map_err(|e| e.to_string())?;
                 (st, None)
             }
             None => {
                 let before = super::snap::before_ns(a)?;
                 let st = r
-                    .run_until(&mut NoAdjustment, &mut log, before)
+                    .run_until(&mut adj, &mut log, before)
                     .map_err(|e| e.to_string())?;
                 (st, before)
             }
@@ -622,7 +643,16 @@ mod spd {
                 Some(p) => {
                     let opts = super::snap::options(a);
                     let mut s = r.snapshot_value(opts.encoding).map_err(|e| e.to_string())?;
+                    #[cfg(not(feature = "reconfiguration"))]
                     s.sections.extend(carry.sections(opts.encoding)?);
+                    #[cfg(feature = "reconfiguration")]
+                    if adj.run.is_started() {
+                        s.sections.push(
+                            adj.run
+                                .snapshot_section(opts.encoding)
+                                .map_err(|e| e.to_string())?,
+                        );
+                    }
                     Some(super::snap::write(p, &s)?)
                 }
                 None => None,
@@ -637,8 +667,13 @@ mod spd {
             });
         }
         let (res, _, s) = r.finish().map_err(|e| e.to_string())?;
+        let executed = if cfg!(feature = "reconfiguration") {
+            format!("adjusted={}", s.adjustments_ok)
+        } else {
+            "(adjustments are not executed: they need the `reconfiguration` feature)".into()
+        };
         eprintln!(
-            "spd: policies={} evaluations={} requests={} (adjustments are not executed yet)",
+            "spd: policies={} evaluations={} requests={} {executed}",
             spd.contexts().len(),
             s.evaluations,
             s.requests
@@ -922,21 +957,15 @@ mod changes {
     use simoxide_sim::snapshot::{Encoding, Section, Snapshot};
     use simoxide_sim::{Compat, Flavour, Simulation};
 
-    /// The QVTo state of a run without rules (transformations at a resume), carried into its
-    /// next snapshot (section `qvto`), and whether the model changed.
+    /// The QVTo state of a run without rules and SPD (transformations at a resume), carried
+    /// into its next snapshot (section `qvto`).
     pub struct Carry {
         qvto: Option<QvtoRun>,
-        /// Read by SPD runs (membership refresh).
-        #[cfg_attr(not(feature = "spd"), allow(dead_code))]
-        pub changed: bool,
     }
 
     impl Carry {
         pub fn none() -> Carry {
-            Carry {
-                qvto: None,
-                changed: false,
-            }
+            Carry { qvto: None }
         }
 
         pub fn sections(&self, enc: Encoding) -> Result<Vec<Section>, String> {
@@ -1037,10 +1066,42 @@ mod changes {
             .apply(sim, &mut q)
             .map_err(|e| e.to_string())?;
         report(&steps);
-        Ok(Carry {
-            qvto: Some(q),
-            changed: !steps.is_empty(),
-        })
+        Ok(Carry { qvto: Some(q) })
+    }
+
+    /// The SPD adjuster of a run (Slingshot's `MainTransformation`, `simoxide-reconf`): QVTo's
+    /// ordered mode unless `--qvto-mode` says otherwise, the transformations of the
+    /// interpreter's compat flags (Q4, Q6, Q7).
+    #[cfg(feature = "spd")]
+    pub fn spd_adjuster(
+        a: &Args,
+        quirks: &simoxide_spd::Quirks,
+    ) -> Result<simoxide_reconf::QvtoAdjuster, String> {
+        let core = QvtoCore::new().map_err(|e| e.to_string())?;
+        let mut opts = simoxide_reconf::SpdAdjust::new(quirks);
+        opts.mode = match mode(a)? {
+            QvtMode::Auto => QvtMode::InsertionOrderSets,
+            m => m,
+        };
+        simoxide_reconf::QvtoAdjuster::spd(&core, &opts).map_err(|e| e.to_string())
+    }
+
+    /// Applies the change steps to a restored SPD run in its adjuster's QVTo state (one QVTo
+    /// state per run: the next snapshot's section `qvto`); whether the model changed.
+    #[cfg(feature = "spd")]
+    pub fn with_qvto<C: Compat, F: Flavour>(
+        a: &Args,
+        sim: &mut Simulation<'_, C, F>,
+        q: &mut QvtoRun,
+    ) -> Result<bool, String> {
+        if a.changes.is_empty() {
+            return Ok(false);
+        }
+        let steps = build(a, q.core())?
+            .apply(sim, q)
+            .map_err(|e| e.to_string())?;
+        report(&steps);
+        Ok(!steps.is_empty())
     }
 
     /// Applies the change steps to a restored run with rules, in its host's QVTo state.
