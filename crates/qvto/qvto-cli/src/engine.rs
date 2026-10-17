@@ -24,8 +24,8 @@ pub struct QvtoEngine {
     /// The Java blackbox signatures of the corpus (`qvto-types/data/blackboxes.tsv`; parsed on
     /// the case's thread, the parsed units are not `Send`).
     signatures: std::sync::Arc<str>,
-    /// Java result directories searched for a case's identity-hash tape (`<dir>/<id>/idtape.tsv`)
-    /// besides the fixture caches of the Eclipse and corpus suites.
+    /// Java result directories searched first for a case's identity-hash tape
+    /// (`<dir>/<id>/idtape.tsv`), before the fixture caches of the suites.
     pub tape_dirs: Vec<std::path::PathBuf>,
     /// Every identity hash this value instead of the tape (the Java side run with
     /// `-XX:hashCode=2`, which gives 1).
@@ -94,6 +94,7 @@ impl Engine for QvtoEngine {
         match self.mode {
             Mode::Compat => "qvto",
             Mode::Fast => "qvto-fast",
+            Mode::Ordered => "qvto-ordered",
         }
     }
 
@@ -354,12 +355,8 @@ fn run_case(
 /// The Java run's identity-hash tape of the case, if cached.
 fn load_tape(env: &CaseEnv, tape_dirs: &[std::path::PathBuf]) -> Option<Tape> {
     let cache = env.base.join(qvto_testkit::paths::JAVA_CACHE);
-    let dirs = [
-        cache.join("eclipse"),
-        cache.join("corpus"),
-        cache.join("fuzz"),
-    ];
-    for dir in dirs.iter().chain(tape_dirs) {
+    let dirs = ["eclipse", "corpus", "fuzz", "spd"].map(|s| cache.join(s));
+    for dir in tape_dirs.iter().chain(&dirs) {
         let p = dir.join(&env.case.id).join("idtape.tsv");
         if let Ok(t) = std::fs::read_to_string(&p) {
             return parse_tape(&t).ok();

@@ -41,6 +41,10 @@ pub mod paths {
     pub const FUZZ_CASES: &str = "qvto-testkit/cases/fuzz.cases";
     /// Committed Java results of the fuzz regression cases.
     pub const FUZZ_FIXTURE: &str = "qvto-testkit/fixtures/java-fuzz.txt";
+    /// The SPD adjustment corpus (`MainTransformation` on every path; DESIGN-SPD Q1).
+    pub const SPD_CASES: &str = "qvto-testkit/cases/spd.cases";
+    /// Committed Java results of the SPD cases.
+    pub const SPD_FIXTURE: &str = "qvto-testkit/fixtures/java-spd.txt";
     /// Metamodel configuration of the Eclipse suite (shared with qvto-emf and its oracle).
     pub const SUITE_CONF: &str = "qvto-emf/tests/data/suite.conf";
     /// The inventory.
@@ -63,4 +67,14 @@ pub mod paths {
     ];
     /// Cache of full Java results (with tapes and XMI), regenerable, not committed.
     pub const JAVA_CACHE: &str = "target/qvto-testkit/java";
+    /// The same for runs of the `det` Java runner (insertion-ordered QVTo/OCL collections).
+    pub const JAVA_DET_CACHE: &str = "target/qvto-testkit/java-det";
+
+    /// The fixture of the `det` Java runner next to a fixture: `java-x.txt` -> `java-x-det.txt`.
+    pub fn det_fixture(fixture: &str) -> String {
+        match fixture.strip_suffix(".txt") {
+            Some(stem) => format!("{stem}-det.txt"),
+            None => format!("{fixture}-det"),
+        }
+    }
 }

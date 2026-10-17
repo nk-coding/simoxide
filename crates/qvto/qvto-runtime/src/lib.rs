@@ -30,6 +30,6 @@ pub mod value;
 pub use coll::{Coll, CollKind};
 #[cfg(feature = "compat")]
 pub use identity::CompatEnv;
-pub use identity::{FastEnv, HashEnv, IdentityKey, Mode};
+pub use identity::{FastEnv, HashEnv, IdentityKey, Mode, OrderedEnv};
 pub use str::Str;
 pub use value::{EnumLit, IntBox, ObjRef, TypeRef, Value};

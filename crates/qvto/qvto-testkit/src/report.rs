@@ -27,6 +27,10 @@ pub enum Verdict {
     Crashed,
     /// The Java runner fails the case's checks too (a harness problem, not counted).
     JavaFails,
+    /// The Java runner fails the case's checks, and the engine's outcome equals the Java
+    /// runner's strictly (the det runner: its ordering rule changes what the suite expects;
+    /// counted apart).
+    JavaFailsEqual,
     /// Not runnable outside Eclipse (by category).
     Unrunnable(String),
 }
@@ -41,6 +45,7 @@ impl Verdict {
             Verdict::NotImplemented => "not-implemented".into(),
             Verdict::Crashed => "crashed".into(),
             Verdict::JavaFails => "java-fails".into(),
+            Verdict::JavaFailsEqual => "java-fails-equal".into(),
             Verdict::Unrunnable(c) => format!("unrunnable:{c}"),
         }
     }
@@ -92,11 +97,11 @@ pub fn run_cases(
             continue;
         }
         let jr = java.get(&case.id);
-        if let Some(j) = jr
-            && j.verdict() != "pass"
-        {
+        let java_fails = jr.is_some_and(|j| j.verdict() != "pass");
+        if java_fails && jr.is_some_and(|j| j.get("severity").is_none()) {
+            // no outcome to compare with (the case did not run in Java)
             rep.verdict = Verdict::JavaFails;
-            rep.detail = format!("java: {}", j.verdict());
+            rep.detail = format!("java: {}", jr.map(|j| j.verdict()).unwrap_or_default());
             out.push(rep);
             continue;
         }
@@ -147,6 +152,19 @@ pub fn run_cases(
                 let failed = rep.checks.iter().find(|c| !c.pass);
                 let diff = jr.map(|j| differential(case, &outcome, j));
                 rep.verdict = match (failed, &diff) {
+                    _ if java_fails => match &diff {
+                        Some(d) if d.equal() => Verdict::JavaFailsEqual,
+                        _ => {
+                            rep.detail = format!(
+                                "java: {}; {}",
+                                jr.map(|j| j.verdict()).unwrap_or_default(),
+                                diff.as_ref()
+                                    .and_then(|d| d.first_difference())
+                                    .unwrap_or_default()
+                            );
+                            Verdict::JavaFails
+                        }
+                    },
                     (Some(f), _) => {
                         rep.detail = format!("{}: {}", f.check, f.detail);
                         Verdict::Fail
@@ -268,6 +286,13 @@ pub fn markdown(engine: &str, reports: &[CaseReport], verbose: bool) -> String {
         all.strict,
         pct(all.strict, all.runnable)
     );
+    let equal_failing = all.counts.get("java-fails-equal").copied().unwrap_or(0);
+    if equal_failing > 0 {
+        let _ = writeln!(
+            s,
+            "{equal_failing} more where the Java runner fails the Eclipse checks itself and the engine equals it strictly (java-fails-equal).\n"
+        );
+    }
     let labels: Vec<String> = all.counts.keys().cloned().collect();
     let table = |s: &mut String, title: &str, m: &BTreeMap<String, Tally>| {
         let _ = writeln!(s, "## By {title}\n");

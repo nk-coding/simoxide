@@ -46,7 +46,8 @@ impl ObjHandle for qvto_emf::ObjId {
 /// Options of a run.
 pub struct RunOptions {
     pub mode: Mode,
-    /// Identity hashes (compat mode); default HotSpot's surrogate sequence.
+    /// Identity hashes (compat mode, default HotSpot's surrogate sequence; ordered mode,
+    /// default derived from the key like fast mode).
     pub id_source: Option<Box<dyn IdentityHashSource>>,
     /// `QVTEvaluationOptions.EVALUATION_MAX_STACK_DEPTH` (default 1000).
     pub max_stack_depth: usize,
@@ -762,6 +763,7 @@ where
                     w!(self, base, dst) = self.globals[g as usize].clone();
                 }
                 Insn::CopyColl { r } => {
+                    // a copy reorders only Java-ordered storage (compat mode)
                     if self.opts.mode == qvto_runtime::Mode::Compat
                         && let Value::Coll(c) = &r!(self, base, r)
                     {
@@ -774,7 +776,8 @@ where
                     self.globals[g as usize] = r!(self, base, src).clone();
                 }
                 Insn::JumpIfFastMode { target } => {
-                    if self.opts.mode == qvto_runtime::Mode::Fast {
+                    // Eclipse's double evaluation is kept in compat and ordered mode
+                    if !self.opts.mode.eclipse_semantics() {
                         pc = target as usize;
                         continue;
                     }
