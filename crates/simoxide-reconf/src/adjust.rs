@@ -4,10 +4,11 @@
 //! environment, repository, semantic SPD and usage model `inout`, SPD `in`) and configuration
 //! properties (`keepModeling = true`), and applies its changes.
 //!
-//! What is specific to `MainTransformation` belongs to P2 and goes into [`AdjustHooks`]:
-//! setting `Configuration.enactedPolicy` before the run ([`AdjustHooks::before`], recorded in
-//! the run's journal), Slingshot's `ModelAdjusted` diff, monitor cloning and the outcome
-//! ([`AdjustHooks::after`]). The default hooks set nothing before and report the
+//! What is specific to `MainTransformation` goes into [`AdjustHooks`]: setting
+//! `Configuration.enactedPolicy` before the run ([`AdjustHooks::before`], recorded in the run's
+//! journal), Slingshot's `ModelAdjusted` diff, the model summaries and the outcome
+//! ([`AdjustHooks::after`]): [`crate::spd::SlingshotHooks`], set up by
+//! [`QvtoAdjuster::spd`]. The default hooks set nothing before and report the
 //! transformation's success, refreshing the SPD membership from the changed model.
 
 use crate::host::{Invocation, InvokeHooks, Outcome, QvtoRun, ReconfError, Transformation};
@@ -18,6 +19,10 @@ use simoxide_spd::{AdjustmentRequest, Membership, Spd, SpdState};
 
 /// The parts of an adjustment that depend on the transformation (P2).
 pub trait AdjustHooks {
+    /// Called first for each request with the run's base model graph (the model the run
+    /// started with, unchanged by adjustments; e.g. which elements are inputs).
+    fn prepare(&mut self, _base: &Graph) {}
+
     /// Edits before the transformation runs, in its journal (P2: `enactedPolicy`).
     fn before(&mut self, _store: &mut Graph, _spd: &Spd, _req: &AdjustmentRequest) {}
 
@@ -44,6 +49,7 @@ pub trait AdjustHooks {
                     ok: o.succeeded,
                     size_before,
                     size_after: state.membership.group_size(group),
+                    ..AdjustOutcome::default()
                 })
             }
             Err(e) => Err(e.to_string()),
@@ -106,6 +112,7 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for QvtoAdjuster {
         state: &mut SpdState,
         req: &AdjustmentRequest,
     ) -> Result<AdjustOutcome, SimError> {
+        self.hooks.prepare(&sim.base_model().model.graph);
         let hooks = &mut self.hooks;
         let mut before = |s: &mut Graph| hooks.before(s, spd, req);
         let r = self.run.invoke_with(

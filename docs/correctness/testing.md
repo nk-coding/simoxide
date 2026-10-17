@@ -118,8 +118,29 @@ fast mode.
   (success, the target group's size after it). With the fixed behaviour the logs equal what
   the evident intent gives (derived by hand per model).
 - `tests/sim.rs`: in a simoxide-sim run the observers deliver the measurements the triggers
-  read, the outputs equal the plain run's (P1 changes no model), and a paused and forked run
-  continues like the uninterrupted one.
+  read, the outputs equal the plain run's (no adjuster changes the model), a paused and forked
+  run continues like the uninterrupted one, and enforced policies queue their requests.
+
+The adjustments (Slingshot's `MainTransformation`) are tested in `simoxide-reconf`'s
+`tests/spd_adjust.rs` against the SPD corpus `corpus-spd/` (each case a model of
+`reference/slingshot/models`, a seed and a simulated time; `expected/` holds the reference
+runner's `det` outputs, `CORPUS=corpus-spd reference/slingshot/corpus-ss.sh [--check]`):
+
+- with all compat flags on, the decision log equals the runner's `spd.jsonl`, the adjustments'
+  change counts and model summaries (containers, links, allocation, target-group elements, in
+  model order) included, in QVTo's ordered and fast mode (V3): `spd_minimal` (1 adjustment),
+  `spd_time_policies` (8), `spd_service_group` (3, top-down); `spd_scale_in` up to its scale-in
+  (F4);
+- the default behaviour runs the patched transformations (Q6: the minimal example's links);
+  dry runs on the QVTo engine's SPD corpus show the Q4 and Q7 fixes;
+- snapshots with adjustments (sections `engine`, `model`, `spd`, `qvto`) restored into fresh
+  runs continue like the uninterrupted run, and a restored run writes the bytes it was read
+  from;
+- repeated adjustments add the same number of objects each (bounded growth);
+- the Slingshot flavour refuses the changes until F4.
+
+`simoxide-cli`'s `tests/spd_cli.rs` (feature `reconfiguration`) runs the minimal example in new
+processes: the scale-out, a resume after it, `--enforce`.
 
 ## Differential fuzzing
 

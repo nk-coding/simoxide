@@ -13,11 +13,15 @@
 //!   filters that ran: `[name, "ok"]`, `[name, "disregard", reason]`, `[name, "null"]`,
 //!   `[name, "exception", message]`) and `request`. Evaluations that the target-group check
 //!   rejects are left out unless [`VecLog::all`] (as the reference runner's default).
-//! * `adjust`: an adjustment request reached its executor: `t`, `policy`, `policy_name`, `ok`,
-//!   and the target-group size before and after when the host knows them.
+//! * `adjust`: an adjustment request reached its executor: `t`, `policy`, `policy_name`, `ok`;
+//!   when the executor computes them, Slingshot's change count `changes` and the model
+//!   summaries `before` and `after` (`crate::adjusted::summary`, as the reference runner's);
+//!   the target-group size before and after when the host knows them; `enforced` for an
+//!   enforced policy.
 //!
-//! The reference runner's records carry the bus event index `e` and its `adjust` records model
-//! summaries; neither exists here. [`project`] maps both logs onto what they share.
+//! The reference runner's records carry the bus event index `e`, which does not exist here.
+//! [`project`] maps both logs onto what P1 compared (no model summaries);
+//! [`project_with_models`] keeps the `adjust` records' change count and summaries.
 
 use crate::jfmt::json_double;
 use serde_json::Value;
@@ -55,8 +59,15 @@ pub enum Record {
         policy: Box<str>,
         policy_name: Box<str>,
         ok: bool,
+        /// Entries of Slingshot's `ModelAdjusted` change list, if the executor computed it.
+        changes: Option<usize>,
+        /// Model summaries (JSON objects) before and after, if the executor recorded them.
+        before: Option<Box<str>>,
+        after: Option<Box<str>>,
         size_before: Option<usize>,
         size_after: Option<usize>,
+        /// An enforced policy's request ([`crate::Spd::enforce`]).
+        enforced: bool,
     },
 }
 
@@ -118,8 +129,12 @@ impl Record {
                 policy,
                 policy_name,
                 ok,
+                changes,
+                before,
+                after,
                 size_before,
                 size_after,
+                enforced,
             } => {
                 let mut s = format!(
                     "{{\"k\":\"adjust\",\"t\":{},\"policy\":{},\"policy_name\":{},\"ok\":{}",
@@ -128,6 +143,20 @@ impl Record {
                     q(policy_name),
                     ok
                 );
+                if let Some(c) = changes {
+                    s.push_str(&format!(",\"changes\":{c}"));
+                }
+                if let Some(b) = before {
+                    s.push_str(",\"before\":");
+                    s.push_str(b);
+                }
+                if let Some(a) = after {
+                    s.push_str(",\"after\":");
+                    s.push_str(a);
+                }
+                if *enforced {
+                    s.push_str(",\"enforced\":true");
+                }
                 if let Some(b) = size_before {
                     s.push_str(&format!(",\"size_before\":{b}"));
                 }
@@ -198,6 +227,10 @@ impl VecLog {
 /// records without the event index `e`, `adjust` records reduced to `t`, `policy`,
 /// `policy_name` and `ok`; `log` records dropped. Lines that are not JSON objects are errors.
 pub fn project(jsonl: &str) -> Result<Vec<Value>, String> {
+    project_keys(jsonl, &["k", "t", "policy", "policy_name", "ok"])
+}
+
+fn project_keys(jsonl: &str, adjust_keys: &[&str]) -> Result<Vec<Value>, String> {
     let mut out = Vec::new();
     for (i, line) in jsonl.lines().enumerate() {
         if line.trim().is_empty() {
@@ -215,7 +248,7 @@ pub fn project(jsonl: &str) -> Result<Vec<Value>, String> {
             }
             Some("adjust") => {
                 let mut p = serde_json::Map::new();
-                for k in ["k", "t", "policy", "policy_name", "ok"] {
+                for &k in adjust_keys {
                     if let Some(x) = o.remove(k) {
                         p.insert(k.to_string(), x);
                     }
@@ -226,6 +259,24 @@ pub fn project(jsonl: &str) -> Result<Vec<Value>, String> {
         }
     }
     Ok(out)
+}
+
+/// [`project`], but `adjust` records keep `changes`, `before` and `after` (the comparison of the
+/// adjustments themselves, V3).
+pub fn project_with_models(jsonl: &str) -> Result<Vec<Value>, String> {
+    project_keys(
+        jsonl,
+        &[
+            "k",
+            "t",
+            "policy",
+            "policy_name",
+            "ok",
+            "changes",
+            "before",
+            "after",
+        ],
+    )
 }
 
 /// Compares two projected logs: `None` if equal, else a description of the first difference.

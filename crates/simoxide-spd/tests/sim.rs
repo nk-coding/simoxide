@@ -369,30 +369,62 @@ fn pause_conditions_in_an_spd_run() {
     assert_eq!(res.measurements.to_csv(), wres.measurements.to_csv());
 }
 
-/// Enforcing policies at a resume (Slingshot's incoming policies) needs P2: the hook checks
-/// the names and refuses; the run is unchanged.
+/// Enforcing policies at a resume (Slingshot's incoming policies): unknown names are refused
+/// and leave the run unchanged; known ones queue one request each at the current time, which
+/// the adjuster executes (here: not executed) and the log records as enforced; nothing else
+/// changes (enforced requests commit no adjustor state).
 #[test]
-fn enforcing_policies_waits_for_p2() {
+fn enforcing_policies_queues_requests() {
+    use simoxide_spd::log::Record;
     use simoxide_spd::resume::EnforceError;
     let (cm, spd, rc) = setup(Quirks::fixed());
     let mut whole = spd_run(&cm, &spd, rc);
     let mut wlog = VecLog::default();
     whole.run(&mut NoAdjustment, &mut wlog).unwrap();
-    let (wres, ..) = whole.finish().unwrap();
+    let (wres, wst, wsummary) = whole.finish().unwrap();
     let mut r = spd_run(&cm, &spd, rc);
     let mut log = VecLog::default();
     r.run_until(&mut NoAdjustment, &mut log, Some(2_000_000_000))
         .unwrap();
+    let before = r.state.clone();
     assert_eq!(
         r.enforce_policies(&["nope"]),
         Err(EnforceError::UnknownPolicy("nope".into()))
     );
-    match r.enforce_policies(&["cpu", "time"]) {
-        Err(EnforceError::Unsupported(m)) => assert!(m.contains("P2"), "{m}"),
-        o => panic!("{o:?}"),
-    }
+    assert_eq!(r.state, before);
+    let now = r.sim.state().now_ns() as f64 / 1e9;
+    r.enforce_policies(&["cpu", "time"]).unwrap();
     r.run(&mut NoAdjustment, &mut log).unwrap();
-    let (res, ..) = r.finish().unwrap();
-    assert_eq!(log.records, wlog.records);
+    let (res, st, summary) = r.finish().unwrap();
+    let enforced: Vec<&Record> = log
+        .records
+        .iter()
+        .filter(|r| matches!(r, Record::Adjust { enforced: true, .. }))
+        .collect();
+    assert_eq!(enforced.len(), 2);
+    for (rec, name) in enforced.iter().zip(["cpu", "time"]) {
+        match rec {
+            Record::Adjust {
+                t,
+                policy_name,
+                ok: false,
+                ..
+            } => {
+                assert_eq!(*t, now);
+                assert_eq!(&**policy_name, name);
+            }
+            o => panic!("{o:?}"),
+        }
+    }
+    let rest: Vec<Record> = log
+        .records
+        .iter()
+        .filter(|r| !matches!(r, Record::Adjust { enforced: true, .. }))
+        .cloned()
+        .collect();
+    assert_eq!(rest, wlog.records);
+    assert_eq!(st.policies, wst.policies);
+    assert_eq!(st.requests, wst.requests + 2);
+    assert_eq!(summary.pending, wsummary.pending);
     assert_eq!(res.measurements.to_csv(), wres.measurements.to_csv());
 }

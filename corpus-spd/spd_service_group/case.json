@@ -1,0 +1,6 @@
+{
+ "model": "reference/slingshot/models/spd_service_group",
+ "sim_time": 100,
+ "seed": 1,
+ "group": "spd"
+}

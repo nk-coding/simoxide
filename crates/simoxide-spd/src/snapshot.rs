@@ -12,7 +12,7 @@ use simoxide_model::raw::ObjId;
 use simoxide_sim::snapshot::{
     Encoding, Section, Snapshot, SnapshotError, SnapshotInfo, SnapshotOptions,
 };
-use simoxide_sim::{Compat, CompiledModel, Outputs, Simulation};
+use simoxide_sim::{Compat, CompiledModel, Flavour, Outputs, Simulation};
 
 /// Name of the SPD section.
 pub const SPD: &str = "spd";
@@ -156,7 +156,7 @@ pub fn quirks_of(s: &Snapshot) -> Result<Option<Quirks>, SnapshotError> {
     }
 }
 
-impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
+impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
     /// The run's snapshot (the simulation's sections and `spd`), between events: after
     /// [`SpdRun::run_until`] returned, when the SPD work of the last event is done.
     pub fn snapshot_value(&mut self, enc: Encoding) -> Result<Snapshot, SnapshotError> {
@@ -243,9 +243,9 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
                 "the SPD state belongs to another scaling policy definition".into(),
             ));
         }
-        let sim = Simulation::<C>::restore_snapshot(s, base, out)?;
+        let sim = Simulation::<C, F>::restore_snapshot(s, base, out)?;
         Ok(SpdRun {
-            series: series_points(sim.base_model()),
+            series: series_points(sim.compiled()),
             sim,
             spd,
             state: SpdState {
