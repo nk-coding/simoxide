@@ -166,18 +166,25 @@ Status values: done, next, open, parked.
   - External corpora: 2 402 `.qvto` files of 233 sources (Palladio repositories, Eclipse
     samples, GitHub), 1 809 not in the suite, in `reference/external/` (not committed; sources,
     revisions and licences in its `SOURCES.tsv`). 1 516 compile cases (`cases/external.cases`):
-    compile problems equal to Eclipse's on 392 at first, 1 263 after the fixes (11 with another
-    verdict, the rest LPG repair messages and cascades in broken files); 410 run cases
-    (`cases/external-run.cases`, inputs found in the sources), 76 of them runnable in Java,
-    71 equal.
-  - Differential fuzzing (`qvto fuzz expr|prog`, bounded niced campaigns, 4 workers): about
-    1.5 M generated expression statements and 30 000 generated transformations over generated
-    models; discrepancies found and fixed by class: type tests and casts, numeric promotion and
-    conversion, strings and regular expressions, collection copies and aliasing, extents and
-    roots, printing of objects and types, iteration scoping, inheritance, analyser problems on
-    unknown types; each minimised and kept (`cases/fuzz.cases`, 29 cases;
-    `qvto-sema/tests/data/q7`).
-  - Robustness fuzzing (`qvto fuzz robust`, own mutational fuzzer; `cargo fuzz` needs nightly):
-    campaigns of several hours over the corpora, panics fixed (`crates/qvto/tests/robust.rs`);
-    limits on collection size, string length and native stack besides the step budget (Q7-4).
-    The 24 h criterion was replaced by these campaigns on the shared machine.
+    compile problems exactly equal to Eclipse's on 392 at first, 1 263 after the fixes (11 with
+    another verdict; the rest are cascades in files with missing metamodels and LPG's repair
+    messages); 410 run cases (`cases/external-run.cases`, inputs found in the sources): problems
+    equal on 371, and of the 76 that compile without errors in Java 71 run equal to the Java
+    runner (the others: QVTo's trace model as input, XML feature maps).
+  - Differential fuzzing (`qvto fuzz expr|prog`, three bounded niced rounds): 2.0 M generated
+    expression statements in 51 000 transformations and 56 700 generated transformations over
+    generated models. Value/model findings per round: 396 / 40, then 12 / 7, then 1 / 0 (the
+    last ones lone surrogates, documented); the remaining analyser findings are LPG's recovery
+    after syntax errors. Classes fixed: type tests and casts, numeric promotion and conversion,
+    strings and regular expressions, collection copies and aliasing, extents and roots,
+    printing of objects, types and numbers, iteration scoping, inheritance, argument evaluation
+    on undefined sources, common supertypes and problems on unknown types. Each minimised and
+    kept: `cases/fuzz.cases` (24 cases, suite `fuzz` of `qvto conform`) and
+    `qvto-sema/tests/data/q7` (23 files with Eclipse's problems).
+  - Robustness fuzzing (`qvto fuzz robust`, own mutational fuzzer; `cargo fuzz` needs
+    nightly): 2.0 M mutated inputs in a 30-minute campaign of 3 workers, besides the shorter
+    ones during development; the panics (nameless nodes after syntax errors) and the one hang
+    (quadratic string growth without step charging) are fixed and kept in
+    `crates/qvto/tests/robust.rs`; limits on collection size, string length and native stack
+    besides the step budget (Q7-4). The 24 h criterion was replaced by these bounded campaigns
+    on the shared machine.

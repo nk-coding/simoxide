@@ -553,7 +553,7 @@ benchmarks (§12 Q5b-10).
 | conformance | `reference/inventory/eclipse-tests.tsv`: expected models (suite comparer), asserts, logs, stack traces | `qvto-testkit`, `qvto conform` |
 | differential | the Java runner on the same transformation and inputs: strict canonical model comparison, exact log, diagnostics (severity, line, code) | `qvto-testkit` |
 | fast vs compat | order-insensitive comparison of both modes on every case | `qvto-testkit` |
-| differential fuzzing (Q7) | the Java runner on generated expressions and programs over generated models, minimised findings kept as regression cases | `qvto fuzz expr|prog`, `cases/fuzz.cases` |
+| differential fuzzing (Q7) | the Java runner on generated expressions and programs over generated models, minimised findings kept as regression cases | `qvto fuzz expr`, `qvto fuzz prog`, `cases/fuzz.cases` |
 | external corpora (Q7) | the Java runner on 1 516 real-world `.qvto` files (compile problems) and their runnable subset (outputs, logs) | `qvto fuzz corpus`, `cases/external*.cases` |
 | robustness fuzzing (Q7) | none: no panic, hang or abort of parser, analyser, compiler and VM on mutated input | `qvto fuzz robust`, `crates/qvto/tests/robust.rs` |
 
