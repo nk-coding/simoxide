@@ -568,6 +568,7 @@ dependencies = [
  "pprof",
  "qvto",
  "qvto-bytecode",
+ "qvto-paths",
  "qvto-runtime",
  "qvto-sema",
  "qvto-syntax",

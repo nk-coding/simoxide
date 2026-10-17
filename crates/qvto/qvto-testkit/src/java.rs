@@ -24,6 +24,31 @@ pub struct JavaRun {
     pub jvm_opts: Option<String>,
     /// Per-case deadline in seconds (the runner's default: 120).
     pub timeout: Option<u64>,
+    /// The `det` runner: the Slingshot reference runner's seed agent with its ordering rule
+    /// (`-javaagent:seed-agent.jar=ordered,qvto`, [`det_agent`]), so that QVTo's and OCL's
+    /// `HashSet`/`HashMap` iterate in insertion order.
+    pub det: bool,
+}
+
+/// The seed agent of the Slingshot reference runner (`reference/slingshot/seed-agent.sh`,
+/// relative to the repository root, two levels above the QVTo root), built if missing;
+/// `QVTO_DET_AGENT` names another jar.
+pub fn det_agent(base: &Path) -> Result<PathBuf, String> {
+    if let Some(p) = std::env::var_os("QVTO_DET_AGENT") {
+        return Ok(PathBuf::from(p));
+    }
+    let dir = base.join("../../reference/slingshot");
+    let jar = dir.join("build/seed-agent.jar");
+    if !jar.is_file() {
+        let st = Command::new(dir.join("seed-agent.sh"))
+            .stdout(std::process::Stdio::null())
+            .status()
+            .map_err(|e| format!("reference/slingshot/seed-agent.sh: {e}"))?;
+        if !st.success() || !jar.is_file() {
+            return Err("reference/slingshot/seed-agent.sh failed".into());
+        }
+    }
+    Ok(jar)
 }
 
 impl JavaRun {
@@ -63,8 +88,14 @@ impl JavaRun {
             cmd.arg("--timeout").arg(t.to_string());
         }
         cmd.env("XMX", "-Xmx2g");
-        if let Some(o) = &self.jvm_opts {
-            cmd.env("JVM_OPTS", o);
+        let mut opts: Vec<String> = Vec::new();
+        if self.det {
+            let jar = det_agent(&self.base)?;
+            opts.push(format!("-javaagent:{}=ordered,qvto", jar.display()));
+        }
+        opts.extend(self.jvm_opts.clone());
+        if !opts.is_empty() {
+            cmd.env("JVM_OPTS", opts.join(" "));
         }
         let out = cmd.output().map_err(|e| format!("qvto-run: {e}"))?;
         let text = String::from_utf8_lossy(&out.stdout).to_string()

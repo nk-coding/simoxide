@@ -11,7 +11,7 @@ use qvto_model::{
 use qvto_runtime::coll::Coll;
 use qvto_runtime::dict::{Dict, List};
 use qvto_runtime::model::datum_to_value;
-use qvto_runtime::{IntBox, ObjRef, Str, Value};
+use qvto_runtime::{IdentityKey, IntBox, ObjRef, Str, Value};
 use qvto_sema::ir::{Direction, IntermPropId, ModelParamRef};
 use qvto_types::{CollKind, Type, TypeId};
 use std::cell::RefCell;
@@ -393,7 +393,9 @@ where
             )));
         }
         let mut next = self.next_extent_uri;
-        self.extents[x].add_object(self.store, o, &mut next);
+        if self.extents[x].add_object(self.store, o, &mut next) {
+            self.env.touch(IdentityKey::Obj(o));
+        }
         self.next_extent_uri = next;
         Ok(())
     }
@@ -1114,20 +1116,26 @@ where
                         None => fi.opposite.is_none().then_some(t),
                     }
                 };
+                // `Copier.get(referencedEObject)` hashes every target (a LinkedHashMap lookup)
+                let touch = |env: &crate::env::RunEnv, t: S::Obj| {
+                    env.touch(IdentityKey::Obj(ObjRef::host(t.to_u32())))
+                };
                 if fi.is_many() {
                     let n = self.store.len(o, f);
                     let targets: Vec<S::Obj> = (0..n)
                         .filter_map(|i| self.store.get_at(o, f, i).as_obj())
                         .collect();
                     for t in targets {
+                        touch(&self.env, t);
                         if let Some(ct) = map_target(t) {
                             let _ = self.store.add(c, f, Datum::Obj(ct), None);
                         }
                     }
-                } else if let Some(t) = self.store.get(o, f).as_obj()
-                    && let Some(ct) = map_target(t)
-                {
-                    let _ = self.store.set(c, f, Datum::Obj(ct));
+                } else if let Some(t) = self.store.get(o, f).as_obj() {
+                    touch(&self.env, t);
+                    if let Some(ct) = map_target(t) {
+                        let _ = self.store.set(c, f, Datum::Obj(ct));
+                    }
                 }
             }
         }
@@ -1254,6 +1262,8 @@ where
         let class = self.store.class_of(o);
         let c = self.store.create(class)?;
         map.push((o, c));
+        // `Copier.put(eObject, copy)`: the original is hashed (a LinkedHashMap key)
+        self.env.touch(IdentityKey::Obj(ObjRef::host(o.to_u32())));
         let meta = &self.prog.ir.meta;
         let feats: Vec<FeatureId> = meta.class(class).all_features.to_vec();
         for f in feats {
@@ -1280,9 +1290,16 @@ where
                     let kids: Vec<S::Obj> = (0..n)
                         .filter_map(|i| self.store.get_at(o, f, i).as_obj())
                         .collect();
+                    let mut copies = Vec::with_capacity(kids.len());
                     for k in kids {
                         let kc = self.copy_rec(k, deep, map)?;
                         self.store.add(c, f, Datum::Obj(kc), None)?;
+                        copies.push(kc);
+                    }
+                    // `setting.set(copyAll(list))`: a unique EList's `addAll` hashes the new
+                    // elements (`getNonDuplicates`, a LinkedHashSet), after the copying
+                    for kc in copies {
+                        self.env.touch(IdentityKey::Obj(ObjRef::host(kc.to_u32())));
                     }
                 } else if let Some(k) = self.store.get(o, f).as_obj() {
                     let kc = self.copy_rec(k, deep, map)?;

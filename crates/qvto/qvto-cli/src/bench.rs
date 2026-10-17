@@ -188,7 +188,8 @@ pub fn bench(args: &[String]) {
                             None => Mode::Compat,
                         },
                         "fast" => Mode::Fast,
-                        _ => die("modes: compat,fast"),
+                        "ordered" => Mode::Ordered,
+                        _ => die("modes: compat,fast,ordered"),
                     })
                     .collect()
             }
@@ -394,6 +395,7 @@ fn print_rust(id: &str, mode: Mode, m: &Measured, series: bool) {
     let side = match mode {
         Mode::Compat => "qvto",
         Mode::Fast => "fast",
+        Mode::Ordered => "ordered",
     };
     print_side(side, id, &m.compile, &m.runs, series, m);
 }
@@ -835,7 +837,7 @@ fn tsv(
         let mut rows: Vec<(&str, &Measured)> = Vec::new();
         if let Some((_, v)) = rust.iter().find(|(id, _)| id == &c.id) {
             for (m, x) in v {
-                rows.push((if *m == Mode::Compat { "compat" } else { "fast" }, x));
+                rows.push((m.name(), x));
             }
         }
         if let Some((_, x)) = java.iter().find(|(id, _)| id == &c.id) {

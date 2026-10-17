@@ -1,13 +1,17 @@
 # qvto-cli
 
 The `qvto` command: `qvto run` (compile and run a transformation), `qvto disasm` (the compiled
-program), `qvto conform` (the conformance scoreboard, `qvto-testkit/README.md`) and
-`qvto bench` (the benchmark suite). `src/engine.rs` is the engine under the harness,
-`src/bbox.rs` the Eclipse test bundle's Java blackboxes ported, `src/bench.rs` the benchmarks.
+program), `qvto conform` (the conformance scoreboard, `qvto-testkit/README.md`),
+`qvto bench` (the benchmark suite) and `qvto spd-replay` (Slingshot's SPD adjustments against the
+Slingshot reference runner's records). `src/engine.rs` is the engine under the harness,
+`src/bbox.rs` the Eclipse test bundle's Java blackboxes ported, `src/bench.rs` the benchmarks,
+`src/spdreplay.rs` the replay.
 
 ```sh
-qvto run t.qvto in.xmi --repeat 10 [--fast]
-qvto bench                                   # all workloads, compat and fast mode
+qvto run t.qvto in.xmi --repeat 10 [--fast | --ordered]
+qvto spd-replay                              # the det runs of reference/slingshot, ordered mode: 13 of 13
+qvto spd-replay MODELDIR SPD.jsonl --mode compat
+qvto bench                                   # all workloads, compat and fast mode (--modes compat,fast,ordered)
 taskset -c 2,3 qvto bench --java --java-cold # with the Java runner (warm: one JVM; cold: one JVM per workload)
 qvto bench --group B2 --only b2_lb_scaleUp_x1,b3_spd_main_x1 --runs 50
 qvto bench --suite corpus                    # the conformance cases as workloads (B1)

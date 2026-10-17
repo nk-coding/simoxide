@@ -206,8 +206,14 @@ pub enum Coll {
 }
 
 impl Coll {
-    /// `new HashSet()`.
+    /// `new HashSet()`; in ordered mode a `LinkedHashSet` (the det JVM's rewritten
+    /// allocation: also its class, which OCL tests with `instanceof LinkedHashSet` to tell an
+    /// OrderedSet, so such a set behaves as an OrderedSet in equality, `asSet`, `oclIsKindOf`,
+    /// printing, ...).
     pub fn new_set(env: &dyn HashEnv) -> Coll {
+        if env.ordered() {
+            return Coll::new_ordered_set();
+        }
         Coll::Set(Index::new(env))
     }
     /// `new LinkedHashSet()`.

@@ -147,6 +147,9 @@ where
 
     /// Allocates a frame for an operation; returns `(base, ibase)`.
     fn push_frame(&mut self, op: OpId, chunk: ChunkId) -> (usize, usize) {
+        if let Some(n) = self.op_entries.get_mut(op.index()) {
+            *n += 1;
+        }
         let code = self.prog.code(op);
         let base = self.regs.len();
         self.regs.resize(base + code.nregs as usize, Value::Null);
@@ -451,6 +454,9 @@ where
             self.set_chunk(w);
             let ok = self.exec(w, base, ibase)?;
             if !ok.is_true() {
+                if let Some(n) = self.op_rejected.get_mut(op.index()) {
+                    *n += 1;
+                }
                 return Ok((Value::Null, MappingStatus::PreconditionFailed));
             }
         }

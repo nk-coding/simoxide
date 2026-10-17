@@ -168,6 +168,9 @@ pub struct Case {
     pub conf: Option<String>,
     /// Besides the extents, dump every other model resource after the run (sorted by file name).
     pub dump_models: bool,
+    /// `resolve-all`: the Java runner resolves every proxy of the inputs before the run (as
+    /// Palladio loads models), not lazily; qvto-rs always resolves the inputs when it loads them.
+    pub resolve_all: bool,
     /// URI prefix maps (`from`, `to` directory relative to the base).
     pub urimaps: Vec<(String, String)>,
     pub checks: Vec<Check>,
@@ -328,6 +331,7 @@ pub fn parse_cases(text: &str) -> Result<Vec<Case>, CaseError> {
             }
             "conf" => c.conf = Some(rest.into()),
             "dump" => c.dump_models = rest == "models",
+            "resolve-all" => c.resolve_all = true,
             "urimap" => {
                 let (a, b) = rest
                     .split_once(' ')
@@ -489,6 +493,9 @@ pub fn write_case(c: &Case, out: &mut String) {
     }
     if c.dump_models {
         kv("dump", "models");
+    }
+    if c.resolve_all {
+        kv("resolve-all", "");
     }
     for (a, b) in &c.urimaps {
         kv("urimap", &format!("{a} {b}"));

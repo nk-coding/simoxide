@@ -5,7 +5,8 @@
 //! Compat mode memoises one identity hash per key, drawn on first use from an
 //! [`IdentityHashSource`]: HotSpot's xor-shift surrogate by default, or a tape of a Java run
 //! ([`TapeHook`]) that maps keys of the run to the hashes the Java run recorded. Fast mode
-//! derives the hash from the key.
+//! derives the hash from the key. Ordered mode does too, unless the run is given a source:
+//! its collections do not depend on the values, which only appear in `Class@hash` texts.
 
 use qvto_runtime::identity::{IdentityHashSource, IdentityHashes};
 use qvto_runtime::{FastEnv, HashEnv, IdentityKey, Mode};
@@ -14,6 +15,8 @@ use std::cell::RefCell;
 /// The `HashEnv` of a run.
 pub struct RunEnv {
     mode: Mode,
+    /// Identity hashes come from the memo (compat mode, or ordered mode with a given source).
+    memo: bool,
     ids: RefCell<IdentityHashes>,
     /// Keys that are the same Java object as another key: type values and the `eClass` of
     /// printed objects are the metamodel's `EClassifier` objects of the store.
@@ -24,6 +27,7 @@ impl RunEnv {
     pub fn new(mode: Mode, source: Option<Box<dyn IdentityHashSource>>) -> RunEnv {
         RunEnv {
             mode,
+            memo: mode == Mode::Compat || (mode == Mode::Ordered && source.is_some()),
             ids: RefCell::new(IdentityHashes::new(source.unwrap_or_else(default_source))),
             aliases: std::collections::HashMap::new(),
         }
@@ -38,6 +42,15 @@ impl RunEnv {
     pub fn peek(&self, key: IdentityKey) -> Option<i32> {
         self.ids.borrow().peek(key)
     }
+
+    /// Where Java hashes an object by identity as a side effect (a `HashSet` of the engine's
+    /// own), the hash is drawn here too, so that the identity-hash sequence (compat mode, or a
+    /// tape in ordered mode) assigns the values in Java's order. Nothing otherwise.
+    pub fn touch(&self, key: IdentityKey) {
+        if self.memo {
+            let _ = self.identity_hash(key);
+        }
+    }
 }
 
 impl HashEnv for RunEnv {
@@ -46,9 +59,10 @@ impl HashEnv for RunEnv {
     }
     fn identity_hash(&self, key: IdentityKey) -> i32 {
         let key = self.aliases.get(&key).copied().unwrap_or(key);
-        match self.mode {
-            Mode::Compat => self.ids.borrow_mut().get(key),
-            Mode::Fast => FastEnv.identity_hash(key),
+        if self.memo {
+            self.ids.borrow_mut().get(key)
+        } else {
+            FastEnv.identity_hash(key)
         }
     }
 }
@@ -59,7 +73,8 @@ fn default_source() -> Box<dyn IdentityHashSource> {
     Box::new(qvto_runtime::identity::HotSpotXorShift::default())
 }
 
-/// Without compat mode the memo is never asked (fast mode derives hashes from the keys).
+/// Without compat mode the memo is asked only with a source (fast and ordered mode derive
+/// hashes from the keys).
 #[cfg(not(feature = "compat"))]
 fn default_source() -> Box<dyn IdentityHashSource> {
     Box::new(qvto_runtime::identity::Sequential::default())

@@ -34,4 +34,4 @@ pub use native::{NativeCall, NativeError, NativeFn, NativeResult, Natives, java_
 pub use run::{MODE_UNAVAILABLE, RunOutcome};
 pub use stdlib::Prim;
 pub use trace::{TraceRecord, Traces};
-pub use vm::{Diag, ObjHandle, RunOptions, Vm};
+pub use vm::{CoveredOp, Diag, ObjHandle, RunOptions, Vm};

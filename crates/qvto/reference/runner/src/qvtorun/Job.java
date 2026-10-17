@@ -77,6 +77,8 @@ final class Job {
 	String importRoot;
 	String conf;
 	boolean dumpModels;
+	/** {@code resolve-all}: EcoreUtil.resolveAll on the inputs before the run (as Palladio loads models). */
+	boolean resolveAll;
 	final List<String[]> urimaps = new ArrayList<>();
 	final List<String[]> checks = new ArrayList<>();
 	/** Benchmark parameters ({@code bench <key> <value>}, read by Bench). */
@@ -147,6 +149,7 @@ final class Job {
 				break;
 			case "conf": cur.conf = rest; break;
 			case "dump": cur.dumpModels = rest.equals("models"); break;
+			case "resolve-all": cur.resolveAll = true; break;
 			case "urimap": cur.urimaps.add(rest.split(" ", 2)); break;
 			case "check": cur.checks.add(rest.split(" ")); break;
 			case "bench": {

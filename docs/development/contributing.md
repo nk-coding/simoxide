@@ -64,9 +64,11 @@ Cargo aliases (`.cargo/config.toml`) run the test gates per area: `cargo test-si
 crates, release), `cargo test-fdn` (the foundation crates) and `cargo test-qvto` (the QVTo
 crates); the tests turn the opt-in features `exact`/`compat` on through their dev-dependencies. After changes to the QVTo crates, also
 the conformance scoreboard and the analyser oracle (`crates/qvto/README.md`, "Building and
-testing"): `cargo conform --suite all` (542 of 542 strictly equal to Eclipse QVTo),
-`cargo conform --suite all --engine qvto-fast` and the `oracle_report` example (1 102 of
-1 102). They catch panics per case and therefore use the profile `release-unwind`.
+testing"): `cargo conform --suite all` (589 of 589 strictly equal to Eclipse QVTo, the SPD
+adjustment corpus included), `cargo conform --suite all --engine qvto-fast`,
+`cargo conform --suite all --engine qvto-ordered` (ordered mode against the `det` Java runner)
+and the `oracle_report` example (1 102 of 1 102). They catch panics per case and therefore use
+the profile `release-unwind`.
 
 ## Releases
 

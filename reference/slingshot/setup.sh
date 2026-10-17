@@ -57,11 +57,7 @@ bundle instrument simoxide.slingshot.instrument_1.0.0.jar
 bundle runner simoxide.slingshot.runner_1.0.0.jar ":$B/plugins/simoxide.slingshot.instrument_1.0.0.jar"
 
 # --- 2. seed agent (-javaagent; on the boot class path together with ASM, boot-delegated by Equinox) ---
-mkdir -p "$B/classes/seed-agent"
-cp "$(ls "$I"/plugins/org.objectweb.asm_9*.jar | head -1)" "$B/asm.jar"
-$JAVAC -nowarn -XDignore.symbol.file --release 21 -d "$B/classes/seed-agent" -cp "$B/asm.jar" \
-  $(find "$H/src/seed-agent" -name '*.java') 2>&1 | grep -E 'error' || true
-$JAR cfm "$B/seed-agent.jar" "$H/src/seed-agent/MANIFEST.MF" -C "$B/classes/seed-agent" .
+"$H/seed-agent.sh" >/dev/null
 echo "built seed-agent.jar"
 
 # --- 3. patched bundles (deterministic same-time order; patches/README.md) -----------------------------

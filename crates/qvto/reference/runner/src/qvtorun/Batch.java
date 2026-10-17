@@ -52,6 +52,10 @@ public final class Batch {
 		runner.tape = tape;
 		runner.saveXmi = saveXmi;
 		runner.timeoutMs = timeout * 1000;
+		// the environment's set-up draws identity hashes: on this thread, not on the first case's
+		// (whose tape seed must be the first two draws of its thread)
+		Env.init();
+		Tape.seed(); // loads the class here too
 		List<Job> jobs = Job.read(cases);
 		StringBuilder tsv = new StringBuilder("id\tverdict\tload\tseverity\tcode\texception\tchecks\tdump_fnv\tlog_fnv\tcompile_ms\trun_ms\tdetail\n");
 		int pass = 0, n = 0;

@@ -23,6 +23,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.XMLResource;
@@ -182,13 +183,14 @@ final class CaseRunner {
 
 	Outcome run(Job job, IProgressMonitor monitor) throws Exception {
 		Env.init();
+		// first on the thread: the tape's seed must be the thread's first two identity hashes
+		int[] seed = Tape.seed();
 		Outcome o = new Outcome();
 		o.id = job.id;
 		Path dir = outRoot.resolve(job.id);
 		Files.createDirectories(dir);
 		Map<String, String> result = new LinkedHashMap<>();
 		result.put("id", job.id);
-		int[] seed = Tape.seed();
 		StringBuilder diag = new StringBuilder();
 
 		org.eclipse.m2m.internal.qvt.oml.blackbox.BlackboxRegistry.INSTANCE.cleanup();
@@ -311,6 +313,13 @@ final class CaseRunner {
 					new org.eclipse.m2m.qvt.oml.util.Trace(tr.getContents()));
 		}
 
+		if (job.resolveAll) {
+			// Palladio (and Slingshot) resolve every proxy when they load the models; without it a
+			// cross-document path proxy resolves when first used, after the run may have moved
+			// the object it named
+			for (Resource r : inputResources) EcoreUtil.resolveAll(r);
+		}
+		Tape.Pre pre = tape ? Tape.pre(inputResources) : null;
 		long t1 = System.nanoTime();
 		ExecutionDiagnostic ed = executor.execute(ctx, extents.toArray(new ModelExtent[0]));
 		o.runMs = (System.nanoTime() - t1) / 1e6;
@@ -318,7 +327,7 @@ final class CaseRunner {
 		if (tape) {
 			List<List<EObject>> outLists = new ArrayList<>();
 			for (int i = 0; i < kinds.size(); i++) if (kinds.get(i) != DirectionKind.IN) outLists.add(extents.get(i).getContents());
-			snap = Tape.snapshot(inputResources, outLists);
+			snap = Tape.snapshot(pre, inputResources, outLists);
 		}
 		o.severity = Tape.sev(ed.getSeverity());
 		o.code = ed.getCode();

@@ -7,6 +7,7 @@ mod bench;
 mod engine;
 mod fuzz;
 mod robust;
+mod spdreplay;
 
 use qvto_model::ModelStore;
 use qvto_testkit::case::{Case, read_cases};
@@ -20,32 +21,44 @@ use std::process::exit;
 
 const USAGE: &str = "\
 usage:
-  qvto run FILE.qvto [MODEL...] [--repeat N] [--fast | --compat]
+  qvto run FILE.qvto [MODEL...] [--repeat N] [--fast | --compat | --ordered]
       Compiles and runs a transformation (models bound to the in/inout parameters in order,
       metamodels by namespace URI from the suite configuration); prints the log and outcome.
       Default mode: compat in builds with `--features compat` (Eclipse's orders; such builds
-      must not be distributed, see LICENSES), else fast.
+      must not be distributed, see LICENSES), else fast. Ordered mode (every build): Eclipse's
+      semantics with insertion-ordered Set, Bag and Dict (the Slingshot det runner's rule).
   qvto disasm FILE.qvto
       Prints the problems, modules, operations and the bytecode of a transformation.
   qvto bench [gen] [--file F | --suite eclipse|corpus] [--only ID,...] [--group G,...]
-             [--modes compat,fast] [--java] [--java-cold] [--no-rust] [--compiles K]
+             [--modes compat,fast,ordered] [--java] [--java-cold] [--no-rust] [--compiles K]
              [--runs N] [--budget-ms B] [--report FILE.md]
       The benchmark suite (qvto-cli/bench/workloads.bench): compile and run times in
       compat and fast mode, with --java against the warm reference runner (one JVM), with
       --java-cold a fresh JVM per workload. Run it pinned: taskset -c 2,3 qvto bench --java.
-  qvto conform [--suite eclipse|corpus|fuzz|all] [--cases FILE] [--fixture FILE]
-               [--engine qvto|qvto-fast|stub|replay:DIR] [--only ID,...] [--prefix P]...
-               [--report FILE.md] [--tsv FILE] [--verbose]
+  qvto conform [--suite eclipse|corpus|fuzz|spd|all] [--cases FILE] [--fixture FILE]
+               [--engine qvto|qvto-fast|qvto-ordered|stub|replay:DIR] [--det] [--compare-unstable]
+               [--only ID,...] [--prefix P]... [--report FILE.md] [--tsv FILE] [--verbose]
       Runs the engine on the cases and prints the scoreboard: per case the Eclipse
       driver's checks and the strict comparison with the Java runner's fixture.
       `qvto` (the default) is compat mode and needs a build with `--features compat`;
-      `qvto-fast` runs in every build.
-  qvto conform record [--suite eclipse|corpus|fuzz|all] [--only ID,...] [--prefix P]... [--runs N]
+      `qvto-fast` and `qvto-ordered` run in every build. `--det` (implied by
+      `qvto-ordered`) compares with the det runner's fixtures (fixtures/java-<suite>-det.txt).
+      `--compare-unstable` also compares what varies between Java runs (the engine replays
+      the recorded run's identity hashes).
+  qvto conform record [--suite eclipse|corpus|fuzz|spd|all] [--det] [--only ID,...] [--prefix P]...
+                      [--runs N]
       Runs the Java reference runner N times (default 5, one JVM per run), marks
       outputs that differ between the runs as unstable and writes the fixture
       bundle; the full results (tapes, XMI) stay in target/qvto-testkit/java/<suite>.
-  qvto conform java [--suite ...] [--out DIR] [--only ID,...] [--prefix P]... [--save-xmi]
+      `--det`: the det runner (the Slingshot reference runner's seed agent with its ordering
+      rule, reference/slingshot/seed-agent.sh), cache target/qvto-testkit/java-det/<suite>.
+  qvto conform java [--suite ...] [--det] [--out DIR] [--only ID,...] [--prefix P]... [--save-xmi]
       Runs the Java reference runner once into DIR.
+  qvto spd-replay [MODELDIR SPD.jsonl] [--mode compat|fast|ordered]
+      Replays the SPD adjustments a Slingshot reference run recorded (reference/slingshot,
+      spd.jsonl; without arguments the repository's det runs) with MainTransformation on one
+      in-memory copy of the models and compares each adjustment's outcome and model summary
+      (default: ordered mode, which the det runner's ordering rule defines).
   qvto fuzz expr|prog [--seed N] [--minutes M | --batches B] [--cases C] [--stmts S] [--depth D] [--out DIR] [--keep]
       Differential fuzzing against the Java runner: random expressions or programs over the fuzz
       metamodel; findings (minimised) in DIR/findings.tsv and DIR/findings/.
@@ -64,7 +77,7 @@ struct Suite {
     fixture: &'static str,
 }
 
-const SUITES: [Suite; 3] = [
+const SUITES: [Suite; 4] = [
     Suite {
         name: "eclipse",
         cases: paths::ECLIPSE_CASES,
@@ -79,6 +92,11 @@ const SUITES: [Suite; 3] = [
         name: "fuzz",
         cases: paths::FUZZ_CASES,
         fixture: paths::FUZZ_FIXTURE,
+    },
+    Suite {
+        name: "spd",
+        cases: paths::SPD_CASES,
+        fixture: paths::SPD_FIXTURE,
     },
 ];
 
@@ -95,6 +113,7 @@ fn main() {
         Some("run") => run_cmd(&args[1..]),
         Some("bench") => bench::bench(&args[1..]),
         Some("fuzz") => fuzz::main(&args[1..]),
+        Some("spd-replay") => spdreplay::main(&args[1..]),
         Some("-h" | "--help") | None => {
             println!("{USAGE}");
         }
@@ -117,6 +136,21 @@ struct Opts {
     verbose: bool,
     save_xmi: bool,
     runs: usize,
+    /// The `det` Java runner's fixtures and caches (implied by `--engine qvto-ordered`).
+    det: bool,
+    /// Compare the aspects a fixture marks unstable too.
+    compare_unstable: bool,
+}
+
+impl Opts {
+    /// The Java result cache of the selected runner (`det` or the plain one).
+    fn java_cache(&self) -> &'static str {
+        if self.det {
+            paths::JAVA_DET_CACHE
+        } else {
+            paths::JAVA_CACHE
+        }
+    }
 }
 
 fn parse(args: &[String]) -> Opts {
@@ -145,6 +179,8 @@ fn parse(args: &[String]) -> Opts {
             "--out" => o.out = Some(val(&mut i).into()),
             "--verbose" | "-v" => o.verbose = true,
             "--save-xmi" => o.save_xmi = true,
+            "--det" => o.det = true,
+            "--compare-unstable" => o.compare_unstable = true,
             "--runs" => {
                 o.runs = val(&mut i)
                     .parse()
@@ -153,6 +189,9 @@ fn parse(args: &[String]) -> Opts {
             a => die(&format!("unknown argument {a}\n{USAGE}")),
         }
         i += 1;
+    }
+    if o.engine.as_deref() == Some("qvto-ordered") {
+        o.det = true;
     }
     o
 }
@@ -171,7 +210,14 @@ fn suites(o: &Opts, root: &Path) -> Vec<(String, PathBuf, PathBuf)> {
         .iter()
         .filter(|s| want == "all" || want == s.name)
         .filter(|s| root.join(s.cases).is_file())
-        .map(|s| (s.name.to_string(), root.join(s.cases), root.join(s.fixture)))
+        .map(|s| {
+            let fixture = if o.det {
+                paths::det_fixture(s.fixture)
+            } else {
+                s.fixture.to_string()
+            };
+            (s.name.to_string(), root.join(s.cases), root.join(fixture))
+        })
         .collect()
 }
 
@@ -186,7 +232,7 @@ fn conform(args: &[String]) {
     match o.sub.as_deref() {
         Some("record") => {
             for (name, cases, fixture) in &suites {
-                let cache = root.join(paths::JAVA_CACHE).join(name);
+                let cache = root.join(o.java_cache()).join(name);
                 let partial = !o.only.is_empty() || !o.prefixes.is_empty();
                 let run = JavaRun {
                     base: root.clone(),
@@ -206,6 +252,7 @@ fn conform(args: &[String]) {
                     jvm_opts: (name == "fuzz")
                         .then(|| "-XX:+UnlockExperimentalVMOptions -XX:hashCode=2".to_string()),
                     timeout: None,
+                    det: o.det,
                 };
                 let _ = std::fs::remove_dir_all(&run.out);
                 let runs = if name == "fuzz" { 1 } else { o.runs };
@@ -244,13 +291,14 @@ fn conform(args: &[String]) {
                         .out
                         .clone()
                         .map(|d| d.join(name))
-                        .unwrap_or_else(|| root.join(paths::JAVA_CACHE).join(name)),
+                        .unwrap_or_else(|| root.join(o.java_cache()).join(name)),
                     only: o.only.clone(),
                     prefixes: o.prefixes.clone(),
                     tape: true,
                     save_xmi: o.save_xmi,
                     jvm_opts: None,
                     timeout: None,
+                    det: o.det,
                 };
                 match run.run() {
                     Ok(log) => print!("{log}"),
@@ -283,11 +331,11 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
         };
         let mut engine: Box<dyn Engine> = match o.engine.as_deref().unwrap_or("qvto") {
             "stub" => Box::new(StubEngine),
-            e @ ("qvto" | "qvto-fast") => {
-                let mode = if e == "qvto" {
-                    qvto_runtime::Mode::Compat
-                } else {
-                    qvto_runtime::Mode::Fast
+            e @ ("qvto" | "qvto-fast" | "qvto-ordered") => {
+                let mode = match e {
+                    "qvto" => qvto_runtime::Mode::Compat,
+                    "qvto-fast" => qvto_runtime::Mode::Fast,
+                    _ => qvto_runtime::Mode::Ordered,
                 };
                 if let Some(why) = mode.unavailable_reason() {
                     die(&format!(
@@ -297,6 +345,11 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
                 let mut q = engine::QvtoEngine::new(root, mode);
                 if name == "fuzz" {
                     q.constant_identity = Some(1);
+                }
+                if o.det {
+                    // the det runs' identity-hash tapes (`Class@hash` texts)
+                    q.tape_dirs
+                        .push(root.join(paths::JAVA_DET_CACHE).join(name));
                 }
                 Box::new(q)
             }
@@ -314,13 +367,14 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
             (o.only.is_empty() || o.only.contains(&c.id))
                 && (o.prefixes.is_empty() || o.prefixes.iter().any(|p| c.id.starts_with(p)))
         };
-        all.extend(report::run_cases(
+        all.extend(report::run_cases_with(
             engine.as_mut(),
             &cases,
             root,
             &models,
             &java,
             &select,
+            o.compare_unstable,
         ));
     }
     let md = report::markdown(&engine_name, &all, o.verbose);
@@ -354,6 +408,7 @@ fn run_cmd(args: &[String]) {
             }
             "--fast" => mode = qvto_runtime::Mode::Fast,
             "--compat" => mode = qvto_runtime::Mode::Compat,
+            "--ordered" => mode = qvto_runtime::Mode::Ordered,
             a => files.push(a.to_string()),
         }
         i += 1;

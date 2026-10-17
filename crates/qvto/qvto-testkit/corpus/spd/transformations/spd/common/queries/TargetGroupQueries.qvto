@@ -1,3 +1,5 @@
+// Copied from Palladio-Addons-SPD-Metamodel (commit 95cdb0b677276f5d14c3001b89705a17d8fb690f),
+// bundles/org.palladiosimulator.spd.semantic.transformations/transformations/spd/common/queries/TargetGroupQueries.qvto. Licence pending confirmation (DESIGN-SPD U3); do not publish.
 /**
 * TargetGroupQueries
 * 

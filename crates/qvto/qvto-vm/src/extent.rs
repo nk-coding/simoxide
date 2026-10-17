@@ -80,14 +80,24 @@ where
 }
 
 impl Extent {
-    /// Binds the initial objects (the constructor of `ModelParameterExtent`).
-    pub fn bind_initial<S: ModelStore>(&mut self, s: &mut S, objs: Vec<ObjRef>, next_uri: &mut u32)
+    /// Binds the initial objects (the constructor of `ModelParameterExtent`). Returns the
+    /// objects Java hashes by identity on the way, in order (the keys of
+    /// `myInitialObj2ContainerMap`, the additions its `ResourceModificationAdapter` records):
+    /// the caller draws their identity hashes, as HotSpot assigns them there.
+    pub fn bind_initial<S: ModelStore>(
+        &mut self,
+        s: &mut S,
+        objs: Vec<ObjRef>,
+        next_uri: &mut u32,
+    ) -> Vec<ObjRef>
     where
         S::Obj: ObjHandle,
     {
+        let mut hashed = Vec::new();
         for &o in &objs {
             if let Some(c) = container(s, o) {
                 self.initial_container.insert(o, c);
+                hashed.push(o);
             }
         }
         if !self.is_readonly() {
@@ -101,6 +111,7 @@ impl Extent {
                         let r = self.in_memory(s, next_uri);
                         let _ = s.add_root(r, h, None);
                         self.record_resource_addition(o);
+                        hashed.push(o);
                     }
                     Some(r) => {
                         if !self.watched.contains(&r) {
@@ -111,6 +122,7 @@ impl Extent {
             }
         }
         self.initial = objs;
+        hashed
     }
 
     fn in_memory<S: ModelStore>(&mut self, s: &mut S, next_uri: &mut u32) -> ResourceId {
@@ -144,18 +156,22 @@ impl Extent {
         !self.is_readonly() && (self.resource == Some(r) || self.watched.contains(&r))
     }
 
-    /// `addObject`.
-    pub fn add_object<S: ModelStore>(&mut self, s: &mut S, o: ObjRef, next_uri: &mut u32)
+    /// `addObject`. Returns whether the object went into the in-memory resource, where the
+    /// `ResourceModificationAdapter` records it in a `LinkedHashSet`: Java hashes it by identity
+    /// then (the caller draws its identity hash).
+    pub fn add_object<S: ModelStore>(&mut self, s: &mut S, o: ObjRef, next_uri: &mut u32) -> bool
     where
         S::Obj: ObjHandle,
     {
         self.additional.push(o);
+        let mut recorded = false;
         if !o.is_local() && !self.local_only {
             let h = S::Obj::from_u32(o.index());
             if s.resource_of(h).is_none() {
                 let r = self.in_memory(s, next_uri);
                 let _ = s.add_root(r, h, None);
                 self.record_resource_addition(o);
+                recorded = true;
             }
         }
         self.count_after_purge += 1;
@@ -164,6 +180,7 @@ impl Extent {
             self.count_after_purge = 0;
             self.purge_limit = self.additional.len().max(INITIAL_EXTENT_SIZE);
         }
+        recorded
     }
 
     fn purge_additional<S: ModelStore>(&mut self, s: &mut S)
