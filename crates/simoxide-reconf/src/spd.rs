@@ -70,7 +70,11 @@ pub const TRANSFORMATIONS: [(&str, &str, &str); 17] = [
         "Loadbalancing.qvto",
         "pcm/helpers/Loadbalancing.qvto"
     ),
-    unit!("pcm.helpers.Wiring", "Wiring.qvto", "pcm/helpers/Wiring.qvto"),
+    unit!(
+        "pcm.helpers.Wiring",
+        "Wiring.qvto",
+        "pcm/helpers/Wiring.qvto"
+    ),
     unit!(
         "spd.bottomup.BottomUpTransformation",
         "BottomUpTransformation.qvto",

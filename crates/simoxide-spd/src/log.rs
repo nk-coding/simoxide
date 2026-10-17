@@ -264,7 +264,19 @@ fn project_keys(jsonl: &str, adjust_keys: &[&str]) -> Result<Vec<Value>, String>
 /// [`project`], but `adjust` records keep `changes`, `before` and `after` (the comparison of the
 /// adjustments themselves, V3).
 pub fn project_with_models(jsonl: &str) -> Result<Vec<Value>, String> {
-    project_keys(jsonl, &["k", "t", "policy", "policy_name", "ok", "changes", "before", "after"])
+    project_keys(
+        jsonl,
+        &[
+            "k",
+            "t",
+            "policy",
+            "policy_name",
+            "ok",
+            "changes",
+            "before",
+            "after",
+        ],
+    )
 }
 
 /// Compares two projected logs: `None` if equal, else a description of the first difference.

@@ -52,15 +52,13 @@ mod process;
 mod qvt;
 pub mod resume;
 mod rules;
-#[cfg(feature = "spd")]
-pub mod spd;
 #[cfg(feature = "snapshot")]
 mod snapshot;
+#[cfg(feature = "spd")]
+pub mod spd;
 
 #[cfg(feature = "spd")]
 pub use adjust::{AdjustHooks, DefaultAdjustHooks, QvtoAdjuster};
-#[cfg(feature = "spd")]
-pub use spd::{SlingshotHooks, SpdAdjust, SpdVariant, main_transformation};
 pub use edits::{ChangeFile, ChangeFileError, EditOp};
 pub use host::{
     AbortPolicy, Bind, CoreBuilder, FailedRunChanges, IdSourceFn, Imports, Invocation, InvokeHooks,
@@ -76,6 +74,8 @@ pub use resume::{
 pub use rules::{RuleSet, RulesOutcome};
 #[cfg(feature = "snapshot")]
 pub use snapshot::{QVTO, QvtoState, RULES};
+#[cfg(feature = "spd")]
+pub use spd::{SlingshotHooks, SpdAdjust, SpdVariant, main_transformation};
 
 /// The simulator's change set of a journal recorded on `g`: the changes of objects of
 /// SimOxide's metamodels, in order, with the object values of list changes (objects of other

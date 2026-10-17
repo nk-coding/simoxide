@@ -43,8 +43,9 @@ pub mod sim;
 pub mod snapshot;
 
 pub use interp::{
-    AdjustOutcome, AdjustmentRequest, AdjustorState, Check, Cmp, FRes, Filter, GroupState, Measurement, Metric,
-    Node, NodeState, PolicyCtx, PolicyState, Reason, Spd, SpdHost, SpdState, TimeEvent, TimerId,
+    AdjustOutcome, AdjustmentRequest, AdjustorState, Check, Cmp, FRes, Filter, GroupState,
+    Measurement, Metric, Node, NodeState, PolicyCtx, PolicyState, Reason, Spd, SpdHost, SpdState,
+    TimeEvent, TimerId,
 };
 pub use model::{Membership, PointKind, PointRef, SpdError, SpdModel};
 pub use quirks::Quirks;

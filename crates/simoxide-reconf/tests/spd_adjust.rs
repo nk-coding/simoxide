@@ -170,3 +170,181 @@ fn adjustments_equal_slingshot() {
         }
     }
 }
+
+fn case(name: &str) -> Case {
+    cases().into_iter().find(|c| c.name == name).unwrap()
+}
+
+struct Setup {
+    cm: CompiledModel,
+    spd: Spd,
+    cfg: simoxide_sim::SimConfig,
+}
+
+fn setup(c: &Case, quirks: Quirks) -> Setup {
+    let model = RunSpec::default()
+        .load_model(&simulizar_copy(&c.model))
+        .unwrap();
+    let spd = spd_of(&model, quirks).unwrap().expect("an SPD");
+    let cm = CompiledModel::compile(model).unwrap();
+    let mut cfg = RunSpec::default().sim_config("p2");
+    cfg.seed = c.seed;
+    cfg.max_sim_time = c.sim_time;
+    Setup { cm, spd, cfg }
+}
+
+fn adjuster(quirks: Quirks) -> QvtoAdjuster {
+    QvtoAdjuster::spd(core(), &SpdAdjust::new(&quirks)).unwrap()
+}
+
+fn adjust_records(log: &str) -> Vec<Value> {
+    project_with_models(log)
+        .unwrap()
+        .into_iter()
+        .filter(|v| v["k"] == "adjust")
+        .collect()
+}
+
+/// The default (fixed) behaviour runs the patched transformations: in the minimal example the
+/// new container joins the link of its unit at the end (fixed Q6: the link keeps its
+/// containers in their order, so nothing moves and SimuLizar's router accepts the change,
+/// MC-2.3), everything else as in Slingshot; the time-policy model runs to its end.
+#[test]
+fn fixed_behaviour_runs_the_patched_transformations() {
+    let c = case("spd_minimal");
+    let (got, err) = run(&c, Quirks::fixed(), QvtMode::InsertionOrderSets);
+    assert_eq!(err, None);
+    let a = adjust_records(&got);
+    assert_eq!(a.len(), 1);
+    assert_eq!(a[0]["ok"], true);
+    assert_eq!(
+        a[0]["after"]["links"],
+        serde_json::json!([[
+            "LinkingResource1",
+            "AppServer",
+            "Loadbalancer_RC",
+            "AppServer_1"
+        ]])
+    );
+    let refl = std::fs::read_to_string(&c.expected).unwrap();
+    let r = adjust_records(&refl);
+    for k in ["containers", "allocation", "target_groups"] {
+        assert_eq!(a[0]["after"][k], r[0]["after"][k], "{k}");
+    }
+    // F4: the fixed behaviour of spd_time_policies removes an allocation context at its first
+    // scale-in (the change path refuses it until F4); every adjustment before it succeeds
+    for mode in [QvtMode::InsertionOrderSets, QvtMode::Fast] {
+        let (got, err) = run(&case("spd_time_policies"), Quirks::fixed(), mode);
+        assert!(err.is_some_and(|e| e.contains("cannot remove")), "{mode:?}");
+        let a = adjust_records(&got);
+        assert!(!a.is_empty() && a.iter().all(|a| a["ok"] == true));
+    }
+}
+
+/// An SPD run with adjustments, written to snapshots (sections `engine`, `model`/`graph`,
+/// `spd`, `qvto`) at several times and restored into a fresh run with a fresh adjuster each
+/// time, continues like the uninterrupted run: decision log (model summaries included) and
+/// measurements equal; a restored run writes the bytes it was read from.
+#[test]
+fn snapshots_with_adjustments_continue_identically() {
+    use simoxide_sim::snapshot::{Encoding, Snapshot};
+    // the fixed behaviour of spd_time_policies scales in (F4)
+    for (name, q) in [
+        ("spd_time_policies", Quirks::slingshot()),
+        ("spd_minimal", Quirks::fixed()),
+    ] {
+        let c = case(name);
+        let s = setup(&c, q);
+        let sim = Simulation::<Exact>::new(&s.cm, s.cfg.clone(), Outputs::default()).unwrap();
+        let mut whole = SpdRun::new(sim, &s.spd).unwrap();
+        let mut wlog = VecLog::default();
+        whole.run(&mut adjuster(q), &mut wlog).unwrap();
+        let (wres, wst, _) = whole.finish().unwrap();
+
+        let sim = Simulation::<Exact>::new(&s.cm, s.cfg.clone(), Outputs::default()).unwrap();
+        let mut r = SpdRun::new(sim, &s.spd).unwrap();
+        let mut adj = adjuster(q);
+        let mut log = VecLog::default();
+        let mut generations = Vec::new();
+        for t in [5, 20, 33, 50, 51, 60, 77, 90] {
+            r.run_until(&mut adj, &mut log, Some(t * 1_000_000_000))
+                .unwrap();
+            let snap = |r: &mut SpdRun<'_, '_, Exact>, adj: &QvtoAdjuster| {
+                let mut snap = r.snapshot_value(Encoding::Postcard).unwrap();
+                snap.sections
+                    .push(adj.run.snapshot_section(Encoding::Postcard).unwrap());
+                let mut bytes = Vec::new();
+                snap.write(&mut bytes).unwrap();
+                bytes
+            };
+            let bytes = snap(&mut r, &adj);
+            generations.push(r.sim.state().model().generation());
+            drop(r);
+            let read = Snapshot::read(&bytes[..]).unwrap();
+            r = SpdRun::restore_snapshot(&read, &s.cm, &s.spd, Outputs::default()).unwrap();
+            adj = adjuster(q);
+            adj.run.restore_section(&r.sim, &read).unwrap();
+            let again = snap(&mut r, &adj);
+            if again != bytes {
+                let a = Snapshot::read(&again[..]).unwrap();
+                for (x, y) in read.sections.iter().zip(&a.sections) {
+                    assert!(x == y, "{q:?} t={t}: section {} differs", x.name);
+                }
+                panic!("{q:?} t={t}: header differs");
+            }
+        }
+        r.run(&mut adj, &mut log).unwrap();
+        let (res, st, _) = r.finish().unwrap();
+        assert!(
+            generations.windows(2).any(|w| w[0] < w[1]),
+            "{generations:?}"
+        );
+        assert_eq!(log.to_jsonl(), wlog.to_jsonl(), "{q:?}");
+        assert_eq!(st, wst);
+        assert_eq!(res.measurements.to_csv(), wres.measurements.to_csv());
+    }
+}
+
+/// Bounded growth: repeated adjustments (enforced scale-outs of the minimal example) add the
+/// same number of graph objects each time (the containers, assemblies, allocations, roles and
+/// branches of one replica; nothing per invocation in the QVTo state), and the journal of each
+/// run is about the same size.
+#[test]
+fn repeated_adjustments_grow_the_model_by_one_replica_each() {
+    let c = case("spd_minimal");
+    let q = Quirks::fixed();
+    let s = setup(&c, q);
+    let mut cfg = s.cfg.clone();
+    cfg.max_sim_time = 1000;
+    let sim = Simulation::<Exact>::new(&s.cm, cfg, Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &s.spd).unwrap();
+    let mut adj = adjuster(q);
+    let mut log = VecLog::default();
+    let mut counts = Vec::new();
+    let mut journals = Vec::new();
+    let adjustments = |log: &VecLog| adjust_records(&log.to_jsonl()).len();
+    for k in 1..=40 {
+        r.run_until(&mut adj, &mut log, Some(k * 10_000_000_000))
+            .unwrap();
+        r.enforce_policies(&["Basic Point in Time Trigger"])
+            .unwrap();
+        r.run_until(&mut adj, &mut log, Some(k * 10_000_000_000 + 1))
+            .unwrap();
+        counts.push((r.sim.model_graph().object_count(), adjustments(&log)));
+        journals.push(adj.last.as_ref().unwrap().journal.len());
+    }
+    // objects per adjustment (the model's own time policy adds one at t = 50)
+    let d: Vec<usize> = counts
+        .windows(2)
+        .map(|w| (w[1].0 - w[0].0) / (w[1].1 - w[0].1))
+        .collect();
+    assert!(d.iter().all(|&x| x == d[0]), "{d:?}");
+    assert!(d[0] > 0 && d[0] < 100, "{d:?}");
+    let (lo, hi) = (journals[5], journals[39]);
+    assert!(hi < lo * 2 + 200, "journal {lo} -> {hi}");
+    assert!(
+        adjust_records(&log.to_jsonl())
+            .iter()
+            .all(|a| a["ok"] == true)
+    );
+}

@@ -220,7 +220,10 @@ fn monitor_clones(g: &Graph, spd: &SpdModel, new: &[ObjId]) -> Vec<MonitorClone>
         for &(m, unit_spec) in &resource_monitors {
             let t = type_of(unit_spec);
             if let Some(spec) = specs(c).into_iter().find(|&s| type_of(s) == t) {
-                out.push(MonitorClone { monitor: m, target: spec });
+                out.push(MonitorClone {
+                    monitor: m,
+                    target: spec,
+                });
             }
         }
     }
@@ -293,14 +296,19 @@ pub fn summary(g: &Graph, input: &HashSet<Box<str>>) -> String {
     s.push_str("],\"links\":[");
     if let Some(env) = env {
         for (i, &l) in g
-            .get_refs(env, feat::ResourceEnvironment_linkingResources__ResourceEnvironment)
+            .get_refs(
+                env,
+                feat::ResourceEnvironment_linkingResources__ResourceEnvironment,
+            )
             .iter()
             .enumerate()
         {
             s.push_str(if i > 0 { ",[" } else { "[" });
             quote(&name(l), &mut s);
-            for &c in g.get_refs(l, feat::LinkingResource_connectedResourceContainers_LinkingResource)
-            {
+            for &c in g.get_refs(
+                l,
+                feat::LinkingResource_connectedResourceContainers_LinkingResource,
+            ) {
                 s.push(',');
                 quote(&name(c), &mut s);
             }
@@ -315,8 +323,14 @@ pub fn summary(g: &Graph, input: &HashSet<Box<str>>) -> String {
             .enumerate()
         {
             s.push_str(if i > 0 { ",[" } else { "[" });
-            let asm = g.get_ref(ac, feat::AllocationContext_assemblyContext_AllocationContext);
-            let rc = g.get_ref(ac, feat::AllocationContext_resourceContainer_AllocationContext);
+            let asm = g.get_ref(
+                ac,
+                feat::AllocationContext_assemblyContext_AllocationContext,
+            );
+            let rc = g.get_ref(
+                ac,
+                feat::AllocationContext_resourceContainer_AllocationContext,
+            );
             quote(&asm.map(name).unwrap_or_default(), &mut s);
             s.push(',');
             quote(&rc.map(name).unwrap_or_default(), &mut s);
