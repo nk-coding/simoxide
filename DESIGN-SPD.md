@@ -2,9 +2,10 @@
 
 State: 2026-10-17. This is a design. Phases S0 (the Slingshot reference runner,
 `reference/slingshot/`), S1 (the Slingshot semantics specification, `docs/spec/slingshot/`, rules
-`SS-*`), F0, F1, F2, P1 (the SPD interpreter, `crates/simoxide-spd`), S2 (the Slingshot flavour's
-fast mode), Q1 (the SPD adjustment corpus) and Q2 (QVTo's ordered mode) are implemented; the rest is
-not. User decisions of §8 are recorded. It is on branch `spd`
+`SS-*`), F0, F1, F2, F3 (the QVTo host, `crates/simoxide-reconf`), P1 (the SPD interpreter,
+`crates/simoxide-spd`), S2 (the Slingshot flavour's fast mode), Q1 (the SPD adjustment corpus), Q2
+(QVTo's ordered mode) and R1 (SimuLizar's reconfiguration rules) are implemented; the rest is not.
+User decisions of §8 are recorded. It is on branch `spd`
 (forked from `qvto-adapter`). It is a plan, so it sits next to the code and not in the VitePress
 site, which describes the current state (`docs/development/contributing.md`). The parts that get
 built move into `docs/spec/` and `docs/guide/`.
@@ -1529,6 +1530,144 @@ on a run"):
   1, `spd_and_trigger` 1) on one in-memory copy of the models; containers, links, allocation and
   target-group elements in their order equal all 13 (compat mode 6, fast mode 13).
 
+**R1 as built** (2026-10-17, branch `r1`; spec: MEAS-7.2, 7.3, 7.5 in `docs/spec/measurements.md`,
+MC-7 in `docs/spec/model-changes.md`; guide: `docs/guide/reconfiguration.md`):
+
+- **Status: done**; the F4 remainder is listed below. Every runnable SimuLizar reconfiguration
+  example runs and equals the patched SimuLizar reference byte for byte (trace, tape,
+  measurements) in the exact build, and matches it statistically in the default (EPL, fast)
+  build.
+- **D2, PRM values (`simoxide-sim`, `src/sim/reconf.rs`, `src/stats.rs`).** Every PRM recorder
+  owns a runtime measurement (`CompiledModel::prm_meas`: monitor MP and spec as graph objects,
+  SimuLizar's order: fixed-size, variable-size, feed-through, time-driven aggregation, utilisation
+  windows; lazily created passive-resource recorders append theirs) and writes its value into
+  `Prm::values`, plain data in the run state's sink, so forks, snapshots and resumes carry it.
+  Values: feed-through = the tuple; fixed and variable size = the statistical characterisation of
+  the buffer (now buffered as `(t, v)`, fixed size in SimuLizar's array order); time-driven
+  aggregation = the characterisation of a sliding window fed by the calculator of the spec's
+  metric (before R1 these windows only produced their events); utilisation windows = the
+  utilisation. The four characterisations (arithmetic, geometric, harmonic mean, median) were
+  decompiled from the 5.2.2 monitor repository jar and ported with Java's arithmetic
+  (`Collectors.averagingDouble` of JDK 21, JScience `Amount`, HotSpot `log`/`exp` with
+  `hotspot-math`). The `Number of Resource Containers` calculator now takes PRM recorders too
+  (the load balancer example aggregates it). Runs without rules: unchanged (golden hashes).
+- **D3, the reconfiguration process.** *Decision: the rules run between events, not inside
+  `Ev::Reconf`.* With a host attached (`Simulation::attach_reconfiguration`, run state), the
+  `Ev::Reconf` event only marks the run of the process as due (`RunState::reconf_pending`); a
+  driver that runs with `run_while(|s| !s.reconf_pending())` gets control right after that event,
+  runs the rules (their changes go through `apply_changes`, safe between events) and reports the
+  result (`Simulation::reconf_done`: the container-count tuple if the count changed, then the
+  `Reconfiguration Time` tuples, both only on success). Nothing else happens in that event, so
+  this equals SimuLizar's in-event run; no engine hook (with its borrow and fork problems) was
+  needed. Runs after the stop, synchronous in SimuLizar (MEAS-7.2): `finalise` became a sequence of
+  steps (each final window, each resource's deactivation, drain, passive cleanup) that pauses
+  after the step whose PRM write triggered a run; the host runs the rules on the PRM values of
+  that write; REF-11 behaves as before. Without a host every run succeeds without rules, as
+  before.
+- **Host (`simoxide-reconf`, `src/process.rs`; F3's public API only).** `RulesHost`: the run's
+  `QvtoRun`, the `RuleSet`, a PRM mirror (a `RuntimeMeasurementModel` in the run's QVTo state,
+  created on the first reconfiguration, one `RuntimeMeasurement` per run-state measurement
+  referring to the graph's MP and spec objects; values written before every run, 15 µs), stats
+  and optional records. `handle` = mirror, `QvtoRun::run_rules`, `reconf_done`. SimuLizar's result:
+  a rule is applied when it *completed* (diagnostic code 0): QVTo 3.10.7, which SimuLizar 5.2.2
+  ships, reports OK for a completed run even when a non-fatal `assert` failed; qvto-rs follows
+  QVTo 3.11, which raises such a run to ERROR (found on the load balancer's `outsource`: 99
+  successful reconfigurations in SimuLizar). Errors (a binding error, a change SimuLizar aborts on,
+  a change SimOxide refuses: F4 kinds, invalid models) fail the run with the rule named.
+  `RulesRun`: simulation + host; `run_until`, `finish`, `fork`, `into_parts`/`from_parts`.
+- **Configuration.** `run.json` `reconfiguration_rules` (`RunSpec::reconfiguration_rules`);
+  `simoxide run --rules DIR --rules-log FILE --qvto-mode auto|fast|compat` (feature
+  `reconfiguration`).
+- **Reference.** `refsim --rules DIR` (and the `run.json` key), `--seeds A:B`. Patch P9: the QVTo
+  loader lists the folder itself in file-name order (stock: a `HashMap<URI, …>` whose order
+  depends on the folder's location), the rule factory compiles a `DeployedQvtModule` (the stock
+  resource asks for the Eclipse workspace), `Bootstrap` registers QVTo's `.qvto` factory. Only the
+  QVTo reconfigurator is active in the 5.2.2 runtime (Henshin and Story Diagram engines use
+  extension points its Dagger components no longer read).
+- **Examples** (`corpus-rules/`, `reference/import-rules-examples.sh`, expected outputs of the
+  patched reference): `lb_outsource` (the load balancer example's launch configuration: branch
+  probabilities), `lb_rules_qvto` (its QVTo folder: branch probabilities and processing rates),
+  `lb_scaleout` (SimOxide's `scaleOut.qvto`: a new container with resources joins the LAN, a new
+  assembly context is allocated to it, the connector is rewired), `lb_add_branch` (SimOxide's
+  `addBranch.qvto`: a third branch in the load balancer's SEFF that routes load), `power_rules_qvto`
+  (the power-consumption variant with its PCM-only rules; its power monitors need the Palladio
+  power extension, which the 5.2.2 product lacks, and its resource-URI measuring points refer to
+  the Eclipse workspace: replaced by the PCM measuring points they denote), `sl_reconfiguration`
+  (SimuLizar's `ReconfigurationSimulationTest`, response times 1..10). All six: byte-identical in
+  the exact build (QVTo compat and fast mode alike); 13 349 reconfigurations in the power case.
+- **Not runnable, and why** (also not headless in SimuLizar 5.2.2): rules that use SimuLizar's
+  action framework (`AdaptationBehavior.execute`: the power example's `switchToStandby` and its
+  `outsource`, which also needs the power model; the TransientEffects media store's
+  `horizontalscaling`, which also needs usage evolution); PCM 5.0/5.1 namespaces (znn.com, trip
+  planner, the old power-consumption example); Henshin and Story Diagram rules;
+  `runconfigtest`'s `addNewServer`/`addClonedServer` add an unallocated assembly context (refused by
+  SimOxide's validation; in simulation their thresholds are never reached anyway).
+- **What needs F4** (per change kind; none of the runnable examples needs it): monitor changes
+  (cloning a monitor or adding a PRM recorder: `ChangeError::Unsupported`, the run fails naming the
+  rule, test `a_change_simoxide_does_not_support_yet_ends_the_run_naming_the_rule`); population and
+  usage-scenario changes (MC-5.2); executions in progress inside a changed behaviour (MC-4.3: they
+  finish their old instructions, SimuLizar follows the changed chain; for the load balancer's
+  branch, the SEFF's first action, it makes no difference: `lb_add_branch` is byte-identical);
+  structural changes of an action itself (its kind or its number of resource or infrastructure
+  calls); removal policies beyond SimuLizar's "keep simulating" (MC-1.5, which R1 has). Of
+  SimuLizar's examples, those that would need F4 also need the action framework: the media
+  store's horizontal scaling (a new assembly context wired into the load balancer by adding a
+  branch, `wirewithloadbalancer.qvto`; monitors of the new container), `migratecomponent.qvto`
+  (moves an allocation context: ignored by SimuLizar's syncer, MC-3.2).
+- **Statistics** (`reference/tools/rules-stat.sh`, 30 seeds per side, Welch and Mann-Whitney on
+  per-run counts, means, time-weighted means, percentiles, KS on the pooled values, Holm 0.01):
+  the exact build equals the reference on 30 of 30 seeds of every case (measurements byte for
+  byte). The default build (fast simulator mode, QVTo fast mode) against the reference: no per-run
+  statistic rejected on `lb_outsource`, `lb_rules_qvto`, `lb_add_branch`, `power_rules_qvto`,
+  `sl_reconfiguration`; on `lb_scaleout` Server2's mean response time was rejected with seeds
+  1-30 (3 tests; the scale-out time is heavy-tailed) but not with seeds 31-60, nor do the
+  exact build's seeds 31-90 differ from the fast build's (median scale-out 280 vs 250 s). The
+  pooled-values KS rejects on some series (11 of 164 tests), as it does in a control that compares
+  the reference with itself (seeds 1-30 against 31-60: 10 of 164, all pooled KS): a run's values
+  are autocorrelated, so the pooled KS is no valid test here.
+- **Tests.** `simoxide-reconf/tests/rules_process.rs` (9): the PRM as the rules see it on the seven
+  `t_reconf_*` models (fixed and variable size, time-driven aggregation, multi-core utilisation,
+  lazily created passive recorders, a run after the stop, a late first run) against the
+  reference's logs (`tests/prm/`, rule `dump.qvto`, `regen.sh`), outputs byte-identical; an empty
+  rule set equals no rules (10 models), no QVTo state without reconfigurations; the six examples
+  byte for byte; forks before and after the scale-out and while a reconfiguration waits; a
+  detached snapshot with its host continuing on another thread; F4 refusal. `simoxide-sim`:
+  `stats.rs` unit tests (JDK 21 averaging checked on the JVM).
+- **Costs.** PRM mirror 15 µs per reconfiguration; a rule run about 0.1 ms in QVTo's fast mode and
+  1 ms in compat mode (the compat mode's per-run set-up, qvto-internal; the power case: 4 s fast vs
+  37 s compat for 40 000 rule runs). The fast build runs `lb_outsource` with rules in 10 ms.
+- **Gates.** `golden.sh` identical (312 runs, `cargo build-exact`, against bae975d's binary);
+  `cargo test --release --workspace --features exact` 555 passed, 0 failed (543 before: +3
+  `stats`, +9 `rules_process`; QVTo's ignored reference material linked from the merge checkout
+  for the run); `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; fmt and clippy `-D warnings`
+  clean (workspace, all targets, default and `--features exact`; `simoxide-cli --features
+  reconfiguration`, also with `exact`; `simoxide-reconf --no-default-features`); release check:
+  `cargo tree -e normal` of `simoxide-cli` (also with `reconfiguration`) and `qvto-cli` lists no
+  opt-in crate. Quick timing of runs without rules (exact mode, long runs, medians of 5, shared
+  machine): within noise on models without PRM recorders; models with a time-driven aggregation
+  monitor pay for its window now collecting tuples and computing its statistic
+  (`t_reconf_tda` −8.7 %, `u_mediastore_own_monitors` −5.2 %, `h28_triggers_default` −2.8 %).
+- **Changes outside `simoxide-reconf`** (for the merge agent): `simoxide-sim`: `src/sim/reconf.rs`
+  (new: PRM state and recorders moved out of `sim.rs`, the host API), `src/stats.rs` (new),
+  `sim.rs` (start: PRM attach and container count; dispatch of `Ev::Reconf`; `emit` passes the
+  value; `window_full` computes TDA statistics and writes PRM values; `finalise` as steps with
+  `deactivate` and `drain`; `advance` resumes a paused stop), `ir.rs` (`PrmMeas`, `prm_meas`,
+  `PrmRec` with statistics, `prm_series` with the measurement index, `CWindow::{prm_meas, stat}`,
+  TDA window inputs, PRM order), `change.rs` (keeps and compares `prm_meas`), `windows.rs`
+  (`Amount::divide_long` public), `config.rs` (`RunSpec::reconfiguration_rules`), two RunSpec
+  literals in tests. `qvt.rs`, `host.rs`, `rules.rs` and `simoxide-model` are unchanged.
+- **R2 prerequisites (D5).** (1) Deterministic ids: SimuLizar's generated code gives every new
+  `Identifier` an `EcoreUtil.generateUUID()`, also objects it creates outside rules (the PRM model
+  and its measurements at initialisation and at passive-calculator registration, possibly per-run
+  objects), so refsim needs a seeded generator that SimOxide reproduces draw for draw, or one that
+  counts only draws inside rule executions (SimOxide's mirror then must not draw for PRM objects);
+  the R1 examples that create objects set explicit ids. (2) Java identity hashes for QVTo's compat
+  mode where a rule's result depends on the order of a `Set` of objects (`->any`, iteration): the
+  reference with insertion-ordered sets (as Slingshot's `det` rule, Q2) or replayed hashes. (3) The
+  order of passive-resource PRM measurements (SimuLizar: a `HashSet` of suppliers). (4) The
+  cross-series order of `meas` lines of a run after the stop within its finalisation step. (5) New
+  containers' ids decide the resource registry's `HashMap` order at the stop (follows from 1).
+
 ### 5.6 Metamodel tables and the generic-supertype bug (early fix)
 
 - SimOxide's main tables miss two things:
@@ -1569,7 +1708,7 @@ together with the immutable `Arc<CompiledModel>`. Then:
 | RNG | MT19937 state, or the fast generator state, per stream; tape position | small |
 | measurements | series rows (or counts), sliding-window buffers and bounds, calculator start maps, PRM values | O(stored rows) unless rows are flushed first; option to fork without past rows |
 | model | `RunModel` overlay: graph `Arc` (copy-on-write), appended or tombstoned entities, journal cursor | O(1) until written |
-| reconfiguration | reconfiguration-process state (`last_ns`, scheduled), rule order | small |
+| reconfiguration | reconfiguration-process state (`last_ns`, scheduled, a waiting run, a paused stop), PRM values (R1) | small |
 | SPD | `SpdState` (adjustor, group, aggregators, incl. EMA and windows) | small |
 | limits | step and event counters | small |
 
@@ -1761,7 +1900,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **F2** | *Done 2026-10-17* (findings: 5.3 "F2 as built"). `RunModel` overlay (D1) with rebuild-and-diff syncer; direct-edit API | F0 | 2-3 w (a: overlay; b: rebuild/diff; c: edit API) | met: a test edit adds a container mid-run and it receives load; changes before the start equal the changed model byte for byte; runs without changes unchanged (golden, corpus, fuzz corpus, fork tests); benchmark within noise |
 | **F3** | *Done 2026-10-17 on the Q6 adapter* (findings: 5.5 "F3 as built"; the switch to the shared graph after M6 is open). QVTo host `simoxide-reconf`: shared immutable core (registry, metamodel objects, compiled programs), lazy per-run state, journal to syncers, natives; first on the Q6 adapter, then on the shared graph (after M) | F0 | 1 w (+2-3 d to switch after M) | met: the 24 corpus cases run on a `RunModel` mid-run; journals equal the standalone runs', models, logs and status the Java runner's |
 | **F4** | Incremental syncers incl. SEFF recompilation, call-cache invalidation, monitor cloning, removal policies (keep / abort / drain) | F2, F3 | 2-3 w | each change kind has a test; load-balancer branch added mid-run changes routing; scale-in in all three policies |
-| **R1** | SimuLizar rules: PRM values (D2), reconfiguration process runs rules (D3), MEAS-7.3 series | F3, F4 | 1.5-2 w | SimuLizar's load-balancer and power examples run; statistical match vs SimuLizar |
+| **R1** | *Done 2026-10-17* (findings: 5.5 "R1 as built"; F4 remainder listed there: monitor, population and in-progress behaviour changes fail or deviate until F4). SimuLizar rules: PRM values (D2), reconfiguration process runs rules (D3), MEAS-7.3 series | F3, F4 | 1.5-2 w | met: the load balancer and power examples (and SimuLizar's reconfiguration test, a scale-out and an added SEFF branch) run, byte-identical to the patched reference in the exact build; statistical match of the default build (30 seeds) |
 | **R2** | Exact rules: deterministic UUIDs in refsim (D5), byte-exact comparison | R1 | 1 w | byte-equal traces on the examples |
 | **S0** | *Done 2026-10-17.* Slingshot reference runner `reference/slingshot/`: stub bundle, scripts with private config areas, trace/tape/CSV/SPD-log extension, seed agent (StoEx, `Math.random`, UUIDs), `det` ordering rule and PS patch, smoke corpus | — | 1 w | met: SPD minimal example (and 8 more models) byte-reproducible; CSV in SimOxide's format |
 | **S1** | *Done 2026-10-17.* Slingshot semantics spec `docs/spec/slingshot/` (10 pages, rules `SS-*`, quirks Q17–Q37 added to Q1–Q16): event core and bus, usage, SEFF, resources, monitoring, random streams, SPD, quirks, exact comparison (projection, tape mapping); 20 probe models with `det` outputs (`models/probes/`, `probes.sh`); draw sites on the tape; `det` verified on 88 models (`verify-det.sh`, `results/det-verify.csv`) | S0 helps | 1.5-2 w | met: every difference has a rule with a source citation; 20 probes and the corpus runs demonstrate them (§2.1) |

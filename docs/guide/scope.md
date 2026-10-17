@@ -33,8 +33,13 @@ distribution function.
 - resource state, utilisation (sliding windows), resource demands, passive-resource state,
   waiting and holding times;
 - FeedThrough, TimeDriven and Fixed/VariableSize aggregation;
-- the side effects of `triggersSelfAdaptations` (the reconfiguration process with empty
-  reconfigurations, reconfiguration time, number of resource containers).
+- the side effects of `triggersSelfAdaptations` (the reconfiguration process, reconfiguration time,
+  number of resource containers) and the runtime measurement values they write.
+
+**Reconfiguration rules** (QVTo, with the `reconfiguration` feature; [Reconfiguration
+rules](./reconfiguration.md)): rate, latency, demand, branch-probability and other StoEx changes;
+new resource containers, resources, link connections, assembly contexts, allocation contexts and
+connectors; connector rewiring.
 
 **Stop conditions.** Maximum simulated time and maximum number of measurements (finished
 usage-scenario runs).
@@ -46,7 +51,9 @@ at the same simulated time, after the same trace.
 
 - Reliability and failure simulation.
 - The exact OS schedulers (Windows, Linux).
-- Reconfiguration rules (QVTo, SPD, Henshin). Only the empty reconfiguration is modelled.
+- Reconfiguration rules of other engines (Henshin, Story Diagrams), rules that use SimuLizar's action
+  framework, and rule changes that create or remove monitors, change the population or usage
+  scenarios, or change a behaviour's structure (`DESIGN-SPD.md` F4).
 - SimuCom code generation.
 - EDP2 output. The output is a plain measurement CSV or the in-memory `Measurements`.
 - `ExecutionResult` tuples. The reference runner cannot record them, so they cannot be verified;

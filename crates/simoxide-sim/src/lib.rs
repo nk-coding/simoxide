@@ -38,6 +38,7 @@ mod javarand;
 pub mod meas;
 pub mod rng;
 pub mod sim;
+pub mod stats;
 mod trace;
 pub mod windows;
 

@@ -1,0 +1,8 @@
+{
+  "seed": 1,
+  "max_measurements": 100000,
+  "max_sim_time": 1000,
+  "simulate_linking_resources": false,
+  "simulate_throughput_of_linking_resources": true,
+  "reconfiguration_rules": "rules"
+}
