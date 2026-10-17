@@ -92,7 +92,7 @@ also checks attaching a tape and dropping the trace at a pause, failed runs, the
 whose graph is unchanged: the whole change path runs (typed rebuild with stable ids,
 recompilation, merge, run-state adoption), and the continuation, a fork of it, a resumed state
 and a deep copy on another thread must equal the uninterrupted run byte for byte, in exact and
-fast mode. `simoxide-reconf/tests/changes.rs` edits models through the QVTo adapter's store:
+fast mode. `simoxide-reconf/tests/changes.rs` edits models through the model graph's `ModelStore` API:
 changes before the start (rates, latencies, demands, branch probabilities) give exactly the run
 of the model changed on disk; changes at pause points (an added container with an allocation, a
 composite moved to a new container, a rewired connector, rate and demand changes, a new route)
@@ -331,3 +331,20 @@ branches of the sliding-window arithmetic, and unused convenience APIs.
 | `reference/reffail-cmp.sh SIMOXIDE DIR...` | for models whose reference run aborts, finds the first trace difference to the partial reference trace |
 | `simoxide-fuzz diff a.jsonl b.jsonl` | first divergence of two traces |
 | `crates/simoxide-testkit/scripts/heavy-tests.sh [--fuzz]` | all slow tests |
+
+## QVTo engine and foundation crates
+
+The [QVTo engine](../qvto/) and the [foundation crates](../development/foundation.md) have
+their own test layers. They are described on [Conformance](../qvto/conformance.md) and
+[Foundation crates](../development/foundation.md#verification):
+
+| Layer | Oracle | Run |
+|---|---|---|
+| QVTo crates' unit and end-to-end tests | hand-written; Eclipse's logs | `cargo test-qvto` |
+| parser, analyser | Eclipse QVTo 3.11's parser and compiler on 1 102 files | `cargo test-qvto`; `qvto-sema`'s `oracle_report` example |
+| Java primitives | JDK 21 and classic OCL (committed samples; the differential test needs the JDK) | `cargo test-qvto` |
+| conformance scoreboard | the Java reference runner on 589 runnable cases (Eclipse suite, SimuLizar and SPD corpus, SPD adjustments, fuzz regressions), in compat, fast and ordered mode | `cargo conform --suite all` |
+| SPD adjustments | the Slingshot reference runner's recorded adjustments | `cargo qvto spd-replay` |
+| differential and robustness fuzzing | the Java runner; no panics | `qvto fuzz` |
+| EMF graph | EMF 2.41 on the suite's and the PCM side's model files, random edit scripts, the suite's comparer; the `ModelStore` contract | `cargo test-fdn` |
+| QVTo on simulation models | the rules corpus byte for byte against the patched reference; the QVTo corpus on SimOxide-loaded models against the Java runner | `simoxide-reconf`'s tests (`cargo test-sim`) |

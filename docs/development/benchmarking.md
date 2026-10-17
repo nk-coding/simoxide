@@ -15,6 +15,7 @@
 | `cargo run --release -p simoxide-random --example bench` | per-sample cost of each distribution |
 | `--profile out.svg` or `--profile out.folded` on `bench` and `load-bench` | in-process sampling profiler (pprof at 5 kHz); needs `--features profile`. `.folded` writes one line per stack, frames as `name@file:line` |
 | `bench/compare/run-all.sh` | the comparison with the other Palladio simulators ([Comparison in detail](../performance/comparison.md#reproducing)) |
+| `taskset -c 2,3 cargo qvto bench [--group B2] [--only ID,...] [--modes compat,fast,ordered] [--java] [--java-cold] [--before last.tsv]` | the QVTo engine: compile and run times of its workloads (SimuLizar rules, SPD, SimpleUML to RDB, Ecore copies, micro benchmarks) per mode, against Eclipse QVTo in a warm JVM (`--java`) and per fresh JVM (`--java-cold`); `--before` puts an earlier run's `target/qvto-bench/last.tsv` into the report ([QVTo performance](../qvto/performance.md)) |
 
 The benchmark models are listed in `crates/simoxide-cli/src/bin/simoxide-bench.rs`. Three of them
 are in `crates/simoxide-cli/bench/models/` (`ps_many`, `gen_s5`, `gen_s6`), the rest in `corpus/`.
