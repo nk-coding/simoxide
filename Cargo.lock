@@ -972,8 +972,10 @@ dependencies = [
  "simoxide-jcompat-exact",
  "simoxide-model",
  "simoxide-random",
+ "simoxide-reconf",
  "simoxide-sched",
  "simoxide-sim",
+ "simoxide-spd",
  "simoxide-stoex",
  "simoxide-testkit",
 ]
