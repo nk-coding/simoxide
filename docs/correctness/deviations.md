@@ -165,7 +165,9 @@ deviates as follows:
 - **Not reproduced**: several SEFFs for one signature are a run error (Slingshot starts all of
   them); a passive resource of an unallocated assembly context is created at first use (Slingshot:
   the request waits forever); two monitors with the same measuring point and metric share one series;
-  model changes (`Simulation::apply_changes`) are refused (phases F4, P3).
+  model changes (`Simulation::apply_changes`) are refused (phases F4, P3); a negative demand on
+  an FCFS resource or link is a run error (Slingshot's event constructor throws; processor sharing
+  makes it a 1e-9 s job).
 - **Time** is Slingshot's `double` seconds (the trace and tape print them; `RunState::now_ns` and
   `SimError::at_ns` convert to nanoseconds). Event counts are SimOxide's notes, not bus events.
 - **Tape**: the `Math.random()` draws of the exact RNG mode are `{"k":"m","i":n,"u":x,"o":"branch:<id>"}`

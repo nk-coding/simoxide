@@ -56,7 +56,7 @@ has one flag per quirk: `--quirks Q26,Q29`, `--quirks fast` (every flag the fast
 
 | # | Fast mode | Notes |
 |---|---|---|
-| Q1–Q16 | SPD | flags defined; read by the SPD interpreter and adjustment (phases P1–P3), which do not exist in S2 |
+| Q1–Q16 | SPD | the SPD interpreter's flags (`simoxide_spd::Quirks`, `simoxide run --spd-quirks`, phase P1; Q5–Q8, Q14, Q16 with the adjustment, P2); `simoxide_sim::Quirks` carries the same numbers so that P3 can drive both from one set |
 | Q17 | refused | concurrent demands with a shared cursor need the exact mode's handler steps (X2); refused for models with an internal action with two or more demands |
 | Q18 | refused | handler disposal is the exact mode's (X2) |
 | Q19 | up to the throw | SEFF loop count 0: body once, then a run error; negative count and usage-loop count ≤ 0: run error at the loop |

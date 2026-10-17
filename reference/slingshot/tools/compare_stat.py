@@ -13,7 +13,7 @@ Tests between the two sets of per-run values: Welch's t-test and the Mann-Whitne
 approximation, ties corrected) on the per-run means, and a two-sample Kolmogorov-Smirnov test on
 the pooled values (asymptotic distribution). Holm's correction over all tests of all series. A
 set without variance in a statistic (deterministic runs) is compared by whether the other set's
-range contains its value ("range"). Pure Python, no dependencies.
+range contains its value, up to a relative 1e-9 ("range"). Pure Python, no dependencies.
 """
 import csv
 import math
@@ -154,8 +154,14 @@ def main(argv):
             desc = lambda x: f"{sum(x)/len(x):.6g} [{min(x):.6g}, {max(x):.6g}]"
             if min(xb) == max(xb) or min(xa) == max(xa):
                 # a deterministic side: inside the other side's range?
-                inside = (min(xa) <= sum(xb) / len(xb) <= max(xa)) if min(xb) == max(xb) else (
-                    min(xb) <= sum(xa) / len(xa) <= max(xb))
+                # inside the other side's range, up to rounding (1e-9 relative)
+                def within(x, lo, hi):
+                    tol = 1e-9 * max(abs(lo), abs(hi), 1.0)
+                    return lo - tol <= x <= hi + tol
+                if min(xb) == max(xb):
+                    inside = within(sum(xb) / len(xb), min(xa), max(xa))
+                else:
+                    inside = within(sum(xa) / len(xa), min(xb), max(xb))
                 tests.append((key, stat, "range", 1.0 if inside else 0.0, desc(xa), desc(xb)))
                 continue
             tests.append((key, stat, "welch", welch(xa, xb), desc(xa), desc(xb)))

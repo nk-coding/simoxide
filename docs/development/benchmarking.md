@@ -6,6 +6,7 @@
 |---|---|
 | `cargo run --release -p simoxide-cli --bin simoxide-bench -- suite [--filter a,b] [--reps N] [--mode exact\|fast]` | per benchmark model: XMI load and compile time, a short run (µs per run, allocations), a long run (events/s with measurements counted and stored, requests/s, allocations per event, peak live heap). Best of `--reps` |
 | `simoxide-bench batch --model DIR --threads 1,2,4,8 --runs N [--mode exact\|fast]` | `run_batch` scaling over threads |
+| `simoxide-bench suite --flavour slingshot [--quirks LIST]` (also `batch`) | the same in the [Slingshot flavour](../guide/slingshot.md); `--quirks` with Q32 needs a simulated time, which the long runs do not set, and quirks that throw stop the suite at the first such model, so measure the fixed behaviour |
 | `simoxide-bench fork [--filter a,b] [--reps N] [--mode exact\|fast]` | per benchmark model, halfway through the long run: the cost of a fork (`Simulation::snapshot`), of a deep copy for another thread (`RunState::detach`), with measurements counted and stored, and of `into_state` plus `resume` |
 | `simoxide-bench change [--filter a,b] [--reps N] [--mode exact\|fast]` | per benchmark model, halfway through the long run: runtime model changes (`Simulation::apply_changes`): a copy of the model graph, a change set that changes nothing in the graph (rebuild, recompilation and merge), a changed processing rate |
 | `simoxide bench --model DIR --max-measurements M --runs N [--threads T]` | events/s of one model with any run flags |
