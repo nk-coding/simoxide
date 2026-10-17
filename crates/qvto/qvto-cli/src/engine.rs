@@ -31,7 +31,7 @@ pub struct QvtoEngine {
 }
 
 /// The signatures of the Java blackboxes Eclipse loads for the suite and the corpus.
-pub const BLACKBOX_SIGNATURES: &str = "crates/qvto-types/data/blackboxes.tsv";
+pub const BLACKBOX_SIGNATURES: &str = "qvto-types/data/blackboxes.tsv";
 
 impl QvtoEngine {
     pub fn new(root: &Path, mode: Mode) -> QvtoEngine {
@@ -166,7 +166,7 @@ pub fn compile_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str) -> Re
     };
     let resolver = FsResolver {
         bundles: match &case.import_root {
-            // `imports root` is relative to the repository root, not to the case's directory
+            // `imports root` is relative to the QVTo root (crates/qvto), not to the case's directory
             Some(r) => vec![Bundle {
                 root: env.base.join(r).canonicalize().unwrap_or_else(|_| env.base.join(r)),
                 containers: vec![String::new()],

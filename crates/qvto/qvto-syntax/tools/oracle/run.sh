@@ -4,10 +4,10 @@
 # LIB: jar directory (default: the reference runner's qvto-3.11.0 set). OUT: class directory.
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
-ROOT=$(cd "$HERE/../../../.." && pwd)
+ROOT=$(cd "$HERE/../../.." && pwd)  # the QVTo root, crates/qvto
 LIB=${LIB:-$ROOT/reference/runner/lib/qvto-3.11.0}
 [ -d "$LIB" ] || LIB=/home/devbox/workspace/qvto-rs/reference/runner/lib/qvto-3.11.0
-OUT=${OUT:-${CARGO_TARGET_DIR:-$ROOT/target}/parse-oracle}
+OUT=${OUT:-${CARGO_TARGET_DIR:-$ROOT/../../target}/parse-oracle}
 CP=$(ls "$LIB"/*.jar | tr '\n' ':')
 mkdir -p "$OUT"
 if [ ! -f "$OUT/ParseOracle.class" ] || [ "$HERE/ParseOracle.java" -nt "$OUT/ParseOracle.class" ]; then

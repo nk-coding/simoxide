@@ -4,11 +4,11 @@
 # and the default models) for tests/pcm_models.rs and the EMF oracle.
 # Also the SimuLizar and SPD metamodels (from the source repositories) and the Slingshot/SPD
 # example models.
-# Usage: tools/pcm-setup.sh <out> [plugins-dir] [corpus-dir] [repos-dir]   (from the repository root)
+# Usage: tools/pcm-setup.sh <out> [plugins-dir] [corpus-dir] [repos-dir]   (from the QVTo root, crates/qvto)
 set -e
-OUT=$(mkdir -p "$1" && cd "$1" && pwd)
+OUT=$(mkdir -p "$1" && cd "$1" && pwd -P)
 P=${2:-/home/devbox/workspace/old/palladio-research/work-simucom/palladio-5.2.2/plugins}
-CORPUS=${3:-/home/devbox/workspace/simoxide/corpus}
+CORPUS=${3:-$(cd "$(dirname "$0")/../../../.." && pwd)/corpus}   # SimOxide's corpus
 REPOS=${4:-/home/devbox/workspace/old/palladio-research/repos}
 BUNDLES="de.uka.ipd.sdq.identifier de.uka.ipd.sdq.units de.uka.ipd.sdq.probfunction de.uka.ipd.sdq.stoex
 org.palladiosimulator.pcm org.palladiosimulator.metricspec org.palladiosimulator.edp2

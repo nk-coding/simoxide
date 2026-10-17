@@ -17,19 +17,17 @@ let out = qvto::Vm::new(&program, &mut store, opts).run_transformation(args);
 let journal = store.session().take_journal();                        // to the syncers
 ```
 
-A separate workspace (not a member of the qvto-rs workspace): it depends on SimOxide's
-`simoxide-model` by path, `../../../simoxide-qvto/crates/simoxide-model` (SimOxide's branch
-`qvto-adapter`, which adds the extension tables and `raw::Graph::add_object`). Build and test
-with its own target directory:
+A member of the SimOxide workspace; it uses the in-repository `simoxide-model` (extension
+tables, `raw::Graph::add_object`). Until M5/M6 of the merge (`docs/merge-into-simoxide.md`) it is
+the bridge between the QVTo engine and SimOxide's graph.
 
 ```sh
-cd crates/qvto-simoxide
-CARGO_TARGET_DIR=../../target/q6-sim cargo test
-cargo run --release --example bench            # time per rule execution, adapter vs qvto-emf
-cargo run --example runtime_flow               # measurement -> rule -> journal -> syncer
+cargo test -p qvto-simoxide
+cargo run --release -p qvto-simoxide --example adapter-bench          # time per rule execution, adapter vs qvto-emf
+cargo run -p qvto-simoxide --example runtime_flow               # measurement -> rule -> journal -> syncer
 ```
 
-The corpus, registry and script tests need `target/pcm` (`crates/qvto-emf/tools/pcm-setup.sh
+The corpus, registry and script tests need `target/pcm` (`qvto-emf/tools/pcm-setup.sh
 target/pcm`) and skip otherwise; the corpus test also reads the Java run's identity-hash tapes
 from `target/qvto-testkit/java` when cached.
 
@@ -47,7 +45,7 @@ from `target/qvto-testkit/java` when cached.
 | `tests/scripts.rs` | 300 random scripts (about 24 000 operations) on PCM classes, adapter vs `qvto_emf`: every result and the final states equal |
 | `tests/corpus.rs`, `tests/common/corpus.rs` | the 24 SimuLizar/SPD corpus cases on PCM models loaded by SimOxide's loader, against the Java runner's fixtures and the `qvto_emf` path |
 | `tests/intermediate.rs` | intermediate-class instances in the store, referring to graph objects |
-| `examples/bench.rs`, `examples/rules/scan.qvto` | time per rule execution on SimOxide's MediaStore model, grown to 100 and 1 000 containers |
+| `examples/adapter-bench.rs`, `examples/rules/scan.qvto` | time per rule execution on SimOxide's MediaStore model, grown to 100 and 1 000 containers |
 | `examples/runtime_flow.rs`, `examples/rules/autoscale.qvto` | the runtime flow with `getSimulationTime` on a clock and a stub syncer |
 | `data/runtimemeasurement.ecore` | SimuLizar's runtime-measurement metamodel (EPL-2.0, `Palladio-Analyzer-SimuLizar/bundles/org.palladiosimulator.simulizar.runtimemeasurement/model`), embedded by the example |
 

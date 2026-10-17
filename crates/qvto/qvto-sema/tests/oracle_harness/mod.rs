@@ -10,7 +10,7 @@
 //!   register (EMF, OCL, QVTo jars; the test bundle; the samples plugin: [`ECLIPSE_REGISTERED`]),
 //!   plus every nsURI of the PCM configuration (`target/pcm/pcm.conf`; the oracle's warm-up pass
 //!   applied it process-wide before the recorded pass, so every case saw it), plus the case's
-//!   `mmfile`s. The `.ecore` files are found through `crates/qvto-emf/tests/data/suite.conf` and
+//!   `mmfile`s. The `.ecore` files are found through `qvto-emf/tests/data/suite.conf` and
 //!   the PCM configuration;
 //! - unit resolution: the main unit's resolver as `UnitResolverFactory.Registry` picks it (the
 //!   runner's bundle factory: source containers of the bundles below `tests/`, or the case's
@@ -18,7 +18,7 @@
 //!   units (registered: `bundle-blackboxes` or the case's own `blackbox` lines; then Java classes
 //!   by name), then `ClassPathUnitResolver` (`.qvto` files below the classpath directories);
 //!   units found there resolve their own imports against that root and blackboxes only;
-//! - Java blackbox units from `crates/qvto-types/data/blackboxes.tsv`.
+//! - Java blackbox units from `qvto-types/data/blackboxes.tsv`.
 //!
 //! Problems are reported as the runner prints them: per unit (main unit and every import, each
 //! once), the unit's file name (last URI segment), line (-1 for Java units), UTF-16 offset and
@@ -618,7 +618,7 @@ fn parse_kind(s: &str) -> BlackboxOpKind {
     }
 }
 
-/// Reads `crates/qvto-types/data/blackboxes.tsv`: env -> unit -> (file name, unit), and the case
+/// Reads `qvto-types/data/blackboxes.tsv`: env -> unit -> (file name, unit), and the case
 /// ids listed per env.
 /// Blackbox units by env and qualified name: (file name, unit).
 type BlackboxEnvs = HashMap<String, HashMap<String, (String, BlackboxUnit)>>;
@@ -765,9 +765,9 @@ pub struct Harness {
     pub timeout: Duration,
 }
 
-/// The repository root (the worktree), from this crate's manifest directory.
+/// The QVTo root (`crates/qvto`, see `qvto_paths`).
 pub fn repo_root() -> PathBuf {
-    normalize(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../.."))
+    qvto_paths::root()
 }
 
 fn install_panic_hook() {
@@ -806,14 +806,14 @@ impl Harness {
     pub fn new() -> Result<Harness, String> {
         let t0 = Instant::now();
         let base = repo_root();
-        let sema = base.join("crates/qvto-sema");
+        let sema = base.join("qvto-sema");
         let cases = qvto_testkit::case::read_cases(&sema.join("tests/data/compile.cases"))
             .map_err(|e| e.to_string())?;
         let oracle = read_oracle(&sema.join("tests/fixtures/eclipse-compile-oracle.tsv"))?;
         let mut notes = Vec::new();
 
         // the package registry
-        let mut conf = Config::read(&base.join("crates/qvto-emf/tests/data/suite.conf"), &base)
+        let mut conf = Config::read(&base.join("qvto-emf/tests/data/suite.conf"), &base)
             .map_err(|e| format!("suite.conf: {e}"))?;
         let pcm_path = base.join(PCM_CONF);
         let mut pcm_ns: Vec<String> = Vec::new();
@@ -916,7 +916,7 @@ impl Harness {
         }
         let classpath_roots = vec![base.join(TEST_BUNDLE), base.join(SAMPLES_PLUGIN)];
         let (blackboxes, case_bb_env) =
-            read_blackboxes(&base.join("crates/qvto-types/data/blackboxes.tsv"))?;
+            read_blackboxes(&base.join("qvto-types/data/blackboxes.tsv"))?;
         let mut norm_prefixes = Vec::new();
         for sub in ["reference/eclipse-qvto", "reference/eclipse-ocl", ""] {
             let p = if sub.is_empty() {

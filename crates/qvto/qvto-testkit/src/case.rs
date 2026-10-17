@@ -1,7 +1,7 @@
 //! Case files: the job lists of the conformance and differential harness.
 //!
 //! A case file is a sequence of blocks; the Java runner (`reference/runner`, `Job.java`) reads
-//! the same format. Format: `crates/qvto-testkit/README.md`, "Case files".
+//! the same format. Format: `qvto-testkit/README.md`, "Case files".
 
 use std::path::{Path, PathBuf};
 

@@ -1,9 +1,9 @@
 #!/bin/sh
 # Records Eclipse's compile problems for tests/data/q7/*.qvto (regressions found by the Q7
 # fuzzing campaigns and the external corpus) next to each file as <name>.diag, with the
-# reference runner (one JVM). Run from the repository root.
+# reference runner (one JVM). Run from the QVTo root (crates/qvto).
 set -e
-D=crates/qvto-sema/tests/data/q7
+D=qvto-sema/tests/data/q7
 OUT=$(mktemp -d)
 for f in $D/*.qvto; do
 	n=$(basename "$f" .qvto)

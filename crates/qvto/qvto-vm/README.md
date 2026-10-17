@@ -133,12 +133,12 @@ operations, `sortedBy` evaluating an effectful body twice in compat mode (once i
 - `cargo test -p qvto --test run`: end-to-end programs whose expected logs are Eclipse's
   (List mutators, two-argument OCL operations, intermediate classes, OCL annotations,
   incremental update, nested instances, `sortedBy`).
-- Performance: `qvto bench` (`crates/qvto-cli/README.md`, "Results"; DESIGN §7.2). After Q5b,
+- Performance: `qvto bench` (`qvto-cli/README.md`, "Results"; DESIGN §7.2). After Q5b,
   against the warm Java runner: SimuLizar rule runs 0.09–0.12 ms (4–11×; series on the same
   model 5–35 µs per run, 4–18×), SPD `MainTransformation` 0.23–0.86 ms (4.5–11×),
   SimpleUML→RDB 0.2/1.5/21 ms on 64/630/6 300 output objects (13×/9×/2.7×), Ecore copy by
   mappings 0.24 ms on `Ecore.ecore` (7×), micro benchmarks 2.8–23×; suite cases median 5.8×.
-  Profiling: `cargo build --release -p qvto-cli --features profile` and `qvto bench --profile
+  Profiling: `cargo build --profile release-unwind -p qvto-cli --features profile` and `qvto bench --profile
   FILE.svg` (DESIGN §12 Q5b-2). What made the difference (§12 Q5b-3 to Q5b-8): cached Ecore
   derived lists and O(1) store paths, `+=` as `add`s, hashed `sortedBy` deduplication, Fx
   hashing, dense identity-hash tables, per-program tables instead of per-call scans (the

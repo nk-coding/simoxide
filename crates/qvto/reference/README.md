@@ -128,7 +128,7 @@ reference/runner/qvto-run --batch CASES --out DIR [--base DIR] [--only id,...] [
 reference/runner/tools/smoke-parserTestData.sh OUTDIR   # all simple parserTestData models
 ```
 
-Batch mode runs every case of a case file (`crates/qvto-testkit/README.md`) on a fresh thread
+Batch mode runs every case of a case file (`qvto-testkit/README.md`) on a fresh thread
 and writes per case `result.txt`, the canonical dump of the outputs, the log, the QVT stack
 trace, the compile problems and the identity-hash tape; all 494 runnable cases of the Eclipse
 suite and the 24 SimuLizar/SPD cases pass their drivers' checks, in about 8 s. `qvto conform
@@ -157,7 +157,7 @@ they use and candidate input models, 987 MB. `external/README.txt` describes the
 `SOURCES.tsv` lists each source's URL, revision and licence (mixed: EPL, Apache, MIT, GPL-3.0
 for a few, unknown for many; nothing is redistributed), `FILES.tsv` each file with its model
 types, metamodel files, inputs and whether it is new (1 809), already in the suite or a
-duplicate. `crates/qvto-testkit/tools/gen_external_cases.py` turns them into
+duplicate. `qvto-testkit/tools/gen_external_cases.py` turns them into
 `cases/external.cases` (compile) and `cases/external-run.cases` (run); `qvto fuzz corpus`
 compares them with the Java runner.
 

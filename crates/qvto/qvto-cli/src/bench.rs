@@ -30,7 +30,7 @@ use std::process::Command;
 use std::time::Instant;
 
 /// The committed workload file.
-pub const WORKLOADS: &str = "crates/qvto-cli/bench/workloads.bench";
+pub const WORKLOADS: &str = "qvto-cli/bench/workloads.bench";
 /// Generated models and results.
 pub const OUT_DIR: &str = "target/qvto-bench";
 
@@ -799,7 +799,7 @@ pub fn generate(root: &Path, force: bool) {
             write(&gdir.join(format!("simpleuml/x{scale}.simpleuml")), &simpleuml(root, scale)?)?;
             write(&gdir.join(format!("ecore/x{scale}.ecore")), &ecore(scale))?;
         }
-        let corpus = root.join("crates/qvto-testkit/corpus");
+        let corpus = root.join("qvto-testkit/corpus");
         for (name, dir) in [
             ("loadbalancer", "simulizar/loadbalancer"),
             ("runconfigtest", "simulizar/runconfigtest"),

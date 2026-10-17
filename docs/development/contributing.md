@@ -22,6 +22,7 @@
 | `crates/simoxide-sim` | IR compiler, event core, interpreter, measurements, batch and embedding API |
 | `crates/simoxide-cli` | `simoxide`, `simoxide-bench`, `bench/golden.sh` |
 | `crates/simoxide-testkit` | differential testing, model generator, `simoxide-fuzz` |
+| `crates/qvto/` | the QVTo engine (`qvto-*` crates, its reference runner and oracles; `crates/qvto/README.md`) |
 | `reference/` | [refsim](../reference-simulator/refsim.md), patches, component oracles |
 | `corpus/`, `corpus-fuzz/` | models with the reference's expected outputs; saved fuzz cases |
 | `bench/compare/` | the comparison with the other Palladio simulators |
@@ -55,6 +56,13 @@ Run after every change to the simulator:
 5. For optimisations: hashes of the outputs of generated models (for example 1 000 with default
    features and 400 with all optional features, three run configurations each, both modes),
    against a binary built before the change.
+
+Cargo aliases (`.cargo/config.toml`) run the test gates per area: `cargo test-sim` (SimOxide's
+crates, release) and `cargo test-qvto` (the QVTo crates). After changes to the QVTo crates, also
+the conformance scoreboard and the analyser oracle (`crates/qvto/README.md`, "Building and
+testing"): `cargo conform -- --suite all` (542 of 542 strictly equal to Eclipse QVTo),
+`cargo conform -- --suite all --engine qvto-fast` and the `oracle_report` example (1 102 of
+1 102). They catch panics per case and therefore use the profile `release-unwind`.
 
 ## Releases
 

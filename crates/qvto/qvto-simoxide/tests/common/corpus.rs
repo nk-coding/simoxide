@@ -1,4 +1,4 @@
-//! Runs the SimuLizar/SPD corpus cases (`crates/qvto-testkit/cases/corpus.cases`) on two stores:
+//! Runs the SimuLizar/SPD corpus cases (`qvto-testkit/cases/corpus.cases`) on two stores:
 //! the adapter (PCM models loaded by SimOxide's loader into a `raw::Graph`, the other models
 //! into the session) and `qvto_emf` (the conformance engine's setup, as `qvto conform`), with
 //! the Java run's identity hashes when cached, and returns what the Java runner reports.
@@ -23,7 +23,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 pub fn repo_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").canonicalize().unwrap()
+    qvto_paths::root()
 }
 
 /// Whether the corpus can run here (PCM metamodels extracted, SimuLizar/SPD metamodels found).
@@ -32,7 +32,7 @@ pub fn available() -> bool {
 }
 
 pub fn cases() -> Vec<Case> {
-    qvto_testkit::case::read_cases(&repo_root().join("crates/qvto-testkit/cases/corpus.cases"))
+    qvto_testkit::case::read_cases(&repo_root().join("qvto-testkit/cases/corpus.cases"))
         .expect("corpus.cases")
 }
 
@@ -90,7 +90,7 @@ pub struct Units {
 
 pub fn units(root: &Path, case: &Case) -> Units {
     let catalog =
-        Catalog::parse(&std::fs::read_to_string(root.join("crates/qvto-types/data/blackboxes.tsv")).unwrap())
+        Catalog::parse(&std::fs::read_to_string(root.join("qvto-types/data/blackboxes.tsv")).unwrap())
             .unwrap();
     let files = FsResolver {
         bundles: match &case.import_root {

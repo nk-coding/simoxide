@@ -1,0 +1,12 @@
+# Test gates per area (docs/development/contributing.md, "Guardrails"; crates/qvto/README.md).
+# Run niced on shared machines: CARGO_BUILD_JOBS=4 nice -n 19 cargo test-sim -- --test-threads=4
+[alias]
+# SimOxide's crates, release (the corpus and golden tests compare bit for bit)
+test-sim = "test --release -p simoxide-hotspot-math -p simoxide-model -p simoxide-stoex -p simoxide-random -p simoxide-sched -p simoxide-sim -p simoxide-testkit -p simoxide-cli"
+# the QVTo crates (debug build, as in qvto-rs)
+test-qvto = "test -p qvto -p qvto-bytecode -p qvto-cli -p qvto-emf -p qvto-model -p qvto-paths -p qvto-runtime -p qvto-sema -p qvto-simoxide -p qvto-syntax -p qvto-testkit -p qvto-types -p qvto-vm"
+# the conformance scoreboard: `cargo conform -- --suite all` (compat), `-- --suite all --engine qvto-fast`
+# (catches panics per case, so it needs the unwinding release profile)
+conform = "run --profile release-unwind -p qvto-cli --bin qvto -- conform"
+# the qvto command line tool (`cargo qvto bench ...`)
+qvto = "run --profile release-unwind -p qvto-cli --bin qvto --"

@@ -12,7 +12,7 @@ use std::time::Duration;
 /// Options of a Java batch run.
 #[derive(Clone, Debug, Default)]
 pub struct JavaRun {
-    /// Repository root (the case files' base).
+    /// The QVTo root (the case files' base).
     pub base: PathBuf,
     pub cases: PathBuf,
     pub out: PathBuf,

@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * One case of a case file (the job list of the differential harness; written and documented by
- * crates/qvto-testkit, "Case files"). A case is a block of lines:
+ * qvto-testkit, "Case files"). A case is a block of lines:
  *
  * <pre>
  * case &lt;id&gt;
@@ -32,7 +32,7 @@ import java.util.Map;
  * no-line-numbers              compile without source line numbers
  * urimap &lt;from&gt; &lt;to&gt;          URIConverter.URI_MAP entry for the case (to: a directory relative to the base)
  * conf &lt;path&gt;                 a qvto-emf resource-set configuration (map, mmroot, alias lines; see
- *                              crates/qvto-emf/src/config.rs): URI maps and the indexed metamodels
+ *                              qvto-emf/src/config.rs): URI maps and the indexed metamodels
  *                              registered globally as lazily loaded dynamic packages (as OSGi
  *                              registers generated ones)
  * dump models                  also dump every other model resource of the resource set after the run

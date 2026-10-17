@@ -63,7 +63,7 @@ final class Env {
 	 * the nsURIs of the .ecore files below mmroot directories are registered globally as package
 	 * descriptors that load the file (by its mapped platform:/plugin URI when one leads to it)
 	 * into a shared resource set, alias lines add registry keys. Same rules as
-	 * crates/qvto-emf/oracle/src/EmfOracle.java.
+	 * qvto-emf/oracle/src/EmfOracle.java.
 	 */
 	static synchronized void applyConf(java.nio.file.Path conf, java.nio.file.Path base) throws java.io.IOException {
 		String key = conf.toAbsolutePath().toString();

@@ -1,4 +1,4 @@
-// Probe of Eclipse QVTo for qvto-rs (crates/qvto-sema/tools/probe/probe.sh). EPL-2.0.
+// Probe of Eclipse QVTo for qvto-rs (qvto-sema/tools/probe/probe.sh). EPL-2.0.
 import java.util.*;
 import org.eclipse.emf.common.util.*;
 import org.eclipse.emf.ecore.*;

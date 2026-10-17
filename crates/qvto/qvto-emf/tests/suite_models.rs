@@ -13,10 +13,7 @@ use qvto_emf::xmi_save::{SaveOptions, save};
 use std::path::{Path, PathBuf};
 
 fn repo() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .unwrap()
+    qvto_paths::root()
 }
 
 /// Models whose metamodel (the QVTo AST) has dynamic subclasses of Ecore's generated classes

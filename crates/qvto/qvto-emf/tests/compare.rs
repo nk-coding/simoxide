@@ -6,7 +6,7 @@
 //!
 //! `tests/data/compare-oracle.tsv` holds the Java verdicts, one per pair. To regenerate:
 //! `QVTO_EMF_WRITE_PAIRS=<file> cargo test -p qvto-emf --test compare`, then
-//! `oracle/run.sh pairs crates/qvto-emf/tests/data/suite.conf <file> <out>` and copy `<out>`.
+//! `oracle/run.sh pairs qvto-emf/tests/data/suite.conf <file> <out>` and copy `<out>`.
 
 use qvto_emf::canon::{dump, object_at};
 use qvto_emf::compare::suite_equal;
@@ -17,10 +17,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 fn repo() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .unwrap()
+    qvto_paths::root()
 }
 
 fn load(config: &Config, root: &Path, path: &str) -> Option<(ResourceSet, ResourceId)> {

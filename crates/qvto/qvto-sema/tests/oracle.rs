@@ -10,7 +10,7 @@ use oracle_harness::{Harness, RunStatus, compare};
 
 fn baseline() -> usize {
     let p = oracle_harness::repo_root()
-        .join("crates/qvto-sema/tests/fixtures/sema-oracle-baseline.txt");
+        .join("qvto-sema/tests/fixtures/sema-oracle-baseline.txt");
     let text = std::fs::read_to_string(&p).expect("baseline file");
     text.lines()
         .map(str::trim)

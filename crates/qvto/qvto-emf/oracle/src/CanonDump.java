@@ -7,7 +7,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 /**
  * Canonical dump of resources, the strict model comparison of qvto-rs (same format as
- * crates/qvto-emf/src/canon.rs). One JSON line per resource and per object, objects in
+ * qvto-emf/src/canon.rs). One JSON line per resource and per object, objects in
  * containment-tree order:
  *
  *   {"resource":"<label>","roots":N}

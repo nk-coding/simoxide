@@ -1,0 +1,10 @@
+[package]
+name = "qvto-paths"
+description = "Where the QVTo crates' tests, examples and tools find their data (the QVTo root, the target directory)"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]

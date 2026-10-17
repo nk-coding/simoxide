@@ -1,36 +1,21 @@
 [package]
 name = "qvto-simoxide"
 description = "Runs qvto-rs on SimOxide's model graph: a ModelStore over simoxide_model::raw::Graph, a metamodel registry from SimOxide's generated tables, a change journal"
-edition = "2024"
-version = "0.1.0"
-license = "EPL-2.0"
-rust-version = "1.88"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
 publish = false
 
-# A workspace of its own: SimOxide is a separate repository, referenced by path. The qvto-rs
-# workspace excludes this crate, so it builds without a SimOxide checkout.
-[workspace]
-
 [dependencies]
-qvto-model = { path = "../qvto-model" }
-qvto-emf = { path = "../qvto-emf" }
-qvto-runtime = { path = "../qvto-runtime" }
-qvto-vm = { path = "../qvto-vm" }
-qvto = { path = "../qvto" }
-# SimOxide's branch `qvto-adapter` (extension tables, `raw::Graph::add_object`)
-simoxide-model = { path = "../../../simoxide-qvto/crates/simoxide-model" }
+qvto-model.workspace = true
+qvto-emf.workspace = true
+qvto-runtime.workspace = true
+qvto-vm.workspace = true
+qvto.workspace = true
+simoxide-model.workspace = true
 
 [dev-dependencies]
-qvto-sema = { path = "../qvto-sema" }
-qvto-testkit = { path = "../qvto-testkit" }
-
-[profile.dev]
-debug = 0
-
-[profile.test]
-debug = 0
-
-[profile.release]
-lto = "fat"
-codegen-units = 1
-debug = "line-tables-only"
+qvto-paths.workspace = true
+qvto-sema.workspace = true
+qvto-testkit.workspace = true

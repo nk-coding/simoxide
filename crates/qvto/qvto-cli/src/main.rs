@@ -28,7 +28,7 @@ usage:
   qvto bench [gen] [--file F | --suite eclipse|corpus] [--only ID,...] [--group G,...]
              [--modes compat,fast] [--java] [--java-cold] [--no-rust] [--compiles K]
              [--runs N] [--budget-ms B] [--report FILE.md]
-      The benchmark suite (crates/qvto-cli/bench/workloads.bench): compile and run times in
+      The benchmark suite (qvto-cli/bench/workloads.bench): compile and run times in
       compat and fast mode, with --java against the warm reference runner (one JVM), with
       --java-cold a fresh JVM per workload. Run it pinned: taskset -c 2,3 qvto bench --java.
   qvto conform [--suite eclipse|corpus|fuzz|all] [--cases FILE] [--fixture FILE]

@@ -61,10 +61,10 @@ Eclipse's full-compile diagnostics (`tests/fixtures/eclipse-compile-oracle.tsv`,
 (`tests/oracle_harness/`) reproduces Eclipse's setup per case: the registry of the runner's
 bundles and the case's metamodel files, unit resolution through the bundles' source containers,
 `imports root`, sibling folders and the classpath, and the blackbox units of
-`crates/qvto-types/data/blackboxes.tsv`. The test gates on the number of exactly matching files
+`qvto-types/data/blackboxes.tsv`. The test gates on the number of exactly matching files
 (`tests/fixtures/sema-oracle-baseline.txt`) and on `irck` for every error-free compilation.
 
-`cargo run --release -p qvto-sema --example oracle_report` prints the full comparison and writes
+`cargo run --profile release-unwind -p qvto-sema --example oracle_report` prints the full comparison and writes
 every mismatch to `target/q2-oracle-report.tsv`. On 2026-10-17 (after Q4b; Q2's numbers in
 brackets):
 

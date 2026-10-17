@@ -11,6 +11,20 @@ members = [
     "crates/simoxide-sim",
     "crates/simoxide-stoex",
     "crates/simoxide-testkit",
+    # the QVTo engine (crates/qvto/README.md)
+    "crates/qvto/qvto",
+    "crates/qvto/qvto-bytecode",
+    "crates/qvto/qvto-cli",
+    "crates/qvto/qvto-emf",
+    "crates/qvto/qvto-model",
+    "crates/qvto/qvto-paths",
+    "crates/qvto/qvto-runtime",
+    "crates/qvto/qvto-sema",
+    "crates/qvto/qvto-simoxide",
+    "crates/qvto/qvto-syntax",
+    "crates/qvto/qvto-testkit",
+    "crates/qvto/qvto-types",
+    "crates/qvto/qvto-vm",
 ]
 
 [workspace.package]
@@ -18,6 +32,7 @@ edition = "2024"
 version = "0.1.0"
 license = "EPL-2.0"
 repository = "https://github.com/nk-coding/simoxide"
+rust-version = "1.88"
 
 # Internal crates: a path for the workspace, a version for packaging (crates.io resolves by version).
 [workspace.dependencies]
@@ -27,6 +42,18 @@ simoxide-random = { path = "crates/simoxide-random", version = "0.1.0", default-
 simoxide-sched = { path = "crates/simoxide-sched", version = "0.1.0" }
 simoxide-sim = { path = "crates/simoxide-sim", version = "0.1.0", default-features = false }
 simoxide-stoex = { path = "crates/simoxide-stoex", version = "0.1.0", default-features = false }
+# QVTo (not published: `publish = false`)
+qvto = { path = "crates/qvto/qvto" }
+qvto-bytecode = { path = "crates/qvto/qvto-bytecode" }
+qvto-emf = { path = "crates/qvto/qvto-emf" }
+qvto-model = { path = "crates/qvto/qvto-model" }
+qvto-paths = { path = "crates/qvto/qvto-paths" }
+qvto-runtime = { path = "crates/qvto/qvto-runtime" }
+qvto-sema = { path = "crates/qvto/qvto-sema" }
+qvto-syntax = { path = "crates/qvto/qvto-syntax" }
+qvto-testkit = { path = "crates/qvto/qvto-testkit" }
+qvto-types = { path = "crates/qvto/qvto-types" }
+qvto-vm = { path = "crates/qvto/qvto-vm" }
 
 [profile.release]
 lto = "fat"

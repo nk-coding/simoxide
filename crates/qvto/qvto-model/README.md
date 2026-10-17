@@ -52,4 +52,4 @@ has; `qvto-simoxide` therefore runs the suite with the contract metamodel in pla
   and loaded from `contract.ecore` (40 tests).
 - The same semantics are checked against real EMF by `qvto-emf`'s differential script test (300
   random scripts, 15 321 operations, every result and the final state equal; see
-  `crates/qvto-emf/README.md`).
+  `qvto-emf/README.md`).

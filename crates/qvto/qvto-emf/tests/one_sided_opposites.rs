@@ -1,6 +1,6 @@
 //! References whose `eOpposite` is set on one side only (QVTo sets it so for
 //! `opposites` declarations of intermediate class features). Expected values from EMF 2.41
-//! (a dynamic `EPackage` built the same way, `crates/qvto-emf/tests/data/OneSided.java`).
+//! (a dynamic `EPackage` built the same way, `qvto-emf/tests/data/OneSided.java`).
 
 use qvto_emf::Graph;
 use qvto_model::{Classifier, Datum, FeatureId, FeatureKind, ModelStore};

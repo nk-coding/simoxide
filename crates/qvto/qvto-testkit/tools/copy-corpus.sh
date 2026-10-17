@@ -1,7 +1,7 @@
 #!/bin/sh
 # Copies the SimuLizar and SPD test material for cases/corpus.cases into corpus/ and writes the
-# synthesized runtime-measurement inputs. Run from the repository root:
-#   crates/qvto-testkit/tools/copy-corpus.sh [repos-dir]
+# synthesized runtime-measurement inputs. Run from the QVTo root (crates/qvto):
+#   qvto-testkit/tools/copy-corpus.sh [repos-dir]
 # Sources (EPL-2.0), revisions used for the committed copy:
 #   Palladio-Analyzer-SimuLizar        2718d73a1f236d5cae10313c2022c6528a99e805
 #   Palladio-Addons-SPD-Metamodel      95cdb0b677276f5d14c3001b89705a17d8fb690f
@@ -11,7 +11,7 @@ R=${1:-/home/devbox/workspace/old/palladio-research/repos}
 S=$R/Palladio-Analyzer-SimuLizar
 T=$S/tests/org.palladiosimulator.simulizar.tests/testmodels
 L=$S/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer
-O=crates/qvto-testkit/corpus
+O=qvto-testkit/corpus
 rm -rf $O/simulizar $O/spd
 mkdir -p $O/simulizar/runconfigtest/monitors $O/simulizar/reconfiguration $O/simulizar/loadbalancer/monitors \
 	$O/spd/minimalexample

@@ -3,7 +3,7 @@
 //! also with the resource environment grown to more containers, on the adapter (SimOxide's
 //! graph, journal on) and on `qvto_emf` (the engine's own store).
 //!
-//! `cargo run --release --example bench [-- <model dir> [iterations]]` (needs `target/pcm`).
+//! `cargo run --release -p qvto-simoxide --example adapter-bench [-- <model dir> [iterations]]` (needs `target/pcm`).
 
 use qvto_emf::ResourceSet;
 use qvto_emf::config::Config;
@@ -16,7 +16,7 @@ use std::time::{Duration, Instant};
 const SRM: &str = "http://simulizar.palladiosimulator.org/RuntimeMeasurement/1.0";
 
 fn root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").canonicalize().unwrap()
+    qvto_paths::root()
 }
 
 struct Rule {
@@ -27,7 +27,7 @@ struct Rule {
 }
 
 fn rules() -> Vec<Rule> {
-    let pc = root().join("crates/qvto-testkit/corpus/simulizar/powerconsumption");
+    let pc = root().join("qvto-testkit/corpus/simulizar/powerconsumption");
     let scan = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/rules/scan.qvto");
     vec![
         Rule { name: "scaleUp (fires)", file: pc.join("scaleUp.qvto"), value: 5.0 },
@@ -180,7 +180,7 @@ fn main() {
         .get(1)
         .filter(|a| !a.is_empty())
         .map(PathBuf::from)
-        .unwrap_or_else(|| root().join("../simoxide/corpus/x_sl_mediastore"))
+        .unwrap_or_else(|| qvto_paths::workspace_root(&root()).join("corpus/x_sl_mediastore"))
         .canonicalize()
         .expect("model directory");
     let iters: usize = args.get(2).and_then(|x| x.parse().ok()).unwrap_or(300);

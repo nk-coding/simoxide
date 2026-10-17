@@ -162,7 +162,7 @@ pub fn main(root: &Path, args: &[String]) {
 /// Seeds: the corpus files.
 fn seeds(root: &Path) -> Vec<String> {
     let mut v = Vec::new();
-    for d in ["reference/eclipse-qvto/tests", "crates/qvto-testkit/corpus", "reference/external"] {
+    for d in ["reference/eclipse-qvto/tests", "qvto-testkit/corpus", "reference/external"] {
         walk(&root.join(d), &mut v);
     }
     v

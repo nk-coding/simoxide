@@ -6,7 +6,7 @@
 //!
 //! `tests/data/scripts-oracle.tsv` holds the hashes of EMF's outputs. To regenerate:
 //! `QVTO_EMF_WRITE_SCRIPTS=<dir> cargo test -p qvto-emf --test scripts`, then
-//! `oracle/run.sh scripts /dev/null crates/qvto-model/src/contract.ecore <dir> <out>` and copy
+//! `oracle/run.sh scripts /dev/null qvto-model/src/contract.ecore <dir> <out>` and copy
 //! `<out>/results.tsv`. With `QVTO_EMF_ORACLE_SCRIPTS=<out>` mismatches show the first
 //! differing line.
 

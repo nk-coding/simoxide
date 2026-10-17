@@ -926,7 +926,7 @@ pub fn eclipse_dir(manifest_dir: &Path) -> Option<PathBuf> {
     if let Ok(d) = std::env::var("QVTO_ECLIPSE_DIR") {
         return Some(PathBuf::from(d));
     }
-    let p = manifest_dir.join("../../reference/eclipse-qvto");
+    let p = manifest_dir.join("../reference/eclipse-qvto");
     p.join("plugins/org.eclipse.m2m.qvt.oml.cst.parser/cst")
         .exists()
         .then_some(p)

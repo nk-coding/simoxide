@@ -11,8 +11,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 /**
  * Runs model-API scripts on dynamic EMF objects of the contract metamodel
- * (crates/qvto-model/src/contract.ecore) and prints each operation's result and the final state,
- * in the format of crates/qvto-emf/tests/common/script.rs.
+ * (qvto-model/src/contract.ecore) and prints each operation's result and the final state,
+ * in the format of qvto-emf/tests/common/script.rs.
  *
  * Script lines (values: s:<text> i:<int> l:<long> d:<double> b:<bool> e:<literal> o:<var> null):
  *   new v Class | set v f val | unset v f | add v f val [at] | remove v f val | removeat v f i

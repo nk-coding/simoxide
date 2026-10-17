@@ -7,11 +7,11 @@
 # Running a transformation: reference/runner/qvto-run --qvto a.qvto [--param in:x.xmi ...].
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
-ROOT=$(cd "$HERE/../../../.." && pwd)
+ROOT=$(cd "$HERE/../../.." && pwd)  # the QVTo root, crates/qvto
 R=$ROOT/reference/runner
 [ -f "$R/build/classpath.txt" ] || "$R/build.sh"
 CP="$R/build/classes:$(sed "s#\(^\|:\)lib/#\1$R/lib/#g" "$R/build/classpath.txt")"
-OUT=$ROOT/target/qvto-sema-probe
+OUT=${CARGO_TARGET_DIR:-$ROOT/../../target}/qvto-sema-probe
 if [ ! -f "$OUT/Problems.class" ] || [ -n "$(find "$HERE" -name '*.java' -newer "$OUT/Problems.class")" ]; then
 	mkdir -p "$OUT"
 	nice -n 19 javac -nowarn -proc:none -d "$OUT" -cp "$CP" "$HERE"/*.java 2>&1 | grep -v '^Note:' || true

@@ -16,7 +16,7 @@ CP=$(ls "$LIB"/*.jar | tr '\n' ':')
 Q=../eclipse-qvto
 T=$Q/tests/org.eclipse.m2m.tests.qvt.oml
 TS=$T/src/org/eclipse/m2m/tests/qvt/oml
-ORACLE=../../crates/qvto-emf/oracle/src
+ORACLE=../../qvto-emf/oracle/src
 rm -rf build/classes && mkdir -p build/classes
 SRC=$(find src -name '*.java')
 EXTRA=""

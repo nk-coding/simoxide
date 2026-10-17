@@ -28,7 +28,7 @@ fn main() {
     let dir = std::env::args()
         .nth(1)
         .map(PathBuf::from)
-        .unwrap_or_else(|| Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../simoxide/corpus/x_sl_mediastore"));
+        .unwrap_or_else(|| qvto_paths::workspace_root(&qvto_paths::root()).join("corpus/x_sl_mediastore"));
     // 1. SimOxide's model, the session
     let mut model = simoxide_model::load_dir(&dir).expect("model directory");
     println!(

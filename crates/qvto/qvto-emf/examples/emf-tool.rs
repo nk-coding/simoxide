@@ -1,16 +1,12 @@
 //! Debugging aid: `cargo run -p qvto-emf --example emf-tool -- <conf> <model> [save|dump|errors]`
-//! (paths relative to the repository root).
+//! (paths relative to the QVTo root (crates/qvto)).
 use qvto_emf::canon::dump;
 use qvto_emf::config::Config;
 use qvto_emf::xmi_save::{SaveOptions, save};
-use std::path::Path;
 
 fn main() {
     let a: Vec<String> = std::env::args().collect();
-    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .unwrap();
+    let root = qvto_paths::root();
     let config = Config::read(&root.join(&a[1]), &root).unwrap();
     let model = root.join(&a[2]);
     let mut rs = config.resource_set_for(&model);

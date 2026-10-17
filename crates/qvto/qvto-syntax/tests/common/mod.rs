@@ -20,8 +20,8 @@ fn dir_from_env(var: &str, default: PathBuf) -> Option<PathBuf> {
 
 /// Corpus roots by fixture prefix (`eclipse`, `simulizar`, `spd`); missing ones are absent.
 pub fn roots() -> BTreeMap<&'static str, PathBuf> {
-    let repo = manifest().join("../..");
-    let old = repo.join("../old/palladio-research/repos");
+    let repo = qvto_paths::root();
+    let old = qvto_paths::workspace_root(&repo).join("../old/palladio-research/repos");
     let mut m = BTreeMap::new();
     if let Some(p) = dir_from_env("QVTO_ECLIPSE_DIR", repo.join("reference/eclipse-qvto")) {
         m.insert("eclipse", p);

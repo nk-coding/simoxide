@@ -33,7 +33,7 @@
 //! logs, asserts and stack traces come from [`Source::lines`].
 //!
 //! Stability: this module is the contract with `qvto-bytecode`/`qvto-vm`. Changes are recorded
-//! in `crates/qvto-sema/CHANGES.md`.
+//! in `qvto-sema/CHANGES.md`.
 
 use qvto_model::{ClassId, EnumId, FeatureId, MetaRegistry, PackageId};
 use qvto_syntax::{LineIndex, Span};

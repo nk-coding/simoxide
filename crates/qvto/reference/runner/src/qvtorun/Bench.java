@@ -30,7 +30,7 @@ import org.eclipse.m2m.qvt.oml.ModelExtent;
 import org.eclipse.m2m.qvt.oml.util.WriterLog;
 
 /**
- * Benchmark mode (the Java side of {@code qvto bench}, crates/qvto-cli/src/bench.rs): runs the
+ * Benchmark mode (the Java side of {@code qvto bench}, qvto-cli/src/bench.rs): runs the
  * workloads of a workload file (case format with {@code bench <key> <value>} lines) in one JVM
  * and writes their compile and run times.
  *

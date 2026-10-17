@@ -162,7 +162,7 @@ fn recheck(root: &Path, dirs: &[String]) {
 /// summary. `--reuse` keeps the Java results of a previous run in `DIR/java`. Identity hashes
 /// are constant on both sides (`--tape`: HotSpot's, replayed from the Java run's tape).
 fn corpus(root: &Path, args: &[String]) {
-    let mut cases = root.join("crates/qvto-testkit/cases/external.cases");
+    let mut cases = root.join("qvto-testkit/cases/external.cases");
     let mut out = root.join("target/qvto-fuzz/corpus");
     let mut only: Vec<String> = Vec::new();
     let mut reuse = false;

@@ -1,5 +1,5 @@
 //! The registry built from SimOxide's generated tables equals the registry `qvto_emf` builds from
-//! the same `.ecore` files (the SimuLizar 5.2.2 product's, `crates/qvto-emf/tools/pcm-setup.sh
+//! the same `.ecore` files (the SimuLizar 5.2.2 product's, `qvto-emf/tools/pcm-setup.sh
 //! target/pcm`), entry by entry; and SimOxide's ids are kept.
 
 use qvto_emf::config::Config;
@@ -8,17 +8,17 @@ use qvto_model::{ClassId, FeatureId, ModelStore};
 use qvto_simoxide::Session;
 use qvto_simoxide::registry::sim_top_packages;
 use simoxide_model::meta as sm;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub fn repo_root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
+    qvto_paths::root()
 }
 
 pub fn pcm_conf() -> Option<Config> {
     let root = repo_root();
     let conf = root.join("target/pcm/pcm.conf");
     if !conf.exists() {
-        eprintln!("skipped: no {} (crates/qvto-emf/tools/pcm-setup.sh target/pcm)", conf.display());
+        eprintln!("skipped: no {} (qvto-emf/tools/pcm-setup.sh target/pcm)", conf.display());
         return None;
     }
     Some(Config::read(&conf, &root).expect("pcm.conf"))

@@ -4,10 +4,10 @@
 #                    (falls back to the main checkout when run from a git worktree)
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
-ROOT=$(cd "$HERE/../../../.." && pwd)
+ROOT=$(cd "$HERE/../../.." && pwd)  # the QVTo root, crates/qvto
 LIB=${QVTO_RUNNER_LIB:-$ROOT/reference/runner/lib/qvto-3.11.0}
 if [ ! -d "$LIB" ]; then
-  MAIN=$(cd "$(git -C "$ROOT" rev-parse --git-common-dir)/.." && pwd)
+  MAIN=$(cd "$(git -C "$ROOT" rev-parse --git-common-dir)/.." && pwd)/crates/qvto
   LIB=$MAIN/reference/runner/lib/qvto-3.11.0
 fi
 CP=$(ls "$LIB"/*.jar | tr '\n' ':')

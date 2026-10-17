@@ -12,3 +12,6 @@ qvto-model.workspace = true
 qvto-runtime.workspace = true
 quick-xml = "0.38"
 memchr = "2"
+
+[dev-dependencies]
+qvto-paths.workspace = true

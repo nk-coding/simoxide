@@ -5,10 +5,10 @@
 #   QVTO_SIMULIZAR_DIR default: <workspace>/old/palladio-research/repos/Palladio-Analyzer-SimuLizar
 #   QVTO_SPD_DIR       default: <workspace>/old/palladio-research/repos/Palladio-Addons-SPD-Metamodel/bundles/org.palladiosimulator.spd.semantic.transformations
 HERE=$(cd "$(dirname "$0")" && pwd)
-ROOT=$(cd "$HERE/../../../.." && pwd)
+ROOT=$(cd "$HERE/../../.." && pwd)  # the QVTo root, crates/qvto
 E=${QVTO_ECLIPSE_DIR:-$ROOT/reference/eclipse-qvto}
-S=${QVTO_SIMULIZAR_DIR:-$ROOT/../old/palladio-research/repos/Palladio-Analyzer-SimuLizar}
-P=${QVTO_SPD_DIR:-$ROOT/../old/palladio-research/repos/Palladio-Addons-SPD-Metamodel/bundles/org.palladiosimulator.spd.semantic.transformations}
+S=${QVTO_SIMULIZAR_DIR:-$ROOT/../../../old/palladio-research/repos/Palladio-Analyzer-SimuLizar}
+P=${QVTO_SPD_DIR:-$ROOT/../../../old/palladio-research/repos/Palladio-Addons-SPD-Metamodel/bundles/org.palladiosimulator.spd.semantic.transformations}
 {
   find -L "$E/tests/" "$E/plugins/" -type f -name '*.qvto'
   [ -d "$S" ] && find "$S" -type f -name '*.qvto'

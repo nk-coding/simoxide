@@ -9,23 +9,23 @@
 #   tests/fixtures/eclipse-compile-times.tsv    <key> <compile ms> (loadTransformation, warm JVM, one run)
 # from tests/data/compile.cases (tools/oracle/gen_compile_cases.py). Needs the runner
 # (reference/runner/build.sh, built here if missing), the PCM metamodels at target/pcm
-# (crates/qvto-emf/tools/pcm-setup.sh target/pcm, or a symlink to an existing one) and the
+# (qvto-emf/tools/pcm-setup.sh target/pcm, or a symlink to an existing one) and the
 # SimuLizar/SPD repositories under ../old/palladio-research/repos.
 #   KEEP=dir   keep the runner's result directories there (default: a temporary directory)
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
-ROOT=$(cd "$HERE/../../../.." && pwd)
-CASES=$ROOT/crates/qvto-sema/tests/data/compile.cases
-FIX=$ROOT/crates/qvto-sema/tests/fixtures
+ROOT=$(cd "$HERE/../../.." && pwd)  # the QVTo root, crates/qvto
+CASES=$ROOT/qvto-sema/tests/data/compile.cases
+FIX=$ROOT/qvto-sema/tests/fixtures
 RUNNER=$ROOT/reference/runner
 [ -f "$RUNNER/build/classpath.txt" ] || "$RUNNER/build.sh"
-[ -f "$ROOT/target/pcm/pcm.conf" ] || { echo "missing target/pcm/pcm.conf (crates/qvto-emf/tools/pcm-setup.sh target/pcm)" >&2; exit 1; }
+[ -f "${CARGO_TARGET_DIR:-$ROOT/../../target}/pcm/pcm.conf" ] || { echo "missing target/pcm/pcm.conf (qvto-emf/tools/pcm-setup.sh target/pcm)" >&2; exit 1; }
 python3 -I "$HERE/gen_compile_cases.py"
 
 # Extra classes on the runner's classpath: the SimuLizar/SPD blackbox stubs (registered by the
 # cases) and the Java libraries that the JDT tests Bug578265/Bug579914 compile in their workspace
 # (resolved by class name, as the workspace's Java project provides them).
-STUBS=$ROOT/target/qvto-sema-oracle/stubs
+STUBS=${CARGO_TARGET_DIR:-$ROOT/../../target}/qvto-sema-oracle/stubs
 T=$ROOT/reference/eclipse-qvto/tests/org.eclipse.m2m.tests.qvt.oml/parserTestData/sources
 rm -rf "$STUBS" && mkdir -p "$STUBS"
 CP=$(sed "s#\(^\|:\)lib/#\1$RUNNER/lib/#g" "$RUNNER/build/classpath.txt")

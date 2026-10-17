@@ -99,9 +99,9 @@ The deepest nesting in the corpus is 14.
 ### Regenerating the fixtures
 
 ```sh
-crates/qvto-syntax/tools/oracle/make-fixture.sh         # tests/fixtures/eclipse-parse-oracle.tsv
-crates/qvto-syntax/tools/oracle/make-mutant-fixture.sh  # tests/fixtures/eclipse-mutants-oracle.tsv
-find … -name '*.qvto' | crates/qvto-syntax/tools/oracle/run.sh [-time N]   # ad hoc
+qvto-syntax/tools/oracle/make-fixture.sh         # tests/fixtures/eclipse-parse-oracle.tsv
+qvto-syntax/tools/oracle/make-mutant-fixture.sh  # tests/fixtures/eclipse-mutants-oracle.tsv
+find … -name '*.qvto' | qvto-syntax/tools/oracle/run.sh [-time N]   # ad hoc
 ```
 
 `run.sh` needs a JDK and the jars of `reference/runner/lib/qvto-3.11.0`. Eclipse's parser

@@ -42,7 +42,7 @@ impl Severity {
     }
 }
 
-/// What the harness hands an engine for one case: the case, the repository root its paths are
+/// What the harness hands an engine for one case: the case, the QVTo root (crates/qvto) its paths are
 /// relative to, and the metamodel configuration shared with the Java oracle.
 pub struct CaseEnv<'a> {
     pub case: &'a Case,
@@ -51,7 +51,7 @@ pub struct CaseEnv<'a> {
 }
 
 impl CaseEnv<'_> {
-    /// A path of the case (relative to its directory) under the repository root.
+    /// A path of the case (relative to its directory) under the QVTo root (crates/qvto).
     pub fn path(&self, p: &str) -> PathBuf {
         self.case.path(self.base, p)
     }

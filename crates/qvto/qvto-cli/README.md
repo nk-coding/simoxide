@@ -1,7 +1,7 @@
 # qvto-cli
 
 The `qvto` command: `qvto run` (compile and run a transformation), `qvto disasm` (the compiled
-program), `qvto conform` (the conformance scoreboard, `crates/qvto-testkit/README.md`) and
+program), `qvto conform` (the conformance scoreboard, `qvto-testkit/README.md`) and
 `qvto bench` (the benchmark suite). `src/engine.rs` is the engine under the harness,
 `src/bbox.rs` the Eclipse test bundle's Java blackboxes ported, `src/bench.rs` the benchmarks.
 
@@ -11,7 +11,7 @@ qvto bench                                   # all workloads, compat and fast mo
 taskset -c 2,3 qvto bench --java --java-cold # with the Java runner (warm: one JVM; cold: one JVM per workload)
 qvto bench --group B2 --only b2_lb_scaleUp_x1,b3_spd_main_x1 --runs 50
 qvto bench --suite corpus                    # the conformance cases as workloads (B1)
-cargo build --release -p qvto-cli --features profile && qvto bench --only b6_fib --profile fib.svg
+cargo build --profile release-unwind -p qvto-cli --features profile && qvto bench --only b6_fib --profile fib.svg
 ```
 
 ## Benchmark suite (`qvto bench`)

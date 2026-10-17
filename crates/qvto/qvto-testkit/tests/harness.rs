@@ -11,13 +11,10 @@ use qvto_testkit::java::JavaReplay;
 use qvto_testkit::paths;
 use qvto_testkit::report::{Verdict, run_cases};
 use std::collections::{BTreeMap, BTreeSet};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 fn root() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .unwrap()
+    qvto_paths::root()
 }
 
 fn cases() -> Vec<Case> {

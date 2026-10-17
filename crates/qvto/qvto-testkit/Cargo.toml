@@ -8,5 +8,6 @@ rust-version.workspace = true
 publish = false
 
 [dependencies]
+qvto-paths.workspace = true
 qvto-emf.workspace = true
 qvto-model.workspace = true

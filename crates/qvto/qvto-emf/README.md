@@ -79,19 +79,19 @@ metamodel, whose classes are dynamic subclasses of Ecore's generated classes (`L
 EClass`); EMF itself stores their features in the wrong slots, so its save and dump are not
 meaningful (in Eclipse these classes are generated).
 
-Regenerating the oracle data (from the repository root, `O=target/emf-oracle`):
+Regenerating the oracle data (from the QVTo root `crates/qvto`, `O=target/emf-oracle`):
 
 ```sh
-crates/qvto-emf/oracle/build.sh
-crates/qvto-emf/oracle/run.sh models crates/qvto-emf/tests/data/suite.conf crates/qvto-emf/tests/data/suite-models.txt $O/suite
-cp $O/suite/results.tsv crates/qvto-emf/tests/data/suite-oracle.tsv
+qvto-emf/oracle/build.sh
+qvto-emf/oracle/run.sh models qvto-emf/tests/data/suite.conf qvto-emf/tests/data/suite-models.txt $O/suite
+cp $O/suite/results.tsv qvto-emf/tests/data/suite-oracle.tsv
 QVTO_EMF_WRITE_SCRIPTS=$O/scripts-in cargo test -p qvto-emf --test scripts   # writes the scripts
-crates/qvto-emf/oracle/run.sh scripts /dev/null crates/qvto-model/src/contract.ecore $O/scripts-in $O/scripts
-cp $O/scripts/results.tsv crates/qvto-emf/tests/data/scripts-oracle.tsv
+qvto-emf/oracle/run.sh scripts /dev/null qvto-model/src/contract.ecore $O/scripts-in $O/scripts
+cp $O/scripts/results.tsv qvto-emf/tests/data/scripts-oracle.tsv
 QVTO_EMF_WRITE_PAIRS=$O/pairs.txt cargo test -p qvto-emf --test compare     # writes the pairs
-crates/qvto-emf/oracle/run.sh pairs crates/qvto-emf/tests/data/suite.conf $O/pairs.txt crates/qvto-emf/tests/data/compare-oracle.tsv
-crates/qvto-emf/tools/pcm-setup.sh target/pcm
-crates/qvto-emf/oracle/run.sh models target/pcm/pcm.conf target/pcm/pcm-models.txt $O/pcm
+qvto-emf/oracle/run.sh pairs qvto-emf/tests/data/suite.conf $O/pairs.txt qvto-emf/tests/data/compare-oracle.tsv
+qvto-emf/tools/pcm-setup.sh target/pcm
+qvto-emf/oracle/run.sh models target/pcm/pcm.conf target/pcm/pcm-models.txt $O/pcm
 ```
 
 With `QVTO_EMF_ORACLE`, `QVTO_EMF_ORACLE_PCM`, `QVTO_EMF_ORACLE_SCRIPTS` pointing at the oracle
