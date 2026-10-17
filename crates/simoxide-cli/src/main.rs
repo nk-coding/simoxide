@@ -29,9 +29,10 @@ const USAGE: &str = "usage:
              [--spd-log spd.jsonl] [--spd-log-all] [--spd-quirks fixed|slingshot|Q2,Q12,...]
              [--no-spd]   (scaling policies of a .spd next to the model; `spd` feature;
              P1: decisions only, adjustments are not executed)
-             [--rules DIR] [--rules-log rules.jsonl]   (SimuLizar's reconfiguration rules:
-             the .qvto files of DIR in file-name order, or run.json's reconfiguration_rules;
-             `reconfiguration` feature)
+             [--rules DIR] [--rules-log rules.jsonl] [--qvto-mode auto|fast|compat]
+             (SimuLizar's reconfiguration rules: the .qvto files of DIR in file-name order, or
+             run.json's reconfiguration_rules; `reconfiguration` feature; QVTo's compat mode
+             needs a build with `exact` or `compat`)
   simoxide bench --model <dir> [--run-json run.json] [--runs N] [--threads T] [same run flags]
   simoxide load-bench --model <dir> [--run-json run.json] [--runs N]   (load + compile only)
   (with the `profile` feature, bench and load-bench take --profile out.svg|out.folded)";
@@ -66,6 +67,7 @@ struct Args {
     no_spd: bool,
     rules: Option<PathBuf>,
     rules_log: Option<PathBuf>,
+    qvto_mode: Option<String>,
 }
 
 fn parse_args() -> Result<Args, String> {
@@ -101,6 +103,7 @@ fn parse_args() -> Result<Args, String> {
         no_spd: false,
         rules: None,
         rules_log: None,
+        qvto_mode: None,
     };
     while let Some(f) = it.next() {
         let mut val = || it.next().ok_or(format!("{f} needs a value"));
@@ -197,6 +200,7 @@ fn parse_args() -> Result<Args, String> {
             "--no-spd" => a.no_spd = true,
             "--rules" => a.rules = Some(val()?.into()),
             "--rules-log" => a.rules_log = Some(val()?.into()),
+            "--qvto-mode" => a.qvto_mode = Some(val()?),
             "-h" | "--help" => return Err(USAGE.into()),
             o => return Err(format!("unknown flag {o}\n{USAGE}")),
         }
@@ -444,7 +448,7 @@ mod spd {
 #[cfg(feature = "reconfiguration")]
 mod rules {
     use super::{Args, create};
-    use simoxide_reconf::{QvtoCore, RuleSet, RulesHost, RulesRun, RunConfig};
+    use simoxide_reconf::{QvtMode, QvtoCore, RuleSet, RulesHost, RulesRun, RunConfig};
     use simoxide_sim::compat::Compat;
     use simoxide_sim::{CompiledModel, Mode, Outputs, RunResult, SimConfig, Simulation};
     use std::io::Write;
@@ -459,8 +463,17 @@ mod rules {
     ) -> Result<RunResult, String> {
         let core = QvtoCore::new().map_err(|e| e.to_string())?;
         let rules = RuleSet::load_dir(&core, dir).map_err(|e| e.to_string())?;
-        let mut host =
-            RulesHost::new(&core, rules, RunConfig::default()).map_err(|e| e.to_string())?;
+        let mode = match a.qvto_mode.as_deref() {
+            None | Some("auto") => QvtMode::Auto,
+            Some("fast") => QvtMode::Fast,
+            Some("compat") => QvtMode::Compat,
+            Some(m) => return Err(format!("--qvto-mode: expected auto, fast or compat, got {m}")),
+        };
+        let cfg_q = RunConfig {
+            mode,
+            ..RunConfig::default()
+        };
+        let mut host = RulesHost::new(&core, rules, cfg_q).map_err(|e| e.to_string())?;
         if a.rules_log.is_some() {
             host = host.keep_records();
         }
@@ -497,12 +510,13 @@ mod rules {
         }
         let s = host.stats();
         eprintln!(
-            "rules: {} rule(s), {} reconfiguration(s), {} succeeded, {} changed the model, {:.1} ms",
+            "rules: {} rule(s), {} reconfiguration(s), {} succeeded, {} changed the model, {:.1} ms (PRM {:.1} ms)",
             host.rules().rules.len(),
             s.runs,
             s.succeeded,
             s.changed,
-            s.micros as f64 / 1e3
+            s.micros as f64 / 1e3,
+            s.prm_micros as f64 / 1e3
         );
         Ok(res)
     }
@@ -633,8 +647,8 @@ fn load_bench(a: &Args) -> Result<(), String> {
 }
 
 fn bench(a: &Args) -> Result<(), String> {
-    if a.rules.is_some() || a.rules_log.is_some() {
-        return Err("--rules is an option of `run`".into());
+    if a.rules.is_some() || a.rules_log.is_some() || a.qvto_mode.is_some() {
+        return Err("--rules, --rules-log and --qvto-mode are options of `run`".into());
     }
     let t0 = Instant::now();
     let (cm, cfg) = setup(a)?;

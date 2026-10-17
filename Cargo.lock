@@ -916,6 +916,7 @@ dependencies = [
  "simoxide-model",
  "simoxide-sim",
  "simoxide-spd",
+ "simoxide-testkit",
 ]
 
 [[package]]

@@ -1,0 +1,12 @@
+-- Logs the runtime measurement model (PRM) as the rules see it: per measurement, in model order,
+-- its specification, its measuring point's string representation and its value. Changes nothing.
+modeltype PRM uses 'http://simulizar.palladiosimulator.org/RuntimeMeasurement/1.0';
+
+transformation dumpPrm(in prm : PRM) {
+	main() {
+		log('reconfiguration: ' + prm.rootObjects()[RuntimeMeasurement]->size().toString() + ' measurements');
+		prm.rootObjects()[RuntimeMeasurement]->forEach(m) {
+			log('  ' + m.measurementSpecification.id + ' ' + m.measuringValue.toString());
+		};
+	}
+}

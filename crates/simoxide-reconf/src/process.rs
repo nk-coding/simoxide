@@ -61,6 +61,8 @@ pub struct RulesStats {
     pub changed: u64,
     /// Wall time in the host: PRM mirror and rules (µs).
     pub micros: u64,
+    /// Of which the PRM mirror (µs).
+    pub prm_micros: u64,
 }
 
 /// The PRM mirror in the run's QVTo state: the model's root and its measurements, in PRM
@@ -201,6 +203,7 @@ impl RulesHost {
         };
         let t0 = Instant::now();
         let r = self.sync_prm(sim).map_err(|e| (RulesOutcome::default(), e));
+        self.stats.prm_micros += t0.elapsed().as_micros() as u64;
         let r = r.and_then(|()| self.run.run_rules(sim, &self.rules, &self.inv));
         self.stats.micros += t0.elapsed().as_micros() as u64;
         self.stats.runs += 1;
