@@ -52,6 +52,32 @@ impl Entry {
     }
 }
 
+/// Where an entry's directory is in this checkout: `models.txt` records absolute paths of the
+/// checkout that generated it, so the in-tree directories (`corpus_*`, `case_*`) are taken from
+/// this checkout (a worktree tests its own files); `$PALLADIO_RESEARCH`, if set, replaces the
+/// `/home/devbox/workspace/palladio-research` prefix of the Palladio repositories.
+fn local_dir(name: &str, dir: &str) -> String {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    for (prefix, marker, base) in [
+        ("corpus_", "/corpus/", root.join("../../corpus")),
+        ("case_", "/tests/xmi-cases/", root.join("tests/xmi-cases")),
+    ] {
+        if name.starts_with(prefix)
+            && let Some((_, rest)) = dir.rsplit_once(marker)
+        {
+            return base.join(rest).to_string_lossy().into_owned();
+        }
+    }
+    const RESEARCH: &str = "/home/devbox/workspace/palladio-research/";
+    if let (Some(rest), Ok(r)) = (
+        dir.strip_prefix(RESEARCH),
+        std::env::var("PALLADIO_RESEARCH"),
+    ) {
+        return Path::new(&r).join(rest).to_string_lossy().into_owned();
+    }
+    dir.to_string()
+}
+
 /// Entries of `models.txt` whose directory exists (the Palladio repos may be absent).
 pub fn entries() -> Vec<Entry> {
     let list = std::fs::read_to_string(oracle_dir().join("models.txt"))
@@ -62,6 +88,11 @@ pub fn entries() -> Vec<Entry> {
         .filter(|l| !l.trim().is_empty() && !l.starts_with('#'))
     {
         let (name, dir) = line.split_once('\t').expect("name<TAB>dir");
+        let dir = &if dir == "-" {
+            dir.to_string()
+        } else {
+            local_dir(name, dir)
+        };
         if dir != "-" && !Path::new(dir).is_dir() {
             continue;
         }

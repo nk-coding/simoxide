@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<probfunction:ProbabilityMassFunction xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:probfunction="http://sdq.ipd.uka.de/ProbFunction/2.1" orderedDomain="true">
+  <samples xsi:type="probfunction:IntSample" probability="0.25" value="1"/>
+  <samples xsi:type="probfunction:IntSample" probability="0.75" value="2"/>
+  <samples xsi:type="probfunction:BoolSample" probability="0.5" value="true"/>
+  <samples xsi:type="probfunction:DoubleSample" probability="0.25" value="2.5"/>
+  <samples xsi:type="probfunction:StringSample" probability="0.25" value="abc"/>
+  <samples xsi:type="probfunction:IntSample"/>
+</probfunction:ProbabilityMassFunction>

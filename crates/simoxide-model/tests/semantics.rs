@@ -242,3 +242,50 @@ fn strict_and_tolerant_resolution() {
     assert!(!m.diagnostics.iter().any(|d| d.kind == "unresolved-ref"));
     std::fs::remove_dir_all(&dir).ok();
 }
+
+#[test]
+fn samples_have_the_features_of_their_generic_supertype() {
+    // `IntSample extends Sample<Integer>`: `probability` and `value` come from `Sample`. EMF types
+    // `value` by the type parameter (erasure EJavaObject), whose literals it cannot convert:
+    // every `value` is an error and stays unset (golden `case_samples`).
+    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/xmi-cases/samples");
+    let mut l = Loader::new(LoadOptions::strict());
+    l.load_dir(dir).unwrap();
+    let (g, diags) = l.finish();
+    let samples: Vec<_> = g
+        .objs
+        .iter()
+        .enumerate()
+        .filter(|(_, o)| o.class.is_a(meta::class::Sample))
+        .map(|(i, _)| raw::ObjId(i as u32))
+        .collect();
+    assert_eq!(samples.len(), 6);
+    let p: Vec<_> = samples
+        .iter()
+        .map(|&o| g.attr(o, meta::feat::Sample_probability))
+        .collect();
+    use raw::Value::Double;
+    assert_eq!(
+        p,
+        [
+            Double(0.25),
+            Double(0.75),
+            Double(0.5),
+            Double(0.25),
+            Double(0.25),
+            Double(0.0)
+        ]
+    );
+    assert!(
+        samples
+            .iter()
+            .all(|&o| !g.is_set(o, meta::feat::Sample_value))
+    );
+    let bad: Vec<_> = diags
+        .0
+        .iter()
+        .filter(|d| d.kind == "illegal-value")
+        .collect();
+    assert_eq!(bad.len(), 5, "{bad:?}");
+    assert!(!diags.0.iter().any(|d| d.kind == "unknown-feature"));
+}

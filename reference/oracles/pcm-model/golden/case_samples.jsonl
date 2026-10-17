@@ -1,0 +1,9 @@
+{"emf_errors":6}
+{"resource":"pmf.resourcetype","roots":1}
+{"path":"/","id":null,"type":"probfunction:ProbabilityMassFunction","attrs":{"orderedDomain":true},"refs":{}}
+{"path":"//@samples.0","id":null,"type":"probfunction:IntSample","attrs":{"probability":"0.25","value":null},"refs":{}}
+{"path":"//@samples.1","id":null,"type":"probfunction:IntSample","attrs":{"probability":"0.75","value":null},"refs":{}}
+{"path":"//@samples.2","id":null,"type":"probfunction:BoolSample","attrs":{"probability":"0.5","value":null},"refs":{}}
+{"path":"//@samples.3","id":null,"type":"probfunction:DoubleSample","attrs":{"probability":"0.25","value":null},"refs":{}}
+{"path":"//@samples.4","id":null,"type":"probfunction:StringSample","attrs":{"probability":"0.25","value":null},"refs":{}}
+{"path":"//@samples.5","id":null,"type":"probfunction:IntSample","attrs":{"probability":"0.0","value":null},"refs":{}}

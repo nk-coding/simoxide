@@ -4,13 +4,14 @@
 Reads the .ecore files and default models straight from the SimuLizar 5.2.2 product jars, so the
 tables are exactly the metamodels the reference runs with.
 
-Usage: tools/gen_meta.py [PLUGINS_DIR]   (run from crates/simoxide-model)
+Usage: tools/gen_meta.py [PLUGINS_DIR]   (run from crates/simoxide-model),
+then `rustfmt --edition 2024 src/meta/generated.rs src/meta/generated_ext.rs`.
 """
 import os, re, sys, zipfile, glob
 import xml.etree.ElementTree as ET
 
-PLUGINS = sys.argv[1] if len(sys.argv) > 1 else \
-    '/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins'
+PLUGINS = sys.argv[1] if len(sys.argv) > 1 else os.environ.get(
+    'PALLADIO_PLUGINS', '/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins')
 XSI = '{http://www.w3.org/2001/XMLSchema-instance}type'
 
 # (bundle symbolic name, path of the .ecore inside the jar)
@@ -156,7 +157,11 @@ def rs_str(s):
 features = []
 for ci, c in enumerate(classes):
     el = c['el']
-    for s in (el.get('eSuperTypes') or '').split():
+    # eSuperTypes, then the classes of generic supertypes (`IntSample extends Sample<Integer>`;
+    # EMF's eSuperTypes lists both). Ecore classes (PCMBaseClass's explicit EObject) have no
+    # ClassId; they are in CLASS_EXT.
+    sups = (el.get('eSuperTypes') or '').split() + [g.get('eClassifier') for g in el.findall('eGenericSuperTypes')]
+    for s in sups:
         r = resolve(s, c['file'])
         if r[0] == 'ecore':
             continue  # EObject
@@ -178,7 +183,8 @@ for ci, c in enumerate(classes):
                  ordered=f.get('ordered', 'true') == 'true', unique=f.get('unique', 'true') == 'true',
                  tref=type_ref(et, c['file']))
         if et is None:
-            d['dt'] = ('Other', None)
+            # typed by a type parameter (`Sample<T>.value`): its erasure is EJavaObject
+            d['dt'] = ('JavaObject', None)
         else:
             r = resolve(et, c['file'])
             if d['attr']:
@@ -333,7 +339,7 @@ w('pub static CLASS_EXT: &[ClassExt] = &[')
 for c in classes:
     icn = f'Some({rs_str(c["icn"])})' if c['icn'] else 'None'
     # eSuperTypes as EMF reports them: explicit Ecore supertypes and generic supertypes included
-    # (the main tables skip both)
+    # (the main tables skip Ecore classes)
     sups = [type_ref(x, c['file']) for x in (c['el'].get('eSuperTypes') or '').split()]
     sups += [type_ref(g.get('eClassifier'), c['file']) for g in c['el'].findall('eGenericSuperTypes')]
     w(f'    ClassExt {{ is_abstract: {str(c["abstract_attr"]).lower()}, is_interface: {str(c["interface"]).lower()}, '

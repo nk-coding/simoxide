@@ -45,6 +45,8 @@ pub struct ClassDef {
     pub name: &'static str,
     pub package: PackageId,
     pub is_abstract: bool,
+    /// EMF `eSuperTypes` (generic supertypes by their class), without Ecore's classes (the
+    /// explicit `EObject` of `PCMBaseClass`; see [`ClassExt::supers`]).
     pub supers: &'static [ClassId],
     /// EMF `eAllSuperTypes` order.
     pub all_supers: &'static [ClassId],
@@ -64,6 +66,10 @@ pub enum DataKind {
     Enum(EnumId),
     /// Any other data type (kept as the raw lexical string).
     Other,
+    /// An attribute typed by a type parameter (`Sample<T>.value`), whose erasure is
+    /// `EJavaObject`. EMF converts its literals by Java deserialisation of a hex string and
+    /// rejects anything else; no model file carries such a stream, so every literal is rejected.
+    JavaObject,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -120,8 +126,8 @@ pub struct ClassExt {
     pub is_abstract: bool,
     pub is_interface: bool,
     pub instance_class_name: Option<&'static str>,
-    /// `eSuperTypes` in order, including Ecore classes (`EObject`) and the classes of generic
-    /// supertypes (`Sample<Integer>`), which `ClassDef::supers` leaves out.
+    /// `eSuperTypes` in order, including Ecore classes (`EObject`), which `ClassDef::supers`
+    /// leaves out. Generic supertypes (`Sample<Integer>`) appear as their class.
     pub supers: &'static [TypeRef],
 }
 

@@ -144,7 +144,7 @@ fn compute_default_value(f: FeatureId) -> Value {
         return v;
     }
     match data {
-        DataKind::Str | DataKind::Other => Value::Null,
+        DataKind::Str | DataKind::Other | DataKind::JavaObject => Value::Null,
         DataKind::Int | DataKind::Long => Value::Int(0),
         DataKind::Double => Value::Double(0.0),
         DataKind::Bool => Value::Bool(false),
@@ -157,6 +157,8 @@ pub fn parse_value(data: DataKind, s: &str) -> Option<Value> {
     Some(match data {
         DataKind::Str => Value::Str(s.into()),
         DataKind::Other => Value::Other(s.into()),
+        // EcoreFactoryImpl.createEJavaObjectFromString: hex-encoded Java serialisation only
+        DataKind::JavaObject => return None,
         DataKind::Int => Value::Int(parse_java_int(s, i32::MIN as i64, i32::MAX as i64)?),
         DataKind::Long => Value::Int(parse_java_int(s, i64::MIN, i64::MAX)?),
         DataKind::Double => Value::Double(parse_java_double(s)?),
