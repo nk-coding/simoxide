@@ -1799,6 +1799,14 @@ policies"). Done (V3x with X2d).
   control (stock seeds 1-30 against 31-60) also rejects (3 of 42, 1 of 42): not a valid test on
   autocorrelated values. New containers' series are pooled per class (the runner keys them
   `~ResourceContainer:AppServer_1/...`, SimOxide by seeded ids).
+- **Gates** (after merging `spd` 4ba5244). `golden.sh` identical (312 runs); `cargo test --release
+  --workspace --features exact` 605 passed, 0 failed (601 on `spd`; +4 `spd_adjust`); CLI tests
+  with `reconfiguration` pass (the N2 test's F4-lifted refusals updated); corpus 132/132,
+  corpus-fuzz 6/6; `conform` 589/589 (fast 584, ordered 583), sema unchanged, `test-qvto` 90; fmt
+  and clippy `-D warnings` clean (default, `exact,hotspot-math`, `compat`; the CLI with
+  `reconfiguration`, `exact,reconfiguration`, without default features); release check 0
+  opt-in crates. Every test and harness process under `prlimit --as=10 GB`. Timing deferred;
+  sanity: a 600 s V4 run takes 25 ms in SimOxide, 4.8 s in stock Slingshot (one JVM).
 - **V3x (exact SPD runs): holds with X2d** (merged from `spd` 4ba5244: `SsxSpd`, `SsxAdjuster`,
   `QvtoAdjuster::adjust_on`): all five `corpus-spd/` cases (`spd_same_instant` added to
   `slingshot_exact.rs`'s `corpus_spd_is_byte_equal_at_level_e`) and the three SPD cases of
