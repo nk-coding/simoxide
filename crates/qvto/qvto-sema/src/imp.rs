@@ -946,7 +946,12 @@ impl<'r> Sema<'r> {
     /// `visitReturnExpCS`
     pub(crate) fn return_exp(&mut self, v: Option<&ast::Expr>, cst: Span) -> Ex {
         let value = v.and_then(|e| self.expr(e));
-        let ty = value.as_ref().map(|x| x.ty()).unwrap_or(TypeId::OCL_VOID);
+        // the value's type, OclVoid without value or for a value of unknown (null) type
+        let ty = value
+            .as_ref()
+            .map(|x| x.ty())
+            .filter(|t| *t != TypeId::NULL)
+            .unwrap_or(TypeId::OCL_VOID);
         let mut x = self.ex(ExprKind::Return(value.map(|x| Box::new(x.e))), ty, cst);
         x.det = true;
         x.info = Info::Return;

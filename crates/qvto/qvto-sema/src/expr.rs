@@ -1185,9 +1185,8 @@ impl<'r> Sema<'r> {
         name: &str,
         args: &[Arg],
     ) -> Option<OpRef> {
-        if owner == TypeId::NULL {
-            return None;
-        }
+        // an unknown (null) owner: `AbstractTypeChecker.getOperations` treats it as a user
+        // type without operations of its own, so OclAny's operations are found
         if let Some(mq) = module {
             return self.qualified_operation_lookup(mq, owner, name, args);
         }
