@@ -3,6 +3,20 @@ resolver = "3"
 # Explicit members: crates/ will also hold directories that are not packages (crates/qvto/,
 # crates/foundation/; see the qvto-rs merge design, step M0).
 members = [
+    "crates/qvto-simoxide-bridge",
+    "crates/simoxide-cli",
+    "crates/simoxide-hotspot-math",
+    "crates/simoxide-model",
+    "crates/simoxide-random",
+    "crates/simoxide-reconf",
+    "crates/simoxide-sched",
+    "crates/simoxide-sim",
+    "crates/simoxide-stoex",
+    "crates/simoxide-testkit",
+]
+# Plain `cargo build`/`cargo test` leave out the runtime-model-change crates, which build
+# qvto-rs crates from the checkout next to this repository (`--workspace` includes them).
+default-members = [
     "crates/simoxide-cli",
     "crates/simoxide-hotspot-math",
     "crates/simoxide-model",
@@ -26,6 +40,7 @@ simoxide-model = { path = "crates/simoxide-model", version = "0.1.0" }
 simoxide-random = { path = "crates/simoxide-random", version = "0.1.0", default-features = false }
 simoxide-sched = { path = "crates/simoxide-sched", version = "0.1.0" }
 simoxide-sim = { path = "crates/simoxide-sim", version = "0.1.0", default-features = false }
+simoxide-reconf = { path = "crates/simoxide-reconf", version = "0.1.0" }
 simoxide-stoex = { path = "crates/simoxide-stoex", version = "0.1.0", default-features = false }
 
 [profile.release]

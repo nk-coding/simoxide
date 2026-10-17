@@ -88,7 +88,7 @@ pub enum UOp {
 
 /// The compiled instruction streams of a model, in two variants: with the trace instructions
 /// and without them (a run without a trace skips the `BEGIN`/`END` lines entirely).
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct Code {
     pub traced: Flat,
     pub plain: Flat,
@@ -110,7 +110,7 @@ impl Code {
 }
 
 /// One variant of the instruction streams.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct Flat {
     /// Instructions of all SEFF behaviours.
     pub sops: Vec<SOp>,
@@ -237,6 +237,32 @@ impl Flat {
             });
         }
         c
+    }
+
+    /// The instructions of `self` followed by those of `new`, with the behaviours starting in
+    /// `new`'s part: instructions are never moved, so the positions of executions in progress
+    /// (in `self`'s part) stay valid (runtime model changes, `crate::change`). The call sites of
+    /// `new` are numbered after those of `self`.
+    pub fn append(&self, new: &Flat) -> Flat {
+        let (s0, u0, c0) = (
+            self.sops.len() as u32,
+            self.uops.len() as u32,
+            self.call_sites,
+        );
+        let mut sops = self.sops.clone();
+        sops.extend(new.sops.iter().map(|op| match *op {
+            SOp::Call { a, site } => SOp::Call { a, site: site + c0 },
+            op => op,
+        }));
+        let mut uops = self.uops.clone();
+        uops.extend_from_slice(&new.uops);
+        Flat {
+            sops,
+            sbeh: new.sbeh.iter().map(|p| p + s0).collect(),
+            uops,
+            ubeh: new.ubeh.iter().map(|p| p + u0).collect(),
+            call_sites: c0 + new.call_sites,
+        }
     }
 
     /// First instruction of SEFF behaviour `b`.

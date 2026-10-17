@@ -12,6 +12,8 @@ path = "src/main.rs"
 
 [dependencies]
 simoxide-sim = { workspace = true }
+simoxide-model = { workspace = true }
+simoxide-reconf = { workspace = true, optional = true }
 mimalloc = { version = "0.1", optional = true, default-features = false }
 pprof = { version = "0.15", optional = true, default-features = false, features = ["flamegraph"] }
 
@@ -28,6 +30,7 @@ mimalloc = ["dep:mimalloc"]
 # Bit-exact HotSpot Math.log/exp, on by default (GPL-2.0-only code; binaries built with it must
 # not be distributed, see simoxide-random's `hotspot-math` feature).
 hotspot-math = ["simoxide-sim/hotspot-math"]
-# Runtime model changes (reconfiguration rules, later SPD; DESIGN-SPD.md F2-F4, R1). Reserved:
-# no effect yet. Whether it joins the defaults is open (DESIGN-SPD.md U2).
-reconfiguration = []
+# Runtime model changes (reconfiguration rules, later SPD; DESIGN-SPD.md F2-F4, R1): builds
+# `simoxide-reconf` (and through it the qvto-rs adapter from the checkout next to this
+# repository). No command uses it yet. Whether it joins the defaults is open (DESIGN-SPD.md U2).
+reconfiguration = ["dep:simoxide-reconf"]

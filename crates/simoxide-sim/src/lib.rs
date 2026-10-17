@@ -22,6 +22,7 @@
 //! Semantics: `docs/spec/simulation.md` (SIM-*), `workloads.md` (WL-*), `actions.md` (ACT-*),
 //! `measurements.md` (MEAS-*).
 
+pub mod change;
 pub mod code;
 pub mod compat;
 pub mod config;
@@ -37,6 +38,7 @@ pub mod sim;
 mod trace;
 pub mod windows;
 
+pub use change::{Change, ChangeError, ChangeKind, ChangeReport, ChangeSet};
 #[cfg(feature = "fast")]
 pub use compat::Fast;
 pub use compat::{Compat, Exact, Literal, Mode};

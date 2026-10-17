@@ -1,0 +1,24 @@
+# Temporary bridge until the qvto-rs merge (qvto-rs docs/merge-into-simoxide.md, M1-M2): builds the
+# Q6 adapter `qvto-simoxide` from its sources in the qvto-rs checkout next to this repository
+# (`../qvto-rs/crates/qvto-simoxide`) against this workspace's `simoxide-model`. A plain path
+# dependency on the adapter does not work: its manifest points at SimOxide's `qvto-adapter`
+# checkout, and two `simoxide-model` packages cannot coexist in one lockfile. Only the adapter's
+# library is built (its tests and examples run in qvto-rs). Used by `simoxide-reconf` only.
+[package]
+name = "qvto-simoxide"
+description = "Bridge: the qvto-rs Q6 adapter (ModelStore over simoxide_model::raw::Graph, change journal), built from the qvto-rs checkout"
+edition = "2024"
+version = "0.1.0"
+license = "EPL-2.0"
+publish = false
+autotests = false
+autoexamples = false
+autobenches = false
+
+[lib]
+path = "../../../qvto-rs/crates/qvto-simoxide/src/lib.rs"
+
+[dependencies]
+qvto-model = { path = "../../../qvto-rs/crates/qvto-model" }
+qvto-emf = { path = "../../../qvto-rs/crates/qvto-emf" }
+simoxide-model = { workspace = true }

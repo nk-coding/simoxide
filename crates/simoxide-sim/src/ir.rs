@@ -248,7 +248,7 @@ pub struct CScenario {
     pub series: Option<SeriesId>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ResKind {
     Processing(ProcessingResourceId),
     Link(LinkingResourceId),
@@ -296,6 +296,10 @@ pub struct AcPath {
 
 /// Id of the empty assembly-context path.
 pub const ROOT_PATH: u32 = 0;
+
+/// An entry of the resource registry ([`CompiledModel::registry`]): a container or linking
+/// resource id with its resources by resource type id.
+pub type RegistryEntry = (Box<str>, Vec<(Box<str>, ResIdx)>);
 
 /// Measurement series: measuring point key and tuple metric name.
 #[derive(Debug, Clone)]
@@ -403,6 +407,16 @@ pub struct CompiledModel {
     pub finalise_order: Vec<ResIdx>,
     /// Linking resources in resource-environment order (routing).
     pub links: Vec<LinkingResourceId>,
+    /// Containers per entry of `links` as the router sees them after model changes (`None`:
+    /// the typed model's `connected` lists; see `crate::change`).
+    pub route_links: Option<Vec<Box<[ContainerId]>>>,
+    /// The resource registry (`ResourceRegistry`) in insertion order: container or linking
+    /// resource id, with its resources by resource type id (`finalise_order` is its Java
+    /// `HashMap` iteration order).
+    pub registry: Vec<RegistryEntry>,
+    /// Trie nodes for assembly-context references outside `ac_path_children` (the system
+    /// assembly context), kept from runs whose model changed (`crate::change`).
+    pub ac_path_extra: FxMap<(u32, AcRef), u32>,
     pub series: Vec<SeriesDef>,
     /// The series by measuring-point key: `(metric, series)` pairs.
     pub series_by_mp: HashMap<Box<str>, Vec<(&'static str, SeriesId)>>,
@@ -646,21 +660,46 @@ fn metric_id<'a>(m: &'a Model, spec: &MeasurementSpecification) -> Option<&'a st
     spec.metric.map(|x| &*m.metrics[x].id)
 }
 
+/// The interned tables a compilation starts from ([`CompiledModel::compile_seeded`]): frame
+/// keys, StoEx programs and measurement series keep their ids, new ones are appended.
+#[derive(Clone, Debug, Default)]
+pub struct Seed {
+    pub keys: Keys,
+    pub progs: Vec<Prog>,
+    pub series: Vec<SeriesDef>,
+}
+
 impl CompiledModel {
-    /// Compiles a loaded model. `usage_model`: index of the usage model to simulate (the first
-    /// one if `None`).
+    /// Compiles a loaded model (the first usage model is simulated).
     pub fn compile(model: Model) -> Result<CompiledModel, CompileError> {
+        Self::compile_seeded(model, Seed::default())
+    }
+
+    /// [`CompiledModel::compile`] starting from the keys, programs and series of `seed`: equal
+    /// keys, StoEx strings and (measuring point, metric) pairs get the seed's ids. Used to
+    /// recompile a changed model for a running simulation (`crate::change`).
+    pub fn compile_seeded(model: Model, seed: Seed) -> Result<CompiledModel, CompileError> {
         let m = &model;
+        let prog_map = seed
+            .progs
+            .iter()
+            .enumerate()
+            .map(|(i, p)| (p.spec.clone(), i as ProgId))
+            .collect();
         let mut b = Builder {
-            keys: Keys::default(),
-            progs: Vec::new(),
-            prog_map: HashMap::new(),
+            keys: seed.keys,
+            progs: seed.progs,
+            prog_map,
         };
         let mut warnings = Vec::new();
 
         // ---------------------------------------------------------------- series registry
-        let mut series: Vec<SeriesDef> = Vec::new();
-        let mut series_map: HashMap<(String, &'static str), SeriesId> = HashMap::new();
+        let mut series: Vec<SeriesDef> = seed.series;
+        let mut series_map: HashMap<(String, &'static str), SeriesId> = series
+            .iter()
+            .enumerate()
+            .map(|(i, d)| ((d.mp.to_string(), d.metric), i as SeriesId))
+            .collect();
         fn new_series(
             series: &mut Vec<SeriesDef>,
             series_map: &mut HashMap<(String, &'static str), SeriesId>,
@@ -1120,75 +1159,10 @@ impl CompiledModel {
         check_composition(m, m.systems[system].structure)?;
         // allocation: FQ path -> container (later entries overwrite; AllocationLookupSyncer)
         let mut alloc: FxMap<Box<[u32]>, ContainerId> = FxMap::default();
-        fn add_nested(
-            m: &Model,
-            base: &mut Vec<u32>,
-            cont: ContainerId,
-            alloc: &mut FxMap<Box<[u32]>, ContainerId>,
-            depth: usize,
-        ) {
-            alloc.insert(base.clone().into_boxed_slice(), cont);
-            let ac = AssemblyContextId(*base.last().expect("path"));
-            if depth < 32
-                && let Some(comp) = m.assembly_contexts[ac].component
-                && let Some(st) = m.components[comp].structure()
-            {
-                for &inner in &m.structures[st].assembly_contexts {
-                    base.push(inner.0);
-                    add_nested(m, base, cont, alloc, depth + 1);
-                    base.pop();
-                }
-            }
-        }
-        // all paths from the system to a nested assembly context (determineBaseAssemblyPath)
-        fn paths_to(
-            m: &Model,
-            from: &[AssemblyContextId],
-            target: AssemblyContextId,
-            cur: &mut Vec<u32>,
-            out: &mut Vec<Vec<u32>>,
-        ) {
-            for &ac in from {
-                if out.len() > 100 || cur.len() > 32 {
-                    return;
-                }
-                cur.push(ac.0);
-                if ac == target {
-                    out.push(cur.clone());
-                } else if let Some(comp) = m.assembly_contexts[ac].component
-                    && let Some(st) = m.components[comp].structure()
-                {
-                    paths_to(m, &m.structures[st].assembly_contexts, target, cur, out);
-                }
-                cur.pop();
-            }
-        }
         let sys_structure = m.systems[system].structure;
         for al in m.allocations.iter() {
             for &ctx in &al.contexts {
-                let c = &m.allocation_contexts[ctx];
-                if let (Some(ac), Some(cont)) = (c.assembly, c.container) {
-                    let mut base = if m.assembly_contexts[ac].parent == Some(sys_structure) {
-                        vec![ac.0]
-                    } else {
-                        let mut out = Vec::new();
-                        paths_to(
-                            m,
-                            &m.structures[sys_structure].assembly_contexts,
-                            ac,
-                            &mut Vec::new(),
-                            &mut out,
-                        );
-                        if out.len() != 1 {
-                            return Err(CompileError(format!(
-                                "Cannot determine unique path to nested assembly context {}",
-                                m.assembly_contexts[ac].id
-                            )));
-                        }
-                        out.pop().expect("one path")
-                    };
-                    add_nested(m, &mut base, cont, &mut alloc, 0);
-                }
+                allocate_context(m, sys_structure, ctx, &mut alloc)?;
             }
         }
 
@@ -1424,18 +1398,16 @@ impl CompiledModel {
                 registry.push((l.id.to_string(), vec![(type_id.to_string(), idx)]));
             }
         }
-        // finalise order: HashMap order of container ids, then of resource type ids
-        let mut finalise_order = Vec::new();
-        {
-            let hashes: Vec<i32> = registry.iter().map(|(k, _)| string_hash(k)).collect();
-            for i in crate::javahash::iteration_order(&hashes) {
-                let types = &registry[i].1;
-                let th: Vec<i32> = types.iter().map(|(k, _)| string_hash(k)).collect();
-                for j in crate::javahash::iteration_order(&th) {
-                    finalise_order.push(types[j].1);
-                }
-            }
-        }
+        let registry: Vec<RegistryEntry> = registry
+            .into_iter()
+            .map(|(k, t)| {
+                (
+                    k.into(),
+                    t.into_iter().map(|(a, b)| (a.into(), b)).collect(),
+                )
+            })
+            .collect();
+        let finalise_order = finalise_order(&registry);
 
         // sliding windows (probe-framework decorators in extension-registry order:
         // slidingwindow = TimeDrivenAggregation, then utilization = TimeDriven utilisation)
@@ -1795,36 +1767,14 @@ impl CompiledModel {
             .iter()
             .map(|r| trace_id(m, &r.id, r.obj))
             .collect();
-        let n_cont = m.containers.len();
-        let mut route_res = Vec::new();
-        if n_cont <= 2048 {
-            // route_res[a][b]: the first link (in `links` order) connecting both containers;
-            // O(sum of |connected|^2) instead of O(n_cont^2 * links)
-            route_res = vec![u32::MAX; n_cont * n_cont];
-            for &l in &links {
-                let mut c: Vec<usize> = m.linking_resources[l]
-                    .connected
-                    .iter()
-                    .map(|x| x.index())
-                    .collect();
-                c.sort_unstable();
-                c.dedup();
-                let r = link_res[&l];
-                for &a in &c {
-                    for &b in &c {
-                        let e = &mut route_res[a * n_cont + b];
-                        if *e == u32::MAX {
-                            *e = r;
-                        }
-                    }
-                }
-            }
-        }
-        let n_types = m.resource_types.len();
-        let mut container_res_dense = vec![u32::MAX; m.containers.len() * n_types];
-        for (&(c, rt), &r) in &container_res {
-            container_res_dense[c.index() * n_types + rt.index()] = r;
-        }
+        let route_res = route_table(
+            m.containers.len(),
+            links
+                .iter()
+                .map(|l| (link_res[l], &m.linking_resources[*l].connected[..])),
+        );
+        let container_res_dense =
+            dense_container_res(&container_res, m.containers.len(), m.resource_types.len());
         let Builder { keys, progs, .. } = b;
         let code = crate::code::Code::build(&beh, &act, &ubeh, &uact);
         let mut series_by_mp: HashMap<Box<str>, Vec<(&'static str, SeriesId)>> = HashMap::new();
@@ -1858,6 +1808,9 @@ impl CompiledModel {
             route_res,
             finalise_order,
             links,
+            route_links: None,
+            registry,
+            ac_path_extra: FxMap::default(),
             series,
             series_by_mp,
             windows,
@@ -1914,6 +1867,141 @@ impl CompiledModel {
         } else {
             &self.ac_ids[ac as usize]
         }
+    }
+}
+
+/// Route table `[src * n_cont + dst]` (see [`CompiledModel::route_res`]): for each pair of
+/// containers the resource of the first link (in `links` order) connecting both; empty for more
+/// than 2 048 containers. O(sum of |connected|^2) instead of O(n_cont^2 * links).
+pub(crate) fn route_table<'a>(
+    n_cont: usize,
+    links: impl Iterator<Item = (ResIdx, &'a [ContainerId])>,
+) -> Vec<ResIdx> {
+    if n_cont > 2048 {
+        return Vec::new();
+    }
+    let mut route_res = vec![u32::MAX; n_cont * n_cont];
+    for (r, connected) in links {
+        let mut c: Vec<usize> = connected.iter().map(|x| x.index()).collect();
+        c.sort_unstable();
+        c.dedup();
+        for &a in &c {
+            for &b in &c {
+                let e = &mut route_res[a * n_cont + b];
+                if *e == u32::MAX {
+                    *e = r;
+                }
+            }
+        }
+    }
+    route_res
+}
+
+/// Dense form of `container_res` (see [`CompiledModel::container_res_dense`]).
+pub(crate) fn dense_container_res(
+    container_res: &FxMap<(ContainerId, ResourceTypeId), ResIdx>,
+    n_cont: usize,
+    n_types: usize,
+) -> Vec<ResIdx> {
+    let mut dense = vec![u32::MAX; n_cont * n_types];
+    for (&(c, rt), &r) in container_res {
+        dense[c.index() * n_types + rt.index()] = r;
+    }
+    dense
+}
+
+/// `deactivateAllActiveResources` order: the Java `HashMap` order of the registry's container
+/// ids, then of each container's resource type ids.
+pub(crate) fn finalise_order(registry: &[RegistryEntry]) -> Vec<ResIdx> {
+    let mut order = Vec::new();
+    let hashes: Vec<i32> = registry.iter().map(|(k, _)| string_hash(k)).collect();
+    for i in crate::javahash::iteration_order(&hashes) {
+        let types = &registry[i].1;
+        let th: Vec<i32> = types.iter().map(|(k, _)| string_hash(k)).collect();
+        for j in crate::javahash::iteration_order(&th) {
+            order.push(types[j].1);
+        }
+    }
+    order
+}
+
+/// `AllocationLookupSyncer.doAddAllocationContext`: the lookup entries of allocation context
+/// `ctx` (its assembly context's FQ path and every path nested below it -> its container;
+/// later entries overwrite). Nothing without an assembly context or container.
+pub(crate) fn allocate_context(
+    m: &Model,
+    sys_structure: StructureId,
+    ctx: AllocationContextId,
+    alloc: &mut FxMap<Box<[u32]>, ContainerId>,
+) -> Result<(), CompileError> {
+    let c = &m.allocation_contexts[ctx];
+    if let (Some(ac), Some(cont)) = (c.assembly, c.container) {
+        let mut base = if m.assembly_contexts[ac].parent == Some(sys_structure) {
+            vec![ac.0]
+        } else {
+            let mut out = Vec::new();
+            paths_to(
+                m,
+                &m.structures[sys_structure].assembly_contexts,
+                ac,
+                &mut Vec::new(),
+                &mut out,
+            );
+            if out.len() != 1 {
+                return Err(CompileError(format!(
+                    "Cannot determine unique path to nested assembly context {}",
+                    m.assembly_contexts[ac].id
+                )));
+            }
+            out.pop().expect("one path")
+        };
+        add_nested(m, &mut base, cont, alloc, 0);
+    }
+    Ok(())
+}
+
+fn add_nested(
+    m: &Model,
+    base: &mut Vec<u32>,
+    cont: ContainerId,
+    alloc: &mut FxMap<Box<[u32]>, ContainerId>,
+    depth: usize,
+) {
+    alloc.insert(base.clone().into_boxed_slice(), cont);
+    let ac = AssemblyContextId(*base.last().expect("path"));
+    if depth < 32
+        && let Some(comp) = m.assembly_contexts[ac].component
+        && let Some(st) = m.components[comp].structure()
+    {
+        for &inner in &m.structures[st].assembly_contexts {
+            base.push(inner.0);
+            add_nested(m, base, cont, alloc, depth + 1);
+            base.pop();
+        }
+    }
+}
+
+/// All paths from the system to a nested assembly context (`determineBaseAssemblyPath`).
+fn paths_to(
+    m: &Model,
+    from: &[AssemblyContextId],
+    target: AssemblyContextId,
+    cur: &mut Vec<u32>,
+    out: &mut Vec<Vec<u32>>,
+) {
+    for &ac in from {
+        if out.len() > 100 || cur.len() > 32 {
+            return;
+        }
+        cur.push(ac.0);
+        if ac == target {
+            out.push(cur.clone());
+        } else if let Some(comp) = m.assembly_contexts[ac].component
+            && let Some(st) = m.components[comp].structure()
+        {
+            paths_to(m, &m.structures[st].assembly_contexts, target, cur, out);
+        }
+        cur.pop();
     }
 }
 

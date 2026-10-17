@@ -149,6 +149,9 @@ pub struct RunState<C: Compat = Exact> {
     /// measuring-point key (see `CompiledModel::series_by_mp`).
     pub(super) run_series: HashMap<Box<str>, Vec<(&'static str, SeriesId)>>,
     pub(super) warnings: Vec<String>,
+    // ------------------------------------------------------------------ model
+    /// The run's own model after model changes (`None` until the first one).
+    pub(super) model: RunModel,
     // ------------------------------------------------------------------ resolution caches
     /// Provided-role calls, by id (see `Simulation::prov_id`).
     pub(super) provs: Vec<ProvRes>,
@@ -213,6 +216,7 @@ impl<C: Compat> Clone for RunState<C> {
             meas: self.meas.clone(),
             run_series: self.run_series.clone(),
             warnings: self.warnings.clone(),
+            model: self.model.clone(),
             provs: self.provs.clone(),
             prov_ids: self.prov_ids.clone(),
             call_cache: self.call_cache.clone(),
@@ -234,21 +238,7 @@ impl<C: Compat> RunState<C> {
     /// A new state for `cm` (the run has not started).
     pub(crate) fn new(cm: &CompiledModel, cfg: SimConfig, traced: bool, rng: C::Rng) -> Self {
         let ps = cfg.ps_algorithm;
-        let res = cm
-            .resources
-            .iter()
-            .map(|r| ResRt {
-                sched: match r.policy {
-                    SchedulingPolicy::Delay => None,
-                    SchedulingPolicy::ProcessorSharing => {
-                        Some(ActiveResource::new(r.policy, r.instances, ps))
-                    }
-                    SchedulingPolicy::Fcfs => Some(ActiveResource::new(r.policy, 1, ps)),
-                },
-                delay_set: Vec::new(),
-                shadow: vec![0; r.instances.max(1) as usize],
-            })
-            .collect();
+        let res = cm.resources.iter().map(|r| ResRt::new(r, ps)).collect();
         let meas = Sink {
             m: Measurements {
                 series: cm.series.clone(),
@@ -298,6 +288,7 @@ impl<C: Compat> RunState<C> {
             meas,
             run_series: HashMap::new(),
             warnings: Vec::new(),
+            model: RunModel::default(),
             provs: Vec::new(),
             prov_ids: FxMap::default(),
             call_cache: vec![CallCache::default(); cm.code.traced.call_sites as usize],
@@ -474,6 +465,26 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// any pause (exact mode only).
     pub fn resume(
         cm: &'m CompiledModel,
+        state: RunState<C>,
+        out: Outputs,
+    ) -> Result<Self, SimError> {
+        let fail = |message: String| SimError {
+            message,
+            at_ns: state.now,
+            kind: SimErrorKind::Model,
+        };
+        let base_shape = state.model.base_shape.unwrap_or(state.shape);
+        if base_shape != Shape::of(cm) {
+            return Err(fail(
+                "the run state belongs to another compiled model".to_string(),
+            ));
+        }
+        Self::resume_on(cm, state, out)
+    }
+
+    /// [`Simulation::resume`] on the base model `base` (checked by the caller).
+    pub(super) fn resume_on(
+        base: &'m CompiledModel,
         mut state: RunState<C>,
         out: Outputs,
     ) -> Result<Self, SimError> {
@@ -482,11 +493,12 @@ impl<'m, C: Compat> Simulation<'m, C> {
             at_ns: state.now,
             kind: SimErrorKind::Model,
         };
-        if state.shape != Shape::of(cm) {
-            return Err(fail(
-                "the run state belongs to another compiled model".to_string(),
-            ));
-        }
+        // SAFETY: see `RunModel::compiled_ref`: the reference points into the `Arc` that the
+        // state, and so the simulation, owns.
+        let cm: &'m CompiledModel = match state.model.cur.as_ref() {
+            Some(a) => unsafe { RunModel::compiled_ref(a) },
+            None => base,
+        };
         let trace = match (out.trace, state.traced) {
             (Some(w), true) => Some(w),
             (None, true) => Some(Box::new(Discard) as Box<dyn Write>),
@@ -502,6 +514,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         Ok(Simulation {
             cm,
             code: cm.code.get(state.traced),
+            base,
             trace: trace.map(TraceOut::new),
             tape: out.tape,
             st: state,
@@ -527,7 +540,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     /// `out` (see [`Simulation::resume`]); this one goes on unchanged.
     pub fn fork(&mut self, out: Outputs) -> Result<Simulation<'m, C>, SimError> {
         let st = self.snapshot();
-        Simulation::resume(self.cm, st, out)
+        Simulation::resume_on(self.base, st, out)
     }
 
     /// Ends this simulation and returns its state (outputs flushed and detached).

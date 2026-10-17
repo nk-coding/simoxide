@@ -1730,12 +1730,50 @@ impl<'a> B<'a> {
 
 /// Builds the typed model from a resolved graph (resources in load order, objects in tree order).
 pub fn build(g: Graph, diags: Diagnostics) -> Model {
-    let n = g.objs.len();
-    let mut order = Vec::with_capacity(n);
+    let order = build_order(&g);
+    build_in_order(g, diags, &order)
+}
+
+/// The objects the typed model is built from, in build order: the contents of every resource
+/// (resource order, then depth first in containment order).
+pub fn build_order(g: &Graph) -> Vec<ObjId> {
+    let mut order = Vec::with_capacity(g.objs.len());
     let mut stack = Vec::new();
     for r in 0..g.resources.len() {
         g.all_contents_into(ResId(r as u32), &mut order, &mut stack);
     }
+    order
+}
+
+/// The build order of a changed graph that keeps the typed ids of a previous build: the objects
+/// of `prev` (the previous build order) first, in that order, also those no longer contained
+/// in any resource (they become tombstones: built from the graph as they are now), then the
+/// objects that are new in [`build_order`] of `g`, in that order. `prev` must be the build
+/// order of an earlier state of `g` (objects are only ever appended to a graph).
+pub fn build_order_after(g: &Graph, prev: &[ObjId]) -> Vec<ObjId> {
+    let mut seen = vec![false; g.objs.len()];
+    let mut order = Vec::with_capacity(g.objs.len().max(prev.len()));
+    for &o in prev {
+        if let Some(s) = seen.get_mut(o.0 as usize)
+            && !*s
+        {
+            *s = true;
+            order.push(o);
+        }
+    }
+    for o in build_order(g) {
+        if !seen[o.0 as usize] {
+            seen[o.0 as usize] = true;
+            order.push(o);
+        }
+    }
+    order
+}
+
+/// Builds the typed model from the objects `order` (each once): an object's typed id is its
+/// position among the objects of its kind in `order`.
+pub fn build_in_order(g: Graph, diags: Diagnostics, order: &[ObjId]) -> Model {
+    let n = g.objs.len();
     let mut kind = vec![K::None; n];
     let mut idx = vec![u32::MAX; n];
     let mut counts = [0u32; K::Metric as usize + 1];
@@ -1747,7 +1785,7 @@ pub fn build(g: Graph, diags: Diagnostics) -> Model {
         *c += 1;
         *c - 1
     };
-    for &o in &order {
+    for &o in order {
         let cl = g[o].class;
         let k = kind_of_cached(cl);
         kind[o.0 as usize] = k;
@@ -1772,7 +1810,7 @@ pub fn build(g: Graph, diags: Diagnostics) -> Model {
         diags,
         m: Model::default(),
     };
-    for &o in &order {
+    for &o in order {
         b.build_obj(o);
         if let Some(&s) = b.structure.get(&o) {
             debug_assert_eq!(b.m.structures.len() as u32, s);

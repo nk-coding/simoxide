@@ -529,6 +529,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "qvto-emf"
+version = "0.1.0"
+dependencies = [
+ "memchr",
+ "quick-xml 0.38.4",
+ "qvto-model",
+]
+
+[[package]]
+name = "qvto-model"
+version = "0.1.0"
+
+[[package]]
+name = "qvto-simoxide"
+version = "0.1.0"
+dependencies = [
+ "qvto-emf",
+ "qvto-model",
+ "simoxide-model",
+]
+
+[[package]]
 name = "r-efi"
 version = "5.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -684,6 +706,8 @@ version = "0.1.0"
 dependencies = [
  "mimalloc",
  "pprof",
+ "simoxide-model",
+ "simoxide-reconf",
  "simoxide-sim",
 ]
 
@@ -707,6 +731,17 @@ version = "0.1.0"
 dependencies = [
  "simoxide-hotspot-math",
  "simoxide-random",
+]
+
+[[package]]
+name = "simoxide-reconf"
+version = "0.1.0"
+dependencies = [
+ "qvto-model",
+ "qvto-simoxide",
+ "serde_json",
+ "simoxide-model",
+ "simoxide-sim",
 ]
 
 [[package]]
