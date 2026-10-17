@@ -275,12 +275,29 @@ and activated (SIM-7 step 4). Uses the first MonitorRepository; specs of **activ
   (t = 0) precede all decorators and are not seen by aggregators. PRM writes in
   `SimuComModel.finalise` (window flush, final state tuples) still create the process (after the
   `stop` line).
+
+  **With reconfiguration rules** (DESIGN-SPD R1; [model changes](./model-changes.md) MC-7) each run
+  of the process executes the rules (`ReconfigurationProcess.internalLifeCycle` → the QVTo
+  reconfigurator, the only reconfiguration engine the 5.2.2 runtime registers: Henshin and Story
+  Diagrams contribute to extension points its Dagger components no longer read). The process runs
+  in its own `Resume` event, so SimOxide pauses the run right after that event and runs the rules
+  there (the run's host, `simoxide-reconf`'s `RulesRun`); nothing else happens in that event. A run
+  after the stop (synchronous in SimuLizar) is due at the PRM write that triggers it: SimOxide
+  finishes the current finalisation step (one final window, one resource's deactivation, the drain,
+  the passive-resource cleanup), pauses, and runs the rules on the PRM values of the write;
+  `lastReconfigurationTime` is restored while the run's own tuples are emitted, so REF-11 occurs as
+  without rules. Only the cross-series order of `meas` lines inside that finalisation step can
+  differ from SimuLizar's (rules triggered by an instance's state tuple run after the resource's
+  other deactivation tuples).
 - **MEAS-7.3** Reconfiguration time and number of resource containers (checked against the reference:
   `crates/simoxide-sim/tests/models/t_reconf_*` and `u_*`).
   - Reconfiguration time (`[SL]interpreter/listener/ProbeFrameworkListener.java:31-45`,
     `reconfiguration/probes/TakeReconfigurationDurationProbe.java`): a calculator per spec (active
     monitors) with metric `Reconfiguration Time` (`_VYg6MujFEeSB6OBq2SKZxQ`); tuple `(t, duration)` per
-    **successful** reconfiguration. Without rules every run succeeds: the QVTo engine's
+    **successful** reconfiguration. With rules, "successful" is the QVTo reconfigurator's result:
+    every rule applied (`QVTOExecutor.executeTransformations`: `result &=` over all rules, each of which
+    runs; MC-7.3); the duration is 0 (simulation time does not advance while rules run). Without rules
+    every run succeeds: the QVTo engine's
     `executeTransformations` returns `true` for an empty rule list (`QVTOExecutor.java:34-41`), so each run of
     the reconfiguration process (MEAS-7.2) records `(t, 0.0)` once (REF-12). Series key of a
     `ReconfigurationMeasuringPoint` (a `ResourceURIMeasuringPoint`):
@@ -293,6 +310,12 @@ and activated (SIM-7 step 4). Uses the first MonitorRepository; specs of **activ
     environment's initial state tuples and the open-workload generators' creation (UsageModelSyncer), before
     the probe-framework decorators; later tuples only when a reconfiguration changes the count (never without
     rules). Key `ResourceEnvironmentMeasuringPoint[<environment id or fragment, "/">]`.
+  - Both are `IReconfigurationListener`s of the `Reconfigurator`: the container count listener is added
+    when the `Reconfigurator` is built, the reconfiguration-time probe when the probe framework
+    initialises, so a successful run records the container count (if it changed since the last
+    successful run) **before** its reconfiguration time. A run that did not succeed records neither, also
+    when its rules changed the number of containers (the next successful run records it).
+
 - **MEAS-7.4** Execution result type (`[SLR]interpreter/listener/ReliabilityProbeFrameworkAdapter.java:49-86`, extension
   always installed): for specs with metric EXECUTION_RESULT_TYPE_TUPLE (all monitors, activation not checked):
   one tuple `(t, SUCCESS|FAILURE)` per usage-scenario run, right after the scenario END (WL-4.1
@@ -301,6 +324,52 @@ and activated (SIM-7 step 4). Uses the first MonitorRepository; specs of **activ
   a textual identifier; the deterministic reference's recorder only takes numbers and aborts
   (`ClassCastException: IdentifierImpl cannot be cast to Number`), so there is no reference output to compare
   with. SimOxide warns and produces nothing.
+
+- **MEAS-7.5 Runtime measurement values (the PRM)** (DESIGN-SPD R1, D2; checked against the reference with
+  a rule that logs the PRM at every reconfiguration: `crates/simoxide-reconf/tests/prm/`). Every PRM recorder
+  (`[SL]metrics/PRMRecorder.java`) owns one `RuntimeMeasurement` (its monitor's measuring point, its
+  measurement specification, `measuringValue`, EMF default 0.0), added to the runtime measurement model's
+  `measurements` when the recorder is created. The rules see these measurements, in that order, as the
+  extent of a PRM parameter (`AbstractQVTOExecutor`: the model's measurements, not the model). Values:
+  - **Order**: the decorators run in extension-registry order, each over the specs with
+    `triggersSelfAdaptations` in monitor-repository order: fixed-size aggregations, then variable-size
+    ones (`AggregatorsProbeFrameworkListenerDecorator`), feed-through, time-driven aggregations
+    (`SlidingWindowProbeFrameWorkListenerDecorator`), utilisation windows (MEAS-6.1 order; the overall
+    window of a multi-core resource has its own measurement with the same spec and MP). Recorders of a
+    calculator created later (passive resources, MEAS-5.1) append their measurement when the
+    calculator appears (`DeferredMeasurementInitialization`; SimuLizar iterates a `HashSet` of suppliers
+    there, SimOxide the order above). Specs whose calculator never exists have no measurement. The
+    `Number of Resource Containers` calculator (MEAS-7.3) takes aggregation and feed-through recorders
+    like any other.
+  - **Feed-through**: the tuple's value (`getMeasureForMetric(spec metric)`, default unit).
+  - **Fixed-size aggregation** (`[SLA]aggregators/FixedSizeMeasurementsAggregator.java`): a circular buffer
+    of `numberOfMeasurements` tuples; when the frequency counter reaches 0 and the buffer is full, the
+    statistical characterisation of the buffer **in array order** (not oldest first) over
+    `[t(eldest), t(newest)]`.
+  - **Variable-size aggregation** (`[SLA]aggregators/VariableSizeMeasurementAggregator.java`): after the
+    eviction of MEAS-7.2, the characterisation of the buffer over `[max(0, t(last) − R), t(last)]`
+    (`Amount.valueOf(0, s)` is exact).
+  - **Time-driven aggregation**: a `SimulizarSlidingWindow` (MEAS-6.3, 6.4 timing) fed by the calculator
+    of the spec's metric at its MP (e.g. the response times of a usage scenario), with
+    `DiscardAllElementsPriorToLowerBoundStrategy` for discrete metrics and
+    `KeepLastElementPriorToLowerBoundStrategy` for continuous ones; at every window event (also for
+    empty windows and the final partial one) the characterisation of the window's data over
+    `[lower, lower + effective length]`. It writes only into the PRM.
+  - **Utilisation windows**: the window's utilisation (MEAS-6.5).
+  - **Statistical characterisations** (jar `org.palladiosimulator.monitorrepository_5.2.2.jar`,
+    `statisticalcharacterization/*Aggregator`, decompiled; `crates/simoxide-sim/src/stats.rs`). Discrete
+    metrics (response times, demands, waiting and holding times): arithmetic mean =
+    `Collectors.averagingDouble` (JDK 21: Kahan sum, the compensation subtracted at the end; 0 for no
+    data); geometric = `exp(mean of Math.log)`, 0 if that mean is +0.0 or not finite; harmonic =
+    `1 / (mean of 1/v)`, 0 if that mean is 0; median of the values sorted by `Double.compareTo`, the mean
+    of the two middle ones for an even count, 0 for none. Continuous metrics (states, utilisation): each
+    value holds from `max(t, left)` to the next point in time (the right bound for the last), in JScience
+    `Amount` arithmetic (MEAS-6.5): arithmetic = Σ validity·value / length; geometric =
+    `exp(Σ log(value)·validity / length)` with the discrete guard; harmonic = length / Σ validity/value;
+    median = the value of the first interval (sorted stably by value) whose prefix area reaches half the
+    total (`Arrays.parallelPrefix`, sequential for these sizes). Empty data give 0.
+  - SimOxide keeps the values in the run state (forks and snapshots carry them) and mirrors them into a
+    runtime measurement model of the run's QVTo state when rules run (`simoxide-reconf`'s `RulesHost`).
 
 ## MEAS-8 Not produced
 

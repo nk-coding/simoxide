@@ -23,6 +23,8 @@ reference/refsim run --model <dir | a.usagemodel,b.allocation[,c.monitorreposito
       [--max-sim-time T] [--max-measurements M] [--trace t.jsonl] [--tape r.jsonl] [--measurements m.csv] \
       [--no-link-throughput]
 reference/refsim run --run-json corpus/<model>/run.json --trace ... --tape ... --measurements ...
+reference/refsim run ... --rules DIR               # SimuLizar's reconfiguration rules (patch P9)
+reference/refsim run ... --seeds 1:30 --measurements 'out/{seed}.csv'   # seeds one after the other, one JVM
 reference/refsim batch corpus [--only a,b] [--out DIR | --in-place] [--repeat N] [--check] [--no-trace]
 reference/refsim gen corpus [--only h01_ps_single,...]      # (re)generate the hand-made models
 reference/refsim import <dir | files> <destDir> [--skip-external-calls] [--keep-monitors] [--triggers] [--run-json '{..}']
@@ -30,6 +32,9 @@ reference/refsim import <dir | files> <destDir> [--skip-external-calls] [--keep-
 reference/import-external.sh [corpusDir] [regex]    # re-import the models of external-models.txt
 reference/regen-expected.sh [--only a,b] | --check  # corpus/*/expected and corpus/INDEX.md
 reference/verify-determinism.sh                     # 2 fresh JVMs, 3x repeat in one JVM, equal to expected/
+reference/import-rules-examples.sh                  # SimuLizar's reconfiguration examples -> corpus-rules/
+CORPUS=../corpus-rules reference/regen-expected.sh  # their expected outputs (also --check)
+reference/tools/rules-stat.sh OUT BIN [FROM TO]     # 30-seed statistical comparison on corpus-rules/
 ```
 
 `import --triggers` gives the default monitors `triggersSelfAdaptations = true` (the EMF

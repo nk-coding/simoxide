@@ -98,3 +98,42 @@ state holds keeps its meaning.
   runtime-measurement recorders are not supported yet. New resources get no monitors, as in
   SimuLizar when no monitor of the monitor repository refers to their specification
   (`attachMonitors`, RES).
+
+## MC-7 Reconfiguration rules (QVTo)
+
+Sources: SimuLizar `releases/5.2.2`, bundle `org.palladiosimulator.simulizar.reconfiguration.qvto`
+(`QVTOReconfigurator`, `QVTOExecutor`, `AbstractQVTOExecutor`, `QVTOReconfigurationLoader`,
+`util/ModelTransformationCache`, `util/QVToModelCache`), `reconfiguration/ReconfigurationProcess.java`;
+QVTo 3.10.7 as shipped with the 5.2.2 product. When the rules run: [measurements](./measurements.md)
+MEAS-7.2; what they see in the runtime measurement model: MEAS-7.5.
+
+- **MC-7.1 Rules.** Every `.qvto` file directly in the rules folder (`reconfigurationRulesFolder`).
+  SimuLizar keeps them in a `HashMap<URI, …>` and runs them in its iteration order, which depends on
+  the URIs, i.e. on where the folder lies. SimOxide, and the patched reference (patch P9), run them in
+  file-name order. Henshin and Story Diagram rules are not run by the 5.2.2 runtime (their engines
+  contribute to extension points its components no longer read), nor by SimOxide.
+- **MC-7.2 Binding** (`AbstractQVTOExecutor.setupModelExtents`, `QVToModelCache`): each `in`/`inout`
+  parameter gets the first root of every model of its metamodel; for the runtime measurement model,
+  its measurements. A parameter without a model throws `IllegalStateException` in the
+  reconfiguration process: the run aborts (SimOxide: the run fails with the error). `out`
+  parameters get empty extents. Changes reach the models in place, whatever the direction.
+- **MC-7.3 Result.** All rules run, one after the other (`result &= executeTransformation(...)`: no
+  short circuit); each sees the changes of the rules before it. A rule is *applied* when QVTo reports
+  `OK` or `INFO`. QVTo 3.10.7 reports `OK` for every run that completes, also when a non-fatal
+  `assert` (`warning`, `error`) failed; a run that terminates (`assert fatal`, an exception) reports
+  `ERROR`: "not applied". What it changed before it terminated stays (SimuLizar transforms the
+  models in place). The reconfiguration succeeds when every rule applied (MEAS-7.3). *SimOxide*:
+  qvto-rs follows QVTo 3.11, which raises a completed run's severity to that of its failed non-fatal
+  assertions; SimOxide's host therefore counts a rule as applied when it completed (diagnostic code
+  0), which is SimuLizar 5.2.2's result.
+- **MC-7.4 Changes.** SimuLizar's syncers react to every notification while the rule runs (MC-1 to
+  MC-6). *SimOxide* applies each rule's changes when the rule has finished, before the next rule
+  runs (`Simulation::apply_changes`), with the same effect on the simulation for the change kinds
+  of MC-1 to MC-5. A change that SimuLizar's syncers abort on (MC-2.3, MC-3.3) ends the run with an
+  error, as in SimuLizar. A change SimOxide does not support yet ends the run with an error that
+  names the rule (instead of continuing on a model that differs from SimuLizar's): monitor changes
+  (MC-6.1), population and scenario changes (MC-5.2), structural behaviour changes such as a branch
+  added to a SEFF (MC-4.3), an assembly context its validation rejects (e.g. one without an
+  allocation context, which SimuLizar accepts until a request reaches it).
+- **MC-7.5 Simulation time.** No simulation time passes while rules run; `getSimulationTime()` (the
+  `SimulationStateLibrary` blackbox of `simulizar.action.repository`) returns the current time.
