@@ -514,7 +514,10 @@ fn severity_name(s: i32) -> &'static str {
 /// process to cores with `taskset`; the JVM inherits the affinity).
 fn run_java(root: &Path, jobs: &Path, out: &Path, only: Option<&str>, o: &Opts) -> Result<Vec<(String, Measured)>, String> {
     let runner = root.join("reference/runner");
-    if !runner.join("build/classpath.txt").is_file() {
+    // a runner built before its benchmark mode existed is rebuilt
+    if !runner.join("build/classpath.txt").is_file()
+        || !runner.join("build/classes/qvtorun/Bench.class").is_file()
+    {
         let st = Command::new(runner.join("build.sh"))
             .status()
             .map_err(|e| format!("build.sh: {e}"))?;
