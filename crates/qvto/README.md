@@ -22,6 +22,7 @@ Status: see `PLAN.md`.
 | `docs/simoxide-integration.md` | running the engine inside SimOxide: what exists, SimOxide's work, plan |
 | `crates/qvto-cli/README.md` | the `qvto` command; the benchmark suite (`qvto bench`) and its results against Eclipse QVTo |
 | `reference/README.md` | specifications, Eclipse sources, the Java reference runner |
+| `reference/external/` | external QVTo corpora (not committed; `SOURCES.tsv`: repositories, revisions, licences) |
 | `reference/inventory/` | inventory of the Eclipse QVTo test suite |
 | `reference/notes/` | notes on Eclipse QVTo and OCL semantics |
 
@@ -38,7 +39,7 @@ Status: see `PLAN.md`.
 | `qvto-runtime` | values, collections, Java-compatible hashing and formatting, standard library |
 | `qvto-vm` | the interpreter |
 | `qvto` | engine facade |
-| `qvto-testkit` | conformance runner, differential testing |
+| `qvto-testkit` | conformance runner, differential testing, fuzz generators and regression cases |
 | `qvto-cli` | the `qvto` command |
 | `qvto-simoxide` | the store over SimOxide's model graph, its metamodel registry, the change journal (a workspace of its own; needs a SimOxide checkout) |
 

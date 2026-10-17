@@ -148,3 +148,16 @@ harness does not yet provide what the Eclipse test bundle registers (metamodels 
 `plugin.xml`, Java blackboxes, imports resolved from the workspace). 13 differ, mostly because
 they need configuration properties or the suite's own comparer. A cold JVM needs about 0.4 s to
 compile a transformation and about 30 ms to run a small one.
+
+## External QVTo corpora (`external/`, not committed)
+
+Real-world `.qvto` files collected for Q7 (2026-10-17): 2 402 files from 233 sources (Palladio
+repositories, Eclipse samples and examples, GitHub), shallow sparse clones with the metamodels
+they use and candidate input models, 987 MB. `external/README.txt` describes the layout,
+`SOURCES.tsv` lists each source's URL, revision and licence (mixed: EPL, Apache, MIT, GPL-3.0
+for a few, unknown for many; nothing is redistributed), `FILES.tsv` each file with its model
+types, metamodel files, inputs and whether it is new (1 809), already in the suite or a
+duplicate. `crates/qvto-testkit/tools/gen_external_cases.py` turns them into
+`cases/external.cases` (compile) and `cases/external-run.cases` (run); `qvto fuzz corpus`
+compares them with the Java runner.
+
