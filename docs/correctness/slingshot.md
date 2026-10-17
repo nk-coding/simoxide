@@ -100,8 +100,8 @@ adjustment times, Holm 0.01), and every measurement series (`tools/compare_stat.
 Every rejected series test is a KS test on pooled values (the CPU's event-sampled state; on
 `spd_v4_rt` also that of the new containers), which rejects stock Slingshot against itself as
 well: a run's values are autocorrelated, so the pooled KS is no valid test here (as for the
-reconfiguration rules, `DESIGN-SPD.md` R1). Exact SPD runs (level E against `det`, the three SPD
-cases of `corpus-ss/` and `corpus-spd/`) wait for the exact engine's SPD events (X2d).
+reconfiguration rules, `DESIGN-SPD.md` R1). In the exact mode the five `corpus-spd/` cases (and
+the three SPD cases of `corpus-ss/`) are byte-equal to the `det` runner at level E.
 
 ## The exact mode
 

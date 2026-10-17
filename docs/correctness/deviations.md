@@ -264,7 +264,7 @@ running (`reconfiguration` feature):
   statistically ([Slingshot](./slingshot.md#scaling-policies)). With the fixed behaviour a
   removed container drains, and calls of its requests in progress cross a link of the remaining
   side (the transformation took it off its links; fixed Q37 keeps Slingshot's fallback for
-  removed containers only). The Slingshot-exact engine does not run scaling policies yet (X2d).
+  removed containers only).
 - **Enforced policies** at a resume run at the resume time behind the events already queued for
   it; Slingshot restarts the time base and schedules them first.
 - **Change steps at the resume of an SPD run** use the adjustments' QVTo state: a transformation
