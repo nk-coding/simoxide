@@ -152,13 +152,15 @@ impl Str {
         }
     }
 
-    /// The text with lone surrogates replaced by U+FFFD.
+    /// The text with lone surrogates replaced by `?` (as Java encodes them to UTF-8).
     pub fn to_str_lossy(&self) -> Cow<'_, str> {
         match self.as_str() {
             Some(s) => Cow::Borrowed(s),
             None => Cow::Owned(
+                // a lone surrogate as Java's UTF-8 encoder writes it (`String.getBytes`, the
+                // log's `Writer`): `?`
                 char::decode_utf16(self.units())
-                    .map(|r| r.unwrap_or('\u{FFFD}'))
+                    .map(|r| r.unwrap_or('?'))
                     .collect(),
             ),
         }

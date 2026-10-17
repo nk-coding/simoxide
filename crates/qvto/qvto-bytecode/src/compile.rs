@@ -432,6 +432,11 @@ struct Builder<'a> {
     ctl: Vec<Ctl>,
     ip: u32,
     locals: &'a [Local],
+    /// Names of `iterate` result variables whose source is being compiled: classic OCL adds
+    /// the result variable to the evaluation environment before it evaluates the source, so a
+    /// variable of the same name added meanwhile (another `iterate`'s result, an iterator, a
+    /// `let`) fails (`IllegalArgumentException`, the expression is invalid).
+    live_names: Vec<String>,
 }
 
 impl<'a> Builder<'a> {
@@ -470,6 +475,7 @@ impl<'a> Builder<'a> {
             ctl: Vec::new(),
             ip: u32::MAX,
             locals,
+            live_names: Vec::new(),
         })
     }
 
@@ -827,6 +833,11 @@ impl<'a> Builder<'a> {
                 let m = self.mark();
                 let t = self.alloc()?;
                 self.expr(init, t)?;
+                if self.live_names.contains(&self.locals[l.0 as usize].name) {
+                    self.emit(Insn::LoadInvalid { dst });
+                    self.release(m);
+                    return Ok(());
+                }
                 self.emit(Insn::Move {
                     dst: self.local(*l),
                     src: t,
@@ -1434,7 +1445,7 @@ impl<'a> Builder<'a> {
         let base = self.call_args(c)?;
         let src_unlimited = c.source.as_ref().is_some_and(|s| self.is_unlimited(s));
         let arg_unlimited = c.args.first().is_some_and(|a| self.is_unlimited(a));
-        let needs_type = matches!(op.name(), "sum" | "product");
+        let needs_type = matches!(op.name(), "sum" | "product" | "oclAsType");
         if src_unlimited || arg_unlimited || needs_type {
             let site = self.site(Site::Std {
                 op,
@@ -1476,7 +1487,7 @@ impl<'a> Builder<'a> {
         }
         let src_unlimited = c.source.as_ref().is_some_and(|s| self.is_unlimited(s));
         let arg_unlimited = c.args.first().is_some_and(|a| self.is_unlimited(a));
-        let needs_type = matches!(op.name(), "sum" | "product");
+        let needs_type = matches!(op.name(), "sum" | "product" | "oclAsType");
         if src_unlimited || arg_unlimited || needs_type {
             let site = self.site(Site::Std {
                 op,
@@ -1558,7 +1569,9 @@ impl<'a> Builder<'a> {
             4 => Insn::Le { dst, a, b },
             5 => Insn::Gt { dst, a, b },
             6 => Insn::Ge { dst, a, b },
+            7 if numeric => Insn::EqNum { dst, a, b },
             7 => Insn::Eq { dst, a, b },
+            _ if numeric => Insn::NeNum { dst, a, b },
             _ => Insn::Ne { dst, a, b },
         });
         self.ip = e.span.start;
@@ -2024,7 +2037,42 @@ impl<'a> Builder<'a> {
 
     fn iterate(&mut self, e: &Expr, lp: &ir::Loop, dst: Reg) -> CResult<()> {
         let m = self.mark();
-        let src = self.expr_reg(&lp.source)?;
+        // `iterate`: the result variable with its initial value first, then the source
+        // (`visitIterateExp`); the iterators are added after the source
+        let acc_name = lp.acc.as_ref().map(|(l, _)| self.locals[l.0 as usize].name.clone());
+        if let Some((accl, init)) = &lp.acc
+            && lp.kind == LoopKind::Iterate
+        {
+            let ar = self.local(*accl);
+            let mm = self.mark();
+            let t = self.alloc()?;
+            self.expr(init, t)?;
+            self.emit(Insn::Move { dst: ar, src: t });
+            self.release(mm);
+            if acc_name.as_ref().is_some_and(|n| self.live_names.contains(n)) {
+                self.emit(Insn::LoadInvalid { dst });
+                self.release(m);
+                return Ok(());
+            }
+        }
+        let pushed = lp.kind == LoopKind::Iterate && acc_name.is_some();
+        if pushed {
+            self.live_names.push(acc_name.clone().unwrap());
+        }
+        let src = self.expr_reg(&lp.source);
+        if pushed {
+            self.live_names.pop();
+        }
+        let src = src?;
+        if lp
+            .iterators
+            .iter()
+            .any(|l| self.live_names.contains(&self.locals[l.0 as usize].name))
+        {
+            self.emit(Insn::LoadInvalid { dst });
+            self.release(m);
+            return Ok(());
+        }
         let acc = self.alloc()?;
         let src_kind = self.static_kind(lp.source.ty);
         let src_set_or_bag = matches!(src_kind, Some(CollKind::Set) | Some(CollKind::Bag));
@@ -2329,15 +2377,8 @@ impl<'a> Builder<'a> {
                 ends.extend(breaks);
             }
             K::Iterate => {
-                let (accl, init) = lp.acc.as_ref().unwrap();
+                let (accl, _) = lp.acc.as_ref().unwrap();
                 let ar = self.local(*accl);
-                {
-                    let mm = self.mark();
-                    let t = self.alloc()?;
-                    self.expr(init, t)?;
-                    self.emit(Insn::Move { dst: ar, src: t });
-                    self.release(mm);
-                }
                 let exits = self.loops(src, &lp.iterators, acc, &mut |b, _next| {
                     let mm = b.mark();
                     let t = b.alloc()?;

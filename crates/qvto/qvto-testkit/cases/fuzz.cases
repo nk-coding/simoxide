@@ -98,3 +98,23 @@ dir crates/qvto-testkit/fuzz/regex
 qvto regex.qvto
 note Java's find loop in replaceAll (an empty match after a non-empty one)
 end
+
+case fuzz_iterate_names
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/iterate_names
+qvto iterate_names.qvto
+note iterate adds its result variable before evaluating the source; a variable of the same name added meanwhile makes the expression invalid
+end
+
+case fuzz_floats
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/floats
+qvto floats.qvto
+in floats.xmi
+mmfile ../fuzz.ecore
+note Float (EFloat) and Long (ELong) values: = with promotion, sortedBy keys by Java class, oclIsTypeOf/oclAsType Real
+end

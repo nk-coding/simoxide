@@ -83,7 +83,8 @@ where
             }
             // only a java.lang.Integer is also a Real (EcoreEvaluationEnvironment)
             Type::Real => match v {
-                Value::Real(_) | Value::Float(_) => true,
+                // `EDataType.isInstance` of `java.lang.Double`: not a `Float`
+                Value::Real(_) => true,
                 Value::Int(i) => *i as i32 as i64 == *i,
                 _ => false,
             },
@@ -254,19 +255,40 @@ where
         self.is_kind_of(v, t)
     }
 
-    /// `oclAsType(T)`.
-    pub(crate) fn ocl_as_type(&self, v: Value, t: TypeId) -> Value {
+    /// `oclAsType(T)` on a value whose static type is `src`. Classic OCL converts only when
+    /// the static type is a primitive, collection, enumeration, data type, OclVoid or
+    /// OclInvalid (`EvaluationVisitorImpl.visitOperationCallExp`): an Integer to Real becomes a
+    /// Double, OclAny accepts everything; otherwise (and for other static types) the value is
+    /// returned if it is `oclIsKindOf(T)`, else invalid. There is no Real to Integer conversion:
+    /// classic OCL compares the argument's type (the type type) with Integer, which never holds.
+    pub(crate) fn ocl_as_type(&self, v: Value, t: TypeId, src: TypeId) -> Value {
         if v.is_undefined() {
             return v;
         }
         let ir = &self.prog.ir;
-        match (ir.types.get(t), &v) {
-            // no Real to Integer conversion: classic OCL compares the argument's type (the type
-            // type) with Integer, which never holds, and falls back to `oclIsKindOf`
-            (Type::Real, Value::Int(i)) if *i as i32 as i64 == *i => {
-                return Value::Real(*i as f64);
+        let convert = matches!(
+            ir.types.get(src),
+            Type::Boolean
+                | Type::Integer
+                | Type::Real
+                | Type::String
+                | Type::UnlimitedNatural
+                | Type::Collection(..)
+                | Type::List(_)
+                | Type::Dict(..)
+                | Type::Enum(_)
+                | Type::DataType(_)
+                | Type::OclVoid
+                | Type::OclInvalid
+        );
+        if convert {
+            match (ir.types.get(t), &v) {
+                (Type::Real, Value::Int(i)) if *i as i32 as i64 == *i => {
+                    return Value::Real(*i as f64);
+                }
+                (Type::OclAny, _) => return v,
+                _ => {}
             }
-            _ => {}
         }
         if self.is_kind_of(&v, t) {
             v

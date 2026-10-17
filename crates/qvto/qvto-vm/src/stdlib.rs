@@ -9,6 +9,7 @@ use crate::vm::{Iter, ObjHandle, Vm, push};
 use qvto_model::{DataKind, ModelStore};
 use qvto_runtime::coll::{Coll, CollKind, ops};
 use qvto_runtime::dict::List;
+use qvto_runtime::IntBox;
 use qvto_runtime::eq::{java_equals, ocl_equal};
 use qvto_runtime::num::{self, NumOp};
 use qvto_runtime::{ObjRef, Str, TypeRef, Value, strings};
@@ -640,7 +641,7 @@ where
                 }
             }
             OclAsType => match type_arg(&a1) {
-                Some(t) => self.ocl_as_type(s, t),
+                Some(t) => self.ocl_as_type(s, t, self.std_src_ty),
                 None => Value::Invalid,
             },
             OclIsKindOf => match type_arg(&a1) {
@@ -853,16 +854,16 @@ where
                 let a2 = args.get(2).cloned().unwrap_or(Value::Null);
                 match (&s, &a1, &a2) {
                     (Value::Str(x), Value::Str(p), Value::Str(r)) => {
-                        match (
-                            self.regex_find(p),
-                            crate::jregex::replacement(&r.to_str_lossy()),
-                        ) {
-                            (Ok(re), Ok(rep)) => {
-                                let text = x.to_str_lossy();
-                                let out = crate::jregex::replace(&re, &text, &rep, prim == ReplaceAll);
-                                Value::str(&out)
-                            }
-                            (Err(m), _) | (_, Err(m)) => self.swallow(m),
+                        match self.regex_find(p).and_then(|re| {
+                            crate::jregex::replace(
+                                &re,
+                                &x.to_str_lossy(),
+                                &r.to_str_lossy(),
+                                prim == ReplaceAll,
+                            )
+                        }) {
+                            Ok(out) => Value::str(&out),
+                            Err(m) => self.swallow(m),
                         }
                     }
                     _ => Value::Invalid,
@@ -1538,11 +1539,15 @@ where
                 }
             }
         }
+        // the keys' Java classes: `Comparable.compareTo` fails across classes
         #[derive(PartialEq)]
         enum K {
             Int,
             Long,
+            Short,
+            Byte,
             Real,
+            Float,
             Str,
             Bool,
             Enum,
@@ -1556,7 +1561,11 @@ where
                         K::Long
                     }
                 }
+                Value::Boxed(IntBox::Long, _) => K::Long,
+                Value::Boxed(IntBox::Short, _) => K::Short,
+                Value::Boxed(IntBox::Byte, _) => K::Byte,
                 Value::Real(_) => K::Real,
+                Value::Float(_) => K::Float,
                 Value::Str(_) => K::Str,
                 Value::Bool(_) => K::Bool,
                 Value::Enum(_) => K::Enum,
@@ -1589,8 +1598,18 @@ where
                     _ => {}
                 }
             }
+            let num = |v: &Value| match v {
+                Value::Int(i) => Some(*i),
+                Value::Boxed(IntBox::Long | IntBox::Short | IntBox::Byte, i) => Some(*i as i64),
+                _ => None,
+            };
+            if let (Some(x), Some(y)) = (num(a), num(b)) {
+                return x.cmp(&y);
+            }
             match (a, b) {
-                (Value::Int(x), Value::Int(y)) => x.cmp(y),
+                (Value::Float(x), Value::Float(y)) => {
+                    qvto_runtime::java::hash::double_compare(*x as f64, *y as f64)
+                }
                 (Value::Real(x), Value::Real(y)) => {
                     qvto_runtime::java::hash::double_compare(*x, *y)
                 }

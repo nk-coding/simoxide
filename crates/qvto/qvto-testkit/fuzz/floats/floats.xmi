@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fz:Root xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:fz="http://qvto-rs/fuzz"><nodes name="x" big="5" value="3" weight="2.5"/><nodes name="y" big="2147483648" value="1"/><items name="i" ratio="2.5" count="3"/><items name="j" ratio="1.0" count="1"/></fz:Root>

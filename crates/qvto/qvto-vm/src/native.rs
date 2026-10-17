@@ -762,8 +762,7 @@ where
         let re = self
             .regex_find(&qvto_runtime::Str::new(regex))
             .map_err(java_exception)?;
-        let rep = crate::jregex::replacement(replacement).map_err(java_exception)?;
-        Ok(re.replace(s, rep.as_str()).into_owned())
+        crate::jregex::replace(&re, s, replacement, false).map_err(java_exception)
     }
 
     /// `String.split(regex, limit)` (`Pattern.split`: no leading empty string for a zero-width
@@ -775,7 +774,8 @@ where
         let limited = limit > 0;
         let mut out: Vec<String> = Vec::new();
         let mut index = 0usize;
-        for m in re.find_iter(s) {
+        for c in crate::jregex::find_all(&re, s) {
+            let m = c.get(0).expect("group 0");
             if !limited || out.len() < (limit - 1) as usize {
                 if index == 0 && m.start() == 0 && m.end() == 0 {
                     continue;

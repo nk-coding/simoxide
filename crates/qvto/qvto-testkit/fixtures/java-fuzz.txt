@@ -1,4 +1,98 @@
 qvto-testkit java fixture 1
+@case fuzz_floats
+@file result.txt 138
+id	fuzz_floats
+load	OK
+params	in:m
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 597
+e1, data: true
+e2, data: true
+e3, data: false
+e4, data: true
+e5, data: true
+e6, data: true
+e7, data: 3.5
+e8, data: 5.0
+e9, data: 1.25
+e10, data: 2
+e11, data: 3
+e12, data: -2.5
+e13, data: 3.0
+e14, data: 2.5
+e15, data: true
+e16, data: 6
+e17, data: 10
+e18, data: true
+e19, data: 5
+e20, data: true
+e21, data: true
+s1, data: [j, i]
+s2, data: [x, y]
+s3, data: [1, 3, 2]
+s4, data: <Invalid>
+s5, data: [2, 1]
+s6, data: <Invalid>
+m1, data: 2.5
+m2, data: 3.5
+m3, data: 2147483648
+m4, data: 2147483653
+m5, data: 4.0
+c1, data: 2
+c2, data: 2
+c3, data: false
+c4, data: 1
+t1, data: 2.5
+t2, data: 5
+t3, data: 2.5
+
+@file diag.txt 597
+exec	1	OK	0	e1
+exec	1	OK	0	e2
+exec	1	OK	0	e3
+exec	1	OK	0	e4
+exec	1	OK	0	e5
+exec	1	OK	0	e6
+exec	1	OK	0	e7
+exec	1	OK	0	e8
+exec	1	OK	0	e9
+exec	1	OK	0	e10
+exec	1	OK	0	e11
+exec	1	OK	0	e12
+exec	1	OK	0	e13
+exec	1	OK	0	e14
+exec	1	OK	0	e15
+exec	1	OK	0	e16
+exec	1	OK	0	e17
+exec	1	OK	0	e18
+exec	1	OK	0	e19
+exec	1	OK	0	e20
+exec	1	OK	0	e21
+exec	1	OK	0	s1
+exec	1	OK	0	s2
+exec	1	OK	0	s3
+exec	1	OK	0	s4
+exec	1	OK	0	s5
+exec	1	OK	0	s6
+exec	1	OK	0	m1
+exec	1	OK	0	m2
+exec	1	OK	0	m3
+exec	1	OK	0	m4
+exec	1	OK	0	m5
+exec	1	OK	0	c1
+exec	1	OK	0	c2
+exec	1	OK	0	c3
+exec	1	OK	0	c4
+exec	1	OK	0	t1
+exec	1	OK	0	t2
+exec	1	OK	0	t3
+
 @case fuzz_inherit_ip_a
 @file result.txt 218
 id	fuzz_inherit_ip_a
@@ -148,6 +242,34 @@ org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: Postcondition fai
 	at e::main(e.qvto:4)
 @file diag.txt 54
 exec	0	ERROR	100	Postcondition failed in mapping 'n0'
+
+@case fuzz_iterate_names
+@file result.txt 141
+id	fuzz_iterate_names
+load	OK
+params	
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file log.txt 97
+i1, data: <Invalid>
+i3, data: 26
+i4, data: 9
+i5, data: <Invalid>
+i7, data: 4
+i9, data: <Invalid>
+
+@file diag.txt 90
+exec	1	OK	0	i1
+exec	1	OK	0	i3
+exec	1	OK	0	i4
+exec	1	OK	0	i5
+exec	1	OK	0	i7
+exec	1	OK	0	i9
 
 @case fuzz_numconv
 @file result.txt 150

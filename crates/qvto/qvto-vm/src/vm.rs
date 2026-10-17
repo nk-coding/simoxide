@@ -629,6 +629,37 @@ where
                     };
                     w!(self, base, dst) = v;
                 }
+                Insn::EqNum { dst, a, b } | Insn::NeNum { dst, a, b } => {
+                    // the operands promoted (copies: they may be variables' registers)
+                    let pa = higher_precision(&r!(self, base, a));
+                    let pb = higher_precision(&r!(self, base, b));
+                    let va = pa.as_ref().unwrap_or(&r!(self, base, a));
+                    let vb = pb.as_ref().unwrap_or(&r!(self, base, b));
+                    let fast = match (va, vb) {
+                        (Value::Int(x), Value::Int(y)) => Some(x == y),
+                        (Value::Real(x), Value::Real(y)) => Some(x == y),
+                        (Value::Int(x), Value::Real(y)) | (Value::Real(y), Value::Int(x)) => {
+                            Some(*x as f64 == *y)
+                        }
+                        _ => None,
+                    };
+                    let ne = matches!(insn, Insn::NeNum { .. });
+                    let v = match fast {
+                        Some(e) => Value::Bool(e != ne),
+                        None => {
+                            let (prim, op) = if ne {
+                                (Prim::Ne, StdOp::OclAny_ne)
+                            } else {
+                                (Prim::Eq, StdOp::OclAny_eq)
+                            };
+                            match self.slow_bin(prim, op, base, a, b) {
+                                Ok(v) => v,
+                                Err(e) => fail!(e),
+                            }
+                        }
+                    };
+                    w!(self, base, dst) = v;
+                }
                 Insn::Eq { dst, a, b } | Insn::Ne { dst, a, b } => {
                     let fast = match (&r!(self, base, a), &r!(self, base, b)) {
                         (Value::Int(x), Value::Int(y)) => Some(x == y),
@@ -1376,3 +1407,15 @@ pub(crate) fn const_value(c: &Const) -> Value {
     }
 }
 
+
+/// `NumberUtil.higherPrecisionNumber`: a `Float` as a `Double`, `Short`/`Byte`/`Long` boxes as
+/// (long) Integers; `None` for values it leaves alone.
+pub(crate) fn higher_precision(v: &Value) -> Option<Value> {
+    match v {
+        Value::Float(f) => Some(Value::Real(*f as f64)),
+        Value::Boxed(qvto_runtime::IntBox::Short | qvto_runtime::IntBox::Byte | qvto_runtime::IntBox::Long, i) => {
+            Some(Value::Int(*i as i64))
+        }
+        _ => None,
+    }
+}

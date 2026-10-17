@@ -184,6 +184,19 @@ pub enum Insn {
         a: Reg,
         b: Reg,
     },
+    /// `=` with a numeric static source type: classic OCL promotes number operands first
+    /// (`higherPrecisionNumber`: a `Float` is a `Double`, `Short`/`Byte` boxes are `Long`s).
+    EqNum {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
+    /// `<>` likewise.
+    NeNum {
+        dst: Reg,
+        a: Reg,
+        b: Reg,
+    },
     /// Boolean `not`.
     Not {
         dst: Reg,

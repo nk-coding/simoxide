@@ -1,0 +1,9 @@
+transformation iterate_names();
+main() {
+  log('i1', Sequence{'a'}->prepend(OrderedSet{'b'}->iterate(x; acc : String = '' | acc + x))->iterate(x; acc : String = '' | acc + x));
+  log('i3', Sequence{1, 2}->iterate(x; acc : Integer = 0 | acc + Sequence{3}->iterate(y; acc2 : Integer = 10 | acc2 + y)));
+  log('i4', Sequence{1, 2}->iterate(x; acc : Integer = Sequence{5}->iterate(z; acc : Integer = 1 | acc + z) | acc + x));
+  log('i5', Sequence{Sequence{1}->iterate(x; acc : Integer = 0 | acc + x)}->select(x | x > 0)->iterate(x; acc : Integer = 0 | acc + x));
+  log('i7', let acc : Integer = 3 in Sequence{1}->iterate(x; acc2 : Integer = acc | acc2 + x));
+  log('i9', Sequence{1, 2}->collect(x | Sequence{x}->iterate(y; acc : Integer = 0 | acc + y))->iterate(x; acc : Integer = 0 | acc + x));
+}
