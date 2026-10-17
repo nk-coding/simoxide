@@ -8,6 +8,9 @@
 //! simoxide-bench change [--filter a,b] [--reps N] [--mode exact|fast]
 //! ```
 //!
+//! `suite` and `batch` also take `--flavour simulizar|slingshot` and `--quirks LIST`
+//! (the Slingshot flavour and its compat flags, as `simoxide run`).
+//!
 //! The modes draw different random numbers, so their runs do different amounts of work: compare
 //! them by runs/s and simulated requests/s (finished usage-scenario runs,
 //! `RunResult::main_count`) as well as events/s.
@@ -27,8 +30,8 @@
 //! allocator (or mimalloc with the `mimalloc` feature).
 
 use simoxide_sim::{
-    ChangeKind, ChangeSet, Compat, CompiledModel, Mode, Outputs, Pause, RunSpec, SimConfig,
-    Simulation,
+    ChangeKind, ChangeSet, Compat, CompiledModel, FlavourConfig, FlavourKind, Mode, Outputs, Pause,
+    Quirks, RunSpec, SimConfig, Simulation,
 };
 use std::alloc::{GlobalAlloc, Layout};
 use std::cell::Cell;
@@ -192,11 +195,18 @@ fn root() -> PathBuf {
 }
 
 fn load(dir: &Path) -> Result<(RunSpec, CompiledModel, f64, f64), String> {
+    load_flavour(dir, FlavourConfig::SIMULIZAR)
+}
+
+fn load_flavour(
+    dir: &Path,
+    flavour: FlavourConfig,
+) -> Result<(RunSpec, CompiledModel, f64, f64), String> {
     let spec = RunSpec::load(&dir.join("run.json"))?;
     let t0 = Instant::now();
     let model = spec.load_model(dir)?;
     let t1 = Instant::now();
-    let cm = CompiledModel::compile(model).map_err(|e| e.to_string())?;
+    let cm = CompiledModel::compile_flavour(model, flavour).map_err(|e| e.to_string())?;
     let t2 = Instant::now();
     Ok((
         spec,
@@ -221,6 +231,7 @@ struct Args {
     runs: usize,
     threads: Vec<usize>,
     mode: Mode,
+    flavour: FlavourConfig,
 }
 
 fn parse() -> Result<Args, String> {
@@ -235,6 +246,7 @@ fn parse() -> Result<Args, String> {
         runs: 64,
         threads: vec![1, 2, 4, 8, 16],
         mode: Mode::default(),
+        flavour: FlavourConfig::SIMULIZAR,
     };
     while let Some(f) = it.next() {
         let mut val = || it.next().ok_or(format!("{f} needs a value"));
@@ -258,6 +270,11 @@ fn parse() -> Result<Args, String> {
                     return Err(format!("--mode {v}: {why}"));
                 }
             }
+            "--flavour" => {
+                let v = val()?;
+                a.flavour.kind = FlavourKind::parse(&v).ok_or(format!("--flavour: unknown {v}"))?;
+            }
+            "--quirks" => a.flavour.quirks = Quirks::parse(&val()?)?,
             o => return Err(format!("unknown flag {o}")),
         }
     }
@@ -272,7 +289,10 @@ fn run_once(cm: &CompiledModel, cfg: &SimConfig) -> Result<(u64, f64, i64), Stri
 }
 
 fn suite(a: &Args) -> Result<(), String> {
-    println!("mode {}", a.mode);
+    println!(
+        "mode {}, flavour {}, quirks {}",
+        a.mode, a.flavour.kind, a.flavour.quirks
+    );
     println!(
         "| benchmark | load µs | compile µs | short: events | short µs/run | short allocs | long: events | long ms/run | Mev/s (count) | Mev/s (store) | M requests/s | allocs/event | peak heap KiB |"
     );
@@ -291,7 +311,7 @@ fn suite(a: &Args) -> Result<(), String> {
         let mut ct = Vec::new();
         let mut loaded = None;
         for _ in 0..5 {
-            let (spec, cm, l, c) = load(&dir)?;
+            let (spec, cm, l, c) = load_flavour(&dir, a.flavour)?;
             lt.push(l);
             ct.push(c);
             loaded = Some((spec, cm));
@@ -364,7 +384,7 @@ fn suite(a: &Args) -> Result<(), String> {
 
 fn batch(a: &Args) -> Result<(), String> {
     let dir = root().join(&a.model);
-    let (spec, cm, _, _) = load(&dir)?;
+    let (spec, cm, _, _) = load_flavour(&dir, a.flavour)?;
     let base = SimConfig {
         max_sim_time: -1,
         max_measurements: a.max_meas,
@@ -465,7 +485,10 @@ fn fork_costs<C: Compat>(
 }
 
 fn fork(a: &Args) -> Result<(), String> {
-    println!("mode {}", a.mode);
+    println!(
+        "mode {}, flavour {}, quirks {}",
+        a.mode, a.flavour.kind, a.flavour.quirks
+    );
     println!(
         "| benchmark | events at fork | live processes | snapshot µs | detach µs | into_state + resume µs | tuples stored | snapshot µs (stored) | detach µs (stored) |"
     );
@@ -571,7 +594,10 @@ fn change_costs<C: Compat>(
 }
 
 fn change(a: &Args) -> Result<(), String> {
-    println!("mode {}", a.mode);
+    println!(
+        "mode {}, flavour {}, quirks {}",
+        a.mode, a.flavour.kind, a.flavour.quirks
+    );
     println!(
         "| benchmark | graph objects | graph copy µs | unchanged-graph change set µs | rate change µs |"
     );

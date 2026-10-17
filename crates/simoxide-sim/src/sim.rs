@@ -18,6 +18,7 @@
 use crate::compat::Exact;
 use crate::compat::{Compat, DefaultCompat, Mode, SimRng};
 use crate::events::{Ev, EventList};
+use crate::flavour::{Flavour, SimuLizar};
 use crate::frames::{
     Binding, Frame, FrameEnv, FramePool, FrameRef, Proxy, ProxyRef, eval_proxy, frame_mut,
 };
@@ -29,9 +30,9 @@ use crate::trace::TraceOut;
 use crate::windows::Window;
 use simoxide_model::*;
 use simoxide_random::UniformSource;
-use simoxide_sched::time::{checked_span, seconds};
+use simoxide_sched::time::seconds;
 use simoxide_sched::{
-    ActiveResource, PassiveListener, PassiveResource, PsAlgorithm, ResourceListener,
+    ActiveResource, Clock, PassiveListener, PassiveResource, PsAlgorithm, ResourceListener,
     SchedulingPolicy,
 };
 use simoxide_stoex::Value;
@@ -41,9 +42,12 @@ use std::io::Write;
 
 mod calls;
 mod flat;
+mod hooks;
 mod runmodel;
+mod slingshot;
 mod state;
 
+pub use hooks::ObservedTuple;
 pub use runmodel::RunModel;
 pub use state::{Detached, Pause, Phase, RunState, Status};
 use state::{NoPause, PauseWhen};
@@ -336,6 +340,8 @@ enum Cont {
     ConsumeDone {
         res: ResIdx,
     },
+    /// Slingshot (Q35): the request stopped silently; the process never continues.
+    Stall,
 }
 
 #[derive(Default, Clone)]
@@ -369,7 +375,14 @@ struct Proc {
     fork_done: bool,
     /// Response-time series of the open external-call / assembly-operation starts (MEAS-1.5).
     rt: Vec<SeriesId>,
+    /// Slingshot flavour: [`SS_EXTRA_FRAME`], [`SS_LINK_FAILED`].
+    ss_flags: u8,
 }
+
+/// Slingshot (Q22): a collection iterator left its frame on the stack.
+const SS_EXTRA_FRAME: u8 = 1;
+/// Slingshot: the process's last link transfer failed (SS-RES-5.3).
+const SS_LINK_FAILED: u8 = 2;
 
 /// The last resolution of an external-call site (`call_required` from the caller's assembly
 /// context `ac`, with `parent` the path id of the context below it): the continuation it
@@ -419,22 +432,25 @@ enum Flow {
 // resources at run time
 
 #[derive(Clone)]
-struct ResRt {
-    sched: Option<ActiveResource<u64>>,
+struct ResRt<K: Clock> {
+    sched: Option<ActiveResource<u64, K>>,
     /// DELAY-type resources: `running_processes` (process keys).
     delay_set: Vec<u64>,
     /// Queue length per instance as the state probes read it.
     shadow: Vec<u64>,
 }
 
-impl ResRt {
-    /// An idle resource.
-    fn new(r: &CRes, ps: PsAlgorithm) -> ResRt {
+impl<K: Clock> ResRt<K> {
+    /// An idle resource (`slingshot`: Slingshot's schedulers, SS-RES-1).
+    fn new(r: &CRes, ps: PsAlgorithm, slingshot: bool) -> ResRt<K> {
         ResRt {
             sched: match r.policy {
                 SchedulingPolicy::Delay => None,
                 SchedulingPolicy::ProcessorSharing => {
                     Some(ActiveResource::new(r.policy, r.instances, ps))
+                }
+                SchedulingPolicy::Fcfs if slingshot => {
+                    Some(ActiveResource::new_slingshot(r.policy, 1, ps))
                 }
                 SchedulingPolicy::Fcfs => Some(ActiveResource::new(r.policy, 1, ps)),
             },
@@ -455,6 +471,8 @@ struct PassiveInst {
     holding: Option<SeriesId>,
     wait_start: Vec<(u64, i64)>,
     hold_start: Vec<(u64, i64)>,
+    /// Slingshot flavour: the passive-resource monitors of this instance (SS-MEAS-4).
+    ss_mon: Vec<(SeriesId, SsPassiveMetric)>,
 }
 
 #[derive(Clone)]
@@ -486,6 +504,8 @@ pub(crate) struct Sink {
     /// The event list: runtime-measurement writes schedule the reconfiguration process from
     /// inside the measurement emission, at the point of the write (FIFO order of same-time notes).
     events: EventList,
+    /// External notes and observed series of host layers (`hooks`).
+    hooks: hooks::Hooks,
 }
 
 /// `Reconfigurator` / `ReconfigurationProcess` state (MEAS-7.2).
@@ -711,6 +731,9 @@ fn emit(
     if meas.prm_armed {
         prm_tuple(meas, trace, now, s, t);
     }
+    if meas.hooks.observing {
+        hooks::observe_tuple(&mut meas.hooks, now, s, t, v);
+    }
 }
 
 /// Emission of a window's aggregated tuple (written to its recorder, not fed back to windows).
@@ -731,9 +754,12 @@ fn emit_out(
         let def = &meas.m.series[s as usize];
         tr.meas(now, &def.mp, def.metric, t, v);
     }
+    if meas.hooks.observing {
+        hooks::observe_tuple(&mut meas.hooks, now, s, t, v);
+    }
 }
 
-struct ResListener<'a> {
+struct ResListener<'a, K: Clock> {
     meas: &'a mut Sink,
     trace: &'a mut Option<TraceOut>,
     store: bool,
@@ -741,11 +767,12 @@ struct ResListener<'a> {
     def: &'a CRes,
     shadow: &'a mut Vec<u64>,
     per_core: bool,
+    clock: std::marker::PhantomData<K>,
 }
 
-impl ResourceListener<u64> for ResListener<'_> {
+impl<K: Clock> ResourceListener<u64> for ResListener<'_, K> {
     fn state_changed(&mut self, core: u32, state: u64) {
-        let t = seconds(self.now);
+        let t = K::secs(self.now);
         let c = core as usize;
         if c < self.shadow.len() {
             self.shadow[c] = state;
@@ -790,7 +817,7 @@ fn busy_fraction(shadow: &[u64], instances: u32, per_core: bool) -> f64 {
 /// ([`DefaultCompat`] by default: `Exact` with the feature `exact`, else `Fast`; see
 /// [`crate::compat`]): the engine, which borrows the compiled model, holds the
 /// output writers and runs one [`RunState`] (which explains pausing, forking and resuming).
-pub struct Simulation<'m, C: Compat = DefaultCompat> {
+pub struct Simulation<'m, C: Compat = DefaultCompat, F: Flavour = SimuLizar> {
     /// The compiled model the run simulates: the one it was created on, or after model changes
     /// the one in `st.model` (see `RunModel`; the reference then lives as long as that `Arc`,
     /// which only `Simulation::apply_changes` replaces).
@@ -802,7 +829,7 @@ pub struct Simulation<'m, C: Compat = DefaultCompat> {
     /// Where the buffered tape records go (`SimRng::tape_buf`).
     tape: Option<Box<dyn Write>>,
     /// Everything the run changes.
-    st: RunState<C>,
+    st: RunState<C, F>,
 }
 
 /// Proxy-depth errors of the evaluator are limits (see `frames::MAX_PROXY_DEPTH`).
@@ -829,7 +856,7 @@ impl<'m> Simulation<'m, Exact> {
     }
 }
 
-impl<'m, C: Compat> Simulation<'m, C> {
+impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// A simulation with policy `C`, e.g. `Simulation::<Fast>::create(..)`; `cfg.mode` must be
     /// `C::MODE`.
     pub fn create(cm: &'m CompiledModel, cfg: SimConfig, out: Outputs) -> Result<Self, SimError> {
@@ -851,6 +878,21 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 kind: SimErrorKind::Model,
             });
         }
+        if cm.flavour.kind != F::KIND {
+            return Err(SimError {
+                message: format!(
+                    "the model is compiled for the {} flavour but the simulation is built for {} (use simoxide_sim::run to dispatch on the flavour)",
+                    cm.flavour.kind,
+                    F::KIND
+                ),
+                at_ns: 0,
+                kind: SimErrorKind::Model,
+            });
+        }
+        let mut cfg = cfg;
+        if F::SLINGSHOT {
+            Self::ss_check(cm, &mut cfg)?;
+        }
         let rng = C::Rng::create(
             &cfg.rng,
             cfg.seed,
@@ -867,7 +909,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         Ok(Simulation {
             cm,
             code: cm.code.get(traced),
-            trace: out.trace.map(TraceOut::new),
+            trace: out.trace.map(|w| TraceOut::new(w, F::Clock::secs)),
             tape: out.tape,
             st: RunState::new(cm, cfg, traced, rng),
         })
@@ -878,7 +920,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn err<T>(&self, msg: impl Into<String>) -> R<T> {
         Err(Box::new(SimError {
             message: msg.into(),
-            at_ns: self.st.now,
+            at_ns: F::Clock::to_ns(self.st.now),
             kind: SimErrorKind::Model,
         }))
     }
@@ -888,7 +930,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn limit_err<T>(&self, kind: SimErrorKind, msg: String) -> R<T> {
         Err(Box::new(SimError {
             message: msg,
-            at_ns: self.st.now,
+            at_ns: F::Clock::to_ns(self.st.now),
             kind,
         }))
     }
@@ -969,7 +1011,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             measurements: std::mem::take(&mut self.st.meas.m),
             uniforms: self.st.rng.count(),
             events: self.st.n_events,
-            end_ns: self.st.now,
+            end_ns: F::Clock::to_ns(self.st.now),
             main_count: self.st.main_count,
             warnings: std::mem::take(&mut self.st.warnings),
         })
@@ -977,7 +1019,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     /// Runs events until `p` asks for a pause between two events, or to the end of the run
     /// (stop condition and post-stop drain). An error ends the run ([`Phase::Failed`]).
-    fn advance<P: PauseWhen<C>>(&mut self, p: &mut P) -> R<Status> {
+    fn advance<P: PauseWhen<C, F>>(&mut self, p: &mut P) -> R<Status> {
         match self.st.phase {
             Phase::Running => {}
             Phase::NotStarted => {
@@ -1008,13 +1050,23 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     /// The main loop: one event after the other until a stop condition holds or no event is
     /// left, then the stop (SIM-6); or a pause before an event.
-    fn event_loop<P: PauseWhen<C>>(&mut self, p: &mut P) -> R<Status> {
+    fn event_loop<P: PauseWhen<C, F>>(&mut self, p: &mut P) -> R<Status> {
         loop {
             if !P::NEVER
                 && let Some(t) = self.st.meas.events.next_time()
                 && p.pause(&self.st, t)
             {
                 return Ok(Status::Paused);
+            }
+            // Slingshot: `SimulationFinished`, queued at t = 0 for `simTime`, comes before every
+            // other event at `simTime` (SS-RUN-3)
+            if F::SLINGSHOT
+                && self.st.cfg.max_sim_time > 0
+                && let Some(t) = self.st.meas.events.next_time()
+                && F::Clock::secs(t) >= self.st.cfg.max_sim_time as f64
+            {
+                self.st.ss_time_stop = true;
+                break;
             }
             let Some((t, ev)) = self.st.meas.events.pop() else {
                 break;
@@ -1143,10 +1195,14 @@ impl<'m, C: Compat> Simulation<'m, C> {
             if let Some(inp) = w.input {
                 self.st.meas.series_windows[inp as usize].push(i as u32);
             }
-            let Some(span) = checked_span(w.len) else {
+            let Some(at) = F::Clock::checked_after(0, w.len) else {
                 return self.err("invalid sliding window length");
             };
-            self.st.meas.events.insert(span, Ev::Window(i as u32));
+            self.st.meas.events.insert(at, Ev::Window(i as u32));
+        }
+        // Slingshot: the passive resources exist before the simulation starts (SS-RES-4.1)
+        if F::SLINGSHOT {
+            self.ss_create_passives()?;
         }
         // SimuComModel.init at t = 0: run the drivers in scenario order
         for (i, s) in cm.scenarios.iter().enumerate() {
@@ -1209,18 +1265,29 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn livelock(&self, n: u64, t: i64) -> R<()> {
         self.limit_err(SimErrorKind::Limit, format!(
             "livelock: {n} events at simulation time {} s without progress towards a stop condition (REF-7; see --max-events-per-instant)",
-            seconds(t)
+            F::Clock::secs(t)
         ))
     }
 
     #[inline]
     fn stop_condition(&self) -> bool {
-        (self.st.cfg.max_sim_time > 0 && seconds(self.st.now) >= self.st.cfg.max_sim_time as f64)
+        if F::SLINGSHOT {
+            // simTime is checked before each event; the maximum measurement count as SimuLizar
+            // (the fixed behaviour of Q32, which sets it to -1)
+            return self.st.cfg.max_measurements > 0
+                && self.st.main_count >= self.st.cfg.max_measurements;
+        }
+        (self.st.cfg.max_sim_time > 0
+            && F::Clock::secs(self.st.now) >= self.st.cfg.max_sim_time as f64)
             || (self.st.cfg.max_measurements > 0
                 && self.st.main_count >= self.st.cfg.max_measurements)
     }
 
     fn finalise(&mut self) -> R<()> {
+        if F::SLINGSHOT {
+            self.ss_finalise();
+            return Ok(());
+        }
         let cm = self.cm;
         self.st.running = false;
         self.st.meas.reconf.stopped = true;
@@ -1230,7 +1297,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         }
         // simulationStop listeners: final partial windows
         for i in 0..self.st.meas.windows.len() {
-            let eff = self.st.meas.windows[i].effective_length(seconds(now));
+            let eff = self.st.meas.windows[i].effective_length(F::Clock::secs(now));
             if eff != 0.0 || eff.is_sign_negative() {
                 self.window_full(i);
             }
@@ -1253,7 +1320,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         self.st.cfg.store_measurements,
                         now,
                         s,
-                        seconds(now),
+                        F::Clock::secs(now),
                         q as f64,
                     );
                 }
@@ -1266,7 +1333,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     self.st.cfg.store_measurements,
                     now,
                     s,
-                    seconds(now),
+                    F::Clock::secs(now),
                     f,
                 );
             }
@@ -1335,6 +1402,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 p.last_res = LastRes::None;
                 p.table_seq = None;
                 p.fork_done = false;
+                p.ss_flags = 0;
                 s
             }
             None => {
@@ -1351,6 +1419,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     table_seq: None,
                     fork_done: false,
                     rt: Vec::new(),
+                    ss_flags: 0,
                 });
                 (self.st.procs.len() - 1) as u32
             }
@@ -1439,6 +1508,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 self.st.meas.reconf.scheduled = false;
                 reconf_run(&mut self.st.meas, &mut self.trace, self.st.now);
             }
+            Ev::External(tag) => self.st.meas.hooks.due.push(tag),
             Ev::Resume(k) => {
                 let (s, g) = unkey(k);
                 let p = &self.st.procs[s as usize];
@@ -1460,26 +1530,28 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     rt.delay_set.swap_remove(pos);
                     let n = rt.delay_set.len() as u64;
                     self.delay_state_changed(ri, n);
+                    if F::SLINGSHOT {
+                        self.ss_res_samples(ri);
+                    }
                     self.handoff(k)?;
                 }
             }
+            Ev::Stale(ri) => self.ss_res_samples(ri),
             Ev::Window(i) => {
                 self.window_full(i as usize);
                 let inc = self.cm.windows[i as usize].inc;
-                let Some(span) = checked_span(inc) else {
+                let Some(at) = F::Clock::checked_after(self.st.now, inc) else {
                     return self.err("invalid sliding window increment");
                 };
-                self.st
-                    .meas
-                    .events
-                    .insert(self.st.now + span, Ev::Window(i));
+                self.st.meas.events.insert(at, Ev::Window(i));
             }
+            Ev::Wake(ri) if F::SLINGSHOT => self.ss_wake(ri)?,
             Ev::Wake(ri) => {
                 let cm = self.cm;
                 let def = &cm.resources[ri as usize];
                 let rt = &mut self.st.res[ri as usize];
                 let per_core = def.policy == SchedulingPolicy::ProcessorSharing;
-                let mut l = ResListener {
+                let mut l = ResListener::<F::Clock> {
                     meas: &mut self.st.meas,
                     trace: &mut self.trace,
                     store: self.st.cfg.store_measurements,
@@ -1487,6 +1559,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     def,
                     shadow: &mut rt.shadow,
                     per_core,
+                    clock: std::marker::PhantomData,
                 };
                 let sched = rt.sched.as_mut().expect("scheduler");
                 // the timer slot always holds the resource's current (pending) wake-up
@@ -1510,7 +1583,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     /// `onWindowFullEvent`: aggregate and record, then move the window on.
     fn window_full(&mut self, i: usize) {
-        let now_s = seconds(self.st.now);
+        let now_s = F::Clock::secs(self.st.now);
         let w = &mut self.st.meas.windows[i];
         let eff = w.effective_length(now_s);
         let res = crate::windows::utilization(&w.data, w.lower, eff);
@@ -1534,7 +1607,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
     fn delay_state_changed(&mut self, ri: ResIdx, n: u64) {
         let def = &self.cm.resources[ri as usize];
         let rt = &mut self.st.res[ri as usize];
-        let mut l = ResListener {
+        let mut l = ResListener::<F::Clock> {
             meas: &mut self.st.meas,
             trace: &mut self.trace,
             store: self.st.cfg.store_measurements,
@@ -1542,6 +1615,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             def,
             shadow: &mut rt.shadow,
             per_core: false,
+            clock: std::marker::PhantomData,
         };
         l.state_changed(0, n);
     }
@@ -1678,7 +1752,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 "Evaluation of expression {} failed: {:?}",
                 self.cm.progs[prog as usize].spec, e
             ),
-            at_ns: self.st.now,
+            at_ns: F::Clock::to_ns(self.st.now),
             kind: eval_error_kind(&e),
         })
     }
@@ -1693,7 +1767,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         v.to_f64().map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.st.now,
+                at_ns: F::Clock::to_ns(self.st.now),
                 kind: SimErrorKind::Model,
             })
         })
@@ -1704,7 +1778,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         v.to_i32().map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.st.now,
+                at_ns: F::Clock::to_ns(self.st.now),
                 kind: SimErrorKind::Model,
             })
         })
@@ -1715,7 +1789,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         v.to_bool().map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.st.now,
+                at_ns: F::Clock::to_ns(self.st.now),
                 kind: SimErrorKind::Model,
             })
         })
@@ -1736,7 +1810,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         r.map_err(|e| {
             Box::new(SimError {
                 message: format!("{:?}", e),
-                at_ns: self.st.now,
+                at_ns: F::Clock::to_ns(self.st.now),
                 kind: eval_error_kind(&e),
             })
         })
@@ -1808,6 +1882,17 @@ impl<'m, C: Compat> Simulation<'m, C> {
             return Ok(false);
         }
         let k = self.pkey(s);
+        if F::SLINGSHOT {
+            // Slingshot: a think time or usage delay is an event after `d` (SS-WL-3.2, SS-WL-4.1)
+            self.st.procs[s as usize].in_think = true;
+            let Some(at) = F::Clock::checked_after(self.st.now, d) else {
+                return self.err(format!(
+                    "IllegalArgumentException: invalid delay {d} (AbstractSimulationEvent)"
+                ));
+            };
+            self.st.meas.events.insert(at, Ev::Think(k));
+            return Ok(true);
+        }
         let last = self.st.procs[s as usize].last_res;
         if last != LastRes::Think {
             if let LastRes::Active(r) = last {
@@ -1820,10 +1905,10 @@ impl<'m, C: Compat> Simulation<'m, C> {
         if !p.in_think {
             p.in_think = true;
         }
-        let Some(span) = checked_span(d) else {
+        let Some(at) = F::Clock::checked_after(self.st.now, d) else {
             return self.err(format!("SimAbortedException: invalid delay {d}"));
         };
-        self.st.meas.events.insert(self.st.now + span, Ev::Think(k));
+        self.st.meas.events.insert(at, Ev::Think(k));
         Ok(true)
     }
 
@@ -1914,7 +1999,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 self.st.cfg.store_measurements,
                 self.st.now,
                 sid,
-                seconds(self.st.now),
+                F::Clock::secs(self.st.now),
                 concrete,
             );
         }
@@ -1949,17 +2034,14 @@ impl<'m, C: Compat> Simulation<'m, C> {
             if !self.st.res[ri as usize].delay_set.contains(&k) {
                 self.delay_enqueue(ri, k);
             }
-            let Some(span) = checked_span(concrete) else {
+            let Some(at) = F::Clock::checked_after(self.st.now, concrete) else {
                 return self.err(format!("SimAbortedException: invalid delay {concrete}"));
             };
-            self.st
-                .meas
-                .events
-                .insert(self.st.now + span, Ev::DelayRes(ri, k));
+            self.st.meas.events.insert(at, Ev::DelayRes(ri, k));
         } else {
             let rt = &mut self.st.res[ri as usize];
             let per_core = def.policy == SchedulingPolicy::ProcessorSharing;
-            let mut l = ResListener {
+            let mut l = ResListener::<F::Clock> {
                 meas: &mut self.st.meas,
                 trace: &mut self.trace,
                 store: self.st.cfg.store_measurements,
@@ -1967,6 +2049,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 def,
                 shadow: &mut rt.shadow,
                 per_core,
+                clock: std::marker::PhantomData,
             };
             let w = rt
                 .sched
@@ -2096,6 +2179,9 @@ impl<'m, C: Compat> Simulation<'m, C> {
         dst: ContainerId,
         payload: Option<&Frame>,
     ) -> R<Option<ResIdx>> {
+        if F::SLINGSHOT {
+            return self.ss_transmit(s, src, dst, payload);
+        }
         let cm = self.cm;
         let demand = if self.st.cfg.simulate_linking_resources {
             // MiddlewareCompletionAwareDemandCalculator: the middleware completion is expected to
@@ -2144,6 +2230,9 @@ impl<'m, C: Compat> Simulation<'m, C> {
 
     fn component_instance(&mut self, d: &ProcData) -> R<()> {
         let path = cur_path(d);
+        if F::SLINGSHOT {
+            return self.ss_component_instance(path);
+        }
         if self
             .st
             .comps
@@ -2194,7 +2283,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     self.st.cfg.store_measurements,
                     self.st.now,
                     st,
-                    seconds(self.st.now),
+                    F::Clock::secs(self.st.now),
                     capacity as f64,
                 );
             }
@@ -2217,6 +2306,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 holding,
                 wait_start: Vec::new(),
                 hold_start: Vec::new(),
+                ss_mon: Vec::new(),
             });
             passives.push((pr, idx));
         }
@@ -2320,7 +2410,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         let inst = &mut self.st.passives[pi];
         let avail = inst.res.available();
         let queue = inst.res.waiting().count();
-        let mut l = PassiveL {
+        let mut l = PassiveL::<F::Clock> {
             meas: &mut self.st.meas,
             trace: &mut self.trace,
             store: self.st.cfg.store_measurements,
@@ -2337,6 +2427,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             woken: Vec::new(),
             pre: Some((pid, avail, queue)),
             error: None,
+            clock: std::marker::PhantomData,
         };
         let granted = inst.res.acquire(k, 1, &mut l);
         if let Some(e) = l.error {
@@ -2354,7 +2445,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
         let cm = self.cm;
         let now = self.st.now;
         let inst = &mut self.st.passives[pi];
-        let mut l = PassiveL {
+        let mut l = PassiveL::<F::Clock> {
             meas: &mut self.st.meas,
             trace: &mut self.trace,
             store: self.st.cfg.store_measurements,
@@ -2371,6 +2462,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
             woken: Vec::new(),
             pre: None,
             error: None,
+            clock: std::marker::PhantomData,
         };
         inst.res.release(k, 1, &mut l);
         let woken = std::mem::take(&mut l.woken);
@@ -2410,10 +2502,48 @@ impl<'m, C: Compat> Simulation<'m, C> {
         if m.assembly_contexts[acid].parent.is_none() {
             return self.err("Required delegation of the system cannot be simulated");
         }
-        let Some(&c) = cm.req_conn.get(&(acid, role)) else {
+        let conn = if self.quirk(crate::flavour::Quirk::Q20) {
+            // Q20: the first assembly connector of the system with this required role id,
+            // whatever the requiring assembly context (SS-ACT-2.2)
+            cm.ss.sys_req_conn.get(&m.roles[role].id).copied()
+        } else {
+            cm.req_conn.get(&(acid, role)).copied()
+        };
+        let Some(c) = conn else {
+            if self.quirk(crate::flavour::Quirk::Q35) {
+                d.conts.push(Cont::Stall);
+                return Ok(());
+            }
             return self.err("Found unbound provided role. PCM model is invalid.");
         };
         match &m.connectors[c].kind {
+            ConnectorKind::Assembly {
+                requiring: Some(req),
+                providing: Some(prov),
+                provided_role: Some(prole),
+                ..
+            } if F::SLINGSHOT => {
+                // the caller's container and the provider's; no transfer if either has none
+                // (SS-ACT-7.1)
+                let _ = req;
+                let sp = self.path_after_push(&d.acs, ac);
+                let src = self
+                    .path_node(sp)
+                    .container
+                    .unwrap_or(slingshot::NO_CONTAINER);
+                let dp = self.path_after_push(&d.acs, prov.0);
+                let dst = self
+                    .path_node(dp)
+                    .container
+                    .unwrap_or(slingshot::NO_CONTAINER);
+                let prov = self.prov_id(prov.0, *prole, sig);
+                d.conts.push(Cont::AsmConn {
+                    src,
+                    dst,
+                    prov,
+                    st: 0,
+                });
+            }
             ConnectorKind::Assembly {
                 requiring: Some(req),
                 providing: Some(prov),
@@ -2439,6 +2569,15 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 ..
             } => {
                 let prov = self.prov_id(prov.0, *prole, sig);
+                if F::SLINGSHOT {
+                    if self.quirk(crate::flavour::Quirk::Q31) && cm.ss.asmop_monitored {
+                        return self.err(
+                            "IllegalArgumentException: AssemblyOperationCompoundKey of a SEFF reached through an infrastructure call (Slingshot Q31)",
+                        );
+                    }
+                    // the fixed Q31: infrastructure SEFFs are not measured
+                    self.st.provs[prov as usize].aser = None;
+                }
                 d.conts.push(Cont::ProvRole {
                     prov,
                     t0: -1,
@@ -2525,6 +2664,21 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         return Ok(Flow::Wait);
                     }
                 }
+                // Slingshot: a new user replacing an aborted one (SS-WL-5.1): a think time,
+                // then the next iteration; the aborted one is not counted
+                3 => {
+                    *st = 4;
+                    let CWorkload::Closed { think_time, .. } =
+                        cm.scenarios[*scen as usize].workload
+                    else {
+                        unreachable!()
+                    };
+                    let tt = self.eval_f64(think_time, None, Origin::Plain("think"))?;
+                    if self.hold(s, tt)? {
+                        return Ok(Flow::Wait);
+                    }
+                }
+                4 => *st = 0,
                 _ => {
                     *st = 0;
                     self.st.main_count += 1;
@@ -2571,7 +2725,16 @@ impl<'m, C: Compat> Simulation<'m, C> {
             // ------------------------------------------------------------------ SEFF
             Cont::SBeh { .. } => return self.step_sbeh(s, d),
             Cont::SLoop { body, left } => {
-                if *left <= 0 {
+                if F::SLINGSHOT && *left <= slingshot::Q19_ONCE + 1 {
+                    // Q19: a loop count of 0 runs the body once, then throws (SS-ACT-6.2)
+                    if *left == slingshot::Q19_ONCE {
+                        *left += 1;
+                        let body = *body;
+                        d.conts.push(self.sbeh(body));
+                    } else {
+                        return self.err(slingshot::Q19_SEFF);
+                    }
+                } else if *left <= 0 {
                     d.conts.pop();
                 } else {
                     *left -= 1;
@@ -2579,7 +2742,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     d.conts.push(self.sbeh(body));
                 }
             }
-            Cont::Coll { .. } => return self.step_coll(d),
+            Cont::Coll { .. } => return self.step_coll(s, d),
             Cont::ForkJoin { a, join } => {
                 let waiting = self.st.joins[*join as usize]
                     .iter()
@@ -2596,6 +2759,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     t.join(self.st.now, pid, &cm.action_ids[a.index()]);
                 }
             }
+            Cont::Stall => return Ok(Flow::Wait),
             Cont::ConsumeDone { res } => {
                 let def = &cm.resources[*res as usize];
                 d.conts.pop();
@@ -2646,7 +2810,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 && self.st.running
                 && t0 >= 0
             {
-                let now = seconds(self.st.now);
+                let now = F::Clock::secs(self.st.now);
                 emit(
                     &mut self.st.meas,
                     &mut self.trace,
@@ -2654,7 +2818,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                     self.st.now,
                     se,
                     now,
-                    now - seconds(t0),
+                    now - F::Clock::secs(t0),
                 );
             }
             d.conts.pop();
@@ -2727,6 +2891,32 @@ impl<'m, C: Compat> Simulation<'m, C> {
                         inner_role: Some(ir),
                         assembly: Some(ia),
                         ..
+                    } if ac == SYSTEM_AC && self.quirk(crate::flavour::Quirk::Q20) => {
+                        // Q20: the first assembly context of the system whose component provides
+                        // the inner role, by id (SS-ACT-1.2)
+                        let rid = &m.roles[*ir].id;
+                        let first = m.structures[stc]
+                            .assembly_contexts
+                            .iter()
+                            .copied()
+                            .find(|a| {
+                                m.assembly_contexts[*a].component.is_some_and(|c| {
+                                    m.components[c]
+                                        .provided_roles
+                                        .iter()
+                                        .any(|r| m.roles[*r].id == *rid)
+                                })
+                            });
+                        res(ProvTarget::Deleg {
+                            ia: first.unwrap_or(*ia).0,
+                            ir: *ir,
+                            inner: u32::MAX,
+                        })
+                    }
+                    ConnectorKind::ProvidedDelegation {
+                        inner_role: Some(ir),
+                        assembly: Some(ia),
+                        ..
                     } => res(ProvTarget::Deleg {
                         ia: ia.0,
                         ir: *ir,
@@ -2777,11 +2967,16 @@ impl<'m, C: Compat> Simulation<'m, C> {
             let Some(sig) = call.signature else {
                 return self.err("infrastructure call without signature");
             };
-            let fin = self.input_frame(
-                &call.inputs,
-                d.frames.last(),
-                Origin::Elem("param", &call.id),
-            )?;
+            let fin = if self.quirk(crate::flavour::Quirk::Q36) {
+                // Q36: the call's input variable usages are ignored (SS-ACT-2.5)
+                self.st.empty.clone()
+            } else {
+                self.input_frame(
+                    &call.inputs,
+                    d.frames.last(),
+                    Origin::Elem("param", &call.id),
+                )?
+            };
             d.frames.push(fin);
             let c = d.acs.pop().unwrap_or((SYSTEM_AC, ROOT_PATH));
             *caller = c;
@@ -2837,8 +3032,9 @@ impl<'m, C: Compat> Simulation<'m, C> {
     }
 
     #[inline(never)]
-    fn step_coll(&mut self, d: &mut ProcData) -> R<Flow> {
+    fn step_coll(&mut self, s: u32, d: &mut ProcData) -> R<Flow> {
         let cm = self.cm;
+        let q22 = self.quirk(crate::flavour::Quirk::Q22);
         let Some(Cont::Coll { a, left, st }) = d.conts.last_mut() else {
             unreachable!()
         };
@@ -2846,6 +3042,29 @@ impl<'m, C: Compat> Simulation<'m, C> {
         let CAct::Collection { prefix, body, .. } = &cm.act[a.index()] else {
             unreachable!()
         };
+        if q22 {
+            // Q22 (SS-ACT-6.3): one frame with the INNER values, evaluated once and never
+            // popped; the body runs `n` times
+            if *st == 0 {
+                *st = 2;
+                let cur = d.frames.last().cloned();
+                let aid = &cm.action_ids[a.index()];
+                let prev = self.st.rng.set_origin(Origin::Elem("inner", aid));
+                let fi = self.eval_inner(cur, prefix);
+                self.st.rng.restore_origin(prev);
+                d.frames.push(fi?);
+                self.st.procs[s as usize].ss_flags |= SS_EXTRA_FRAME;
+            } else if *left <= 0 {
+                d.conts.pop();
+            } else {
+                *left -= 1;
+                let Some(body) = *body else {
+                    return self.err("collection iterator without body");
+                };
+                d.conts.push(self.sbeh(body));
+            }
+            return Ok(Flow::Continue);
+        }
         if *st == 0 {
             if *left <= 0 {
                 d.conts.pop();
@@ -2884,7 +3103,7 @@ fn cur_path(d: &ProcData) -> u32 {
 }
 
 /// Listener for passive-resource events: trace lines, state/waiting/holding tuples, wake-ups.
-struct PassiveL<'a> {
+struct PassiveL<'a, K: Clock> {
     meas: &'a mut Sink,
     trace: &'a mut Option<TraceOut>,
     store: bool,
@@ -2902,9 +3121,10 @@ struct PassiveL<'a> {
     /// acquire: (pid, available before, queue length before)
     pre: Option<(u64, i64, usize)>,
     error: Option<String>,
+    clock: std::marker::PhantomData<K>,
 }
 
-impl PassiveL<'_> {
+impl<K: Clock> PassiveL<'_, K> {
     fn pid_of(&self, k: u64) -> u64 {
         let (s, _) = unkey(k);
         self.procs[s as usize].pid
@@ -2914,7 +3134,7 @@ impl PassiveL<'_> {
     }
 }
 
-impl PassiveListener<u64> for PassiveL<'_> {
+impl<K: Clock> PassiveListener<u64> for PassiveL<'_, K> {
     fn requested(&mut self, job: u64, _num: u64) {
         if self.waiting.is_some() {
             if self.wait_start.iter().any(|x| x.0 == job) {
@@ -2938,7 +3158,7 @@ impl PassiveListener<u64> for PassiveL<'_> {
     fn acquired(&mut self, job: u64, _num: u64, available: i64) {
         let pid = self.pid_of(job);
         let now = self.now;
-        let t = seconds(now);
+        let t = K::secs(now);
         if let Some(tr) = self.trace.as_mut() {
             tr.passive(now, "grant", pid, self.pr_id, self.ac_id, available, None);
         }
@@ -2964,7 +3184,7 @@ impl PassiveListener<u64> for PassiveL<'_> {
                 now,
                 s,
                 t,
-                t - seconds(t0),
+                t - K::secs(t0),
             );
         }
         if self.holding.is_some() {
@@ -2979,7 +3199,7 @@ impl PassiveListener<u64> for PassiveL<'_> {
     fn released(&mut self, job: u64, _num: u64, available: i64) {
         let pid = self.pid_of(job);
         let now = self.now;
-        let t = seconds(now);
+        let t = K::secs(now);
         if let Some(tr) = self.trace.as_mut() {
             tr.passive(now, "release", pid, self.pr_id, self.ac_id, available, None);
         }
@@ -3005,7 +3225,7 @@ impl PassiveListener<u64> for PassiveL<'_> {
                     now,
                     s,
                     t,
-                    t - seconds(t0),
+                    t - K::secs(t0),
                 );
             }
         }

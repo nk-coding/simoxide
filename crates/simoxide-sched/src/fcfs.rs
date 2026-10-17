@@ -15,7 +15,8 @@ use std::collections::VecDeque;
 use crate::common::{
     Completion, ResourceListener, SchedError, Wakeup, mathtools_equals, mathtools_less,
 };
-use crate::time::{SimTime, seconds, span};
+use crate::time::{Clock, Nanos, SimTime};
+use std::marker::PhantomData;
 
 /// `running_processes.get(p)` returned `null` for a process queued twice (see [`Fcfs`]).
 const NPE_SCHEDULE: SchedError = SchedError(
@@ -36,7 +37,7 @@ const NPE_TO_NOW: SchedError = SchedError(
 /// `NullPointerException` that aborts the run. This is reproduced: all queue entries of a job
 /// share one value (`None` once removed), and the lookups return [`SchedError`].
 #[derive(Clone, Debug)]
-pub struct Fcfs<J> {
+pub struct Fcfs<J, K: Clock = Nanos> {
     /// `processQ` together with the `running_processes` value of each job.
     queue: VecDeque<(J, Option<f64>)>,
     last_time: f64,
@@ -44,15 +45,16 @@ pub struct Fcfs<J> {
     pending: Option<Wakeup<J>>,
     /// A job has been queued twice at some point: entries must be kept in sync.
     shared: bool,
+    clock: PhantomData<K>,
 }
 
-impl<J: Copy + PartialEq> Default for Fcfs<J> {
+impl<J: Copy + PartialEq, K: Clock> Default for Fcfs<J, K> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<J: Copy + PartialEq> Fcfs<J> {
+impl<J: Copy + PartialEq, K: Clock> Fcfs<J, K> {
     /// Creates an idle resource.
     pub fn new() -> Self {
         Fcfs {
@@ -61,6 +63,7 @@ impl<J: Copy + PartialEq> Fcfs<J> {
             generation: 0,
             pending: None,
             shared: false,
+            clock: PhantomData,
         }
     }
 
@@ -94,7 +97,7 @@ impl<J: Copy + PartialEq> Fcfs<J> {
 
     /// `toNow()`.
     fn advance_to(&mut self, now: SimTime) -> Result<(), SchedError> {
-        let now = seconds(now);
+        let now = K::secs(now);
         let passed = now - self.last_time;
         if mathtools_less(0.0, passed)
             && let Some((job, rem)) = self.queue.front_mut()
@@ -126,7 +129,7 @@ impl<J: Copy + PartialEq> Fcfs<J> {
                 return Err(NPE_SCHEDULE);
             }
             Some(&(job, Some(rem))) => Some(Wakeup {
-                at: now + span(rem),
+                at: K::after(now, rem),
                 job,
                 generation: self.generation,
             }),

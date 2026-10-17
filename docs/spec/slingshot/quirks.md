@@ -41,10 +41,52 @@ always simulated (SS-ACT-7.2), the release that does not wait (SS-ACT-8.3).
 | Q31 | infrastructure calls break the assembly-operation monitor | no assembly-operation response time after the first infrastructure call | defined: infrastructure SEFFs are not measured, nothing is disposed | corpus `h18` |
 | Q32 | `simTime` the only stop condition, no livelock guard | zero-time loops never end; maximum measurement count ignored | defined: the maximum measurement count is honoured as in SimuLizar (SIM-6); SimOxide's livelock guard (always on, also with the flag) | corpus `x_pem_fork` |
 | Q33 | entry-level assembly-operation key uses the system role | a measuring point with the component's provided role never matches the entry call | defined: the inner (component) role | `ss_role_lookup` |
-| Q34 | probes per specification / per passive resource | a monitor for replica *k* gets replica-independent values; passive instances of several assemblies share series | defined: passive series per (passive resource, assembly context) as SimuLizar; an active-resource point with replica *k* gets SimuLizar's per-core series where SimuLizar has one (details S2d) | `ss_ps_multicore` |
+| Q34 | probes per specification / per passive resource | a monitor for replica *k* gets replica-independent values; passive instances of several assemblies share series | defined: passive series per (passive resource, assembly context) as SimuLizar; an active-resource point with replica *k* gets the per-core values of core *k* ([compat flags](#compat-flags), defined in S2) | `ss_ps_multicore` |
 | Q35 | silent stalls | unsupported actions, `ResourceCall`s, missing connectors or SEFFs end a request without an error | defined: run error; `ResourceCall` as ACT-3.6 | corpus `h23`, `x_pem_reliability` (RecoveryAction: no request completes) |
 | Q36 | infrastructure-call inputs ignored | no input frame for the callee | defined: ACT-3.5 | corpus `h18` |
 | Q37 | calls between unconnected containers | `IllegalArgumentException` disposes `onCallOverWireRequested`: no further transfer anywhere | defined: run error (as SimuLizar ACT-11.2) | – |
+
+## Compat flags in SimOxide {#compat-flags}
+
+SimOxide's Slingshot flavour (fast mode, design phase S2; [Slingshot flavour](../../guide/slingshot.md))
+has one flag per quirk: `--quirks Q26,Q29`, `--quirks fast` (every flag the fast mode supports),
+`--quirks list`; in the library `simoxide_sim::Quirks` / `Quirk::Q26` in
+`FlavourConfig::slingshot(..)`. Without a flag the fixed behaviour of the table above applies.
+"Fast mode" says how far the fast mode reproduces the quirk under its flag:
+
+| # | Fast mode | Notes |
+|---|---|---|
+| Q1–Q16 | SPD | the SPD interpreter's flags (`simoxide_spd::Quirks`, `simoxide run --spd-quirks`, phase P1; Q5–Q8, Q14, Q16 with the adjustment, P2); `simoxide_sim::Quirks` carries the same numbers so that P3 can drive both from one set |
+| Q17 | refused | concurrent demands with a shared cursor need the exact mode's handler steps (X2); refused for models with an internal action with two or more demands |
+| Q18 | refused | handler disposal is the exact mode's (X2) |
+| Q19 | up to the throw | SEFF loop count 0: body once, then a run error; negative count and usage-loop count ≤ 0: run error at the loop |
+| Q20 | full | entry calls: the first system assembly context whose component provides the inner role (by id); external calls: the first system assembly connector with the required role (by id) |
+| Q21 | up to the throw | the same run error as the fixed behaviour |
+| Q22 | up to the throw | INNER drawn once, the frame left on the stack (with Slingshot's frame misalignment), run error at the end of the entry-level call |
+| Q23 | up to the throw | asynchronous behaviours ignored; no synchronisation point: run error; one synchronous behaviour runs on the user's stack; two or more: run error at the fork |
+| Q24 | up to the throw | run error at an Acquire/Release without demand |
+| Q25 | full | Delay resources (and any other non-FCFS/PS policy) have no resource: the user is aborted |
+| Q26 | full | the superseded completion stays in the event list at its old position and samples state and utilisation |
+| Q27 | full | capacities evaluated without a frame (an unknown variable is a run error before t = 0) |
+| Q28 | full | a `Math.random()` draw at every link completion; a failed transfer stalls the link |
+| Q29 | full | no series for these measuring points |
+| Q30 | up to the throw | entry into a composite stalls the user; inner assembly contexts unallocated, a demand there is a run error |
+| Q31 | up to the throw | run error at the first infrastructure call when an assembly-operation response-time monitor exists |
+| Q32 | full | the maximum measurement count is ignored (`simTime` must be set); the livelock guard stays on |
+| Q33 | full | the entry-level SEFF's assembly-operation key uses the system's role |
+| Q34 | full | every replica's monitor gets the resource totals; passive monitors merged per passive resource |
+| Q35 | full | the request stalls (the process never continues); resource calls are skipped |
+| Q36 | full | the callee gets the shared empty frame |
+| Q37 | up to the throw | a link touching either container is used; none: run error |
+
+"Up to the throw" means: Slingshot throws in a handler at that point, disposes the handler and runs
+on (Q18); the fast mode stops there with a run error. *Provisional:* the fixed behaviours marked
+*proposed* (Q4, Q6, Q7, Q9, Q13, Q14) and *kept* (Q3) above are not confirmed by the user; the SPD
+phases implement them as proposed. The fixed behaviour of Q34 for active resources is defined by
+S2: a measuring point with replica *k* of a processor-sharing resource with several cores records
+core *k* (the jobs `reportCoreUsage` attributes to it, utilisation 1 or 0), FCFS and delay
+resources and single-core resources the resource itself; a replica outside the resource records
+nothing.
 
 ## Details
 
@@ -175,19 +217,19 @@ when the flag is off; the unchanged transformations run under the flag.
 
 | # | Quirk | Rule | Fixed behaviour |
 |---|---|---|---|
-| Q1 | `doOnDisregard` does not restore the state | SS-SPD-3.2 | defined: a disregard restores the state as `doOnDisregard` intends (no effect on results known) |
-| Q2 | constraint state changes when the request is made, even if QVTo fails | SS-SPD-3.2 | defined: the adjustor's state change is committed only by a successful `ModelAdjusted` |
-| Q3 | AVERAGE is an EMA (60 s, 10 s, 0.2); the others use the last 10 values | SS-SPD-2.4 | kept: Slingshot's aggregator design (no SimuLizar counterpart, no other intent in the code); P1 may revisit |
-| Q4 | relative 0 % ignores `minAdjustmentValue` | SS-SPD-4.2 | proposed (P2): a zero change stays zero; otherwise the magnitude is at least `minAdjustmentValue`, in the direction of the percentage. Needs a patched transformation |
+| Q1 | `doOnDisregard` does not restore the state | SS-SPD-3.2 | defined: a disregard restores the state as `doOnDisregard` intends (no effect on results known). P1: `Quirks::q1_disregard_keeps_state`. |
+| Q2 | constraint state changes when the request is made, even if QVTo fails | SS-SPD-3.2 | defined: the adjustor's state change is committed only by a successful `ModelAdjusted`. P1: `Quirks::q2_commit_on_request`. |
+| Q3 | AVERAGE is an EMA (60 s, 10 s, 0.2); the others use the last 10 values | SS-SPD-2.4 | kept: Slingshot's aggregator design (no SimuLizar counterpart, no other intent in the code); P1 may revisit. P1: kept, no flag (*provisional*). |
+| Q4 | relative 0 % ignores `minAdjustmentValue` | SS-SPD-4.2 | proposed (P2): a zero change stays zero; otherwise the magnitude is at least `minAdjustmentValue`, in the direction of the percentage. Needs a patched transformation. P1: the arithmetic and `Quirks::q4_relative_zero` (used by the Q9 check), *provisional*. |
 | Q5 | scale-in aborts one job, loses the others | SS-SPD-5.4 | defined in the design (§5.3): drain |
 | Q6 | every link connects every container after an adjustment | SS-SPD-4.2 | proposed (P2): a new container joins the links of the unit container; other links unchanged. Needs a patched transformation |
 | Q7 | top-down scale-in removes emptied containers one enactment late | SS-SPD-4.2 | proposed (P2): removed in the same enactment (the transformation's own TODO). Needs a patched transformation |
 | Q8 | top-down placement `->any(true)`: Java-hash order | SS-SPD-4.2 | qvto-rs deterministic order (documented deviation, §5.5) |
-| Q9 | only thrashing constraints in the chain | SS-SPD-1.4 | proposed (P1): the `TargetGroupSizeConstraint` is also checked in the chain, so a policy whose change would be clamped to zero is disregarded (and changes no constraint state) |
+| Q9 | only thrashing constraints in the chain | SS-SPD-1.4 | proposed (P1): the `TargetGroupSizeConstraint` is also checked in the chain, so a policy whose change would be clamped to zero is disregarded (and changes no constraint state). P1: `Quirks::q9_no_size_check`, *provisional*. |
 | Q10 | static fields in `TargetGroupUtils` | – | not reproduced (no shared JVM state in SimOxide) |
-| Q11 | unsupported stimuli: NPE at set-up | SS-SPD-2.2 | defined: a configuration error naming the stimulus |
-| Q12 | composed triggers broken | SS-SPD-2.6 | defined: AND/OR/XOR of the children's results |
-| Q13 | instantaneous samples merged over containers; aggregation on every event | SS-SPD-2.3/2.4 | proposed (P1): `aggregationOverElements` aggregates the latest value of each element of the group; `getResult` only for events that were aggregated; samples are consumed only when the chain gets that far |
+| Q11 | unsupported stimuli: NPE at set-up | SS-SPD-2.2 | defined: a configuration error naming the stimulus. P1: `Quirks::q11_setup_error_drops_spd` (also wrong expectation types, CPU percentages outside 0-100, `QueueLength` outside competing-consumer groups). |
+| Q12 | composed triggers broken | SS-SPD-2.6 | defined: AND/OR/XOR of the children's results. P1: `Quirks::q12_broken_composed` (also the double evaluation with two measurement stimulus kinds); fixed XOR = exactly one child. |
+| Q13 | instantaneous samples merged over containers; aggregation on every event | SS-SPD-2.3/2.4 | proposed (P1): `aggregationOverElements` aggregates the latest value of each element of the group; `getResult` only for events that were aggregated; samples are consumed only when the chain gets that far. P1: `Quirks::q13_merged_samples`; fixed: one window per measuring point, the method over the ready windows, *provisional*. |
 | Q14 | deleted elements not reported; population changes ineffective | SS-SPD-5.2 | proposed (F4/P2): deletions are reported, monitors and passive resources of removed elements are dropped, a population change takes effect |
-| Q15 | policies react to each other's `SimulationTimeReached` | SS-SPD-2.1 | defined: only the policy's own event |
+| Q15 | policies react to each other's `SimulationTimeReached` | SS-SPD-2.1 | defined: only the policy's own event. P1: `Quirks::q15_shared_time_events`. |
 | Q16 | container order after an adjustment follows Java identity hashes | SS-SPD-4.2 | insertion order (the `det` rule, phase Q2) |

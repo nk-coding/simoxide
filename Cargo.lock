@@ -858,6 +858,7 @@ dependencies = [
  "simoxide-model",
  "simoxide-reconf",
  "simoxide-sim",
+ "simoxide-spd",
 ]
 
 [[package]]
@@ -929,6 +930,16 @@ dependencies = [
  "simoxide-sim",
  "simoxide-stoex",
  "simoxide-testkit",
+]
+
+[[package]]
+name = "simoxide-spd"
+version = "0.1.0"
+dependencies = [
+ "ryu",
+ "serde_json",
+ "simoxide-model",
+ "simoxide-sim",
 ]
 
 [[package]]

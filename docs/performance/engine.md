@@ -179,3 +179,21 @@ algorithms and cannot change without changing the samples; the fast mode replace
   queue of "run next" processes and a proof that no event can be scheduled in between.
 - Building the typed model without the generic XMI graph, and interned strings in the model
   (both change public types).
+
+## Slingshot flavour
+
+The [Slingshot flavour](../guide/slingshot.md) runs on the same engine (`--flavour slingshot`,
+fixed behaviour). Finished requests per second against the SimuLizar flavour, medians of five
+`simoxide-bench suite` runs pinned to one core, shared machine (2026-10-17):
+
+| | geomean (11 models) | range |
+|---|---|---|
+| exact RNG mode | ×1.03 | ×0.94 (call chain h14, more link transfers) to ×1.13 |
+| fast RNG mode | ×0.99 | ×0.87 to ×1.07 |
+
+`generated s10 (#6)` stops with a run error in the Slingshot flavour (a negative FCFS demand,
+which Slingshot rejects). A 200 000 s run of `x_ss_mediastore` takes 0.25 ms, 100 s of
+`x_espresso` 0.31 ms; the Slingshot runner needs 418 ms and 271 ms for them in a warm JVM
+(smoke run, [Slingshot runner](../reference-simulator/slingshot.md#smoke-corpus)). The flavour
+hooks cost the SimuLizar flavour nothing measurable (geomean +0.2 % exact, +2.7 % fast, within
+noise; `DESIGN-SPD.md`, S2 as built).

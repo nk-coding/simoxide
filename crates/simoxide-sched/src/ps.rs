@@ -13,7 +13,8 @@
 //! * Delays are converted to nanoseconds by truncation ([`crate::time::span`]).
 
 use crate::common::{Completion, JIFFY, ResourceListener, Wakeup, mathtools_less};
-use crate::time::{SimTime, seconds, span};
+use crate::time::{Clock, Nanos, SimTime};
+use std::marker::PhantomData;
 
 #[derive(Clone, Copy, Debug)]
 struct Entry<J> {
@@ -21,9 +22,10 @@ struct Entry<J> {
     remaining: f64,
 }
 
-/// Processor-sharing resource with `cores` cores (`numberOfReplicas`).
+/// Processor-sharing resource with `cores` cores (`numberOfReplicas`); `K`: the time encoding
+/// ([`Nanos`]: SimuLizar's, truncated delays; [`crate::time::F64Secs`]: Slingshot's double time).
 #[derive(Clone, Debug)]
-pub struct ProcessorSharing<J> {
+pub struct ProcessorSharing<J, K: Clock = Nanos> {
     cores: u32,
     /// `running_processes` in insertion order.
     jobs: Vec<Entry<J>>,
@@ -34,9 +36,10 @@ pub struct ProcessorSharing<J> {
     generation: u64,
     /// The pending `ProcessingFinishedEvent`: index into `jobs` of its job, and the wake-up.
     pending: Option<(usize, Wakeup<J>)>,
+    clock: PhantomData<K>,
 }
 
-impl<J: Copy + PartialEq> ProcessorSharing<J> {
+impl<J: Copy + PartialEq, K: Clock> ProcessorSharing<J, K> {
     /// Creates an idle resource. `cores` must be at least 1.
     pub fn new(cores: u32) -> Self {
         assert!(
@@ -50,6 +53,7 @@ impl<J: Copy + PartialEq> ProcessorSharing<J> {
             last_time: 0.0,
             generation: 0,
             pending: None,
+            clock: PhantomData,
         }
     }
 
@@ -92,7 +96,7 @@ impl<J: Copy + PartialEq> ProcessorSharing<J> {
 
     /// `toNow()`.
     fn advance_to(&mut self, now: SimTime) {
-        let now = seconds(now);
+        let now = K::secs(now);
         let passed = now - self.last_time;
         let processed = passed / self.factor();
         if mathtools_less(0.0, passed) {
@@ -123,7 +127,7 @@ impl<J: Copy + PartialEq> ProcessorSharing<J> {
                 remaining_time = 0.0;
             }
             let w = Wakeup {
-                at: now + span(remaining_time),
+                at: K::after(now, remaining_time),
                 job: self.jobs[i].job,
                 generation: self.generation,
             };

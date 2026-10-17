@@ -20,7 +20,8 @@ use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
 use crate::common::{Completion, JIFFY, ResourceListener, Wakeup, mathtools_less};
-use crate::time::{SimTime, seconds, span};
+use crate::time::{Clock, Nanos, SimTime};
+use std::marker::PhantomData;
 
 #[derive(Clone, Copy, Debug)]
 struct Tagged<J> {
@@ -52,7 +53,7 @@ impl<J> Ord for Tagged<J> {
 
 /// Virtual-time processor sharing (see the module docs).
 #[derive(Clone, Debug)]
-pub struct VirtualTimeProcessorSharing<J> {
+pub struct VirtualTimeProcessorSharing<J, K: Clock = Nanos> {
     cores: u32,
     heap: BinaryHeap<Tagged<J>>,
     per_core: Vec<u64>,
@@ -61,9 +62,10 @@ pub struct VirtualTimeProcessorSharing<J> {
     seq: u64,
     generation: u64,
     pending: Option<Wakeup<J>>,
+    clock: PhantomData<K>,
 }
 
-impl<J: Copy + PartialEq> VirtualTimeProcessorSharing<J> {
+impl<J: Copy + PartialEq, K: Clock> VirtualTimeProcessorSharing<J, K> {
     /// Creates an idle resource. `cores` must be at least 1.
     pub fn new(cores: u32) -> Self {
         assert!(
@@ -79,6 +81,7 @@ impl<J: Copy + PartialEq> VirtualTimeProcessorSharing<J> {
             seq: 0,
             generation: 0,
             pending: None,
+            clock: PhantomData,
         }
     }
 
@@ -119,7 +122,7 @@ impl<J: Copy + PartialEq> VirtualTimeProcessorSharing<J> {
     }
 
     fn advance_to(&mut self, now: SimTime) {
-        let now = seconds(now);
+        let now = K::secs(now);
         let passed = now - self.last_time;
         let processed = passed / self.factor();
         if mathtools_less(0.0, passed) {
@@ -136,7 +139,7 @@ impl<J: Copy + PartialEq> VirtualTimeProcessorSharing<J> {
                 remaining_time = 0.0;
             }
             Wakeup {
-                at: now + span(remaining_time),
+                at: K::after(now, remaining_time),
                 job: t.job,
                 generation: self.generation,
             }

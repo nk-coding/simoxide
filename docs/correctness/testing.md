@@ -101,6 +101,26 @@ keeps simulating (the run equals the uninterrupted one); changes SimuLizar abort
 unsupported ones, leave the run unchanged; forks with changes equal their counterparts, also in
 fast mode.
 
+## Scaling policies
+
+`simoxide-spd` ([Scaling policies](../guide/spd.md)) has three test files:
+
+- `tests/unit.rs` (V1): the comparator, time triggers, cooldown (also `t == coolDownEnd`),
+  interval (`t % delta == 0`, repeated and once), thrashing, the EMA emit rule, the 10-value
+  window, the target-group check, response-time and task-count triggers, composed triggers, and
+  every compat flag in both settings, against values derived by hand from Slingshot's code, with
+  a fake host; forks of the SPD state continue like the original.
+- `tests/reference.rs`: the decision log of the time-triggered models of the Slingshot
+  reference runner (`spd_minimal`, `spd_scale_in`, `spd_time_policies`, the `spd_or_trigger`
+  and `spd_and_trigger` reproductions, the 20 probes) equals the runner's `spd.jsonl` (det
+  mode), projected, with all compat flags on: 83 records on the five SPD models. The adjustment
+  is not executed (phase P2): a test double reports the reference's outcome of each adjustment
+  (success, the target group's size after it). With the fixed behaviour the logs equal what
+  the evident intent gives (derived by hand per model).
+- `tests/sim.rs`: in a simoxide-sim run the observers deliver the measurements the triggers
+  read, the outputs equal the plain run's (P1 changes no model), and a paused and forked run
+  continues like the uninterrupted one.
+
 ## Differential fuzzing
 
 `simoxide_testkit::modelgen` generates random, structurally valid PCM models: composite

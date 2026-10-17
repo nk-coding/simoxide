@@ -14,6 +14,7 @@ path = "src/main.rs"
 simoxide-sim = { workspace = true }
 simoxide-model = { workspace = true }
 simoxide-reconf = { workspace = true, optional = true }
+simoxide-spd = { workspace = true, optional = true, features = ["sim"] }
 mimalloc = { version = "0.1", optional = true, default-features = false }
 pprof = { version = "0.15", optional = true, default-features = false, features = ["flamegraph"] }
 
@@ -21,10 +22,13 @@ pprof = { version = "0.15", optional = true, default-features = false, features 
 # The default build is the distributable EPL build: fast mode only (`--mode fast`, the default).
 # `--features exact,hotspot-math` is the local exact build (byte-identical to the reference); its
 # binaries must not be distributed (LICENSES, sections 4 and 7).
-default = ["fast"]
-fast = ["simoxide-sim/fast"]
+default = ["fast", "spd"]
+fast = ["simoxide-sim/fast", "simoxide-spd?/fast"]
 # SimuLizar-exact mode (`--mode exact`).
-exact = ["simoxide-sim/exact", "simoxide-reconf?/exact"]
+exact = ["simoxide-sim/exact", "simoxide-reconf?/exact", "simoxide-spd?/exact"]
+# Scaling policy definitions (`.spd` next to the model): the SPD interpreter runs with the
+# simulation (`--spd-log`, `--spd-quirks`); adjustments are not executed yet (DESIGN-SPD.md P2).
+spd = ["dep:simoxide-spd"]
 # `simoxide bench --profile out.svg`: in-process sampling profiler (SIGPROF), flame graph output.
 profile = ["dep:pprof"]
 # Use mimalloc as the global allocator of `simoxide` and `simoxide-bench`.

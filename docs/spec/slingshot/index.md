@@ -9,8 +9,8 @@ precisely enough to implement SimOxide's planned **Slingshot flavour** in both o
   [Slingshot runner](../../reference-simulator/slingshot.md));
 - **fast**: the same semantics, statistically equal results.
 
-SimOxide does not implement the Slingshot flavour yet (phases S2, X2 of the design). These pages are
-its specification, like the [SimuLizar pages](../index.md) are for the SimuLizar mode. The rules are
+SimOxide implements the flavour's fast mode ([Slingshot flavour](../../guide/slingshot.md), phase S2
+of the design); the exact mode is phase X2. These pages are its specification, like the [SimuLizar pages](../index.md) are for the SimuLizar mode. The rules are
 extracted from the Slingshot sources with file and line references, and wherever possible each rule
 has a **probe**: a small model in `reference/slingshot/models/probes/` whose recorded `det` outputs
 demonstrate it.
