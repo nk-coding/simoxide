@@ -11,6 +11,7 @@ members = [
     "crates/simoxide-reconf",
     "crates/simoxide-sched",
     "crates/simoxide-sim",
+    "crates/simoxide-spd",
     "crates/simoxide-stoex",
     "crates/simoxide-testkit",
 ]
@@ -23,6 +24,7 @@ default-members = [
     "crates/simoxide-random",
     "crates/simoxide-sched",
     "crates/simoxide-sim",
+    "crates/simoxide-spd",
     "crates/simoxide-stoex",
     "crates/simoxide-testkit",
 ]
@@ -41,6 +43,7 @@ simoxide-random = { path = "crates/simoxide-random", version = "0.1.0", default-
 simoxide-sched = { path = "crates/simoxide-sched", version = "0.1.0" }
 simoxide-sim = { path = "crates/simoxide-sim", version = "0.1.0", default-features = false }
 simoxide-reconf = { path = "crates/simoxide-reconf", version = "0.1.0" }
+simoxide-spd = { path = "crates/simoxide-spd", version = "0.1.0", default-features = false }
 simoxide-stoex = { path = "crates/simoxide-stoex", version = "0.1.0", default-features = false }
 
 [profile.release]

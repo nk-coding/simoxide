@@ -783,6 +783,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "simoxide-spd"
+version = "0.1.0"
+dependencies = [
+ "ryu",
+ "serde_json",
+ "simoxide-model",
+ "simoxide-sim",
+]
+
+[[package]]
 name = "simoxide-stoex"
 version = "0.1.0"
 dependencies = [

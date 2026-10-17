@@ -1,0 +1,23 @@
+[package]
+name = "simoxide-spd"
+description = "Scaling policy definitions (SPD) for SimOxide: Slingshot's filter-chain interpreter (triggers, aggregators, constraints) behind a small host trait, with a driver for simoxide-sim"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+simoxide-model = { workspace = true }
+simoxide-sim = { workspace = true, optional = true }
+serde_json = "1"
+ryu = "1"
+
+[features]
+default = ["sim"]
+# The driver that runs the interpreter inside a simoxide-sim run (time events as external notes,
+# measurement observers, decision log). Without it the crate is host independent.
+sim = ["dep:simoxide-sim"]
+fast = ["sim", "simoxide-sim/fast"]
+
+[dev-dependencies]
+simoxide-sim = { workspace = true, features = ["fast"] }
