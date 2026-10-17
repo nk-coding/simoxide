@@ -1,0 +1,573 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,0.0,0.13417432729220902
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,0.3278690694720544,0.09619787905113045
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,0.5835906334410115,0.20433208360778995
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,0.7280656297428998,0.1326569453657017
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,0.8091280395767114,0.13047988483813297
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,1.1982798424411425,0.4397029852142203
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,1.2941596113043021,0.11995058005597359
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,1.3894288028937416,0.10873787778497004
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,1.603991569565213,0.15331441250654118
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,1.715648902559931,0.11487816858763084
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,1.9301988311384966,0.00458886034432886
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,2.281142845076463,0.48991465795535416
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,3.4160293018016414,0.008179842704051575
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,3.467643116798044,0.08305362908531506
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,3.6642230123739514,0.17891545190770503
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,4.451200309141399,0.03304675834688924
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,4.580734283084823,1.2402736295817767
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,4.640354672851737,0.8657806959373252
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,4.700220227361593,0.44076490503761057
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,4.905236272760613,0.3868196318608288
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,5.154719254961519,0.2703363684904801
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,5.488875231477018,0.02443508722795478
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,5.81852173659782,0.21581685259125521
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,6.152169243465495,0.06988834308019239
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,6.556263436596783,0.024867230532868403
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,6.615466315885537,0.08532890343953582
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,6.736517923146388,0.00728653942415531
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,7.013763685451737,0.027312147633719003
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,7.019304068829797,0.20630559401497095
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,7.077589619605398,0.09428557409671748
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,7.230302276599121,0.04180734301207557
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,7.241567575839655,0.1594923696281374
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,7.385003974746315,0.10146142865832186
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,7.387765805258091,0.09094784142507303
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,7.749852581155455,0.20931829125677767
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,7.860112951907119,0.0837715132737242
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,8.315054322902794,0.6470360446594269
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,8.49511570326488,0.12460399349746859
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,9.062899285106457,0.18861278117320446
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,9.340377252019168,0.08476443806022621
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,9.66952953208389,0.04123967608146972
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,9.72887733334464,0.19402941702540838
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,10.608685688005046,0.574291550398134
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,10.716920913390659,0.12478199608371543
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,11.279365029469485,0.13777758677938137
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,11.550827752158897,0.22199543669650434
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,11.917556548029792,0.005487179659751073
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,12.225453982337411,0.07731946976627374
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,12.67763115138156,0.21359321356245398
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,12.909617199932034,0.031736174970671174
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,13.028111680274057,0.8651895206784549
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,13.054268375995107,0.012548589170660263
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,14.197346703550748,0.11187546321928901
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,14.728494490677992,0.25753684545972005
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,14.78213819046305,0.4921893755111495
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,14.846986640908408,0.09699687007752889
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,15.237097893240852,0.436940166375536
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,15.691238873558314,0.0016432526049699138
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,16.148215662355334,0.005589849445499062
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,16.470102440414326,0.01979801610414439
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,16.522742160326214,0.2439921837944437
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,16.54953189938048,0.3785690690176219
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,16.56445088882834,0.031602474518363004
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,17.166823996110224,0.10630311124576496
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,17.258527138783357,0.1583329690102
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,17.495556426879812,0.21068567249475728
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,17.59855919912582,0.09993449338412858
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,17.631653078387014,0.26231944916904176
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,17.744544995436677,0.13092896127499995
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,17.89373268723416,0.00807318862780884
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,18.807201805084578,0.23016517565658537
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,19.09921848355163,0.08930312460087686
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,19.230356772796885,0.010550288191602192
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,19.48708789851839,0.10996808866522133
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],Resource Demand Tuple,20.681506495479603,0.0942476667754823
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,0.13417432729220902,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,0.3278690694720544,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,0.42406694852318483,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,0.5835906334410115,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,0.7280656297428998,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,0.7879227170488015,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,0.8091280395767114,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,0.8477798043547031,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,0.8671056867436989,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.012705402863299,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.051059547252636,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.1982798424411425,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.2941596113043021,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.3894288028937416,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.5340607714162493,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.603991569565213,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.6063767556775033,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.6071718177149332,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.6379828276553627,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.715648902559931,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.7164374982860817,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.716700363528132,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.9301988311384966,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,1.948554272515812,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,2.060546273564874,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,2.0651351339092026,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,2.0680994411088314,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,2.1394527269348074,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,2.281142845076463,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,2.771057503031817,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,3.4160293018016414,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,3.424209144505693,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,3.467643116798044,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,3.550696745883359,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,3.6642230123739514,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,3.8431384642816564,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,4.451200309141399,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,4.484247067488288,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,4.580734283084823,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,4.640354672851737,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,4.700220227361593,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,4.905236272760613,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,5.154719254961519,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,5.488875231477018,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,5.635485754844747,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,5.81852173659782,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,5.8210079126666,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.022514942474425,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.152169243465495,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.3719160647263875,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.394941165712362,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.506401097413919,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.530836184641874,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.556263436596783,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.615466315885537,9.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.641387645026842,9.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.653548246231136,9.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.6583084875243355,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.673299074250685,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.736517923146388,9.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.75996152215293,9.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.762891972028748,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.796971967138868,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,6.797644598255876,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.013763685451737,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.019304068829797,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.035382712481825,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.038985883653507,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.041797571485465,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.077589619605398,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.142551431845705,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.151831690737177,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.217040665611201,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.21808435222957,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.230302276599121,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.241567575839655,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.266843999996809,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.274152344676346,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.279583139482461,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.385003974746315,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.387765805258091,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.4865771294776895,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.503505988599586,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.520040300505514,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.738894402478207,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.749852581155455,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.860112951907119,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,7.99778634933077,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.039108644026655,8.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.064679457186589,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.135512737307556,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.315054322902794,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.345692779025903,7.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.350799188379755,6.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.429109107240464,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.44283822940209,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.49511570326488,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.871036117461195,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,8.965016221010274,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.062899285106457,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.087511780803833,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.093664904728177,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.30932788672261,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.340377252019168,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.66952953208389,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.679435004260073,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.68191137230412,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.694959621973366,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.72887733334464,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.815630113335478,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.837318308333188,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,9.858652799451525,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,10.359675597195869,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,10.38765041739504,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,10.507320923785528,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,10.608685688005046,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,10.716920913390659,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,10.96648490555809,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,11.182977238403181,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,11.279365029469485,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,11.307759234486896,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,11.336153439504306,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,11.445536821266277,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,11.550827752158897,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,11.772823188855401,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,11.917556548029792,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,11.923043727689542,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,12.225453982337411,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,12.302773452103684,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,12.67763115138156,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,12.891224364944014,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,12.909617199932034,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,12.941353374902706,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,13.028111680274057,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,13.054268375995107,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,13.079365554336428,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,13.89330120095251,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,13.905849790123172,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,14.197346703550748,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,14.309222166770036,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,14.728494490677992,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,14.78213819046305,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,14.846986640908408,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,14.986031336137712,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,15.137977251140995,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,15.189924481812374,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,15.237097893240852,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,15.286921351889903,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,15.311833081214429,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,15.691238873558314,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,15.696168631373224,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,15.888425540887404,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,15.890068793492373,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.013801000706895,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.148215662355334,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.153805511800833,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.470102440414326,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.48990045651847,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.522742160326214,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.54953189938048,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.56445088882834,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.65925831238343,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.766734344120657,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,16.983936788860834,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.0155392633792,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.166823996110224,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.176905887656645,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.18698777920306,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.258527138783357,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.283208998902406,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.30789085902146,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.44154196791261,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.495556426879812,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.59855919912582,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.631653078387014,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.70624209937457,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.744544995436677,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.79842818589408,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.881815739647607,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.89373268723416,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.927572654384587,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.934098630373203,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.935645843012395,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,17.95889106360626,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,18.113738342953063,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,18.20749819183055,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,18.807201805084578,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,19.03736698074116,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,19.09921848355163,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,19.18852160815251,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,19.230356772796885,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,19.240907060988487,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,19.48708789851839,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,19.597055987183612,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,20.681506495479603,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs1|replicaID=0],State of Active Resource Tuple,20.775754162255087,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,0.13417432729220902,0.13105763111358454
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,0.42406694852318483,0.167485338964879
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,0.8671056867436989,0.10237762552177103
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,1.012705402863299,0.16137556682029772
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,1.051059547252636,0.14025073026684448
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,1.6071718177149332,0.15999713882495473
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,1.716700363528132,0.23060712424809676
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,1.948554272515812,0.08143127626925152
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,2.0651351339092026,0.014359313803996134
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,2.0680994411088314,0.22102237793475782
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,2.1394527269348074,0.19039221971928866
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,2.771057503031817,0.3483740962736451
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,3.424209144505693,0.17197772863057192
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,3.550696745883359,0.10892239284663932
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,3.8431384642816564,0.052656808921419225
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,4.484247067488288,0.1445283491743164
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,5.635485754844747,0.17722539303162374
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,6.6583084875243355,0.14313826538986857
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,6.762891972028748,0.1911651942516766
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,6.796971967138868,0.12441957032658305
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,6.797644598255876,0.15250158911387363
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,7.041797571485465,0.04995763025262649
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,7.151831690737177,0.11918056370096868
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,7.217040665611201,0.18463710859484328
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,7.21808435222957,0.12901683456946295
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,7.279583139482461,0.1932233762309774
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,7.520040300505514,0.19751848344624384
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,7.738894402478207,0.15024319439335027
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,8.064679457186589,0.13982667788746542
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,8.135512737307556,0.026917597185104118
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,8.350799188379755,0.119636613836653
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,8.429109107240464,0.005242738192934823
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,8.44283822940209,0.028074551797844762
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,8.965016221010274,0.11806897904087106
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,9.093664904728177,0.3504262191891721
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,9.30932788672261,0.11328692918690968
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,9.68191137230412,0.1883447792278808
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,9.837318308333188,0.0364887652522965
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,9.858652799451525,0.3432343761987902
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,10.359675597195869,0.033270601632620085
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,10.38765041739504,0.19039079212671445
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,10.507320923785528,0.11582412037057943
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,10.96648490555809,0.19814979136444108
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,11.336153439504306,0.1883965958447197
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,11.445536821266277,0.2934602173130246
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,11.772823188855401,0.10678222845426158
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,11.923043727689542,0.17084678600233022
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,12.302773452103684,0.10634058372795549
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,12.891224364944014,0.12597875042917783
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,12.941353374902706,0.08045044907797207
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,13.079365554336428,0.10104188031190708
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,13.905849790123172,0.03261105951384462
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,14.309222166770036,0.06263704036623012
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,15.137977251140995,0.13789437188838236
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,15.311833081214429,0.0978107731462586
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,15.696168631373224,0.04431775451530233
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,15.890068793492373,0.19932504346143576
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,16.013801000706895,0.11712765095475483
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,16.153805511800833,0.26982256219259254
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,16.48990045651847,0.22418941285447752
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,16.65925831238343,0.16603323198705772
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,17.0155392633792,0.27793237519158503
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,17.18698777920306,0.1295807813081967
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,17.30789085902146,0.0885889308511283
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,17.44154196791261,0.1881115787970904
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,17.934098630373203,0.04506442948824889
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,17.935645843012395,0.11044567126435383
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,17.95889106360626,0.16536906141557806
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,18.113738342953063,0.11341776635552696
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,18.20749819183055,0.23697066578432652
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,19.03736698074116,0.2791144909598647
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,19.18852160815251,0.19236707331831676
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,19.240907060988487,0.1587424658565054
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,19.597055987183612,0.04356772943471055
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],Resource Demand Tuple,20.775754162255087,0.17696350299923647
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,0.13417432729220902,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,0.26523195840579356,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,0.42406694852318483,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,0.5915522874880639,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,0.8671056867436989,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,0.9694833122654699,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,1.012705402863299,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,1.051059547252636,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,1.1740809696835965,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,1.314331699950441,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,1.6071718177149332,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,1.716700363528132,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,1.767168956539888,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,1.948554272515812,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,1.9977760807879847,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,2.0651351339092026,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,2.0680994411088314,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,2.0792073570572365,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,2.093566670861233,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,2.1394527269348074,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,2.3145890487959906,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,2.5049812685152792,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,2.771057503031817,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,3.119431599305462,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,3.424209144505693,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,3.550696745883359,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,3.596186873136265,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,3.7051092659829044,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,3.8431384642816564,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,3.895795273203076,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,4.484247067488288,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,4.628775416662604,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,5.635485754844747,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,5.812711147876371,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,6.6583084875243355,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,6.762891972028748,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,6.796971967138868,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,6.797644598255876,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,6.801446752914204,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,6.992611947165881,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.041797571485465,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.117031517492464,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.151831690737177,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.217040665611201,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.21808435222957,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.269533106606337,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.279583139482461,5.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.319490736858963,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.438671300559932,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.520040300505514,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.623308409154776,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.738894402478207,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.752325243724239,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,7.9455486199552166,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.064679457186589,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.135512737307556,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.14306710340146,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.293310297794811,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.350799188379755,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.429109107240464,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.433136975682276,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.44283822940209,4.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.46005457286738,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.579691186704032,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.584933924896967,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.613008476694812,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,8.965016221010274,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,9.083085200051144,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,9.093664904728177,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,9.30932788672261,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,9.44409112391735,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,9.557378053104259,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,9.68191137230412,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,9.837318308333188,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,9.858652799451525,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,9.870256151532,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,9.906744916784298,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,10.249979292983088,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,10.359675597195869,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,10.38765041739504,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,10.39294619882849,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,10.507320923785528,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,10.583336990955205,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,10.699161111325784,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,10.96648490555809,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,11.164634696922532,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,11.336153439504306,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,11.445536821266277,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,11.524550035349026,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,11.772823188855401,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,11.81801025266205,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,11.923043727689542,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,11.924792481116311,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,12.095639267118642,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,12.302773452103684,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,12.40911403583164,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,12.891224364944014,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,12.941353374902706,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,13.017203115373192,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,13.079365554336428,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,13.097653564451164,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,13.198695444763072,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,13.905849790123172,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,13.938460849637016,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,14.309222166770036,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,14.371859207136266,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,15.137977251140995,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,15.275871623029378,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,15.311833081214429,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,15.409643854360688,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,15.696168631373224,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,15.740486385888527,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,15.890068793492373,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,16.013801000706895,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,16.08939383695381,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,16.153805511800833,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,16.206521487908564,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,16.476344050101158,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,16.48990045651847,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,16.65925831238343,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,16.71408986937295,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,16.880123101360006,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.0155392633792,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.18698777920306,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.293471638570786,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.30789085902146,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.42305241987898,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.44154196791261,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.51164135073011,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.6997529295272,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.934098630373203,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.935645843012395,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.95889106360626,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,17.979163059861452,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,18.089608731125807,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,18.113738342953063,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,18.20749819183055,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,18.254977792541386,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,18.368395558896914,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,18.60536622468124,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,19.03736698074116,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,19.18852160815251,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,19.240907060988487,3.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,19.316481471701028,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,19.508848545019344,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,19.597055987183612,2.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,19.66759101087585,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,19.71115874031056,0.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,20.775754162255087,1.0
+ActiveResourceMeasuringPoint[_h03_fcfs_hdd_prs2|replicaID=0],State of Active Resource Tuple,20.952717665254323,0.0
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,0.26523195840579356,0.26523195840579356
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,0.5915522874880639,0.26368321801600947
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,0.9694833122654699,0.38589267882445843
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,1.1740809696835965,0.44601533994069675
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,1.314331699950441,0.5052036603737297
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,1.767168956539888,0.4730093452355859
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,1.9977760807879847,0.6083472778942431
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,2.0792073570572365,0.14900852591873992
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,2.093566670861233,0.37791776830130175
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,2.3145890487959906,0.7105974792307777
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,2.5049812685152792,1.3067014260741368
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,3.119431599305462,0.8382887542289992
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,3.596186873136265,0.1801575713346235
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,3.7051092659829044,0.23746614918486042
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,3.895795273203076,0.2315722608291244
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,4.628775416662604,0.1775751075212053
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,5.812711147876371,0.3238359163993527
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,6.801446752914204,0.6492775094487095
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,6.992611947165881,0.43634851056909785
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,7.117031517492464,1.9623122625309453
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,7.269533106606337,0.5330151834599492
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,7.319490736858963,2.61927050949737
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,7.438671300559932,2.533435027799319
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,7.623308409154776,0.6095447237030385
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,7.752325243724239,1.136858927838702
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,7.9455486199552166,2.127026883357397
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,8.14306710340146,0.9127648268023387
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,8.293310297794811,1.2157206781894132
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,8.433136975682276,1.0453711704241844
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,8.46005457286738,1.0750505981210647
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,8.579691186704032,1.3381236108643773
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,8.584933924896967,0.724820972989848
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,8.613008476694812,1.5937044078650153
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,9.083085200051144,1.3332326188956891
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,9.44409112391735,0.9489754206524701
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,9.557378053104259,4.917023380252521
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,9.870256151532,0.5298788995128323
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,9.906744916784298,0.8438456316778407
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,10.249979292983088,0.5804497608991976
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,10.39294619882849,0.6640688654838502
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,10.583336990955205,6.002602707870382
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,10.699161111325784,2.38410678842299
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,11.164634696922532,0.4477137835318725
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,11.524550035349026,0.9158643473439803
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,11.81801025266205,0.5386452231925656
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,11.924792481116311,0.3739647289574144
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,12.095639267118642,0.17808271908885054
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,12.40911403583164,0.1836600534942292
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,13.017203115373192,0.3395719639916326
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,13.097653564451164,0.18803636451912986
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,13.198695444763072,0.14442706876796407
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,13.938460849637016,0.9103491693629593
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,14.371859207136266,0.17451250358551817
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,15.275871623029378,0.4288849821209695
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,15.409643854360688,0.681149363682696
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,15.740486385888527,0.04924751233021318
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,16.08939383695381,1.307255646490761
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,16.206521487908564,0.9694235946677114
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,16.476344050101158,0.3281283877458243
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,16.71408986937295,0.24398742895862213
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,16.880123101360006,0.3156722125316662
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,17.293471638570786,0.7707294782445722
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,17.42305241987898,0.8735205204985022
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,17.51164135073011,0.3448173546198845
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,17.6997529295272,0.44122579074384305
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,17.979163059861452,0.08543037262729314
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,18.089608731125807,0.49104953199998747
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,18.254977792541386,0.7594213656615736
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,18.368395558896914,0.6238505634602376
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,18.60536622468124,0.9737131462942266
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,19.316481471701028,0.5092796666164503
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,19.508848545019344,0.40963006146771264
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,19.66759101087585,0.43723423807896467
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,19.71115874031056,0.22407084179216952
+UsageScenarioMeasuringPoint[_h03_fcfs_hdd_us1],Response Time Tuple,20.952717665254323,0.2712111697747197

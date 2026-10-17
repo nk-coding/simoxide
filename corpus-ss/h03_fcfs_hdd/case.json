@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h03_fcfs_hdd",
+ "sim_time": 21,
+ "seed": 2,
+ "group": "corpus"
+}

@@ -766,6 +766,31 @@ So in Slingshot, resume ≠ uninterrupted, even without changes.
   hooks, no source patch needed; SS-X-4); `det` verification beyond the smoke corpus
   (`verify-det.sh`, `results/det-verify.csv`, SS-X-6); the subscriber order per event (`bus.jsonl`).
 
+**X1 as built** (2026-10-17, branch `x2`; `docs/spec/slingshot/exact.md` SS-X-8):
+
+- **Corpus `corpus-ss/`.** 88 cases, each `case.json` (model directory, seed, simulated time,
+  group) and `expected/` with the `det` outputs: measurements, the level-E projection (level M is
+  its subset and is not stored), the tape projection, the handler exceptions (`errors.txt`), the
+  summary, the SPD log and the full bus trace (`trace.jsonl.gz`, debugging only). Groups: the 20
+  probes, the SPD examples (`spd_minimal`, `spd_scale_in`, `spd_time_policies`), the 38 corpus
+  models without failures, 25 failure models (all corpus models with handler errors, aborts or
+  empty output: the 22 handler-error cases of the corpus and the probes are all in), and the two
+  runs that end before t = 0 (`error.txt`). Seeds and simulated times from
+  `results/det-verify.csv`; `x_pem_fork` (zero-time livelock) has no reference. About 14 MB of
+  text. Tool: `reference/slingshot/corpus-ss.sh [--check]`.
+- **Reproducibility.** `corpus-ss.sh --check` reproduced every case byte for byte in fresh JVMs.
+  The only varying bytes were identity hashes inside three exception messages (Q31's
+  `SEFFInterpretationContext@…`); `tools/errors.py` normalises them.
+- **Subscriber audit.** `tools/audit_subscribers.py` parses the pinned Slingshot sources: 73
+  `@Subscribe` methods in 25 classes; no class has two subscribers that can receive the same event
+  (parameter types with a common subtype among the event classes and overlapping reified types);
+  the three classes with overlapping parameter types reify to disjoint types. The bus itself
+  refuses equal (type, reified) pairs in one class. So `getDeclaredMethods()` order cannot change
+  a run (SS-BUS-2).
+- **SPD corpus in `det`.** The P2 corpus `corpus-spd/` does not exist yet; the three SPD example
+  models run in `det` as part of `corpus-ss/` (1, 2 and 8 adjustments, decision records in
+  `spd.jsonl`). `corpus-spd/` joins when P2 builds it.
+
 ### 4.2 Validation levels
 
 | Level | What | Oracle |
@@ -1766,7 +1791,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **S0** | *Done 2026-10-17.* Slingshot reference runner `reference/slingshot/`: stub bundle, scripts with private config areas, trace/tape/CSV/SPD-log extension, seed agent (StoEx, `Math.random`, UUIDs), `det` ordering rule and PS patch, smoke corpus | — | 1 w | met: SPD minimal example (and 8 more models) byte-reproducible; CSV in SimOxide's format |
 | **S1** | *Done 2026-10-17.* Slingshot semantics spec `docs/spec/slingshot/` (10 pages, rules `SS-*`, quirks Q17–Q37 added to Q1–Q16): event core and bus, usage, SEFF, resources, monitoring, random streams, SPD, quirks, exact comparison (projection, tape mapping); 20 probe models with `det` outputs (`models/probes/`, `probes.sh`); draw sites on the tape; `det` verified on 88 models (`verify-det.sh`, `results/det-verify.csv`) | S0 helps | 1.5-2 w | met: every difference has a rule with a source citation; 20 probes and the corpus runs demonstrate them (§2.1) |
 | **S2** | *Done 2026-10-17* (findings: 5.2 "S2 as built"). Slingshot flavour, fast mode: `Flavour` trait, hooks of 5.2, Slingshot monitors and windows, stop, branch stream, quirk compat flags (U5) | F1, S1 | 4-6 w (a: trait and SimuLizar impl, golden unchanged; b: usage, stop, RNG; c: resources; d: monitoring) | met as sharpened in 5.2 "S2 as built": `x_ss_*` byte-identical to `det` (exact RNG, compat flags; 5 models x 3 seeds), also 16/20 probes and 38/45 corpus models; `x_ss_mediastore` statistically equal to stock (30 seeds, 0/26 tests rejected, both RNG modes); `x_espresso` equal on every order-independent series, its event-sampled state series is order-dependent (Slingshot's own `det` order fails the same test) and left to X2 |
-| **X1** | Slingshot-exact oracle hardening. Done in S1: trace projection (`tools/project.py`), draw sites on the tape (agent hooks, no patch), `det` verification on probes and corpus. Remaining: corpus `corpus-ss/` with `det` reference outputs (probes, SPD examples, the 38 corpus models without failures, chosen failure models), a static audit that no class subscribes twice to one event type without disjoint reification, SPD corpus runs in `det` (P2 models) | S0, S1 | 0.5-1 w | every Slingshot corpus model byte-reproducible in `det`; projection documented |
+| **X1** | *Done 2026-10-17* (findings: 4.1 "X1 as built"). Slingshot-exact oracle hardening. Done in S1: trace projection (`tools/project.py`), draw sites on the tape (agent hooks, no patch), `det` verification on probes and corpus. Remaining: corpus `corpus-ss/` with `det` reference outputs (probes, SPD examples, the 38 corpus models without failures, chosen failure models), a static audit that no class subscribes twice to one event type without disjoint reification, SPD corpus runs in `det` (P2 models) | S0, S1 | 0.5-1 w | met: all 88 `corpus-ss/` cases byte-reproducible in fresh JVMs; projection documented (SS-X-2, SS-X-8); audit clean |
 | **X2** | Slingshot-exact mode, **level E directly** (U14): the per-handler cascade as a FIFO queue of handler steps (insertion-ordered results, FIFO after queued events, direct `MeasurementMade`), double time, PS stale-event samples and zero-demand jiffy, `java.util.Random` branch stream, `SimulationFinished` order, all 37 quirk flags on, **handler disposal** (Q18: a disposed bit per handler, Slingshot's partial side effects up to each throw: Q17, Q19, Q21-Q24, Q30, Q31, Q37), level-E projection writer | S2, X1 | 7-10 w (a: handler-step queue, event order and time, 2-3 w; b: resources and monitoring, 1.5-2 w; c: handler disposal and the throwing quirks, 1.5-2.5 w; d: SPD events, 1 w; e: level-E projection and corpus debugging, 1-1.5 w) | V3x: level-E projection, tape (with positions) and measurements byte-equal with `det` on the Slingshot corpus, including the 22 models with handler errors |
 | **Q2** | *Done 2026-10-17* (findings: 5.5 "Q2 as built"). qvto-rs insertion-order policy for `Set`s (the `det` oracle's QVTo/OCL rule), opt-in for the Slingshot-exact mode: `Mode::Ordered` (EPL) | Q1 | 3-5 d | met: SPD corpus adjustments equal the `det` Java runner's byte for byte, including container and link order (Q16); also the whole suite (589/589) and the 13 adjustments of the S0 Slingshot `det` runs |
 | **P1** | *Done 2026-10-17* (findings: 5.4 "P1 as built"). SPD interpreter: model view, filters, aggregators, state, stimulus observers, time events | F0 (F1 for state) | 1.5-2 w | met: V1 unit tests; decision log equals the reference runner's on the time-triggered models (5 SPD models, 83 records, compat flags on) |

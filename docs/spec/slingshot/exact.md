@@ -212,3 +212,41 @@ order). `probes.sh` regenerates `expected/`, `probes.sh --check` compares.
 | `ss_usage_loop_zero` | SS-WL-4.3, SS-Q19, SS-BUS-7 | usage loop count 0: builder throws; later users stop after their `Start` |
 | `ss_zero_demand` | SS-RES-2.2, SS-RES-3.4, SS-MEAS-3.4 | PS zero demand = 1e-9 s job; FCFS zero demand at once; demand tuple 0 |
 
+## SS-X-8 The Slingshot-exact corpus
+
+`corpus-ss/` (phase X1) is the corpus the Slingshot-exact mode is checked against (V3x). Each case
+is a directory `corpus-ss/<name>/` with
+
+- `case.json`: `model` (the model directory, relative to the repository root), `seed`,
+  `sim_time` (whole seconds) and `group`;
+- `expected/`: the `det` runner's outputs for that seed and simulated time: `measurements.csv`,
+  `projection.jsonl` (level E; level M is the subset of the lines whose `ev` is `job_abort`,
+  `user_abort`, `meas`, `spd_*` or `stop`), `tape-projection.jsonl`, `errors.txt` (the handler
+  exceptions in order, `tools/errors.py`), `summary.json`, `spd.jsonl` (SPD runs),
+  `trace.jsonl.gz` (the full bus trace, for debugging only) and, for runs that end before t = 0,
+  `error.txt`.
+
+`reference/slingshot/corpus-ss.sh` writes `expected/`; `corpus-ss.sh --check` runs every case
+again in a fresh JVM and compares all files. Seeds and simulated times are those of
+`results/det-verify.csv` (SS-X-6).
+
+| Group | Cases | What |
+|---|---|---|
+| `probe` | 20 | the specification probes (SS-X-7); 4 with handler errors |
+| `spd` | 3 | `spd_minimal`, `spd_scale_in`, `spd_time_policies` (`reference/slingshot/models/`) |
+| `corpus` | 38 | the corpus models that run without handler errors, aborts or empty output |
+| `failure` | 25 | the corpus models with handler errors (18), aborts (`h04`, `h25`, `x_sl_elsc_return`) or no output (`h15`, `x_pem_reliability`, `x_pem_subsystem*`) |
+| `setup-error` | 2 | `x_pem_acquire`, `x_sl_runconfigtest`: the run fails before t = 0 (`error.txt`) |
+
+Left out: `x_pem_fork`, a zero-time livelock without a reference result (SS-RUN-5).
+
+**Reproducibility (X1, 2026-10-17).** `corpus-ss.sh --check` reproduced all 88 cases byte for byte
+in fresh JVMs (projection, tape projection, measurements, SPD log, summary, full trace). The only
+JVM-dependent bytes were identity hash codes inside three exception messages
+(`SEFFInterpretationContext@1b2c3d`, Q31); `tools/errors.py` writes them as `@*`. The 22 cases
+with handler errors are the 4 probes `ss_guard_none`, `ss_loop_zero`, `ss_two_demands`,
+`ss_usage_loop_zero` and the corpus models `h10`, `h11`, `h12`, `h13`, `h18`, `h26`, `h27`, `h28`,
+`x_pem_harddisk`, `x_pem_hdd_infrastructure_calls`, `x_pem_infrastructure`,
+`x_pem_replicated_composite`, `x_pem_screencast_ms*` (3), `x_pem_simple_optimisation_composites`,
+`x_sl_mediastore`, `x_sl_simulizar154`.
+

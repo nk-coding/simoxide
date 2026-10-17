@@ -1,0 +1,1 @@
+1) [Guice/ErrorInjectingConstructor]: NullPointerException: Cannot invoke "org.palladiosimulator.pcm.resourceenvironment.CommunicationLinkResourceSpecification.getThroughput_CommunicationLinkResourceSpecification()" because the return value of "org.palladiosimulator.pcm.resourceenvironment.LinkingRe

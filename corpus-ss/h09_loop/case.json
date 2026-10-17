@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h09_loop",
+ "sim_time": 24,
+ "seed": 8,
+ "group": "corpus"
+}

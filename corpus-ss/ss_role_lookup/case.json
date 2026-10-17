@@ -1,0 +1,6 @@
+{
+ "model": "reference/slingshot/models/probes/ss_role_lookup",
+ "sim_time": 2,
+ "seed": 1,
+ "group": "probe"
+}

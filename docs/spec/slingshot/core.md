@@ -78,7 +78,15 @@ reacts to one event and returns the events that follow, and these are put on the
     round. Within every Slingshot class, methods that subscribe to the same event type are reified to
     disjoint types, so this never changes which handler runs or in which order handlers of one event
     run. The runner records the observed order per event type in `bus.jsonl` (in the probes'
-    `expected/`, not compared by `probes.sh --check`). Where more than one Slingshot subscriber
+    `expected/`, not compared by `probes.sh --check`). The disjointness is checked statically
+    (X1, `reference/slingshot/tools/audit_subscribers.py`, on the pinned sources): of the 73
+    `@Subscribe` methods in 25 classes, no two of one class can receive the same event; the only
+    classes with two subscribers whose parameter types overlap are
+    `UsageScenarioResponseTimeMonitoringBehavior` (`<Start>`/`<Stop>`),
+    `OperationCallActionResponseTimeMonitoringBehavior` (`<StartAction>`/`<StopAction>`) and
+    `MeasurementsAggregatorBehavior` (`<FixedSizeAggregation>`/`<VariableSizeAggregation>`), all
+    reified to disjoint types. (The bus itself refuses two methods with the same parameter type and
+    reified types in one class, `BusImplementation.java:172-175`.) Where more than one Slingshot subscriber
     handles an event, the order is:
 
     | Event | Subscribers, in order |

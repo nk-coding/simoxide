@@ -1,0 +1,6 @@
+{
+ "model": "corpus/x_espresso",
+ "sim_time": 6,
+ "seed": 1,
+ "group": "corpus"
+}

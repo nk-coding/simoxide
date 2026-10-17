@@ -1,0 +1,157 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_ss_open_draws_ua1"}
+{"ev":"pass","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_open_draws_ua2"}
+{"ev":"call","t":0.0,"u":1,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_ss_open_draws_ac1","type":"StartAction","el":"_ss_open_draws_act1"}
+{"ev":"request","t":0.0,"u":1,"ac":"_ss_open_draws_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_open_draws_act2"}
+{"ev":"job","t":0.0,"job":1,"u":1,"rc":"_ss_open_draws_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":1.0380639289919347}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,1.0380639289919347]}
+{"ev":"pass","t":0.5829675930528927,"u":2,"type":"Start","el":"_ss_open_draws_ua1"}
+{"ev":"pass","t":0.5829675930528927,"u":2,"type":"EntryLevelSystemCall","el":"_ss_open_draws_ua2"}
+{"ev":"call","t":0.5829675930528927,"u":2,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":0.5829675930528927,"u":2,"ac":"_ss_open_draws_ac1","type":"StartAction","el":"_ss_open_draws_act1"}
+{"ev":"request","t":0.5829675930528927,"u":2,"ac":"_ss_open_draws_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_open_draws_act2"}
+{"ev":"job","t":0.5829675930528927,"job":2,"u":2,"rc":"_ss_open_draws_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.19293627883488706}
+{"ev":"meas","t":0.5829675930528927,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.5829675930528927,2.0]}
+{"ev":"meas","t":0.5829675930528927,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.5829675930528927,1.0]}
+{"ev":"meas","t":0.5829675930528927,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.5829675930528927,0.19293627883488706]}
+{"ev":"pass","t":0.6322582704440458,"u":3,"type":"Start","el":"_ss_open_draws_ua1"}
+{"ev":"pass","t":0.6322582704440458,"u":3,"type":"EntryLevelSystemCall","el":"_ss_open_draws_ua2"}
+{"ev":"call","t":0.6322582704440458,"u":3,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":0.6322582704440458,"u":3,"ac":"_ss_open_draws_ac1","type":"StartAction","el":"_ss_open_draws_act1"}
+{"ev":"request","t":0.6322582704440458,"u":3,"ac":"_ss_open_draws_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_open_draws_act2"}
+{"ev":"job","t":0.6322582704440458,"job":3,"u":3,"rc":"_ss_open_draws_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1630700911565046}
+{"ev":"meas","t":0.6322582704440458,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.6322582704440458,3.0]}
+{"ev":"meas","t":0.6322582704440458,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.6322582704440458,1.0]}
+{"ev":"meas","t":0.6322582704440458,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.6322582704440458,0.1630700911565046]}
+{"ev":"pass","t":0.8671316778206634,"u":4,"type":"Start","el":"_ss_open_draws_ua1"}
+{"ev":"pass","t":0.8671316778206634,"u":4,"type":"EntryLevelSystemCall","el":"_ss_open_draws_ua2"}
+{"ev":"call","t":0.8671316778206634,"u":4,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":0.8671316778206634,"u":4,"ac":"_ss_open_draws_ac1","type":"StartAction","el":"_ss_open_draws_act1"}
+{"ev":"request","t":0.8671316778206634,"u":4,"ac":"_ss_open_draws_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_open_draws_act2"}
+{"ev":"job","t":0.8671316778206634,"job":4,"u":4,"rc":"_ss_open_draws_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.38118541267188244}
+{"ev":"meas","t":0.8671316778206634,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.8671316778206634,4.0]}
+{"ev":"meas","t":0.8671316778206634,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.8671316778206634,1.0]}
+{"ev":"meas","t":0.8671316778206634,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.8671316778206634,0.38118541267188244]}
+{"ev":"meas","t":0.9688401507226668,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.9688401507226668,4.0]}
+{"ev":"meas","t":0.9688401507226668,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.9688401507226668,1.0]}
+{"ev":"meas","t":1.0380639289919347,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0380639289919347,4.0]}
+{"ev":"meas","t":1.0380639289919347,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0380639289919347,1.0]}
+{"ev":"meas","t":1.1214685439135597,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.1214685439135597,4.0]}
+{"ev":"meas","t":1.1214685439135597,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.1214685439135597,1.0]}
+{"ev":"job_end","t":1.2062474992778582,"job":3}
+{"ev":"meas","t":1.2062474992778582,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.2062474992778582,3.0]}
+{"ev":"meas","t":1.2062474992778582,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.2062474992778582,1.0]}
+{"ev":"pass","t":1.2062474992778582,"u":3,"ac":"_ss_open_draws_ac1","type":"StopAction","el":"_ss_open_draws_act3"}
+{"ev":"call_end","t":1.2062474992778582,"u":3,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":1.2062474992778582,"u":3,"type":"Stop","el":"_ss_open_draws_ua3"}
+{"ev":"user_end","t":1.2062474992778582,"u":3}
+{"ev":"meas","t":1.2062474992778582,"mp":"UsageScenarioMeasuringPoint[_ss_open_draws_us1]","metric":"Response Time Tuple","v":[1.2062474992778582,0.5739892288338124]}
+{"ev":"job_end","t":1.221910046226276,"job":2}
+{"ev":"meas","t":1.221910046226276,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.221910046226276,2.0]}
+{"ev":"meas","t":1.221910046226276,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.221910046226276,1.0]}
+{"ev":"pass","t":1.221910046226276,"u":2,"ac":"_ss_open_draws_ac1","type":"StopAction","el":"_ss_open_draws_act3"}
+{"ev":"call_end","t":1.221910046226276,"u":2,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":1.221910046226276,"u":2,"type":"Stop","el":"_ss_open_draws_ua3"}
+{"ev":"user_end","t":1.221910046226276,"u":2}
+{"ev":"meas","t":1.221910046226276,"mp":"UsageScenarioMeasuringPoint[_ss_open_draws_us1]","metric":"Response Time Tuple","v":[1.221910046226276,0.6389424531733833]}
+{"ev":"job_end","t":1.7462301604345858,"job":1}
+{"ev":"meas","t":1.7462301604345858,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.7462301604345858,1.0]}
+{"ev":"meas","t":1.7462301604345858,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.7462301604345858,1.0]}
+{"ev":"pass","t":1.7462301604345858,"u":1,"ac":"_ss_open_draws_ac1","type":"StopAction","el":"_ss_open_draws_act3"}
+{"ev":"call_end","t":1.7462301604345858,"u":1,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":1.7462301604345858,"u":1,"type":"Stop","el":"_ss_open_draws_ua3"}
+{"ev":"user_end","t":1.7462301604345858,"u":1}
+{"ev":"meas","t":1.7462301604345858,"mp":"UsageScenarioMeasuringPoint[_ss_open_draws_us1]","metric":"Response Time Tuple","v":[1.7462301604345858,1.7462301604345858]}
+{"ev":"job_end","t":1.7752557116552088,"job":4}
+{"ev":"meas","t":1.7752557116552088,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.7752557116552088,0.0]}
+{"ev":"meas","t":1.7752557116552088,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.7752557116552088,0.0]}
+{"ev":"pass","t":1.7752557116552088,"u":4,"ac":"_ss_open_draws_ac1","type":"StopAction","el":"_ss_open_draws_act3"}
+{"ev":"call_end","t":1.7752557116552088,"u":4,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":1.7752557116552088,"u":4,"type":"Stop","el":"_ss_open_draws_ua3"}
+{"ev":"user_end","t":1.7752557116552088,"u":4}
+{"ev":"meas","t":1.7752557116552088,"mp":"UsageScenarioMeasuringPoint[_ss_open_draws_us1]","metric":"Response Time Tuple","v":[1.7752557116552088,0.9081240338345454]}
+{"ev":"pass","t":2.6207534995825306,"u":5,"type":"Start","el":"_ss_open_draws_ua1"}
+{"ev":"pass","t":2.6207534995825306,"u":5,"type":"EntryLevelSystemCall","el":"_ss_open_draws_ua2"}
+{"ev":"call","t":2.6207534995825306,"u":5,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":2.6207534995825306,"u":5,"ac":"_ss_open_draws_ac1","type":"StartAction","el":"_ss_open_draws_act1"}
+{"ev":"request","t":2.6207534995825306,"u":5,"ac":"_ss_open_draws_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_open_draws_act2"}
+{"ev":"job","t":2.6207534995825306,"job":5,"u":5,"rc":"_ss_open_draws_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.20158736500175747}
+{"ev":"meas","t":2.6207534995825306,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.6207534995825306,1.0]}
+{"ev":"meas","t":2.6207534995825306,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.6207534995825306,1.0]}
+{"ev":"meas","t":2.6207534995825306,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.6207534995825306,0.20158736500175747]}
+{"ev":"job_end","t":2.8223408645842882,"job":5}
+{"ev":"meas","t":2.8223408645842882,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.8223408645842882,0.0]}
+{"ev":"meas","t":2.8223408645842882,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.8223408645842882,0.0]}
+{"ev":"pass","t":2.8223408645842882,"u":5,"ac":"_ss_open_draws_ac1","type":"StopAction","el":"_ss_open_draws_act3"}
+{"ev":"call_end","t":2.8223408645842882,"u":5,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":2.8223408645842882,"u":5,"type":"Stop","el":"_ss_open_draws_ua3"}
+{"ev":"user_end","t":2.8223408645842882,"u":5}
+{"ev":"meas","t":2.8223408645842882,"mp":"UsageScenarioMeasuringPoint[_ss_open_draws_us1]","metric":"Response Time Tuple","v":[2.8223408645842882,0.20158736500175767]}
+{"ev":"pass","t":3.543250704913192,"u":6,"type":"Start","el":"_ss_open_draws_ua1"}
+{"ev":"pass","t":3.543250704913192,"u":6,"type":"EntryLevelSystemCall","el":"_ss_open_draws_ua2"}
+{"ev":"call","t":3.543250704913192,"u":6,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":3.543250704913192,"u":6,"ac":"_ss_open_draws_ac1","type":"StartAction","el":"_ss_open_draws_act1"}
+{"ev":"request","t":3.543250704913192,"u":6,"ac":"_ss_open_draws_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_open_draws_act2"}
+{"ev":"job","t":3.543250704913192,"job":6,"u":6,"rc":"_ss_open_draws_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.19520417099682918}
+{"ev":"meas","t":3.543250704913192,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.543250704913192,1.0]}
+{"ev":"meas","t":3.543250704913192,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.543250704913192,1.0]}
+{"ev":"meas","t":3.543250704913192,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.543250704913192,0.19520417099682918]}
+{"ev":"job_end","t":3.738454875910021,"job":6}
+{"ev":"meas","t":3.738454875910021,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.738454875910021,0.0]}
+{"ev":"meas","t":3.738454875910021,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.738454875910021,0.0]}
+{"ev":"pass","t":3.738454875910021,"u":6,"ac":"_ss_open_draws_ac1","type":"StopAction","el":"_ss_open_draws_act3"}
+{"ev":"call_end","t":3.738454875910021,"u":6,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":3.738454875910021,"u":6,"type":"Stop","el":"_ss_open_draws_ua3"}
+{"ev":"user_end","t":3.738454875910021,"u":6}
+{"ev":"meas","t":3.738454875910021,"mp":"UsageScenarioMeasuringPoint[_ss_open_draws_us1]","metric":"Response Time Tuple","v":[3.738454875910021,0.19520417099682907]}
+{"ev":"pass","t":3.7767102944383786,"u":7,"type":"Start","el":"_ss_open_draws_ua1"}
+{"ev":"pass","t":3.7767102944383786,"u":7,"type":"EntryLevelSystemCall","el":"_ss_open_draws_ua2"}
+{"ev":"call","t":3.7767102944383786,"u":7,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":3.7767102944383786,"u":7,"ac":"_ss_open_draws_ac1","type":"StartAction","el":"_ss_open_draws_act1"}
+{"ev":"request","t":3.7767102944383786,"u":7,"ac":"_ss_open_draws_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_open_draws_act2"}
+{"ev":"job","t":3.7767102944383786,"job":7,"u":7,"rc":"_ss_open_draws_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":1.1353675188406478}
+{"ev":"meas","t":3.7767102944383786,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.7767102944383786,1.0]}
+{"ev":"meas","t":3.7767102944383786,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.7767102944383786,1.0]}
+{"ev":"meas","t":3.7767102944383786,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.7767102944383786,1.1353675188406478]}
+{"ev":"pass","t":3.923051546127082,"u":8,"type":"Start","el":"_ss_open_draws_ua1"}
+{"ev":"pass","t":3.923051546127082,"u":8,"type":"EntryLevelSystemCall","el":"_ss_open_draws_ua2"}
+{"ev":"call","t":3.923051546127082,"u":8,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":3.923051546127082,"u":8,"ac":"_ss_open_draws_ac1","type":"StartAction","el":"_ss_open_draws_act1"}
+{"ev":"request","t":3.923051546127082,"u":8,"ac":"_ss_open_draws_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_open_draws_act2"}
+{"ev":"job","t":3.923051546127082,"job":8,"u":8,"rc":"_ss_open_draws_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.779008988675668}
+{"ev":"meas","t":3.923051546127082,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.923051546127082,2.0]}
+{"ev":"meas","t":3.923051546127082,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.923051546127082,1.0]}
+{"ev":"meas","t":3.923051546127082,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[3.923051546127082,0.779008988675668]}
+{"ev":"pass","t":4.132410810959639,"u":9,"type":"Start","el":"_ss_open_draws_ua1"}
+{"ev":"pass","t":4.132410810959639,"u":9,"type":"EntryLevelSystemCall","el":"_ss_open_draws_ua2"}
+{"ev":"call","t":4.132410810959639,"u":9,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":4.132410810959639,"u":9,"ac":"_ss_open_draws_ac1","type":"StartAction","el":"_ss_open_draws_act1"}
+{"ev":"request","t":4.132410810959639,"u":9,"ac":"_ss_open_draws_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_open_draws_act2"}
+{"ev":"job","t":4.132410810959639,"job":9,"u":9,"rc":"_ss_open_draws_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.25583040915688493}
+{"ev":"meas","t":4.132410810959639,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.132410810959639,3.0]}
+{"ev":"meas","t":4.132410810959639,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.132410810959639,1.0]}
+{"ev":"meas","t":4.132410810959639,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[4.132410810959639,0.25583040915688493]}
+{"ev":"pass","t":4.606387499592343,"u":10,"type":"Start","el":"_ss_open_draws_ua1"}
+{"ev":"pass","t":4.606387499592343,"u":10,"type":"EntryLevelSystemCall","el":"_ss_open_draws_ua2"}
+{"ev":"call","t":4.606387499592343,"u":10,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":4.606387499592343,"u":10,"ac":"_ss_open_draws_ac1","type":"StartAction","el":"_ss_open_draws_act1"}
+{"ev":"request","t":4.606387499592343,"u":10,"ac":"_ss_open_draws_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_open_draws_act2"}
+{"ev":"job","t":4.606387499592343,"job":10,"u":10,"rc":"_ss_open_draws_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.8687051292706441}
+{"ev":"meas","t":4.606387499592343,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.606387499592343,4.0]}
+{"ev":"meas","t":4.606387499592343,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.606387499592343,1.0]}
+{"ev":"meas","t":4.606387499592343,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[4.606387499592343,0.8687051292706441]}
+{"ev":"meas","t":4.899902038430294,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.899902038430294,4.0]}
+{"ev":"meas","t":4.899902038430294,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.899902038430294,1.0]}
+{"ev":"meas","t":4.912077813279026,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.912077813279026,4.0]}
+{"ev":"meas","t":4.912077813279026,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.912077813279026,1.0]}
+{"ev":"job_end","t":4.997740218042944,"job":9}
+{"ev":"meas","t":4.997740218042944,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.997740218042944,3.0]}
+{"ev":"meas","t":4.997740218042944,"mp":"ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[4.997740218042944,1.0]}
+{"ev":"pass","t":4.997740218042944,"u":9,"ac":"_ss_open_draws_ac1","type":"StopAction","el":"_ss_open_draws_act3"}
+{"ev":"call_end","t":4.997740218042944,"u":9,"role":"_ss_open_draws_sysprov1","sig":"_ss_open_draws_op"}
+{"ev":"pass","t":4.997740218042944,"u":9,"type":"Stop","el":"_ss_open_draws_ua3"}
+{"ev":"user_end","t":4.997740218042944,"u":9}
+{"ev":"meas","t":4.997740218042944,"mp":"UsageScenarioMeasuringPoint[_ss_open_draws_us1]","metric":"Response Time Tuple","v":[4.997740218042944,0.8653294070833049]}
+{"ev":"stop","t":5.0}

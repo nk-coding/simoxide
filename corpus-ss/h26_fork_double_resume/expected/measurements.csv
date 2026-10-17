@@ -1,0 +1,16 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],Resource Demand Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],Resource Demand Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],Resource Demand Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],Resource Demand Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,0.0,2.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,0.0,3.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,0.0,4.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,1.0E-9,4.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,2.0E-9,4.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,3.0000000000000004E-9,4.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,4.0E-9,3.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,7.000000000000001E-9,2.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,9.000000000000001E-9,1.0
+ActiveResourceMeasuringPoint[_h26_fork_double_resume_prs1|replicaID=0],State of Active Resource Tuple,1.0000000000000002E-8,0.0

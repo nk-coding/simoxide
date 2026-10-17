@@ -1,0 +1,78 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_ss_allocation_first_ua1"}
+{"ev":"pass","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_allocation_first_ua2"}
+{"ev":"call","t":0.0,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_ss_allocation_first_ac1","type":"StartAction","el":"_ss_allocation_first_act1"}
+{"ev":"request","t":0.0,"u":1,"ac":"_ss_allocation_first_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_allocation_first_act2"}
+{"ev":"job","t":0.0,"job":1,"u":1,"rc":"_ss_allocation_first_rc_fast","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":1.0}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"job_end","t":0.5,"job":1}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.5,0.0]}
+{"ev":"pass","t":0.5,"u":1,"ac":"_ss_allocation_first_ac1","type":"StopAction","el":"_ss_allocation_first_act3"}
+{"ev":"call_end","t":0.5,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":0.5,"u":1,"type":"Stop","el":"_ss_allocation_first_ua3"}
+{"ev":"user_end","t":0.5,"u":1}
+{"ev":"meas","t":0.5,"mp":"UsageScenarioMeasuringPoint[_ss_allocation_first_us1]","metric":"Response Time Tuple","v":[0.5,0.5]}
+{"ev":"pass","t":0.5,"u":1,"type":"Start","el":"_ss_allocation_first_ua1"}
+{"ev":"pass","t":0.5,"u":1,"type":"EntryLevelSystemCall","el":"_ss_allocation_first_ua2"}
+{"ev":"call","t":0.5,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":0.5,"u":1,"ac":"_ss_allocation_first_ac1","type":"StartAction","el":"_ss_allocation_first_act1"}
+{"ev":"request","t":0.5,"u":1,"ac":"_ss_allocation_first_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_allocation_first_act2"}
+{"ev":"job","t":0.5,"job":2,"u":1,"rc":"_ss_allocation_first_rc_fast","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":1.0}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.5,1.0]}
+{"ev":"job_end","t":1.0,"job":2}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,0.0]}
+{"ev":"pass","t":1.0,"u":1,"ac":"_ss_allocation_first_ac1","type":"StopAction","el":"_ss_allocation_first_act3"}
+{"ev":"call_end","t":1.0,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":1.0,"u":1,"type":"Stop","el":"_ss_allocation_first_ua3"}
+{"ev":"user_end","t":1.0,"u":1}
+{"ev":"meas","t":1.0,"mp":"UsageScenarioMeasuringPoint[_ss_allocation_first_us1]","metric":"Response Time Tuple","v":[1.0,0.5]}
+{"ev":"pass","t":1.0,"u":1,"type":"Start","el":"_ss_allocation_first_ua1"}
+{"ev":"pass","t":1.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_allocation_first_ua2"}
+{"ev":"call","t":1.0,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":1.0,"u":1,"ac":"_ss_allocation_first_ac1","type":"StartAction","el":"_ss_allocation_first_act1"}
+{"ev":"request","t":1.0,"u":1,"ac":"_ss_allocation_first_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_allocation_first_act2"}
+{"ev":"job","t":1.0,"job":3,"u":1,"rc":"_ss_allocation_first_rc_fast","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":1.0}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"job_end","t":1.5,"job":3}
+{"ev":"meas","t":1.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.5,0.0]}
+{"ev":"pass","t":1.5,"u":1,"ac":"_ss_allocation_first_ac1","type":"StopAction","el":"_ss_allocation_first_act3"}
+{"ev":"call_end","t":1.5,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":1.5,"u":1,"type":"Stop","el":"_ss_allocation_first_ua3"}
+{"ev":"user_end","t":1.5,"u":1}
+{"ev":"meas","t":1.5,"mp":"UsageScenarioMeasuringPoint[_ss_allocation_first_us1]","metric":"Response Time Tuple","v":[1.5,0.5]}
+{"ev":"pass","t":1.5,"u":1,"type":"Start","el":"_ss_allocation_first_ua1"}
+{"ev":"pass","t":1.5,"u":1,"type":"EntryLevelSystemCall","el":"_ss_allocation_first_ua2"}
+{"ev":"call","t":1.5,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":1.5,"u":1,"ac":"_ss_allocation_first_ac1","type":"StartAction","el":"_ss_allocation_first_act1"}
+{"ev":"request","t":1.5,"u":1,"ac":"_ss_allocation_first_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_allocation_first_act2"}
+{"ev":"job","t":1.5,"job":4,"u":1,"rc":"_ss_allocation_first_rc_fast","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":1.0}
+{"ev":"meas","t":1.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.5,1.0]}
+{"ev":"job_end","t":2.0,"job":4}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,0.0]}
+{"ev":"pass","t":2.0,"u":1,"ac":"_ss_allocation_first_ac1","type":"StopAction","el":"_ss_allocation_first_act3"}
+{"ev":"call_end","t":2.0,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":2.0,"u":1,"type":"Stop","el":"_ss_allocation_first_ua3"}
+{"ev":"user_end","t":2.0,"u":1}
+{"ev":"meas","t":2.0,"mp":"UsageScenarioMeasuringPoint[_ss_allocation_first_us1]","metric":"Response Time Tuple","v":[2.0,0.5]}
+{"ev":"pass","t":2.0,"u":1,"type":"Start","el":"_ss_allocation_first_ua1"}
+{"ev":"pass","t":2.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_allocation_first_ua2"}
+{"ev":"call","t":2.0,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":2.0,"u":1,"ac":"_ss_allocation_first_ac1","type":"StartAction","el":"_ss_allocation_first_act1"}
+{"ev":"request","t":2.0,"u":1,"ac":"_ss_allocation_first_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_allocation_first_act2"}
+{"ev":"job","t":2.0,"job":5,"u":1,"rc":"_ss_allocation_first_rc_fast","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":1.0}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"job_end","t":2.5,"job":5}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.5,0.0]}
+{"ev":"pass","t":2.5,"u":1,"ac":"_ss_allocation_first_ac1","type":"StopAction","el":"_ss_allocation_first_act3"}
+{"ev":"call_end","t":2.5,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":2.5,"u":1,"type":"Stop","el":"_ss_allocation_first_ua3"}
+{"ev":"user_end","t":2.5,"u":1}
+{"ev":"meas","t":2.5,"mp":"UsageScenarioMeasuringPoint[_ss_allocation_first_us1]","metric":"Response Time Tuple","v":[2.5,0.5]}
+{"ev":"pass","t":2.5,"u":1,"type":"Start","el":"_ss_allocation_first_ua1"}
+{"ev":"pass","t":2.5,"u":1,"type":"EntryLevelSystemCall","el":"_ss_allocation_first_ua2"}
+{"ev":"call","t":2.5,"u":1,"role":"_ss_allocation_first_sysprov1","sig":"_ss_allocation_first_op"}
+{"ev":"pass","t":2.5,"u":1,"ac":"_ss_allocation_first_ac1","type":"StartAction","el":"_ss_allocation_first_act1"}
+{"ev":"request","t":2.5,"u":1,"ac":"_ss_allocation_first_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_allocation_first_act2"}
+{"ev":"job","t":2.5,"job":6,"u":1,"rc":"_ss_allocation_first_rc_fast","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":1.0}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.5,1.0]}
+{"ev":"stop","t":3.0}

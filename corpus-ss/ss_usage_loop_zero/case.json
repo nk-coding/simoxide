@@ -1,0 +1,6 @@
+{
+ "model": "reference/slingshot/models/probes/ss_usage_loop_zero",
+ "sim_time": 8,
+ "seed": 1,
+ "group": "probe"
+}

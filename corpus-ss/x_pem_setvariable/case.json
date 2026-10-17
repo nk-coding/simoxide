@@ -1,0 +1,6 @@
+{
+ "model": "corpus/x_pem_setvariable",
+ "sim_time": 2500,
+ "seed": 1,
+ "group": "corpus"
+}

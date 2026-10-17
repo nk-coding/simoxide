@@ -1,0 +1,6 @@
+{
+ "model": "reference/slingshot/models/probes/ss_monitors",
+ "sim_time": 4,
+ "seed": 1,
+ "group": "probe"
+}

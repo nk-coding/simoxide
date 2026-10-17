@@ -1,0 +1,1 @@
+NoSuchElementException: User Interpretation Context not found! | org.palladiosimulator.analyzer.slingshot.behavior.systemsimulation.SystemSimulationBehavior.findUserInterpretationContext(SystemSimulationBehavior.java:310)

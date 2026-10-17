@@ -1,0 +1,16 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_h28_triggers_default_ua3"}
+{"ev":"pass","t":0.0,"u":2,"type":"Start","el":"_h28_triggers_default_ua3"}
+{"ev":"pass","t":0.0,"u":3,"type":"Start","el":"_h28_triggers_default_ua3"}
+{"ev":"pass","t":0.0,"u":1,"type":"Delay","el":"_h28_triggers_default_ua1"}
+{"ev":"pass","t":0.0,"u":2,"type":"Delay","el":"_h28_triggers_default_ua1"}
+{"ev":"pass","t":0.0,"u":3,"type":"Delay","el":"_h28_triggers_default_ua1"}
+{"ev":"pass","t":0.25,"u":1,"type":"EntryLevelSystemCall","el":"_h28_triggers_default_ua2"}
+{"ev":"call","t":0.25,"u":1,"role":"_h28_triggers_default_prov2","sig":"_h28_triggers_default_sig1"}
+{"ev":"pass","t":0.25,"u":2,"type":"EntryLevelSystemCall","el":"_h28_triggers_default_ua2"}
+{"ev":"call","t":0.25,"u":2,"role":"_h28_triggers_default_prov2","sig":"_h28_triggers_default_sig1"}
+{"ev":"pass","t":0.25,"u":3,"type":"EntryLevelSystemCall","el":"_h28_triggers_default_ua2"}
+{"ev":"call","t":0.25,"u":3,"role":"_h28_triggers_default_prov2","sig":"_h28_triggers_default_sig1"}
+{"ev":"pass","t":0.25,"u":1,"ac":"_h28_triggers_default_ac1","type":"StartAction","el":"_h28_triggers_default_act4"}
+{"ev":"pass","t":0.25,"u":2,"ac":"_h28_triggers_default_ac1","type":"StartAction","el":"_h28_triggers_default_act4"}
+{"ev":"pass","t":0.25,"u":3,"ac":"_h28_triggers_default_ac1","type":"StartAction","el":"_h28_triggers_default_act4"}
+{"ev":"stop","t":20.0}

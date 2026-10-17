@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h04_delay_resource",
+ "sim_time": 18,
+ "seed": 3,
+ "group": "failure"
+}

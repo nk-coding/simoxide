@@ -1,0 +1,6 @@
+{
+ "model": "corpus/x_pem_acquire",
+ "sim_time": 500,
+ "seed": 1,
+ "group": "setup-error"
+}

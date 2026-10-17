@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h16_component_params",
+ "sim_time": 15,
+ "seed": 15,
+ "group": "corpus"
+}

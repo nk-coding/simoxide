@@ -1,0 +1,1026 @@
+{"ev":"pass","t":0.0,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":0.0,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":0.0,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":0.0,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":0.0,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":0.0,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":0.0,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":0.0,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":0.0,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":0.0,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":0.0,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":0.0,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"pass","t":0.0,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"pass","t":0.0,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"pass","t":0.0,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":0.0,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"request","t":0.0,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"request","t":0.0,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"request","t":0.0,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":0.0,"job":1,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.28197511063445674}
+{"ev":"job","t":0.0,"job":2,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.12519855284217027}
+{"ev":"job","t":0.0,"job":3,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.6562095975812691}
+{"ev":"job","t":0.0,"job":4,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2916734454975773}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.28197511063445674]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,2.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.12519855284217027]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,3.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.6562095975812691]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,4.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.2916734454975773]}
+{"ev":"meas","t":0.25039710568434054,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.25039710568434054,4.0]}
+{"ev":"meas","t":0.28197511063445674,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.28197511063445674,4.0]}
+{"ev":"meas","t":0.3755956585265108,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.3755956585265108,4.0]}
+{"ev":"job_end","t":0.5007942113686811,"job":2}
+{"ev":"meas","t":0.5007942113686811,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.5007942113686811,3.0]}
+{"ev":"pass","t":0.5007942113686811,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":0.5007942113686811,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":0.5007942113686811,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":0.5007942113686811,"u":2}
+{"ev":"meas","t":0.5007942113686811,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[0.5007942113686811,0.5007942113686811]}
+{"ev":"pass","t":0.7360360536976489,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":0.7360360536976489,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":0.7360360536976489,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":0.7360360536976489,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":0.7360360536976489,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":0.7360360536976489,"job":5,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.30930280217905254}
+{"ev":"meas","t":0.7360360536976489,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.7360360536976489,4.0]}
+{"ev":"meas","t":0.7360360536976489,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[0.7360360536976489,0.30930280217905254]}
+{"ev":"meas","t":0.9711238847455405,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.9711238847455405,4.0]}
+{"ev":"job_end","t":1.0494864950948377,"job":1}
+{"ev":"meas","t":1.0494864950948377,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0494864950948377,3.0]}
+{"ev":"pass","t":1.0494864950948377,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":1.0494864950948377,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":1.0494864950948377,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":1.0494864950948377,"u":1}
+{"ev":"meas","t":1.0494864950948377,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[1.0494864950948377,1.0494864950948377]}
+{"ev":"job_end","t":1.0785814996841994,"job":4}
+{"ev":"meas","t":1.0785814996841994,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0785814996841994,2.0]}
+{"ev":"pass","t":1.0785814996841994,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":1.0785814996841994,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":1.0785814996841994,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":1.0785814996841994,"u":4}
+{"ev":"meas","t":1.0785814996841994,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[1.0785814996841994,1.0785814996841994]}
+{"ev":"pass","t":1.180733628051165,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":1.180733628051165,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":1.180733628051165,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":1.180733628051165,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":1.180733628051165,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":1.180733628051165,"job":6,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.48428114441581127}
+{"ev":"meas","t":1.180733628051165,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.180733628051165,3.0]}
+{"ev":"meas","t":1.180733628051165,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[1.180733628051165,0.48428114441581127]}
+{"ev":"pass","t":1.3660127818074177,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":1.3660127818074177,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":1.3660127818074177,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":1.3660127818074177,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":1.3660127818074177,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":1.3660127818074177,"job":7,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.10765849588580914}
+{"ev":"meas","t":1.3660127818074177,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.3660127818074177,4.0]}
+{"ev":"meas","t":1.3660127818074177,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[1.3660127818074177,0.10765849588580914]}
+{"ev":"meas","t":1.521065213617469,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.521065213617469,4.0]}
+{"ev":"meas","t":1.6912310064006209,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.6912310064006209,4.0]}
+{"ev":"job_end","t":1.7966467653506544,"job":7}
+{"ev":"meas","t":1.7966467653506544,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.7966467653506544,3.0]}
+{"ev":"pass","t":1.7966467653506544,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":1.7966467653506544,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":1.7966467653506544,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":1.7966467653506544,"u":1}
+{"ev":"meas","t":1.7966467653506544,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[1.7966467653506544,0.4306339835432367]}
+{"ev":"job_end","t":1.79888950228643,"job":5}
+{"ev":"meas","t":1.79888950228643,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.79888950228643,2.0]}
+{"ev":"pass","t":1.79888950228643,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":1.79888950228643,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":1.79888950228643,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":1.79888950228643,"u":2}
+{"ev":"meas","t":1.79888950228643,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[1.79888950228643,1.062853448588781]}
+{"ev":"job_end","t":2.085478092520544,"job":3}
+{"ev":"meas","t":2.085478092520544,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.085478092520544,1.0]}
+{"ev":"pass","t":2.085478092520544,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":2.085478092520544,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":2.085478092520544,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":2.085478092520544,"u":3}
+{"ev":"meas","t":2.085478092520544,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[2.085478092520544,2.085478092520544]}
+{"ev":"pass","t":2.2387117375274075,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":2.2387117375274075,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":2.2387117375274075,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":2.2387117375274075,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":2.2387117375274075,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":2.2387117375274075,"job":8,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.13179235080159205}
+{"ev":"meas","t":2.2387117375274075,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.2387117375274075,2.0]}
+{"ev":"meas","t":2.2387117375274075,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[2.2387117375274075,0.13179235080159205]}
+{"ev":"meas","t":2.2562991490361464,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.2562991490361464,2.0]}
+{"ev":"job_end","t":2.2738865605448852,"job":6}
+{"ev":"meas","t":2.2738865605448852,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.2738865605448852,1.0]}
+{"ev":"pass","t":2.2738865605448852,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":2.2738865605448852,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":2.2738865605448852,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":2.2738865605448852,"u":4}
+{"ev":"meas","t":2.2738865605448852,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[2.2738865605448852,1.0931529324937201]}
+{"ev":"pass","t":2.308335427003124,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":2.308335427003124,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":2.308335427003124,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":2.308335427003124,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":2.308335427003124,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":2.308335427003124,"job":9,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.5319877597547927}
+{"ev":"meas","t":2.308335427003124,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.308335427003124,2.0]}
+{"ev":"meas","t":2.308335427003124,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[2.308335427003124,0.5319877597547927]}
+{"ev":"meas","t":2.3880914998377385,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.3880914998377385,2.0]}
+{"ev":"pass","t":2.4322106941952106,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":2.4322106941952106,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":2.4322106941952106,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":2.4322106941952106,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":2.4322106941952106,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":2.4322106941952106,"job":10,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.19469336502983886}
+{"ev":"meas","t":2.4322106941952106,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.4322106941952106,3.0]}
+{"ev":"meas","t":2.4322106941952106,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[2.4322106941952106,0.19469336502983886]}
+{"ev":"meas","t":2.467847572672353,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.467847572672353,3.0]}
+{"ev":"job_end","t":2.485666011910924,"job":8}
+{"ev":"meas","t":2.485666011910924,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.485666011910924,2.0]}
+{"ev":"pass","t":2.485666011910924,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":2.485666011910924,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":2.485666011910924,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":2.485666011910924,"u":3}
+{"ev":"meas","t":2.485666011910924,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[2.485666011910924,0.24695427438351647]}
+{"ev":"pass","t":2.680308724437552,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":2.680308724437552,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":2.680308724437552,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":2.680308724437552,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":2.680308724437552,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":2.680308724437552,"job":11,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.31128057279783233}
+{"ev":"meas","t":2.680308724437552,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.680308724437552,3.0]}
+{"ev":"meas","t":2.680308724437552,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[2.680308724437552,0.31128057279783233]}
+{"ev":"meas","t":2.8394158634934596,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.8394158634934596,3.0]}
+{"ev":"job_end","t":2.918969433021413,"job":10}
+{"ev":"meas","t":2.918969433021413,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.918969433021413,2.0]}
+{"ev":"pass","t":2.918969433021413,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":2.918969433021413,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":2.918969433021413,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":2.918969433021413,"u":4}
+{"ev":"meas","t":2.918969433021413,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[2.918969433021413,0.48675873882620246]}
+{"ev":"pass","t":3.140601828388581,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":3.140601828388581,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":3.140601828388581,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":3.140601828388581,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":3.140601828388581,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":3.140601828388581,"job":12,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1909944188026901}
+{"ev":"meas","t":3.140601828388581,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.140601828388581,3.0]}
+{"ev":"meas","t":3.140601828388581,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[3.140601828388581,0.1909944188026901]}
+{"ev":"pass","t":3.2188432369608972,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":3.2188432369608972,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":3.2188432369608972,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":3.2188432369608972,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":3.2188432369608972,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":3.2188432369608972,"job":13,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.5746358369009847}
+{"ev":"meas","t":3.2188432369608972,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.2188432369608972,4.0]}
+{"ev":"meas","t":3.2188432369608972,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[3.2188432369608972,0.5746358369009847]}
+{"ev":"meas","t":3.3824234395611703,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.3824234395611703,4.0]}
+{"ev":"meas","t":3.5033342451474647,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.5033342451474647,4.0]}
+{"ev":"job_end","t":3.5981645812096543,"job":11}
+{"ev":"meas","t":3.5981645812096543,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.5981645812096543,3.0]}
+{"ev":"pass","t":3.5981645812096543,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":3.5981645812096543,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":3.5981645812096543,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":3.5981645812096543,"u":3}
+{"ev":"meas","t":3.5981645812096543,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[3.5981645812096543,0.9178558567721025]}
+{"ev":"pass","t":3.712764318909006,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":3.712764318909006,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":3.712764318909006,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":3.712764318909006,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":3.712764318909006,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":3.712764318909006,"job":14,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.20689796227171264}
+{"ev":"meas","t":3.712764318909006,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.712764318909006,4.0]}
+{"ev":"meas","t":3.712764318909006,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[3.712764318909006,0.20689796227171264]}
+{"ev":"meas","t":3.72905385478675,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.72905385478675,4.0]}
+{"ev":"job_end","t":3.734483700079332,"job":9}
+{"ev":"meas","t":3.734483700079332,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.734483700079332,3.0]}
+{"ev":"pass","t":3.734483700079332,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":3.734483700079332,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":3.734483700079332,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":3.734483700079332,"u":1}
+{"ev":"meas","t":3.734483700079332,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[3.734483700079332,1.4261482730762078]}
+{"ev":"job_end","t":3.8138452661514224,"job":12}
+{"ev":"meas","t":3.8138452661514224,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.8138452661514224,2.0]}
+{"ev":"pass","t":3.8138452661514224,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":3.8138452661514224,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":3.8138452661514224,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":3.8138452661514224,"u":4}
+{"ev":"meas","t":3.8138452661514224,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[3.8138452661514224,0.6732434377628413]}
+{"ev":"pass","t":4.01216333809485,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":4.01216333809485,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":4.01216333809485,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":4.01216333809485,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":4.01216333809485,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":4.01216333809485,"job":15,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.3377661056397336}
+{"ev":"meas","t":4.01216333809485,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.01216333809485,3.0]}
+{"ev":"meas","t":4.01216333809485,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[4.01216333809485,0.3377661056397336]}
+{"ev":"meas","t":4.163873789394958,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.163873789394958,3.0]}
+{"ev":"job_end","t":4.239729015045011,"job":14}
+{"ev":"meas","t":4.239729015045011,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.239729015045011,2.0]}
+{"ev":"pass","t":4.239729015045011,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":4.239729015045011,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":4.239729015045011,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":4.239729015045011,"u":3}
+{"ev":"meas","t":4.239729015045011,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[4.239729015045011,0.5269646961360053]}
+{"ev":"pass","t":4.688403794567922,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":4.688403794567922,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":4.688403794567922,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":4.688403794567922,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":4.688403794567922,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":4.688403794567922,"job":16,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.24531518029189622}
+{"ev":"meas","t":4.688403794567922,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.688403794567922,3.0]}
+{"ev":"meas","t":4.688403794567922,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[4.688403794567922,0.24531518029189622]}
+{"ev":"pass","t":4.705003218159454,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":4.705003218159454,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":4.705003218159454,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":4.705003218159454,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":4.705003218159454,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":4.705003218159454,"job":17,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2917257910997013}
+{"ev":"meas","t":4.705003218159454,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.705003218159454,4.0]}
+{"ev":"meas","t":4.705003218159454,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[4.705003218159454,0.2917257910997013]}
+{"ev":"meas","t":4.709144267046276,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.709144267046276,4.0]}
+{"ev":"meas","t":4.719514503285453,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.719514503285453,4.0]}
+{"ev":"job_end","t":4.724351598327453,"job":13}
+{"ev":"meas","t":4.724351598327453,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.724351598327453,3.0]}
+{"ev":"pass","t":4.724351598327453,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":4.724351598327453,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":4.724351598327453,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":4.724351598327453,"u":2}
+{"ev":"meas","t":4.724351598327453,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[4.724351598327453,1.5055083613665556]}
+{"ev":"job_end","t":4.805961360294595,"job":15}
+{"ev":"meas","t":4.805961360294595,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.805961360294595,2.0]}
+{"ev":"pass","t":4.805961360294595,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":4.805961360294595,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":4.805961360294595,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":4.805961360294595,"u":1}
+{"ev":"meas","t":4.805961360294595,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[4.805961360294595,0.7937980221997449]}
+{"ev":"pass","t":4.913577614826876,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":4.913577614826876,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":4.913577614826876,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":4.913577614826876,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":4.913577614826876,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":4.913577614826876,"job":18,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.13523429893788824}
+{"ev":"meas","t":4.913577614826876,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[4.913577614826876,3.0]}
+{"ev":"meas","t":4.913577614826876,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[4.913577614826876,0.13523429893788824]}
+{"ev":"meas","t":5.221444740421939,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.221444740421939,3.0]}
+{"ev":"job_end","t":5.319280511640541,"job":18}
+{"ev":"meas","t":5.319280511640541,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.319280511640541,2.0]}
+{"ev":"pass","t":5.319280511640541,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":5.319280511640541,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":5.319280511640541,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":5.319280511640541,"u":2}
+{"ev":"meas","t":5.319280511640541,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[5.319280511640541,0.4057028968136649]}
+{"ev":"job_end","t":5.356679039359827,"job":16}
+{"ev":"meas","t":5.356679039359827,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.356679039359827,1.0]}
+{"ev":"pass","t":5.356679039359827,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":5.356679039359827,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":5.356679039359827,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":5.356679039359827,"u":3}
+{"ev":"meas","t":5.356679039359827,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[5.356679039359827,0.6682752447919054]}
+{"ev":"job_end","t":5.4086227913648095,"job":17}
+{"ev":"meas","t":5.4086227913648095,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.4086227913648095,0.0]}
+{"ev":"pass","t":5.4086227913648095,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":5.4086227913648095,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":5.4086227913648095,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":5.4086227913648095,"u":4}
+{"ev":"meas","t":5.4086227913648095,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[5.4086227913648095,0.7036195732053558]}
+{"ev":"pass","t":5.4413298855799015,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":5.4413298855799015,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":5.4413298855799015,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":5.4413298855799015,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":5.4413298855799015,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":5.4413298855799015,"job":19,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.10086295408981391}
+{"ev":"meas","t":5.4413298855799015,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.4413298855799015,1.0]}
+{"ev":"meas","t":5.4413298855799015,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[5.4413298855799015,0.10086295408981391]}
+{"ev":"pass","t":5.517211637656183,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":5.517211637656183,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":5.517211637656183,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":5.517211637656183,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":5.517211637656183,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":5.517211637656183,"job":20,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.4497277963658817}
+{"ev":"meas","t":5.517211637656183,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.517211637656183,2.0]}
+{"ev":"meas","t":5.517211637656183,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[5.517211637656183,0.4497277963658817]}
+{"ev":"pass","t":5.5260022439223,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":5.5260022439223,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":5.5260022439223,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":5.5260022439223,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":5.5260022439223,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":5.5260022439223,"job":21,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.11132252640423304}
+{"ev":"meas","t":5.5260022439223,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.5260022439223,3.0]}
+{"ev":"meas","t":5.5260022439223,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[5.5260022439223,0.11132252640423304]}
+{"ev":"meas","t":5.542192839669715,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.542192839669715,3.0]}
+{"ev":"meas","t":5.5671740416832485,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.5671740416832485,3.0]}
+{"ev":"job_end","t":5.587759940563722,"job":19}
+{"ev":"meas","t":5.587759940563722,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.587759940563722,2.0]}
+{"ev":"pass","t":5.587759940563722,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":5.587759940563722,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":5.587759940563722,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":5.587759940563722,"u":1}
+{"ev":"meas","t":5.587759940563722,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[5.587759940563722,0.14643005498382067]}
+{"ev":"job_end","t":5.76923319561124,"job":21}
+{"ev":"meas","t":5.76923319561124,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.76923319561124,1.0]}
+{"ev":"pass","t":5.76923319561124,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":5.76923319561124,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":5.76923319561124,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":5.76923319561124,"u":3}
+{"ev":"meas","t":5.76923319561124,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[5.76923319561124,0.2432309516889397]}
+{"ev":"pass","t":5.781329106501412,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":5.781329106501412,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":5.781329106501412,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":5.781329106501412,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":5.781329106501412,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":5.781329106501412,"job":22,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.16065830019045033}
+{"ev":"meas","t":5.781329106501412,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.781329106501412,2.0]}
+{"ev":"meas","t":5.781329106501412,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[5.781329106501412,0.16065830019045033]}
+{"ev":"job_end","t":6.102645706882313,"job":22}
+{"ev":"meas","t":6.102645706882313,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.102645706882313,1.0]}
+{"ev":"pass","t":6.102645706882313,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":6.102645706882313,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":6.102645706882313,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":6.102645706882313,"u":1}
+{"ev":"meas","t":6.102645706882313,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[6.102645706882313,0.32131660038090093]}
+{"ev":"meas","t":6.10324316243983,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.10324316243983,1.0]}
+{"ev":"pass","t":6.112563234211396,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":6.112563234211396,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":6.112563234211396,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":6.112563234211396,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":6.112563234211396,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":6.112563234211396,"job":23,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.5477060800298091}
+{"ev":"meas","t":6.112563234211396,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.112563234211396,2.0]}
+{"ev":"meas","t":6.112563234211396,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[6.112563234211396,0.5477060800298091]}
+{"ev":"meas","t":6.2639014626302805,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.2639014626302805,2.0]}
+{"ev":"pass","t":6.267848315295824,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":6.267848315295824,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":6.267848315295824,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":6.267848315295824,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":6.267848315295824,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":6.267848315295824,"job":24,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.26302800485239425}
+{"ev":"meas","t":6.267848315295824,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.267848315295824,3.0]}
+{"ev":"meas","t":6.267848315295824,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[6.267848315295824,0.26302800485239425]}
+{"ev":"meas","t":6.415239691049165,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.415239691049165,3.0]}
+{"ev":"job_end","t":6.488935378925836,"job":20}
+{"ev":"meas","t":6.488935378925836,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.488935378925836,2.0]}
+{"ev":"pass","t":6.488935378925836,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":6.488935378925836,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":6.488935378925836,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":6.488935378925836,"u":4}
+{"ev":"meas","t":6.488935378925836,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[6.488935378925836,0.9717237412696536]}
+{"ev":"job_end","t":6.867600012877283,"job":24}
+{"ev":"meas","t":6.867600012877283,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.867600012877283,1.0]}
+{"ev":"pass","t":6.867600012877283,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":6.867600012877283,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":6.867600012877283,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":6.867600012877283,"u":2}
+{"ev":"meas","t":6.867600012877283,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[6.867600012877283,0.5997516975814587]}
+{"ev":"job_end","t":7.074635547512484,"job":23}
+{"ev":"meas","t":7.074635547512484,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.074635547512484,0.0]}
+{"ev":"pass","t":7.074635547512484,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":7.074635547512484,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":7.074635547512484,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":7.074635547512484,"u":1}
+{"ev":"meas","t":7.074635547512484,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[7.074635547512484,0.9620723133010882]}
+{"ev":"pass","t":7.213228851896803,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":7.213228851896803,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":7.213228851896803,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":7.213228851896803,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":7.213228851896803,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":7.213228851896803,"job":25,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.18762005335079787}
+{"ev":"meas","t":7.213228851896803,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.213228851896803,1.0]}
+{"ev":"meas","t":7.213228851896803,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[7.213228851896803,0.18762005335079787]}
+{"ev":"job_end","t":7.4008489052476,"job":25}
+{"ev":"meas","t":7.4008489052476,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.4008489052476,0.0]}
+{"ev":"pass","t":7.4008489052476,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":7.4008489052476,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":7.4008489052476,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":7.4008489052476,"u":1}
+{"ev":"meas","t":7.4008489052476,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[7.4008489052476,0.18762005335079746]}
+{"ev":"pass","t":7.606903539770175,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":7.606903539770175,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":7.606903539770175,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":7.606903539770175,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":7.606903539770175,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":7.606903539770175,"job":26,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1861530763444846}
+{"ev":"meas","t":7.606903539770175,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.606903539770175,1.0]}
+{"ev":"meas","t":7.606903539770175,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[7.606903539770175,0.1861530763444846]}
+{"ev":"job_end","t":7.79305661611466,"job":26}
+{"ev":"meas","t":7.79305661611466,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.79305661611466,0.0]}
+{"ev":"pass","t":7.79305661611466,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":7.79305661611466,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":7.79305661611466,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":7.79305661611466,"u":4}
+{"ev":"meas","t":7.79305661611466,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[7.79305661611466,0.18615307634448452]}
+{"ev":"pass","t":7.922836866282046,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":7.922836866282046,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":7.922836866282046,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":7.922836866282046,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":7.922836866282046,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":7.922836866282046,"job":27,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.19084185912881807}
+{"ev":"meas","t":7.922836866282046,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.922836866282046,1.0]}
+{"ev":"meas","t":7.922836866282046,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[7.922836866282046,0.19084185912881807]}
+{"ev":"pass","t":8.069281544491638,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":8.069281544491638,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":8.069281544491638,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":8.069281544491638,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":8.069281544491638,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":8.069281544491638,"job":28,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.17683150588660682}
+{"ev":"meas","t":8.069281544491638,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.069281544491638,2.0]}
+{"ev":"meas","t":8.069281544491638,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[8.069281544491638,0.17683150588660682]}
+{"ev":"meas","t":8.113678725410864,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.113678725410864,2.0]}
+{"ev":"job_end","t":8.15807590633009,"job":27}
+{"ev":"meas","t":8.15807590633009,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.15807590633009,1.0]}
+{"ev":"pass","t":8.15807590633009,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":8.15807590633009,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":8.15807590633009,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":8.15807590633009,"u":1}
+{"ev":"meas","t":8.15807590633009,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[8.15807590633009,0.23523904004804397]}
+{"ev":"pass","t":8.270111620549276,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":8.270111620549276,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":8.270111620549276,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":8.270111620549276,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":8.270111620549276,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":8.270111620549276,"job":29,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.3259888729040785}
+{"ev":"meas","t":8.270111620549276,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.270111620549276,2.0]}
+{"ev":"meas","t":8.270111620549276,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[8.270111620549276,0.3259888729040785]}
+{"ev":"meas","t":8.290510231297471,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.290510231297471,2.0]}
+{"ev":"pass","t":8.297491758618397,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":8.297491758618397,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":8.297491758618397,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":8.297491758618397,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":8.297491758618397,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":8.297491758618397,"job":30,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2664710687371684}
+{"ev":"meas","t":8.297491758618397,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.297491758618397,3.0]}
+{"ev":"meas","t":8.297491758618397,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[8.297491758618397,0.2664710687371684]}
+{"ev":"meas","t":8.310908842045666,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.310908842045666,3.0]}
+{"ev":"job_end","t":8.3176173837593,"job":28}
+{"ev":"meas","t":8.3176173837593,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.3176173837593,2.0]}
+{"ev":"pass","t":8.3176173837593,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":8.3176173837593,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":8.3176173837593,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":8.3176173837593,"u":2}
+{"ev":"meas","t":8.3176173837593,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[8.3176173837593,0.24833583926766245]}
+{"ev":"pass","t":8.564566747931364,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":8.564566747931364,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":8.564566747931364,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":8.564566747931364,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":8.564566747931364,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":8.564566747931364,"job":31,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.26065714655699695}
+{"ev":"meas","t":8.564566747931364,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.564566747931364,3.0]}
+{"ev":"meas","t":8.564566747931364,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[8.564566747931364,0.26065714655699695]}
+{"ev":"pass","t":8.576657575209225,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":8.576657575209225,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":8.576657575209225,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":8.576657575209225,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":8.576657575209225,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":8.576657575209225,"job":32,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.320067774710679}
+{"ev":"meas","t":8.576657575209225,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.576657575209225,4.0]}
+{"ev":"meas","t":8.576657575209225,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[8.576657575209225,0.320067774710679]}
+{"ev":"meas","t":8.837142437806369,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.837142437806369,4.0]}
+{"ev":"meas","t":8.973430282743871,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.973430282743871,4.0]}
+{"ev":"job_end","t":9.105687851922086,"job":30}
+{"ev":"meas","t":9.105687851922086,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.105687851922086,3.0]}
+{"ev":"pass","t":9.105687851922086,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":9.105687851922086,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":9.105687851922086,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":9.105687851922086,"u":1}
+{"ev":"meas","t":9.105687851922086,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[9.105687851922086,0.8081960933036889]}
+{"ev":"job_end","t":9.243171057319135,"job":29}
+{"ev":"meas","t":9.243171057319135,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.243171057319135,2.0]}
+{"ev":"pass","t":9.243171057319135,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":9.243171057319135,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":9.243171057319135,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":9.243171057319135,"u":3}
+{"ev":"meas","t":9.243171057319135,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[9.243171057319135,0.9730594367698586]}
+{"ev":"pass","t":9.38063165890763,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":9.38063165890763,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":9.38063165890763,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":9.38063165890763,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":9.38063165890763,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":9.38063165890763,"job":33,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.17719538016786987}
+{"ev":"meas","t":9.38063165890763,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.38063165890763,3.0]}
+{"ev":"meas","t":9.38063165890763,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[9.38063165890763,0.17719538016786987]}
+{"ev":"meas","t":9.400254190293426,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.400254190293426,3.0]}
+{"ev":"job_end","t":9.410065455986322,"job":31}
+{"ev":"meas","t":9.410065455986322,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.410065455986322,2.0]}
+{"ev":"pass","t":9.410065455986322,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":9.410065455986322,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":9.410065455986322,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":9.410065455986322,"u":4}
+{"ev":"meas","t":9.410065455986322,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[9.410065455986322,0.8454987080549579]}
+{"ev":"job_end","t":9.53694726381226,"job":32}
+{"ev":"meas","t":9.53694726381226,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.53694726381226,1.0]}
+{"ev":"pass","t":9.53694726381226,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":9.53694726381226,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":9.53694726381226,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":9.53694726381226,"u":2}
+{"ev":"meas","t":9.53694726381226,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[9.53694726381226,0.9602896886030354]}
+{"ev":"job_end","t":9.640890474374263,"job":33}
+{"ev":"meas","t":9.640890474374263,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.640890474374263,0.0]}
+{"ev":"pass","t":9.640890474374263,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":9.640890474374263,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":9.640890474374263,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":9.640890474374263,"u":1}
+{"ev":"meas","t":9.640890474374263,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[9.640890474374263,0.2602588154666332]}
+{"ev":"pass","t":9.905708418401707,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":9.905708418401707,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":9.905708418401707,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":9.905708418401707,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":9.905708418401707,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":9.905708418401707,"job":34,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.20405149691173655}
+{"ev":"meas","t":9.905708418401707,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[9.905708418401707,1.0]}
+{"ev":"meas","t":9.905708418401707,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[9.905708418401707,0.20405149691173655]}
+{"ev":"pass","t":10.02550163888108,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":10.02550163888108,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":10.02550163888108,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":10.02550163888108,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":10.02550163888108,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":10.02550163888108,"job":35,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2551493366101151}
+{"ev":"meas","t":10.02550163888108,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.02550163888108,2.0]}
+{"ev":"meas","t":10.02550163888108,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[10.02550163888108,0.2551493366101151]}
+{"ev":"meas","t":10.109759915313443,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.109759915313443,2.0]}
+{"ev":"job_end","t":10.194018191745807,"job":34}
+{"ev":"meas","t":10.194018191745807,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.194018191745807,1.0]}
+{"ev":"pass","t":10.194018191745807,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":10.194018191745807,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":10.194018191745807,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":10.194018191745807,"u":1}
+{"ev":"meas","t":10.194018191745807,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[10.194018191745807,0.2883097733440998]}
+{"ev":"job_end","t":10.364909251923558,"job":35}
+{"ev":"meas","t":10.364909251923558,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.364909251923558,0.0]}
+{"ev":"pass","t":10.364909251923558,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":10.364909251923558,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":10.364909251923558,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":10.364909251923558,"u":2}
+{"ev":"meas","t":10.364909251923558,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[10.364909251923558,0.3394076130424786]}
+{"ev":"pass","t":10.800701330498482,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":10.800701330498482,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":10.800701330498482,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":10.800701330498482,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":10.800701330498482,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":10.800701330498482,"job":36,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2695086170409965}
+{"ev":"meas","t":10.800701330498482,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.800701330498482,1.0]}
+{"ev":"meas","t":10.800701330498482,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[10.800701330498482,0.2695086170409965]}
+{"ev":"pass","t":10.934503637125747,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":10.934503637125747,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":10.934503637125747,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":10.934503637125747,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":10.934503637125747,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":10.934503637125747,"job":37,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.5253682348582588}
+{"ev":"meas","t":10.934503637125747,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[10.934503637125747,2.0]}
+{"ev":"meas","t":10.934503637125747,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[10.934503637125747,0.5253682348582588]}
+{"ev":"meas","t":11.070209947539478,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.070209947539478,2.0]}
+{"ev":"pass","t":11.082408640916443,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":11.082408640916443,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":11.082408640916443,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":11.082408640916443,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":11.082408640916443,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":11.082408640916443,"job":38,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.378708544352965}
+{"ev":"meas","t":11.082408640916443,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.082408640916443,3.0]}
+{"ev":"meas","t":11.082408640916443,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[11.082408640916443,0.378708544352965]}
+{"ev":"pass","t":11.148708537145344,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":11.148708537145344,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":11.148708537145344,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":11.148708537145344,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":11.148708537145344,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":11.148708537145344,"job":39,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.21334864305773618}
+{"ev":"meas","t":11.148708537145344,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.148708537145344,4.0]}
+{"ev":"meas","t":11.148708537145344,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[11.148708537145344,0.21334864305773618]}
+{"ev":"meas","t":11.20591625795321,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.20591625795321,4.0]}
+{"ev":"meas","t":11.267670066471593,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.267670066471593,4.0]}
+{"ev":"job_end","t":11.307323909580344,"job":36}
+{"ev":"meas","t":11.307323909580344,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.307323909580344,3.0]}
+{"ev":"pass","t":11.307323909580344,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":11.307323909580344,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":11.307323909580344,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":11.307323909580344,"u":1}
+{"ev":"meas","t":11.307323909580344,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[11.307323909580344,0.5066225790818617]}
+{"ev":"job_end","t":11.828408309427303,"job":39}
+{"ev":"meas","t":11.828408309427303,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[11.828408309427303,2.0]}
+{"ev":"pass","t":11.828408309427303,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":11.828408309427303,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":11.828408309427303,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":11.828408309427303,"u":2}
+{"ev":"meas","t":11.828408309427303,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[11.828408309427303,0.6796997722819587]}
+{"ev":"job_end","t":12.114928181198493,"job":38}
+{"ev":"meas","t":12.114928181198493,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.114928181198493,1.0]}
+{"ev":"pass","t":12.114928181198493,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":12.114928181198493,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":12.114928181198493,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":12.114928181198493,"u":4}
+{"ev":"meas","t":12.114928181198493,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[12.114928181198493,1.0325195402820508]}
+{"ev":"job_end","t":12.187635369808438,"job":37}
+{"ev":"meas","t":12.187635369808438,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.187635369808438,0.0]}
+{"ev":"pass","t":12.187635369808438,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":12.187635369808438,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":12.187635369808438,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":12.187635369808438,"u":3}
+{"ev":"meas","t":12.187635369808438,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[12.187635369808438,1.2531317326826912]}
+{"ev":"pass","t":12.338108982214905,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":12.338108982214905,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":12.338108982214905,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":12.338108982214905,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":12.338108982214905,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":12.338108982214905,"job":40,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.17588210271729957}
+{"ev":"meas","t":12.338108982214905,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.338108982214905,1.0]}
+{"ev":"meas","t":12.338108982214905,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[12.338108982214905,0.17588210271729957]}
+{"ev":"job_end","t":12.513991084932204,"job":40}
+{"ev":"meas","t":12.513991084932204,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.513991084932204,0.0]}
+{"ev":"pass","t":12.513991084932204,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":12.513991084932204,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":12.513991084932204,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":12.513991084932204,"u":1}
+{"ev":"meas","t":12.513991084932204,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[12.513991084932204,0.1758821027172992]}
+{"ev":"pass","t":12.520062806388406,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":12.520062806388406,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":12.520062806388406,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":12.520062806388406,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":12.520062806388406,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":12.520062806388406,"job":41,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.06705585095476572}
+{"ev":"meas","t":12.520062806388406,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.520062806388406,1.0]}
+{"ev":"meas","t":12.520062806388406,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[12.520062806388406,0.06705585095476572]}
+{"ev":"pass","t":12.57669988307087,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":12.57669988307087,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":12.57669988307087,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":12.57669988307087,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":12.57669988307087,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":12.57669988307087,"job":42,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1512177029468315}
+{"ev":"meas","t":12.57669988307087,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.57669988307087,2.0]}
+{"ev":"meas","t":12.57669988307087,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[12.57669988307087,0.1512177029468315]}
+{"ev":"meas","t":12.587118657343172,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.587118657343172,2.0]}
+{"ev":"job_end","t":12.597537431615475,"job":41}
+{"ev":"meas","t":12.597537431615475,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.597537431615475,1.0]}
+{"ev":"pass","t":12.597537431615475,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":12.597537431615475,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":12.597537431615475,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":12.597537431615475,"u":2}
+{"ev":"meas","t":12.597537431615475,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[12.597537431615475,0.07747462522706883]}
+{"ev":"job_end","t":12.738336360290004,"job":42}
+{"ev":"meas","t":12.738336360290004,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.738336360290004,0.0]}
+{"ev":"pass","t":12.738336360290004,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":12.738336360290004,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":12.738336360290004,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":12.738336360290004,"u":4}
+{"ev":"meas","t":12.738336360290004,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[12.738336360290004,0.161636477219135]}
+{"ev":"pass","t":12.809198206284444,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":12.809198206284444,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":12.809198206284444,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":12.809198206284444,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":12.809198206284444,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":12.809198206284444,"job":43,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.3765007177353711}
+{"ev":"meas","t":12.809198206284444,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.809198206284444,1.0]}
+{"ev":"meas","t":12.809198206284444,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[12.809198206284444,0.3765007177353711]}
+{"ev":"pass","t":12.817334876931215,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":12.817334876931215,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":12.817334876931215,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":12.817334876931215,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":12.817334876931215,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":12.817334876931215,"job":44,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.306647698268546}
+{"ev":"meas","t":12.817334876931215,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[12.817334876931215,2.0]}
+{"ev":"meas","t":12.817334876931215,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[12.817334876931215,0.306647698268546]}
+{"ev":"meas","t":13.185698924019816,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[13.185698924019816,2.0]}
+{"ev":"pass","t":13.209585647619308,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":13.209585647619308,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":13.209585647619308,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":13.209585647619308,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":13.209585647619308,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":13.209585647619308,"job":45,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.34058925407319796}
+{"ev":"meas","t":13.209585647619308,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[13.209585647619308,3.0]}
+{"ev":"meas","t":13.209585647619308,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[13.209585647619308,0.34058925407319796]}
+{"ev":"meas","t":13.430630273468307,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[13.430630273468307,3.0]}
+{"ev":"job_end","t":13.541152586392805,"job":44}
+{"ev":"meas","t":13.541152586392805,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[13.541152586392805,2.0]}
+{"ev":"pass","t":13.541152586392805,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":13.541152586392805,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":13.541152586392805,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":13.541152586392805,"u":1}
+{"ev":"meas","t":13.541152586392805,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[13.541152586392805,0.7238177094615903]}
+{"ev":"job_end","t":13.664585284032915,"job":43}
+{"ev":"meas","t":13.664585284032915,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[13.664585284032915,1.0]}
+{"ev":"pass","t":13.664585284032915,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":13.664585284032915,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":13.664585284032915,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":13.664585284032915,"u":2}
+{"ev":"meas","t":13.664585284032915,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[13.664585284032915,0.8553870777484711]}
+{"ev":"pass","t":13.676136849835437,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":13.676136849835437,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":13.676136849835437,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":13.676136849835437,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":13.676136849835437,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":13.676136849835437,"job":46,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.15096151253181533}
+{"ev":"meas","t":13.676136849835437,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[13.676136849835437,2.0]}
+{"ev":"meas","t":13.676136849835437,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[13.676136849835437,0.15096151253181533]}
+{"ev":"meas","t":13.832935876361558,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[13.832935876361558,2.0]}
+{"ev":"pass","t":13.956665338452858,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":13.956665338452858,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":13.956665338452858,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":13.956665338452858,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":13.956665338452858,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":13.956665338452858,"job":47,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.20301278045858423}
+{"ev":"meas","t":13.956665338452858,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[13.956665338452858,3.0]}
+{"ev":"meas","t":13.956665338452858,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[13.956665338452858,0.20301278045858423]}
+{"ev":"meas","t":13.978059874899067,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[13.978059874899067,3.0]}
+{"ev":"job_end","t":13.988757143122173,"job":46}
+{"ev":"meas","t":13.988757143122173,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[13.988757143122173,2.0]}
+{"ev":"pass","t":13.988757143122173,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":13.988757143122173,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":13.988757143122173,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":13.988757143122173,"u":4}
+{"ev":"meas","t":13.988757143122173,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[13.988757143122173,0.31262029328673613]}
+{"ev":"job_end","t":14.000432171110786,"job":45}
+{"ev":"meas","t":14.000432171110786,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.000432171110786,1.0]}
+{"ev":"pass","t":14.000432171110786,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":14.000432171110786,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":14.000432171110786,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":14.000432171110786,"u":3}
+{"ev":"meas","t":14.000432171110786,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[14.000432171110786,0.7908465234914779]}
+{"ev":"pass","t":14.029209683671755,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":14.029209683671755,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":14.029209683671755,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":14.029209683671755,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":14.029209683671755,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":14.029209683671755,"job":48,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.1549964374984587}
+{"ev":"meas","t":14.029209683671755,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.029209683671755,2.0]}
+{"ev":"meas","t":14.029209683671755,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[14.029209683671755,0.1549964374984587]}
+{"ev":"pass","t":14.168977088190635,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":14.168977088190635,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":14.168977088190635,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":14.168977088190635,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":14.168977088190635,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":14.168977088190635,"job":49,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.10348612298095805}
+{"ev":"meas","t":14.168977088190635,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.168977088190635,3.0]}
+{"ev":"meas","t":14.168977088190635,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[14.168977088190635,0.10348612298095805]}
+{"ev":"meas","t":14.18691016935196,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.18691016935196,3.0]}
+{"ev":"pass","t":14.223225082488952,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":14.223225082488952,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":14.223225082488952,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":14.223225082488952,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":14.223225082488952,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":14.223225082488952,"job":50,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.413242069459502}
+{"ev":"meas","t":14.223225082488952,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.223225082488952,4.0]}
+{"ev":"meas","t":14.223225082488952,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[14.223225082488952,0.413242069459502]}
+{"ev":"meas","t":14.339202558668672,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.339202558668672,4.0]}
+{"ev":"meas","t":14.424315293907691,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.424315293907691,4.0]}
+{"ev":"job_end","t":14.491345364380605,"job":48}
+{"ev":"meas","t":14.491345364380605,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.491345364380605,3.0]}
+{"ev":"pass","t":14.491345364380605,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":14.491345364380605,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":14.491345364380605,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":14.491345364380605,"u":1}
+{"ev":"meas","t":14.491345364380605,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[14.491345364380605,0.46213568070884925]}
+{"ev":"job_end","t":14.499457508925838,"job":47}
+{"ev":"meas","t":14.499457508925838,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.499457508925838,2.0]}
+{"ev":"pass","t":14.499457508925838,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":14.499457508925838,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":14.499457508925838,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":14.499457508925838,"u":2}
+{"ev":"meas","t":14.499457508925838,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[14.499457508925838,0.5427921704729801]}
+{"ev":"job_end","t":14.530796188046228,"job":49}
+{"ev":"meas","t":14.530796188046228,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.530796188046228,1.0]}
+{"ev":"pass","t":14.530796188046228,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":14.530796188046228,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":14.530796188046228,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":14.530796188046228,"u":4}
+{"ev":"meas","t":14.530796188046228,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[14.530796188046228,0.3618190998555928]}
+{"ev":"job_end","t":14.858634799290877,"job":50}
+{"ev":"meas","t":14.858634799290877,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.858634799290877,0.0]}
+{"ev":"pass","t":14.858634799290877,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":14.858634799290877,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":14.858634799290877,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":14.858634799290877,"u":3}
+{"ev":"meas","t":14.858634799290877,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[14.858634799290877,0.6354097168019255]}
+{"ev":"pass","t":14.894432540780963,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":14.894432540780963,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":14.894432540780963,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":14.894432540780963,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":14.894432540780963,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":14.894432540780963,"job":51,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.3236472417254279}
+{"ev":"meas","t":14.894432540780963,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[14.894432540780963,1.0]}
+{"ev":"meas","t":14.894432540780963,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[14.894432540780963,0.3236472417254279]}
+{"ev":"pass","t":15.106213099044123,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":15.106213099044123,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":15.106213099044123,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":15.106213099044123,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":15.106213099044123,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":15.106213099044123,"job":52,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.2005487209601958}
+{"ev":"meas","t":15.106213099044123,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.106213099044123,2.0]}
+{"ev":"meas","t":15.106213099044123,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[15.106213099044123,0.2005487209601958]}
+{"ev":"meas","t":15.218079782506392,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.218079782506392,2.0]}
+{"ev":"job_end","t":15.32994646596866,"job":51}
+{"ev":"meas","t":15.32994646596866,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.32994646596866,1.0]}
+{"ev":"pass","t":15.32994646596866,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":15.32994646596866,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":15.32994646596866,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":15.32994646596866,"u":3}
+{"ev":"meas","t":15.32994646596866,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[15.32994646596866,0.4355139251876974]}
+{"ev":"job_end","t":15.418628503466588,"job":52}
+{"ev":"meas","t":15.418628503466588,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.418628503466588,0.0]}
+{"ev":"pass","t":15.418628503466588,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":15.418628503466588,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":15.418628503466588,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":15.418628503466588,"u":4}
+{"ev":"meas","t":15.418628503466588,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[15.418628503466588,0.31241540442246496]}
+{"ev":"pass","t":15.433513181266276,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":15.433513181266276,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":15.433513181266276,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":15.433513181266276,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":15.433513181266276,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":15.433513181266276,"job":53,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.5621247592645285}
+{"ev":"meas","t":15.433513181266276,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.433513181266276,1.0]}
+{"ev":"meas","t":15.433513181266276,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[15.433513181266276,0.5621247592645285]}
+{"ev":"pass","t":15.509711833017503,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":15.509711833017503,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":15.509711833017503,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":15.509711833017503,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":15.509711833017503,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":15.509711833017503,"job":54,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.21940425550790066}
+{"ev":"meas","t":15.509711833017503,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.509711833017503,2.0]}
+{"ev":"meas","t":15.509711833017503,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[15.509711833017503,0.21940425550790066]}
+{"ev":"pass","t":15.567796101049856,"u":3,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":15.567796101049856,"u":3,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":15.567796101049856,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":15.567796101049856,"u":3,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":15.567796101049856,"u":3,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":15.567796101049856,"job":55,"u":3,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.14028446234486536}
+{"ev":"meas","t":15.567796101049856,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.567796101049856,3.0]}
+{"ev":"meas","t":15.567796101049856,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[15.567796101049856,0.14028446234486536]}
+{"ev":"meas","t":15.948520344033305,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.948520344033305,3.0]}
+{"ev":"job_end","t":15.988649488084452,"job":55}
+{"ev":"meas","t":15.988649488084452,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.988649488084452,2.0]}
+{"ev":"pass","t":15.988649488084452,"u":3,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":15.988649488084452,"u":3,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":15.988649488084452,"u":3,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":15.988649488084452,"u":3}
+{"ev":"meas","t":15.988649488084452,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[15.988649488084452,0.4208533870345956]}
+{"ev":"meas","t":15.995637940530806,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[15.995637940530806,2.0]}
+{"ev":"pass","t":16.05803863027399,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":16.05803863027399,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":16.05803863027399,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":16.05803863027399,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":16.05803863027399,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":16.05803863027399,"job":56,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.15394656339673188}
+{"ev":"meas","t":16.05803863027399,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[16.05803863027399,3.0]}
+{"ev":"meas","t":16.05803863027399,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[16.05803863027399,0.15394656339673188]}
+{"ev":"meas","t":16.08880480637817,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[16.08880480637817,3.0]}
+{"ev":"job_end","t":16.104187894430257,"job":54}
+{"ev":"meas","t":16.104187894430257,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[16.104187894430257,2.0]}
+{"ev":"pass","t":16.104187894430257,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":16.104187894430257,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":16.104187894430257,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":16.104187894430257,"u":4}
+{"ev":"meas","t":16.104187894430257,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[16.104187894430257,0.5944760614127542]}
+{"ev":"job_end","t":16.381314845119544,"job":56}
+{"ev":"meas","t":16.381314845119544,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[16.381314845119544,1.0]}
+{"ev":"pass","t":16.381314845119544,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":16.381314845119544,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":16.381314845119544,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":16.381314845119544,"u":2}
+{"ev":"meas","t":16.381314845119544,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[16.381314845119544,0.3232762148455528]}
+{"ev":"pass","t":16.409747930523842,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":16.409747930523842,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":16.409747930523842,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":16.409747930523842,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":16.409747930523842,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":16.409747930523842,"job":57,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.4614054423308276}
+{"ev":"meas","t":16.409747930523842,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[16.409747930523842,2.0]}
+{"ev":"meas","t":16.409747930523842,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[16.409747930523842,0.4614054423308276]}
+{"ev":"pass","t":16.451254854658586,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":16.451254854658586,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":16.451254854658586,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":16.451254854658586,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":16.451254854658586,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":16.451254854658586,"job":58,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.10160060867921372}
+{"ev":"meas","t":16.451254854658586,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[16.451254854658586,3.0]}
+{"ev":"meas","t":16.451254854658586,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[16.451254854658586,0.10160060867921372]}
+{"ev":"meas","t":16.5092732217803,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[16.5092732217803,3.0]}
+{"ev":"meas","t":16.608798513036763,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[16.608798513036763,3.0]}
+{"ev":"job_end","t":16.68757034222585,"job":53}
+{"ev":"meas","t":16.68757034222585,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[16.68757034222585,2.0]}
+{"ev":"pass","t":16.68757034222585,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":16.68757034222585,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":16.68757034222585,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":16.68757034222585,"u":1}
+{"ev":"meas","t":16.68757034222585,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[16.68757034222585,1.254057160959574]}
+{"ev":"job_end","t":16.733227901206103,"job":58}
+{"ev":"meas","t":16.733227901206103,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[16.733227901206103,1.0]}
+{"ev":"pass","t":16.733227901206103,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":16.733227901206103,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":16.733227901206103,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":16.733227901206103,"u":4}
+{"ev":"meas","t":16.733227901206103,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[16.733227901206103,0.28197304654751676]}
+{"ev":"job_end","t":17.072279272790343,"job":57}
+{"ev":"meas","t":17.072279272790343,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[17.072279272790343,0.0]}
+{"ev":"pass","t":17.072279272790343,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":17.072279272790343,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":17.072279272790343,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":17.072279272790343,"u":2}
+{"ev":"meas","t":17.072279272790343,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[17.072279272790343,0.6625313422665009]}
+{"ev":"pass","t":17.197794266448177,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":17.197794266448177,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":17.197794266448177,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":17.197794266448177,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":17.197794266448177,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":17.197794266448177,"job":59,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.17678512325345397}
+{"ev":"meas","t":17.197794266448177,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[17.197794266448177,1.0]}
+{"ev":"meas","t":17.197794266448177,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[17.197794266448177,0.17678512325345397]}
+{"ev":"job_end","t":17.37457938970163,"job":59}
+{"ev":"meas","t":17.37457938970163,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[17.37457938970163,0.0]}
+{"ev":"pass","t":17.37457938970163,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":17.37457938970163,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":17.37457938970163,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":17.37457938970163,"u":1}
+{"ev":"meas","t":17.37457938970163,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[17.37457938970163,0.17678512325345253]}
+{"ev":"pass","t":17.392422387451433,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":17.392422387451433,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":17.392422387451433,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":17.392422387451433,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":17.392422387451433,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":17.392422387451433,"job":60,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.19328641580343106}
+{"ev":"meas","t":17.392422387451433,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[17.392422387451433,1.0]}
+{"ev":"meas","t":17.392422387451433,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[17.392422387451433,0.19328641580343106]}
+{"ev":"job_end","t":17.585708803254864,"job":60}
+{"ev":"meas","t":17.585708803254864,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[17.585708803254864,0.0]}
+{"ev":"pass","t":17.585708803254864,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":17.585708803254864,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":17.585708803254864,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":17.585708803254864,"u":2}
+{"ev":"meas","t":17.585708803254864,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[17.585708803254864,0.1932864158034313]}
+{"ev":"pass","t":17.732251167635752,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":17.732251167635752,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":17.732251167635752,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":17.732251167635752,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":17.732251167635752,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":17.732251167635752,"job":61,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.22175240316060688}
+{"ev":"meas","t":17.732251167635752,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[17.732251167635752,1.0]}
+{"ev":"meas","t":17.732251167635752,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[17.732251167635752,0.22175240316060688]}
+{"ev":"pass","t":17.777973810475082,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":17.777973810475082,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":17.777973810475082,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":17.777973810475082,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":17.777973810475082,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":17.777973810475082,"job":62,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.24284530343465752}
+{"ev":"meas","t":17.777973810475082,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[17.777973810475082,2.0]}
+{"ev":"meas","t":17.777973810475082,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[17.777973810475082,0.24284530343465752]}
+{"ev":"pass","t":17.92916622889363,"u":2,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":17.92916622889363,"u":2,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":17.92916622889363,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":17.92916622889363,"u":2,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":17.92916622889363,"u":2,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":17.92916622889363,"job":63,"u":2,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.3100682187794688}
+{"ev":"meas","t":17.92916622889363,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[17.92916622889363,3.0]}
+{"ev":"meas","t":17.92916622889363,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[17.92916622889363,0.3100682187794688]}
+{"ev":"meas","t":17.95400357079636,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[17.95400357079636,3.0]}
+{"ev":"meas","t":18.130033331117637,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.130033331117637,3.0]}
+{"ev":"job_end","t":18.23046688222964,"job":61}
+{"ev":"meas","t":18.23046688222964,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.23046688222964,2.0]}
+{"ev":"pass","t":18.23046688222964,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":18.23046688222964,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":18.23046688222964,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":18.23046688222964,"u":1}
+{"ev":"meas","t":18.23046688222964,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[18.23046688222964,0.49821571459388636]}
+{"ev":"pass","t":18.294695083772343,"u":1,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":18.294695083772343,"u":1,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":18.294695083772343,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":18.294695083772343,"u":1,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":18.294695083772343,"u":1,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":18.294695083772343,"job":64,"u":1,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.22299420405303635}
+{"ev":"meas","t":18.294695083772343,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.294695083772343,3.0]}
+{"ev":"meas","t":18.294695083772343,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[18.294695083772343,0.22299420405303635]}
+{"ev":"meas","t":18.3640979684564,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.3640979684564,3.0]}
+{"ev":"job_end","t":18.39879941079843,"job":62}
+{"ev":"meas","t":18.39879941079843,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.39879941079843,2.0]}
+{"ev":"pass","t":18.39879941079843,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":18.39879941079843,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":18.39879941079843,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":18.39879941079843,"u":4}
+{"ev":"meas","t":18.39879941079843,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[18.39879941079843,0.6208256003233465]}
+{"ev":"pass","t":18.621549897427066,"u":4,"type":"Start","el":"_h06_closed_think_ua2"}
+{"ev":"pass","t":18.621549897427066,"u":4,"type":"EntryLevelSystemCall","el":"_h06_closed_think_ua1"}
+{"ev":"call","t":18.621549897427066,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":18.621549897427066,"u":4,"ac":"_h06_closed_think_ac1","type":"StartAction","el":"_h06_closed_think_act2"}
+{"ev":"request","t":18.621549897427066,"u":4,"ac":"_h06_closed_think_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_h06_closed_think_act1"}
+{"ev":"job","t":18.621549897427066,"job":65,"u":4,"rc":"_h06_closed_think_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","d":0.09587016761482631}
+{"ev":"meas","t":18.621549897427066,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.621549897427066,3.0]}
+{"ev":"meas","t":18.621549897427066,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"Resource Demand Tuple","v":[18.621549897427066,0.09587016761482631]}
+{"ev":"meas","t":18.6844376599066,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.6844376599066,3.0]}
+{"ev":"job_end","t":18.715881541146366,"job":63}
+{"ev":"meas","t":18.715881541146366,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.715881541146366,2.0]}
+{"ev":"pass","t":18.715881541146366,"u":2,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":18.715881541146366,"u":2,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":18.715881541146366,"u":2,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":18.715881541146366,"u":2}
+{"ev":"meas","t":18.715881541146366,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[18.715881541146366,0.7867153122527348]}
+{"ev":"job_end","t":18.80682881546021,"job":64}
+{"ev":"meas","t":18.80682881546021,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.80682881546021,1.0]}
+{"ev":"pass","t":18.80682881546021,"u":1,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":18.80682881546021,"u":1,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":18.80682881546021,"u":1,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":18.80682881546021,"u":1}
+{"ev":"meas","t":18.80682881546021,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[18.80682881546021,0.512133731687868]}
+{"ev":"job_end","t":18.825781464678347,"job":65}
+{"ev":"meas","t":18.825781464678347,"mp":"ActiveResourceMeasuringPoint[_h06_closed_think_prs1|replicaID=0]","metric":"State of Active Resource Tuple","v":[18.825781464678347,0.0]}
+{"ev":"pass","t":18.825781464678347,"u":4,"ac":"_h06_closed_think_ac1","type":"StopAction","el":"_h06_closed_think_act3"}
+{"ev":"call_end","t":18.825781464678347,"u":4,"role":"_h06_closed_think_prov2","sig":"_h06_closed_think_sig1"}
+{"ev":"pass","t":18.825781464678347,"u":4,"type":"Stop","el":"_h06_closed_think_ua3"}
+{"ev":"user_end","t":18.825781464678347,"u":4}
+{"ev":"meas","t":18.825781464678347,"mp":"UsageScenarioMeasuringPoint[_h06_closed_think_us1]","metric":"Response Time Tuple","v":[18.825781464678347,0.20423156725128067]}
+{"ev":"stop","t":19.0}

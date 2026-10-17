@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h13_passive_contention",
+ "sim_time": 21,
+ "seed": 12,
+ "group": "failure"
+}

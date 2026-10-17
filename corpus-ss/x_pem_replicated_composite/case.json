@@ -1,0 +1,6 @@
+{
+ "model": "corpus/x_pem_replicated_composite",
+ "sim_time": 2,
+ "seed": 1,
+ "group": "failure"
+}

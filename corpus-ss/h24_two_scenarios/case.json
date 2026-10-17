@@ -1,0 +1,6 @@
+{
+ "model": "corpus/h24_two_scenarios",
+ "sim_time": 16,
+ "seed": 23,
+ "group": "corpus"
+}
