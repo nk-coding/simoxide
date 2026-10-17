@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:spdmeasuringpoint="http://palladiosimulator.org/PCM/SPDMeasuringPoint/1.0" id="_mpr">
+  <measuringPoints xsi:type="spdmeasuringpoint:ElasticInfrastructureMeasuringPoint" elasticInfrastructure="policies.spd#_tg_infra"/>
+  <measuringPoints xsi:type="spdmeasuringpoint:ServiceGroupMeasuringPoint" serviceGroup="policies.spd#_tg_svc"/>
+  <measuringPoints xsi:type="spdmeasuringpoint:CompetingConsumerGroupMeasuringPoint" competingConsumerGroup="policies.spd#_tg_cc"/>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Generates src/meta/generated.rs (metamodel tables) and extracts the bundled pathmap models.
+"""Generates src/meta/generated.rs and generated_ext.rs (metamodel tables) and extracts the
+bundled pathmap models.
 
 Reads the .ecore files and default models straight from the SimuLizar 5.2.2 product jars, so the
-tables are exactly the metamodels the reference runs with.
+tables are exactly the metamodels the reference runs with. The SPD metamodels (scaling policy
+definitions, their semantics and measuring points; not part of SimuLizar 5.2.2) come from the
+Slingshot product jars and are appended after the 5.2.2 packages, so every id of the 5.2.2 part
+stays the same.
 
-Usage: tools/gen_meta.py [PLUGINS_DIR]   (run from crates/simoxide-model),
+Usage: tools/gen_meta.py [PLUGINS_DIR [SPD_PLUGINS_DIR]]   (run from crates/simoxide-model),
 then `rustfmt --edition 2024 src/meta/generated.rs src/meta/generated_ext.rs`.
 """
 import os, re, sys, zipfile, glob
@@ -12,9 +16,14 @@ import xml.etree.ElementTree as ET
 
 PLUGINS = sys.argv[1] if len(sys.argv) > 1 else os.environ.get(
     'PALLADIO_PLUGINS', '/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins')
+# Slingshot install (org.palladiosimulator.spd* 1.0.0.202609010039; the .ecore files are identical
+# to Palladio-Addons-SPD-Metamodel commit 95cdb0b6, see LICENSES)
+SPD_PLUGINS = sys.argv[2] if len(sys.argv) > 2 else os.environ.get(
+    'SPD_PLUGINS', '/home/devbox/workspace/old/palladio-research/work-slingshot/sl-install/plugins')
 XSI = '{http://www.w3.org/2001/XMLSchema-instance}type'
 
-# (bundle symbolic name, path of the .ecore inside the jar)
+# (bundle symbolic name, path of the .ecore inside the jar[, plugins directory])
+# Append only: the table ids are positions in this order.
 ECORES = [
     ('de.uka.ipd.sdq.identifier', 'model/identifier.ecore'),
     ('de.uka.ipd.sdq.units', 'model/Units.ecore'),
@@ -27,7 +36,13 @@ ECORES = [
     ('org.palladiosimulator.monitorrepository.map', 'model/map.ecore'),
     ('org.palladiosimulator.pcm.edp2.measuringpoint', 'model/pcmmeasuringpoint.ecore'),
     ('org.palladiosimulator.simulizar.edp2.measuringpoint', 'model/simulizarmeasuringpoint.ecore'),
+    # appended: SPD (licence pending confirmation, see LICENSES)
+    ('org.palladiosimulator.spd', 'model/SPD.ecore', SPD_PLUGINS),
+    ('org.palladiosimulator.spd.semantic', 'model/semantic.ecore', SPD_PLUGINS),
+    ('org.palladiosimulator.spd.measuringpoint', 'model/spdmeasuringpoint.ecore', SPD_PLUGINS),
 ]
+# Files whose classifiers get constant names that never displace those of the 5.2.2 part.
+APPENDED = {'SPD.ecore', 'semantic.ecore', 'spdmeasuringpoint.ecore'}
 # bundled default models: (bundle, path in jar, uri prefix it is served under, file name)
 MODELS = [
     ('org.palladiosimulator.pcm.resources', 'defaultModels/Palladio.resourcetype'),
@@ -38,8 +53,9 @@ MODELS = [
     ('org.palladiosimulator.metricspec.resources', 'models/commonMetrics.metricspec'),
 ]
 
-def jar_for(bsn):
-    c = sorted(glob.glob(os.path.join(PLUGINS, bsn + '_*.jar')))
+def jar_for(bsn, plugins=None):
+    plugins = plugins or PLUGINS
+    c = sorted(glob.glob(os.path.join(plugins, bsn + '_*.jar')))
     c = [x for x in c if re.match(re.escape(bsn) + r'_\d', os.path.basename(x))]
     if not c:
         sys.exit('no jar for ' + bsn)
@@ -56,8 +72,11 @@ BUILTIN = {  # Ecore data types -> kind
 
 files = {}  # basename -> root
 nsfile = {}  # nsURI -> basename (top package)
-for bsn, path in ECORES:
-    z = zipfile.ZipFile(jar_for(bsn))
+jars = []  # basenames of the jars read, for the header
+for bsn, path, *src in ECORES:
+    jar = jar_for(bsn, *src)
+    jars.append(os.path.basename(jar))
+    z = zipfile.ZipFile(jar)
     root = ET.fromstring(z.read(path))
     files[os.path.basename(path)] = root
     nsfile[root.get('nsURI')] = os.path.basename(path)
@@ -108,7 +127,7 @@ def walk(fname, pkg, qual, pathprefix, parent=None, loc=None):
         walk(fname, sp, q, pathprefix + sp.get('name') + '/', pi)
 
 locations = {}  # file basename -> platform:/plugin URI of the .ecore
-for bsn, path in ECORES:
+for bsn, path, *_ in ECORES:
     locations[os.path.basename(path)] = f'platform:/plugin/{bsn}/{path}'
 for fname, root in files.items():
     walk(fname, root, '', '', None, locations[fname])
@@ -236,19 +255,38 @@ def all_feats(ci):
     memo_feat[ci] = res
     return res
 
-# constant names
-cls_count = {}
-for c in classes:
-    cls_count[c['name']] = cls_count.get(c['name'], 0) + 1
+# constant names: `package_Name` where the name is ambiguous. Ambiguity among the 5.2.2 classes
+# is decided among them alone, so appended metamodels never rename an existing constant; an
+# appended class is prefixed if its name occurs anywhere else.
+def counts(items, base_only):
+    n = {}
+    for x in items:
+        if not base_only or packages_file[x['pkg']] not in APPENDED:
+            n[x['name']] = n.get(x['name'], 0) + 1
+    return n
+packages_file = [p['loc'].rsplit('/', 1)[1] if p['loc'] else None for p in packages]
+for i, p in enumerate(packages):
+    if packages_file[i] is None:
+        packages_file[i] = packages_file[p['sup']]
+def const_name(x, base_count, all_count):
+    if packages_file[x['pkg']] in APPENDED:
+        ambiguous = all_count[x['name']] > 1
+    else:
+        ambiguous = base_count[x['name']] > 1
+    return packages[x['pkg']]['short'] + '_' + x['name'] if ambiguous else x['name']
+cls_base, cls_all = counts(classes, True), counts(classes, False)
 def cls_const(ci):
-    c = classes[ci]
-    if cls_count[c['name']] > 1:
-        return packages[c['pkg']]['short'] + '_' + c['name']
-    return c['name']
+    return const_name(classes[ci], cls_base, cls_all)
 
 out = []
 w = out.append
-w('// @generated by tools/gen_meta.py from the SimuLizar 5.2.2 product jars. Do not edit.')
+spd_jars = [j for j in jars if '.spd' in j]
+HEADER = ['// @generated by tools/gen_meta.py from the SimuLizar 5.2.2 product jars. Do not edit.']
+if spd_jars:
+    HEADER += ['// SPD packages appended from ' + ', '.join(spd_jars) + '.',
+               '// SPD-derived data: licence pending confirmation (see LICENSES).']
+for h in HEADER:
+    w(h)
 w('#![allow(non_upper_case_globals, clippy::all)]')
 w('use super::*;')
 w('')
@@ -306,11 +344,9 @@ w('')
 w('/// Enum constants.')
 w('pub mod enums {')
 w('    use super::EnumId;')
-ecount = {}
-for e in enums:
-    ecount[e['name']] = ecount.get(e['name'], 0) + 1
+enum_base, enum_all = counts(enums, True), counts(enums, False)
 for ei, e in enumerate(enums):
-    n = e['name'] if ecount[e['name']] == 1 else packages[e['pkg']]['short'] + '_' + e['name']
+    n = const_name(e, enum_base, enum_all)
     w(f'    pub const {n}: EnumId = EnumId({ei});')
 w('}')
 open('src/meta/generated.rs', 'w').write('\n'.join(out) + '\n')
@@ -324,7 +360,8 @@ def classifier_ref(k, i):
 
 ext = []
 w = ext.append
-w('// @generated by tools/gen_meta.py from the SimuLizar 5.2.2 product jars. Do not edit.')
+for h in HEADER:
+    w(h)
 w('#![allow(clippy::all)]')
 w('use super::*;')
 w('')

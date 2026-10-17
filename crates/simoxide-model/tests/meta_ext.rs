@@ -2,7 +2,8 @@
 
 use simoxide_model::meta::{
     CLASS_EXT, CLASSES, ClassId, ClassifierRef, DATA_TYPES, ENUMS, FEATURE_EXT, FEATURES,
-    FeatureKind, OPERATIONS, PACKAGE_EXT, PACKAGES, PackageId, TypeRef, class, feat,
+    FeatureKind, OPERATIONS, PACKAGE_EXT, PACKAGES, PackageId, TypeRef, class, enums, feat,
+    package_by_ns,
 };
 use simoxide_model::raw::{Graph, ResId};
 
@@ -141,4 +142,52 @@ fn appended_packages_keep_the_ids_of_the_base_tables() {
             x.name
         );
     }
+}
+
+#[test]
+fn spd_packages_are_appended() {
+    let (p, c, ..) = BASE;
+    let names: Vec<&str> = PACKAGES[p..].iter().map(|x| x.name).collect();
+    assert_eq!(
+        names,
+        [
+            "spd",
+            "spd.targets",
+            "spd.adjustments",
+            "spd.constraints",
+            "spd.constraints.policy",
+            "spd.constraints.target",
+            "spd.triggers",
+            "spd.triggers.stimuli",
+            "spd.triggers.expectations",
+            "semanticspd",
+            "spdmeasuringpoint",
+        ]
+    );
+    assert_eq!(
+        package_by_ns("http://palladiosimulator.org/ScalingPolicyDefinition/1.0"),
+        Some(PackageId(p as u32))
+    );
+    assert_eq!(class::SPD.0 as usize, c + 1);
+    assert_eq!(
+        PACKAGE_EXT[p].location,
+        Some("platform:/plugin/org.palladiosimulator.spd/model/SPD.ecore")
+    );
+    // cross-metamodel references and supertypes resolve into the base tables
+    assert!(class::SPD.is_a(class::Entity));
+    assert!(class::ElasticInfrastructureMeasuringPoint.is_a(class::MeasuringPoint));
+    assert_eq!(
+        class::ElasticInfrastructure
+            .feature("unit")
+            .and_then(|f| f.target()),
+        Some(class::ResourceContainer)
+    );
+    assert_eq!(
+        class::Configuration.feature("spd").and_then(|f| f.target()),
+        Some(class::SPD)
+    );
+    assert_eq!(
+        enums::RelationalOperator.def().literals[4].name,
+        "GreaterThanOrEqualTo"
+    );
 }

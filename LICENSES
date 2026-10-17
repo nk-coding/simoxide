@@ -35,9 +35,10 @@ Used in:
 - crates/simoxide-model/models/: Palladio.resourcetype, PrimitiveTypes.repository,
   FailureTypes.repository, Glassfish.repository, default_event_middleware.repository and
   commonMetrics.metricspec, copied verbatim from the 5.2.2 product.
-- crates/simoxide-model/src/meta/generated.rs: tables generated from the PCM, StoEx,
-  probability-function, units, identifier, metric-specification, EDP2, monitor-repository and
-  measuring-point metamodels (.ecore) of the 5.2.2 product.
+- crates/simoxide-model/src/meta/generated.rs, generated_ext.rs: tables generated from the PCM,
+  StoEx, probability-function, units, identifier, metric-specification, EDP2, monitor-repository
+  and measuring-point metamodels (.ecore) of the 5.2.2 product (the SPD packages appended to the
+  same tables: section 6).
 - reference/patches/src/, reference/patches/diffs/, reference/oracles/sched/patched/: modified
   copies of 5.2.2 source files (marked // REFSIM).
 - bench/compare/simucom/bundle/: PatchedSimuComJob follows SimuCom's SimuComJob.
@@ -134,8 +135,32 @@ is not an option either, because only the copyright holders could relicense the 
 Neither repository declares a licence. The models are used as test input only.
 
 
+6. Palladio SPD metamodels (scaling policy definitions) -- LICENCE PENDING CONFIRMATION
+-------------------------------------------------------------------------------------
+
+Source:    https://github.com/PalladioSimulator/Palladio-Addons-SPD-Metamodel, commit
+           95cdb0b677276f5d14c3001b89705a17d8fb690f (2026-08-18): bundles
+           org.palladiosimulator.spd (model/SPD.ecore), org.palladiosimulator.spd.semantic
+           (model/semantic.ecore) and org.palladiosimulator.spd.measuringpoint
+           (model/spdmeasuringpoint.ecore). The generator reads them from the Slingshot product
+           jars, version 1.0.0.202609010039, whose .ecore files are byte-identical to that commit.
+Copyright: Palladiosimulator.org and its contributors
+Licence:   pending confirmation; the user is clarifying it with the maintainers. The repository
+           has no LICENSE file and its feature.xml carries the template text; the bundles'
+           MANIFEST.MF declare "Bundle-License: The Apache License, Version 2.0"; Palladio
+           projects are EPL by convention.
+
+Used in:
+- crates/simoxide-model/src/meta/generated.rs, generated_ext.rs: the packages spd (with its 8
+  subpackages), semanticspd and spdmeasuringpoint, appended after the 5.2.2 packages.
+- reference/oracles/pcm-model/golden-spd/: canonical dumps written by EMF with the generated SPD
+  packages of the Slingshot jars (run-spd.sh); the models themselves are SimOxide's own.
+
+
 Open issues
 -----------
+
+- SPD metamodels (section 6): the licence of the generated SPD tables is not confirmed yet.
 
 - HotSpot LIBM port (section 4): binaries built with the feature "hotspot-math" must not be
   distributed; only the EPL build may be distributed as a binary. An independent implementation

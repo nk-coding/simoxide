@@ -23,7 +23,23 @@ public class PcmModelOracle {
             "resourcetype", "monitorrepository", "measuringpoint"};
 
     public static void main(String[] args) throws Exception {
-        File plugins = new File(args[0]);
+        setup(new File(args[0]));
+        Path out = Paths.get(args[2]);
+        Files.createDirectories(out);
+        for (String line : Files.readAllLines(Paths.get(args[1]))) {
+            if (line.isBlank() || line.startsWith("#")) continue;
+            String[] kv = line.split("\t");
+            try {
+                String dump = kv[1].equals("-") ? dumpBundled() : dumpDir(new File(kv[1]));
+                Files.write(out.resolve(kv[0] + ".jsonl"), dump.getBytes(StandardCharsets.UTF_8));
+            } catch (Throwable t) {
+                System.out.println("FAILED " + kv[0] + ": " + t);
+            }
+        }
+    }
+
+    /** Registers the generated 5.2.2 packages and maps platform:/plugin and pathmap URIs to the jars. */
+    static void setup(File plugins) throws IOException {
         // register the generated packages
         EPackage[] pkgs = {
             org.palladiosimulator.pcm.PcmPackage.eINSTANCE,
@@ -41,6 +57,11 @@ public class PcmModelOracle {
         if (pkgs.length == 0) throw new IllegalStateException();
         Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("*", new XMIResourceFactoryImpl());
         // pathmap + platform:/plugin mappings (as registered by the bundles' plugin.xml)
+        mapPlugins(plugins, bsn -> true);
+    }
+
+    /** Maps platform:/plugin/<bsn>/ to the jars of the directory whose bundle name passes the filter. */
+    static void mapPlugins(File plugins, java.util.function.Predicate<String> filter) throws IOException {
         for (File jar : plugins.listFiles((d, n) -> n.endsWith(".jar"))) {
             String bsn;
             try (JarFile jf = new JarFile(jar)) {
@@ -49,24 +70,13 @@ public class PcmModelOracle {
             }
             if (bsn == null) continue;
             bsn = bsn.split(";")[0].trim();
+            if (!filter.test(bsn)) continue;
             URI base = URI.createURI("jar:" + jar.toURI() + "!/");
             URIConverter.URI_MAP.put(URI.createURI("platform:/plugin/" + bsn + "/"), base);
             if (bsn.equals("org.palladiosimulator.pcm.resources"))
                 URIConverter.URI_MAP.put(URI.createURI("pathmap://PCM_MODELS/"), base.appendSegment("defaultModels").appendSegment(""));
             if (bsn.equals("org.palladiosimulator.metricspec.resources"))
                 URIConverter.URI_MAP.put(URI.createURI("pathmap://METRIC_SPEC_MODELS/"), base);
-        }
-        Path out = Paths.get(args[2]);
-        Files.createDirectories(out);
-        for (String line : Files.readAllLines(Paths.get(args[1]))) {
-            if (line.isBlank() || line.startsWith("#")) continue;
-            String[] kv = line.split("\t");
-            try {
-                String dump = kv[1].equals("-") ? dumpBundled() : dumpDir(new File(kv[1]));
-                Files.write(out.resolve(kv[0] + ".jsonl"), dump.getBytes(StandardCharsets.UTF_8));
-            } catch (Throwable t) {
-                System.out.println("FAILED " + kv[0] + ": " + t);
-            }
         }
     }
 
@@ -140,10 +150,14 @@ public class PcmModelOracle {
     }
 
     static String dumpDir(File dir) throws IOException {
+        return dumpDir(dir, EXT);
+    }
+
+    static String dumpDir(File dir, String[] ext) throws IOException {
         baseDir = dir.getAbsoluteFile().toPath().normalize();
         ResourceSet rs = newResourceSet();
         File[] files = dir.listFiles((d, n) -> {
-            for (String e : EXT) if (n.endsWith("." + e)) return new File(d, n).isFile();
+            for (String e : ext) if (n.endsWith("." + e)) return new File(d, n).isFile();
             return false;
         });
         Arrays.sort(files);
@@ -153,6 +167,7 @@ public class PcmModelOracle {
                 rs.getResource(URI.createFileURI(f.getAbsolutePath()), true);
             } catch (RuntimeException e) {
                 errors++;
+                if (System.getenv("ORACLE_ERRORS") != null) System.err.println(f + ": " + e);
             }
         }
         try {
@@ -166,6 +181,12 @@ public class PcmModelOracle {
     /** Pathmap (bundled) resources are only dumped by the "_bundled" entry. */
     static String dump(ResourceSet rs, int errors, boolean bundled) {
         for (Resource r : rs.getResources()) errors += r.getErrors().size();
+        if (System.getenv("ORACLE_ERRORS") != null)  // debugging aid: print the load errors
+            for (Resource r : rs.getResources())
+                for (Resource.Diagnostic d : r.getErrors()) {
+                    System.err.println(r.getURI() + ": " + d.getMessage());
+                    if (d instanceof Throwable && ((Throwable) d).getCause() != null) ((Throwable) d).getCause().printStackTrace();
+                }
         List<Resource> res = new ArrayList<>();
         for (Resource r : rs.getResources())
             if (!r.getContents().isEmpty() && (bundled || !name(r).startsWith("pathmap:"))) res.add(r);

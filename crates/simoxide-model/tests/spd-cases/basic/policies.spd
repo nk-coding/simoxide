@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spd:SPD xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:adjustments="http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0" xmlns:expectations="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Expectations/1.0" xmlns:policy="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:spd="http://palladiosimulator.org/ScalingPolicyDefinition/1.0" xmlns:stimuli="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Stimuli/1.0" xmlns:target="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0" xmlns:targets="http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0" xmlns:triggers="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0" id="_spd" entityName="policies">
+  <scalingPolicies id="_p_out" entityName="scale out on CPU" targetGroup="_tg_infra" active="true">
+    <adjustmentType xsi:type="adjustments:RelativeAdjustment" percentageGrowthValue="50" minAdjustmentValue="1"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_c_cool" cooldownTime="30.0" maxScalingOperations="2"/>
+    <policyConstraints xsi:type="policy:IntervalConstraint" id="_c_int" offset="10.0" intervalDuration="5.0" repeat="true"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_t_cpu" relationalOperator="GreaterThan">
+      <stimulus xsi:type="stimuli:CPUUtilization" aggregationOverElements="MAX"/>
+      <expectedValue xsi:type="expectations:ExpectedPercentage" value="80.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_p_in" entityName="scale in" targetGroup="_tg_infra">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="-1"/>
+    <scalingTrigger xsi:type="triggers:ComposedTrigger" id="_t_comp" logicalOperator="OR">
+      <scalingtrigger xsi:type="triggers:SimpleFireOnValue" id="_t_time" relationalOperator="GreaterThanOrEqualTo">
+        <stimulus xsi:type="stimuli:SimulationTime"/>
+        <expectedValue xsi:type="expectations:ExpectedTime" value="20.0"/>
+      </scalingtrigger>
+      <scalingtrigger xsi:type="triggers:SimpleFireOnTrend" id="_t_trend">
+        <stimulus xsi:type="stimuli:HDDUtilization" usageType="WRITE"/>
+        <expectedValue xsi:type="expectations:ExpectedTrend" trend="NonIncreasing"/>
+      </scalingtrigger>
+      <scalingtrigger xsi:type="triggers:SimpleFireOnValue" id="_t_net" relationalOperator="LessThan">
+        <stimulus xsi:type="stimuli:NetworkUtilization" usageType="RECEIVE"/>
+        <expectedValue xsi:type="expectations:NoExpectation"/>
+      </scalingtrigger>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_p_svc" entityName="services" targetGroup="_tg_svc" active="false">
+    <adjustmentType xsi:type="adjustments:AbsoluteAdjustment" goalValue="3"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_t_rt" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:OperationResponseTime">
+        <operationSignature href="h01_ps_single.repository#_h01_ps_single_sig1"/>
+      </stimulus>
+      <expectedValue xsi:type="expectations:ExpectedCount" count="4"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_p_cc" entityName="consumers" targetGroup="_tg_cc">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="1"/>
+    <scalingTrigger xsi:type="triggers:ComposedTrigger" id="_t_and" logicalOperator="XOR">
+      <scalingtrigger xsi:type="triggers:SimpleFireOnValue" id="_t_ql" relationalOperator="LessThanOrEqualTo">
+        <stimulus xsi:type="stimuli:QueueLength"/>
+        <expectedValue xsi:type="expectations:ExpectedCount" count="10"/>
+      </scalingtrigger>
+      <scalingtrigger xsi:type="triggers:SimpleFireOnValue" id="_t_tc" relationalOperator="GreaterThan">
+        <stimulus xsi:type="stimuli:TaskCount" aggregationOverElements="SUM"/>
+        <expectedValue xsi:type="expectations:ExpectedCount" count="2"/>
+      </scalingtrigger>
+      <scalingtrigger xsi:type="triggers:SimpleFireOnValue" id="_t_mem" relationalOperator="GreaterThan">
+        <stimulus xsi:type="stimuli:MemoryUtilization" aggregationOverElements="MEDIAN"/>
+        <expectedValue xsi:type="expectations:ExpectedPercentage" value="0.5"/>
+      </scalingtrigger>
+      <scalingtrigger xsi:type="triggers:SimpleFireOnValue" id="_t_n" relationalOperator="LessThan">
+        <stimulus xsi:type="stimuli:NumberOfElements"/>
+        <expectedValue xsi:type="expectations:ExpectedCount" count="1"/>
+      </scalingtrigger>
+    </scalingTrigger>
+  </scalingPolicies>
+  <targetGroups xsi:type="targets:ElasticInfrastructure" id="_tg_infra" entityName="infrastructure">
+    <targetConstraints xsi:type="target:TargetGroupSizeConstraint" id="_c_size" minSize="1" maxSize="5"/>
+    <targetConstraints xsi:type="target:ThrashingConstraint" id="_c_thrash" minimumTimeNoThrashing="15.0"/>
+    <PCM_ResourceEnvironment href="h01_ps_single.resourceenvironment#/"/>
+    <unit href="h01_ps_single.resourceenvironment#_h01_ps_single_rc1"/>
+  </targetGroups>
+  <targetGroups xsi:type="targets:ServiceGroup" id="_tg_svc" entityName="services">
+    <unitAssembly href="h01_ps_single.system#_h01_ps_single_ac1"/>
+  </targetGroups>
+  <targetGroups xsi:type="targets:CompetingConsumersGroup" id="_tg_cc" entityName="consumers">
+    <unitAssembly href="h01_ps_single.system#_h01_ps_single_ac1"/>
+  </targetGroups>
+</spd:SPD>

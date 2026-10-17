@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<semanticspd:Configuration xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:semanticspd="http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0" spd="policies.spd#_spd" enactedPolicy="policies.spd#_p_out">
+  <targetCfgs xsi:type="semanticspd:ElasticInfrastructureCfg" enactedPolicies="policies.spd#_p_out policies.spd#_p_in" unit="h01_ps_single.resourceenvironment#_h01_ps_single_rc1" elements="h01_ps_single.resourceenvironment#_h01_ps_single_rc1" resourceEnvironment="h01_ps_single.resourceenvironment#/"/>
+  <targetCfgs xsi:type="semanticspd:ServiceGroupCfg" enactedPolicies="policies.spd#_p_svc" unit="h01_ps_single.system#_h01_ps_single_ac1" elements="h01_ps_single.system#_h01_ps_single_ac1" loadBalancingAssembly="h01_ps_single.system#_h01_ps_single_ac1"/>
+  <targetCfgs xsi:type="semanticspd:CompetingConsumersGroupCfg" enactedPolicies="policies.spd#_p_cc" unit="h01_ps_single.system#_h01_ps_single_ac1" brokerAssembly="h01_ps_single.system#_h01_ps_single_ac1">
+    <unitQueues name="orders" usageScenarioForConsumption="h01_ps_single.usagemodel#_h01_ps_single_us1"/>
+  </targetCfgs>
+  <allocation href="h01_ps_single.allocation#_h01_ps_single_allocation1"/>
+  <system href="h01_ps_single.system#_h01_ps_single_system1"/>
+  <resourceEnvironment href="h01_ps_single.resourceenvironment#/"/>
+  <repository href="h01_ps_single.repository#_h01_ps_single_repository1"/>
+</semanticspd:Configuration>

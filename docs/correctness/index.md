@@ -26,7 +26,7 @@ order in which it drains processes after the stop).
 | Saved fuzz and regression cases (`corpus-fuzz/`, `crates/simoxide-sim/tests/models*`) | all pass, including the cases where the reference aborts: same error, identical trace prefix |
 | Differential fuzzing: about 12 000 generated models, with default features, boosted features and all 15 optional features at once | no open divergence; SimOxide also aborts wherever the reference does |
 | Long runs (20 000 measurements, up to 2.2 million tuples; traces up to 1.2 GB in fuzzing) | identical |
-| Component oracles: StoEx (8 834 cases), random numbers and distributions (10^6-sample goldens), `Math.log`/`exp` (1.1 million inputs), schedulers (39 traces), XMI loader against EMF (163 model directories) | exact |
+| Component oracles: StoEx (8 834 cases), random numbers and distributions (10^6-sample goldens), `Math.log`/`exp` (1.1 million inputs), schedulers (39 traces), XMI loader against EMF (165 model directories, and SPD models against EMF with the Slingshot SPD packages) | exact |
 | Statistical validation against queueing theory (M/M/1, M/D/1, M/G/1-PS, M/M/c, Jackson, MVA, fork/join) | 10/10 within 99.9 % confidence intervals, in both modes |
 | Fast mode against exact mode: 1 396 models, 40 to 100 seeds per mode, about 105 000 tests | no difference after Holm correction |
 | `cargo test --release --workspace` (2026-09-30) | 208 passed, 0 failed; the 25 ignored slow and reference tests pass as well |

@@ -1,5 +1,7 @@
 //! Static metamodel tables (EPackages, EClasses, EStructuralFeatures, EEnums) generated from the
-//! `.ecore` files shipped in the SimuLizar 5.2.2 product (see `tools/gen_meta.py`).
+//! `.ecore` files shipped in the SimuLizar 5.2.2 product (see `tools/gen_meta.py`), followed by
+//! the SPD, semanticspd and spdmeasuringpoint packages of Slingshot (appended, so the ids of the
+//! 5.2.2 part do not depend on them).
 //!
 //! The generic XMI layer ([`crate::raw`]) is driven entirely by these tables, which is what makes
 //! it reproduce EMF's behaviour (feature lookup, defaults, containment order, opposites, IDs) for
