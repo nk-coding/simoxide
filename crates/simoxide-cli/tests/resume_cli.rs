@@ -215,7 +215,9 @@ fn resume_with_a_change_file() {
             "population RealisticUsageScenario 3\n",
             "not a closed workload",
         ),
-        ("delete _sj2LoLYiEeaM_9DBke4xEw\n", "SimuLizar aborts"),
+        // F4: deleting the allocation context leaves the assembly unallocated, which the
+        // model validation refuses (SimuLizar's abort is `removal keep`)
+        ("delete _sj2LoLYiEeaM_9DBke4xEw\n", "is not allocated"),
         ("rate NoSuchServer 2\n", "line 1: no element"),
     ] {
         std::fs::write(d.join("bad.changes"), text).unwrap();
@@ -231,7 +233,7 @@ fn resume_with_a_change_file() {
     }
     let err = fails(&["resume", &snap, "--model", &model, "--enforce", "scaleOut"]);
     assert!(err.contains("no scaling policies"), "{err}");
-    // a closed workload's population: not supported before F4
+    // a closed workload's population (F4: applied)
     let h06 = root()
         .join("corpus/h06_closed_think")
         .to_string_lossy()
@@ -249,7 +251,7 @@ fn resume_with_a_change_file() {
         &s6,
     ]);
     std::fs::write(d.join("pop.changes"), "population Scenario 8\n").unwrap();
-    let err = fails(&[
+    let err = ok(&[
         "resume",
         &s6,
         "--model",
@@ -258,10 +260,10 @@ fn resume_with_a_change_file() {
         &p("pop.changes"),
     ]);
     assert!(
-        err.contains("unsupported model change") && err.contains("population"),
+        err.contains("closed population") && err.contains("4 -> 8"),
         "{err}"
     );
-    // the Slingshot flavour takes no model changes before F4
+    // the Slingshot flavour takes model changes (F4)
     let ss = root()
         .join("corpus/x_ss_minimal")
         .to_string_lossy()
@@ -279,8 +281,8 @@ fn resume_with_a_change_file() {
         &s7,
     ]);
     std::fs::write(d.join("ss.changes"), "rate ResourceContainer1 2\n").unwrap();
-    let err = fails(&["resume", &s7, "--model", &ss, "--change", &p("ss.changes")]);
-    assert!(err.contains("Slingshot-flavour"), "{err}");
+    let err = ok(&["resume", &s7, "--model", &ss, "--change", &p("ss.changes")]);
+    assert!(err.contains("generation 1"), "{err}");
     std::fs::remove_dir_all(&d).unwrap();
 }
 
