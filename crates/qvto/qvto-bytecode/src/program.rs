@@ -239,6 +239,8 @@ pub struct Program {
     /// Per operation of `ir.operations`: the operation that overrides it in the end
     /// (`extends`), itself if none.
     pub overriding: Vec<OpId>,
+    /// Per class of `ir.meta`: a class of QVTo's library package (instances are engine-local).
+    pub library_classes: Vec<bool>,
 }
 
 impl Program {

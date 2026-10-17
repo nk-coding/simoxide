@@ -423,6 +423,12 @@ qvto crates/qvto-cli/bench/micro/sets.qvto
 bench group B6
 end
 
+case b6_hashsets
+kind bench
+qvto crates/qvto-cli/bench/micro/hashsets.qvto
+bench group B6
+end
+
 case b6_dict
 kind bench
 qvto crates/qvto-cli/bench/micro/dict.qvto

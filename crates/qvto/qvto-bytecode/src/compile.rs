@@ -123,6 +123,11 @@ pub fn compile(ir: ir::Program) -> CResult<Program> {
         );
     }
     let overriding = overriding_table(&ir);
+    let library_classes = ir
+        .meta
+        .classes()
+        .map(|c| ir.meta.class(c).package == ir.std_classes.package)
+        .collect();
     Ok(Program {
         ir,
         consts: consts.consts,
@@ -134,6 +139,7 @@ pub fn compile(ir: ir::Program) -> CResult<Program> {
         meta_bodies,
         derivations,
         overriding,
+        library_classes,
     })
 }
 

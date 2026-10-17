@@ -22,12 +22,8 @@ use std::rc::Rc;
 /// ([`IntermInfo::in_store`]).
 pub fn local_classes(p: &Program, interm_in_store: bool) -> Vec<bool> {
     let meta = &p.ir.meta;
-    let mut v = vec![false; meta.class_count()];
-    for c in meta.classes() {
-        if meta.class(c).package == p.ir.std_classes.package {
-            v[c.index()] = true;
-        }
-    }
+    let mut v = p.library_classes.clone();
+    v.resize(meta.class_count(), false);
     let exception = p.ir.std_classes.exception;
     for ic in &p.ir.interm_classes {
         if !interm_in_store || ic.exception || meta.is_subclass(ic.class, exception) {

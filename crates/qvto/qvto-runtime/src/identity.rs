@@ -168,16 +168,19 @@ impl IdentityHashSource for Sequential {
 
 /// Memoised identity hashes: one value per key for the whole run, as in Java.
 pub struct IdentityHashes {
-    /// Host objects by index (the common key; a dense table).
-    objs: Vec<Option<i32>>,
+    /// Host objects by index, in pages of 512 allocated on first use (handles are dense but
+    /// can be large: a run touches few of a big store's objects).
+    pages: Vec<Option<Box<[Option<i32>; PAGE]>>>,
     memo: crate::fxhash::FxHashMap<IdentityKey, i32>,
     source: Box<dyn IdentityHashSource>,
 }
 
+const PAGE: usize = 512;
+
 impl IdentityHashes {
     pub fn new(source: Box<dyn IdentityHashSource>) -> Self {
         IdentityHashes {
-            objs: Vec::new(),
+            pages: Vec::new(),
             memo: Default::default(),
             source,
         }
@@ -187,14 +190,17 @@ impl IdentityHashes {
             && !o.is_local()
         {
             let i = o.index() as usize;
-            if let Some(Some(h)) = self.objs.get(i) {
-                return *h;
+            let (p, j) = (i / PAGE, i % PAGE);
+            if let Some(Some(page)) = self.pages.get(p)
+                && let Some(h) = page[j]
+            {
+                return h;
             }
             let h = self.source.draw(key);
-            if self.objs.len() <= i {
-                self.objs.resize(i + 1, None);
+            if self.pages.len() <= p {
+                self.pages.resize_with(p + 1, || None);
             }
-            self.objs[i] = Some(h);
+            self.pages[p].get_or_insert_with(|| Box::new([None; PAGE]))[j] = Some(h);
             return h;
         }
         if let Some(&h) = self.memo.get(&key) {
@@ -209,7 +215,8 @@ impl IdentityHashes {
         if let IdentityKey::Obj(o) = key
             && !o.is_local()
         {
-            return self.objs.get(o.index() as usize).copied().flatten();
+            let i = o.index() as usize;
+            return self.pages.get(i / PAGE)?.as_ref()?[i % PAGE];
         }
         self.memo.get(&key).copied()
     }

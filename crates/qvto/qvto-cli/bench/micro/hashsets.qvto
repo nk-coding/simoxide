@@ -1,0 +1,19 @@
+-- Hash lookups and set algebra on Integers and Strings: asSet, includes, union, intersection,
+-- excluding, Bag counts (benchmark B6; compat keeps Java's HashMap order, fast mode does not).
+transformation hashsets();
+
+main() {
+	var xs := Sequence{1..40000}->collect(i | (i * 7919).mod(60013));
+	var a := xs->asSet();
+	var b := xs->collect(x | x + 7)->asSet();
+	var hits := 0;
+	xs->forEach(x) { if (a->includes(x + 1)) then { hits := hits + 1 } endif };
+	var u := a->union(b);
+	var n := a->intersection(b);
+	var d := a - b;
+	var strs := Sequence{1..5000}->collect(i | 's' + i.toString())->asSet();
+	var shits := Sequence{1..20000}->select(i | strs->includes('s' + (i.mod(7000)).toString()))->size();
+	var bag := xs->collect(x | x.mod(100))->asBag();
+	log(hits.toString() + ' ' + u->size().toString() + ' ' + n->size().toString() + ' ' + d->size().toString()
+		+ ' ' + shits.toString() + ' ' + bag->count(7).toString());
+}
