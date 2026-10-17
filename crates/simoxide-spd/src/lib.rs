@@ -32,6 +32,8 @@ pub mod log;
 pub mod model;
 mod quirks;
 #[cfg(feature = "sim")]
+pub mod resume;
+#[cfg(feature = "sim")]
 pub mod sim;
 #[cfg(feature = "snapshot")]
 pub mod snapshot;

@@ -49,6 +49,7 @@ mod slingshot;
 #[cfg(feature = "snapshot")]
 mod snapshot;
 mod state;
+pub mod watch;
 
 pub use hooks::ObservedTuple;
 use reconf::{FinStep, Prm, Reconf, prm_tuple, prm_write, reconf_resume};
