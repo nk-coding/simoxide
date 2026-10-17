@@ -1,0 +1,13 @@
+modeltype FZ uses fz('http://qvto-rs/fuzz');
+transformation d(in m : FZ, out o : FZ);
+main() {
+	m.rootObjects()![FZ::Root].map toR();
+}
+mapping FZ::Root::toR() : FZ::Root {
+	nodes += self.nodes->map toN();
+	end {
+		log('q', FZ::Node.allInstances()->size());
+		result.nodes := result.nodes->excluding(result.nodes->first());
+	}
+}
+mapping FZ::Node::toN() : FZ::Node { name := self.name; }

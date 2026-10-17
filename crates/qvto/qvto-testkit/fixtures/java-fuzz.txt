@@ -90,6 +90,97 @@ exec	1	OK	0	a
 exec	1	OK	0	d
 exec	1	OK	0	g
 
+@case fuzz_extent_roots_a
+@file result.txt 152
+id	fuzz_extent_roots_a
+load	OK
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 449
+{"resource":"extent1.xmi","roots":2}
+{"path":"/0","type":"http://qvto-rs/fuzz#Root","attrs":{"name":"r"},"refs":{}}
+{"path":"/0/@nodes.0","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"y","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/1","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"x","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+
+@file log.txt 26
+q, data: 3
+roots, data: 1
+
+@file diag.txt 32
+exec	1	OK	0	q
+exec	1	OK	0	roots
+
+@case fuzz_extent_roots_b
+@file result.txt 152
+id	fuzz_extent_roots_b
+load	OK
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 449
+{"resource":"extent1.xmi","roots":2}
+{"path":"/0","type":"http://qvto-rs/fuzz#Root","attrs":{"name":"r"},"refs":{}}
+{"path":"/0/@nodes.0","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"y","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/1","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"x","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+
+@case fuzz_extent_roots_c
+@file result.txt 152
+id	fuzz_extent_roots_c
+load	OK
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	0
+verdict	pass
+
+@file out.jsonl 449
+{"resource":"extent1.xmi","roots":2}
+{"path":"/0","type":"http://qvto-rs/fuzz#Root","attrs":{"name":"r"},"refs":{}}
+{"path":"/0/@nodes.0","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"y","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+{"path":"/1","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"x","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+
+@file log.txt 11
+q, data: 3
+
+@file diag.txt 14
+exec	1	OK	0	q
+
+@case fuzz_extent_roots_d
+@file result.txt 152
+id	fuzz_extent_roots_d
+load	OK
+params	in:m,out:o
+severity	OK
+code	0
+message	Transformation execution completed
+exception	-
+trace-records	2
+verdict	pass
+
+@file out.jsonl 279
+{"resource":"extent1.xmi","roots":2}
+{"path":"/0","type":"http://qvto-rs/fuzz#Root","attrs":{"name":null},"refs":{}}
+{"path":"/1","type":"http://qvto-rs/fuzz#Node","attrs":{"name":"x","value":"0","big":"0","weight":"0.0","flag":"false","kind":"A","tags":[],"nums":[]},"refs":{}}
+
+@file log.txt 11
+q, data: 2
+
+@file diag.txt 14
+exec	1	OK	0	q
+
 @case fuzz_flatten
 @file result.txt 135
 id	fuzz_flatten

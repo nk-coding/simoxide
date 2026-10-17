@@ -171,3 +171,47 @@ in ecoreprint.xmi
 mmfile ../fuzz.ecore
 note objects of Ecore's classes print with their generated toString; OCL primitive types as PrimitiveTypeImpl
 end
+
+case fuzz_extent_roots_a
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/extent_roots
+qvto a.qvto
+in a.xmi
+mmfile ../fuzz.ecore
+note objects added to the in-memory extent resource are roots at the end when they have no container, even if a purge dropped them (ResourceModificationAdapter)
+end
+
+case fuzz_extent_roots_b
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/extent_roots
+qvto b.qvto
+in b.xmi
+mmfile ../fuzz.ecore
+note objects added to the in-memory extent resource are roots at the end when they have no container, even if a purge dropped them (ResourceModificationAdapter)
+end
+
+case fuzz_extent_roots_c
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/extent_roots
+qvto c.qvto
+in c.xmi
+mmfile ../fuzz.ecore
+note objects added to the in-memory extent resource are roots at the end when they have no container, even if a purge dropped them (ResourceModificationAdapter)
+end
+
+case fuzz_extent_roots_d
+driver fuzz
+kind log
+features fuzz
+dir crates/qvto-testkit/fuzz/extent_roots
+qvto d.qvto
+in d.xmi
+mmfile ../fuzz.ecore
+note objects added to the in-memory extent resource are roots at the end when they have no container, even if a purge dropped them (ResourceModificationAdapter)
+end

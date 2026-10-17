@@ -1489,6 +1489,7 @@ where
         } else if let Some(i) = e.additional.iter().position(|o| *o == r) {
             e.additional.remove(i);
         }
+        e.forget_resource_addition(r);
     }
 
     /// `sortedBy`: elements sorted by their keys (stable; the last key of equal elements

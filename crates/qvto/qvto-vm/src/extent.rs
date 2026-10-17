@@ -39,6 +39,7 @@ pub struct Extent {
     /// Objects added to a watched resource (`myResourceAdditionalEObjects`, e.g. UML stereotype
     /// applications added by a blackbox): roots of the contents if they have no container.
     pub resource_additional: Vec<ObjRef>,
+    resource_additional_set: std::collections::HashSet<ObjRef>,
 }
 
 impl Extent {
@@ -57,6 +58,7 @@ impl Extent {
             model_type: None,
             watched: Vec::new(),
             resource_additional: Vec::new(),
+            resource_additional_set: std::collections::HashSet::new(),
         }
     }
 
@@ -98,6 +100,7 @@ impl Extent {
                     None => {
                         let r = self.in_memory(s, next_uri);
                         let _ = s.add_root(r, h, None);
+                        self.record_resource_addition(o);
                     }
                     Some(r) => {
                         if !self.watched.contains(&r) {
@@ -121,6 +124,22 @@ impl Extent {
     }
 
     /// Whether a root added to `r` is recorded (`ResourceModificationAdapter`).
+    /// An object added to the in-memory resource: the extent's `ResourceModificationAdapter`
+    /// records it, so that it is a root at the end if it then has no container, even when a
+    /// purge dropped it from the additional objects meanwhile (`getContents`).
+    pub fn record_resource_addition(&mut self, o: ObjRef) {
+        if self.resource_additional_set.insert(o) {
+            self.resource_additional.push(o);
+        }
+    }
+
+    /// `removeElement`: no longer a candidate root.
+    pub fn forget_resource_addition(&mut self, o: ObjRef) {
+        if self.resource_additional_set.remove(&o) {
+            self.resource_additional.retain(|x| *x != o);
+        }
+    }
+
     pub fn watches(&self, r: ResourceId) -> bool {
         !self.is_readonly() && (self.resource == Some(r) || self.watched.contains(&r))
     }
@@ -136,6 +155,7 @@ impl Extent {
             if s.resource_of(h).is_none() {
                 let r = self.in_memory(s, next_uri);
                 let _ = s.add_root(r, h, None);
+                self.record_resource_addition(o);
             }
         }
         self.count_after_purge += 1;
