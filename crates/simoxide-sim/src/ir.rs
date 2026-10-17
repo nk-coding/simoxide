@@ -803,7 +803,9 @@ impl CompiledModel {
     /// [`CompiledModel::compile`] starting from the keys, programs and series of `seed`: equal
     /// keys, StoEx strings and (measuring point, metric) pairs get the seed's ids. Used to
     /// recompile a changed model for a running simulation (`crate::change`).
-    pub fn compile_seeded(model: Model, seed: Seed) -> Result<CompiledModel, CompileError> {
+    pub fn compile_seeded(mut model: Model, seed: Seed) -> Result<CompiledModel, CompileError> {
+        // runs copy the model graph for model changes and QVTo (cheap once frozen)
+        model.graph.freeze();
         let m = &model;
         let flavour = seed.flavour;
         if flavour.kind == crate::flavour::FlavourKind::SimuLizar && !flavour.quirks.is_empty() {

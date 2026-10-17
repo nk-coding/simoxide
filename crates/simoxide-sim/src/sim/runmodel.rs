@@ -100,7 +100,6 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         let same = graph.object_count() >= old.object_count()
             && old
                 .objects()
-                .iter()
                 .zip(graph.objects())
                 .all(|(a, b)| a.class == b.class);
         if !same {

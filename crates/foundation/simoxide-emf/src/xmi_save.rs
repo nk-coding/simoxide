@@ -239,13 +239,13 @@ pub fn save(g: &Graph, r: ResourceId, opts: &SaveOptions) -> Result<String, Stri
     let encoding = opts
         .encoding
         .clone()
-        .unwrap_or_else(|| res.encoding.clone());
+        .unwrap_or_else(|| res.encoding.to_string());
     let limit = match encoding.to_ascii_uppercase().as_str() {
         "ASCII" | "US-ASCII" => 127,
         "ISO-8859-1" => 255,
         _ => 0x10FFFF,
     };
-    let xmi_uri = match res.xmi_version.as_str() {
+    let xmi_uri = match &*res.xmi_version {
         "2.0" => "http://www.omg.org/XMI".to_string(),
         "2.1" => "http://schema.omg.org/spec/XMI/2.1".to_string(),
         v => format!("http://www.omg.org/spec/XMI/{v}"),

@@ -256,7 +256,6 @@ fn samples_have_the_features_of_their_generic_supertype() {
     let (g, diags) = l.finish();
     let samples: Vec<_> = g
         .objects()
-        .iter()
         .enumerate()
         .filter(|(_, o)| o.class.is_a(meta::class::Sample))
         .map(|(i, _)| raw::ObjId(i as u32))

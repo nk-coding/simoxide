@@ -95,12 +95,13 @@ pub(crate) struct IdMaps {
 #[derive(Clone, Debug)]
 pub struct Resource {
     pub uri: String,
-    pub(crate) parsed: Uri,
+    /// The parsed URI, on first use.
+    pub(crate) parsed: std::sync::OnceLock<Uri>,
     pub roots: Vec<ObjId>,
     pub kind: ResourceKind,
-    pub encoding: String,
-    pub xml_version: String,
-    pub xmi_version: String,
+    pub encoding: std::borrow::Cow<'static, str>,
+    pub xml_version: std::borrow::Cow<'static, str>,
+    pub xmi_version: std::borrow::Cow<'static, str>,
     pub(crate) ids: Option<IdMaps>,
     /// Short name for dumps and diagnostics (a host's choice; the URI by default).
     pub name: String,
@@ -119,7 +120,7 @@ pub struct Resource {
 
 impl Resource {
     pub fn parsed_uri(&self) -> &Uri {
-        &self.parsed
+        self.parsed.get_or_init(|| Uri::parse(&self.uri))
     }
     /// The `xmi:id` of an object of this resource.
     pub fn xmi_id(&self, o: ObjId) -> Option<&str> {
@@ -158,8 +159,9 @@ impl DerivedCell {
 }
 
 impl Clone for DerivedCell {
+    /// An empty cache (it is a cache: entries are computed again on demand).
     fn clone(&self) -> Self {
-        DerivedCell(Mutex::new(self.lock().clone()))
+        DerivedCell::default()
     }
 }
 
@@ -182,9 +184,9 @@ pub struct Graph {
     pub(crate) meta: Arc<MetaRegistry>,
     pub(crate) ecore: EcoreIds,
     pub(crate) hooks: Arc<[Hook]>,
-    pub(crate) objs: Vec<Object>,
+    pub(crate) objs: crate::chunks::ChunkVec<Object>,
     pub(crate) resources: Vec<Resource>,
-    pub(crate) links: MetaLinks,
+    pub(crate) links: Arc<MetaLinks>,
     /// Changes of objects of Ecore's classes (the derived lists of `ecore_hooks` depend on
     /// nothing else); the version of [`Graph::derived_cache`]'s entries.
     pub(crate) ecore_gen: u64,
@@ -230,9 +232,9 @@ impl Graph {
             meta: Arc::new(meta),
             ecore,
             hooks,
-            objs: Vec::new(),
+            objs: Default::default(),
             resources: Vec::new(),
-            links: MetaLinks::default(),
+            links: Default::default(),
             ecore_gen: 0,
             derived_cache: Default::default(),
             journal: None,
@@ -248,9 +250,9 @@ impl Graph {
             meta: self.meta.clone(),
             ecore: self.ecore.clone(),
             hooks: self.hooks.clone(),
-            objs: Vec::new(),
+            objs: Default::default(),
             resources: Vec::new(),
-            links: MetaLinks::default(),
+            links: Default::default(),
             ecore_gen: 0,
             derived_cache: Default::default(),
             journal: None,
@@ -262,6 +264,14 @@ impl Graph {
     /// entries must not be changed.
     pub fn meta_mut(&mut self) -> &mut MetaRegistry {
         Arc::make_mut(&mut self.meta)
+    }
+
+    /// Makes copies of this graph cheap: its objects move into shared, copy-on-write chunks
+    /// (objects created later are copied with the graph until the next `freeze`). For hosts that
+    /// copy a loaded model graph (simulation runs, forks, model changes); loading is faster
+    /// before it.
+    pub fn freeze(&mut self) {
+        self.objs.freeze();
     }
 
     /// The shared registry.
@@ -289,7 +299,7 @@ impl Graph {
         &self.links
     }
     pub fn links_mut(&mut self) -> &mut MetaLinks {
-        &mut self.links
+        Arc::make_mut(&mut self.links)
     }
     pub fn object(&self, o: ObjId) -> &Object {
         &self.objs[o.index()]
@@ -319,7 +329,7 @@ impl Graph {
         let id = ResourceId(self.resources.len() as u32);
         self.resources.push(Resource {
             uri: uri.to_string(),
-            parsed: Uri::parse(uri),
+            parsed: std::sync::OnceLock::new(),
             roots: Vec::new(),
             kind,
             encoding: match kind {

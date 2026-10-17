@@ -11,13 +11,16 @@
 use crate::graph::{Graph, ObjId, Slot, Value};
 use crate::ids::{IdPolicy, UuidGen};
 use qvto_model::{ClassId, FeatureId, ResourceId};
+use std::sync::Arc;
 
 impl Graph {
     // ---- reading ------------------------------------------------------------------------------
 
-    /// The objects (index = `ObjId`).
-    pub fn objects(&self) -> &[crate::graph::Object] {
-        &self.objs
+    /// The objects in id order.
+    pub fn objects(
+        &self,
+    ) -> impl ExactSizeIterator<Item = &crate::graph::Object> + DoubleEndedIterator + '_ {
+        self.objs.iter()
     }
 
     /// The resources (index = `ResourceId`).
@@ -172,6 +175,11 @@ impl Graph {
     /// values, container or resource; not recorded.
     pub fn load_object(&mut self, c: ClassId) -> ObjId {
         self.new_object(c)
+    }
+
+    /// Reserves room for `n` more objects (a loader's estimate).
+    pub fn reserve_objects(&mut self, n: usize) {
+        self.objs.reserve(n);
     }
 
     /// Sets the source line of an object.
@@ -430,8 +438,9 @@ impl Graph {
     pub fn block_of(&self, r: ResourceId, first: usize) -> ObjectBlock {
         let off = first as u32;
         let shift = |o: ObjId| ObjId(o.0 - off);
-        let objs = self.objs[first..]
-            .iter()
+        let objs = self
+            .objs
+            .iter_from(first)
             .map(|o| {
                 let mut o = o.clone();
                 shift_object(&mut o, shift);
@@ -504,7 +513,7 @@ impl Graph {
         let shift = |o: ObjId| ObjId(o.0 + off);
         let rshift = |r: ResourceId| ResourceId(r.0 + roff);
         self.objs.reserve(other.objs.len());
-        for o in &other.objs {
+        for o in other.objs.iter() {
             let mut o = o.clone();
             shift_object(&mut o, shift);
             o.resource = o.resource.map(rshift);
@@ -520,7 +529,7 @@ impl Graph {
             self.resources.push(r);
         }
         let l = &other.links;
-        let t = &mut self.links;
+        let t = Arc::make_mut(&mut self.links);
         t.classifier_obj
             .extend(l.classifier_obj.iter().map(|(k, o)| (*k, shift(*o))));
         t.obj_classifier

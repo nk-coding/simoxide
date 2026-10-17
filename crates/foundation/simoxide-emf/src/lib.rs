@@ -3,6 +3,7 @@
 //! comparing models.
 
 pub mod canon;
+mod chunks;
 pub mod compare;
 pub mod config;
 pub mod datatypes;

@@ -93,6 +93,7 @@ impl Template {
         if g.links().package_obj.is_empty() {
             g.append_graph(&self.rs.graph);
             g.set_id_policy(ids);
+            g.freeze();
         } else if !std::sync::Arc::ptr_eq(g.meta_arc(), self.rs.graph.meta_arc()) {
             g.adopt_meta(self.rs.graph.meta_arc().clone());
         }

@@ -225,11 +225,11 @@ impl<'a> Parser<'a> {
                 Event::Decl(d) => {
                     if let Some(Ok(enc)) = d.encoding() {
                         let enc = String::from_utf8_lossy(&enc).into_owned();
-                        self.g.resource_mut(self.res).encoding = enc;
+                        self.g.resource_mut(self.res).encoding = enc.into();
                     }
                     if let Ok(v) = d.version() {
                         let v = String::from_utf8_lossy(&v).into_owned();
-                        self.g.resource_mut(self.res).xml_version = v;
+                        self.g.resource_mut(self.res).xml_version = v.into();
                     }
                 }
                 Event::Start(e) => self.start(&e, false)?,
@@ -375,7 +375,7 @@ impl<'a> Parser<'a> {
                     && let Some(v) = u.strip_prefix("http://schema.omg.org/spec/XMI/")
                 {
                     let v = v.to_string();
-                    self.g.resource_mut(self.res).xmi_version = v;
+                    self.g.resource_mut(self.res).xmi_version = v.into();
                 }
                 if is_root && local == "XMI" {
                     Frame::Wrapper

@@ -199,6 +199,7 @@ impl<'a> Parser<'a> {
         self.text = text;
         self.first_obj = self.g.object_count();
         // about one object per 100 bytes of XMI
+        self.g.reserve_objects(text.len() / 100);
         self.obj_pos.reserve(text.len() / 100);
         self.attached.reserve(text.len() / 100);
         let r = self.read_all();

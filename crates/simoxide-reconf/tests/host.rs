@@ -654,7 +654,6 @@ mod spd {
         let g = r.sim.model_graph();
         let containers: Vec<String> = g
             .objects()
-            .iter()
             .enumerate()
             .filter(|(_, o)| o.class == simoxide_model::meta::class::ResourceContainer)
             .filter_map(|(i, _)| {

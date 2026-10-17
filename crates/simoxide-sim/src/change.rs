@@ -874,7 +874,6 @@ fn check_graph(old: &Graph, new: &Graph) -> Result<(), ChangeError> {
         || new.resources().len() < old.resources().len()
         || old
             .objects()
-            .iter()
             .zip(new.objects())
             .any(|(a, b)| a.class != b.class);
     if bad {
@@ -888,7 +887,7 @@ fn check_graph(old: &Graph, new: &Graph) -> Result<(), ChangeError> {
 /// The aborts that only the notifications show.
 fn journal_checks(g: &Graph, changes: &ChangeSet) -> Result<(), ChangeError> {
     for c in &changes.changes {
-        let Some(obj) = g.objects().get(c.obj.0 as usize) else {
+        let Some(obj) = (c.obj.index() < g.object_count()).then(|| &g[c.obj]) else {
             return Err(ChangeError::Invalid(vec![format!(
                 "change of object {} which is not in the graph",
                 c.obj.0
