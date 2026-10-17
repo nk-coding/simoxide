@@ -56,6 +56,35 @@ runner's aliases (`~ResourceContainer:AppServer_1`). In the library:
 `simoxide_sim::ssx::run_with_spd` with `simoxide_spd::ssx::SsxSpd` and an adjuster
 (`simoxide_reconf::QvtoAdjuster::spd`).
 
+### Pause, snapshots and forks in the exact mode
+
+The exact mode pauses between two events like the other engines: `--pause-at`,
+`--pause-before`, `--pause-events` and `--pause-when` (N2's conditions, time conditions on
+Slingshot's `double` clock) with `--snapshot FILE`, and `simoxide resume FILE` continues the run
+in another process, with or without scaling policies; the projection, the tape and the decision
+log of the hops concatenate to the uninterrupted run's, byte for byte
+([Snapshots](./snapshots.md)). A resume can change the model (`--change`, `--transform`, with
+`reconfiguration`): the change takes effect as an SPD adjustment's would (new containers'
+resources and monitors, removed containers' resources leave the resource table), without a
+`ModelAdjusted` event; change files with option lines (`removal ...`) are refused there.
+`--enforce` is not supported in the exact mode.
+
+```rust
+use simoxide_sim::ssx::SsxRun;
+use simoxide_sim::{Outputs, Pause};
+let mut run = SsxRun::new(&cm, cfg, Outputs::default())?;       // cm: compiled for slingshot-exact
+run.run_until(Pause::After(60_000_000_000), None)?;             // hooks: Some(&mut ssx_spd) with SPD
+let fork = run.fork(Outputs::default())?;                       // a deep copy, continues alone
+let state = run.detach();                                       // `Send`: SsxRun::attach elsewhere
+run.snapshot_to(std::fs::File::create("run.snap")?)?;           // feature `snapshot`
+let r = run.finish(None)?;                                      // the uninterrupted run's result
+```
+
+`SsxRun::run_watch` takes a `Watch`, `run_while` a predicate; `SsxRun` is a `ChangeHost`
+(`simoxide_reconf::ChangeFile::apply_to`, `ResumeChanges::apply_to`, QVTo's `QvtoRun::invoke`).
+With SPD the layer writes its sections itself (`SsxSpd::snapshot_sections`, restored with
+`SsxSpd::restore`), the adjuster's QVTo state is `QvtoRun::snapshot_section`.
+
 ## What changes against SimuLizar
 
 The genuine design differences of Slingshot, always on in the flavour:
@@ -124,6 +153,7 @@ let r = simoxide_sim::run(&cm, cfg, Outputs::default())?;   // dispatches on mod
 
 The typed form is `Simulation::<C, simoxide_sim::Slingshot>::create`; the flavour is a
 compile-time parameter like the RNG policy `C`, so the SimuLizar flavour runs exactly the code it
-ran before flavours existed. Pause, fork and resume work in both flavours.
+ran before flavours existed. Pause, fork and resume work in both flavours (and in the exact
+mode, `SsxRun` above).
 `Simulation::observe_series` and `take_observed` give the tuples of chosen series as they are
 recorded (Slingshot's `MeasurementMade` stream), the hook for the SPD interpreter.

@@ -15,9 +15,9 @@ SIMOXIDE-SNAPSHOT 1\n                       magic line: the format version
 |---|---|
 | `format` | format version (1); a reader refuses other versions |
 | `simoxide` | the SimOxide version that wrote it; the sections hold internal run state, so a reader refuses other versions |
-| `mode` | `exact` or `fast` |
+| `mode` | `exact` or `fast` (the Slingshot-exact engine does not read it: the run configuration's mode) |
 | `literal` | the literal engine (tests only) |
-| `flavour`, `quirks` | `simulizar` or `slingshot`; the Slingshot compat flags (`Q26,Q29`; empty: none) |
+| `flavour`, `quirks` | `simulizar`, `slingshot` or `slingshot-exact` (the Slingshot-exact engine); the Slingshot compat flags (`Q26,Q29`; empty: none; all 37 for `slingshot-exact`) |
 | `model` | fingerprint of the compiled model the run was created on (below) |
 | `run_model` | after model changes: `{"generation": n, "fingerprint": ...}` of the run's own model; else `null` |
 | `time_ns`, `events`, `phase` | simulation time (ns), events processed, `notstarted`/`running`/`finished`/`failed` |
@@ -52,8 +52,10 @@ and the `serde` derives on the engine's types); it is versioned with SimOxide, n
 | Name | Written by | Contents |
 |---|---|---|
 | `engine` | `simoxide-sim` | the run state ([`RunState`](../guide/library.md#pause-fork-and-resume)) |
+| `ssx` | `simoxide-sim` (`SsxRun`), instead of `engine` | the Slingshot-exact engine's run state |
 | `model` | `simoxide-sim`, after model changes | the run's own model |
-| `spd` | `simoxide-spd` (`SpdRun`) | the SPD interpreter's state |
+| `spd` | `simoxide-spd` (`SpdRun`, `SsxSpd`) | the SPD interpreter's state |
+| `spd-ssx` | `simoxide-spd` (`SsxSpd`) | the Slingshot-exact SPD layer's own state |
 | `rules` | `simoxide-reconf` (`RulesRun`) | the reconfiguration host's state |
 | `qvto` | `simoxide-reconf` (`QvtoRun::snapshot_section`), for hosts of their own | a run's QVTo state |
 
@@ -88,6 +90,44 @@ Everything a run changes, as of a point between two events:
   model's generation.
 
 What is zero or empty between events (nesting counters, allocation pools) is not written.
+
+### `ssx`
+
+The Slingshot-exact engine's state (`--flavour slingshot-exact`), between two events of
+Slingshot's bus, and its configuration (as in `engine`):
+
+- the **object arena**: Slingshot's entities as nodes, each referring to earlier nodes by index
+  (written depth first, post order): immutable frames and evaluation proxies (`INNER`), the
+  shared mutable SimuCom frames, users (id, stack of frames), usage behaviour contexts (with
+  `startOnce` and the loop progression), user interpretation contexts, user requests, SEFF
+  behaviour-context holders (kind with the loop progression, the fork holder's `ArrayList`
+  iterator, the infrastructure-call list; the behaviour cursors), request processing contexts,
+  SEFF interpretation contexts (identity, holder, caller, call over the wire, parent, result
+  frame), general entry requests, calls over the wire, resource demand requests, jobs (id,
+  demand, kind) and `ModelAdjusted` payloads. Restoring builds one object per node, so shared
+  objects stay shared. The nodes are collected from the event list (by insertion number), the
+  jobs at a resource (by id) and the passive resources' waiting queues, in this order;
+- the **event list**: `(double time, insertion number, event)` per queued event, in insertion
+  order, the next insertion number, the current time;
+- random numbers: the MT19937 words and position, the StoEx draws so far, `Math.random()`'s
+  `java.util.Random`, the position of the last projection line (the tape's `p`);
+- the disposed bits of the subscribers (Q18), the handler exceptions so far;
+- measurements (series and rows) and the monitors' calculators: per scenario and resource the
+  series, the assembly-operation and passive-resource probes by key, the open start-stop
+  calculators with their request contexts, the series by (measuring-point key, metric);
+- the projection's state: written or not (`traced`), its line count, users and jobs numbered by
+  first appearance;
+- resources: per resource of the run's model its scheduler (processor sharing or FCFS from the
+  head) and whether it is in the active-resource table (`res_live`), the linking-resource table,
+  passive resources (available units, waiting requests with their amounts) and their index, the
+  first-match allocation, the system;
+- counters (ids of users, contexts and jobs; events; finished usage-scenario runs; the livelock
+  guard's instant), whether the run is over and the error that ended it;
+- with scaling policies: the engine's side of the layer (target group per time event,
+  subscribers with their stimulus and disposed bits), and the run model's generation (the
+  model itself is the section `model`, a graph override the section `graph`).
+
+Aliases of created elements and the ids of the input model are computed again from the models.
 
 ### `model`
 
@@ -125,6 +165,13 @@ policy the adjustor state, the parked chain position, per trigger node the aggre
 or the compound filter's iterator; per target group the last enactment; the membership (target
 group configurations, allocation, environment, provided signatures; object ids); the queued
 adjustment requests; counters.
+
+### `spd-ssx`
+
+The Slingshot-exact SPD layer (`simoxide_spd::ssx::SsxSpd`) next to `spd`: per engine series
+its resolved measuring point (kind with object ids, class name) and metric, or that it is not
+resolved yet or not a policy's. They are resolved on the model of a series' first measurement,
+so they are kept rather than resolved again on the restored model.
 
 ### `rules`
 

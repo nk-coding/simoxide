@@ -45,8 +45,8 @@ simoxide snapshot-info ms-300.snap   # the header (JSON)
   `--spd-quirks` are kept in the snapshot and used again.
 - Reconfiguration rules (`reconfiguration` feature): resume with the same rules (`--rules DIR` or
   the model's `run.json`); the rules' names are checked.
-- The Slingshot-exact engine (`--flavour slingshot-exact`) has no pause yet: `--pause-at` and
-  `--snapshot` are refused there.
+- The Slingshot-exact engine (`--flavour slingshot-exact`) pauses, snapshots and resumes the
+  same way, with or without scaling policies (below, "The Slingshot-exact engine").
 
 ## Library
 
@@ -290,6 +290,48 @@ if let Some(f) = watch.fired() {
   `SpdRun::enforce_policies` (P2: returns `EnforceError::Unsupported` until then).
 - `simoxide_reconf::explore` (restores in parallel threads, `Variant`, `VariantResult`) and
   `compare` (the table).
+
+## The Slingshot-exact engine
+
+`--flavour slingshot-exact` (Slingshot's event bus handler by handler, [Slingshot
+flavour](./slingshot.md#the-exact-mode)) takes the same options: `--pause-at`, `--pause-before`,
+`--pause-events`, `--pause-when`, `--snapshot`, `--snapshot-format json`, and `simoxide resume`
+with `--until`, `--pause-when`, `--change` and `--transform` (with `reconfiguration`). The
+snapshot's header names the flavour `slingshot-exact`; its run state is the section `ssx`
+(format page), a run with scaling policies adds `spd`, `spd-ssx` and, after adjustments, `qvto`
+and `model`. The continuation is exact: the level-E projection, the tape projection with its
+positions, the measurements, the handler exceptions and the decision log of the paused run and
+the resumed run concatenate to the uninterrupted run's.
+
+- A change at a resume takes effect as an SPD adjustment's would (resources of new containers
+  join the resource table, those of removed containers leave it, passive resources of new
+  allocation contexts, calculators of new monitors), without a `ModelAdjusted` event. The
+  engine has no change options: change files with `removal`, `in-progress`, `reallocation` or
+  `monitors` lines are refused. `--enforce` is not supported.
+- `--pause-events` and every pause condition work with scaling policies too (the engine pauses
+  between two events of Slingshot's bus, after the SPD work of the last one).
+
+```rust
+use simoxide_sim::ssx::SsxRun;
+let mut run = SsxRun::new(&cm, cfg, Outputs::default())?;    // cm compiled for slingshot-exact
+run.run_until(Pause::After(120_000_000_000), Some(&mut hooks))?;   // hooks: SsxSpd, or None
+let mut extra = hooks.snapshot_sections(Encoding::Postcard)?;      // SPD: `spd`, `spd-ssx`
+drop(hooks);
+extra.push(adjuster.run.snapshot_section(Encoding::Postcard)?);    // if adjuster.run.is_started()
+run.snapshot_with(&mut file, &SnapshotOptions::default(), extra)?;
+
+// later: the run, the adjuster's QVTo state, the SPD layer
+let s = Snapshot::read(f)?;
+let mut run = SsxRun::restore_snapshot(&s, &cm, Outputs::default())?;
+adjuster.run.restore_section(&run, &s)?;
+let mut hooks = SsxSpd::restore(&spd, &s, &mut adjuster, &mut log)?;
+let r = run.finish(Some(&mut hooks))?;
+```
+
+`SsxRun::fork(outputs)` copies the run in memory (a deep copy of Slingshot's objects that keeps
+their sharing), `SsxRun::detach()` gives the state as a `Send` value (`SsxState`) that
+`SsxRun::attach` continues on any thread, `SsxState::{serialize, deserialize}` work on a state
+alone. Same state, same bytes; a restored state writes the bytes it was read from.
 
 ## What a snapshot is not (yet)
 
