@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Statistical comparison of two sets of runs (measurements.csv in SimOxide's format), per series.
 
-    compare_stat.py [--alpha 0.01] [--csv OUT] A_DIR... -- B_DIR...
+    compare_stat.py [--alpha 0.01] [--csv OUT] [--created-from MODEL_DIR] A_DIR... -- B_DIR...
 
 Each DIR is a run directory with measurements.csv (or the CSV file itself). Typical use: A = the
 Slingshot reference runner in stock mode with seeds 1..30, B = SimOxide's Slingshot flavour with
@@ -13,12 +13,32 @@ Tests between the two sets of per-run values: Welch's t-test and the Mann-Whitne
 approximation, ties corrected) on the per-run means, and a two-sample Kolmogorov-Smirnov test on
 the pooled values (asymptotic distribution). Holm's correction over all tests of all series. A
 set without variance in a statistic (deterministic runs) is compared by whether the other set's
-range contains its value, up to a relative 1e-9 ("range"). Pure Python, no dependencies.
+range contains its value, up to a relative 1e-9 ("range"). --created-from MODEL_DIR pools the
+series of elements created during the run (ids not in the model, or the reference runner's
+`~Class:name` aliases) per measuring-point class and metric (SPD scale-outs: the two sides name
+new elements differently). Pure Python, no dependencies.
 """
 import csv
 import math
 import os
 import sys
+
+
+CREATED = None  # --created-from: the ids of the model's elements; others were created at run time
+
+
+def created_key(mp):
+    """The key of a series of an element created during the run (SPD adjustments): one key per
+    measuring-point class and the rest of the key, whatever its id (SimOxide: a seeded id;
+    the reference runner: a `~Class:name` alias), so both sides pool their new elements."""
+    if CREATED is None or "[" not in mp:
+        return mp
+    cls, rest = mp.split("[", 1)
+    first, _, tail = rest.partition("|")
+    first = first.rstrip("]")
+    if first.startswith("~") or first not in CREATED:
+        return f"{cls}[~created" + ("|" + tail if tail else "]")
+    return mp
 
 
 def load(path):
@@ -28,8 +48,21 @@ def load(path):
         r = csv.reader(fh)
         next(r, None)
         for mp, metric, t, v in r:
-            series.setdefault((mp, metric), []).append((float(t), float(v)))
+            series.setdefault((created_key(mp), metric), []).append((float(t), float(v)))
+    for rows in series.values():
+        rows.sort(key=lambda x: x[0])
     return series
+
+
+def model_ids(d):
+    import re
+    ids = set()
+    for name in os.listdir(d):
+        p = os.path.join(d, name)
+        if os.path.isfile(p):
+            with open(p, errors="replace") as fh:
+                ids.update(re.findall(r'id="([^"]+)"', fh.read()))
+    return ids
 
 
 def summary(rows):
@@ -134,6 +167,9 @@ def main(argv):
             alpha = float(next(it))
         elif x == "--csv":
             out = next(it)
+        elif x == "--created-from":
+            global CREATED
+            CREATED = model_ids(next(it))
         else:
             args.append(x)
     if "--" not in args:

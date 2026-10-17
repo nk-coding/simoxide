@@ -14,8 +14,11 @@ adjustment runs Slingshot's own transformation, `MainTransformation.qvto`, on th
 Scale-in drains the removed containers by default: their jobs and the requests in progress
 finish there, new requests go elsewhere ([Model changes](../spec/model-changes.md) MC-8; the Q5
 flag reproduces Slingshot's removal). The adjuster creates the monitors Slingshot clones for new
-containers, so their resources are measured from the adjustment on. Both flavours take the
-adjustments.
+containers, so their resources are measured from the adjustment on, and measurement triggers
+see them. Both flavours take the adjustments: in the Slingshot flavour (`--flavour slingshot`)
+the triggers read Slingshot's instantaneous utilisation samples, and with Slingshot's quirks
+(`--quirks fast --spd-quirks slingshot`) the runs match stock Slingshot statistically. The
+Slingshot-exact engine (`--flavour slingshot-exact`) does not run scaling policies yet.
 :::
 
 ## What is supported

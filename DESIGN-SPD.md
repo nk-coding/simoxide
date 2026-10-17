@@ -1646,12 +1646,15 @@ F4 (listed below).
   equal; bounded growth: 40 enforced scale-outs add 12 objects each, journals stay flat; the
   Slingshot flavour's refusal; `enforce` in `simoxide-spd/tests/sim.rs`; the CLI in new
   processes.
-- **Waits for F4** (each a test that asserts today's refusal and the records before it):
-  scale-in in any form (`AllocationLookupSyncer cannot remove an allocation context`: corpus case
-  `spd_scale_in` from 80 s, `spd_time_policies` with the fixed behaviour from its first
-  scale-in), the Slingshot flavour (`slingshot_flavour_waits_for_f4`), monitors of new containers
-  (counted in `changes`, not created; then measurement-triggered policies on new containers),
-  add-and-remove in one adjustment.
+- **Waited for F4; finished after F4 landed** (`spd` d57907b, merged): F4 flipped the markers
+  (scale-in drains; `spd_scale_in` 8 records, 2 adjustments equal; the Slingshot flavour; the
+  adjuster clones `ModelAdjusted::monitor_clones`). P2 then: `SpdRun` maps the run's
+  `Measurements::series` (the compiled model's plus those a change appends), not the compiled
+  model's, after every adjustment and at restore (test `measurement_triggers_see_new_containers`:
+  a CPU policy's trigger gets a window for the new container's series in both flavours, SimuLizar
+  with `MonitorSync::Full`); add and remove at one instant: `corpus-spd/spd_same_instant` (+2 and
+  -1 at 50 s, with Q15 each twice: 4 adjustments equal); V3 in the Slingshot flavour (fast mode,
+  Slingshot's fast-mode quirks): all five `corpus-spd/` cases' decision logs equal the reference.
 - **Gates.** `golden.sh` identical (312 runs, `cargo build-exact`, against `spd` fb03e7d);
   `cargo test --release --workspace --features exact` 574 passed, 0 failed (566 before; +6
   `spd_adjust`, +2 `spd` unit tests; `simoxide-cli`'s `spd_cli` runs with `reconfiguration`);
@@ -1666,6 +1669,37 @@ F4 (listed below).
   container names for `spd_adjusted`, `monitor_clones` for the `MonitorChange`s, `summary`),
   `QvtoAdjuster::spd` callable from any `Simulation<C, F>` (`Adjuster<C, F>`), `SpdRun` over any
   flavour, `Spd::enforce`.
+
+**P3 as built** (2026-10-17, branch `p2`; evidence `docs/correctness/slingshot.md` "Scaling
+policies"). Done except V3x (exact SPD runs), which needs X2d.
+
+- **Slingshot flavour end to end.** The CLI's refusal is gone: `simoxide run`/`resume` run
+  `SpdRun<C, F>` for both flavours (and refuse `--flavour slingshot-exact` with SPD: X2d).
+  Found and fixed: (1) an adjustment request at the current time failed in the Slingshot flavour
+  ("external note ... before the current time"): its double clock rounds `now` to nanoseconds;
+  `Simulation::schedule_external` takes the current time for the current nanosecond
+  (`sim/hooks.rs`); (2) with the fixed behaviour (drain) a removed container's requests in progress
+  call over a link the transformation took it off, a run error ("no linking resource connects");
+  the fixed Q37 now uses a link touching the remaining side when one side was removed from the
+  environment (`sim/slingshot.rs`, Slingshot's own fallback "the other one got deleted during
+  scaling in"). Tests: `slingshot_flavour_drains_a_removed_container`,
+  `slingshot_flavour_runs_a_stochastic_cpu_scenario` (both quirk settings, three seeds,
+  deterministic), `adjustments_equal_slingshot_in_the_slingshot_flavour` (V3, five cases).
+- **V4** (`reference/slingshot/spd-stat.sh OUT BIN [FROM TO]`, `CONTROL=1`; `tools/spd_stat.py`,
+  `tools/compare_stat.py --created-from`): scenarios `spd_v4_cpu` (CPU AVERAGE > 80 % out, < 60 %
+  in, cooldowns 30/60 s) and `spd_v4_rt` (operation response time > 20 s out), `Exp` arrivals and
+  demands, 600 s, sizes 1..4; stock Slingshot (one JVM per seed, `MALLOC_ARENA_MAX=2` under
+  `prlimit`) against the Slingshot flavour with Slingshot's quirks, seeds 1-30. Per-run SPD
+  statistics (adjustments, scale-outs, scale-ins, first adjustment time, time-weighted and final
+  size, mean response time in four windows, pooled adjustment times): 0 of 21 and 0 of 20 tests
+  reject (Holm 0.01). All series: 1 of 42 and 2 of 42 reject, all pooled-values KS, which the
+  control (stock seeds 1-30 against 31-60) also rejects (3 of 42, 1 of 42): not a valid test on
+  autocorrelated values. New containers' series are pooled per class (the runner keys them
+  `~ResourceContainer:AppServer_1/...`, SimOxide by seeded ids).
+- **V3x (exact SPD runs): not done, waits for X2d** (the exact engine's SPD events, branch
+  `x2d`, `ssx/` untouched here). What it can use: `corpus-spd/` (five cases with level-E
+  projections, tapes and measurements of the `det` runner), `simoxide_spd::adjusted`,
+  `QvtoAdjuster::spd` (ordered mode equals `det`).
 
 ### 5.5 QVTo host for both flavours (`simoxide-reconf`)
 
@@ -2739,8 +2773,8 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **X2** | *a-c and e done 2026-10-17, d open* (findings: 5.2 "X2 as built"; d needs P2 and F4's Slingshot syncers). Slingshot-exact mode, **level E directly** (U14): the per-handler cascade as a FIFO queue of handler steps (insertion-ordered results, FIFO after queued events, direct `MeasurementMade`), double time, PS stale-event samples and zero-demand jiffy, `java.util.Random` branch stream, `SimulationFinished` order, all 37 quirk flags on, **handler disposal** (Q18: a disposed bit per handler, Slingshot's partial side effects up to each throw: Q17, Q19, Q21-Q24, Q30, Q31, Q37), level-E projection writer | S2, X1 | 7-10 w (a: handler-step queue, event order and time, 2-3 w; b: resources and monitoring, 1.5-2 w; c: handler disposal and the throwing quirks, 1.5-2.5 w; d: SPD events, 1 w; e: level-E projection and corpus debugging, 1-1.5 w) | V3x: level-E projection, tape (with positions) and measurements byte-equal with `det` on the Slingshot corpus, including the 22 models with handler errors. *Status:* 86 of 90 `corpus-ss/` cases (85 in the EPL build), 21 of the 22 handler-error cases; h27 (`HashMap` order) and h21 in the EPL build are licence-bound, the 3 SPD cases wait for X2d |
 | **Q2** | *Done 2026-10-17* (findings: 5.5 "Q2 as built"). qvto-rs insertion-order policy for `Set`s (the `det` oracle's QVTo/OCL rule), opt-in for the Slingshot-exact mode: `Mode::Ordered` (EPL) | Q1 | 3-5 d | met: SPD corpus adjustments equal the `det` Java runner's byte for byte, including container and link order (Q16); also the whole suite (589/589) and the 13 adjustments of the S0 Slingshot `det` runs |
 | **P1** | *Done 2026-10-17* (findings: 5.4 "P1 as built"). SPD interpreter: model view, filters, aggregators, state, stimulus observers, time events | F0 (F1 for state) | 1.5-2 w | met: V1 unit tests; decision log equals the reference runner's on the time-triggered models (5 SPD models, 83 records, compat flags on) |
-| **P2** | *Done 2026-10-17 except the F4 part* (findings: 5.4 "P2 as built"; scale-in, the Slingshot flavour and monitors of new containers wait for F4). SPD adjustment via `MainTransformation`; `ModelAdjusted` diff; corpus `corpus-spd/` with reference outputs | P1, F3, F4 | 2 w | met for scale-out: minimal example (and `spd_time_policies`, `spd_service_group`): same scale time, container and assembly names, models as Slingshot's (V3, model summaries of every adjustment equal); `spd_scale_in` up to its scale-in (F4) |
-| **P3** | SPD in the Slingshot flavour end to end; statistical scenarios; exact SPD runs (with X2, Q2) | P2, S2 | 1.5-2.5 w | V4 on utilisation and response-time scenarios; V3x on the SPD corpus |
+| **P2** | *Done 2026-10-17* (findings: 5.4 "P2 as built"; the F4-dependent part finished after F4). SPD adjustment via `MainTransformation`; `ModelAdjusted` diff; corpus `corpus-spd/` with reference outputs | P1, F3, F4 | 2 w | met: minimal example and `spd_time_policies`, `spd_service_group`, `spd_scale_in`, `spd_same_instant`: same scale times, container and assembly names, models as Slingshot's (V3, model summaries of every adjustment equal), in both flavours |
+| **P3** | *Done 2026-10-17 except V3x* (findings: 5.4 "P3 as built"; exact SPD runs wait for X2d). SPD in the Slingshot flavour end to end; statistical scenarios; exact SPD runs (with X2, Q2) | P2, S2 | 1.5-2.5 w | V4 met on a utilisation and a response-time scenario (0 of 41 SPD statistics rejected, 30 seeds); V3x on the SPD corpus: after X2d |
 | **Q1** | *Done 2026-10-17* (findings: 5.5 "Q1 as built"). qvto-rs: SPD adjustment corpus for every path (V2) incl. service group, competing consumers, scale-in: 47 cases, 73 of 105 operations (all of `MainTransformation`'s call graph) | — | 3-5 d | met: strict match with the Java runner (47/47, also on identity-hash-dependent outputs); two engine discrepancies and three harness ones fixed |
 | **N1** | *Done 2026-10-17* (findings: 5.7 "N1 as built"). Snapshot serialisation: serde of `RunState`, XMI writer for the overlay, versioned format | F1, F2 | 1.5 w | met: serialize → deserialize → identical continuation, byte for byte, on every model directory in exact and fast mode and both flavours (Slingshot-exact engine: refused, no pause yet), after model changes, with SPD, with SimuLizar rules and a QVTo state; deterministic bytes |
 | **N2** | *Done 2026-10-17* (findings: 5.7 "N2 as built"; enforced policies built in P2, 5.4 "P2 as built"). Pause/resume API with change sets, enforced policies, snapshot conditions (duration, trigger, threshold) | N1, P2 | 1 w | met: resume-with-change tests (change files, QVTo transformations, rule sets; byte-equal to the in-process change, exact and fast; the Slingshot flavour refuses until F4); pause-condition tests; fork-based exploration example (`explore.rs`, `simoxide explore`), deterministic |

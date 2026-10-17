@@ -79,6 +79,30 @@ sample per arrival, Q26). Slingshot's own deterministic order (`det`) is outside
 well, so this statistic depends on the order of simultaneous events, not on the model: it is the
 exact mode's domain (X2), not a fast-mode criterion (see `DESIGN-SPD.md`, S2 as built).
 
+## Scaling policies
+
+SPD runs in the Slingshot flavour (fast mode, Slingshot's quirks: `--flavour slingshot --quirks
+fast --spd-quirks slingshot`, with the `reconfiguration` feature) are compared with stock
+Slingshot on two stochastic scenarios (`reference/slingshot/models/spd_v4_cpu`, `spd_v4_rt`:
+exponential arrivals and demands, 600 s, group size 1..4; CPU-utilisation policies out above
+80 % and in below 60 %, or a response-time policy out above 20 s), 30 seeds per side
+(`reference/slingshot/spd-stat.sh`, `CONTROL=1`). Per run: executed adjustments, scale-outs,
+scale-ins, the first adjustment's time, the time-weighted and final group size, the mean
+response time in four windows (`tools/spd_stat.py`: Welch and Mann-Whitney, KS on the pooled
+adjustment times, Holm 0.01), and every measurement series (`tools/compare_stat.py
+--created-from`: the series of new containers pooled, since both sides name them differently).
+
+| Scenario | SPD statistics rejected | series tests rejected | control: stock seeds 1-30 vs 31-60 |
+|---|---|---|---|
+| `spd_v4_cpu` (15 adjustments per run: 8 out, 5.5 in) | 0 of 21 | 1 of 42 | SPD 0 of 21, series 3 of 42 |
+| `spd_v4_rt` | 0 of 20 | 2 of 42 | SPD 0 of 20, series 1 of 42 |
+
+Every rejected series test is a KS test on pooled values (the CPU's event-sampled state; on
+`spd_v4_rt` also that of the new containers), which rejects stock Slingshot against itself as
+well: a run's values are autocorrelated, so the pooled KS is no valid test here (as for the
+reconfiguration rules, `DESIGN-SPD.md` R1). Exact SPD runs (level E against `det`, the three SPD
+cases of `corpus-ss/` and `corpus-spd/`) wait for the exact engine's SPD events (X2d).
+
 ## The exact mode
 
 The Slingshot-exact mode (`--flavour slingshot-exact`, design phase X2) is compared with the
