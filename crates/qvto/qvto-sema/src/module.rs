@@ -1752,7 +1752,9 @@ impl<'r> Sema<'r> {
                 blackbox_impl: None,
             },
             owner: context.unwrap_or(module_ty),
-            contextual: context.is_some(),
+            // an unknown context type is the module's (`getModuleContextType`): the operation
+            // collides like a module operation
+            contextual: context.is_some_and(|c| c != module_ty),
             params: sig,
             ret,
             module,

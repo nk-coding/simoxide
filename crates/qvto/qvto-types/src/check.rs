@@ -679,6 +679,8 @@ impl<'a> Checker<'a> {
             Type::OclElement => "OclElement".into(),
             Type::OclMessage => "OclMessage".into(),
             Type::State => "State".into(),
+            // an unknown (null) element type prints as nothing (`CollectionTypeImpl.getName`)
+            Type::Collection(k, e) if *e == TypeId::NULL => format!("{}()", k.name()),
             Type::Collection(k, e) => format!("{}({})", k.name(), self.name(*e)),
             Type::Tuple(parts) => {
                 let mut s = String::from("Tuple(");

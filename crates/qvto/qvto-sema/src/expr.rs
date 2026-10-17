@@ -1370,9 +1370,11 @@ impl<'r> Sema<'r> {
                 self.error(cs.span, msg);
             }
             Some(o) => {
+                // a null result type (e.g. the element type of a collection of unknown
+                // elements) falls back to the operation's own type (`genOperationCallExp`)
                 ty = match self.result_type(cs.span, op_owner, o, &a) {
-                    Some(t) => t,
-                    None => self.op_ret(o),
+                    Some(t) if t != TypeId::NULL => t,
+                    _ => self.op_ret(o),
                 };
                 ty = self.ts.ck().ocl_type(ty);
             }
