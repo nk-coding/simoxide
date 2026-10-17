@@ -1,0 +1,17 @@
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.5,0.0]}
+{"ev":"meas","t":0.5,"mp":"UsageScenarioMeasuringPoint[_ss_allocation_first_us1]","metric":"Response Time Tuple","v":[0.5,0.5]}
+{"ev":"meas","t":0.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.5,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,0.0]}
+{"ev":"meas","t":1.0,"mp":"UsageScenarioMeasuringPoint[_ss_allocation_first_us1]","metric":"Response Time Tuple","v":[1.0,0.5]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.5,0.0]}
+{"ev":"meas","t":1.5,"mp":"UsageScenarioMeasuringPoint[_ss_allocation_first_us1]","metric":"Response Time Tuple","v":[1.5,0.5]}
+{"ev":"meas","t":1.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.5,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,0.0]}
+{"ev":"meas","t":2.0,"mp":"UsageScenarioMeasuringPoint[_ss_allocation_first_us1]","metric":"Response Time Tuple","v":[2.0,0.5]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.5,0.0]}
+{"ev":"meas","t":2.5,"mp":"UsageScenarioMeasuringPoint[_ss_allocation_first_us1]","metric":"Response Time Tuple","v":[2.5,0.5]}
+{"ev":"meas","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_allocation_first_cpu_fast|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.5,1.0]}
+{"ev":"stop","t":3.0}

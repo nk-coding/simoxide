@@ -124,6 +124,9 @@ public final class Instrument {
 	}
 
 	private String close() throws IOException {
+		if (trace != null || tape != null) {
+			writeSubscribers();
+		}
 		if (spd != null) {
 			spd.close();
 		}
@@ -151,10 +154,12 @@ public final class Instrument {
 	}
 
 	private void tapeDraw(final String s, final double u) {
-		final long i = "math".equals(s) ? tapeMath++ : tapeStoex++;
+		final boolean math = "math".equals(s);
+		final long i = math ? tapeMath++ : tapeStoex++;
+		final String o = math ? mathSite() : stoexSite();
 		try {
 			tape.write(new Json().str("k", "u").str("s", s).integer("i", i).num("u", u).integer("e", eventIndex)
-					.end());
+					.str("o", o).end());
 			tape.write('\n');
 		} catch (final IOException e) {
 			throw new UncheckedIOException(e);
@@ -313,5 +318,113 @@ public final class Instrument {
 			m.put(id, n);
 		}
 		return n;
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// draw sites (tape "o")
+
+	private static final String SLINGSHOT = "org.palladiosimulator.analyzer.slingshot.";
+	private static final StackWalker WALKER = StackWalker.getInstance();
+	private static final java.lang.invoke.MethodHandle TAKE_SITE = takeSite();
+
+	private static java.lang.invoke.MethodHandle takeSite() {
+		try {
+			final Class<?> c = ClassLoader.getSystemClassLoader().loadClass("simoxide.slingshot.seed.Sites");
+			return java.lang.invoke.MethodHandles.publicLookup().findStatic(c, "take",
+					java.lang.invoke.MethodType.methodType(Object.class));
+		} catch (final ReflectiveOperationException | RuntimeException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Site of a {@code Math.random()} draw, announced by the seed agent's hooks ({@code Sites}):
+	 * {@code branch:<id>} for the usage Branch or SEFF BranchAction whose transitions were passed to
+	 * {@code TransitionDeterminer}, {@code link:<id>} for the failure draw of a linking resource, {@code ?}
+	 * otherwise.
+	 */
+	private static String mathSite() {
+		Object site = null;
+		try {
+			site = TAKE_SITE == null ? null : (Object) TAKE_SITE.invokeExact();
+		} catch (final Throwable t) {
+			return "?";
+		}
+		if (site instanceof final List<?> l && !l.isEmpty() && l.get(0) instanceof final EObject t
+				&& t.eContainer() != null) {
+			return "branch:" + Keys.id(t.eContainer());
+		}
+		if (site != null && site.getClass().getSimpleName().equals("SimulatedLinkingResource")) {
+			try {
+				return "link:" + Keys.id((EObject) site.getClass().getMethod("getLinkingResource").invoke(site));
+			} catch (final ReflectiveOperationException | RuntimeException e) {
+				return "link:?";
+			}
+		}
+		return "?";
+	}
+
+	/**
+	 * Site of a StoEx draw: {@code Class.method} of the innermost Slingshot frame on the stack, skipping the
+	 * generic helpers {@code AbstractStoExProxy} and {@code SimulatedStackHelper} (their caller says why the
+	 * expression is evaluated). Classes outside Slingshot (StoEx, SimuCom variables) are skipped too.
+	 */
+	private static String stoexSite() {
+		return WALKER.walk(st -> st.filter(f -> f.getClassName().startsWith(SLINGSHOT))
+				.filter(f -> !f.getClassName().endsWith(".AbstractStoExProxy")
+						&& !f.getClassName().endsWith(".SimulatedStackHelper"))
+				.map(f -> {
+					final String c = f.getClassName();
+					return c.substring(c.lastIndexOf('.') + 1) + "." + f.getMethodName();
+				}).findFirst().orElse("?"));
+	}
+
+	// ---------------------------------------------------------------------------------------------
+	// subscriber order (bus.jsonl)
+
+	private final Map<String, List<String>> subscribers = new java.util.LinkedHashMap<>();
+	private Object subscribersEvent;
+	private List<String> subscribersCollecting;
+
+	/**
+	 * One pre-interception = one subscriber about to handle {@code e} (the bus runs the composite
+	 * pre-interceptor once per subscriber, in subscription order). For the first event of each class, the
+	 * subscribers are recorded in that order.
+	 */
+	void subscriber(final org.palladiosimulator.analyzer.slingshot.eventdriver.entity.interceptors.InterceptorInformation info,
+			final DESEvent e) {
+		if (e != subscribersEvent) {
+			subscribersEvent = e;
+			final String k = e.getClass().getSimpleName();
+			subscribersCollecting = subscribers.containsKey(k) ? null : new java.util.ArrayList<>();
+			if (subscribersCollecting != null) {
+				subscribers.put(k, subscribersCollecting);
+			}
+		}
+		if (subscribersCollecting != null) {
+			String n = info.getEnclosingType().map(Class::getSimpleName).orElse("?") + "." + info.getName();
+			if (info instanceof final org.palladiosimulator.analyzer.slingshot.eventdriver.entity.Subscriber<?> sub
+					&& sub.getReifiedClasses() != null && !sub.getReifiedClasses().isEmpty()) {
+				n += "<" + sub.getReifiedClasses().stream().map(Class::getSimpleName)
+						.collect(java.util.stream.Collectors.joining(",")) + ">";
+			}
+			subscribersCollecting.add(n);
+		}
+	}
+
+	private void writeSubscribers() throws IOException {
+		try (BufferedWriter w = writer("bus.jsonl")) {
+			for (final Map.Entry<String, List<String>> en : subscribers.entrySet()) {
+				final StringBuilder sb = new StringBuilder("[");
+				for (final String n : en.getValue()) {
+					if (sb.length() > 1) {
+						sb.append(',');
+					}
+					Json.quote(sb, n);
+				}
+				w.write(new Json().str("ev", en.getKey()).raw("subs", sb.append(']').toString()).end());
+				w.write('\n');
+			}
+		}
 	}
 }

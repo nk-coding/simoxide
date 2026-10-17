@@ -1,0 +1,10 @@
+{
+  "name": "ss_passive",
+  "seed": 1,
+  "sim_time": 5,
+  "rules": [
+    "SS-RES-4",
+    "SS-MEAS-4.2"
+  ],
+  "description": "capacity-1 passive resource, 2 closed users: FIFO grants, the release re-evaluates its amount, waiting/holding time and passive state are recorded at AssemblyPassiveResourceMeasuringPoints (state sampled at PassiveResourceStateUpdated, a separate later event)."
+}

@@ -1,0 +1,10 @@
+{
+  "name": "ss_open_draws",
+  "seed": 1,
+  "sim_time": 5,
+  "rules": [
+    "SS-WL-2.1",
+    "SS-RNG-2"
+  ],
+  "description": "open workload with Exp inter-arrival and Exp demand: the inter-arrival time of the next user is drawn while the current user's Start is interpreted, before the current user's demand."
+}

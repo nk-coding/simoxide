@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resourceenvironment:ResourceEnvironment xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:resourceenvironment="http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2" entityName="ss_loop_zero">
+  <resourceContainer_ResourceEnvironment id="_ss_loop_zero_rc1" entityName="Node">
+    <activeResourceSpecifications_ResourceContainer id="_ss_loop_zero_cpu">
+      <schedulingPolicy href="pathmap://PCM_MODELS/Palladio.resourcetype#ProcessorSharing"/>
+      <activeResourceType_ActiveResourceSpecification href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+      <processingRate_ProcessingResourceSpecification specification="1.0"/>
+    </activeResourceSpecifications_ResourceContainer>
+  </resourceContainer_ResourceEnvironment>
+</resourceenvironment:ResourceEnvironment>

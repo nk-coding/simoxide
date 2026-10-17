@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_ss_role_lookup_repository" entityName="ss_role_lookup">
+  <components__Repository xsi:type="repository:BasicComponent" id="_ss_role_lookup_client" entityName="Client">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_role_lookup_prov_client" entityName="prov_client" providedInterface__OperationProvidedRole="_ss_role_lookup_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_ss_role_lookup_req_front" entityName="req_front" requiredInterface__OperationRequiredRole="_ss_role_lookup_if1"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_ss_role_lookup_seff1" describedService__SEFF="_ss_role_lookup_op">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_ss_role_lookup_act1" entityName="start" successor_AbstractAction="_ss_role_lookup_act2"/>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_ss_role_lookup_act2" entityName="toFront" predecessor_AbstractAction="_ss_role_lookup_act1" successor_AbstractAction="_ss_role_lookup_act3" calledService_ExternalService="_ss_role_lookup_op" role_ExternalService="_ss_role_lookup_req_front">
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_ss_role_lookup_act3" entityName="stop" predecessor_AbstractAction="_ss_role_lookup_act2"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_ss_role_lookup_front" entityName="Front">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_role_lookup_prov_front" entityName="prov_front" providedInterface__OperationProvidedRole="_ss_role_lookup_if1"/>
+    <requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="_ss_role_lookup_req_back" entityName="req_back" requiredInterface__OperationRequiredRole="_ss_role_lookup_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_ss_role_lookup_seff2" describedService__SEFF="_ss_role_lookup_op">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_ss_role_lookup_act4" entityName="start" successor_AbstractAction="_ss_role_lookup_act5"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_role_lookup_act5" entityName="pre" predecessor_AbstractAction="_ss_role_lookup_act4" successor_AbstractAction="_ss_role_lookup_act6">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.1"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:ExternalCallAction" id="_ss_role_lookup_act6" entityName="call" predecessor_AbstractAction="_ss_role_lookup_act5" successor_AbstractAction="_ss_role_lookup_act7" calledService_ExternalService="_ss_role_lookup_work" role_ExternalService="_ss_role_lookup_req_back">
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_ss_role_lookup_act7" entityName="stop" predecessor_AbstractAction="_ss_role_lookup_act6"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_ss_role_lookup_fast" entityName="FastBackend">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_role_lookup_prov_fast" entityName="prov_fast" providedInterface__OperationProvidedRole="_ss_role_lookup_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_ss_role_lookup_seff3" describedService__SEFF="_ss_role_lookup_work">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_ss_role_lookup_act8" entityName="start" successor_AbstractAction="_ss_role_lookup_act9"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_role_lookup_act9" entityName="w" predecessor_AbstractAction="_ss_role_lookup_act8" successor_AbstractAction="_ss_role_lookup_act10">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="0.2"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_ss_role_lookup_act10" entityName="stop" predecessor_AbstractAction="_ss_role_lookup_act9"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <components__Repository xsi:type="repository:BasicComponent" id="_ss_role_lookup_slow" entityName="SlowBackend">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_role_lookup_prov_slow" entityName="prov_slow" providedInterface__OperationProvidedRole="_ss_role_lookup_if2"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_ss_role_lookup_seff4" describedService__SEFF="_ss_role_lookup_work">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_ss_role_lookup_act11" entityName="start" successor_AbstractAction="_ss_role_lookup_act12"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_role_lookup_act12" entityName="w" predecessor_AbstractAction="_ss_role_lookup_act11" successor_AbstractAction="_ss_role_lookup_act13">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="2.0"/>
+          <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_ss_role_lookup_act13" entityName="stop" predecessor_AbstractAction="_ss_role_lookup_act12"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_ss_role_lookup_if1" entityName="IService">
+    <signatures__OperationInterface id="_ss_role_lookup_op" entityName="op"/>
+  </interfaces__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_ss_role_lookup_if2" entityName="IBackend">
+    <signatures__OperationInterface id="_ss_role_lookup_work" entityName="work"/>
+  </interfaces__Repository>
+</repository:Repository>

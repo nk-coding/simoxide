@@ -1,0 +1,10 @@
+{
+  "name": "ss_stop_time",
+  "seed": 1,
+  "sim_time": 10,
+  "rules": [
+    "SS-RUN-3",
+    "SS-RUN-4"
+  ],
+  "description": "open workload with inter-arrival 2.5 and demand 1.0, simTime 10: the arrival at exactly t = 10 and the completion at t = 10 never run, SimulationFinished comes first; queues are cleared without a drain; no end-of-run state sample."
+}

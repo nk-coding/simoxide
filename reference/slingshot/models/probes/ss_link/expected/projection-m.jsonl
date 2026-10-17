@@ -1,0 +1,5 @@
+{"ev":"meas","t":0.81,"mp":"AssemblyOperationMeasuringPoint[_ss_link_prov2|_ss_link_remote|_ss_link_ac2]","metric":"Response Time Tuple","v":[0.81,0.20000000000000007]}
+{"ev":"meas","t":1.07,"mp":"UsageScenarioMeasuringPoint[_ss_link_us1]","metric":"Response Time Tuple","v":[1.07,1.07]}
+{"ev":"meas","t":2.3800000000000003,"mp":"AssemblyOperationMeasuringPoint[_ss_link_prov2|_ss_link_remote|_ss_link_ac2]","metric":"Response Time Tuple","v":[2.3800000000000003,0.20000000000000018]}
+{"ev":"meas","t":2.6400000000000006,"mp":"UsageScenarioMeasuringPoint[_ss_link_us1]","metric":"Response Time Tuple","v":[2.6400000000000006,1.0700000000000005]}
+{"ev":"stop","t":3.0}

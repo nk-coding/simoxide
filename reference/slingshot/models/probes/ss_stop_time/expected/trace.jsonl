@@ -1,0 +1,192 @@
+{"ev":"header","t":0.0,"format":"slingshot-trace/1","run":{"simulator":"slingshot","seed":"1","stoex":"mt","ordered":true,"sim_time":10.0,"linking_resources":false}}
+{"ev":"PreSimulationConfigurationStarted","t":0.0}
+{"ev":"SimulationStarted","t":0.0}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_stop_time_ft1_rt"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_stop_time_ms1_rt"}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_stop_time_ft2_state"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_stop_time_ms2_state"}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_stop_time_ft2_demand"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_stop_time_ms2_demand"}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_stop_time_ft2_util"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_stop_time_ms2_util"}
+{"ev":"UsageModelPassedElement","t":0.0,"type":"Start","el":"_ss_stop_time_ua1","u":1}
+{"ev":"UserStarted","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2"}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"UsageModelPassedElement","t":0.0,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2","u":1}
+{"ev":"UserEntryRequested","t":0.0,"u":1,"role":"_ss_stop_time_sysprov1","sig":"_ss_stop_time_op"}
+{"ev":"UsageScenarioStarted","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":0.0,"u":1,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":0.0,"u":1,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFModelPassedElement","t":0.0,"type":"StartAction","el":"_ss_stop_time_act1","u":1,"ac":"_ss_stop_time_ac1"}
+{"ev":"ResourceDemandRequested","t":0.0,"u":1,"ac":"_ss_stop_time_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_stop_time_act2"}
+{"ev":"JobInitiated","t":0.0,"job":1,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ActiveResourceStateUpdated","t":0.0,"job":1,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ResourceDemandCalculated","t":0.0,"job":1,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"MeasurementMade","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,1.0]}
+{"ev":"MeasurementUpdated","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"ProcessorSharingJobProgressed","t":1.0,"job":1,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"JobFinished","t":1.0,"job":1,"d":0.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ActiveResourceStateUpdated","t":1.0,"job":1,"d":0.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":1}
+{"ev":"ActiveResourceFinished","t":1.0,"u":1,"ac":"_ss_stop_time_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_stop_time_act2"}
+{"ev":"MeasurementMade","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,0.0]}
+{"ev":"MeasurementUpdated","t":1.0}
+{"ev":"MeasurementMade","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0,0.0]}
+{"ev":"MeasurementUpdated","t":1.0}
+{"ev":"ProbeTaken","t":1.0}
+{"ev":"ProbeTaken","t":1.0}
+{"ev":"SEFFInterpretationProgressed","t":1.0,"u":1,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFInterpretationFinished","t":1.0,"u":1,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFModelPassedElement","t":1.0,"type":"StopAction","el":"_ss_stop_time_act3","u":1,"ac":"_ss_stop_time_ac1"}
+{"ev":"UserRequestFinished","t":1.0,"u":1,"role":"_ss_stop_time_sysprov1","sig":"_ss_stop_time_op"}
+{"ev":"UsageModelPassedElement","t":1.0,"type":"Stop","el":"_ss_stop_time_ua3","u":1}
+{"ev":"UserFinished","t":1.0,"u":1,"type":"Stop","el":"_ss_stop_time_ua3"}
+{"ev":"MeasurementMade","t":1.0,"mp":"UsageScenarioMeasuringPoint[_ss_stop_time_us1]","metric":"Response Time Tuple","v":[1.0,1.0]}
+{"ev":"MeasurementUpdated","t":1.0}
+{"ev":"ProbeTaken","t":1.0}
+{"ev":"UsageScenarioFinished","t":1.0,"u":1,"type":"Stop","el":"_ss_stop_time_ua3"}
+{"ev":"InterArrivalUserInitiated","t":2.5,"u":2,"type":"Start","el":"_ss_stop_time_ua1"}
+{"ev":"UsageModelPassedElement","t":2.5,"type":"Start","el":"_ss_stop_time_ua1","u":2}
+{"ev":"UserStarted","t":2.5,"u":2,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2"}
+{"ev":"ProbeTaken","t":2.5}
+{"ev":"UsageModelPassedElement","t":2.5,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2","u":2}
+{"ev":"UserEntryRequested","t":2.5,"u":2,"role":"_ss_stop_time_sysprov1","sig":"_ss_stop_time_op"}
+{"ev":"UsageScenarioStarted","t":2.5,"u":2,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":2.5,"u":2,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":2.5,"u":2,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFModelPassedElement","t":2.5,"type":"StartAction","el":"_ss_stop_time_act1","u":2,"ac":"_ss_stop_time_ac1"}
+{"ev":"ResourceDemandRequested","t":2.5,"u":2,"ac":"_ss_stop_time_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_stop_time_act2"}
+{"ev":"JobInitiated","t":2.5,"job":2,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ActiveResourceStateUpdated","t":2.5,"job":2,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ResourceDemandCalculated","t":2.5,"job":2,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"MeasurementMade","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.5,1.0]}
+{"ev":"MeasurementUpdated","t":2.5}
+{"ev":"MeasurementMade","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.5,1.0]}
+{"ev":"MeasurementUpdated","t":2.5}
+{"ev":"ProbeTaken","t":2.5}
+{"ev":"ProbeTaken","t":2.5}
+{"ev":"MeasurementMade","t":2.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.5,1.0]}
+{"ev":"MeasurementUpdated","t":2.5}
+{"ev":"ProbeTaken","t":2.5}
+{"ev":"ProcessorSharingJobProgressed","t":3.5,"job":2,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"JobFinished","t":3.5,"job":2,"d":0.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ActiveResourceStateUpdated","t":3.5,"job":2,"d":0.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":2}
+{"ev":"ActiveResourceFinished","t":3.5,"u":2,"ac":"_ss_stop_time_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_stop_time_act2"}
+{"ev":"MeasurementMade","t":3.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[3.5,0.0]}
+{"ev":"MeasurementUpdated","t":3.5}
+{"ev":"MeasurementMade","t":3.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[3.5,0.0]}
+{"ev":"MeasurementUpdated","t":3.5}
+{"ev":"ProbeTaken","t":3.5}
+{"ev":"ProbeTaken","t":3.5}
+{"ev":"SEFFInterpretationProgressed","t":3.5,"u":2,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFInterpretationFinished","t":3.5,"u":2,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFModelPassedElement","t":3.5,"type":"StopAction","el":"_ss_stop_time_act3","u":2,"ac":"_ss_stop_time_ac1"}
+{"ev":"UserRequestFinished","t":3.5,"u":2,"role":"_ss_stop_time_sysprov1","sig":"_ss_stop_time_op"}
+{"ev":"UsageModelPassedElement","t":3.5,"type":"Stop","el":"_ss_stop_time_ua3","u":2}
+{"ev":"UserFinished","t":3.5,"u":2,"type":"Stop","el":"_ss_stop_time_ua3"}
+{"ev":"MeasurementMade","t":3.5,"mp":"UsageScenarioMeasuringPoint[_ss_stop_time_us1]","metric":"Response Time Tuple","v":[3.5,1.0]}
+{"ev":"MeasurementUpdated","t":3.5}
+{"ev":"ProbeTaken","t":3.5}
+{"ev":"UsageScenarioFinished","t":3.5,"u":2,"type":"Stop","el":"_ss_stop_time_ua3"}
+{"ev":"InterArrivalUserInitiated","t":5.0,"u":3,"type":"Start","el":"_ss_stop_time_ua1"}
+{"ev":"UsageModelPassedElement","t":5.0,"type":"Start","el":"_ss_stop_time_ua1","u":3}
+{"ev":"UserStarted","t":5.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2"}
+{"ev":"ProbeTaken","t":5.0}
+{"ev":"UsageModelPassedElement","t":5.0,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2","u":3}
+{"ev":"UserEntryRequested","t":5.0,"u":3,"role":"_ss_stop_time_sysprov1","sig":"_ss_stop_time_op"}
+{"ev":"UsageScenarioStarted","t":5.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":5.0,"u":3,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":5.0,"u":3,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFModelPassedElement","t":5.0,"type":"StartAction","el":"_ss_stop_time_act1","u":3,"ac":"_ss_stop_time_ac1"}
+{"ev":"ResourceDemandRequested","t":5.0,"u":3,"ac":"_ss_stop_time_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_stop_time_act2"}
+{"ev":"JobInitiated","t":5.0,"job":3,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ActiveResourceStateUpdated","t":5.0,"job":3,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ResourceDemandCalculated","t":5.0,"job":3,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"MeasurementMade","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"MeasurementUpdated","t":5.0}
+{"ev":"MeasurementMade","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[5.0,1.0]}
+{"ev":"MeasurementUpdated","t":5.0}
+{"ev":"ProbeTaken","t":5.0}
+{"ev":"ProbeTaken","t":5.0}
+{"ev":"MeasurementMade","t":5.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[5.0,1.0]}
+{"ev":"MeasurementUpdated","t":5.0}
+{"ev":"ProbeTaken","t":5.0}
+{"ev":"ProcessorSharingJobProgressed","t":6.0,"job":3,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"JobFinished","t":6.0,"job":3,"d":0.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ActiveResourceStateUpdated","t":6.0,"job":3,"d":0.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":3}
+{"ev":"ActiveResourceFinished","t":6.0,"u":3,"ac":"_ss_stop_time_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_stop_time_act2"}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[6.0,0.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"MeasurementMade","t":6.0,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[6.0,0.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"SEFFInterpretationProgressed","t":6.0,"u":3,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFInterpretationFinished","t":6.0,"u":3,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFModelPassedElement","t":6.0,"type":"StopAction","el":"_ss_stop_time_act3","u":3,"ac":"_ss_stop_time_ac1"}
+{"ev":"UserRequestFinished","t":6.0,"u":3,"role":"_ss_stop_time_sysprov1","sig":"_ss_stop_time_op"}
+{"ev":"UsageModelPassedElement","t":6.0,"type":"Stop","el":"_ss_stop_time_ua3","u":3}
+{"ev":"UserFinished","t":6.0,"u":3,"type":"Stop","el":"_ss_stop_time_ua3"}
+{"ev":"MeasurementMade","t":6.0,"mp":"UsageScenarioMeasuringPoint[_ss_stop_time_us1]","metric":"Response Time Tuple","v":[6.0,1.0]}
+{"ev":"MeasurementUpdated","t":6.0}
+{"ev":"ProbeTaken","t":6.0}
+{"ev":"UsageScenarioFinished","t":6.0,"u":3,"type":"Stop","el":"_ss_stop_time_ua3"}
+{"ev":"InterArrivalUserInitiated","t":7.5,"u":4,"type":"Start","el":"_ss_stop_time_ua1"}
+{"ev":"UsageModelPassedElement","t":7.5,"type":"Start","el":"_ss_stop_time_ua1","u":4}
+{"ev":"UserStarted","t":7.5,"u":4,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2"}
+{"ev":"ProbeTaken","t":7.5}
+{"ev":"UsageModelPassedElement","t":7.5,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2","u":4}
+{"ev":"UserEntryRequested","t":7.5,"u":4,"role":"_ss_stop_time_sysprov1","sig":"_ss_stop_time_op"}
+{"ev":"UsageScenarioStarted","t":7.5,"u":4,"type":"EntryLevelSystemCall","el":"_ss_stop_time_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":7.5,"u":4,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":7.5,"u":4,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFModelPassedElement","t":7.5,"type":"StartAction","el":"_ss_stop_time_act1","u":4,"ac":"_ss_stop_time_ac1"}
+{"ev":"ResourceDemandRequested","t":7.5,"u":4,"ac":"_ss_stop_time_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_stop_time_act2"}
+{"ev":"JobInitiated","t":7.5,"job":4,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":4}
+{"ev":"ActiveResourceStateUpdated","t":7.5,"job":4,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":4}
+{"ev":"ResourceDemandCalculated","t":7.5,"job":4,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":4}
+{"ev":"MeasurementMade","t":7.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[7.5,1.0]}
+{"ev":"MeasurementUpdated","t":7.5}
+{"ev":"MeasurementMade","t":7.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[7.5,1.0]}
+{"ev":"MeasurementUpdated","t":7.5}
+{"ev":"ProbeTaken","t":7.5}
+{"ev":"ProbeTaken","t":7.5}
+{"ev":"MeasurementMade","t":7.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[7.5,1.0]}
+{"ev":"MeasurementUpdated","t":7.5}
+{"ev":"ProbeTaken","t":7.5}
+{"ev":"ProcessorSharingJobProgressed","t":8.5,"job":4,"d":1.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":4}
+{"ev":"JobFinished","t":8.5,"job":4,"d":0.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":4}
+{"ev":"ActiveResourceStateUpdated","t":8.5,"job":4,"d":0.0,"rc":"_ss_stop_time_rc1","res":"_oro4gG3fEdy4YaaT-RYrLQ","u":4}
+{"ev":"ActiveResourceFinished","t":8.5,"u":4,"ac":"_ss_stop_time_ac1","kind":"ACTIVE","res":"_oro4gG3fEdy4YaaT-RYrLQ","action":"_ss_stop_time_act2"}
+{"ev":"MeasurementMade","t":8.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[8.5,0.0]}
+{"ev":"MeasurementUpdated","t":8.5}
+{"ev":"MeasurementMade","t":8.5,"mp":"ActiveResourceMeasuringPoint[_ss_stop_time_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[8.5,0.0]}
+{"ev":"MeasurementUpdated","t":8.5}
+{"ev":"ProbeTaken","t":8.5}
+{"ev":"ProbeTaken","t":8.5}
+{"ev":"SEFFInterpretationProgressed","t":8.5,"u":4,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFInterpretationFinished","t":8.5,"u":4,"ac":"_ss_stop_time_ac1"}
+{"ev":"SEFFModelPassedElement","t":8.5,"type":"StopAction","el":"_ss_stop_time_act3","u":4,"ac":"_ss_stop_time_ac1"}
+{"ev":"UserRequestFinished","t":8.5,"u":4,"role":"_ss_stop_time_sysprov1","sig":"_ss_stop_time_op"}
+{"ev":"UsageModelPassedElement","t":8.5,"type":"Stop","el":"_ss_stop_time_ua3","u":4}
+{"ev":"UserFinished","t":8.5,"u":4,"type":"Stop","el":"_ss_stop_time_ua3"}
+{"ev":"MeasurementMade","t":8.5,"mp":"UsageScenarioMeasuringPoint[_ss_stop_time_us1]","metric":"Response Time Tuple","v":[8.5,1.0]}
+{"ev":"MeasurementUpdated","t":8.5}
+{"ev":"ProbeTaken","t":8.5}
+{"ev":"UsageScenarioFinished","t":8.5,"u":4,"type":"Stop","el":"_ss_stop_time_ua3"}
+{"ev":"SimulationFinished","t":10.0}
+{"ev":"finish","t":10.0,"events":190,"measurements_made":24,"stoex":0,"math":0}

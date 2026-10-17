@@ -1,0 +1,54 @@
+{"ev":"header","t":0.0,"format":"slingshot-trace/1","run":{"simulator":"slingshot","seed":"1","stoex":"mt","ordered":true,"sim_time":4.0,"linking_resources":false}}
+{"ev":"PreSimulationConfigurationStarted","t":0.0}
+{"ev":"SimulationStarted","t":0.0}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_guard_none_ft1_rt"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_guard_none_ms1_rt"}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_guard_none_ft2_state"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_guard_none_ms2_state"}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_guard_none_ft2_demand"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_guard_none_ms2_demand"}
+{"ev":"MonitorModelVisited","t":0.0,"type":"FeedThrough","el":"_ss_guard_none_ft2_util"}
+{"ev":"MeasurementSpecificationVisited","t":0.0,"type":"MeasurementSpecification","el":"_ss_guard_none_ms2_util"}
+{"ev":"UsageModelPassedElement","t":0.0,"type":"Start","el":"_ss_guard_none_ua1","u":1}
+{"ev":"UserStarted","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"Processing Type Revealed","t":0.0}
+{"ev":"CalculatorRegistered","t":0.0}
+{"ev":"ProbeTaken","t":0.0}
+{"ev":"UsageModelPassedElement","t":0.0,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2","u":1}
+{"ev":"UserEntryRequested","t":0.0,"u":1,"role":"_ss_guard_none_sysprov1","sig":"_ss_guard_none_op"}
+{"ev":"UsageScenarioStarted","t":0.0,"u":1,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":0.0,"u":1,"ac":"_ss_guard_none_ac1"}
+{"ev":"SEFFInterpretationProgressed","t":0.0,"u":1,"ac":"_ss_guard_none_ac1"}
+{"ev":"SEFFModelPassedElement","t":0.0,"type":"StartAction","el":"_ss_guard_none_act1","u":1,"ac":"_ss_guard_none_ac1"}
+{"ev":"InterArrivalUserInitiated","t":1.0,"u":2,"type":"Start","el":"_ss_guard_none_ua1"}
+{"ev":"UsageModelPassedElement","t":1.0,"type":"Start","el":"_ss_guard_none_ua1","u":2}
+{"ev":"UserStarted","t":1.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"ProbeTaken","t":1.0}
+{"ev":"UsageModelPassedElement","t":1.0,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2","u":2}
+{"ev":"UserEntryRequested","t":1.0,"u":2,"role":"_ss_guard_none_sysprov1","sig":"_ss_guard_none_op"}
+{"ev":"UsageScenarioStarted","t":1.0,"u":2,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":1.0,"u":2,"ac":"_ss_guard_none_ac1"}
+{"ev":"InterArrivalUserInitiated","t":2.0,"u":3,"type":"Start","el":"_ss_guard_none_ua1"}
+{"ev":"UsageModelPassedElement","t":2.0,"type":"Start","el":"_ss_guard_none_ua1","u":3}
+{"ev":"UserStarted","t":2.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"ProbeTaken","t":2.0}
+{"ev":"UsageModelPassedElement","t":2.0,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2","u":3}
+{"ev":"UserEntryRequested","t":2.0,"u":3,"role":"_ss_guard_none_sysprov1","sig":"_ss_guard_none_op"}
+{"ev":"UsageScenarioStarted","t":2.0,"u":3,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":2.0,"u":3,"ac":"_ss_guard_none_ac1"}
+{"ev":"InterArrivalUserInitiated","t":3.0,"u":4,"type":"Start","el":"_ss_guard_none_ua1"}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"Start","el":"_ss_guard_none_ua1","u":4}
+{"ev":"UserStarted","t":3.0,"u":4,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"ProbeTaken","t":3.0}
+{"ev":"UsageModelPassedElement","t":3.0,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2","u":4}
+{"ev":"UserEntryRequested","t":3.0,"u":4,"role":"_ss_guard_none_sysprov1","sig":"_ss_guard_none_op"}
+{"ev":"UsageScenarioStarted","t":3.0,"u":4,"type":"EntryLevelSystemCall","el":"_ss_guard_none_ua2"}
+{"ev":"SEFFInterpretationProgressed","t":3.0,"u":4,"ac":"_ss_guard_none_ac1"}
+{"ev":"SimulationFinished","t":4.0}
+{"ev":"finish","t":4.0,"events":52,"measurements_made":0,"stoex":0,"math":0}

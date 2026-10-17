@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repository:Repository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:seff="http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2" xmlns:stoex="http://sdq.ipd.uka.de/StochasticExpressions/2.2" id="_ss_branches_repository" entityName="ss_branches">
+  <components__Repository xsi:type="repository:BasicComponent" id="_ss_branches_comp1" entityName="Server">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_ss_branches_prov1" entityName="prov1" providedInterface__OperationProvidedRole="_ss_branches_if1"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_ss_branches_seff1" describedService__SEFF="_ss_branches_op">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_ss_branches_act1" entityName="start" successor_AbstractAction="_ss_branches_act2"/>
+      <steps_Behaviour xsi:type="seff:BranchAction" id="_ss_branches_act2" entityName="pbranch" predecessor_AbstractAction="_ss_branches_act1" successor_AbstractAction="_ss_branches_act3">
+        <branches_Branch xsi:type="seff:ProbabilisticBranchTransition" id="_ss_branches_bt1" entityName="bt1" branchProbability="0.25">
+          <branchBehaviour_BranchTransition id="_ss_branches_rdb1">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_ss_branches_act5" entityName="start" successor_AbstractAction="_ss_branches_act6"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_branches_act6" entityName="small" predecessor_AbstractAction="_ss_branches_act5" successor_AbstractAction="_ss_branches_act7">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.1"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_ss_branches_act7" entityName="stop" predecessor_AbstractAction="_ss_branches_act6"/>
+          </branchBehaviour_BranchTransition>
+        </branches_Branch>
+        <branches_Branch xsi:type="seff:ProbabilisticBranchTransition" id="_ss_branches_bt2" entityName="bt2" branchProbability="0.75">
+          <branchBehaviour_BranchTransition id="_ss_branches_rdb2">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_ss_branches_act8" entityName="start" successor_AbstractAction="_ss_branches_act9"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_branches_act9" entityName="large" predecessor_AbstractAction="_ss_branches_act8" successor_AbstractAction="_ss_branches_act10">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.3"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_ss_branches_act10" entityName="stop" predecessor_AbstractAction="_ss_branches_act9"/>
+          </branchBehaviour_BranchTransition>
+        </branches_Branch>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:BranchAction" id="_ss_branches_act3" entityName="gbranch" predecessor_AbstractAction="_ss_branches_act2" successor_AbstractAction="_ss_branches_act4">
+        <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_ss_branches_bt3" entityName="bt3">
+          <branchBehaviour_BranchTransition id="_ss_branches_rdb3">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_ss_branches_act11" entityName="start" successor_AbstractAction="_ss_branches_act12"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_branches_act12" entityName="never" predecessor_AbstractAction="_ss_branches_act11" successor_AbstractAction="_ss_branches_act13">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="9.0"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_ss_branches_act13" entityName="stop" predecessor_AbstractAction="_ss_branches_act12"/>
+          </branchBehaviour_BranchTransition>
+          <branchCondition_GuardedBranchTransition specification="false"/>
+        </branches_Branch>
+        <branches_Branch xsi:type="seff:GuardedBranchTransition" id="_ss_branches_bt4" entityName="bt4">
+          <branchBehaviour_BranchTransition id="_ss_branches_rdb4">
+            <steps_Behaviour xsi:type="seff:StartAction" id="_ss_branches_act14" entityName="start" successor_AbstractAction="_ss_branches_act15"/>
+            <steps_Behaviour xsi:type="seff:InternalAction" id="_ss_branches_act15" entityName="always" predecessor_AbstractAction="_ss_branches_act14" successor_AbstractAction="_ss_branches_act16">
+              <resourceDemand_Action>
+                <specification_ParametericResourceDemand specification="0.05"/>
+                <requiredResource_ParametricResourceDemand href="pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ"/>
+              </resourceDemand_Action>
+            </steps_Behaviour>
+            <steps_Behaviour xsi:type="seff:StopAction" id="_ss_branches_act16" entityName="stop" predecessor_AbstractAction="_ss_branches_act15"/>
+          </branchBehaviour_BranchTransition>
+          <branchCondition_GuardedBranchTransition specification="true"/>
+        </branches_Branch>
+      </steps_Behaviour>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_ss_branches_act4" entityName="stop" predecessor_AbstractAction="_ss_branches_act3"/>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_ss_branches_if1" entityName="IService">
+    <signatures__OperationInterface id="_ss_branches_op" entityName="op"/>
+  </interfaces__Repository>
+</repository:Repository>

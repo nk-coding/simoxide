@@ -1,0 +1,10 @@
+{
+  "name": "ss_closed_think",
+  "seed": 1,
+  "sim_time": 6,
+  "rules": [
+    "SS-WL-3.1",
+    "SS-RNG-2"
+  ],
+  "description": "closed workload, 2 users, think time Exp(1.0), demand 0.5 on FCFS. All users start at t = 0 without think time; the think time is drawn when the scenario finishes (in the UserFinished handler, after the response time was measured)."
+}

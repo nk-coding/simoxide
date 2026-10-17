@@ -1,0 +1,58 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Resource Demand Tuple,0.0,0.5
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Resource Demand Tuple,0.0,0.5
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Resource Demand Tuple,1.0829675930528926,0.5
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Resource Demand Tuple,1.6322582704440458,0.5
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Resource Demand Tuple,2.5181308281138204,0.5
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Resource Demand Tuple,3.0761278579838693,0.5
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Resource Demand Tuple,3.253004235490438,0.5
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Resource Demand Tuple,3.9022680402968786,0.5
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Resource Demand Tuple,5.338498683327634,0.5
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Resource Demand Tuple,5.829749679745737,0.5
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,0.0,2.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,0.5,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,1.0,0.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,1.0829675930528926,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,1.5829675930528926,0.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,1.6322582704440458,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,2.132258270444046,0.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,2.5181308281138204,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,3.0181308281138204,0.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,3.0761278579838693,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,3.253004235490438,2.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,3.5761278579838693,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,3.9022680402968786,2.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,4.076127857983869,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,4.576127857983869,0.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,5.338498683327634,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,5.829749679745737,2.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],State of Active Resource Tuple,5.838498683327634,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,0.5,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,1.0,0.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,1.0829675930528926,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,1.5829675930528926,0.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,1.6322582704440458,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,2.132258270444046,0.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,2.5181308281138204,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,3.0181308281138204,0.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,3.0761278579838693,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,3.253004235490438,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,3.5761278579838693,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,3.9022680402968786,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,4.076127857983869,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,4.576127857983869,0.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,5.338498683327634,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,5.829749679745737,1.0
+ActiveResourceMeasuringPoint[_ss_closed_think_cpu|replicaID=0],Utilization of Active Resource Tuple,5.838498683327634,1.0
+UsageScenarioMeasuringPoint[_ss_closed_think_us1],Response Time Tuple,0.5,0.5
+UsageScenarioMeasuringPoint[_ss_closed_think_us1],Response Time Tuple,1.0,1.0
+UsageScenarioMeasuringPoint[_ss_closed_think_us1],Response Time Tuple,1.5829675930528926,0.5
+UsageScenarioMeasuringPoint[_ss_closed_think_us1],Response Time Tuple,2.132258270444046,0.5000000000000002
+UsageScenarioMeasuringPoint[_ss_closed_think_us1],Response Time Tuple,3.0181308281138204,0.5
+UsageScenarioMeasuringPoint[_ss_closed_think_us1],Response Time Tuple,3.5761278579838693,0.5
+UsageScenarioMeasuringPoint[_ss_closed_think_us1],Response Time Tuple,4.076127857983869,0.8231236224934313
+UsageScenarioMeasuringPoint[_ss_closed_think_us1],Response Time Tuple,4.576127857983869,0.6738598176869908
+UsageScenarioMeasuringPoint[_ss_closed_think_us1],Response Time Tuple,5.838498683327634,0.5

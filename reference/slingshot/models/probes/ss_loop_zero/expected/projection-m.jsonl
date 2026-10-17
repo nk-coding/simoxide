@@ -1,0 +1,6 @@
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_loop_zero_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_loop_zero_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_loop_zero_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.1]}
+{"ev":"meas","t":0.1,"mp":"ActiveResourceMeasuringPoint[_ss_loop_zero_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.1,0.0]}
+{"ev":"meas","t":0.1,"mp":"ActiveResourceMeasuringPoint[_ss_loop_zero_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.1,0.0]}
+{"ev":"stop","t":8.0}

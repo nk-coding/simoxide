@@ -1,0 +1,28 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],Resource Demand Tuple,0.0,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],Resource Demand Tuple,1.0,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],Resource Demand Tuple,2.0,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],State of Active Resource Tuple,1.0E-9,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],State of Active Resource Tuple,1.0,1.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],State of Active Resource Tuple,1.000000001,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],State of Active Resource Tuple,2.0,1.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],State of Active Resource Tuple,2.000000001,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],Utilization of Active Resource Tuple,1.0E-9,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],Utilization of Active Resource Tuple,1.0,1.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],Utilization of Active Resource Tuple,1.000000001,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],Utilization of Active Resource Tuple,2.0,1.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0],Utilization of Active Resource Tuple,2.000000001,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0],Resource Demand Tuple,1.0E-9,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0],Resource Demand Tuple,1.000000001,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0],Resource Demand Tuple,2.000000001,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0],State of Active Resource Tuple,1.0E-9,1.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0],State of Active Resource Tuple,1.0E-9,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0],State of Active Resource Tuple,1.000000001,1.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0],State of Active Resource Tuple,1.000000001,0.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0],State of Active Resource Tuple,2.000000001,1.0
+ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0],State of Active Resource Tuple,2.000000001,0.0
+UsageScenarioMeasuringPoint[_ss_zero_demand_us1],Response Time Tuple,1.0E-9,1.0E-9
+UsageScenarioMeasuringPoint[_ss_zero_demand_us1],Response Time Tuple,1.000000001,1.000000082740371E-9
+UsageScenarioMeasuringPoint[_ss_zero_demand_us1],Response Time Tuple,2.000000001,1.000000082740371E-9

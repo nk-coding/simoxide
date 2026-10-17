@@ -1,0 +1,9 @@
+{"ev":"job_abort","t":0.0,"job":1}
+{"ev":"user_abort","t":0.0,"u":1}
+{"ev":"job_abort","t":1.0,"job":2}
+{"ev":"user_abort","t":1.0,"u":2}
+{"ev":"job_abort","t":2.0,"job":3}
+{"ev":"user_abort","t":2.0,"u":3}
+{"ev":"job_abort","t":3.0,"job":4}
+{"ev":"user_abort","t":3.0,"u":4}
+{"ev":"stop","t":4.0}

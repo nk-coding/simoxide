@@ -1,0 +1,28 @@
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[0.0,1.0]}
+{"ev":"meas","t":0.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[0.0,0.0]}
+{"ev":"meas","t":1.0E-9,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0E-9,0.0]}
+{"ev":"meas","t":1.0E-9,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0E-9,0.0]}
+{"ev":"meas","t":1.0E-9,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0E-9,1.0]}
+{"ev":"meas","t":1.0E-9,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"Resource Demand Tuple","v":[1.0E-9,0.0]}
+{"ev":"meas","t":1.0E-9,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0E-9,0.0]}
+{"ev":"meas","t":1.0E-9,"mp":"UsageScenarioMeasuringPoint[_ss_zero_demand_us1]","metric":"Response Time Tuple","v":[1.0E-9,1.0E-9]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.0,1.0]}
+{"ev":"meas","t":1.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[1.0,0.0]}
+{"ev":"meas","t":1.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.000000001,0.0]}
+{"ev":"meas","t":1.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[1.000000001,0.0]}
+{"ev":"meas","t":1.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.000000001,1.0]}
+{"ev":"meas","t":1.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"Resource Demand Tuple","v":[1.000000001,0.0]}
+{"ev":"meas","t":1.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[1.000000001,0.0]}
+{"ev":"meas","t":1.000000001,"mp":"UsageScenarioMeasuringPoint[_ss_zero_demand_us1]","metric":"Response Time Tuple","v":[1.000000001,1.000000082740371E-9]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.0,1.0]}
+{"ev":"meas","t":2.0,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Resource Demand Tuple","v":[2.0,0.0]}
+{"ev":"meas","t":2.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.000000001,0.0]}
+{"ev":"meas","t":2.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_cpu|replicaID=0]","metric":"Utilization of Active Resource Tuple","v":[2.000000001,0.0]}
+{"ev":"meas","t":2.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.000000001,1.0]}
+{"ev":"meas","t":2.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"Resource Demand Tuple","v":[2.000000001,0.0]}
+{"ev":"meas","t":2.000000001,"mp":"ActiveResourceMeasuringPoint[_ss_zero_demand_hdd|replicaID=0]","metric":"State of Active Resource Tuple","v":[2.000000001,0.0]}
+{"ev":"meas","t":2.000000001,"mp":"UsageScenarioMeasuringPoint[_ss_zero_demand_us1]","metric":"Response Time Tuple","v":[2.000000001,1.000000082740371E-9]}
+{"ev":"stop","t":3.0}

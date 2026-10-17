@@ -1,0 +1,11 @@
+{
+  "name": "ss_guard_none",
+  "seed": 1,
+  "sim_time": 4,
+  "rules": [
+    "SS-ACT-5.3",
+    "SS-Q21",
+    "SS-BUS-7"
+  ],
+  "description": "a guarded BranchAction whose guards are all false throws IllegalStateException (\"No branch transition was active\"): the subscriber is disposed."
+}

@@ -1,0 +1,5 @@
+{"k":"log","t":0.0,"e":-1,"level":"WARN","logger":"SemanticModelProvider","msg":"Semantic model not present: List size is 0."}
+{"k":"log","t":0.0,"e":-1,"level":"WARN","logger":"SemanticModelProvider","msg":"Semantic model not present: List size is 0."}
+{"k":"log","t":0.0,"e":-1,"level":"DEBUG","logger":"QVToLoader","msg":"Uri is: null"}
+{"k":"log","t":0.0,"e":-1,"level":"DEBUG","logger":"ModelTransformationCache","msg":"Cache reconfiguration rule \"platform:/plugin/org.palladiosimulator.spd.semantic.transformations/transformations/spd/MainTransformation.qvto\""}
+{"k":"log","t":0.0,"e":-1,"level":"WARN","logger":"SemanticModelProvider","msg":"Semantic model not present: List size is 0."}

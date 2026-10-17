@@ -1,0 +1,62 @@
+measuring_point,metric,time,value
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Resource Demand Tuple,0.0,1.0380639289919347
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Resource Demand Tuple,0.5829675930528927,0.19293627883488706
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Resource Demand Tuple,0.6322582704440458,0.1630700911565046
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Resource Demand Tuple,0.8671316778206634,0.38118541267188244
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Resource Demand Tuple,2.6207534995825306,0.20158736500175747
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Resource Demand Tuple,3.543250704913192,0.19520417099682918
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Resource Demand Tuple,3.7767102944383786,1.1353675188406478
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Resource Demand Tuple,3.923051546127082,0.779008988675668
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Resource Demand Tuple,4.132410810959639,0.25583040915688493
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Resource Demand Tuple,4.606387499592343,0.8687051292706441
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,0.5829675930528927,2.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,0.6322582704440458,3.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,0.8671316778206634,4.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,0.9688401507226668,4.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,1.0380639289919347,4.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,1.1214685439135597,4.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,1.2062474992778582,3.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,1.221910046226276,2.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,1.7462301604345858,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,1.7752557116552088,0.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,2.6207534995825306,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,2.8223408645842882,0.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,3.543250704913192,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,3.738454875910021,0.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,3.7767102944383786,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,3.923051546127082,2.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,4.132410810959639,3.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,4.606387499592343,4.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,4.899902038430294,4.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,4.912077813279026,4.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],State of Active Resource Tuple,4.997740218042944,3.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,0.0,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,0.5829675930528927,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,0.6322582704440458,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,0.8671316778206634,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,0.9688401507226668,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,1.0380639289919347,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,1.1214685439135597,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,1.2062474992778582,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,1.221910046226276,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,1.7462301604345858,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,1.7752557116552088,0.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,2.6207534995825306,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,2.8223408645842882,0.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,3.543250704913192,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,3.738454875910021,0.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,3.7767102944383786,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,3.923051546127082,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,4.132410810959639,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,4.606387499592343,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,4.899902038430294,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,4.912077813279026,1.0
+ActiveResourceMeasuringPoint[_ss_open_draws_cpu|replicaID=0],Utilization of Active Resource Tuple,4.997740218042944,1.0
+UsageScenarioMeasuringPoint[_ss_open_draws_us1],Response Time Tuple,1.2062474992778582,0.5739892288338124
+UsageScenarioMeasuringPoint[_ss_open_draws_us1],Response Time Tuple,1.221910046226276,0.6389424531733833
+UsageScenarioMeasuringPoint[_ss_open_draws_us1],Response Time Tuple,1.7462301604345858,1.7462301604345858
+UsageScenarioMeasuringPoint[_ss_open_draws_us1],Response Time Tuple,1.7752557116552088,0.9081240338345454
+UsageScenarioMeasuringPoint[_ss_open_draws_us1],Response Time Tuple,2.8223408645842882,0.20158736500175767
+UsageScenarioMeasuringPoint[_ss_open_draws_us1],Response Time Tuple,3.738454875910021,0.19520417099682907
+UsageScenarioMeasuringPoint[_ss_open_draws_us1],Response Time Tuple,4.997740218042944,0.8653294070833049
