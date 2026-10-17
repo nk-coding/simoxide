@@ -217,19 +217,19 @@ when the flag is off; the unchanged transformations run under the flag.
 
 | # | Quirk | Rule | Fixed behaviour |
 |---|---|---|---|
-| Q1 | `doOnDisregard` does not restore the state | SS-SPD-3.2 | defined: a disregard restores the state as `doOnDisregard` intends (no effect on results known) |
-| Q2 | constraint state changes when the request is made, even if QVTo fails | SS-SPD-3.2 | defined: the adjustor's state change is committed only by a successful `ModelAdjusted` |
-| Q3 | AVERAGE is an EMA (60 s, 10 s, 0.2); the others use the last 10 values | SS-SPD-2.4 | kept: Slingshot's aggregator design (no SimuLizar counterpart, no other intent in the code); P1 may revisit |
-| Q4 | relative 0 % ignores `minAdjustmentValue` | SS-SPD-4.2 | proposed (P2): a zero change stays zero; otherwise the magnitude is at least `minAdjustmentValue`, in the direction of the percentage. Needs a patched transformation |
+| Q1 | `doOnDisregard` does not restore the state | SS-SPD-3.2 | defined: a disregard restores the state as `doOnDisregard` intends (no effect on results known). P1: `Quirks::q1_disregard_keeps_state`. |
+| Q2 | constraint state changes when the request is made, even if QVTo fails | SS-SPD-3.2 | defined: the adjustor's state change is committed only by a successful `ModelAdjusted`. P1: `Quirks::q2_commit_on_request`. |
+| Q3 | AVERAGE is an EMA (60 s, 10 s, 0.2); the others use the last 10 values | SS-SPD-2.4 | kept: Slingshot's aggregator design (no SimuLizar counterpart, no other intent in the code); P1 may revisit. P1: kept, no flag (*provisional*). |
+| Q4 | relative 0 % ignores `minAdjustmentValue` | SS-SPD-4.2 | proposed (P2): a zero change stays zero; otherwise the magnitude is at least `minAdjustmentValue`, in the direction of the percentage. Needs a patched transformation. P1: the arithmetic and `Quirks::q4_relative_zero` (used by the Q9 check), *provisional*. |
 | Q5 | scale-in aborts one job, loses the others | SS-SPD-5.4 | defined in the design (§5.3): drain |
 | Q6 | every link connects every container after an adjustment | SS-SPD-4.2 | proposed (P2): a new container joins the links of the unit container; other links unchanged. Needs a patched transformation |
 | Q7 | top-down scale-in removes emptied containers one enactment late | SS-SPD-4.2 | proposed (P2): removed in the same enactment (the transformation's own TODO). Needs a patched transformation |
 | Q8 | top-down placement `->any(true)`: Java-hash order | SS-SPD-4.2 | qvto-rs deterministic order (documented deviation, §5.5) |
-| Q9 | only thrashing constraints in the chain | SS-SPD-1.4 | proposed (P1): the `TargetGroupSizeConstraint` is also checked in the chain, so a policy whose change would be clamped to zero is disregarded (and changes no constraint state) |
+| Q9 | only thrashing constraints in the chain | SS-SPD-1.4 | proposed (P1): the `TargetGroupSizeConstraint` is also checked in the chain, so a policy whose change would be clamped to zero is disregarded (and changes no constraint state). P1: `Quirks::q9_no_size_check`, *provisional*. |
 | Q10 | static fields in `TargetGroupUtils` | – | not reproduced (no shared JVM state in SimOxide) |
-| Q11 | unsupported stimuli: NPE at set-up | SS-SPD-2.2 | defined: a configuration error naming the stimulus |
-| Q12 | composed triggers broken | SS-SPD-2.6 | defined: AND/OR/XOR of the children's results |
-| Q13 | instantaneous samples merged over containers; aggregation on every event | SS-SPD-2.3/2.4 | proposed (P1): `aggregationOverElements` aggregates the latest value of each element of the group; `getResult` only for events that were aggregated; samples are consumed only when the chain gets that far |
+| Q11 | unsupported stimuli: NPE at set-up | SS-SPD-2.2 | defined: a configuration error naming the stimulus. P1: `Quirks::q11_setup_error_drops_spd` (also wrong expectation types, CPU percentages outside 0-100, `QueueLength` outside competing-consumer groups). |
+| Q12 | composed triggers broken | SS-SPD-2.6 | defined: AND/OR/XOR of the children's results. P1: `Quirks::q12_broken_composed` (also the double evaluation with two measurement stimulus kinds); fixed XOR = exactly one child. |
+| Q13 | instantaneous samples merged over containers; aggregation on every event | SS-SPD-2.3/2.4 | proposed (P1): `aggregationOverElements` aggregates the latest value of each element of the group; `getResult` only for events that were aggregated; samples are consumed only when the chain gets that far. P1: `Quirks::q13_merged_samples`; fixed: one window per measuring point, the method over the ready windows, *provisional*. |
 | Q14 | deleted elements not reported; population changes ineffective | SS-SPD-5.2 | proposed (F4/P2): deletions are reported, monitors and passive resources of removed elements are dropped, a population change takes effect |
-| Q15 | policies react to each other's `SimulationTimeReached` | SS-SPD-2.1 | defined: only the policy's own event |
+| Q15 | policies react to each other's `SimulationTimeReached` | SS-SPD-2.1 | defined: only the policy's own event. P1: `Quirks::q15_shared_time_events`. |
 | Q16 | container order after an adjustment follows Java identity hashes | SS-SPD-4.2 | insertion order (the `det` rule, phase Q2) |

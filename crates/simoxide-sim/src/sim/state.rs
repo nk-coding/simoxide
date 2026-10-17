@@ -263,9 +263,6 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             reconf_pid: 0,
             error: None,
             prm_armed: false,
-            armed: false,
-            observe: Vec::new(),
-            observed: Vec::new(),
             prm: Prm::default(),
             reconf: Reconf {
                 time_series: cm.reconf_time_series.clone(),
@@ -273,6 +270,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
                 ..Default::default()
             },
             events: EventList::default(),
+            hooks: Default::default(),
         };
         let max_depth = max_depth(&cfg.limits);
         let math = crate::javarand::JavaRandom::slingshot_math(cfg.seed);
@@ -565,26 +563,6 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         self.flush_outputs();
         let _ = self.st.rng.attach_tape(false);
         self.st
-    }
-
-    /// Observes series `s` from now on: every tuple recorded for it is also kept for
-    /// [`Simulation::take_observed`] (the measurement-observer hook for an SPD interpreter,
-    /// `DESIGN-SPD.md` §5.4; in the Slingshot flavour the tuples are Slingshot's
-    /// `MeasurementMade` stream). Unobserved runs pay nothing but the existing branch of the
-    /// measurement path.
-    pub fn observe_series(&mut self, s: SeriesId) {
-        let meas = &mut self.st.meas;
-        let n = meas.m.series.len().max(s as usize + 1);
-        if meas.observe.len() < n {
-            meas.observe.resize(n, false);
-        }
-        meas.observe[s as usize] = true;
-        meas.armed = true;
-    }
-
-    /// The tuples of observed series recorded since the last call, in emission order.
-    pub fn take_observed(&mut self) -> Vec<Observed> {
-        std::mem::take(&mut self.st.meas.observed)
     }
 
     /// Replaces the [`Limits`] of the run (e.g. a fork's own deadline or cancellation flag:

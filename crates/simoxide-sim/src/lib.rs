@@ -52,8 +52,8 @@ pub use ir::{CompileError, CompiledModel};
 pub use meas::{Measurements, SeriesSummary};
 pub use rng::{RngMode, Tape};
 pub use sim::{
-    DEFAULT_MAX_EVENTS_PER_INSTANT, Detached, Limits, Observed, Outputs, Pause, Phase, RunResult,
-    RunState, SimConfig, SimError, SimErrorKind, Simulation, Status,
+    DEFAULT_MAX_EVENTS_PER_INSTANT, Detached, Limits, Outputs, Pause, Phase, RunResult, RunState,
+    SimConfig, SimError, SimErrorKind, Simulation, Status,
 };
 pub use simoxide_sched::PsAlgorithm;
 

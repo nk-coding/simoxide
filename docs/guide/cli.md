@@ -34,6 +34,9 @@ simoxide run --model <dir> [flags]
 | `--ps-algorithm exact\|virtual-time` | processor-sharing algorithm, default `exact` ([Deviations](../correctness/deviations.md#virtual-time-processor-sharing)) |
 | `--flavour simulizar\|slingshot` | whose semantics, default `simulizar` ([Slingshot flavour](./slingshot.md)) |
 | `--quirks LIST` | Slingshot compat flags: `Q1`..`Q37`, `fast`, `all`, `none`, `-Qn`; default `none` (the fixed behaviour); `--quirks list` prints them ([Quirks](../spec/slingshot/quirks.md#compat-flags)) |
+| `--spd-log FILE`, `--spd-log-all` | write the decision log of the model's scaling policies ([Scaling policies](./spd.md)) |
+| `--spd-quirks fixed\|slingshot\|Q2,…` | Slingshot SPD quirks to reproduce, default `fixed` |
+| `--no-spd` | ignore a `.spd` file of the model |
 
 Limits (see [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)):
 

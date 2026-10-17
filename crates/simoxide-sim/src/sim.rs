@@ -40,10 +40,12 @@ use std::io::Write;
 
 mod calls;
 mod flat;
+mod hooks;
 mod runmodel;
 mod slingshot;
 mod state;
 
+pub use hooks::ObservedTuple;
 pub use runmodel::RunModel;
 pub use state::{Detached, Pause, Phase, RunState, Status};
 use state::{NoPause, PauseWhen};
@@ -492,17 +494,13 @@ pub(crate) struct Sink {
     error: Option<&'static str>,
     /// PRM recorders exist (MEAS-7.2).
     prm_armed: bool,
-    /// `prm_armed` or a series is observed: tuples take the slow path ([`emit_hooks`]).
-    armed: bool,
-    /// Observed series (empty: none), see [`Simulation::observe_series`].
-    observe: Vec<bool>,
-    /// Tuples of observed series since the last [`Simulation::take_observed`].
-    observed: Vec<Observed>,
     prm: Prm,
     reconf: Reconf,
     /// The event list: runtime-measurement writes schedule the reconfiguration process from
     /// inside the measurement emission, at the point of the write (FIFO order of same-time notes).
     events: EventList,
+    /// External notes and observed series of host layers (`hooks`).
+    hooks: hooks::Hooks,
 }
 
 /// `Reconfigurator` / `ReconfigurationProcess` state (MEAS-7.2).
@@ -646,7 +644,6 @@ fn prm_write(meas: &mut Sink, trace: &mut Option<TraceOut>, now: i64) {
             "IllegalStateException: Tried to schedule thread which was not suspended [Reconfiguration Process]",
         );
         meas.prm_armed = false;
-        meas.armed = !meas.observe.is_empty();
         if let Some(tr) = trace.as_mut() {
             tr.pend(now, meas.reconf_pid);
         }
@@ -726,37 +723,11 @@ fn emit(
             meas.windows[w as usize].add(t, v);
         }
     }
-    if meas.armed {
-        emit_hooks(meas, trace, now, s, t, v);
-    }
-}
-
-/// A tuple of an observed series (the measurement-observer hook, `DESIGN-SPD.md` §5.4
-/// "Stimulus sources": Slingshot's `MeasurementMade` stream for the SPD interpreter).
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Observed {
-    pub series: SeriesId,
-    /// The tuple: point in time (seconds) and value.
-    pub t: f64,
-    pub v: f64,
-}
-
-/// The tuple's PRM recorders and observers (the slow path of [`emit`]).
-#[cold]
-#[inline(never)]
-fn emit_hooks(
-    meas: &mut Sink,
-    trace: &mut Option<TraceOut>,
-    now: i64,
-    s: SeriesId,
-    t: f64,
-    v: f64,
-) {
     if meas.prm_armed {
         prm_tuple(meas, trace, now, s, t);
     }
-    if meas.observe.get(s as usize).copied().unwrap_or(false) {
-        meas.observed.push(Observed { series: s, t, v });
+    if meas.hooks.observing {
+        hooks::observe_tuple(&mut meas.hooks, now, s, t, v);
     }
 }
 
@@ -777,6 +748,9 @@ fn emit_out(
     if let Some(tr) = trace.as_mut() {
         let def = &meas.m.series[s as usize];
         tr.meas(now, &def.mp, def.metric, t, v);
+    }
+    if meas.hooks.observing {
+        hooks::observe_tuple(&mut meas.hooks, now, s, t, v);
     }
 }
 
@@ -1199,7 +1173,6 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 prm.recs.push(PrmState::new(rec));
             }
             self.st.meas.prm_armed = true;
-            self.st.meas.armed = true;
         }
         // probe-framework decorators: sliding windows, first events at span(length) (MEAS-6.3)
         self.st.meas.series_windows = vec![Vec::new(); self.st.meas.m.series.len()];
@@ -1521,6 +1494,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 self.st.meas.reconf.scheduled = false;
                 reconf_run(&mut self.st.meas, &mut self.trace, self.st.now);
             }
+            Ev::External(tag) => self.st.meas.hooks.due.push(tag),
             Ev::Resume(k) => {
                 let (s, g) = unkey(k);
                 let p = &self.st.procs[s as usize];

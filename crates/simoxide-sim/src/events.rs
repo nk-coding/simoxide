@@ -29,6 +29,8 @@ pub(crate) enum Ev {
     /// Slingshot (Q26): a superseded processor-sharing completion of a resource, dispatched at
     /// its old time and position (SS-RES-2.6).
     Stale(ResIdx),
+    /// An external note of a host layer (`sim::hooks`): records its tag.
+    External(u32),
 }
 
 #[derive(Clone, Copy)]

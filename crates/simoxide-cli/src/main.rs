@@ -25,6 +25,9 @@ const USAGE: &str = "usage:
              semantics, fast mode, docs/spec/slingshot)
              [--quirks LIST]   (Slingshot compat flags: Q1..Q37, all, fast, none, -Qn;
              default none = the fixed behaviour; --quirks list prints them)
+             [--spd-log spd.jsonl] [--spd-log-all] [--spd-quirks fixed|slingshot|Q2,Q12,...]
+             [--no-spd]   (scaling policies of a .spd next to the model; `spd` feature;
+             P1: decisions only, adjustments are not executed)
   simoxide bench --model <dir> [--run-json run.json] [--runs N] [--threads T] [same run flags]
   simoxide load-bench --model <dir> [--run-json run.json] [--runs N]   (load + compile only)
   (with the `profile` feature, bench and load-bench take --profile out.svg|out.folded)";
@@ -53,6 +56,10 @@ struct Args {
     ps_virtual_time: bool,
     flavour: FlavourKind,
     quirks: Quirks,
+    spd_log: Option<PathBuf>,
+    spd_log_all: bool,
+    spd_quirks: Option<String>,
+    no_spd: bool,
 }
 
 fn parse_args() -> Result<Args, String> {
@@ -82,6 +89,10 @@ fn parse_args() -> Result<Args, String> {
         ps_virtual_time: false,
         flavour: FlavourKind::SimuLizar,
         quirks: Quirks::NONE,
+        spd_log: None,
+        spd_log_all: false,
+        spd_quirks: None,
+        no_spd: false,
     };
     while let Some(f) = it.next() {
         let mut val = || it.next().ok_or(format!("{f} needs a value"));
@@ -174,6 +185,10 @@ fn parse_args() -> Result<Args, String> {
                 }
                 a.quirks = Quirks::parse(&v).map_err(|e| format!("--quirks: {e}"))?;
             }
+            "--spd-log" => a.spd_log = Some(val()?.into()),
+            "--spd-log-all" => a.spd_log_all = true,
+            "--spd-quirks" => a.spd_quirks = Some(val()?),
+            "--no-spd" => a.no_spd = true,
             "-h" | "--help" => return Err(USAGE.into()),
             o => return Err(format!("unknown flag {o}\n{USAGE}")),
         }
@@ -258,7 +273,16 @@ fn run(a: &Args) -> Result<(), String> {
         tape: a.tape.as_deref().map(create).transpose()?,
     };
     let t0 = Instant::now();
-    let r = simoxide_sim::run(&cm, cfg, out).map_err(|e| e.to_string())?;
+    let r = match spd::of(a, &cm)? {
+        Some(_) if a.flavour == FlavourKind::Slingshot => {
+            return Err(
+                "scaling policies in the Slingshot flavour are phase P3 (use --no-spd to ignore the .spd)"
+                    .into(),
+            );
+        }
+        Some(s) => spd::run(a, &cm, cfg, out, &s)?,
+        None => simoxide_sim::run(&cm, cfg, out).map_err(|e| e.to_string())?,
+    };
     let dt = t0.elapsed();
     for w in &r.warnings {
         eprintln!("warning: {w}");
@@ -279,6 +303,105 @@ fn run(a: &Args) -> Result<(), String> {
         dt.as_secs_f64() * 1e3
     );
     Ok(())
+}
+
+/// Scaling policies (`spd` feature): the interpreter runs with the simulation when the model
+/// directory has a `.spd` file.
+#[cfg(feature = "spd")]
+mod spd {
+    use super::{Args, create};
+    use simoxide_sim::compat::Compat;
+    use simoxide_sim::{CompiledModel, Mode, Outputs, RunResult, SimConfig, Simulation};
+    use simoxide_spd::log::JsonlLog;
+    use simoxide_spd::sim::{NoAdjustment, SpdRun, spd_of};
+    use simoxide_spd::{Quirks, Spd};
+
+    pub fn of(a: &Args, cm: &CompiledModel) -> Result<Option<Spd>, String> {
+        if a.no_spd {
+            return Ok(None);
+        }
+        let q = match &a.spd_quirks {
+            Some(s) => Quirks::parse(s)?,
+            None => Quirks::fixed(),
+        };
+        let s = spd_of(&cm.model, q).map_err(|e| e.to_string())?;
+        if let Some(s) = &s
+            && let Some(d) = s.dropped()
+        {
+            eprintln!("warning: SPD dropped (Q11 compat, as Slingshot): {d}");
+        }
+        Ok(s)
+    }
+
+    fn go<C: Compat>(
+        a: &Args,
+        cm: &CompiledModel,
+        cfg: SimConfig,
+        out: Outputs,
+        spd: &Spd,
+    ) -> Result<RunResult, String> {
+        let sim = Simulation::<C>::create(cm, cfg, out).map_err(|e| e.to_string())?;
+        let mut r = SpdRun::new(sim, spd).map_err(|e| e.to_string())?;
+        let file = a.spd_log.as_deref().map(create).transpose()?;
+        let sink: Box<dyn std::io::Write> = file.unwrap_or_else(|| Box::new(std::io::sink()));
+        let mut log = JsonlLog::new(sink);
+        log.all = a.spd_log_all;
+        r.run(&mut NoAdjustment, &mut log)
+            .map_err(|e| e.to_string())?;
+        if a.spd_log.is_some() {
+            log.finish().map_err(|e| format!("--spd-log: {e}"))?;
+        }
+        let (res, _, s) = r.finish().map_err(|e| e.to_string())?;
+        eprintln!(
+            "spd: policies={} evaluations={} requests={} (adjustments are not executed yet)",
+            spd.contexts().len(),
+            s.evaluations,
+            s.requests
+        );
+        Ok(res)
+    }
+
+    pub fn run(
+        a: &Args,
+        cm: &CompiledModel,
+        cfg: SimConfig,
+        out: Outputs,
+        spd: &Spd,
+    ) -> Result<RunResult, String> {
+        match cfg.mode {
+            Mode::Exact => go::<simoxide_sim::Exact>(a, cm, cfg, out, spd),
+            #[cfg(feature = "fast")]
+            Mode::Fast => go::<simoxide_sim::Fast>(a, cm, cfg, out, spd),
+            #[cfg(not(feature = "fast"))]
+            m => Err(format!("mode {m} needs the `fast` feature")),
+        }
+    }
+}
+
+/// Without the `spd` feature, `.spd` files are ignored.
+#[cfg(not(feature = "spd"))]
+mod spd {
+    use super::Args;
+    use simoxide_sim::{CompiledModel, Outputs, RunResult, SimConfig};
+
+    pub enum Never {}
+
+    pub fn of(a: &Args, _: &CompiledModel) -> Result<Option<Never>, String> {
+        if a.spd_log.is_some() || a.spd_quirks.is_some() {
+            return Err("--spd-log/--spd-quirks need the `spd` feature".into());
+        }
+        Ok(None)
+    }
+
+    pub fn run(
+        _: &Args,
+        _: &CompiledModel,
+        _: SimConfig,
+        _: Outputs,
+        s: &Never,
+    ) -> Result<RunResult, String> {
+        match *s {}
+    }
 }
 
 /// Starts the sampling profiler if `--profile` was given.

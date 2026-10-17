@@ -124,6 +124,9 @@ impl RunSpec {
             Some(m) => entries.push(m.clone()),
             None => entries.extend(with_ext("monitorrepository")),
         }
+        for ext in SPD_EXTENSIONS {
+            entries.extend(with_ext(ext));
+        }
         let m = simoxide_model::load_memory_entries(
             files
                 .iter()
@@ -134,7 +137,8 @@ impl RunSpec {
     }
 
     /// Loads the model of a directory: the entry files named in the spec, or the directory's
-    /// single `.usagemodel`, its `.allocation` files and optional `.monitorrepository`.
+    /// single `.usagemodel`, its `.allocation` files and optional `.monitorrepository`; then the
+    /// directory's [`SPD_EXTENSIONS`] files.
     pub fn load_model(&self, dir: &Path) -> Result<simoxide_model::Model, String> {
         let mut files: Vec<PathBuf> = Vec::new();
         let list = |ext: &str| -> Result<Vec<PathBuf>, String> {
@@ -169,9 +173,18 @@ impl RunSpec {
             Some(m) => files.push(dir.join(m)),
             None => files.extend(list("monitorrepository")?),
         }
+        for ext in SPD_EXTENSIONS {
+            files.extend(list(ext)?);
+        }
         model_errors(simoxide_model::load_files(&files))
     }
 }
+
+/// Scaling-policy files a model directory may contain (`.spd`, and the semantic configuration
+/// `.semanticspd`): loaded after the entry files, sorted by name, like Slingshot's run
+/// configuration loads them next to the PCM models. The simulator itself ignores them; the SPD
+/// interpreter (`simoxide-spd`) reads them from the model graph.
+pub const SPD_EXTENSIONS: [&str; 2] = ["spd", "semanticspd"];
 
 /// The model, or its first error diagnostic.
 fn model_errors(m: simoxide_model::Model) -> Result<simoxide_model::Model, String> {
