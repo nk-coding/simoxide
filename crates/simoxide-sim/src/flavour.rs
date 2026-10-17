@@ -152,7 +152,8 @@ pub enum Support {
     UpToThrow,
     /// A quirk of the SPD interpreter or adjustment: read by `simoxide-spd` (phases P1-P3).
     Spd,
-    /// Needs the Slingshot-exact mode's handler steps (phase X2): refused in the fast mode.
+    /// Needs the Slingshot-exact mode's handler steps ([`FlavourKind::SlingshotExact`], which
+    /// runs every quirk): refused in the fast mode.
     ExactOnly,
 }
 

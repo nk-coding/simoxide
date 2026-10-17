@@ -151,7 +151,8 @@ reacts to one event and returns the events that follow, and these are put on the
     reaches `simTime` and reports no error. Quirk [SS-Q18](./quirks.md#ss-q18).
   - Probes: `ss_loop_zero`, `ss_usage_loop_zero`, `ss_guard_none`, `ss_two_demands`; corpus `h10`,
     `h11`, `h12`, `h13`, `h18`, `h26`, `h27`, `h28` (`expected/errors.txt`,
-    `results/det-verify.csv` column `handler_errors`).
+    `results/det-verify.csv` column `handler_errors`). SimOxide's exact mode keeps a disposed bit
+    per subscriber method and reproduces each of them ([Quirks](./quirks.md#exact-mode)).
   - A pre- or post-interceptor that throws returns `InterceptionResult.error` instead
     (`[ED]entity/interceptors/PreInterceptor.java:48-60`, `PostInterceptor.java:45-52`); a failed
     pre-interception skips the handler for that event only.

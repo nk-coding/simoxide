@@ -239,10 +239,11 @@ again in a fresh JVM and compares all files. Seeds and simulated times are those
 | `corpus` | 38 | the corpus models that run without handler errors, aborts or empty output |
 | `failure` | 25 | the corpus models with handler errors (18), aborts (`h04`, `h25`, `x_sl_elsc_return`) or no output (`h15`, `x_pem_reliability`, `x_pem_subsystem*`) |
 | `setup-error` | 2 | `x_pem_acquire`, `x_sl_runconfigtest`: the run fails before t = 0 (`error.txt`) |
+| `x2` | 2 | `ss_q37_fallback` (a link touching only one of the containers is used), `ss_q37_none` (no link: `IllegalArgumentException` disposes `onCallOverWireRequested`), models in `reference/slingshot/models/x2/`, added in X2 because no corpus model has quirk Q37 |
 
 Left out: `x_pem_fork`, a zero-time livelock without a reference result (SS-RUN-5).
 
-**Reproducibility (X1, 2026-10-17).** `corpus-ss.sh --check` reproduced all 88 cases byte for byte
+**Reproducibility (X1, 2026-10-17; the two `x2` cases in X2).** `corpus-ss.sh --check` reproduced all 88 cases byte for byte
 in fresh JVMs (projection, tape projection, measurements, SPD log, summary, full trace). The only
 JVM-dependent bytes were identity hash codes inside three exception messages
 (`SEFFInterpretationContext@1b2c3d`, Q31); `tools/errors.py` writes them as `@*`. The 22 cases

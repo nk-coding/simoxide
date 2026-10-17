@@ -79,7 +79,7 @@ handler is a run error. Each documented quirk `Q1`–`Q37` has a compat flag tha
 | `Q26,Q29` | these quirks |
 | `fast` | every quirk the fast mode reproduces (all but Q17 and Q18) |
 | `fast,-Q32` | `fast` without Q32 |
-| `all` | all 37 (refused by the fast mode, which cannot reproduce Q17 and Q18) |
+| `all` | all 37 (refused by the fast mode, which cannot reproduce Q17 and Q18; the exact mode, `--flavour slingshot-exact`, always runs all) |
 
 How far the fast mode reproduces a quirk (`--quirks list` prints it):
 
@@ -88,7 +88,7 @@ How far the fast mode reproduces a quirk (`--quirks list` prints it):
   stops with a run error. What Slingshot does next (it disposes the handler and runs on, Q18) is
   the exact mode's.
 - **Spd**: an SPD quirk (Q1–Q16), read by the SPD interpreter (design phases P1–P3).
-- **ExactOnly** (Q17, Q18): refused in the fast mode.
+- **ExactOnly** (Q17, Q18): refused in the fast mode; the exact mode reproduces them.
 
 ## How close is it?
 

@@ -1074,6 +1074,24 @@ handlers, with Slingshot's side effects up to the throwing statement (SS-X-3.6).
   reproduced): the "link touching either container" fallback and the `IllegalArgumentException`
   that disposes `onCallOverWireRequested` (no corpus model had them); both equal.
 
+- **X2c: handler disposal and the throwing quirks.** The disposal mechanism is X2a's (a disposed
+  bit per subscriber method, side effects up to the throw kept); X2c checks it quirk by quirk. Each
+  throw site follows the Java statement order, e.g. Q19 (SEFF loop count 0: the body runs once,
+  the wrapper's `next()` throws in `onSeffInterpretationProgressed`; usage loop: the builder throws
+  after the count was drawn and, in `onUserStarted`, after the frame was pushed), Q21 (guards
+  evaluated until none holds), Q22 (the `INNER` frame stays, `onUserRequestFinished` fails its
+  two-frame precondition), Q23 (the fork holder's `ArrayList` iterator rotates on every
+  `getCurrentProcessedBehavior()` call, also in `onActiveResourceFinished` and when a child
+  holder is built, and throws `NoSuchElementException` when it runs dry), Q24, Q30 (the inner
+  assembly's demand aborts, `findUserInterpretationContext` finds no user), Q31
+  (`AssemblyOperationCompoundKey.of` throws for every root SEFF reached by an infrastructure call,
+  monitored or not, so both monitor handlers go), Q17 (each completion of a concurrent demand
+  advances the shared cursor; the completion after the `Stop` throws the
+  `getPredecessor_AbstractAction()` NPE), Q37. New test `handler_errors_match_the_reference`: on
+  every corpus case with handler errors (21 of the 22, h27 excepted, plus `ss_q37_none`) the
+  exception classes and their order equal the reference's `errors.txt`. Docs:
+  `docs/spec/slingshot/quirks.md#exact-mode`, SS-BUS-7.
+
 ### 5.3 The runtime-model-change foundation (shared)
 
 This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these additions:

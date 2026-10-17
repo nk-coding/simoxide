@@ -51,6 +51,7 @@ struct Outcome {
     tape: String,
     csv: Option<String>,
     error: Option<String>,
+    warnings: Vec<String>,
 }
 
 fn run_case(name: &str) -> (Outcome, PathBuf) {
@@ -74,9 +75,9 @@ fn run_case(name: &str) -> (Outcome, PathBuf) {
         tape: Some(Box::new(t.clone())),
     };
     let r = simoxide_sim::run(&cm, cfg, out);
-    let (csv, error) = match r {
-        Ok(r) => (Some(r.measurements.to_csv()), None),
-        Err(e) => (None, Some(e.to_string())),
+    let (csv, error, warnings) = match r {
+        Ok(r) => (Some(r.measurements.to_csv()), None, r.warnings),
+        Err(e) => (None, Some(e.to_string()), Vec::new()),
     };
     (
         Outcome {
@@ -84,6 +85,7 @@ fn run_case(name: &str) -> (Outcome, PathBuf) {
             tape: t.text(),
             csv,
             error,
+            warnings,
         },
         dir.join("expected"),
     )
@@ -161,4 +163,36 @@ fn exact_mode_is_deterministic() {
         assert_eq!(a.tape, b.tape, "{n}");
         assert_eq!(a.csv, b.csv, "{n}");
     }
+}
+
+/// The disposed handlers (Q18): every case with handler errors throws the same exceptions in the
+/// same order as the reference (`expected/errors.txt`: one line per "An error occurred").
+#[test]
+fn handler_errors_match_the_reference() {
+    let mut checked = 0;
+    for e in std::fs::read_dir(root().join("corpus-ss"))
+        .unwrap()
+        .filter_map(|e| e.ok())
+    {
+        let name = e.file_name().to_string_lossy().into_owned();
+        let errors = e.path().join("expected/errors.txt");
+        let Ok(text) = std::fs::read_to_string(&errors) else {
+            continue;
+        };
+        if text.trim().is_empty() || KNOWN.iter().any(|k| k.0 == name) {
+            continue;
+        }
+        let want: Vec<&str> = text.lines().map(|l| l.split(':').next().unwrap()).collect();
+        let (o, _) = run_case(&name);
+        // "t=<time>: <class> in <handler>: <message>"
+        let got: Vec<String> = o
+            .warnings
+            .iter()
+            .filter_map(|w| w.split(": ").nth(1))
+            .map(|x| x.split(' ').next().unwrap().to_string())
+            .collect();
+        assert_eq!(got, want, "{name}: {:#?}", o.warnings);
+        checked += 1;
+    }
+    assert!(checked >= 22, "{checked} cases with handler errors");
 }
