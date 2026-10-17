@@ -26,10 +26,11 @@
 //! * Lines run in order on one copy of the run's model (an element created by a line can be
 //!   named by later ones) and are applied together; on any error nothing changes.
 
-use crate::{Edit, EditError, Session};
+use crate::{Edit, EditError};
 use qvto_model::{Datum, ModelStore};
+use simoxide_model::meta::prelude::*;
 use simoxide_model::meta::{ClassId, DataKind, FeatureId, class as mc, feat as mf};
-use simoxide_model::raw::{Graph, ObjId, Value};
+use simoxide_model::raw::{Graph, ObjId, PcmGraph, Value};
 use simoxide_sim::{ChangeError, ChangeReport, Compat, Flavour, Simulation};
 use std::fmt;
 use std::path::Path;
@@ -373,8 +374,7 @@ impl ChangeFile {
         &self,
         sim: &mut Simulation<'_, C, F>,
     ) -> Result<ChangeReport, ChangeFileError> {
-        let mut session = Session::new();
-        let mut e = Edit::new(sim, &mut session);
+        let mut e = Edit::new(sim);
         let types: Vec<(ObjId, Box<str>, Box<str>)> = sim
             .compiled()
             .model
@@ -395,8 +395,8 @@ impl ChangeFile {
 }
 
 /// Applies the ops of a file on an [`Edit`].
-struct Cx<'a, 's> {
-    e: &'a mut Edit<'s>,
+struct Cx<'a> {
+    e: &'a mut Edit,
     /// Resource types of the run's model: object, id, name.
     types: &'a [(ObjId, Box<str>, Box<str>)],
 }
@@ -407,7 +407,7 @@ fn err<T>(m: impl Into<String>) -> R<T> {
     Err(EditError(m.into()))
 }
 
-impl Cx<'_, '_> {
+impl Cx<'_> {
     fn g(&self) -> &Graph {
         self.e.graph()
     }
@@ -424,8 +424,8 @@ impl Cx<'_, '_> {
             return Ok(o);
         }
         let g = self.g();
-        let named: Vec<ObjId> = (0..g.resources.len() as u32)
-            .flat_map(|res| g.all_contents(simoxide_model::raw::ResId(res)))
+        let named: Vec<ObjId> = (0..g.resources().len() as u32)
+            .flat_map(|res| g.tree_contents(simoxide_model::raw::ResId(res)))
             .filter(|&o| g.str_attr(o, mf::NamedElement_entityName).as_deref() == Some(r))
             .collect();
         let typed: Vec<ObjId> = named
@@ -579,8 +579,8 @@ impl Cx<'_, '_> {
             EditOp::Replicas { target, n } => {
                 let p = self.spec(target)?;
                 self.e.store().set(
-                    p.0,
-                    qvto_model::FeatureId(mf::ProcessingResourceSpecification_numberOfReplicas.0),
+                    p,
+                    mf::ProcessingResourceSpecification_numberOfReplicas,
                     Datum::Int(*n),
                 )?;
                 Ok(())
@@ -694,11 +694,9 @@ impl Cx<'_, '_> {
             }
             EditOp::Population { workload, n } => {
                 let w = self.workload(workload, mc::ClosedWorkload, "closed workload")?;
-                self.e.store().set(
-                    w.0,
-                    qvto_model::FeatureId(mf::ClosedWorkload_population.0),
-                    Datum::Int(*n),
-                )?;
+                self.e
+                    .store()
+                    .set(w, mf::ClosedWorkload_population, Datum::Int(*n))?;
                 Ok(())
             }
             EditOp::LoopCount { action, spec } => {
@@ -792,7 +790,6 @@ impl Cx<'_, '_> {
         if d.many {
             return err(format!("`{}` is many-valued", f.name()));
         }
-        let qf = qvto_model::FeatureId(f.0);
         if let Some(kind) = f.data_kind() {
             let v = simoxide_model::raw::parse_value(kind, value)
                 .ok_or_else(|| EditError(format!("`{value}` is not a valid {}", f.name())))?;
@@ -811,7 +808,7 @@ impl Cx<'_, '_> {
                     ));
                 }
             };
-            self.e.store().set(o.0, qf, datum)?;
+            self.e.store().set(o, f, datum)?;
             return Ok(());
         }
         let target = f.target();

@@ -13,7 +13,7 @@ use simoxide_model::meta::feat as mf;
 use simoxide_model::raw::ObjId;
 use simoxide_reconf::{
     ChangeFile, ChangeFileError, Edit, Imports, Invocation, QvtoRun, ResumeChanges, RuleSet,
-    RulesHost, RulesRun, RunConfig, Session, Transformation, Variant,
+    RulesHost, RulesRun, RunConfig, Transformation, Variant,
 };
 use simoxide_sim::snapshot::Snapshot;
 use simoxide_sim::{
@@ -109,9 +109,9 @@ fn snapshot_bytes<C: Compat>(sim: &mut Simulation<'_, C>) -> Vec<u8> {
     b
 }
 
-type Direct = dyn Fn(&mut Edit<'_>);
+type Direct = dyn Fn(&mut Edit);
 
-fn find(e: &Edit<'_>, id: &str) -> ObjId {
+fn find(e: &Edit, id: &str) -> ObjId {
     e.find(id).unwrap_or_else(|| panic!("no {id}"))
 }
 
@@ -131,8 +131,7 @@ fn change_at_resume<C: Compat>(
     let w = W::default();
     let mut sim = Simulation::<C>::create(cm, cfg.clone(), w.outputs(tape)).unwrap();
     assert_eq!(sim.run_until(pause).unwrap(), Status::Paused, "{what}");
-    let mut session = Session::new();
-    let mut e = Edit::new(&sim, &mut session);
+    let mut e = Edit::new(&sim);
     direct(&mut e);
     let rep = e.apply(&mut sim).unwrap();
     assert_eq!(rep.generation, 1, "{what}");
@@ -166,14 +165,14 @@ fn change_at_resume<C: Compat>(
     );
 }
 
-fn workload(e: &Edit<'_>, scenario: &str) -> ObjId {
+fn workload(e: &Edit, scenario: &str) -> ObjId {
     let s = find(e, scenario);
     e.graph()
         .get_ref(s, mf::UsageScenario_workload_UsageScenario)
         .unwrap()
 }
 
-fn demand(e: &Edit<'_>, action: &str) -> ObjId {
+fn demand(e: &Edit, action: &str) -> ObjId {
     let a = find(e, action);
     e.graph().get_refs(
         a,

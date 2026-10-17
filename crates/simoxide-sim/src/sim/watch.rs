@@ -24,6 +24,7 @@
 use super::state::PauseWhen;
 use super::*;
 use simoxide_model::meta::feat as mf;
+use simoxide_model::raw::PcmGraph;
 use std::collections::VecDeque;
 
 /// A comparison of a [`Condition::Series`].
@@ -233,7 +234,7 @@ impl Watch {
             }
             let _ = metric_matcher(&sel.metric)?;
             // element names: the element's id and those of its direct children
-            for o in 0..g.objs.len() as u32 {
+            for o in 0..g.object_count() as u32 {
                 let o = simoxide_model::raw::ObjId(o);
                 if g.str_attr(o, mf::NamedElement_entityName).as_deref() == Some(&*sel.point) {
                     t.ids.extend(g.id(o).map(str::to_string));
