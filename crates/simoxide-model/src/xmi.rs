@@ -761,6 +761,13 @@ impl<'a> Parser<'a> {
         v: Option<ObjId>,
         position: i32,
     ) -> bool {
+        if !meta::FEATURE_EXT[f.0 as usize].changeable {
+            // derived features without a setter (`RandomVariable.expression`,
+            // `ElasticInfrastructure.PCM_ResourceEnvironment`): the reflective eSet throws
+            let msg = format!("feature {} is not changeable", f.name());
+            self.emf_error("illegal-value", msg);
+            return true;
+        }
         if let (Some(t), Some(tc)) = (v, f.target())
             && !self.g[t].class.is_a(tc)
         {

@@ -289,3 +289,21 @@ fn samples_have_the_features_of_their_generic_supertype() {
     assert_eq!(bad.len(), 5, "{bad:?}");
     assert!(!diags.0.iter().any(|d| d.kind == "unknown-feature"));
 }
+
+#[test]
+fn derived_features_without_setter_are_errors() {
+    // `RandomVariable.expression` is derived and not changeable: EMF's reflective eSet throws,
+    // so the element is an error and the value is dropped (golden `case_not_changeable`)
+    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/xmi-cases/not_changeable");
+    let mut l = Loader::new(LoadOptions::strict());
+    l.load_dir(dir).unwrap();
+    let (g, diags) = l.finish();
+    let errors: Vec<_> = diags.0.iter().filter(|d| d.level == Level::Error).collect();
+    assert_eq!(errors.len(), 1, "{errors:?}");
+    assert!(errors[0].message.contains("expression is not changeable"));
+    let rv = (0..g.objs.len() as u32)
+        .map(raw::ObjId)
+        .find(|&o| g[o].class == meta::class::PCMRandomVariable)
+        .unwrap();
+    assert!(!g.is_set(rv, meta::feat::RandomVariable_expression));
+}

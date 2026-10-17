@@ -1,0 +1,9 @@
+{"emf_errors":2}
+{"resource":"n.usagemodel","roots":1}
+{"path":"/","id":null,"type":"usagemodel:UsageModel","attrs":{},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0","id":"_us","type":"usagemodel:UsageScenario","attrs":{"entityName":"aName"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario","id":"_sb","type":"usagemodel:ScenarioBehaviour","attrs":{"entityName":"aName"},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.0","id":"_st","type":"usagemodel:Start","attrs":{"entityName":"aName"},"refs":{"successor":"n.usagemodel#_sp"}}
+{"path":"//@usageScenario_UsageModel.0/@scenarioBehaviour_UsageScenario/@actions_ScenarioBehaviour.1","id":"_sp","type":"usagemodel:Stop","attrs":{"entityName":"aName"},"refs":{"predecessor":"n.usagemodel#_st"}}
+{"path":"//@usageScenario_UsageModel.0/@workload_UsageScenario","id":null,"type":"usagemodel:ClosedWorkload","attrs":{"population":1},"refs":{}}
+{"path":"//@usageScenario_UsageModel.0/@workload_UsageScenario/@thinkTime_ClosedWorkload","id":null,"type":"core:PCMRandomVariable","attrs":{"specification":"2"},"refs":{}}

@@ -99,6 +99,7 @@ case_dup_ids	/home/devbox/workspace/simoxide/crates/simoxide-model/tests/xmi-cas
 case_errors	/home/devbox/workspace/simoxide/crates/simoxide-model/tests/xmi-cases/errors
 case_forward_many	/home/devbox/workspace/simoxide/crates/simoxide-model/tests/xmi-cases/forward_many
 case_multi_root	/home/devbox/workspace/simoxide/crates/simoxide-model/tests/xmi-cases/multi_root
+case_not_changeable	/home/devbox/workspace/simoxide/crates/simoxide-model/tests/xmi-cases/not_changeable
 case_samples	/home/devbox/workspace/simoxide/crates/simoxide-model/tests/xmi-cases/samples
 case_seff_links	/home/devbox/workspace/simoxide/crates/simoxide-model/tests/xmi-cases/seff_links
 corpus_h01_ps_single	/home/devbox/workspace/simoxide/corpus/h01_ps_single
