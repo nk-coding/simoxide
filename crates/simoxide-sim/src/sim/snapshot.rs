@@ -254,6 +254,7 @@ struct ProcImage {
     fork_done: bool,
     rt: Vec<SeriesId>,
     ss_flags: u8,
+    epoch: u32,
 }
 
 /// A recorded tape being replayed (part of the configuration).
@@ -404,6 +405,7 @@ struct EngineImage<K: Clock> {
     warnings: Vec<String>,
     /// The run model's generation (0: the base model, no section `model`).
     generation: u32,
+    changes: crate::change::ChangeOptions,
     provs: Vec<ProvRes>,
     prov_ids: Vec<((AcRef, RoleId, SignatureId), u32)>,
     call_cache: Vec<CallCache>,
@@ -469,6 +471,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
                     fork_done: p.fork_done,
                     rt: p.rt.clone(),
                     ss_flags: p.ss_flags,
+                    epoch: p.epoch,
                 }
             })
             .collect();
@@ -502,6 +505,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             run_series: self.run_series.clone(),
             warnings: self.warnings.clone(),
             generation: self.model.generation(),
+            changes: self.changes,
             provs: self.provs.clone(),
             prov_ids: sorted(&self.prov_ids),
             call_cache: self.call_cache.clone(),
@@ -700,6 +704,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
                 fork_done: p.fork_done,
                 rt: p.rt,
                 ss_flags: p.ss_flags,
+                epoch: p.epoch,
             });
         }
         let max_depth = max_depth(&cfg.limits);
@@ -732,6 +737,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             run_series: img.run_series,
             warnings: img.warnings,
             model,
+            changes: img.changes,
             provs: img.provs,
             prov_ids: img.prov_ids.into_iter().collect(),
             call_cache: img.call_cache,

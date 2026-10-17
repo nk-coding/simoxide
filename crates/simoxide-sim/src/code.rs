@@ -126,14 +126,21 @@ pub struct Flat {
     pub ubeh: Vec<u32>,
     /// Number of external-call sites ([`SOp::Call`]).
     pub call_sites: u32,
+    /// The segments of `sops` in order: `(first instruction, behaviour)`. One per behaviour
+    /// as built; after runtime model changes also the old instructions that executions in
+    /// progress still run (kept after the current ones, `crate::sim::runmodel`).
+    pub sseg: Vec<(u32, u32)>,
+    /// The same for `uops`.
+    pub useg: Vec<(u32, u32)>,
 }
 
 impl Flat {
     /// `trace`: with the instructions that only write trace lines.
     pub fn build(beh: &[CBeh], act: &[CAct], ubeh: &[CUBeh], uact: &[CUAct], trace: bool) -> Flat {
         let mut c = Flat::default();
-        for b in beh {
+        for (bi, b) in beh.iter().enumerate() {
             c.sbeh.push(c.sops.len() as u32);
+            c.sseg.push((c.sops.len() as u32, bi as u32));
             let ops = &mut c.sops;
             let Some(start) = b.start else {
                 ops.push(SOp::NoStart);
@@ -198,8 +205,9 @@ impl Flat {
                 SOp::NoStop
             });
         }
-        for b in ubeh {
+        for (bi, b) in ubeh.iter().enumerate() {
             c.ubeh.push(c.uops.len() as u32);
+            c.useg.push((c.uops.len() as u32, bi as u32));
             let ops = &mut c.uops;
             let Some(start) = b.start else {
                 ops.push(UOp::NoStart);
@@ -243,30 +251,14 @@ impl Flat {
         c
     }
 
-    /// The instructions of `self` followed by those of `new`, with the behaviours starting in
-    /// `new`'s part: instructions are never moved, so the positions of executions in progress
-    /// (in `self`'s part) stay valid (runtime model changes, `crate::change`). The call sites of
-    /// `new` are numbered after those of `self`.
-    pub fn append(&self, new: &Flat) -> Flat {
-        let (s0, u0, c0) = (
-            self.sops.len() as u32,
-            self.uops.len() as u32,
-            self.call_sites,
-        );
-        let mut sops = self.sops.clone();
-        sops.extend(new.sops.iter().map(|op| match *op {
-            SOp::Call { a, site } => SOp::Call { a, site: site + c0 },
-            op => op,
-        }));
-        let mut uops = self.uops.clone();
-        uops.extend_from_slice(&new.uops);
-        Flat {
-            sops,
-            sbeh: new.sbeh.iter().map(|p| p + s0).collect(),
-            uops,
-            ubeh: new.ubeh.iter().map(|p| p + u0).collect(),
-            call_sites: c0 + new.call_sites,
-        }
+    /// The segment of `sops` that contains instruction `pc`: `(start, end, behaviour)`.
+    pub fn sseg_of(&self, pc: u32) -> (u32, u32, u32) {
+        seg_of(&self.sseg, self.sops.len(), pc)
+    }
+
+    /// The segment of `uops` that contains instruction `pc`.
+    pub fn useg_of(&self, pc: u32) -> (u32, u32, u32) {
+        seg_of(&self.useg, self.uops.len(), pc)
     }
 
     /// First instruction of SEFF behaviour `b`.
@@ -280,6 +272,12 @@ impl Flat {
     pub fn ubeh_start(&self, b: ScenarioBehaviourId) -> u32 {
         self.ubeh[b.index()]
     }
+}
+
+fn seg_of(segs: &[(u32, u32)], len: usize, pc: u32) -> (u32, u32, u32) {
+    let i = segs.partition_point(|s| s.0 <= pc).saturating_sub(1);
+    let end = segs.get(i + 1).map_or(len as u32, |s| s.0);
+    (segs[i].0, end, segs[i].1)
 }
 
 const _: () = assert!(std::mem::size_of::<SOp>() <= 16);

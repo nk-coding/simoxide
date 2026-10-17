@@ -59,6 +59,11 @@ impl<J: Copy + PartialEq, K: Clock> FcfsHead<J, K> {
         self.queue.is_empty()
     }
 
+    /// The jobs in queue order (the head first).
+    pub fn jobs(&self) -> impl Iterator<Item = J> + '_ {
+        self.queue.iter().map(|&(j, _)| j)
+    }
+
     /// The scheduled completion of the head, if any.
     pub fn pending(&self) -> Option<Wakeup<J>> {
         self.pending

@@ -342,18 +342,17 @@ fn refused_changes_leave_the_run_unchanged() {
     let mut sim = Simulation::<Exact>::restore_from(&bytes[..], &cm, Outputs::default()).unwrap();
     for (file, check) in [
         (
-            "population Scenario 8\n",
-            &(|e: &ChangeFileError| {
-                matches!(e, ChangeFileError::Change(ChangeError::Unsupported(v))
-                    if v.iter().any(|m| m.contains("population")))
-            }) as &dyn Fn(&ChangeFileError) -> bool,
-        ),
-        (
             "think-time Scenario Exp(0.5)\nrate NoSuchServer 2\n",
-            &|e| matches!(e, ChangeFileError::Line(2, m) if m.contains("NoSuchServer")),
+            &(|e: &ChangeFileError| matches!(e, ChangeFileError::Line(2, m) if m.contains("NoSuchServer")))
+                as &dyn Fn(&ChangeFileError) -> bool,
         ),
-        ("delete _h06_closed_think_alc1\n", &|e| {
+        // SimuLizar's syncers (removal keep) abort on a removed allocation context (MC-3.3)
+        ("removal keep\ndelete _h06_closed_think_alc1\n", &|e| {
             matches!(e, ChangeFileError::Change(ChangeError::Abort(_)))
+        }),
+        // drained: the assembly context would be unallocated
+        ("delete _h06_closed_think_alc1\n", &|e| {
+            matches!(e, ChangeFileError::Change(ChangeError::Invalid(_)))
         }),
         (
             "inter-arrival Scenario Exp(1)\n",
@@ -371,7 +370,7 @@ fn refused_changes_leave_the_run_unchanged() {
 /// The Slingshot flavour takes no model changes yet (F4): the change file is refused and the
 /// run goes on unchanged.
 #[test]
-fn the_slingshot_flavour_refuses_changes_at_resume() {
+fn the_slingshot_flavour_takes_changes_at_resume() {
     let dir = root().join("corpus/x_ss_minimal");
     let spec = RunSpec::load(&dir.join("run.json")).unwrap();
     let cm = CompiledModel::compile_flavour(
@@ -395,14 +394,11 @@ fn the_slingshot_flavour_refuses_changes_at_resume() {
     sim.snapshot_to(&mut bytes).unwrap();
     let mut sim =
         Simulation::<Fast, Slingshot>::restore_from(&bytes[..], &cm, Outputs::default()).unwrap();
+    // F4: the Slingshot flavour takes changes
     let f = ChangeFile::parse("rate ResourceContainer1 2.0\n").unwrap();
-    match f.apply(&mut sim) {
-        Err(ChangeFileError::Change(ChangeError::Unsupported(v))) => {
-            assert!(v[0].contains("Slingshot"), "{v:?}")
-        }
-        o => panic!("{o:?}"),
-    }
-    assert_eq!(result(&sim.finish()), want);
+    let r = f.apply(&mut sim).unwrap();
+    assert!(r.applied.iter().any(|m| m.starts_with("rate of")), "{r:?}");
+    assert_ne!(result(&sim.finish()), want);
 }
 
 fn rule(name: &str) -> Transformation {
@@ -635,7 +631,7 @@ const EXPLORE_VARIANTS: &[(&str, &str)] = &[
          allocate FileStorage _db2 _alloc_fs2\n",
     ),
     // SimuLizar aborts on a removed allocation context (MC-3.3)
-    ("bad", "delete _sj2LoLYiEeaM_9DBke4xEw\n"),
+    ("bad", "removal keep\ndelete _sj2LoLYiEeaM_9DBke4xEw\n"),
 ];
 
 /// Fork-based exploration of a MediaStore snapshot: the same results on 1 and 3 threads and

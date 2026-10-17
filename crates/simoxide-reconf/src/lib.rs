@@ -56,7 +56,7 @@ mod snapshot;
 
 #[cfg(feature = "spd")]
 pub use adjust::{AdjustHooks, DefaultAdjustHooks, QvtoAdjuster};
-pub use edits::{ChangeFile, ChangeFileError, EditOp};
+pub use edits::{ChangeFile, ChangeFileError, EditOp, OptionOp};
 pub use host::{
     AbortPolicy, Bind, CoreBuilder, FailedRunChanges, IdSourceFn, Imports, Invocation, InvokeHooks,
     ModelRef, NsBinding, Outcome, ParamDir, ParamInfo, QvtMode, QvtoCore, QvtoRun, ReconfError,
@@ -425,6 +425,210 @@ impl Edit {
     /// an `UNSET` notification, on which SimuLizar's allocation syncer aborts).
     pub fn delete(&mut self, o: ObjId) {
         self.graph.delete(o);
+    }
+
+    /// Monitor cloning as Slingshot's `ResourceContainerMonitorCloner` does it after a
+    /// scale-out: for every monitor of the monitor repository whose measuring point is a
+    /// resource-container measuring point of `template`, and for every monitor of an
+    /// active-resource measuring point of one of `template`'s processing resources (per
+    /// specification, in specification order), a copy for `container` (for an active resource:
+    /// `container`'s first specification of the same resource type, the replica id kept) with a
+    /// new measuring point in the original's measuring-point repository. Copies keep
+    /// `activated`, the metric descriptions, `triggersSelfAdaptations` and the processing types
+    /// (attributes copied); names get `-copy`; ids are `<id_prefix>_<n>` (Slingshot draws
+    /// UUIDs). Returns the new monitors. The change path then attaches them: in the Slingshot
+    /// flavour every new monitor probes; in the SimuLizar flavour those of new active
+    /// resources (`ResourceEnvironmentSyncer.attachMonitors`), all with `MonitorSync::Full`.
+    pub fn clone_monitors(
+        &mut self,
+        template: ObjId,
+        container: ObjId,
+        id_prefix: &str,
+    ) -> R<Vec<ObjId>> {
+        let g = &self.graph;
+        let Some(repo) = (0..g.object_count() as u32)
+            .map(ObjId)
+            .find(|&o| g[o].class.is_a(mc::MonitorRepository) && g[o].proxy.is_none())
+        else {
+            return Err(EditError("no monitor repository".into()));
+        };
+        let specs_of = |c: ObjId| {
+            g.get_refs(
+                c,
+                mf::ResourceContainer_activeResourceSpecifications_ResourceContainer,
+            )
+            .to_vec()
+        };
+        let rtype = |p: ObjId| {
+            g.get_ref(
+                p,
+                mf::ProcessingResourceSpecification_activeResourceType_ActiveResourceSpecification,
+            )
+            .and_then(|t| g.id(t).map(str::to_string))
+        };
+        let monitors = g.get_refs(repo, mf::MonitorRepository_monitors).to_vec();
+        let mp_of = |m: ObjId| g.get_ref(m, mf::Monitor_measuringPoint);
+        // (original monitor, new measuring point's class, its target, replica id)
+        let mut plan: Vec<(ObjId, ObjId, ClassId, ObjId, Option<i32>)> = Vec::new();
+        for &m in &monitors {
+            if let Some(mp) = mp_of(m)
+                && g[mp].class.is_a(mc::ResourceContainerMeasuringPoint)
+                && g.get_ref(mp, mf::ResourceContainerReference_resourceContainer) == Some(template)
+            {
+                plan.push((m, mp, mc::ResourceContainerMeasuringPoint, container, None));
+            }
+        }
+        let new_specs = specs_of(container);
+        for spec in specs_of(template) {
+            for &m in &monitors {
+                let Some(mp) = mp_of(m) else { continue };
+                if !g[mp].class.is_a(mc::ActiveResourceMeasuringPoint)
+                    || g.get_ref(mp, mf::ActiveResourceReference_activeResource) != Some(spec)
+                {
+                    continue;
+                }
+                let Some(target) = new_specs
+                    .iter()
+                    .copied()
+                    .find(|&p| rtype(p).is_some() && rtype(p) == rtype(spec))
+                else {
+                    continue;
+                };
+                let replica = match g.get(mp, mf::ActiveResourceReference_replicaID) {
+                    Datum::Int(i) => Some(i),
+                    _ => Some(0),
+                };
+                plan.push((m, mp, mc::ActiveResourceMeasuringPoint, target, replica));
+            }
+        }
+        // what each copy copies
+        /// A processing type: its class and attributes.
+        type Processing = (ClassId, Vec<(FeatureId, OwnedDatum<ObjId>)>);
+        struct Copy {
+            mp_repo: Option<(ObjId, FeatureId)>,
+            activated: bool,
+            name: String,
+            /// Per specification: metric description, `triggersSelfAdaptations`, processing type.
+            specs: Vec<(Option<ObjId>, bool, Option<Processing>)>,
+        }
+        let copies: Vec<Copy> = plan
+            .iter()
+            .map(|&(m, mp, ..)| Copy {
+                mp_repo: g[mp].container,
+                activated: matches!(g.get(m, mf::Monitor_activated), Datum::Bool(true)),
+                name: g
+                    .str_attr(m, mf::NamedElement_entityName)
+                    .unwrap_or_default()
+                    .to_string(),
+                specs: g
+                    .get_refs(m, mf::Monitor_measurementSpecifications)
+                    .iter()
+                    .map(|&sp| {
+                        let pt = g
+                            .get_ref(sp, mf::MeasurementSpecification_processingType)
+                            .map(|pt| {
+                                let class = g[pt].class;
+                                let values = class
+                                    .features()
+                                    .filter(|&f| {
+                                        f != mf::identifier_Identifier_id && g.is_stored(pt, f)
+                                    })
+                                    .filter_map(|f| match g.get(pt, f) {
+                                        Datum::Obj(_) | Datum::Null => None,
+                                        d => Some((f, d.to_owned())),
+                                    })
+                                    .collect();
+                                (class, values)
+                            });
+                        (
+                            g.get_ref(sp, mf::MeasurementSpecification_metricDescription),
+                            matches!(
+                                g.get(sp, mf::MeasurementSpecification_triggersSelfAdaptations),
+                                Datum::Bool(true)
+                            ),
+                            pt,
+                        )
+                    })
+                    .collect(),
+            })
+            .collect();
+        let st = &mut self.graph;
+        let mut out = Vec::new();
+        let mut n = 0;
+        let mut id = || {
+            n += 1;
+            format!("{id_prefix}_{n}")
+        };
+        for (&(_, _, class, target, replica), c) in plan.iter().zip(&copies) {
+            let mon = st.create(mc::Monitor)?;
+            st.set(mon, mf::identifier_Identifier_id, Datum::Str(&id()))?;
+            st.set(
+                mon,
+                mf::NamedElement_entityName,
+                Datum::Str(&format!("{}-copy", c.name)),
+            )?;
+            st.set(mon, mf::Monitor_activated, Datum::Bool(c.activated))?;
+            for (metric, triggers, pt) in &c.specs {
+                let sp = st.create(mc::MeasurementSpecification)?;
+                st.set(sp, mf::identifier_Identifier_id, Datum::Str(&id()))?;
+                if let Some(md) = metric {
+                    st.set(
+                        sp,
+                        mf::MeasurementSpecification_metricDescription,
+                        Datum::Obj(*md),
+                    )?;
+                }
+                st.set(
+                    sp,
+                    mf::MeasurementSpecification_triggersSelfAdaptations,
+                    Datum::Bool(*triggers),
+                )?;
+                if let Some((pclass, values)) = pt {
+                    let p = st.create(*pclass)?;
+                    st.set(p, mf::identifier_Identifier_id, Datum::Str(&id()))?;
+                    for (f, v) in values {
+                        st.set(p, *f, v.as_datum())?;
+                    }
+                    st.set(
+                        sp,
+                        mf::MeasurementSpecification_processingType,
+                        Datum::Obj(p),
+                    )?;
+                }
+                st.add(
+                    mon,
+                    mf::Monitor_measurementSpecifications,
+                    Datum::Obj(sp),
+                    None,
+                )?;
+            }
+            let mp = st.create(class)?;
+            if class == mc::ResourceContainerMeasuringPoint {
+                st.set(
+                    mp,
+                    mf::ResourceContainerReference_resourceContainer,
+                    Datum::Obj(target),
+                )?;
+            } else {
+                st.set(
+                    mp,
+                    mf::ActiveResourceReference_activeResource,
+                    Datum::Obj(target),
+                )?;
+                st.set(
+                    mp,
+                    mf::ActiveResourceReference_replicaID,
+                    Datum::Int(replica.unwrap_or(0)),
+                )?;
+            }
+            if let Some((r, f)) = c.mp_repo {
+                st.add(r, f, Datum::Obj(mp), None)?;
+            }
+            st.set(mon, mf::Monitor_measuringPoint, Datum::Obj(mp))?;
+            st.add(repo, mf::MonitorRepository_monitors, Datum::Obj(mon), None)?;
+            out.push(mon);
+        }
+        Ok(out)
     }
 
     /// Removes a resource container from its resource environment (the references to it stay).

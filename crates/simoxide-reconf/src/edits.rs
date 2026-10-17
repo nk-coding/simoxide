@@ -132,6 +132,60 @@ pub enum EditOp {
     Delete {
         target: String,
     },
+    /// `clone-monitors TEMPLATE CONTAINER`: copies of the template container's monitors for the
+    /// container (Slingshot's `ResourceContainerMonitorCloner`, [`Edit::clone_monitors`]; ids
+    /// `<container id>_mon_<n>`).
+    CloneMonitors {
+        template: String,
+        container: String,
+    },
+    /// `add-demand ACTION:TYPE STOEX`: a new parametric resource demand of an internal action
+    /// (a structural change of the action).
+    AddDemand {
+        target: Target,
+        spec: String,
+    },
+    /// `removal keep|drain|abort|slingshot-q5`, `in-progress follow|finish`,
+    /// `reallocation ignore|apply`, `monitors reference|full`: the run's change options
+    /// ([`simoxide_sim::ChangeOptions`]) from this change set on (they stay with the run).
+    Options(OptionOp),
+}
+
+/// A change-option line of a [`ChangeFile`].
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum OptionOp {
+    Removal(simoxide_sim::Removal),
+    InProgress(simoxide_sim::InProgress),
+    Reallocation(simoxide_sim::Reallocation),
+    Monitors(simoxide_sim::MonitorSync),
+}
+
+impl OptionOp {
+    fn parse(op: &str, v: &str) -> Option<OptionOp> {
+        use simoxide_sim::{InProgress, MonitorSync, Reallocation, Removal};
+        Some(match (op, v) {
+            ("removal", "keep") => OptionOp::Removal(Removal::Keep),
+            ("removal", "drain") => OptionOp::Removal(Removal::Drain),
+            ("removal", "abort") => OptionOp::Removal(Removal::Abort),
+            ("removal", "slingshot-q5") => OptionOp::Removal(Removal::SlingshotQ5),
+            ("in-progress", "follow") => OptionOp::InProgress(InProgress::Follow),
+            ("in-progress", "finish") => OptionOp::InProgress(InProgress::Finish),
+            ("reallocation", "ignore") => OptionOp::Reallocation(Reallocation::Ignore),
+            ("reallocation", "apply") => OptionOp::Reallocation(Reallocation::Apply),
+            ("monitors", "reference") => OptionOp::Monitors(MonitorSync::Reference),
+            ("monitors", "full") => OptionOp::Monitors(MonitorSync::Full),
+            _ => return None,
+        })
+    }
+
+    fn set(self, o: &mut simoxide_sim::ChangeOptions) {
+        match self {
+            OptionOp::Removal(x) => o.removal = x,
+            OptionOp::InProgress(x) => o.in_progress = x,
+            OptionOp::Reallocation(x) => o.reallocation = x,
+            OptionOp::Monitors(x) => o.monitors = x,
+        }
+    }
 }
 
 /// `REF` or `REF:TYPE`.
@@ -354,6 +408,25 @@ impl ChangeFile {
                         target: arg(1, "element")?,
                     }
                 }
+                "clone-monitors" => {
+                    at_most(3)?;
+                    EditOp::CloneMonitors {
+                        template: arg(1, "template container")?,
+                        container: arg(2, "container")?,
+                    }
+                }
+                "add-demand" => EditOp::AddDemand {
+                    target: target(arg(1, "internal action:resource type")?),
+                    spec: rest(2, "demand")?,
+                },
+                "removal" | "in-progress" | "reallocation" | "monitors" => {
+                    at_most(2)?;
+                    let v = arg(1, "value")?;
+                    EditOp::Options(
+                        OptionOp::parse(op, &v)
+                            .ok_or_else(|| e(format!("{op}: unknown value `{v}`")))?,
+                    )
+                }
                 o => return Err(e(format!("unknown change `{o}`"))),
             };
             ops.push((line_no, o));
@@ -382,7 +455,13 @@ impl ChangeFile {
             .iter()
             .map(|t| (t.obj, t.id.clone(), t.name.clone()))
             .collect();
+        let before = sim.change_options();
+        let mut opts = before;
         for (line, op) in &self.ops {
+            if let EditOp::Options(o) = op {
+                o.set(&mut opts);
+                continue;
+            }
             let mut cx = Cx {
                 e: &mut e,
                 types: &types,
@@ -390,7 +469,12 @@ impl ChangeFile {
             cx.op(op)
                 .map_err(|m| ChangeFileError::Line(*line, m.to_string()))?;
         }
-        e.apply(sim).map_err(ChangeFileError::Change)
+        sim.set_change_options(opts);
+        let r = e.apply(sim).map_err(ChangeFileError::Change);
+        if r.is_err() {
+            sim.set_change_options(before);
+        }
+        r
     }
 }
 
@@ -572,6 +656,54 @@ impl Cx<'_> {
 
     fn op(&mut self, op: &EditOp) -> R<()> {
         match op {
+            EditOp::Options(_) => Ok(()),
+            EditOp::CloneMonitors {
+                template,
+                container,
+            } => {
+                let t = self.find_as(template, &[mc::ResourceContainer])?;
+                self.expect(t, mc::ResourceContainer, "resource container")?;
+                let c = self.find_as(container, &[mc::ResourceContainer])?;
+                self.expect(c, mc::ResourceContainer, "resource container")?;
+                let prefix = format!("{}_mon", self.g().id(c).unwrap_or("container"));
+                let n = self.e.clone_monitors(t, c, &prefix)?;
+                if n.is_empty() {
+                    return err(format!("{template} has no monitors to clone"));
+                }
+                Ok(())
+            }
+            EditOp::AddDemand { target, spec } => {
+                let a = self.find_as(&target.element, &[mc::InternalAction])?;
+                self.expect(a, mc::InternalAction, "internal action")?;
+                let Some(ty) = &target.resource_type else {
+                    return err("add-demand: name the resource type (`ACTION:CPU`)");
+                };
+                let Some(&(t, ..)) = self
+                    .types
+                    .iter()
+                    .find(|x| &*x.1 == ty.as_str() || x.2.eq_ignore_ascii_case(ty))
+                else {
+                    return err(format!("no resource type {ty}"));
+                };
+                let st = self.e.store();
+                let d = st.create(mc::ParametricResourceDemand)?;
+                st.set(
+                    d,
+                    mf::ParametricResourceDemand_requiredResource_ParametricResourceDemand,
+                    Datum::Obj(t),
+                )?;
+                st.add(
+                    a,
+                    mf::AbstractInternalControlFlowAction_resourceDemand_Action,
+                    Datum::Obj(d),
+                    None,
+                )?;
+                self.e.set_spec(
+                    d,
+                    mf::ParametricResourceDemand_specification_ParametericResourceDemand,
+                    spec,
+                )
+            }
             EditOp::Rate { target, spec } => {
                 let p = self.spec(target)?;
                 self.e.set_rate(p, spec)

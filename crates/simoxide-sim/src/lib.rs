@@ -45,7 +45,10 @@ pub mod stats;
 mod trace;
 pub mod windows;
 
-pub use change::{Change, ChangeError, ChangeKind, ChangeReport, ChangeSet};
+pub use change::{
+    Change, ChangeError, ChangeKind, ChangeOptions, ChangeReport, ChangeSet, InProgress,
+    MonitorSync, Reallocation, Removal,
+};
 #[cfg(feature = "exact")]
 pub use compat::Exact;
 pub use compat::{Compat, DefaultCompat, Fast, Literal, Mode};

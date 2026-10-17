@@ -127,6 +127,19 @@ impl<J: Copy + PartialEq, K: Clock> ActiveResource<J, K> {
         }
     }
 
+    /// The jobs at the resource (in service and waiting), in the scheduler's order (a delay
+    /// resource keeps no jobs: empty). For runtime model changes that take the jobs off a
+    /// removed resource.
+    pub fn job_list(&self) -> Vec<J> {
+        match self {
+            Self::Ps(r) => r.remaining().map(|e| e.0).collect(),
+            Self::PsVirtualTime(r) => r.remaining().map(|e| e.0).collect(),
+            Self::Fcfs(r) => r.remaining().map(|e| e.0).collect(),
+            Self::Delay(_) => Vec::new(),
+            Self::FcfsHead(r) => r.jobs().collect(),
+        }
+    }
+
     /// Slingshot's link failure (SS-RES-5.3): the head of an [`FcfsHead`] is removed without
     /// serving it; with `stall` (Q28) the next job is not scheduled. Returns the next wake-up.
     pub fn fail_head(&mut self, stall: bool) -> Option<Wakeup<J>> {

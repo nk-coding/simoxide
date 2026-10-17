@@ -261,6 +261,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// a link's failure check, SS-RES-5.3).
     pub(super) fn ss_wake(&mut self, ri: ResIdx) -> R<()> {
         let cm = self.cm;
+        if self.st.res[ri as usize].life == removal::Life::Q5 {
+            return self.q5_wake(ri);
+        }
         let rt = &mut self.st.res[ri as usize];
         let sched = rt.sched.as_mut().expect("scheduler");
         let w = sched.pending_wakeup().expect("pending wake-up");
@@ -288,7 +291,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             self.st.meas.events.set_timer(ri, n.at);
         }
         self.ss_res_samples(ri);
-        self.handoff(c.job)
+        self.handoff(c.job)?;
+        if self.st.res[ri as usize].life.closed() {
+            self.retire_if_drained(ri);
+        }
+        Ok(())
     }
 
     /// A user whose demand cannot be served (no allocation, no resource of the type: SS-ACT-9.2,
@@ -332,6 +339,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         let Some(ri) = rtype.and_then(|t| self.cm.resource_in(c, t)) else {
             return self.ss_abort(s, d, path).map(Some);
         };
+        if self.st.res[ri as usize].life.closed()
+            && let Some(f) = self.closed_demand(s, d, ri)?
+        {
+            return Ok(Some(f));
+        }
         if self.ss_consume(s, ri, v)? {
             return Ok(Some(self.wait_consumed(d, ri)));
         }

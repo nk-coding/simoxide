@@ -44,6 +44,7 @@ mod calls;
 mod flat;
 mod hooks;
 mod reconf;
+mod removal;
 mod runmodel;
 mod slingshot;
 #[cfg(feature = "snapshot")]
@@ -387,14 +388,25 @@ struct Proc {
     fork_done: bool,
     /// Response-time series of the open external-call / assembly-operation starts (MEAS-1.5).
     rt: Vec<SeriesId>,
-    /// Slingshot flavour: [`SS_EXTRA_FRAME`], [`SS_LINK_FAILED`].
+    /// Slingshot flavour: [`SS_EXTRA_FRAME`], [`SS_LINK_FAILED`]; both flavours:
+    /// [`STOP_REQUESTED`].
     ss_flags: u8,
+    /// The model generation at the start of the request the process serves (a usage-scenario
+    /// run, inherited by forked behaviours), [`NO_REQUEST`] outside one: decides whether a
+    /// draining resource still serves it (`Removal::Drain`, `sim/removal.rs`).
+    epoch: u32,
 }
+
+/// [`Proc::epoch`] of a process outside a request.
+const NO_REQUEST: u32 = u32::MAX;
 
 /// Slingshot (Q22): a collection iterator left its frame on the stack.
 const SS_EXTRA_FRAME: u8 = 1;
 /// Slingshot: the process's last link transfer failed (SS-RES-5.3).
 const SS_LINK_FAILED: u8 = 2;
+/// A closed-workload user leaves after its current usage-scenario run and think time (a
+/// population decrease, `ClosedWorkloadUser.requestStop`, MC-5.2).
+const STOP_REQUESTED: u8 = 4;
 
 /// The last resolution of an external-call site (`call_required` from the caller's assembly
 /// context `ac`, with `parent` the path id of the context below it): the continuation it
@@ -457,6 +469,8 @@ struct ResRt<K: Clock> {
     delay_set: Vec<u64>,
     /// Queue length per instance as the state probes read it.
     shadow: Vec<u64>,
+    /// Removed from the resource environment? (`sim/removal.rs`)
+    life: removal::Life,
 }
 
 impl<K: Clock> ResRt<K> {
@@ -475,6 +489,7 @@ impl<K: Clock> ResRt<K> {
             },
             delay_set: Vec::new(),
             shadow: vec![0; r.instances.max(1) as usize],
+            life: removal::Life::Live,
         }
     }
 }
@@ -985,7 +1000,10 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             );
         }
         // resource environment: initial state tuples
-        for r in &cm.resources {
+        for (ri, r) in cm.resources.iter().enumerate() {
+            if self.st.res[ri].life.closed() {
+                continue;
+            }
             for &(s, _inst) in &r.initial_states {
                 emit(
                     &mut self.st.meas,
@@ -1001,6 +1019,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         // usage model: open workload generators are processes created at init
         let mut gens = Vec::new();
         for (i, s) in cm.scenarios.iter().enumerate() {
+            if s.removed {
+                continue;
+            }
             if let CWorkload::Open { .. } = s.workload {
                 let k = self.spawn(
                     PKind::OpenGen,
@@ -1057,6 +1078,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         }
         // SimuComModel.init at t = 0: run the drivers in scenario order
         for (i, s) in cm.scenarios.iter().enumerate() {
+            if s.removed {
+                continue;
+            }
             match s.workload {
                 CWorkload::Open { .. } => {
                     let k = gens.iter().find(|g| g.0 == i).map(|g| g.1).unwrap_or(0);
@@ -1224,6 +1248,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// `deactivateAllActiveResources` for resource `ri`: its current queue lengths (state
     /// tuples per instance), then the overall utilisation; its scheduler stops.
     fn deactivate(&mut self, ri: ResIdx, now: i64) {
+        if self.st.res[ri as usize].life.closed() && !self.deactivates(ri) {
+            return;
+        }
         let cm = self.cm;
         let def = &cm.resources[ri as usize];
         let rt = &mut self.st.res[ri as usize];
@@ -1297,6 +1324,15 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         }
         self.st.meas.next_pid += 1;
         let pid = self.st.meas.next_pid;
+        // a forked behaviour belongs to its parent's request
+        let epoch = match kind {
+            PKind::Forked { parent, .. } => self
+                .st
+                .procs
+                .get(unkey(parent).0 as usize)
+                .map_or(NO_REQUEST, |p| p.epoch),
+            _ => NO_REQUEST,
+        };
         let slot = match self.st.free.pop() {
             Some(s) => {
                 let p = &mut self.st.procs[s as usize];
@@ -1310,6 +1346,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 p.table_seq = None;
                 p.fork_done = false;
                 p.ss_flags = 0;
+                p.epoch = epoch;
                 s
             }
             None => {
@@ -1327,6 +1364,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     fork_done: false,
                     rt: Vec::new(),
                     ss_flags: 0,
+                    epoch,
                 });
                 (self.st.procs.len() - 1) as u32
             }
@@ -1428,6 +1466,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     self.handoff(k)?;
                 }
             }
+            Ev::DelayRes(ri, k) if self.st.res[ri as usize].life == removal::Life::Q5 => {
+                self.q5_delay_end(ri, k)?
+            }
             Ev::DelayRes(ri, k) => {
                 let rt = &mut self.st.res[ri as usize];
                 if let Some(pos) = rt.delay_set.iter().position(|&x| x == k) {
@@ -1438,8 +1479,12 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         self.ss_res_samples(ri);
                     }
                     self.handoff(k)?;
+                    if self.st.res[ri as usize].life.closed() {
+                        self.retire_if_drained(ri);
+                    }
                 }
             }
+            Ev::Stale(ri) if self.st.res[ri as usize].life.closed() => {}
             Ev::Stale(ri) => self.ss_res_samples(ri),
             Ev::Window(i) => {
                 self.window_full(i as usize);
@@ -1450,6 +1495,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 self.st.meas.events.insert(at, Ev::Window(i));
             }
             Ev::Wake(ri) if F::SLINGSHOT => self.ss_wake(ri)?,
+            Ev::Wake(ri) if self.st.res[ri as usize].life == removal::Life::Q5 => {
+                self.q5_wake(ri)?
+            }
             Ev::Wake(ri) => {
                 let cm = self.cm;
                 let def = &cm.resources[ri as usize];
@@ -1479,6 +1527,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         self.st.meas.events.set_timer(ri, n.at);
                     }
                     self.handoff(c.job)?;
+                    if self.st.res[ri as usize].life.closed() {
+                        self.retire_if_drained(ri);
+                    }
                 }
             }
         }
@@ -1504,7 +1555,8 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         w.move_on();
         let pm = self.cm.windows[i].prm_meas;
         if pm != u32::MAX {
-            self.st.meas.prm.values[pm as usize] = res.1;
+            let vi = self.st.meas.prm.value_of(pm);
+            self.st.meas.prm.values[vi as usize] = res.1;
         }
         if let Some(out) = self.cm.windows[i].out {
             emit_out(
@@ -2517,7 +2569,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             // ------------------------------------------------------------------ bodies
             Cont::OpenGen { scen, st } => {
                 if *st == 0 {
-                    if !self.st.running {
+                    if !self.st.running || cm.scenarios[*scen as usize].removed {
                         d.conts.pop();
                         return Ok(Flow::Continue);
                     }
@@ -2553,7 +2605,8 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             }
             Cont::ClosedUser { scen, st } => match *st {
                 0 => {
-                    if !self.st.running {
+                    if !self.st.running || self.st.procs[s as usize].ss_flags & STOP_REQUESTED != 0
+                    {
                         d.conts.pop();
                         return Ok(Flow::Continue);
                     }
@@ -2695,6 +2748,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         let sid = &cm.scenario_ids[sc.id.index()];
         if *st == 0 {
             *st = 1;
+            self.st.procs[s as usize].epoch = self.st.model.generation();
             let pid = self.pid(s);
             if let Some(t) = self.trace.as_mut() {
                 t.element(self.st.now, true, pid, "UsageScenario", sid, None);
@@ -2734,6 +2788,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     now - F::Clock::secs(t0),
                 );
             }
+            self.st.procs[s as usize].epoch = NO_REQUEST;
             d.conts.pop();
         }
         Ok(Flow::Continue)

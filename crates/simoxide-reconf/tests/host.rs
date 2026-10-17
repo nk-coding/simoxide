@@ -325,6 +325,8 @@ fn an_aborting_rule_fails_the_run() {
     let t = rule("remove_allocation.qvto");
     let w = W::default();
     let mut sim = Simulation::new(&cm, sim_config(), w.outputs()).unwrap();
+    // SimuLizar's syncers (the default removal policy drains instead)
+    sim.set_change_options(simoxide_sim::ChangeOptions::simulizar());
     sim.run_until(Pause::After(100 * S)).unwrap();
     let before = sim.fork(Outputs::default()).unwrap();
     let mut run = qrun();
@@ -365,6 +367,7 @@ fn an_aborting_rule_can_be_rejected_instead() {
     )
     .unwrap();
     let got = with_at(&cm, 100, |sim| {
+        sim.set_change_options(simoxide_sim::ChangeOptions::simulizar());
         match run.invoke(sim, &t, &Invocation::simulizar()) {
             Err(ReconfError::Rejected {
                 error: ChangeError::Abort(_),
@@ -513,7 +516,7 @@ fn fast_mode_gives_the_same_journal_here() {
 }
 
 #[test]
-fn the_slingshot_flavour_runs_rules_and_refuses_changes_for_now() {
+fn the_slingshot_flavour_runs_rules_and_changes() {
     let cm = CompiledModel::compile_flavour(loaded(), FlavourConfig::SLINGSHOT).unwrap();
     let cfg = SimConfig {
         mode: Mode::Fast,
@@ -526,13 +529,16 @@ fn the_slingshot_flavour_runs_rules_and_refuses_changes_for_now() {
         .invoke(&mut sim, &rule("clock.qvto"), &Invocation::slingshot())
         .unwrap();
     assert_eq!(logged_time(&o.log), sim.state().now_ns() as f64 / 1e9);
-    match run.invoke(&mut sim, &rule("set/a_rate.qvto"), &Invocation::slingshot()) {
-        Err(ReconfError::Rejected {
-            error: ChangeError::Unsupported(_),
-            ..
-        }) => {}
-        r => panic!("{:?}", r.map(|o| o.log)),
-    }
+    // F4: the Slingshot flavour takes model changes
+    let o = run
+        .invoke(&mut sim, &rule("set/a_rate.qvto"), &Invocation::slingshot())
+        .unwrap();
+    let report = o.change.expect("a change report");
+    assert!(
+        report.applied.iter().any(|m| m.starts_with("rate of")),
+        "{report:?}"
+    );
+    assert_eq!(sim.state().model().generation(), 1);
     assert!(sim.finish().is_ok());
 }
 

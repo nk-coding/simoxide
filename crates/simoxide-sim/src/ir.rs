@@ -265,6 +265,9 @@ pub struct CScenario {
     pub behaviour: Option<ScenarioBehaviourId>,
     pub workload: CWorkload,
     pub series: Option<SeriesId>,
+    /// Removed from the usage model by a runtime model change (MC-5.2): its workload driver
+    /// stops (the open-workload generator ends, closed users leave after their run).
+    pub removed: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -1351,6 +1354,7 @@ impl CompiledModel {
                 behaviour: s.behaviour,
                 workload,
                 series: scen_series.get(&*s.id).copied(),
+                removed: false,
             });
         }
 
