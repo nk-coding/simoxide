@@ -69,6 +69,8 @@ fn resource_limits() {
         "transformation t(); main() { var c := Sequence{1..20000}; log('x', c->product(c)->size()); }",
         "transformation t(); main() { var s := 'ab'; while (true) { s := s + s; }; }",
         "transformation t(); main() { while (true) { }; }",
+        // quadratic work: the string grows by one character per step (the budget charges it)
+        "transformation t(); main() { var s := ''; var n := 1; while (n > 0) { s := s + '.'; n = n - 1; }; }",
         "transformation t(); helper f(i : Integer) : Integer { return f(i + 1); } main() { log('x', f(1)); }",
     ] {
         assert!(pipeline(src), "{src}");

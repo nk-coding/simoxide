@@ -1346,8 +1346,20 @@ where
         }
     }
 
-    /// The size limits for a value an operation built (collections, strings).
-    pub(crate) fn check_value_size(&self, v: &Value) -> VmResult<()> {
+    /// The size limits for a value an operation built (collections, strings); building it is
+    /// also charged to the step budget (one step per 256 elements or characters), so that a
+    /// loop that grows a value step by step cannot do quadratic work within its budget.
+    pub(crate) fn check_value_size(&mut self, v: &Value) -> VmResult<()> {
+        if self.opts.step_limit.is_some() {
+            let n = match v {
+                Value::Str(s) => s.len16(),
+                _ => coll_len(v),
+            };
+            if n >= 256 {
+                self.steps += (n / 256) as u64;
+                self.step()?;
+            }
+        }
         match v {
             Value::Coll(_) | Value::List(_) | Value::Dict(_) => {
                 self.check_collection_size(coll_len(v) as i64)
