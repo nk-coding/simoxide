@@ -25,4 +25,11 @@ if [ -s build/sources-patches.txt ]; then
   n=$(grep -c . build/sources-patches.txt); m=$(find build/classes-patches -name '*.class' | grep -v '\$' | wc -l)
   [ "$m" -ge "$n" ] || { echo "BUILD FAILED (patches: $m of $n top-level classes)"; exit 1; }
 fi
+# 3) patch P10: the det ordering rule's agent (reference/slingshot/src/seed-agent) with the product's ASM:
+#    build/seed-agent.jar, build/asm.jar next to it (its Boot-Class-Path); refsim loads it with `ordered,qvto`
+rm -rf build/classes-agent; mkdir -p build/classes-agent
+cp "$(ls "$P"/org.objectweb.asm_9*.jar | sort | tail -1)" build/asm.jar
+$J -cp build/asm.jar -d build/classes-agent $(find slingshot/src/seed-agent -name '*.java' | sort) 2>&1 | grep -v '^Note:' || true
+(cd build && ${JAR:-jar} cfm seed-agent.jar ../slingshot/src/seed-agent/MANIFEST.MF -C classes-agent .)
+test -f build/seed-agent.jar || { echo "BUILD FAILED (seed agent)"; exit 1; }
 echo "refsim built: base $(find build/classes-base -name '*.class' | wc -l) classes, patches $(find build/classes-patches -name '*.class' | wc -l) classes, product classpath entries: $(tr ':' '\n' < build/classpath.txt | wc -l)"

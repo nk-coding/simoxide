@@ -1,0 +1,76 @@
+/*
+ * SimOxide R2 example (not part of SimuLizar): a rule whose result depends on the iteration order
+ * of an OCL Set of model objects. When the mean response time of the calls to Server2 exceeds the
+ * threshold, every server moves to a new, twice as fast node: for each server allocation, in the
+ * order of a Set of the allocation contexts, a resource container (copies of its node's processing
+ * resources) joins the resource environment and the LAN, a new assembly context of the server
+ * component is allocated to it, and the load balancer's connector to the server is rewired to it.
+ * No explicit ids: the ids (seeded, DESIGN-SPD R2), the order of the new containers in the resource
+ * environment and on the LAN, and the order of the new assembly and allocation contexts follow the
+ * Set's order: insertion order in the reference (refsim patch P10, the det ordering rule) and in
+ * QVTo's ordered mode; Java identity-hash order in stock SimuLizar.
+ */
+modeltype PRM uses 'http://simulizar.palladiosimulator.org/RuntimeMeasurement/1.0';
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_COMP uses 'http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+modeltype PCM_SYS uses 'http://palladiosimulator.org/PalladioComponentModel/System/5.2';
+
+transformation scaleOutEach(in prm : PRM, inout pcmAllocation : PCM_ALLOC) {
+
+	property threshold : Real = 1.2;
+	-- the time-driven aggregation of the response times of the calls to Server2
+	property server2Spec : String = '_5osNEAOzEeWk4qXEVpjV-g';
+
+	main() {
+		var allocation : Allocation := pcmAllocation.rootObjects()[Allocation]->any(true);
+		var env : ResourceEnvironment := allocation.targetResourceEnvironment_Allocation;
+		var system : System := allocation.system_Allocation;
+		assert fatal (not env.resourceContainer_ResourceEnvironment->exists(entityName.endsWith('_scaled')))
+			with log ('Already scaled out');
+		assert fatal (prm.rootObjects()[RuntimeMeasurement]->exists(m |
+				m.measurementSpecification.id = server2Spec and m.measuringValue > threshold))
+			with log ('Server2 is fast enough');
+		var servers : Set(AllocationContext) := allocation.allocationContexts_Allocation
+			->select(a | a.assemblyContext_AllocationContext.entityName.startsWith('Server'))->asSet();
+		var n : Integer := 0;
+		servers->forEach(a) {
+			n := n + 1;
+			var old : ResourceContainer := a.resourceContainer_AllocationContext;
+			var server : AssemblyContext := a.assemblyContext_AllocationContext;
+			var node : ResourceContainer := object ResourceContainer {
+				entityName := old.entityName + '_scaled';
+			};
+			old.activeResourceSpecifications_ResourceContainer->forEach(s) {
+				node.activeResourceSpecifications_ResourceContainer += object ProcessingResourceSpecification {
+					schedulingPolicy := s.schedulingPolicy;
+					activeResourceType_ActiveResourceSpecification := s.activeResourceType_ActiveResourceSpecification;
+					processingRate_ProcessingResourceSpecification := object PCMRandomVariable {
+						specification := (s.processingRate_ProcessingResourceSpecification.specification.toReal() * 2).toString();
+					};
+				};
+			};
+			env.resourceContainer_ResourceEnvironment += node;
+			env.linkingResources__ResourceEnvironment->forEach(l) {
+				l.connectedResourceContainers_LinkingResource += node;
+			};
+			var scaled : AssemblyContext := object AssemblyContext {
+				entityName := server.entityName + '_scaled';
+				encapsulatedComponent__AssemblyContext := server.encapsulatedComponent__AssemblyContext;
+			};
+			system.assemblyContexts__ComposedStructure += scaled;
+			allocation.allocationContexts_Allocation += object AllocationContext {
+				entityName := 'Allocation_' + scaled.entityName;
+				resourceContainer_AllocationContext := node;
+				assemblyContext_AllocationContext := scaled;
+			};
+			system.connectors__ComposedStructure[AssemblyConnector]
+				->select(c | c.providingAssemblyContext_AssemblyConnector = server)
+				->forEach(c) {
+					c.providingAssemblyContext_AssemblyConnector := scaled;
+				};
+			log(n.toString() + ': ' + server.entityName + ' moved to ' + node.entityName);
+		};
+	}
+}

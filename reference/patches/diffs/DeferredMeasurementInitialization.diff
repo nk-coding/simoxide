@@ -1,0 +1,18 @@
+--- 5.2.2/Palladio-Analyzer-SimuLizar/bundles/org.palladiosimulator.simulizar/src/org/palladiosimulator/simulizar/interpreter/listener/DeferredMeasurementInitialization.java
++++ patched/org/palladiosimulator/simulizar/interpreter/listener/DeferredMeasurementInitialization.java
+@@ -104,10 +104,13 @@
+                     	} else registryAccess.addObserver(this);
+                     }
+                     
++                    // REFSIM (patch P10, DESIGN-SPD R2): insertion order. Stock: a HashMap keyed by the
++                    // metric description and a HashSet of suppliers, both in identity-hash order, which
++                    // decides the order of the runtime measurements (PRM) of a lazily created calculator.
+                     deferredInitializations
+                             .computeIfAbsent(mp.getStringRepresentation(),
+-                                    (s) -> new HashMap<MetricDescription, Set<Supplier<IMeasurementSourceListener>>>())
+-                            .computeIfAbsent(desc, (d) -> new HashSet<Supplier<IMeasurementSourceListener>>())
++                                    (s) -> new java.util.LinkedHashMap<MetricDescription, Set<Supplier<IMeasurementSourceListener>>>())
++                            .computeIfAbsent(desc, (d) -> new java.util.LinkedHashSet<Supplier<IMeasurementSourceListener>>())
+                             .add(supplier);
+                 }
+             }

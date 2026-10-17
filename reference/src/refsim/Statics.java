@@ -32,6 +32,8 @@ public final class Statics {
         if (UNPATCHED) {
             return;
         }
+        // patch P10: the seeded ids of objects that reconfiguration rules create
+        Ids.reset();
         for (Object[] c : COUNTERS) {
             try {
                 java.lang.reflect.Field f = Class.forName((String) c[0]).getDeclaredField((String) c[1]);
