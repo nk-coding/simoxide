@@ -23,6 +23,11 @@ impl UuidGen {
         UuidGen(seed)
     }
 
+    /// The generator's state (a generator in this state is `UuidGen::new(state)`).
+    pub fn state(&self) -> u64 {
+        self.0
+    }
+
     fn next_u64(&mut self) -> u64 {
         // splitmix64
         self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);

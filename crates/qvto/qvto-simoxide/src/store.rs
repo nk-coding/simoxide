@@ -233,6 +233,18 @@ impl Session {
         };
     }
 
+    /// The state of the id generator ([`IdPolicy::Uuid`]; `None` without one): a session whose
+    /// generator is set to it ([`Session::set_id_state`]) draws the same ids from then on
+    /// (snapshots of runs).
+    pub fn id_state(&self) -> Option<u64> {
+        self.st.uuid.as_ref().map(UuidGen::state)
+    }
+
+    /// Continues the id generator from `state` ([`Session::id_state`]); the id policy stays.
+    pub fn set_id_state(&mut self, state: Option<u64>) {
+        self.st.uuid = state.map(UuidGen::new);
+    }
+
     /// The store over `g` (the graph this session belongs to).
     pub fn store<'a>(&'a mut self, g: &'a mut raw::Graph) -> SimStore<'a> {
         SimStore::new(g, self)

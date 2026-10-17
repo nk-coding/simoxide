@@ -31,6 +31,7 @@ use std::time::Instant;
 
 /// One run of the reconfiguration process with rules.
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReconfRecord {
     /// Simulation time (ns).
     pub at_ns: i64,
@@ -43,6 +44,7 @@ pub struct ReconfRecord {
 }
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct RuleRecord {
     pub name: String,
     pub succeeded: bool,
@@ -52,6 +54,7 @@ pub struct RuleRecord {
 
 /// Counters of a run's reconfigurations.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct RulesStats {
     /// Runs of the reconfiguration process.
     pub runs: u64,
@@ -68,22 +71,22 @@ pub struct RulesStats {
 /// The PRM mirror in the run's QVTo state: the model's root and its measurements, in PRM
 /// order (handles of the QVTo store).
 #[derive(Clone, Debug, Default)]
-struct PrmMirror {
-    model: Option<(ModelRef, u32)>,
-    meas: Vec<u32>,
+pub(crate) struct PrmMirror {
+    pub(crate) model: Option<(ModelRef, u32)>,
+    pub(crate) meas: Vec<u32>,
 }
 
 /// The host of a run's reconfiguration process: the run's QVTo state, the rules and the PRM
 /// mirror. `Clone` is the host of a fork.
 #[derive(Clone)]
 pub struct RulesHost {
-    run: QvtoRun,
-    rules: RuleSet,
+    pub(crate) run: QvtoRun,
+    pub(crate) rules: RuleSet,
     inv: Invocation,
-    prm: PrmMirror,
-    stats: RulesStats,
+    pub(crate) prm: PrmMirror,
+    pub(crate) stats: RulesStats,
     /// Records of the reconfigurations, when kept ([`RulesHost::keep_records`]).
-    records: Option<Vec<ReconfRecord>>,
+    pub(crate) records: Option<Vec<ReconfRecord>>,
 }
 
 /// The URI of the PRM model in the run's QVTo state.
@@ -147,6 +150,16 @@ impl RulesHost {
             .iter()
             .map(|m| (m.def.mp.map(|o| o.0), m.def.spec.0, m.value))
             .collect();
+        self.mirror_prm(sim, &ms)
+    }
+
+    /// Creates the PRM model (once) and the runtime measurements of `ms` it lacks, then writes
+    /// the values of `ms`.
+    pub(crate) fn mirror_prm<C: Compat, F: Flavour>(
+        &mut self,
+        sim: &mut Simulation<'_, C, F>,
+        ms: &[(Option<u32>, u32, f64)],
+    ) -> Result<(), ReconfError> {
         if self.prm.model.is_none() {
             let r = self.run.create_model(sim, PRM_URI);
             let ModelRef::Loaded(i) = r else {
@@ -174,7 +187,7 @@ impl RulesHost {
                     f(meas, "measuringValue"),
                 )
             };
-            for &(mp, spec, _) in &ms[known..] {
+            for &(mp, spec, _) in &ms[known.min(ms.len())..] {
                 let m = st.create(meas).expect("RuntimeMeasurement");
                 if let Some(mp) = mp {
                     st.set(m, f_mp, Datum::Obj(mp)).expect("measuringPoint");
@@ -186,7 +199,7 @@ impl RulesHost {
                 created.push(m);
             }
             let handles: Vec<u32> = self.prm.meas.iter().chain(&created).copied().collect();
-            for (&h, &(_, _, v)) in handles.iter().zip(&ms) {
+            for (&h, &(_, _, v)) in handles.iter().zip(ms) {
                 st.set(h, f_value, Datum::Double(v))
                     .expect("measuringValue");
             }
@@ -271,6 +284,31 @@ fn applied(o: &crate::host::Outcome) -> bool {
     o.code == 0 && o.severity != 8
 }
 
+impl RulesHost {
+    /// The mirror's runtime measurements, rebuilt for the first `n` PRM measurements of `sim`
+    /// (a restored run's host: the same objects in the same order; the values are written before
+    /// every rule run anyway).
+    pub(crate) fn rebuild_prm<C: Compat, F: Flavour>(
+        &mut self,
+        sim: &mut Simulation<'_, C, F>,
+        n: usize,
+    ) -> Result<(), ReconfError> {
+        let ms: Vec<(Option<u32>, u32, f64)> = sim
+            .prm_measurements()
+            .iter()
+            .take(n)
+            .map(|m| (m.def.mp.map(|o| o.0), m.def.spec.0, m.value))
+            .collect();
+        if ms.len() != n {
+            return Err(ReconfError::Load(format!(
+                "the snapshot's PRM mirror has {n} measurements, the run {}",
+                ms.len()
+            )));
+        }
+        self.mirror_prm(sim, &ms)
+    }
+}
+
 /// The PRM metamodel's classes: `RuntimeMeasurementModel`, `RuntimeMeasurement`.
 fn prm_classes(st: &impl ModelStore) -> (qvto_model::ClassId, qvto_model::ClassId) {
     let meta = st.meta();
@@ -317,6 +355,11 @@ impl<'m, C: Compat, F: Flavour> RulesRun<'m, C, F> {
 
     pub fn into_parts(self) -> (Simulation<'m, C, F>, RulesHost) {
         (self.sim, self.host)
+    }
+
+    /// The simulation and the host, both mutable.
+    pub(crate) fn parts_mut(&mut self) -> (&mut Simulation<'m, C, F>, &mut RulesHost) {
+        (&mut self.sim, &mut self.host)
     }
 
     pub fn sim(&self) -> &Simulation<'m, C, F> {
