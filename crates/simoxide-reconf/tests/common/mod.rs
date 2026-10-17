@@ -153,9 +153,9 @@ pub fn inputs<C: simoxide_sim::Compat>(
         let text = std::fs::read_to_string(&file).unwrap();
         if is_graph_document(&text) {
             let g = sim.model_graph();
-            let r = (0..g.resources.len())
+            let r = (0..g.resources().len())
                 .find(|&i| {
-                    let u = &g.resources[i].uri;
+                    let u = &g.resources()[i].uri;
                     u.ends_with(&*file.to_string_lossy())
                 })
                 .unwrap_or_else(|| panic!("{}: {} not in the graph", c.id, file.display()));
@@ -218,8 +218,8 @@ impl IdentityHashSource for Recovered {
 /// before the run by key, created objects in the Java thread's draw order.
 pub fn id_source(s: &SimStore<'_>, tape: &Tape) -> Box<dyn IdentityHashSource> {
     let keys: HashMap<String, u32> = object_keys(s).into_iter().map(|(o, k)| (k, o)).collect();
-    let graph_objs = s.graph().objs.len() as u32;
-    let existed = move |i: u32| i < graph_objs || i >= EXT_BASE;
+    let graph_objs = s.graph().object_count() as u32;
+    let existed = move |i: u32| i < graph_objs;
     let mut by_obj: HashMap<u32, i32> = HashMap::new();
     let mut others: Vec<i32> = Vec::new();
     for (k, h, assigned) in &tape.objects {

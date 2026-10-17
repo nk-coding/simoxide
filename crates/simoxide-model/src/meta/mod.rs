@@ -135,7 +135,11 @@ impl PcmClass for ClassId {
         format!("{}:{}", self.def().package.short_name(), self.def().name)
     }
     fn is_a(self, other: ClassId) -> bool {
-        self == other || self.def().all_supers.contains(&other)
+        // classes of other metamodels in the same graph are none of the tables'
+        self == other
+            || CLASSES
+                .get(self.0 as usize)
+                .is_some_and(|d| d.all_supers.contains(&other))
     }
     fn feature(self, name: &str) -> Option<FeatureId> {
         index().features.get(&(self, name)).copied()

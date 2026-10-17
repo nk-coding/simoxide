@@ -9,6 +9,7 @@ mod common;
 use common::*;
 use qvto_simoxide::{ChangeKind, IdPolicy};
 use simoxide_model::meta::feat as mf;
+use simoxide_model::raw::PcmGraph;
 use simoxide_reconf::{
     AbortPolicy, Bind, Edit, FailedRunChanges, Imports, Invocation, ModelRef, QvtMode, QvtoCore,
     QvtoRun, ReconfError, RuleSet, RunConfig, Session, Transformation,
@@ -656,7 +657,7 @@ mod spd {
         );
         let g = r.sim.model_graph();
         let containers: Vec<String> = g
-            .objs
+            .objects()
             .iter()
             .enumerate()
             .filter(|(_, o)| o.class == simoxide_model::meta::class::ResourceContainer)

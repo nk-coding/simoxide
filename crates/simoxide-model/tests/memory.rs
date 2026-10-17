@@ -52,7 +52,7 @@ fn fingerprint(m: &Model, dir: &Path) -> String {
     }
     s.push_str(&canon::dump(&m.graph, false));
     s.push_str(&canon::typed_dump(m));
-    for o in &m.graph.objs {
+    for o in m.graph.objects() {
         let proxy = o.proxy.as_deref().map(|p| p.replace(&dir, MEMORY_DIR));
         s.push_str(&format!("{} {proxy:?}\n", o.line));
     }
@@ -77,7 +77,7 @@ fn memory_loading_equals_directory_loading() {
         );
         let res: Vec<(&str, &str)> = from_mem
             .graph
-            .resources
+            .resources()
             .iter()
             .map(|r| (r.uri.as_str(), r.name.as_str()))
             .collect();
@@ -134,7 +134,7 @@ fn memory_loading_does_not_read_files() {
     );
     assert!(
         m.graph
-            .resources
+            .resources()
             .iter()
             .any(|r| r.failed && r.uri.ends_with(".repository"))
     );

@@ -839,6 +839,7 @@ version = "0.1.0"
 dependencies = [
  "mimalloc",
  "pprof",
+ "simoxide-emf",
  "simoxide-model",
  "simoxide-reconf",
  "simoxide-sim",
@@ -886,6 +887,7 @@ dependencies = [
  "pprof",
  "quick-xml 0.38.4",
  "serde_json",
+ "simoxide-emf",
  "simoxide-emf-core",
  "simoxide-jcompat",
 ]

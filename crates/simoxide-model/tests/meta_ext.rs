@@ -6,7 +6,6 @@ use simoxide_model::meta::{
     CLASSES, ClassId, Classifier, DATA_TYPES, ENUMS, FEATURES, FeatureKind, OPERATIONS, PACKAGES,
     PackageId, TypeRef, class, enums, feat, package_by_ns,
 };
-use simoxide_model::raw::{Graph, ResId};
 
 #[test]
 fn derived_fields_agree_with_the_emf_facts() {
@@ -58,14 +57,17 @@ fn derived_fields_agree_with_the_emf_facts() {
 }
 
 #[test]
-fn add_object_appends_a_detached_object() {
-    let mut g = Graph::default();
-    g.resources.push(Default::default());
-    let c = simoxide_model::meta::class::ResourceContainer;
-    let o = g.add_object(c, ResId(0));
-    assert_eq!(g[o].class, c);
-    assert!(g[o].container.is_none() && g[o].slots.is_empty());
-    assert!(g.resources[0].roots.is_empty());
+fn the_graph_registry_has_the_tables_ids() {
+    use simoxide_emf_core::ModelStore;
+    let g = simoxide_model::raw::pcm_graph();
+    let m = g.meta();
+    for (i, c) in CLASSES.iter().enumerate() {
+        assert_eq!(&*m.class(ClassId(i as u32)).name, c.name);
+    }
+    for (i, f) in FEATURES.iter().enumerate() {
+        let fi = m.feature(simoxide_model::meta::FeatureId(i as u32));
+        assert_eq!((&*fi.name, fi.owner), (f.name, f.owner));
+    }
 }
 
 #[test]

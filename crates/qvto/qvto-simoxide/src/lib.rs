@@ -21,11 +21,9 @@
 //! See `docs/simoxide-integration.md` for the integration plan.
 
 pub mod journal;
-mod raw_part;
 pub mod registry;
 mod store;
-mod uuid;
 
 pub use journal::{Change, ChangeKind, Journal, Summary};
+pub use qvto_emf::IdPolicy;
 pub use store::{EXT_BASE, Session, SimStore};
-pub use uuid::IdPolicy;

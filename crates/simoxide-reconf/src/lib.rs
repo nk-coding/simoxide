@@ -42,7 +42,7 @@ use qvto_model::{
 };
 use simoxide_model::meta::prelude::*;
 use simoxide_model::meta::{ClassId, FeatureId, class as mc, feat as mf};
-use simoxide_model::raw::{Graph, ObjId, Value};
+use simoxide_model::raw::{Graph, ObjId, PcmGraph, Value};
 use simoxide_sim::{
     Change, ChangeError, ChangeKind, ChangeReport, ChangeSet, Compat, Flavour, Simulation,
 };
@@ -200,8 +200,8 @@ impl<'s> Edit<'s> {
 
     /// The object with this id (`Identifier.id` or `xmi:id`) contained in a resource.
     pub fn find(&self, id: &str) -> Option<ObjId> {
-        (0..self.graph.resources.len() as u32)
-            .flat_map(|r| self.graph.all_contents(simoxide_model::raw::ResId(r)))
+        (0..self.graph.resources().len() as u32)
+            .flat_map(|r| self.graph.tree_contents(simoxide_model::raw::ResId(r)))
             .find(|&o| self.graph.id(o) == Some(id))
     }
 
@@ -406,7 +406,7 @@ impl<'s> Edit<'s> {
     /// transformation would do it. Returns the allocation context.
     pub fn allocate(&mut self, assembly: ObjId, container: ObjId, id: &str) -> R<ObjId> {
         let g = &self.graph;
-        let allocation = (0..g.objs.len() as u32)
+        let allocation = (0..g.object_count() as u32)
             .map(ObjId)
             .find(|&o| {
                 g[o].class.is_a(mc::Allocation) && g[o].container.is_none() && g[o].proxy.is_none()

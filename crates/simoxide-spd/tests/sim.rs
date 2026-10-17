@@ -17,7 +17,7 @@ fn corpus(name: &str) -> std::path::PathBuf {
 }
 
 fn find(m: &simoxide_model::Model, id: &str) -> ObjId {
-    (0..m.graph.objs.len() as u32)
+    (0..m.graph.object_count() as u32)
         .map(ObjId)
         .find(|&o| m.graph.id(o) == Some(id))
         .unwrap()

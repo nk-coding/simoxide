@@ -27,13 +27,8 @@ impl SimTables {
     }
 }
 
-/// A registry holding SimOxide's packages with their ids (Ecore not yet registered).
-pub(crate) fn sim_registry() -> MetaRegistry {
-    MetaRegistry::from_static(&sm::SEED)
-}
-
 /// The top-level SimOxide packages and the locations other metamodels use for them
 /// (`platform:/plugin/<bundle>/<path>`).
 pub fn sim_top_packages() -> Vec<(PackageId, &'static str)> {
-    sim_registry().static_top_packages()
+    MetaRegistry::from_static(&sm::SEED).static_top_packages()
 }

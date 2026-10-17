@@ -13,7 +13,7 @@ use qvto_model::{ModelStore, ResourceId};
 use qvto_runtime::identity::IdentityHashSource;
 use qvto_runtime::{IdentityKey, Mode};
 use qvto_sema::ir::Direction;
-use qvto_simoxide::{EXT_BASE, Journal, Session, SimStore};
+use qvto_simoxide::{Journal, Session, SimStore};
 use qvto_testkit::case::Case;
 use qvto_testkit::fixture::{Tape, parse_tape};
 use qvto_vm::ObjHandle;
@@ -519,15 +519,8 @@ pub fn run_adapter(root: &Path, case: &Case) -> Result {
     };
     setup.session.start_journal();
     let mut store = SimStore::new(&mut setup.graph, &mut setup.session);
-    let (graph_objs, ext_objs) = (
-        store.graph().objs.len() as u32,
-        store.session().resource_set().graph.object_count() as u32,
-    );
-    let ids = load_tape(root, case).map(|t| {
-        id_source(&store, &t, move |i| {
-            i < graph_objs || (i >= EXT_BASE && i - EXT_BASE < ext_objs)
-        })
-    });
+    let graph_objs = store.graph().object_count() as u32;
+    let ids = load_tape(root, case).map(|t| id_source(&store, &t, move |i| i < graph_objs));
     res.keys_before = object_keys(&store)
         .into_iter()
         .map(|(k, o)| (o, k))

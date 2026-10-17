@@ -9,6 +9,7 @@
 //! empty (EMF's `eIsSet` is [`ModelStore::is_set`]).
 
 use crate::graph::{Graph, ObjId, Slot, Value};
+use crate::ids::{IdPolicy, UuidGen};
 use qvto_model::{ClassId, FeatureId, ResourceId};
 
 impl Graph {
@@ -103,6 +104,14 @@ impl Graph {
                 stack.extend(self.get_refs(o, f).iter().rev().copied());
             }
         }
+    }
+
+    /// All objects of resource `r` in tree order (`getAllContents`; plain containment lists,
+    /// for models: Ecore's own objects go through `ModelStore::resource_contents`).
+    pub fn tree_contents(&self, r: ResourceId) -> Vec<ObjId> {
+        let mut out = Vec::new();
+        self.resource_contents_into(r, &mut out, &mut Vec::new());
+        out
     }
 
     /// The value of the object's ID attribute (`eIDAttribute`), if it is set: a string, or an
@@ -380,5 +389,163 @@ impl Graph {
                 self.load_slot(p, pf, Slot::Ref(None));
             }
         }
+    }
+}
+
+/// Objects detached from a graph, with ids from 0: a parsed resource kept for copying into
+/// other graphs instead of parsing it again (SimOxide's parse cache, bundled models). Holds the
+/// objects of one resource (created contiguously, referring only to each other), its roots and
+/// `xmi:id`s.
+#[derive(Clone, Debug)]
+pub struct ObjectBlock {
+    objs: Vec<crate::graph::Object>,
+    roots: Vec<ObjId>,
+    ids: Option<crate::graph::IdMaps>,
+}
+
+impl ObjectBlock {
+    pub fn len(&self) -> usize {
+        self.objs.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.objs.is_empty()
+    }
+}
+
+fn shift_object(o: &mut crate::graph::Object, f: impl Fn(ObjId) -> ObjId) {
+    o.container = o.container.map(|(c, feat)| (f(c), feat));
+    for s in &mut o.slots {
+        match s {
+            Slot::Ref(Some(x)) => *x = f(*x),
+            Slot::Refs(v, _) => v.iter_mut().for_each(|x| *x = f(*x)),
+            _ => {}
+        }
+    }
+}
+
+impl Graph {
+    /// The objects from `first` on (all of resource `r`'s, nothing else) with `r`'s roots and
+    /// `xmi:id`s, as a block with ids from 0.
+    pub fn block_of(&self, r: ResourceId, first: usize) -> ObjectBlock {
+        let off = first as u32;
+        let shift = |o: ObjId| ObjId(o.0 - off);
+        let objs = self.objs[first..]
+            .iter()
+            .map(|o| {
+                let mut o = o.clone();
+                shift_object(&mut o, shift);
+                o
+            })
+            .collect();
+        let res = &self.resources[r.index()];
+        let ids = res.ids.as_ref().map(|m| crate::graph::IdMaps {
+            to_id: m
+                .to_id
+                .iter()
+                .filter(|(o, _)| o.0 >= off)
+                .map(|(o, s)| (shift(*o), s.clone()))
+                .collect(),
+            to_obj: m
+                .to_obj
+                .iter()
+                .filter(|(_, o)| o.0 >= off)
+                .map(|(s, o)| (s.clone(), shift(*o)))
+                .collect(),
+        });
+        ObjectBlock {
+            objs,
+            roots: res.roots.iter().map(|o| shift(*o)).collect(),
+            ids,
+        }
+    }
+
+    /// Appends a block as the contents of resource `r` (empty so far); returns the id of its
+    /// first object.
+    pub fn splice_block(&mut self, r: ResourceId, b: &ObjectBlock) -> ObjId {
+        let off = self.objs.len() as u32;
+        let shift = |o: ObjId| ObjId(o.0 + off);
+        self.objs.reserve(b.objs.len());
+        for o in &b.objs {
+            let mut o = o.clone();
+            shift_object(&mut o, shift);
+            if o.resource.is_some() {
+                o.resource = Some(r);
+            }
+            self.objs.push(o);
+        }
+        let res = &mut self.resources[r.index()];
+        res.roots = b.roots.iter().map(|o| shift(*o)).collect();
+        if let Some(m) = &b.ids {
+            let maps = res.ids.get_or_insert_with(Default::default);
+            for (o, s) in &m.to_id {
+                maps.to_id.insert(shift(*o), s.clone());
+            }
+            for (s, o) in &m.to_obj {
+                maps.to_obj.insert(s.clone(), shift(*o));
+            }
+        }
+        ObjId(off)
+    }
+}
+
+impl Graph {
+    /// Appends every object, resource and metamodel link of `other` (whose registry must hold
+    /// this graph's, e.g. a prototype with metamodel objects and further metamodels): ids are
+    /// shifted, this graph adopts `other`'s registry. Returns the offsets of the appended
+    /// objects and resources. Not recorded in the journal.
+    pub fn append_graph(&mut self, other: &Graph) -> (u32, u32) {
+        assert!(
+            self.adopt_meta(other.meta.clone()),
+            "the appended graph's registry must extend this graph's"
+        );
+        let off = self.objs.len() as u32;
+        let roff = self.resources.len() as u32;
+        let shift = |o: ObjId| ObjId(o.0 + off);
+        let rshift = |r: ResourceId| ResourceId(r.0 + roff);
+        self.objs.reserve(other.objs.len());
+        for o in &other.objs {
+            let mut o = o.clone();
+            shift_object(&mut o, shift);
+            o.resource = o.resource.map(rshift);
+            self.objs.push(o);
+        }
+        for r in &other.resources {
+            let mut r = r.clone();
+            r.roots.iter_mut().for_each(|o| *o = shift(*o));
+            if let Some(m) = r.ids.as_mut() {
+                m.to_id = m.to_id.drain().map(|(o, s)| (shift(o), s)).collect();
+                m.to_obj.values_mut().for_each(|o| *o = shift(*o));
+            }
+            self.resources.push(r);
+        }
+        let l = &other.links;
+        let t = &mut self.links;
+        t.classifier_obj
+            .extend(l.classifier_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_classifier
+            .extend(l.obj_classifier.iter().map(|(o, k)| (shift(*o), *k)));
+        t.feature_obj
+            .extend(l.feature_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_feature
+            .extend(l.obj_feature.iter().map(|(o, k)| (shift(*o), *k)));
+        t.package_obj
+            .extend(l.package_obj.iter().map(|(k, o)| (*k, shift(*o))));
+        t.obj_package
+            .extend(l.obj_package.iter().map(|(o, k)| (shift(*o), *k)));
+        self.ecore_gen += 1;
+        (off, roff)
+    }
+
+    /// The id policy and the state of its generator (to carry them from graph to graph).
+    pub fn id_state(&self) -> (IdPolicy, Option<UuidGen>) {
+        (self.ids.policy, self.ids.uuid.clone())
+    }
+
+    /// Restores what [`Graph::id_state`] returned (the id class is looked up as by
+    /// [`Graph::set_id_policy`]).
+    pub fn set_id_state(&mut self, policy: IdPolicy, uuid: Option<UuidGen>) {
+        self.set_id_policy(policy);
+        self.ids.uuid = uuid;
     }
 }

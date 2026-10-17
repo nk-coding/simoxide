@@ -26,7 +26,7 @@ use crate::fxhash::FxMap;
 use crate::ir::*;
 use simoxide_model::meta::prelude::*;
 use simoxide_model::meta::{ClassId, FeatureId, class as mc, feat as mf};
-use simoxide_model::raw::{Graph, ObjId};
+use simoxide_model::raw::{Graph, ObjId, PcmGraph};
 use simoxide_model::*;
 use std::collections::HashSet;
 use std::fmt;
@@ -868,12 +868,12 @@ pub(crate) fn recompile(
 /// The new graph must be the run's graph with changes: objects are only ever appended and keep
 /// their class.
 fn check_graph(old: &Graph, new: &Graph) -> Result<(), ChangeError> {
-    let bad = new.objs.len() < old.objs.len()
-        || new.resources.len() < old.resources.len()
+    let bad = new.object_count() < old.object_count()
+        || new.resources().len() < old.resources().len()
         || old
-            .objs
+            .objects()
             .iter()
-            .zip(&new.objs)
+            .zip(new.objects())
             .any(|(a, b)| a.class != b.class);
     if bad {
         return Err(ChangeError::Invalid(vec![
@@ -886,7 +886,7 @@ fn check_graph(old: &Graph, new: &Graph) -> Result<(), ChangeError> {
 /// The aborts that only the notifications show.
 fn journal_checks(g: &Graph, changes: &ChangeSet) -> Result<(), ChangeError> {
     for c in &changes.changes {
-        let Some(obj) = g.objs.get(c.obj.0 as usize) else {
+        let Some(obj) = g.objects().get(c.obj.0 as usize) else {
             return Err(ChangeError::Invalid(vec![format!(
                 "change of object {} which is not in the graph",
                 c.obj.0

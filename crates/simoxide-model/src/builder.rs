@@ -5,7 +5,7 @@ use crate::fxhash::FxHashMap;
 use crate::meta::prelude::*;
 use crate::meta::{ClassId, FeatureId, class as c, feat as f};
 use crate::model::*;
-use crate::raw::{Graph, ObjId, ResId, Value};
+use crate::raw::{Graph, ObjId, PcmGraph, ResId, Value};
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 enum K {
@@ -48,11 +48,16 @@ enum K {
 /// [`kind_of`] of every class, computed once.
 fn kind_of_cached(cl: ClassId) -> K {
     static KINDS: std::sync::OnceLock<Vec<K>> = std::sync::OnceLock::new();
-    KINDS.get_or_init(|| {
-        (0..crate::meta::CLASSES.len())
-            .map(|i| kind_of(ClassId(i as u32)))
-            .collect()
-    })[cl.0 as usize]
+    KINDS
+        .get_or_init(|| {
+            (0..crate::meta::CLASSES.len())
+                .map(|i| kind_of(ClassId(i as u32)))
+                .collect()
+        })
+        .get(cl.0 as usize)
+        .copied()
+        // objects of other metamodels (PRM, metamodel objects) in the same graph
+        .unwrap_or(K::None)
 }
 
 fn kind_of(cl: ClassId) -> K {
@@ -1738,10 +1743,10 @@ pub fn build(g: Graph, diags: Diagnostics) -> Model {
 /// The objects the typed model is built from, in build order: the contents of every resource
 /// (resource order, then depth first in containment order).
 pub fn build_order(g: &Graph) -> Vec<ObjId> {
-    let mut order = Vec::with_capacity(g.objs.len());
+    let mut order = Vec::with_capacity(g.object_count());
     let mut stack = Vec::new();
-    for r in 0..g.resources.len() {
-        g.all_contents_into(ResId(r as u32), &mut order, &mut stack);
+    for r in 0..g.resources().len() {
+        g.resource_contents_into(ResId(r as u32), &mut order, &mut stack);
     }
     order
 }
@@ -1752,8 +1757,8 @@ pub fn build_order(g: &Graph) -> Vec<ObjId> {
 /// objects that are new in [`build_order`] of `g`, in that order. `prev` must be the build
 /// order of an earlier state of `g` (objects are only ever appended to a graph).
 pub fn build_order_after(g: &Graph, prev: &[ObjId]) -> Vec<ObjId> {
-    let mut seen = vec![false; g.objs.len()];
-    let mut order = Vec::with_capacity(g.objs.len().max(prev.len()));
+    let mut seen = vec![false; g.object_count()];
+    let mut order = Vec::with_capacity(g.object_count().max(prev.len()));
     for &o in prev {
         if let Some(s) = seen.get_mut(o.0 as usize)
             && !*s
@@ -1774,7 +1779,7 @@ pub fn build_order_after(g: &Graph, prev: &[ObjId]) -> Vec<ObjId> {
 /// Builds the typed model from the objects `order` (each once): an object's typed id is its
 /// position among the objects of its kind in `order`.
 pub fn build_in_order(g: Graph, diags: Diagnostics, order: &[ObjId]) -> Model {
-    let n = g.objs.len();
+    let n = g.object_count();
     let mut kind = vec![K::None; n];
     let mut idx = vec![u32::MAX; n];
     let mut counts = [0u32; K::Metric as usize + 1];

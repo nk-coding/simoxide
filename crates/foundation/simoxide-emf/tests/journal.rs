@@ -112,3 +112,11 @@ fn graph_is_plain_data() {
     fn value<T: Clone + Send + Sync>() {}
     value::<Graph>();
 }
+
+#[test]
+fn ids_as_numbers() {
+    use simoxide_emf::ObjId;
+    let v = [ObjId(3), ObjId(0), ObjId(u32::MAX)];
+    assert_eq!(simoxide_emf::graph::ids_as_u32(&v), &[3, 0, u32::MAX]);
+    assert!(simoxide_emf::graph::ids_as_u32(&[]).is_empty());
+}

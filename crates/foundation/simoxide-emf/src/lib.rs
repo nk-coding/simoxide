@@ -12,7 +12,7 @@ pub mod fragment;
 pub mod graph;
 pub mod ids;
 pub mod journal;
-mod load_ops;
+pub mod load_ops;
 pub mod materialize;
 pub mod operations;
 pub mod register;

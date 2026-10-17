@@ -17,7 +17,7 @@ use crate::diag::Level;
 use crate::fxhash::FxHashMap;
 use crate::meta::prelude::*;
 use crate::model::*;
-use crate::raw::{ObjId, ResId};
+use crate::raw::{ObjId, PcmGraph, ResId};
 use std::collections::HashSet;
 
 struct V<'a> {
@@ -49,11 +49,15 @@ impl V<'_> {
         let g = &self.m.graph;
         let (mut order, mut stack) = (Vec::new(), Vec::new());
         let mut ids: FxHashMap<&str, ObjId> = FxHashMap::default();
-        for r in 0..g.resources.len() {
+        for r in 0..g.resources().len() {
             ids.clear();
             order.clear();
-            g.all_contents_into(ResId(r as u32), &mut order, &mut stack);
+            g.resource_contents_into(ResId(r as u32), &mut order, &mut stack);
             for &o in &order {
+                // objects of other metamodels in the same graph (PRM, metamodel objects)
+                if !crate::raw::is_pcm_class(g[o].class) {
+                    continue;
+                }
                 if let Some(id) = g.id(o)
                     && let Some(prev) = ids.insert(id, o)
                 {

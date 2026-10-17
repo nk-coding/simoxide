@@ -36,7 +36,7 @@ fn main() {
     println!(
         "loaded {} with SimOxide: {} objects, {} containers",
         dir.display(),
-        model.graph.objs.len(),
+        model.graph.object_count(),
         model.containers.len()
     );
     let t0 = std::time::Instant::now();

@@ -436,7 +436,7 @@ fn population_change_is_not_supported_yet() {
     let want = run(&cm, &cfg);
     let set = |e: &mut Edit<'_>| {
         let g = e.graph();
-        let w = (0..g.objs.len() as u32)
+        let w = (0..g.object_count() as u32)
             .map(simoxide_model::raw::ObjId)
             .find(|&o| g[o].class == simoxide_model::meta::class::ClosedWorkload)
             .unwrap();

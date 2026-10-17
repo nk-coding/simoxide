@@ -13,7 +13,6 @@ use qvto_model::{
     ModelResult, ModelStore, ResourceId,
 };
 use qvto_simoxide::{Journal, Session, SimStore};
-use simoxide_model::raw;
 use std::collections::HashMap;
 
 const SCRIPTS: u64 = 300;
@@ -480,7 +479,7 @@ fn pcm_scripts_equal_qvto_emf() {
         // the adapter, with a journal
         let mut session = Session::new();
         session.start_journal();
-        let mut g = raw::Graph::default();
+        let mut g = session.new_graph();
         let mut a = Side {
             s: SimStore::new(&mut g, &mut session),
             map: None,

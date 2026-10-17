@@ -83,7 +83,7 @@ fn spd_basic_uses_every_package() {
             .contains("PCM_ResourceEnvironment is not changeable")
     );
     // every appended package is used
-    let classes: Vec<_> = g.objs.iter().map(|o| o.class).collect();
+    let classes: Vec<_> = g.objects().iter().map(|o| o.class).collect();
     for c in [
         class::SPD,
         class::ElasticInfrastructure,

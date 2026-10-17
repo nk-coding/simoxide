@@ -1,14 +1,10 @@
-//! `qvto-model`'s contract suite on the adapter, in both homes of its objects.
-//!
-//! The suite's metamodel is not one of SimOxide's, but the adapter's graph code is driven by the
-//! registry alone, so the contract metamodel can be put where SimOxide's packages normally are
-//! (first in the registry, classes stored in a `raw::Graph`). The PCM roles are covered by
-//! `tests/scripts.rs`, which runs random operations on PCM classes against `qvto_emf`.
+//! `qvto-model`'s contract suite on the adapter (since M5 a view of the shared graph), with the
+//! contract metamodel first in the registry (where SimOxide's packages normally are) and after
+//! the session's metamodels. The PCM roles are covered by `tests/scripts.rs`.
 
 use qvto_model::MetaRegistry;
 use qvto_model::contract::build_metamodel;
 use qvto_simoxide::{Session, SimStore};
-use simoxide_model::raw;
 
 fn leak<T>(x: T) -> &'static mut T {
     Box::leak(Box::new(x))
@@ -22,7 +18,7 @@ mod graph_home {
         let roles = build_metamodel(&mut meta);
         let session = leak(Session::with_registry(meta, &[]));
         assert!(session.is_graph_class(roles.node));
-        let store = SimStore::new(leak(raw::Graph::default()), session);
+        let store = SimStore::new(leak(session.new_graph()), session);
         (store, roles)
     });
 }
@@ -34,7 +30,7 @@ mod other_home {
         let session = leak(Session::with_registry(MetaRegistry::new(), &[]));
         let roles = build_metamodel(session.resource_set_mut().graph.meta_mut());
         assert!(!session.is_graph_class(roles.node));
-        let store = SimStore::new(leak(raw::Graph::default()), session);
+        let store = SimStore::new(leak(session.new_graph()), session);
         (store, roles)
     });
 }

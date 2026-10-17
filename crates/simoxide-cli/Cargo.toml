@@ -13,6 +13,7 @@ path = "src/main.rs"
 [dependencies]
 simoxide-sim = { workspace = true }
 simoxide-model = { workspace = true }
+simoxide-emf = { workspace = true }
 simoxide-reconf = { workspace = true, optional = true }
 simoxide-spd = { workspace = true, optional = true, features = ["sim"] }
 mimalloc = { version = "0.1", optional = true, default-features = false }

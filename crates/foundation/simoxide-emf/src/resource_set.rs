@@ -50,6 +50,21 @@ impl ResourceSet {
         }
     }
 
+    /// A resource set with this one's configuration (URI maps, metamodel locations, aliases)
+    /// over another graph, e.g. a model graph that got this set's metamodel objects by
+    /// `Graph::append_graph` (its Ecore resource is found by URI).
+    pub fn rebind(&self, graph: Graph) -> ResourceSet {
+        let ecore_resource = graph.resource_by_uri(ECORE_NS_URI);
+        ResourceSet {
+            graph,
+            uri_map: self.uri_map.clone(),
+            ns_locations: self.ns_locations.clone(),
+            aliases: self.aliases.clone(),
+            ecore_resource,
+            failed: HashMap::new(),
+        }
+    }
+
     /// `URIConverter.URI_MAP.put(from, to)`: a prefix mapping (both ending with `/`) or an exact
     /// mapping.
     pub fn map_uri(&mut self, from: &str, to: &str) {

@@ -83,8 +83,8 @@ fn main() {
     }
     println!(
         "{} resources, {} objects; {} components, {} seffs, {} actions, {} assembly contexts, {} containers, {} usage scenarios, {} monitors; {} errors, {} warnings; {:.3} ms",
-        m.graph.resources.len(),
-        m.graph.objs.len(),
+        m.graph.resources().len(),
+        m.graph.object_count(),
         m.components.len(),
         m.seffs.len(),
         m.actions.len(),

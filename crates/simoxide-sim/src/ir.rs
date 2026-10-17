@@ -14,6 +14,7 @@ use simoxide_jcompat::order::{InsertionOrder, MapOrder};
 #[cfg(feature = "exact")]
 use simoxide_jcompat_exact::order::JdkHashOrder;
 use simoxide_model::meta::prelude::*;
+use simoxide_model::raw::PcmGraph;
 use simoxide_model::*;
 use simoxide_sched::SchedulingPolicy;
 use simoxide_stoex::Program;

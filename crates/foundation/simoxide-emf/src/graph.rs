@@ -22,12 +22,26 @@ use std::sync::{Arc, Mutex, MutexGuard};
 
 /// An object of a [`Graph`].
 #[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
+#[repr(transparent)]
 pub struct ObjId(pub u32);
+
+/// Object ids as their numbers, without a copy (for stores whose handles are the numbers).
+pub fn ids_as_u32(ids: &[ObjId]) -> &[u32] {
+    // SAFETY: `ObjId` is `repr(transparent)` over `u32`, so a slice of `ObjId` has the layout
+    // of a slice of `u32` with the same length (tested in `tests/journal.rs`).
+    unsafe { std::slice::from_raw_parts(ids.as_ptr().cast::<u32>(), ids.len()) }
+}
 
 impl ObjId {
     #[inline]
     pub fn index(self) -> usize {
         self.0 as usize
+    }
+}
+
+impl std::fmt::Display for ObjId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "#{}", self.0)
     }
 }
 

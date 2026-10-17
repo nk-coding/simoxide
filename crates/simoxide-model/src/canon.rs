@@ -13,7 +13,8 @@
 
 use crate::meta::prelude::*;
 use crate::meta::{DataKind, FeatureId};
-use crate::raw::{Graph, ObjId, ResId, Value};
+use crate::raw::{Graph, ObjId, PcmGraph, ResId, Value};
+use simoxide_emf_core::ModelStore;
 use std::fmt::Write;
 
 /// Java `Double.toString` (JDK 19+, shortest repr; `simoxide-jcompat`).
@@ -152,16 +153,16 @@ pub fn object_line(g: &Graph, o: ObjId) -> String {
 /// Per resource: its name, or `name~k` for the k-th (k >= 1) further resource with the same name
 /// in dump order (the same file loaded under two URIs).
 pub fn resource_labels(g: &Graph) -> Vec<String> {
-    let mut rs: Vec<usize> = (0..g.resources.len())
-        .filter(|r| !g.resources[*r].roots.is_empty())
+    let mut rs: Vec<usize> = (0..g.resources().len())
+        .filter(|r| !g.resources()[*r].roots.is_empty())
         .collect();
-    rs.sort_by(|a, b| g.resources[*a].name.cmp(&g.resources[*b].name));
-    let mut labels: Vec<String> = g.resources.iter().map(|r| r.name.clone()).collect();
+    rs.sort_by(|a, b| g.resources()[*a].name.cmp(&g.resources()[*b].name));
+    let mut labels: Vec<String> = g.resources().iter().map(|r| r.name.clone()).collect();
     let mut seen: std::collections::HashMap<&str, usize> = std::collections::HashMap::new();
     for r in rs {
-        let n = seen.entry(&g.resources[r].name).or_insert(0);
+        let n = seen.entry(&g.resources()[r].name).or_insert(0);
         if *n > 0 {
-            labels[r] = format!("{}~{}", g.resources[r].name, n);
+            labels[r] = format!("{}~{}", g.resources()[r].name, n);
         }
         *n += 1;
     }
@@ -171,25 +172,25 @@ pub fn resource_labels(g: &Graph) -> Vec<String> {
 /// Canonical dump of all (non-empty) resources. Bundled `pathmap:` resources are only included
 /// with `include_bundled` (the oracle dumps them once, in its `_bundled` entry).
 pub fn dump(g: &Graph, include_bundled: bool) -> String {
-    let mut rs: Vec<ResId> = (0..g.resources.len() as u32)
+    let mut rs: Vec<ResId> = (0..g.resources().len() as u32)
         .map(ResId)
         .filter(|r| {
-            let res = &g.resources[r.0 as usize];
+            let res = &g.resources()[r.0 as usize];
             !res.roots.is_empty() && (include_bundled || !res.name.starts_with("pathmap:"))
         })
         .collect();
     rs.sort_by(|a, b| {
-        g.resources[a.0 as usize]
+        g.resources()[a.0 as usize]
             .name
-            .cmp(&g.resources[b.0 as usize].name)
+            .cmp(&g.resources()[b.0 as usize].name)
     });
     let mut out = String::new();
     for r in rs {
-        let res = &g.resources[r.0 as usize];
+        let res = &g.resources()[r.0 as usize];
         out.push_str("{\"resource\":");
         json_str(&mut out, &res.name);
         let _ = writeln!(out, ",\"roots\":{}}}", res.roots.len());
-        for o in g.all_contents(r) {
+        for o in g.tree_contents(r) {
             out.push_str(&object_line(g, o));
             out.push('\n');
         }
@@ -318,7 +319,9 @@ impl W<'_> {
 
     fn line(&mut self, o: ObjId, ty: &str, id: &str, attrs: Attrs, refs: Refs, contains: Contains) {
         let g = &self.m.graph;
-        let res = self.labels[g[o].resource.0 as usize].clone();
+        let res = g
+            .resource_of(o)
+            .map_or_else(String::new, |r| self.labels[r.index()].clone());
         let path = g.path_fragment(o);
         self.line_at(&res, &path, ty, id, attrs, refs, contains);
     }
@@ -364,7 +367,9 @@ impl W<'_> {
             }
             // the reference chain, with paths computed from the names only
             let g = &self.m.graph;
-            let res = self.labels[g[u.obj].resource.0 as usize].clone();
+            let res = g
+                .resource_of(u.obj)
+                .map_or_else(String::new, |r| self.labels[r.index()].clone());
             let mut path = format!("{}/@namedReference__VariableUsage", g.path_fragment(u.obj));
             for (i, n) in u.reference.iter().enumerate() {
                 let last = i + 1 == u.reference.len();

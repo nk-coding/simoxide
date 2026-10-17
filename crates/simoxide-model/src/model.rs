@@ -9,7 +9,7 @@
 //! [`crate::validate`]). StoEx expressions are kept as raw strings ([`RandomVar::spec`]).
 
 use crate::diag::Diagnostics;
-use crate::raw::{Graph, ObjId};
+use crate::raw::{Graph, ObjId, PcmGraph};
 use std::fmt;
 use std::marker::PhantomData;
 
@@ -1201,7 +1201,7 @@ impl Model {
 
     /// Graph objects whose XMI id is `id` (over all resources).
     pub fn objects_with_id(&self, id: &str) -> Vec<ObjId> {
-        (0..self.graph.objs.len() as u32)
+        (0..self.graph.object_count() as u32)
             .map(ObjId)
             .filter(|o| self.graph.id(*o) == Some(id))
             .collect()
