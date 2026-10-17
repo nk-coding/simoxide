@@ -241,8 +241,12 @@ pub struct Tape {
     /// The first two identity hashes of the case's fresh thread.
     pub seed: (i32, i32),
     /// Object key, identity hash, assigned during the run (`Some(true)`), by the tape
-    /// (`Some(false)`) or unknown (`None`).
+    /// (`Some(false)`) or unknown (`None`): every line, the `pre` lines first.
     pub objects: Vec<(String, i32, Option<bool>)>,
+    /// How many of [`Tape::objects`] are `pre` lines: the objects of the input resources,
+    /// keyed by their path before the run (tapes recorded before these lines existed have none;
+    /// their input objects are keyed by their path after the run).
+    pub n_pre: usize,
 }
 
 pub fn parse_tape(text: &str) -> Result<Tape, String> {
@@ -256,15 +260,21 @@ pub fn parse_tape(text: &str) -> Result<Tape, String> {
                     f[2].parse().map_err(|_| "bad seed")?,
                 )
             }
-            Some(&"obj") if f.len() == 4 => t.objects.push((
-                f[1].into(),
-                f[2].parse().map_err(|_| "bad hash")?,
-                match f[3] {
-                    "1" => Some(true),
-                    "0" => Some(false),
-                    _ => None,
-                },
-            )),
+            Some(&k @ ("obj" | "pre")) if f.len() == 4 => {
+                let e = (
+                    f[1].into(),
+                    f[2].parse().map_err(|_| "bad hash")?,
+                    match f[3] {
+                        "1" => Some(true),
+                        "0" => Some(false),
+                        _ => None,
+                    },
+                );
+                if k == "pre" {
+                    t.n_pre += 1;
+                }
+                t.objects.push(e);
+            }
             _ => return Err(format!("bad tape line: {l}")),
         }
     }

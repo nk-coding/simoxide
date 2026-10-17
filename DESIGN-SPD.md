@@ -2,8 +2,9 @@
 
 State: 2026-10-17. This is a design. Phases S0 (the Slingshot reference runner,
 `reference/slingshot/`), S1 (the Slingshot semantics specification, `docs/spec/slingshot/`, rules
-`SS-*`), F0, F1, F2, P1 (the SPD interpreter, `crates/simoxide-spd`) and S2 (the Slingshot flavour's
-fast mode) are implemented; the rest is not. User decisions of §8 are recorded. It is on branch `spd`
+`SS-*`), F0, F1, F2, P1 (the SPD interpreter, `crates/simoxide-spd`), S2 (the Slingshot flavour's
+fast mode), Q1 (the SPD adjustment corpus) and Q2 (QVTo's ordered mode) are implemented; the rest is
+not. User decisions of §8 are recorded. It is on branch `spd`
 (forked from `qvto-adapter`). It is a plan, so it sits next to the code and not in the VitePress
 site, which describes the current state (`docs/development/contributing.md`). The parts that get
 built move into `docs/spec/` and `docs/guide/`.
@@ -770,7 +771,7 @@ So in Slingshot, resume ≠ uninterrupted, even without changes.
 | Level | What | Oracle |
 |---|---|---|
 | V1 unit | filters, constraints, aggregators, comparator, adjustment arithmetic: edge cases from §1.2 (`==` at `coolDownEnd`, `t % delta == 0`, EMA emit rule, 10-value window) | hand-computed, from the Java code |
-| V2 QVTo | every adjustment path (EI step ±, relative, absolute, size clamp, service group top-down and bottom-up, competing consumers, scale-in) on SimOxide-loaded models | qvto-rs Java runner, strict (extends the one SPD corpus case, `qvto-testkit/cases/corpus.cases:347-366`) |
+| V2 QVTo | every adjustment path (EI step ±, relative, absolute, size clamp, service group top-down and bottom-up, competing consumers, scale-in) on SimOxide-loaded models | qvto-rs Java runner, strict. *Built in Q1* (5.5, "Q1 as built"): suite `spd` of `qvto conform`, 47 cases on qvto-emf-loaded models (SimOxide-loaded with P2/F3) |
 | V3 deterministic runs | SimulationTime triggers, constant demands, deterministic arrivals: same adjustment times, container and assembly names, model after each step, response times | Slingshot reference runner: exact on these values |
 | V3x Slingshot-exact | any model the `det` runner reproduces: level-E trace projection, tape and measurements byte-equal, also on models with handler errors (U14) | S0 runner, `det` mode, same seed |
 | V4 statistical runs | utilisation, response-time and task-count triggers on stochastic models: distribution of scale-event times, container-count trajectory, mean response time per window, over 30 or more seeds | Slingshot reference runner: confidence-interval overlap of per-run summaries and two-sample KS tests |
@@ -1266,6 +1267,16 @@ This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these
   `MeasurementMade` stream (instantaneous utilisation, S2) into `on_measurement`, observing the
   lazily created passive-resource series (`QueueLength`), and the exact mode's same-instant
   order and event index (X2).
+- **From Q1/Q2** (5.5): run `MainTransformation` with `qvto::Mode::Ordered` for the
+  Slingshot-exact mode (`Fast` otherwise; compat mode is never needed), `keepModeling=true`, the
+  `ProfilesLibrary` signatures with stub natives; the transformation copies with licence headers
+  are in `crates/qvto/qvto-testkit/corpus/spd/transformations`. The host must give objects that
+  QVTo creates distinct PCM `id`s, as Slingshot's generated classes do (`Wiring`'s `.id`
+  comparisons misbehave on `null` ids, corpus cases `min3_noid_*`), and resolve the models'
+  proxies at load. `qvto spd-replay`'s model summary is the V3 comparison for the adjustment
+  (container, link, allocation and target-group order equal the `det` runs); it also shows two
+  candidates for the quirk list (the parentless `RequiredDelegationConnector`s, duplicate names
+  across adjustments).
 
 ### 5.5 QVTo host for both flavours (`simoxide-reconf`)
 
@@ -1302,8 +1313,13 @@ This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these
     replayed for comparisons (`InvokeHooks::ids`).
   - In the Slingshot-exact mode, the oracle's QVTo and OCL collections iterate in insertion order
     (S0 ordering rule), so qvto-rs needs a matching **insertion-order policy** for `Set`s (Q2).
-    The host has the mode parameter for it (`QvtMode::InsertionOrderSets`), unavailable until Q2
-    lands.
+    The host has the mode parameter for it (`QvtMode::InsertionOrderSets`, mapped to the ordered
+    mode below).
+  - qvto-rs fast mode is an option for throughput.
+  - *As built (Q2):* the policy is QVTo's **ordered mode** (`qvto_runtime::Mode::Ordered`, below);
+    the Slingshot-exact mode uses it, and compat mode is not needed by either Slingshot mode (so
+    neither needs the GPL-adjacent `simoxide-jcompat-exact`, decision U12).
+
 
 **F3 as built** (2026-10-17, branch `f3`; guide: `docs/guide/library.md`, "QVTo transformations
 on a run"):
@@ -1417,6 +1433,101 @@ on a run"):
   `QvtoRun`, `Invocation`, `Bind`, `Outcome`, `RuleSet`, `QvtoAdjuster`) does not change except
   the store type in the closures of `with_store`, `with_scratch_store`, `dry_run` and the hooks
   (the adapter's `SimStore` → the graph). `Edit` changes the same way.
+
+**Q1 as built** (2026-10-17, branch `q12`; `crates/qvto/qvto-testkit/README.md`, "SPD corpus"):
+
+- **Corpus.** Suite `spd` of `qvto conform` (`cases/spd.cases`, 47 cases), models in
+  `corpus/spd/q1`, generated by `qvto-testkit/tools/gen-spd-corpus.py`:
+  - base `min`: the minimal example (an elastic infrastructure whose unit hosts a service group
+    behind a load balancer) with an SPD of 17 policies; one semantic configuration per case
+    (the enacted policy, or a broken configuration);
+  - base `full` (built for the corpus): the unit of the elastic infrastructure hosts a
+    service-group unit (load balancer whose branch call has input variable usages, an assembly
+    connector to a database, a required delegation to the system, an infrastructure connector
+    to a middleware, a required infrastructure delegation) and a competing-consumers unit (a
+    queue, a consumption scenario with one branch, a closed workload of 4), a nested container,
+    two linking resources, an elastic infrastructure without services, one without
+    configuration; 17 policies;
+  - six chained states: a case's outputs (Java runner with the `det` rule, so reproducible)
+    become the inputs of later cases, as Slingshot's consecutive adjustments; objects the first
+    run created get ids (`_q1_<state>_<n>`, as Slingshot's generated classes give them UUIDs),
+    except in `min_abs_3-noid`; path references are rewritten to ids.
+  - Paths: bottom-up scale-out and scale-in (step, relative incl. 0 % (Q4) and a minimum
+    adjustment, absolute incl. the fatal goal 0, the size clamp at both bounds, the fatal
+    constraints min 0 and max = min, scale-in at the minimum, by more than the size), service
+    group and competing consumers bottom-up and top-down (scale-out, scale-in, consecutive),
+    top-down placement among free containers (Q8), the late removal of emptied containers (Q7,
+    a chain of two scale-ins), no change (no disjunct of `modifyAllocation` applies), an empty
+    service group, the preconditions (no policy, no repository, no elastic-infrastructure
+    configuration), an elastic infrastructure without configuration or without services.
+- **Coverage** (`tools/spd-coverage.py`, from the VM's operation counts `RunOptions::coverage`):
+  73 of the 105 operations of the 17 units are reached: every mapping, helper, query and
+  constructor in `MainTransformation`'s call graph. The other 32 are not in it: 11 helpers of
+  `Commons` nothing calls, the constructors only `BasicComponent`'s constructor and
+  `LinkingResource` call (both never called), `connectLoadBalancerAndAssemblyContexts` and its
+  `get*AssemblyContext` queries, the empty `createDelegationConnectorsForProvidedRoles`, the
+  `InfrastructureInterface` overload of `createAssemblyConnectorsBetween…` (the call passes an
+  `OperationInterface`).
+- **Result.** Compat mode: 47 of 47 strictly equal to the Java runner, also on what varies
+  between Java runs (`--compare-unstable`; the engine replays the recorded run's identity
+  hashes). The gates: `cargo conform --suite all` 589 of 589 (542 + 47).
+- **Discrepancies found and fixed** (DESIGN Q1-1 to Q1-4 in `crates/qvto/DESIGN.md`):
+  1. *Engine:* Java hashes objects by identity as side effects qvto-rs did not reproduce:
+     `ModelParameterExtent`'s `ResourceModificationAdapter` records every object added to an
+     extent's in-memory resource in a `LinkedHashSet` (every created object, at creation), and
+     EMF's `Copier` (`deepclone`) hashes the originals, every reference target, and the copies
+     it adds to many-valued containments (`addAll` de-duplicates through a `LinkedHashSet`).
+     With HotSpot's per-thread sequence one missed draw shifts the hash of every later object, so
+     `Set` orders (containers, assemblies, allocations) differed in 36 of 47 cases. Now drawn at
+     the same points (`RunEnv::touch`).
+  2. *Harness:* the identity-hash tape keyed input objects by their path after the run, so an
+     inout list the run reorders (the resource environment) gave moved objects the wrong hashes;
+     the tape now has `pre` lines keyed before the run. The first case of a batch drew hashes
+     before its seed (an unrecoverable seed), and the search for the run's hashes in the thread's
+     sequence stopped at 20 000 draws (compiling the SPD transformations alone takes about
+     10 000).
+  3. *Harness:* EMF resolves cross-document path proxies lazily, when first used, which after an
+     adjustment can be another object; qvto-rs and Palladio resolve at load. Case key
+     `resolve-all` (the Java runner resolves the inputs before the run).
+  4. Not a discrepancy: in dynamic EMF (the Java runner, qvto-emf) created PCM objects have no
+     `id`; `Wiring`'s `.id` comparisons then treat all created objects as equal in a later
+     adjustment (`min3_noid_*` cases). SimOxide must give them ids (P2).
+- **SPD findings** (candidates for the quirk list): `RequiredDelegationConnector`'s constructor
+  takes its parent from `resolveone(System)`, which is `null`: the connector of each replica is a
+  root of the allocation model and points to a removed assembly after a scale-in; the name counter
+  restarts with every adjustment, so consecutive scale-outs create containers of the same name
+  (`AppServer_1` twice; also in the S0 run of `spd_time_policies`).
+
+**Q2 as built** (2026-10-17, branch `q12`; `crates/qvto/DESIGN.md` §6.4):
+
+- **Policy.** `qvto_runtime::Mode::Ordered`, next to `Compat` (Java `HashMap` order) and `Fast`:
+  Eclipse's semantics, with QVTo's and OCL's `HashSet`/`HashMap` replaced by
+  `LinkedHashSet`/`LinkedHashMap`, exactly as the S0 seed agent rewrites them (`det`): `Set`,
+  `Bag` and `Dict` iterate in insertion order, `->any`, `asSequence`, `asSet` and every loop
+  follow it. As in the `det` JVM, a `Set` *is* a `LinkedHashSet`, which classic OCL takes for an
+  OrderedSet (`instanceof LinkedHashSet`: ordered equality, `asSet` copies, printing); the
+  Eclipse suite under `det` showed it (6 `bug467600_*` cases whose own assertions fail under the
+  ordering rule, e.g. `Set{1, "2"}->union(Set{"1", "2"}) = Set{1, "1", "2"}` is false). An
+  effectful `sortedBy` body is evaluated twice as in compat mode. Identity hashes only print in
+  `Class@hash` texts: derived from the key unless the host gives a source.
+- **EPL only.** No Java hash order is involved: `Mode::Ordered.available()` in every build; the
+  release check (`cargo tree`) is unchanged.
+- **API** (`crates/qvto/README.md`, "Building and testing", modes): `qvto::RunOptions { mode:
+  qvto::Mode::Ordered, .. }` (`qvto::Mode` is `qvto_runtime::Mode`; `Mode::from_name("ordered")`
+  for configuration; `RunOptions::id_source` optional); `qvto_runtime::OrderedEnv` for
+  runtime-level use; `qvto run --ordered`, `qvto conform --engine qvto-ordered`, `qvto bench
+  --modes ordered`.
+- **`det` Java runner.** `reference/slingshot/seed-agent.sh` builds the seed agent alone;
+  `qvto conform record --det` runs the QVTo Java runner with `-javaagent:seed-agent.jar=ordered,qvto`
+  (fixtures `java-<suite>-det.txt`, cache `target/qvto-testkit/java-det`).
+- **Exit met.** Ordered mode against the `det` runner: all 589 cases (Eclipse 494, corpus 24,
+  fuzz 24, SPD 47) equal strictly, 6 of them where the `det` runner fails the Eclipse checks
+  itself (verdict `java-fails-equal`); with `--compare-unstable` all but 2 (a timing log, a log of
+  objects the tape does not have). The SPD corpus byte for byte, incl. container and link order
+  (Q16). Against Slingshot itself: `qvto spd-replay` replays the 13 adjustments the S0 runs
+  recorded in `det` (`spd_time_policies` 8, `spd_minimal` 1, `spd_scale_in` 2, `spd_or_trigger`
+  1, `spd_and_trigger` 1) on one in-memory copy of the models; containers, links, allocation and
+  target-group elements in their order equal all 13 (compat mode 6, fast mode 13).
 
 ### 5.6 Metamodel tables and the generic-supertype bug (early fix)
 
@@ -1657,11 +1768,11 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **S2** | *Done 2026-10-17* (findings: 5.2 "S2 as built"). Slingshot flavour, fast mode: `Flavour` trait, hooks of 5.2, Slingshot monitors and windows, stop, branch stream, quirk compat flags (U5) | F1, S1 | 4-6 w (a: trait and SimuLizar impl, golden unchanged; b: usage, stop, RNG; c: resources; d: monitoring) | met as sharpened in 5.2 "S2 as built": `x_ss_*` byte-identical to `det` (exact RNG, compat flags; 5 models x 3 seeds), also 16/20 probes and 38/45 corpus models; `x_ss_mediastore` statistically equal to stock (30 seeds, 0/26 tests rejected, both RNG modes); `x_espresso` equal on every order-independent series, its event-sampled state series is order-dependent (Slingshot's own `det` order fails the same test) and left to X2 |
 | **X1** | Slingshot-exact oracle hardening. Done in S1: trace projection (`tools/project.py`), draw sites on the tape (agent hooks, no patch), `det` verification on probes and corpus. Remaining: corpus `corpus-ss/` with `det` reference outputs (probes, SPD examples, the 38 corpus models without failures, chosen failure models), a static audit that no class subscribes twice to one event type without disjoint reification, SPD corpus runs in `det` (P2 models) | S0, S1 | 0.5-1 w | every Slingshot corpus model byte-reproducible in `det`; projection documented |
 | **X2** | Slingshot-exact mode, **level E directly** (U14): the per-handler cascade as a FIFO queue of handler steps (insertion-ordered results, FIFO after queued events, direct `MeasurementMade`), double time, PS stale-event samples and zero-demand jiffy, `java.util.Random` branch stream, `SimulationFinished` order, all 37 quirk flags on, **handler disposal** (Q18: a disposed bit per handler, Slingshot's partial side effects up to each throw: Q17, Q19, Q21-Q24, Q30, Q31, Q37), level-E projection writer | S2, X1 | 7-10 w (a: handler-step queue, event order and time, 2-3 w; b: resources and monitoring, 1.5-2 w; c: handler disposal and the throwing quirks, 1.5-2.5 w; d: SPD events, 1 w; e: level-E projection and corpus debugging, 1-1.5 w) | V3x: level-E projection, tape (with positions) and measurements byte-equal with `det` on the Slingshot corpus, including the 22 models with handler errors |
-| **Q2** | qvto-rs insertion-order policy for `Set`s (the `det` oracle's QVTo/OCL rule), opt-in for the Slingshot-exact mode | Q1 | 3-5 d | SPD corpus adjustments equal the `det` Java runner's, including container and link order (Q16) |
+| **Q2** | *Done 2026-10-17* (findings: 5.5 "Q2 as built"). qvto-rs insertion-order policy for `Set`s (the `det` oracle's QVTo/OCL rule), opt-in for the Slingshot-exact mode: `Mode::Ordered` (EPL) | Q1 | 3-5 d | met: SPD corpus adjustments equal the `det` Java runner's byte for byte, including container and link order (Q16); also the whole suite (589/589) and the 13 adjustments of the S0 Slingshot `det` runs |
 | **P1** | *Done 2026-10-17* (findings: 5.4 "P1 as built"). SPD interpreter: model view, filters, aggregators, state, stimulus observers, time events | F0 (F1 for state) | 1.5-2 w | met: V1 unit tests; decision log equals the reference runner's on the time-triggered models (5 SPD models, 83 records, compat flags on) |
 | **P2** | SPD adjustment via `MainTransformation`; `ModelAdjusted` diff; corpus `corpus-spd/` with reference outputs | P1, F3, F4 | 2 w | minimal example: same scale time, container and assembly names, models as Slingshot's (V3) |
 | **P3** | SPD in the Slingshot flavour end to end; statistical scenarios; exact SPD runs (with X2, Q2) | P2, S2 | 1.5-2.5 w | V4 on utilisation and response-time scenarios; V3x on the SPD corpus |
-| **Q1** | qvto-rs: SPD adjustment corpus for every path (V2) incl. service group, competing consumers, scale-in | — | 3-5 d | strict match with the Java runner |
+| **Q1** | *Done 2026-10-17* (findings: 5.5 "Q1 as built"). qvto-rs: SPD adjustment corpus for every path (V2) incl. service group, competing consumers, scale-in: 47 cases, 73 of 105 operations (all of `MainTransformation`'s call graph) | — | 3-5 d | met: strict match with the Java runner (47/47, also on identity-hash-dependent outputs); two engine discrepancies and three harness ones fixed |
 | **N1** | Snapshot serialisation: serde of `RunState`, XMI writer for the overlay, versioned format | F1, F2 | 1.5 w | serialize → deserialize → identical continuation (both flavours) |
 | **N2** | Pause/resume API with change sets, enforced policies, snapshot conditions (duration, trigger, threshold) | N1, P2 | 1 w | resume-with-change tests; fork-based exploration example |
 | **N3** | Slingshot `.snapshot`/`.config`/`.state` interop: a: spike on the format mapping; b: export/import | N2, S2 | a: 3 d; b: 2-3 w | a: go/no-go report; b: round trip with the MENTOR app on a model (if U7) |

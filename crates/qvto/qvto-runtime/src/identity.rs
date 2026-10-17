@@ -15,14 +15,15 @@
 //!   harness maps from stable object keys), with a fallback source for keys not on the tape.
 //! - [`Sequential`]: 1, 2, 3, ...; small hash sets then iterate in creation order.
 //!
-//! Fast mode does not depend on these values for order; [`FastEnv`] derives them from the key.
+//! Fast and ordered mode do not depend on these values for order; [`FastEnv`] derives them from
+//! the key.
 
 use crate::value::{EnumLit, ObjRef, TypeRef};
 #[cfg(feature = "compat")]
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-/// Compat or fast mode (`DESIGN.md` §6).
+/// Compat, fast or ordered mode (`DESIGN.md` §6, §6.4).
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum Mode {
     /// Java's observable behaviour: hash-based collections iterate in `HashMap` bucket order
@@ -31,6 +32,14 @@ pub enum Mode {
     /// Same values, insertion-ordered hash-based collections (always available; the default
     /// without `compat`).
     Fast,
+    /// Eclipse's behaviour with **insertion-ordered** hash-based collections: everything as in
+    /// compat mode, except that `Set`, `Bag` and `Dict` iterate in insertion order, as in a JVM
+    /// whose QVTo and OCL classes create `LinkedHashSet`/`LinkedHashMap` where they create
+    /// `HashSet`/`HashMap` (the ordering rule of the Slingshot reference runner's `det` mode,
+    /// `reference/slingshot/src/seed-agent`). It differs from [`Mode::Fast`] in what fast mode
+    /// drops for speed (an effectful `sortedBy` body is evaluated twice, as classic OCL does).
+    /// EPL-only: always available, no Java hash order is involved (`DESIGN.md` §6.4).
+    Ordered,
 }
 
 impl Default for Mode {
@@ -45,9 +54,33 @@ impl Default for Mode {
 }
 
 impl Mode {
+    /// Every mode, in the order of [`Mode::name`].
+    pub const ALL: [Mode; 3] = [Mode::Compat, Mode::Fast, Mode::Ordered];
+
     /// Whether this build can run the mode (compat mode needs the cargo feature `compat`).
     pub fn available(self) -> bool {
-        self == Mode::Fast || cfg!(feature = "compat")
+        self != Mode::Compat || cfg!(feature = "compat")
+    }
+
+    /// `compat`, `fast` or `ordered`.
+    pub fn name(self) -> &'static str {
+        match self {
+            Mode::Compat => "compat",
+            Mode::Fast => "fast",
+            Mode::Ordered => "ordered",
+        }
+    }
+
+    /// The mode of a [`Mode::name`].
+    pub fn from_name(name: &str) -> Option<Mode> {
+        Mode::ALL.into_iter().find(|m| m.name() == name)
+    }
+
+    /// Whether the mode keeps Eclipse's semantics wherever they do not concern the order of
+    /// hash-based collections (compat and ordered; fast mode evaluates an effectful `sortedBy`
+    /// body once).
+    pub fn eclipse_semantics(self) -> bool {
+        self != Mode::Fast
     }
 
     /// Why this build cannot run the mode (`None` if it can).
@@ -237,6 +270,12 @@ pub trait HashEnv {
     fn compat(&self) -> bool {
         cfg!(feature = "compat") && self.mode() == Mode::Compat
     }
+    /// Ordered mode: every `new HashSet` of QVTo and OCL is a `LinkedHashSet` (and every
+    /// `new HashMap` a `LinkedHashMap`), as in the det JVM.
+    #[inline]
+    fn ordered(&self) -> bool {
+        self.mode() == Mode::Ordered
+    }
 }
 
 /// Java class names Eclipse uses for identity-hashed values of a dynamic-EMF run.
@@ -317,9 +356,62 @@ impl HashEnv for FastEnv {
     }
 }
 
+/// Ordered-mode environment: insertion-ordered collections, `new HashSet` gives a
+/// `LinkedHashSet`; identity hashes as [`FastEnv`] (no state, no memo).
+#[derive(Default, Clone, Copy, Debug)]
+pub struct OrderedEnv;
+
+impl HashEnv for OrderedEnv {
+    fn mode(&self) -> Mode {
+        Mode::Ordered
+    }
+    fn identity_hash(&self, key: IdentityKey) -> i32 {
+        FastEnv.identity_hash(key)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn mode_names() {
+        for m in Mode::ALL {
+            assert_eq!(Mode::from_name(m.name()), Some(m));
+        }
+        assert!(Mode::Ordered.available() && Mode::Fast.available());
+        assert!(Mode::Ordered.eclipse_semantics() && !Mode::Fast.eclipse_semantics());
+    }
+
+    #[test]
+    fn ordered_sets_are_linked_hash_sets() {
+        use crate::coll::{Coll, CollKind};
+        use crate::value::Value;
+        let env = OrderedEnv;
+        let mut s = Coll::new_set(&env);
+        for v in ["zz", "b", "a", "c", "b"] {
+            s.add(Value::str(v), &env);
+        }
+        // the det JVM's `new HashSet` is a LinkedHashSet: OCL sees an OrderedSet
+        assert_eq!(s.kind(), CollKind::OrderedSet);
+        let got: Vec<String> = s.iter().map(|v| format!("{v:?}")).collect();
+        let want: Vec<String> = ["zz", "b", "a", "c"]
+            .iter()
+            .map(|v| format!("{:?}", Value::str(v)))
+            .collect();
+        assert_eq!(got, want);
+        // BagImpl over a LinkedHashMap: distinct elements in insertion order, repeats grouped
+        let mut b = Coll::new_bag(&env);
+        for v in [3, 1, 3, 2] {
+            b.add(Value::int(v), &env);
+        }
+        let got: Vec<String> = b.iter().map(|v| format!("{v:?}")).collect();
+        let want: Vec<String> = [3, 3, 1, 2]
+            .iter()
+            .map(|v| format!("{:?}", Value::int(*v)))
+            .collect();
+        assert_eq!(got, want);
+    }
 
     #[test]
     fn memo_draws_once() {

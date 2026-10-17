@@ -92,11 +92,21 @@ an ASM rewrite of every class under `org.palladiosimulator.analyzer.slingshot.*`
 - `Collectors.toSet()`, `toUnmodifiableSet()`, `Set.of(…)`, `Set.copyOf(…)` → insertion-ordered
   equivalents (`Ordered`). These keep the null and duplicate checks and the immutability.
 
-Contents, lookups and equality are unchanged; only the iteration order becomes insertion order. The
-nightly loads 91 rewritten classes with 227 sites. Without `qvto`, QVTo's `Set(ResourceContainer)`
-in `ResourceEnvironmentTransformation.qvto:13-18` orders the resource environment's container list
+Contents and lookups are unchanged, and in Slingshot's own code only the iteration order becomes
+insertion order. In OCL the class change is visible too: classic OCL tells an OrderedSet by
+`instanceof LinkedHashSet`, so under the rule every OCL `Set` behaves as an OrderedSet (ordered
+`=`, `asSet` copies, printing). The SPD transformations do not depend on it; six cases of the
+Eclipse QVTo suite do (their own assertions fail under the rule). The nightly loads 91 rewritten
+classes with 227 sites. Without `qvto`, QVTo's `Set(ResourceContainer)` in
+`ResourceEnvironmentTransformation.qvto:13-18` orders the resource environment's container list
 and each link's connected containers by identity hash. `ORDERING=ordered ./run.sh` keeps QVTo
 unrewritten.
+
+qvto-rs reproduces the rule as its *ordered mode* (EPL, every build): `seed-agent.sh` builds the
+agent alone, and the QVTo Java runner with it is ordered mode's oracle on every QVTo test suite
+(`crates/qvto/qvto-testkit/README.md`, "The `det` Java runner"); `qvto spd-replay` replays the
+adjustments of this runner's `det` runs (`spd.jsonl`) in ordered mode and compares the model
+summaries: 13 of 13 equal.
 
 **2. Source patches (`patches/`).** `orig/` is the upstream source (Slingshot commit `8bf9adc`, the
 commit the nightly was built from) and `src/` the patched copy. `setup.sh` compiles both, checks that

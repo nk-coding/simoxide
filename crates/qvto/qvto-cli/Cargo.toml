@@ -31,5 +31,6 @@ compat = ["qvto/compat", "qvto-vm/compat", "qvto-runtime/compat", "qvto-testkit/
 profile = ["dep:pprof"]
 
 [dev-dependencies]
+qvto-paths.workspace = true
 qvto-testkit = { workspace = true, features = ["compat"] }
 qvto = { workspace = true, features = ["compat"] }

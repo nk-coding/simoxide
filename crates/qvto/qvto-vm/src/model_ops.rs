@@ -55,7 +55,9 @@ where
         let mut e = Extent::new(param, direction, label);
         e.model_type = self.extent_model_type(x);
         let mut next = self.next_extent_uri;
-        e.bind_initial(self.store, copies, &mut next);
+        for o in e.bind_initial(self.store, copies, &mut next) {
+            self.env.touch(qvto_runtime::IdentityKey::Obj(o));
+        }
         self.next_extent_uri = next;
         self.extents.push(e);
         Ok(Value::Model((self.extents.len() - 1) as u32))

@@ -15,6 +15,7 @@ Documentation: `docs/reference-simulator/slingshot.md`.
 
 ```
 ./setup.sh                                         # build/ (gitignored): bundles, agent, patched jars, configs
+./seed-agent.sh                                    # the seed agent alone (also for the QVTo runner's det mode)
 ./run.sh -model models/spd_minimal -out /tmp/o -simTime 100 -seed 1      # det mode (default)
 ./run.sh --stock -model ... -seed 1                # unpatched nightly, seeded randomness only
 ./smoke.sh                                         # smoke corpus, determinism, times -> results/smoke.csv

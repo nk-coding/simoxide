@@ -82,7 +82,7 @@ pub enum Insn {
         inst: Reg,
         g: u16,
     },
-    /// Fast mode: jump (skips what only compat mode evaluates).
+    /// Fast mode: jump (skips what only compat and ordered mode evaluate).
     JumpIfFastMode {
         target: u32,
     },
@@ -193,7 +193,8 @@ pub enum Insn {
     },
     /// Compat mode: `r` becomes a copy of the OCL collection in it (`createNewCollection(kind,
     /// c)`, the copy constructor), as classic OCL's `coerceValue` copies a collection-typed
-    /// property on every read; fast mode and other values: no-op.
+    /// property on every read; fast and ordered mode (an insertion-ordered copy iterates like
+    /// its source) and other values: no-op.
     CopyColl {
         r: Reg,
     },

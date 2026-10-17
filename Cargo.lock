@@ -570,6 +570,7 @@ dependencies = [
  "qvto-bytecode",
  "qvto-emf",
  "qvto-model",
+ "qvto-paths",
  "qvto-runtime",
  "qvto-sema",
  "qvto-syntax",

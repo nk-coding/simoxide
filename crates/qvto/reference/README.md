@@ -135,6 +135,16 @@ suite and the 24 SimuLizar/SPD cases pass their drivers' checks, in about 8 s. `
 record` turns the results into the committed fixtures. Both modes use the same environment
 (`Env`): the `plugin.xml` registrations of the test bundle and the samples plugin through EMF's
 standalone `ExtensionProcessor`, imports resolved against the bundles' source containers.
+The 47 SPD adjustment cases (`cases/spd.cases`) pass too. A case with `resolve-all` has its
+inputs' proxies resolved before the run. The identity-hash tape keys the objects of the input
+resources by their path before the run (`pre` lines) and takes the thread's seed first
+(`Tape.java`; `qvto-testkit/README.md`, "Identity-hash tape").
+
+**`det` mode.** `JVM_OPTS=-javaagent:<repository>/reference/slingshot/build/seed-agent.jar=ordered,qvto`
+(built by `reference/slingshot/seed-agent.sh`; `qvto conform record --det` sets it) gives the
+Slingshot reference runner's ordering rule: QVTo's and OCL's `HashSet`/`HashMap` become
+`LinkedHashSet`/`LinkedHashMap` at class-load time (also the class: OCL then takes a `Set` for an
+OrderedSet). It is the oracle of qvto-rs's ordered mode.
 
 The runner registers every package of the `--mm` files by nsURI, runs `TransformationExecutor`
 with one `ModelExtent` per `--param` (in signature order), prints the load and execution

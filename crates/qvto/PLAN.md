@@ -18,6 +18,8 @@ Status values: done, next, open, parked.
 | Q5b | Fast mode and performance: benchmarks, profiling, optimisations | done | Q5a |
 | Q6 | SimOxide integration preparation: adapter over `raw::Graph`, change journal | done | Q5 |
 | Q7 | Hardening: external corpora, differential and robustness fuzzing, resource limits, documentation | done | Q6 |
+| SPD-Q1 | SPD adjustment corpus for every path of `MainTransformation` (DESIGN-SPD Q1) | done | SPD-Q2 |
+| SPD-Q2 | Ordered mode: the Slingshot `det` runner's insertion order for `Set`s, EPL-only (DESIGN-SPD Q2) | done | SPD-Q1 |
 
 ## Exit criteria
 
@@ -188,3 +190,16 @@ Status values: done, next, open, parked.
     `crates/qvto/tests/robust.rs`; limits on collection size, string length and native stack
     besides the step budget (Q7-4). The 24 h criterion was replaced by these bounded campaigns
     on the shared machine.
+- **SPD-Q1** (DESIGN-SPD phase Q1): a corpus of SPD adjustments covering every path of
+  Slingshot's `MainTransformation`; strict match with the Java runner.
+  Done 2026-10-17 (DESIGN §12 SPD-Q1-1 to SPD-Q1-4; `qvto-testkit/README.md`, "SPD corpus";
+  DESIGN-SPD §5.5 "Q1 as built"): 47 cases (suite `spd`), 73 of the 105 operations of the 17 units
+  reached, every one in `MainTransformation`'s call graph; 47 of 47 strictly equal in compat mode,
+  also on the outputs that vary between Java runs. Fixed: identity hashes Java draws as side
+  effects (extent additions, `deepclone`), tapes keyed before the run, the batch's first seed,
+  the sequence search depth, lazy proxies (`resolve-all`). Scoreboard: 589 of 589 (542 + 47).
+- **SPD-Q2** (DESIGN-SPD phase Q2): an insertion-order policy for the Slingshot-exact mode, EPL
+  only; SPD corpus equal to the `det` Java runner incl. container and link order.
+  Done 2026-10-17 (DESIGN §6.4, §12 SPD-Q2-1, SPD-Q2-2): `Mode::Ordered`; against the Java runner
+  with the `det` seed agent all 589 cases equal (6 where that runner fails the Eclipse checks
+  itself); against the Slingshot `det` runs all 13 recorded adjustments (`qvto spd-replay`).

@@ -49,8 +49,9 @@ pub enum QvtMode {
     /// the models equal the Java runner's. Needs the feature `compat` (no licence covers such
     /// builds, LICENSES section 7).
     Compat,
-    /// The Slingshot-exact mode's rule: compat semantics with insertion-ordered `Set`s (the
-    /// `det` oracle's ordering rule, `DESIGN-SPD.md` Q2). Not available yet.
+    /// The Slingshot-exact mode's rule: Eclipse's semantics with QVTo's and OCL's hash
+    /// collections insertion-ordered, as the `det` oracle rewrites them (qvto-rs's ordered mode,
+    /// `DESIGN-SPD.md` Q2). Always available (EPL).
     InsertionOrderSets,
 }
 
@@ -72,11 +73,7 @@ pub fn resolve_mode(m: QvtMode, compat_built: bool) -> Result<Mode, ReconfError>
              or `exact` (no licence covers such builds, see LICENSES section 7)"
                 .into(),
         )),
-        QvtMode::InsertionOrderSets => Err(ReconfError::ModeUnavailable(
-            "the insertion-order Set policy of the Slingshot-exact mode is not available yet \
-             (DESIGN-SPD.md Q2)"
-                .into(),
-        )),
+        QvtMode::InsertionOrderSets => Ok(Mode::Ordered),
     }
 }
 
@@ -990,10 +987,10 @@ mod tests {
             resolve_mode(QvtMode::Compat, false),
             Err(ReconfError::ModeUnavailable(_))
         ));
-        assert!(matches!(
-            resolve_mode(QvtMode::InsertionOrderSets, true),
-            Err(ReconfError::ModeUnavailable(_))
-        ));
+        assert_eq!(
+            resolve_mode(QvtMode::InsertionOrderSets, false).unwrap(),
+            Mode::Ordered
+        );
         assert_eq!(QvtMode::Compat.resolve().is_ok(), Mode::Compat.available());
     }
 }

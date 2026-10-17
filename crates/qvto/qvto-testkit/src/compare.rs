@@ -266,7 +266,23 @@ impl Differential {
 /// the canonical dump of the outputs (strict: order and reference targets); the log; the stack
 /// trace; the compile problems by severity and line.
 pub fn differential(case: &Case, o: &Outcome, java: &JavaResult) -> Differential {
-    let unstable = java.unstable();
+    differential_with(case, o, java, false)
+}
+
+/// [`differential`]; with `compare_unstable`, aspects the fixture marks unstable (they vary
+/// between Java runs, e.g. identity-hash orders) are compared too: the engine replays the
+/// recorded run's identity hashes, so it should reproduce that run exactly.
+pub fn differential_with(
+    case: &Case,
+    o: &Outcome,
+    java: &JavaResult,
+    compare_unstable: bool,
+) -> Differential {
+    let unstable = if compare_unstable {
+        Vec::new()
+    } else {
+        java.unstable()
+    };
     let status = {
         let mut d = Vec::new();
         if o.load.map(Severity::name) != java.get("load") {
