@@ -24,6 +24,7 @@ pub const EMA_ALPHA: f64 = 0.2;
 
 /// `SlidingTimeWindowAggregationBasedOnEMA`.
 #[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct Ema {
     pub window: f64,
     pub no_emit: f64,
@@ -71,6 +72,7 @@ impl Ema {
 /// `FixedLengthWindowSimpleAggregation`: the last `n` values and an aggregation function,
 /// emittable once `n` values are present.
 #[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct LastN {
     pub n: usize,
     pub f: Aggregation,
@@ -104,6 +106,7 @@ impl LastN {
 
 /// A window of the kind Slingshot uses for `aggregation` (Q3).
 #[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub enum Window {
     Ema(Ema),
     Last(LastN),
@@ -237,6 +240,7 @@ pub fn apply(f: Aggregation, values: impl Iterator<Item = f64> + Clone) -> f64 {
 ///   latest update must be more than 10 s after the last emission; the emission is committed
 ///   only when the policy fires ([`PerElement::commit`]), not when the value is read.
 #[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
 pub struct PerElement {
     pub aggregation: Aggregation,
     /// (element key, its window), in first-sample order.
