@@ -752,3 +752,53 @@ fn exploration_is_deterministic() {
     );
     assert_eq!(r.events, ok[3].events);
 }
+
+/// `RulesRun::run_while` with a pause condition: a time condition pauses where `run_until`
+/// pauses (the same snapshot); a response-time trigger pauses after the rules of its event ran;
+/// the continuation equals the uninterrupted run.
+#[test]
+fn pause_conditions_in_a_rules_run() {
+    use simoxide_sim::{Condition, Watch};
+    let (cm, cfg) = load("corpus-rules/lb_scaleout", |_| {});
+    let rules = root().join("corpus-rules/lb_scaleout/rules");
+    let cfg = SimConfig {
+        mode: Mode::Fast,
+        ..cfg
+    };
+    let new = |cfg: &SimConfig| {
+        RulesRun::new(
+            Simulation::<Fast>::create(&cm, cfg.clone(), Outputs::default()).unwrap(),
+            rules_host(&rules),
+        )
+    };
+    let (want, mut wh) = new(&cfg).finish().unwrap();
+    let mut a = new(&cfg);
+    a.run_until(Pause::After(250 * S)).unwrap();
+    let mut b = new(&cfg);
+    let mut w = Watch::new(vec![Condition::At(Pause::After(250 * S))]);
+    w.arm(b.sim()).unwrap();
+    b.run_while(|s| w.keep_going(s)).unwrap();
+    let (mut x, mut y) = (Vec::new(), Vec::new());
+    a.snapshot_to(&mut x).unwrap();
+    b.snapshot_to(&mut y).unwrap();
+    // the engine's state (the host's section holds wall times)
+    let engine = |b: &[u8]| {
+        Snapshot::read(b)
+            .unwrap()
+            .section("engine")
+            .unwrap()
+            .data
+            .clone()
+    };
+    assert!(engine(&x) == engine(&y));
+    let mut r = new(&cfg);
+    let mut w = Watch::new(vec![
+        simoxide_sim::sim::watch::parse_condition("rt[UsageScenarioMeasuringPoint] > 2").unwrap(),
+    ]);
+    w.arm(r.sim()).unwrap();
+    assert_eq!(r.run_while(|s| w.keep_going(s)).unwrap(), Status::Paused);
+    assert!(w.fired().is_some());
+    let (got, mut h) = r.finish().unwrap();
+    assert_eq!(result(&Ok(got)), result(&Ok(want)));
+    assert_eq!(records(&mut h), records(&mut wh));
+}

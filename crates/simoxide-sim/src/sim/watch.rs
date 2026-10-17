@@ -65,7 +65,8 @@ pub struct SeriesSel {
     pub metric: String,
     /// The measuring point: the key as in `measurements.csv`, a part of it (e.g. an element's
     /// id), or the name (`entityName`) of a model element, which matches the keys that contain
-    /// its id or the id of an element it contains directly (a container's processing resources).
+    /// its id or the id of an element it contains directly (a container's processing resources);
+    /// `*` matches every measuring point.
     pub point: String,
 }
 
@@ -443,7 +444,7 @@ fn resolve(c: &Condition, t: &mut Track, m: &Measurements) {
         return;
     };
     for (i, def) in m.series.iter().enumerate().skip(t.resolved) {
-        let point = &*def.mp == sel.point
+        let point = sel.point == "*"
             || def.mp.contains(&*sel.point)
             || t.ids.iter().any(|id| def.mp.contains(id.as_str()));
         if point && metric(def.metric) {
@@ -468,7 +469,9 @@ pub fn selected_series(sel: &SeriesSel, ids: &[String], m: &Measurements) -> Vec
     m.series
         .iter()
         .filter(|d| {
-            (d.mp.contains(&*sel.point) || ids.iter().any(|id| d.mp.contains(id.as_str())))
+            (sel.point == "*"
+                || d.mp.contains(&*sel.point)
+                || ids.iter().any(|id| d.mp.contains(id.as_str())))
                 && metric(d.metric)
         })
         .map(|d| format!("{} {}", d.mp, d.metric))

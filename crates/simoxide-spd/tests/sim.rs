@@ -314,3 +314,85 @@ fn snapshot_equals_uninterrupted_run() {
         assert!(e.to_string().contains("no SPD state"), "{e}");
     }
 }
+
+/// `SpdRun::run_while` with a pause condition (`DESIGN-SPD.md` N2): a time condition pauses
+/// where `run_until` pauses (the same snapshot), a series condition after the SPD work of the
+/// event whose tuple made it hold; the continuation equals the uninterrupted run.
+#[test]
+fn pause_conditions_in_an_spd_run() {
+    use simoxide_sim::sim::watch::parse_condition;
+    use simoxide_sim::{Condition, Pause, Status, Watch};
+    let (cm, spd, rc) = setup(Quirks::fixed());
+    let mut whole = spd_run(&cm, &spd, rc);
+    let mut wlog = VecLog::default();
+    whole.run(&mut NoAdjustment, &mut wlog).unwrap();
+    let (wres, wst, _) = whole.finish().unwrap();
+    // time
+    let mut a = spd_run(&cm, &spd, rc);
+    a.run_until(
+        &mut NoAdjustment,
+        &mut VecLog::default(),
+        Some(3_000_000_001),
+    )
+    .unwrap();
+    let mut b = spd_run(&cm, &spd, rc);
+    let mut w = Watch::new(vec![Condition::At(Pause::After(3_000_000_000))]);
+    w.arm(&b.sim).unwrap();
+    let st = b
+        .run_while(&mut NoAdjustment, &mut VecLog::default(), |s| {
+            w.keep_going(s)
+        })
+        .unwrap();
+    assert_eq!(st, Status::Paused);
+    let (mut x, mut y) = (Vec::new(), Vec::new());
+    a.snapshot_to(&mut x).unwrap();
+    b.snapshot_to(&mut y).unwrap();
+    assert!(x == y);
+    // a response time above 0.5 s, then on to the end
+    let mut r = spd_run(&cm, &spd, rc);
+    let mut log = VecLog::default();
+    let mut w = Watch::new(vec![
+        parse_condition("rt[_h20_ps_multicore_sig1] > 0.5").unwrap(),
+    ]);
+    w.arm(&r.sim).unwrap();
+    let st = r
+        .run_while(&mut NoAdjustment, &mut log, |s| w.keep_going(s))
+        .unwrap();
+    assert_eq!(st, Status::Paused);
+    let f = w.fired().unwrap();
+    assert!(f.reason.contains("Response Time"), "{}", f.reason);
+    assert_eq!(f.events, r.sim.state().events());
+    r.run(&mut NoAdjustment, &mut log).unwrap();
+    let (res, st, _) = r.finish().unwrap();
+    assert_eq!(log.records, wlog.records);
+    assert_eq!(st, wst);
+    assert_eq!(res.measurements.to_csv(), wres.measurements.to_csv());
+}
+
+/// Enforcing policies at a resume (Slingshot's incoming policies) needs P2: the hook checks
+/// the names and refuses; the run is unchanged.
+#[test]
+fn enforcing_policies_waits_for_p2() {
+    use simoxide_spd::resume::EnforceError;
+    let (cm, spd, rc) = setup(Quirks::fixed());
+    let mut whole = spd_run(&cm, &spd, rc);
+    let mut wlog = VecLog::default();
+    whole.run(&mut NoAdjustment, &mut wlog).unwrap();
+    let (wres, ..) = whole.finish().unwrap();
+    let mut r = spd_run(&cm, &spd, rc);
+    let mut log = VecLog::default();
+    r.run_until(&mut NoAdjustment, &mut log, Some(2_000_000_000))
+        .unwrap();
+    assert_eq!(
+        r.enforce_policies(&["nope"]),
+        Err(EnforceError::UnknownPolicy("nope".into()))
+    );
+    match r.enforce_policies(&["cpu", "time"]) {
+        Err(EnforceError::Unsupported(m)) => assert!(m.contains("P2"), "{m}"),
+        o => panic!("{o:?}"),
+    }
+    r.run(&mut NoAdjustment, &mut log).unwrap();
+    let (res, ..) = r.finish().unwrap();
+    assert_eq!(log.records, wlog.records);
+    assert_eq!(res.measurements.to_csv(), wres.measurements.to_csv());
+}
