@@ -1289,14 +1289,123 @@ This follows plan D1-D4 (`qvto-rs/docs/simoxide-integration.md` §3), with these
   applied"; deterministic UUIDs for exactness against a patched refsim (D5).
 - **Slingshot flavour**: SPD adjustment as above. The same host can also run SimuLizar-style
   rules in the Slingshot flavour if wanted (no reference; low cost).
-- **Exact vs fast.**
-  - QVTo compat mode always for the adjustment, so the models equal the Java runner's.
-  - The exception is Java identity-hash order (Q8, Q16): without a Java run there is no identity
-    hash. In the fast mode, `->any` and the iteration of sets of objects follow qvto-rs's
-    deterministic order; this is documented as a deviation.
+- **Exact vs fast** (since merge step M3 the default build is EPL-only, `LICENSES` §7):
+  - The default build has only qvto-rs's **fast mode**: Eclipse's semantics with hash-based
+    collections in deterministic insertion order (`->any` and the iteration of sets of objects
+    follow it). This is a documented deviation from Eclipse's Java `HashMap` and identity-hash
+    orders; runs stay deterministic and seed-independent.
+  - Builds with the feature `compat` (on through `exact`; no licence covers them) run QVTo's
+    **compat mode** by default, so the models equal the Java runner's. Asking for the compat mode
+    in a build without it is an error (`ModeUnavailable`), not a silent fallback.
+  - Java identity-hash order (Q8, Q16): without a Java run there is no identity hash. The compat
+    mode draws HotSpot's generator (seed-independent, not Java-equal); a Java run's hashes can be
+    replayed for comparisons (`InvokeHooks::ids`).
   - In the Slingshot-exact mode, the oracle's QVTo and OCL collections iterate in insertion order
     (S0 ordering rule), so qvto-rs needs a matching **insertion-order policy** for `Set`s (Q2).
-  - qvto-rs fast mode is an option for throughput.
+    The host has the mode parameter for it (`QvtMode::InsertionOrderSets`), unavailable until Q2
+    lands.
+
+**F3 as built** (2026-10-17, branch `f3`; guide: `docs/guide/library.md`, "QVTo transformations
+on a run"):
+
+- **Crate `simoxide-reconf`** (EPL; feature `spd`, default: the SPD adjuster; `compat`: QVTo's
+  compat mode; `exact` = `compat` + `simoxide-sim/exact`). Only `src/qvt.rs` uses the adapter's
+  `Session`/`SimStore` for transformation runs (besides F2's `Edit`, whose `store()` is the
+  adapter's store): the switch to the shared graph changes that module.
+  - `QvtoCore` (`Arc`, `Send + Sync`): a template session (registry with SimOxide's tables and
+    ids, metamodel objects, and the metamodels Palladio's analyzers register besides SimOxide's
+    tables, embedded: feature model and feature configuration from the 5.2.2 product, which
+    SimuLizar's rules declare as model types; the analyzer framework's completions, which the SPD
+    transformations use; SimuLizar's runtime measurement model), behind a `Mutex` (the session
+    holds a `RefCell` cache: `Send`, not `Sync`). `compile_file(path, Imports::{Folder, Roots})`
+    and `compile(UnitSource, &dyn UnitResolver)` (embedded transformations) give a
+    `Transformation` (`Arc`, `Send + Sync`) with its parameters (name, direction, nsURIs).
+    Palladio's blackbox libraries are registered for every compilation. Not tied to a model:
+    one core and one compilation serve all runs, models and threads.
+  - `QvtoRun` (per run, `Clone + Send`): empty until the first use; then a clone of the template
+    session (resource table, models of other metamodels such as the PRM, mirrors, journal, id
+    generator) and a working copy of the run's model graph, recognised by the run model's
+    generation and address and copied again when the simulation's model changed otherwise. Forks
+    clone it copy-on-write (the session is shared until one side uses it). `RunConfig`: mode,
+    `IdPolicy` (seeded UUIDs by default, none for dynamic-EMF comparisons), `AbortPolicy`
+    (`FailRun` default, `Reject`), `FailedRunChanges` (`Keep` default: what a failing
+    transformation changed stays, as in SimuLizar and Slingshot, which transform in place;
+    `Discard`), call-depth limit.
+  - `QvtoRun::invoke(sim, t, Invocation)` (generic over `Compat` and `Flavour`, between events):
+    binds each model parameter (`Bind::ByNsUri(NsBinding::SimuLizar)`: the first root of each
+    model of the parameter's metamodel, the PRM's measurements for the PRM model, as SimuLizar's
+    `QVToModelCache`; `NsBinding::Slingshot`: every root, without `PrimitiveTypes.repository`;
+    `Bind::Models`, `Bind::Empty`; order: resource order, the Java caches iterate a `HashSet`),
+    sets configuration properties, registers `getSimulationTime()` on the run's clock and
+    `ProfilesLibrary` stubs (both units; they throw `UnsupportedOperationException` "not supported
+    by SimOxide"), runs with the journal on, converts the journal (`change_set`) and applies it
+    (`Simulation::apply_changes`). `Outcome`: severity, code, message, `succeeded` (OK or INFO:
+    SimuLizar's and Slingshot's "applied"; `assert fatal` makes it false), log, journal, the
+    `ChangeReport`, extents, time. Errors: `Binding` (nothing ran, as the Java executors'
+    `IllegalStateException`), `Rejected { outcome, error }` (`Invalid`, `Unsupported`, `State`,
+    or `Abort` under `Reject`: the run is unchanged), `RunFailed` (`Abort` under `FailRun`: the
+    run fails through the new `Simulation::fail_run`, every later `run_until`/`finish` returns
+    the error), `ModeUnavailable`, `WrongCore`.
+  - Hooks and helpers: `InvokeHooks { before, ids }` (edits before the run in its journal, e.g.
+    SPD's `enactedPolicy`; replayed identity hashes), `load_model`/`create_model` (models of
+    other metamodels, e.g. R1's PRM), `with_store` (any `ModelStore` operation; graph changes go
+    through the change path), `with_scratch_store` (a scratch copy: dumps, summaries),
+    `dry_run` (a transformation on a scratch copy, nothing reaches the run).
+  - **R1**: `RuleSet::load_dir(core, dir)` (the `.qvto` files, file-name order, imports next to
+    the rule), `QvtoRun::run_rules(sim, rules, inv)`: each rule in order, its changes applied
+    before the next one runs (each sees the changes before it; SimuLizar's syncers react to each
+    notification at once); a failing rule does not stop the others; `RulesOutcome::all_succeeded`
+    is SimuLizar's `result &= ...`. The PRM storage, the reconfiguration process's timing and
+    `Reconfiguration Time` tuples stay R1's; R1 calls the host at a pause point between events
+    (an apply inside `Ev::Reconf` needs an engine hook, 5.3).
+  - **P2**: `QvtoAdjuster` implements `simoxide_spd::Adjuster<C, F>` (the trait is generic over
+    the flavour now; `SpdRun` still drives the SimuLizar flavour): Slingshot's bindings,
+    `keepModeling = true`, `AdjustHooks { before, after }` (default: nothing before; `ok` = the
+    transformation succeeded, membership refreshed from the changed graph, group sizes); a
+    `RunFailed` ends the SPD run with the run's error. `fork` copies the QVTo state.
+- **Costs** (release, shared machine, `tests/host.rs costs`): core 2.6 ms; compiling a rule
+  0.4 ms; the per-run state on first use 0.8-1.4 ms (session clone, graph copy); a fork of it
+  below 1 µs (copy on write); a rule run 25-100 µs; a change 0.12-0.16 ms (h19). 2 000
+  invocations do not grow the session (`repeated_runs_do_not_grow_the_state`).
+- **Tests.** `tests/corpus.rs` (exit criterion): the 24 SimuLizar/SPD corpus cases run on the
+  `RunModel` of a simulation of the case's models at t = 100 s; a dry run's models (dump of the
+  Java runner's resources), log and status equal the Java runner's (with the Java run's identity
+  hashes when cached; the SPD dump is marked unstable in the fixture, as in the adapter's test);
+  the run's journal equals the dry run's and the journal of the same transformation on the
+  case's models loaded on their own (the adapter's set-up), object by object; the change path:
+  10 cases applied, 12 change nothing, `addNewServer_high` and `addClonedServer_high` refused
+  (`Invalid`: the rule adds an assembly context without allocating it, which SimOxide's model
+  validation rejects; SimuLizar would only fail when a request reaches it), and every run then
+  finishes. `tests/host.rs` (16): state created on first use, a plain run unchanged; a rule
+  mid-run equals the same change as a direct edit, trace equal before the change; forks before
+  and after a rule (equal continuations, the id sequence continues in both; a fresh state would
+  repeat the first id); snapshot, detach to another thread and resume with the QVTo state:
+  equal continuation and ids; an aborting rule (removing an allocation context, MC-3.3) fails
+  the run, or under `Reject` leaves it byte-identical to the uninterrupted run; `assert fatal`
+  "not applied" with the change kept, or dropped under `Discard` (then byte-identical); a rule
+  folder in file-name order (the second rule sees the first's change, the third fails, the
+  others count); `ProfilesLibrary` stub; binding and core checks; fast and compat give the same
+  journal; the Slingshot flavour runs a read-only rule and refuses a change (`Unsupported`, S2);
+  id policies; no growth over 2 000 runs; the SPD minimal example end to end (`SpdRun` with
+  `QvtoAdjuster` and a hook setting `enactedPolicy`): `MainTransformation` adds `AppServer_1`
+  at t = 50 s, the run model's generation is 1, the target group has 2 elements, as the
+  reference runner's `adjust` record.
+- **Found for P2/F4.** In compat mode without Java's identity hashes (HotSpot's generator),
+  `MainTransformation`'s wiring *moves* a container within
+  `LinkingResource.connectedResourceContainers`; SimuLizar's router throws on that (MC-2.3), so
+  the SimuLizar flavour's SPD run fails. With the Java run's hashes (corpus) and in fast mode it
+  does not happen. The SimuLizar flavour's SPD needs the fixed router semantics there (U13: a
+  move changes nothing for routing). The end-to-end test runs in fast mode.
+- **Adapter API added** (`qvto-simoxide`): `#[derive(Clone)]` on `Session` (and its state).
+- **What the switch to the shared graph (M4-M6) needs.** `qvt.rs` only: the template becomes
+  the registry (`Arc<MetaRegistry>`) plus a graph prototype holding the embedded metamodels; the
+  run session becomes the run graph's journal, id policy and resources (a resource for the PRM);
+  `SimStore` becomes the graph (`ModelStore` on `simoxide_emf::Graph`); the working copy and its
+  fingerprint stay (or become the run's copy-on-write graph, 5.9). `ModelRef::Loaded` indexes
+  the store's resource table and becomes a graph `ResourceId`. The public API (`QvtoCore`,
+  `QvtoRun`, `Invocation`, `Bind`, `Outcome`, `RuleSet`, `QvtoAdjuster`) does not change except
+  the store type in the closures of `with_store`, `with_scratch_store`, `dry_run` and the hooks
+  (the adapter's `SimStore` → the graph). `Edit` changes the same way.
 
 ### 5.6 Metamodel tables and the generic-supertype bug (early fix)
 
@@ -1528,7 +1637,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **M** | *(merge, designed separately)* QVTo crates and foundation crates in the repo; QVTo on the shared graph; the graph meets 5.9. *M0-M3 done 2026-10-17 on branch `qvto-merge`* (QVTo in `crates/qvto/` with history, foundation Java-compat crates, EPL-only defaults with `exact`/`compat` opt-in; status in `crates/qvto/docs/merge-into-simoxide.md`); M4-M8 open | — | see the merge design | F3 switches from the adapter to the shared graph without API change |
 | **F1** | *Done 2026-10-17* (findings: 5.7 "F1 as built"). `RunState` extraction: all mutable run state in one struct; `Rc` → `Arc` or deep-clone decision; `clone()` | F0 | 1 w | met: fork, pause/resume and resume of a deep copy on another thread equal the uninterrupted run on every model directory (exact own/replay, fast, literal engine); golden hashes, corpus, fuzz corpus unchanged; benchmark within noise |
 | **F2** | *Done 2026-10-17* (findings: 5.3 "F2 as built"). `RunModel` overlay (D1) with rebuild-and-diff syncer; direct-edit API | F0 | 2-3 w (a: overlay; b: rebuild/diff; c: edit API) | met: a test edit adds a container mid-run and it receives load; changes before the start equal the changed model byte for byte; runs without changes unchanged (golden, corpus, fuzz corpus, fork tests); benchmark within noise |
-| **F3** | QVTo host `simoxide-reconf`: shared immutable core (registry, metamodel objects, compiled programs), lazy per-run state, journal to syncers, natives; first on the Q6 adapter, then on the shared graph (after M) | F0 | 1 w (+2-3 d to switch after M) | corpus rules run on a `RunModel`; journals equal the corpus results |
+| **F3** | *Done 2026-10-17 on the Q6 adapter* (findings: 5.5 "F3 as built"; the switch to the shared graph after M6 is open). QVTo host `simoxide-reconf`: shared immutable core (registry, metamodel objects, compiled programs), lazy per-run state, journal to syncers, natives; first on the Q6 adapter, then on the shared graph (after M) | F0 | 1 w (+2-3 d to switch after M) | met: the 24 corpus cases run on a `RunModel` mid-run; journals equal the standalone runs', models, logs and status the Java runner's |
 | **F4** | Incremental syncers incl. SEFF recompilation, call-cache invalidation, monitor cloning, removal policies (keep / abort / drain) | F2, F3 | 2-3 w | each change kind has a test; load-balancer branch added mid-run changes routing; scale-in in all three policies |
 | **R1** | SimuLizar rules: PRM values (D2), reconfiguration process runs rules (D3), MEAS-7.3 series | F3, F4 | 1.5-2 w | SimuLizar's load-balancer and power examples run; statistical match vs SimuLizar |
 | **R2** | Exact rules: deterministic UUIDs in refsim (D5), byte-exact comparison | R1 | 1 w | byte-equal traces on the examples |

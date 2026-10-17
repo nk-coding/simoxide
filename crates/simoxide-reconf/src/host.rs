@@ -949,9 +949,7 @@ impl QvtoRun {
                 st.work = None;
                 match error {
                     ChangeError::Abort(_) if self.cfg.on_abort == AbortPolicy::FailRun => {
-                        let e = sim.fail_run(format!(
-                            "reconfiguration by {name}: {error} (SimuLizar's syncer throws)"
-                        ));
+                        let e = sim.fail_run(format!("reconfiguration by {name}: {error}"));
                         Err(ReconfError::RunFailed {
                             outcome: Box::new(out),
                             cause: error,
