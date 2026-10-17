@@ -25,9 +25,12 @@ use simoxide_sim::{ChangeError, Outputs, Pause, Simulation};
 /// What the change path does with each case's changes, mid-run: `none` (the rule changed
 /// nothing: below its threshold), `applied`, or `invalid` (refused, the run unchanged: the
 /// rule adds an assembly context without allocating it, which SimOxide's model validation
-/// rejects).
-fn expected(id: &str) -> &'static str {
+/// rejects). Without the Java run's identity hashes (HotSpot's generator instead), the SPD
+/// transformation moves a container within a link's container list, on which SimuLizar's
+/// router throws (MC-2.3): `abort`.
+fn expected(id: &str, java_hashes: bool) -> &'static str {
     match id {
+        "spd_minimalexample_main" if !java_hashes => "abort",
         "simulizar_runconfigtest_scaleUp_high"
         | "simulizar_runconfigtest_outsource_high"
         | "simulizar_reconfiguration_adapt"
@@ -209,26 +212,30 @@ fn corpus_rules_on_a_run_model_mid_run() {
             )
             .unwrap();
         let mut diffs = Vec::new();
-        if renumber(&d) != renumber(jd) && !unstable.contains(&"dump") {
-            let diff = qvto_emf::canon::first_difference(&renumber(jd), &renumber(&d));
-            diffs.push(format!("dump vs java: {diff:?}"));
-        }
-        if dry.log != j.log() && !unstable.contains(&"log") {
-            diffs.push(format!("log: {:?} vs java {:?}", dry.log, j.log()));
-        }
-        let sev = match dry.severity {
-            0 => "OK",
-            2 => "WARNING",
-            8 => "CANCEL",
-            _ => "ERROR",
-        };
-        if Some(sev) != j.severity() || Some(dry.code) != j.code() {
-            diffs.push(format!(
-                "status {sev} {} vs java {:?} {:?}",
-                dry.code,
-                j.severity(),
-                j.code()
-            ));
+        // the Java run's identity hashes decide orders in compat mode: without them (no
+        // cached Java runs, `target/qvto-testkit/java`) only the journals are compared
+        if tape.is_some() {
+            if renumber(&d) != renumber(jd) && !unstable.contains(&"dump") {
+                let diff = qvto_emf::canon::first_difference(&renumber(jd), &renumber(&d));
+                diffs.push(format!("dump vs java: {diff:?}"));
+            }
+            if dry.log != j.log() && !unstable.contains(&"log") {
+                diffs.push(format!("log: {:?} vs java {:?}", dry.log, j.log()));
+            }
+            let sev = match dry.severity {
+                0 => "OK",
+                2 => "WARNING",
+                8 => "CANCEL",
+                _ => "ERROR",
+            };
+            if Some(sev) != j.severity() || Some(dry.code) != j.code() {
+                diffs.push(format!(
+                    "status {sev} {} vs java {:?} {:?}",
+                    dry.code,
+                    j.severity(),
+                    j.code()
+                ));
+            }
         }
         // the run itself
         let mut ids = |s: &SimStore<'_>| id_source(s, tape.as_ref().unwrap());
@@ -280,7 +287,7 @@ fn corpus_rules_on_a_run_model_mid_run() {
             diffs.push(format!("journal: {mine:#?}\n vs standalone {theirs:#?}"));
         }
         // the change path
-        let want = expected(&c.id);
+        let want = expected(&c.id, tape.is_some());
         if want != applied {
             diffs.push(format!("change path: {applied}, expected {want}"));
         }
@@ -298,7 +305,9 @@ fn corpus_rules_on_a_run_model_mid_run() {
             if diffs.is_empty() { "equal" } else { "DIFFERS" },
             outcome.journal.changes.len(),
             applied,
-            if unstable.contains(&"dump") {
+            if tape.is_none() {
+                "no tape"
+            } else if unstable.contains(&"dump") {
                 "unstable"
             } else {
                 "compared"
