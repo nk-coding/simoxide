@@ -529,3 +529,144 @@ fn continue_run(
     fill(&mut o, r);
     o
 }
+
+/// The bytes of `run`'s snapshot (postcard, no extra sections).
+fn bytes_of(run: &mut SsxRun<'_>) -> Vec<u8> {
+    let mut b = Vec::new();
+    run.snapshot_value(Encoding::Postcard, Vec::new())
+        .unwrap()
+        .write(&mut b)
+        .unwrap();
+    b
+}
+
+/// N2's pause conditions on the Slingshot-exact engine: a watched pause is the pause at the
+/// same event count (same snapshot bytes); time conditions on the double clock; a condition
+/// that never holds runs to the end unchanged.
+#[test]
+fn pause_conditions_pause_where_event_counts_pause() {
+    use simoxide_sim::sim::watch::parse_condition;
+    let core = QvtoCore::new().unwrap();
+    let c = load(&root().join("corpus-ss/x_ss_mediastore"));
+    let full = uninterrupted(&c, &core);
+    for cond in [
+        "state[*] >= 2",
+        "rt[*] > 0",
+        "time 3000",
+        "before 3000.5",
+        "events 777",
+    ] {
+        let mut w = simoxide_sim::Watch::new(vec![parse_condition(cond).unwrap()]);
+        let (out, _, _) = outputs();
+        let mut a = SsxRun::new(&c.cm, c.cfg.clone(), out).unwrap();
+        assert_eq!(a.run_watch(&mut w, None).unwrap(), Status::Paused, "{cond}");
+        let f = w.fired().expect("fired").clone();
+        assert_eq!(f.events, a.events(), "{cond}");
+        let (out, _, _) = outputs();
+        let mut b = SsxRun::new(&c.cm, c.cfg.clone(), out).unwrap();
+        b.run_until(Pause::Events(a.events()), None).unwrap();
+        assert_eq!(b.events(), a.events(), "{cond}");
+        assert!(bytes_of(&mut a) == bytes_of(&mut b), "{cond}: other bytes");
+    }
+    // `elapsed` after a pause, and a condition that never holds
+    let (out, p, t) = outputs();
+    let mut a = SsxRun::new(&c.cm, c.cfg.clone(), out).unwrap();
+    a.run_until(Pause::After(1_000_000_000_000), None).unwrap();
+    let mut w = simoxide_sim::Watch::new(vec![parse_condition("elapsed 500").unwrap()]);
+    let base = a.now();
+    let n0 = a.events();
+    assert_eq!(a.run_watch(&mut w, None).unwrap(), Status::Paused);
+    // every event up to base + 500 s has run, the next one is later
+    assert!(a.events() >= n0 && a.now() <= base + 500.0, "{} {}", base, a.now());
+    assert!(w.fired().unwrap().reason.contains("elapsed"));
+    let mut never = simoxide_sim::Watch::new(vec![parse_condition("rt[*] > 1e300").unwrap()]);
+    assert_eq!(a.run_watch(&mut never, None).unwrap(), Status::Finished);
+    let r = a.finish(None).unwrap();
+    assert_eq!(p.text(), full.projection);
+    assert_eq!(t.text(), full.tape);
+    assert_eq!(Some(r.measurements.to_csv()), full.csv);
+}
+
+/// A change file between two events (`ChangeFile::apply_to` on the engine's `ChangeHost`):
+/// a restored run that applies it equals the run that applies it at the pause, and it has an
+/// effect; option lines are refused and leave the run unchanged.
+#[test]
+fn changes_at_a_resume_equal_the_change_at_the_pause() {
+    use simoxide_reconf::ChangeFile;
+    let core = QvtoCore::new().unwrap();
+    let c = load(&root().join("corpus-ss/x_ss_mediastore"));
+    let full = uninterrupted(&c, &core);
+    let cf = ChangeFile::parse("rate Server1:CPU 2 * 1000 * 1000\n").unwrap();
+    let pause = Pause::After(20_000_000_000_000);
+    let go = |restore: bool| -> Out {
+        let (out, p, t) = outputs();
+        let mut run = SsxRun::new(&c.cm, c.cfg.clone(), out).unwrap();
+        run.run_until(pause, None).unwrap();
+        let (mut run, p, t) = if restore {
+            let b = bytes_of(&mut run);
+            let (out, p2, t2) = outputs();
+            let r = SsxRun::restore_from(&b[..], &c.cm, out).unwrap();
+            // the restored run's buffers hold the continuation only
+            let (pp, tt) = (p.text(), t.text());
+            p2.0.borrow_mut().splice(0..0, pp.into_bytes());
+            t2.0.borrow_mut().splice(0..0, tt.into_bytes());
+            (r, p2, t2)
+        } else {
+            (run, p, t)
+        };
+        let rep = cf.apply_to(&mut run).unwrap();
+        assert_eq!(rep.generation, 1);
+        assert_eq!(run.generation(), 1);
+        let mut o = Out::default();
+        fill(&mut o, run.finish(None));
+        o.projection = p.text();
+        o.tape = t.text();
+        o
+    };
+    let a = go(false);
+    let b = go(true);
+    assert_eq!(a.diff(&b), None);
+    assert!(a.csv != full.csv, "no effect");
+    // refused: an option line (the run is unchanged)
+    let bad = ChangeFile::parse("removal keep\nrate Server1:CPU 3\n").unwrap();
+    let (out, p, _) = outputs();
+    let mut run = SsxRun::new(&c.cm, c.cfg.clone(), out).unwrap();
+    run.run_until(pause, None).unwrap();
+    assert!(bad.apply_to(&mut run).is_err());
+    assert_eq!(run.generation(), 0);
+    run.finish(None).unwrap();
+    assert_eq!(p.text(), full.projection);
+}
+
+/// Determinism: two runs paused at the same point write the same bytes; so do a fork and a
+/// detached copy attached again; the state is `Send`.
+#[test]
+fn the_same_state_gives_the_same_bytes() {
+    fn send<T: Send>(_: &T) {}
+    let c = load(&root().join("corpus-ss/h14_call_chain_3"));
+    let mk = || {
+        let (out, _, _) = outputs();
+        let mut r = SsxRun::new(&c.cm, c.cfg.clone(), out).unwrap();
+        r.run_until(Pause::Events(5_001), None).unwrap();
+        r
+    };
+    let (mut a, mut b) = (mk(), mk());
+    let x = bytes_of(&mut a);
+    assert!(x == bytes_of(&mut b));
+    let mut f = a.fork(Outputs::default()).unwrap();
+    let st = a.detach();
+    send(&st);
+    let mut d = SsxRun::attach(&c.cm, st, Outputs::default()).unwrap();
+    assert!(x == bytes_of(&mut f));
+    assert!(x == bytes_of(&mut d));
+    // a state without a trace cannot gain one
+    let (out, _, _) = outputs();
+    let mut plain = SsxRun::new(&c.cm, c.cfg.clone(), Outputs::default()).unwrap();
+    plain.run_until(Pause::Events(10), None).unwrap();
+    let st = plain.detach();
+    assert!(SsxRun::attach(&c.cm, st, out).is_err());
+    // another model is refused
+    let other = load(&root().join("corpus-ss/h01_ps_single"));
+    let s = Snapshot::read(&x[..]).unwrap();
+    assert!(SsxRun::restore_snapshot(&s, &other.cm, Outputs::default()).is_err());
+}

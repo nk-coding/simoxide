@@ -220,22 +220,45 @@ fn resume_refuses_another_model() {
     std::fs::remove_dir_all(&d).unwrap();
 }
 
+/// The Slingshot-exact engine (`DESIGN-SPD.md` 5.7, "ssx snapshots as built"): paused,
+/// written and resumed by new processes, a JSON hop and a pause within one instant included.
 #[test]
-fn the_slingshot_exact_engine_refuses_snapshots() {
-    let a = root().join("corpus/h01_ps_single");
-    let out = Command::new(env!("CARGO_BIN_EXE_simoxide"))
-        .args([
-            "run",
-            "--model",
-            &a.to_string_lossy(),
+fn the_slingshot_exact_engine_resumes_too() {
+    check(
+        "ssx",
+        &root().join("corpus/x_ss_mediastore"),
+        &[
             "--flavour",
             "slingshot-exact",
-            "--pause-at",
+            "--seed",
             "1",
-        ])
-        .output()
-        .unwrap();
-    assert!(!out.status.success());
-    let err = String::from_utf8_lossy(&out.stderr);
-    assert!(err.contains("Slingshot-exact"), "{err}");
+            "--max-sim-time",
+            "70470",
+            "--max-measurements",
+            "-1",
+        ],
+        &["100", "20000", "20000.5"],
+        &[],
+    );
+}
+
+/// The Slingshot-exact engine with scaling policies: the decision log continues (with
+/// `reconfiguration` the adjustments run, their QVTo state in the section `qvto`).
+#[cfg(feature = "spd")]
+#[test]
+fn a_slingshot_exact_spd_run_resumes_with_its_decision_log() {
+    check(
+        "ssx-spd",
+        &root().join("reference/slingshot/models/spd_scale_in"),
+        &[
+            "--flavour",
+            "slingshot-exact",
+            "--seed",
+            "1",
+            "--max-sim-time",
+            "150",
+        ],
+        &["40", "80", "80.5"],
+        &["--spd-log"],
+    );
 }

@@ -119,6 +119,12 @@ impl<'s, 'a> SsxSpd<'s, 'a> {
         }
     }
 
+    /// The target groups' members after a model change the layer did not make (e.g. a change
+    /// file at a resume): read from the run's model graph `g`.
+    pub fn model_changed(&mut self, g: &simoxide_model::raw::Graph) {
+        self.state.membership = Membership::from_graph(g, self.spd.model());
+    }
+
     /// Requests not executed when the run ended.
     pub fn pending(&self) -> usize {
         self.requests.iter().filter(|r| r.is_some()).count()

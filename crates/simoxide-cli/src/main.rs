@@ -439,9 +439,14 @@ fn run(a: &Args) -> Result<(), String> {
     }
     let r = match spd {
         Some(s) if a.flavour == simoxide_sim::FlavourKind::SlingshotExact => {
-            spd::run_exact(a, &cm, cfg, out, &s)?
+            spd::run_exact(a, &cm, Ok(cfg), out, &s)?
         }
         Some(s) => spd::run(a, &cm, cfg, out, &s, None)?,
+        None if a.flavour == simoxide_sim::FlavourKind::SlingshotExact
+            && (a.pause.is_some() || a.snapshot.is_some() || !a.pause_when.is_empty()) =>
+        {
+            ssxrun::plain(a, &cm, Ok(cfg), out)?
+        }
         None if a.pause.is_some() || a.snapshot.is_some() || !a.pause_when.is_empty() => {
             snap::plain(a, &cm, Ok(cfg), out)?
         }
@@ -688,30 +693,99 @@ mod spd {
     }
 
     /// The Slingshot-exact engine with the SPD layer (`DESIGN-SPD.md` X2d): Slingshot's
-    /// adjustment in QVTo's ordered mode with `reconfiguration`, decisions only without.
+    /// adjustment in QVTo's ordered mode with `reconfiguration`, decisions only without;
+    /// started (`Ok(cfg)`) or restored from a snapshot, to the pause or the end (5.7, "ssx
+    /// snapshots as built").
     pub fn run_exact(
         a: &Args,
         cm: &CompiledModel,
-        cfg: SimConfig,
+        start: Result<SimConfig, &Snapshot>,
         out: Outputs,
         spd: &Spd,
     ) -> Result<End, String> {
+        use simoxide_sim::ssx::{SpdHooks, SsxRun};
+        use simoxide_spd::ssx::SsxSpd;
+        if !a.enforce.is_empty() {
+            return Err(
+                "--enforce is not supported by the Slingshot-exact engine (use --flavour slingshot)"
+                    .into(),
+            );
+        }
         #[cfg(feature = "reconfiguration")]
         let mut adj = super::changes::spd_adjuster(a, &spd.quirks())?;
         #[cfg(not(feature = "reconfiguration"))]
         let mut adj = NoAdjustment;
+        let (mut run, snap) = match start {
+            Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(|e| e.to_string())?, None),
+            Err(s) => (
+                SsxRun::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?,
+                Some(s),
+            ),
+        };
+        #[cfg(feature = "reconfiguration")]
+        let changed = {
+            if let Some(s) = snap {
+                adj.run
+                    .restore_section(&run, s)
+                    .map_err(|e| e.to_string())?;
+            }
+            super::changes::ssx_with_qvto(a, &mut run, &mut adj.run)?
+        };
+        #[cfg(not(feature = "reconfiguration"))]
+        let carry = super::changes::ssx_plain_changes(a, &mut run, snap)?;
         let file = a.spd_log.as_deref().map(create).transpose()?;
         let sink: Box<dyn std::io::Write> = file.unwrap_or_else(|| Box::new(std::io::sink()));
         let mut log = JsonlLog::new(sink);
         log.all = a.spd_log_all;
-        let mut hooks = simoxide_spd::ssx::SsxSpd::new(spd, &cm.model, &mut adj, &mut log);
-        let r = simoxide_sim::ssx::run_with_spd(cm, cfg, out, &mut hooks);
-        let (ok, st) = (hooks.adjusted_ok, hooks.state.clone());
-        drop(hooks);
+        let mut hooks = match snap {
+            Some(s) => SsxSpd::restore(spd, s, &mut adj, &mut log).map_err(|e| e.to_string())?,
+            None => SsxSpd::new(spd, &cm.model, &mut adj, &mut log),
+        };
+        #[cfg(feature = "reconfiguration")]
+        if changed {
+            hooks.model_changed(&run.compiled().model.graph);
+        }
+        let (status, reason) =
+            super::ssxrun::drive(a, &mut run, Some(&mut hooks as &mut dyn SpdHooks))?;
+        let (end, ok, st) = if status == simoxide_sim::Status::Paused {
+            let enc = super::snap::options(a).encoding;
+            let mut extra = match &a.snapshot {
+                Some(_) => hooks.snapshot_sections(enc).map_err(|e| e.to_string())?,
+                None => Vec::new(),
+            };
+            let (ok, st) = (hooks.adjusted_ok, hooks.state.clone());
+            drop(hooks);
+            #[cfg(feature = "reconfiguration")]
+            if a.snapshot.is_some() && adj.run.is_started() {
+                extra.push(adj.run.snapshot_section(enc).map_err(|e| e.to_string())?);
+            }
+            #[cfg(not(feature = "reconfiguration"))]
+            extra.extend(carry.sections(enc)?);
+            let snapshot = match &a.snapshot {
+                Some(p) => {
+                    let s = run.snapshot_value(enc, extra).map_err(|e| e.to_string())?;
+                    Some(super::snap::write(p, &s)?)
+                }
+                None => None,
+            };
+            let end = Ok(End::Paused {
+                now_ns: run.now_ns(),
+                events: run.events(),
+                measurements: run.measurements().clone(),
+                snapshot,
+                reason,
+            });
+            (end, ok, st)
+        } else {
+            let r = run.finish(Some(&mut hooks as &mut dyn SpdHooks));
+            let (ok, st) = (hooks.adjusted_ok, hooks.state.clone());
+            drop(hooks);
+            (r.map(End::Finished).map_err(|e| e.to_string()), ok, st)
+        };
         if a.spd_log.is_some() {
             log.finish().map_err(|e| format!("--spd-log: {e}"))?;
         }
-        let res = r.map_err(|e| e.to_string())?;
+        let end = end?;
         let executed = if cfg!(feature = "reconfiguration") {
             format!("adjusted={ok}")
         } else {
@@ -723,7 +797,7 @@ mod spd {
             st.evaluations,
             st.requests
         );
-        Ok(End::Finished(res))
+        Ok(end)
     }
 
     pub fn run(
@@ -795,7 +869,7 @@ mod spd {
     pub fn run_exact(
         _: &Args,
         _: &CompiledModel,
-        _: SimConfig,
+        _: Result<SimConfig, &Snapshot>,
         _: Outputs,
         s: &Never,
     ) -> Result<End, String> {
@@ -1141,6 +1215,46 @@ mod changes {
         Ok(Carry { qvto: Some(q) })
     }
 
+    /// [`plain`] for a restored Slingshot-exact run: its change steps through the engine's
+    /// `ChangeHost` (change files without option lines, transformations).
+    pub fn ssx_plain_changes(
+        a: &Args,
+        run: &mut simoxide_sim::ssx::SsxRun<'_>,
+        snap: Option<&Snapshot>,
+    ) -> Result<Carry, String> {
+        let has_qvto = snap.is_some_and(|s| s.section(simoxide_reconf::QVTO).is_some());
+        if a.changes.is_empty() && !has_qvto {
+            return Ok(Carry::none());
+        }
+        let core = QvtoCore::new().map_err(|e| e.to_string())?;
+        let mut q = QvtoRun::new(&core, config(a)?).map_err(|e| e.to_string())?;
+        if let Some(s) = snap {
+            q.restore_section(&*run, s).map_err(|e| e.to_string())?;
+        }
+        let steps = build(a, &core)?
+            .apply_to(run, &mut q)
+            .map_err(|e| e.to_string())?;
+        report(&steps);
+        Ok(Carry { qvto: Some(q) })
+    }
+
+    /// [`with_qvto`] for a restored Slingshot-exact run with scaling policies.
+    #[cfg(feature = "spd")]
+    pub fn ssx_with_qvto(
+        a: &Args,
+        run: &mut simoxide_sim::ssx::SsxRun<'_>,
+        q: &mut QvtoRun,
+    ) -> Result<bool, String> {
+        if a.changes.is_empty() {
+            return Ok(false);
+        }
+        let steps = build(a, q.core())?
+            .apply_to(run, q)
+            .map_err(|e| e.to_string())?;
+        report(&steps);
+        Ok(!steps.is_empty())
+    }
+
     /// The SPD adjuster of a run (Slingshot's `MainTransformation`, `simoxide-reconf`): QVTo's
     /// ordered mode unless `--qvto-mode` says otherwise, the transformations of the
     /// interpreter's compat flags (Q4, Q6, Q7).
@@ -1232,6 +1346,23 @@ mod changes {
                 ),
             }
         }
+    }
+
+    /// [`plain`] for a restored Slingshot-exact run.
+    pub fn ssx_plain_changes(
+        a: &Args,
+        _: &mut simoxide_sim::ssx::SsxRun<'_>,
+        snap: Option<&Snapshot>,
+    ) -> Result<Carry, String> {
+        if !a.changes.is_empty() {
+            return Err(
+                "--change and --transform need a build with the `reconfiguration` feature".into(),
+            );
+        }
+        Ok(Carry {
+            raw: snap.and_then(|s| Some((s.section("qvto")?.clone(), s.header.encoding))),
+            changed: false,
+        })
     }
 
     pub fn plain<C: Compat, F: Flavour>(
@@ -1370,6 +1501,78 @@ mod explore {
     }
 }
 
+/// The Slingshot-exact engine with pauses and snapshots (`DESIGN-SPD.md` 5.7, "ssx snapshots
+/// as built"): runs without scaling policies (with them: `spd::run_exact`).
+mod ssxrun {
+    use super::{Args, End};
+    use simoxide_sim::snapshot::Snapshot;
+    use simoxide_sim::ssx::{SpdHooks, SsxRun};
+    use simoxide_sim::{CompiledModel, Outputs, SimConfig, Status};
+
+    /// Runs `run` to the pause of `a` (`--pause-at` and the like, `--pause-when`) or the end;
+    /// the status and the pause condition that held.
+    pub fn drive(
+        a: &Args,
+        run: &mut SsxRun<'_>,
+        hooks: Option<&mut dyn SpdHooks>,
+    ) -> Result<(Status, Option<String>), String> {
+        let mut watch = super::snap::watch(a);
+        let status = match (&mut watch, a.pause) {
+            (Some(w), _) => run.run_watch(w, hooks),
+            (None, Some(p)) => run.run_until(p, hooks),
+            (None, None) => run.run_until(simoxide_sim::Pause::Never, hooks),
+        }
+        .map_err(|e| e.to_string())?;
+        let reason = watch.and_then(|w| w.fired().map(|f| f.reason.clone()));
+        Ok((status, reason))
+    }
+
+    /// A run without scaling policies: started (`Ok(cfg)`) or restored (with `--change` and
+    /// `--transform` steps), to the pause or the end.
+    pub fn plain(
+        a: &Args,
+        cm: &CompiledModel,
+        start: Result<SimConfig, &Snapshot>,
+        out: Outputs,
+    ) -> Result<End, String> {
+        if !a.enforce.is_empty() {
+            return Err("--enforce: the snapshot has no scaling policies".into());
+        }
+        let (mut run, snap) = match start {
+            Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(|e| e.to_string())?, None),
+            Err(s) => (
+                SsxRun::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?,
+                Some(s),
+            ),
+        };
+        let carry = super::changes::ssx_plain_changes(a, &mut run, snap)?;
+        let (status, reason) = drive(a, &mut run, None)?;
+        if status == Status::Finished {
+            return run
+                .finish(None)
+                .map(End::Finished)
+                .map_err(|e| e.to_string());
+        }
+        let snapshot = match &a.snapshot {
+            Some(p) => {
+                let enc = super::snap::options(a).encoding;
+                let s = run
+                    .snapshot_value(enc, carry.sections(enc)?)
+                    .map_err(|e| e.to_string())?;
+                Some(super::snap::write(p, &s)?)
+            }
+            None => None,
+        };
+        Ok(End::Paused {
+            now_ns: run.now_ns(),
+            events: run.events(),
+            measurements: run.measurements().clone(),
+            snapshot,
+            reason,
+        })
+    }
+}
+
 /// Pausing, snapshots and `simoxide resume` (docs/guide/snapshots.md).
 mod snap {
     use super::{Args, End, create, report_end, setup_with_rules};
@@ -1504,11 +1707,7 @@ mod snap {
             (Mode::Fast, FlavourKind::Slingshot) => {
                 go::<simoxide_sim::Fast, Slingshot>(a, cm, start, out)
             }
-            (_, FlavourKind::SlingshotExact) => Err(
-                "snapshots of the Slingshot-exact engine are not supported yet (it has no pause and \
-                 resume; DESIGN-SPD.md 5.7, \"N1 as built\")"
-                    .into(),
-            ),
+            (_, FlavourKind::SlingshotExact) => super::ssxrun::plain(a, cm, start, out),
             #[cfg(not(feature = "exact"))]
             (m, _) => Err(m.unavailable_reason().unwrap_or_default()),
         }
@@ -1585,7 +1784,11 @@ mod snap {
             }
             let spd = super::spd::of_snapshot(a, &cm, &s)?
                 .ok_or("the snapshot is of a run with scaling policies, the model has none")?;
-            super::spd::run(a, &cm, cfg, out, &spd, Some(&s))?
+            if a.flavour == FlavourKind::SlingshotExact {
+                super::spd::run_exact(a, &cm, Err(&s), out, &spd)?
+            } else {
+                super::spd::run(a, &cm, cfg, out, &spd, Some(&s))?
+            }
         } else {
             plain(a, &cm, Err(&s), out)?
         };

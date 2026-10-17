@@ -468,3 +468,130 @@ fn explore_is_deterministic() {
     assert_eq!(a, table("3"));
     std::fs::remove_dir_all(&d).unwrap();
 }
+
+/// The Slingshot-exact engine (`DESIGN-SPD.md` 5.7, "ssx snapshots as built"): a pause
+/// condition across three processes equals the uninterrupted run (trace, tape, measurements).
+#[test]
+fn the_slingshot_exact_engine_pauses_on_conditions() {
+    let d = tmp("ssx-when");
+    let p = |f: &str| d.join(f).to_string_lossy().into_owned();
+    let model = root()
+        .join("corpus/x_ss_mediastore")
+        .to_string_lossy()
+        .into_owned();
+    let base = [
+        "--model",
+        model.as_str(),
+        "--flavour",
+        "slingshot-exact",
+        "--seed",
+        "1",
+        "--max-sim-time",
+        "20000",
+        "--max-measurements",
+        "-1",
+    ];
+    let outs = |tag: &str| -> Vec<String> {
+        vec![
+            "--trace".into(),
+            p(&format!("t-{tag}")),
+            "--tape".into(),
+            p(&format!("p-{tag}")),
+            "--measurements".into(),
+            p(&format!("m-{tag}.csv")),
+        ]
+    };
+    let with = |head: Vec<&str>, tag: &str, more: &[&str]| -> String {
+        let o = outs(tag);
+        let mut a = head;
+        a.extend(o.iter().map(String::as_str));
+        a.extend(more);
+        ok(&a)
+    };
+    let mut run = vec!["run"];
+    run.extend(base);
+    with(run.clone(), "whole", &[]);
+    let s1 = p("s1.snap");
+    let err = with(
+        run,
+        "0",
+        &["--pause-when", "state[*] >= 2", "--snapshot", &s1],
+    );
+    assert!(err.contains("pause condition: "), "{err}");
+    let s2 = p("s2.snap");
+    let err = with(
+        vec!["resume", &s1, "--model", &model],
+        "1",
+        &["--pause-when", "elapsed-events 1000", "--snapshot", &s2],
+    );
+    assert!(err.contains("1000 events elapsed"), "{err}");
+    with(vec!["resume", &s2, "--model", &model], "2", &[]);
+    for k in ["t", "p"] {
+        let joined: String = (0..3).map(|i| read(&d.join(format!("{k}-{i}")))).collect();
+        assert!(joined == read(&d.join(format!("{k}-whole"))), "{k}");
+    }
+    assert_eq!(read(&d.join("m-2.csv")), read(&d.join("m-whole.csv")));
+    std::fs::remove_dir_all(&d).unwrap();
+}
+
+/// `resume --change` on a Slingshot-exact snapshot: through the engine's `ChangeHost`,
+/// deterministic and effective; option lines are refused.
+#[cfg(feature = "reconfiguration")]
+#[test]
+fn the_slingshot_exact_engine_resumes_with_a_change_file() {
+    let d = tmp("ssx-change");
+    let p = |f: &str| d.join(f).to_string_lossy().into_owned();
+    let model = root()
+        .join("corpus/x_ss_mediastore")
+        .to_string_lossy()
+        .into_owned();
+    let snap = p("s.snap");
+    ok(&[
+        "run",
+        "--model",
+        &model,
+        "--flavour",
+        "slingshot-exact",
+        "--max-sim-time",
+        "20000",
+        "--max-measurements",
+        "-1",
+        "--pause-at",
+        "5000",
+        "--snapshot",
+        &snap,
+    ]);
+    std::fs::write(d.join("c.changes"), "rate Server1:CPU 2 * 1000 * 1000\n").unwrap();
+    let run = |tag: &str, extra: &[&str]| -> (String, String) {
+        let m = p(&format!("m-{tag}.csv"));
+        let mut a = vec![
+            "resume",
+            snap.as_str(),
+            "--model",
+            &model,
+            "--measurements",
+            &m,
+        ];
+        a.extend(extra);
+        let err = ok(&a);
+        (read(Path::new(&m)), err)
+    };
+    let c = p("c.changes");
+    let (x, err) = run("a", &["--change", &c]);
+    assert!(err.contains("generation 1"), "{err}");
+    let (y, _) = run("b", &["--change", &c]);
+    let (z, _) = run("plain", &[]);
+    assert!(x == y, "not deterministic");
+    assert!(x != z, "no effect");
+    std::fs::write(d.join("o.changes"), "removal keep\nrate Server1:CPU 3\n").unwrap();
+    let err = fails(&[
+        "resume",
+        &snap,
+        "--model",
+        &model,
+        "--change",
+        &p("o.changes"),
+    ]);
+    assert!(err.contains("change options are not supported"), "{err}");
+    std::fs::remove_dir_all(&d).unwrap();
+}
