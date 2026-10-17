@@ -140,6 +140,7 @@ pub struct CaseProgram {
 }
 
 /// Parses, analyses and compiles a case's transformation as the Java runner loads it.
+#[allow(clippy::result_large_err)]
 pub fn compile_case(env: &CaseEnv, bundles: Vec<Bundle>, signatures: &str) -> Result<CaseProgram, Outcome> {
     let catalog = match Catalog::parse(signatures) {
         Ok(c) => c,
@@ -353,6 +354,7 @@ impl CaseModels {
 }
 
 /// Loads a case's models for one run of `program`.
+#[allow(clippy::result_large_err)]
 pub fn case_models(
     env: &CaseEnv,
     program: &qvto::Program,

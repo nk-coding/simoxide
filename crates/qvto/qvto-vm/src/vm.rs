@@ -997,10 +997,7 @@ where
                                 *pos += 1;
                                 x
                             }
-                            Coll::OrderedSet(m) => {
-                                let x = m.next_from(pos).cloned();
-                                x
-                            }
+                            Coll::OrderedSet(m) => m.next_from(pos).cloned(),
                             _ => None,
                         },
                         _ => None,

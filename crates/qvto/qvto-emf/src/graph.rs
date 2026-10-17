@@ -112,6 +112,9 @@ pub struct MetaLinks {
     pub obj_package: HashMap<ObjId, PackageId>,
 }
 
+/// Ecore's derived lists by (object, feature), with the `ecore_gen` they were computed at.
+pub(crate) type DerivedCache = HashMap<(ObjId, FeatureId), (u64, std::sync::Arc<[ObjId]>)>;
+
 /// A resource set and all its objects; implements [`ModelStore`].
 #[derive(Clone, Debug)]
 pub struct Graph {
@@ -126,7 +129,7 @@ pub struct Graph {
     pub(crate) ecore_gen: u64,
     /// Ecore's derived lists (`eAllStructuralFeatures`, ...) by object and feature, with the
     /// `ecore_gen` they were computed at (EMF caches them in `EClassImpl` likewise).
-    pub(crate) derived_cache: std::cell::RefCell<HashMap<(ObjId, FeatureId), (u64, std::sync::Arc<[ObjId]>)>>,
+    pub(crate) derived_cache: std::cell::RefCell<DerivedCache>,
 }
 
 impl Default for Graph {
