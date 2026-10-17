@@ -195,7 +195,7 @@ fn is_containment(g: &Graph, f: ObjId) -> bool {
 /// The value of a derived list of Ecore (`eAllStructuralFeatures`, ...), cached until an
 /// object of Ecore's classes changes.
 pub(crate) fn derived(g: &Graph, o: ObjId, f: FeatureId) -> Option<std::sync::Arc<[ObjId]>> {
-    if let Some((at, v)) = g.derived_cache.borrow().get(&(o, f))
+    if let Some((at, v)) = g.derived_cache.lock().get(&(o, f))
         && *at == g.ecore_gen
     {
         return Some(v.clone());
@@ -205,11 +205,11 @@ pub(crate) fn derived(g: &Graph, o: ObjId, f: FeatureId) -> Option<std::sync::Ar
     }
     // an empty placeholder while computing: a cycle of supertypes contributes nothing
     g.derived_cache
-        .borrow_mut()
+        .lock()
         .insert((o, f), (g.ecore_gen, std::sync::Arc::from(Vec::new())));
     let v: std::sync::Arc<[ObjId]> = derived_list(g, o, f)?.into();
     g.derived_cache
-        .borrow_mut()
+        .lock()
         .insert((o, f), (g.ecore_gen, v.clone()));
     Some(v)
 }

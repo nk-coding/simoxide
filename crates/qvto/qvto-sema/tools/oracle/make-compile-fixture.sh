@@ -9,7 +9,7 @@
 #   tests/fixtures/eclipse-compile-times.tsv    <key> <compile ms> (loadTransformation, warm JVM, one run)
 # from tests/data/compile.cases (tools/oracle/gen_compile_cases.py). Needs the runner
 # (reference/runner/build.sh, built here if missing), the PCM metamodels at target/pcm
-# (qvto-emf/tools/pcm-setup.sh target/pcm, or a symlink to an existing one) and the
+# (../foundation/simoxide-emf/tools/pcm-setup.sh target/pcm, or a symlink to an existing one) and the
 # SimuLizar/SPD repositories under ../old/palladio-research/repos.
 #   KEEP=dir   keep the runner's result directories there (default: a temporary directory)
 set -e
@@ -19,7 +19,7 @@ CASES=$ROOT/qvto-sema/tests/data/compile.cases
 FIX=$ROOT/qvto-sema/tests/fixtures
 RUNNER=$ROOT/reference/runner
 [ -f "$RUNNER/build/classpath.txt" ] || "$RUNNER/build.sh"
-[ -f "${CARGO_TARGET_DIR:-$ROOT/../../target}/pcm/pcm.conf" ] || { echo "missing target/pcm/pcm.conf (qvto-emf/tools/pcm-setup.sh target/pcm)" >&2; exit 1; }
+[ -f "${CARGO_TARGET_DIR:-$ROOT/../../target}/pcm/pcm.conf" ] || { echo "missing target/pcm/pcm.conf (../foundation/simoxide-emf/tools/pcm-setup.sh target/pcm)" >&2; exit 1; }
 python3 -I "$HERE/gen_compile_cases.py"
 
 # Extra classes on the runner's classpath: the SimuLizar/SPD blackbox stubs (registered by the

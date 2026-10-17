@@ -2,7 +2,7 @@
 //! (create, set, unset, add, insert, remove, set at, move, clear, `setEList`, roots, delete; with
 //! wrong types, nulls and bad indexes) run on the adapter (objects in a `raw::Graph`) and on
 //! `qvto_emf::Graph` with the PCM metamodels loaded from their `.ecore` files. `qvto_emf` is
-//! checked against EMF itself (`qvto-emf/tests/scripts.rs`), so equal results and equal
+//! checked against EMF itself (`simoxide-emf/tests/scripts.rs`), so equal results and equal
 //! final states mean EMF's semantics on SimOxide's graph. Needs `target/pcm` (skipped otherwise).
 
 mod registry;

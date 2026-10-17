@@ -1,5 +1,5 @@
 //! The registry built from SimOxide's generated tables equals the registry `qvto_emf` builds from
-//! the same `.ecore` files (the SimuLizar 5.2.2 product's, `qvto-emf/tools/pcm-setup.sh
+//! the same `.ecore` files (the SimuLizar 5.2.2 product's, `../foundation/simoxide-emf/tools/pcm-setup.sh
 //! target/pcm`), entry by entry; and SimOxide's ids are kept.
 
 use qvto_emf::config::Config;
@@ -19,7 +19,7 @@ pub fn pcm_conf() -> Option<Config> {
     let conf = root.join("target/pcm/pcm.conf");
     if !conf.exists() {
         eprintln!(
-            "skipped: no {} (qvto-emf/tools/pcm-setup.sh target/pcm)",
+            "skipped: no {} (../foundation/simoxide-emf/tools/pcm-setup.sh target/pcm)",
             conf.display()
         );
         return None;

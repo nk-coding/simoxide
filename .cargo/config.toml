@@ -8,9 +8,9 @@
 # SimOxide's crates, release (the corpus and golden tests compare bit for bit)
 test-sim = "test --release -p simoxide-hotspot-math -p simoxide-model -p simoxide-stoex -p simoxide-random -p simoxide-sched -p simoxide-sim -p simoxide-testkit -p simoxide-cli -p simoxide-reconf -p simoxide-spd"
 # the foundation crates
-test-fdn = "test --release -p simoxide-jcompat -p simoxide-jcompat-exact -p simoxide-emf-core"
+test-fdn = "test --release -p simoxide-jcompat -p simoxide-jcompat-exact -p simoxide-emf-core -p simoxide-emf"
 # the QVTo crates (debug build, as in qvto-rs)
-test-qvto = "test -p qvto -p qvto-bytecode -p qvto-cli -p qvto-emf -p qvto-paths -p qvto-runtime -p qvto-sema -p qvto-simoxide -p qvto-syntax -p qvto-testkit -p qvto-types -p qvto-vm"
+test-qvto = "test -p qvto -p qvto-bytecode -p qvto-cli -p qvto-paths -p qvto-runtime -p qvto-sema -p qvto-simoxide -p qvto-syntax -p qvto-testkit -p qvto-types -p qvto-vm"
 # the exact build of the command line tools (for bench/golden.sh and simoxide-fuzz corpus)
 build-exact = "build --release -p simoxide-cli -p simoxide-testkit --bins --features simoxide-cli/exact,simoxide-cli/hotspot-math,simoxide-testkit/exact"
 # the conformance scoreboard in compat mode: `cargo conform --suite all`;

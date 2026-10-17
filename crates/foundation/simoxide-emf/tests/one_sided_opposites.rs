@@ -1,9 +1,9 @@
 //! References whose `eOpposite` is set on one side only (QVTo sets it so for
 //! `opposites` declarations of intermediate class features). Expected values from EMF 2.41
-//! (a dynamic `EPackage` built the same way, `qvto-emf/tests/data/OneSided.java`).
+//! (a dynamic `EPackage` built the same way, `simoxide-emf/tests/data/OneSided.java`).
 
-use qvto_emf::Graph;
 use qvto_model::{Classifier, Datum, FeatureId, FeatureKind, ModelStore};
+use simoxide_emf::Graph;
 
 struct M {
     name: FeatureId,
@@ -51,7 +51,7 @@ fn metamodel(g: &mut Graph) -> M {
     }
 }
 
-fn name(g: &Graph, m: &M, o: Option<qvto_emf::ObjId>) -> String {
+fn name(g: &Graph, m: &M, o: Option<simoxide_emf::ObjId>) -> String {
     match o {
         None => "null".into(),
         Some(o) => match g.get(o, m.name) {

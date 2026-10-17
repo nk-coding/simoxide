@@ -1,11 +1,11 @@
 //! Registries built in code: Ecore registered after other packages, and metamodel objects
 //! materialized from registry entries.
 
-use qvto_emf::materialize::describe_packages;
-use qvto_emf::xmi_save::{SaveOptions, save};
-use qvto_emf::{Graph, ResourceSet};
 use qvto_model::contract::{CONTRACT_ECORE, CONTRACT_NS_URI, build_metamodel};
 use qvto_model::{Classifier, Datum, MetaMultiplicity, MetaOperation, MetaRegistry, ModelStore};
+use simoxide_emf::materialize::describe_packages;
+use simoxide_emf::xmi_save::{SaveOptions, save};
+use simoxide_emf::{Graph, ResourceSet};
 
 /// The contract suite on a graph whose registry has the contract package first, Ecore second.
 mod ecore_second {
@@ -62,7 +62,7 @@ fn materialized_objects_register_as_the_original() {
         Some(Classifier::Class(node))
     );
     // the operations read back
-    let back: Vec<_> = qvto_emf::operations::meta_operations(&rs.graph)
+    let back: Vec<_> = simoxide_emf::operations::meta_operations(&rs.graph)
         .into_iter()
         .filter(|o| o.class == node)
         .collect();

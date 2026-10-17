@@ -6,13 +6,13 @@
 //!
 //! `tests/data/compare-oracle.tsv` holds the Java verdicts, one per pair. To regenerate:
 //! `QVTO_EMF_WRITE_PAIRS=<file> cargo test -p qvto-emf --test compare`, then
-//! `oracle/run.sh pairs qvto-emf/tests/data/suite.conf <file> <out>` and copy `<out>`.
+//! `oracle/run.sh pairs ../foundation/simoxide-emf/tests/data/suite.conf <file> <out>` and copy `<out>`.
 
-use qvto_emf::canon::{dump, object_at};
-use qvto_emf::compare::suite_equal;
-use qvto_emf::config::Config;
-use qvto_emf::{ObjId, ResourceSet};
 use qvto_model::{Datum, FeatureKind, ModelStore, ResourceId};
+use simoxide_emf::canon::{dump, object_at};
+use simoxide_emf::compare::suite_equal;
+use simoxide_emf::config::Config;
+use simoxide_emf::{ObjId, ResourceSet};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
@@ -36,7 +36,7 @@ fn perturbations(rs: &ResourceSet, r: ResourceId) -> Vec<String> {
     let g = &rs.graph;
     let meta = g.meta();
     let objs = g.resource_contents(r);
-    let path = |o: ObjId| qvto_emf::canon::path(g, o);
+    let path = |o: ObjId| simoxide_emf::canon::path(g, o);
     let mut out = Vec::new();
     let mut want = |p: Option<String>| {
         if let Some(p) = p {
@@ -116,7 +116,7 @@ fn perturb(rs: &mut ResourceSet, r: ResourceId, p: &str) {
     let a: Vec<&str> = p.split(' ').collect();
     let o = object_at(&rs.graph, r, a[1]).expect("perturbation path");
     let g = &mut rs.graph;
-    let f = |g: &qvto_emf::Graph, n: &str| g.meta().feature_by_name(g.class_of(o), n).unwrap();
+    let f = |g: &simoxide_emf::Graph, n: &str| g.meta().feature_by_name(g.class_of(o), n).unwrap();
     match a[0] {
         "reverse" => {
             let f = f(g, a[2]);

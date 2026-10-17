@@ -9,12 +9,16 @@
 use crate::datatypes;
 use crate::ecore::{EcoreIds, register_ecore};
 use crate::ecore_hooks::{self, Hook};
+use crate::ids::{IdPolicy, UuidGen};
+use crate::journal::{ChangeKind, Journal};
 use crate::uri::Uri;
 use qvto_model::{
     ClassId, Classifier, DataKind, Datum, FeatureId, FeatureKind, MetaRegistry, ModelError,
     ModelResult, ModelStore, OwnedDatum, PackageId, ResourceId,
 };
-use std::collections::HashMap;
+use simoxide_jcompat::fx::FxHashMap as HashMap;
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex, MutexGuard};
 
 /// An object of a [`Graph`].
 #[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
@@ -42,13 +46,19 @@ pub(crate) enum Slot {
     Refs(Vec<ObjId>, bool),
 }
 
+/// An object: read its fields through [`Graph`]'s `Index` (`g[o].class`); every write goes
+/// through the graph.
 #[derive(Clone, Debug)]
 pub struct Object {
-    pub(crate) class: ClassId,
-    pub(crate) container: Option<(ObjId, FeatureId)>,
+    pub class: ClassId,
+    /// `eContainer()` and `eContainmentFeature()`.
+    pub container: Option<(ObjId, FeatureId)>,
     /// `eDirectResource()`: the resource whose root list holds the object.
     pub(crate) resource: Option<ResourceId>,
-    pub(crate) proxy: Option<Box<str>>,
+    /// The URI of an unresolved proxy (`<resource>#<fragment>`).
+    pub proxy: Option<Box<str>>,
+    /// 1-based line of the object's start tag in the document it was loaded from (0: unknown).
+    pub line: u32,
     pub(crate) slots: Vec<Slot>,
 }
 
@@ -78,6 +88,12 @@ pub struct Resource {
     pub xml_version: String,
     pub xmi_version: String,
     pub(crate) ids: Option<IdMaps>,
+    /// Short name for dumps and diagnostics (a host's choice; the URI by default).
+    pub name: String,
+    /// The file the resource was read from, if any.
+    pub path: Option<PathBuf>,
+    /// The document could not be read or parsed at all.
+    pub failed: bool,
     /// Load errors (EMF's `getErrors()`): the reference would reject the document.
     pub errors: Vec<String>,
     pub warnings: Vec<String>,
@@ -113,14 +129,45 @@ pub struct MetaLinks {
 }
 
 /// Ecore's derived lists by (object, feature), with the `ecore_gen` they were computed at.
-pub(crate) type DerivedCache = HashMap<(ObjId, FeatureId), (u64, std::sync::Arc<[ObjId]>)>;
+pub(crate) type DerivedCache = HashMap<(ObjId, FeatureId), (u64, Arc<[ObjId]>)>;
+
+/// The derived-list cache behind a lock, so that a graph is `Sync` (models are shared between
+/// threads); a clone copies the entries.
+#[derive(Debug, Default)]
+pub(crate) struct DerivedCell(Mutex<DerivedCache>);
+
+impl DerivedCell {
+    pub(crate) fn lock(&self) -> MutexGuard<'_, DerivedCache> {
+        // a panic while holding the lock cannot leave the cache inconsistent
+        self.0.lock().unwrap_or_else(|e| e.into_inner())
+    }
+}
+
+impl Clone for DerivedCell {
+    fn clone(&self) -> Self {
+        DerivedCell(Mutex::new(self.lock().clone()))
+    }
+}
+
+/// The id policy's state (cloned with the graph, so forks draw the same ids).
+#[derive(Clone, Debug, Default)]
+pub(crate) struct IdState {
+    pub policy: IdPolicy,
+    pub uuid: Option<UuidGen>,
+    /// The class whose new objects get an id, and the id feature (PCM's `Identifier.id`).
+    pub target: Option<(ClassId, FeatureId)>,
+}
 
 /// A resource set and all its objects; implements [`ModelStore`].
+///
+/// Plain data: no `Rc`/`RefCell`, `Send + Sync`, and a clone is an independent copy (the
+/// registry and Ecore's hook table are shared through `Arc`; adding a metamodel to a clone copies
+/// the registry first).
 #[derive(Clone, Debug)]
 pub struct Graph {
-    pub(crate) meta: MetaRegistry,
+    pub(crate) meta: Arc<MetaRegistry>,
     pub(crate) ecore: EcoreIds,
-    pub(crate) hooks: Vec<Hook>,
+    pub(crate) hooks: Arc<[Hook]>,
     pub(crate) objs: Vec<Object>,
     pub(crate) resources: Vec<Resource>,
     pub(crate) links: MetaLinks,
@@ -129,7 +176,18 @@ pub struct Graph {
     pub(crate) ecore_gen: u64,
     /// Ecore's derived lists (`eAllStructuralFeatures`, ...) by object and feature, with the
     /// `ecore_gen` they were computed at (EMF caches them in `EClassImpl` likewise).
-    pub(crate) derived_cache: std::cell::RefCell<DerivedCache>,
+    pub(crate) derived_cache: DerivedCell,
+    /// The change journal, while recording.
+    pub(crate) journal: Option<Journal>,
+    pub(crate) ids: IdState,
+}
+
+impl std::ops::Index<ObjId> for Graph {
+    type Output = Object;
+    #[inline]
+    fn index(&self, o: ObjId) -> &Object {
+        &self.objs[o.index()]
+    }
 }
 
 impl Default for Graph {
@@ -150,9 +208,9 @@ impl Graph {
     pub fn with_registry(mut meta: MetaRegistry) -> Graph {
         let ecore = register_ecore(&mut meta);
         meta.resolve_static_ecore(ecore.package);
-        let hooks = ecore_hooks::hook_table(&meta, &ecore);
+        let hooks = ecore_hooks::hook_table(&meta, &ecore).into();
         Graph {
-            meta,
+            meta: Arc::new(meta),
             ecore,
             hooks,
             objs: Vec::new(),
@@ -160,12 +218,52 @@ impl Graph {
             links: MetaLinks::default(),
             ecore_gen: 0,
             derived_cache: Default::default(),
+            journal: None,
+            ids: IdState::default(),
         }
     }
 
-    /// The registry, for adding metamodels. Ecore's entries must not be changed.
+    /// An empty graph with the same registry (shared) and Ecore: no objects, resources,
+    /// metamodel objects or journal. Cheap; hosts that load many models keep one empty graph
+    /// and start each load from such a copy.
+    pub fn empty_like(&self) -> Graph {
+        Graph {
+            meta: self.meta.clone(),
+            ecore: self.ecore.clone(),
+            hooks: self.hooks.clone(),
+            objs: Vec::new(),
+            resources: Vec::new(),
+            links: MetaLinks::default(),
+            ecore_gen: 0,
+            derived_cache: Default::default(),
+            journal: None,
+            ids: IdState::default(),
+        }
+    }
+
+    /// The registry, for adding metamodels (copied first when other graphs share it). Ecore's
+    /// entries must not be changed.
     pub fn meta_mut(&mut self) -> &mut MetaRegistry {
-        &mut self.meta
+        Arc::make_mut(&mut self.meta)
+    }
+
+    /// The shared registry.
+    pub fn meta_arc(&self) -> &Arc<MetaRegistry> {
+        &self.meta
+    }
+
+    /// Adopts `meta` (shared, no copy) if it holds every entry of the current registry under
+    /// the same id (e.g. the same metamodels plus a program's intermediate classes, or plus
+    /// metamodels a host loaded once for many graphs). `false` (nothing changes) otherwise.
+    pub fn adopt_meta(&mut self, meta: Arc<MetaRegistry>) -> bool {
+        if Arc::ptr_eq(&self.meta, &meta) {
+            return true;
+        }
+        if !meta.extends(&self.meta) {
+            return false;
+        }
+        self.meta = meta;
+        true
     }
     pub fn ecore(&self) -> &EcoreIds {
         &self.ecore
@@ -214,6 +312,9 @@ impl Graph {
             xml_version: "1.0".into(),
             xmi_version: "2.0".into(),
             ids: None,
+            name: uri.to_string(),
+            path: None,
+            failed: false,
             errors: Vec::new(),
             warnings: Vec::new(),
             loaded: false,
@@ -252,6 +353,7 @@ impl Graph {
             container: None,
             resource: None,
             proxy: None,
+            line: 0,
             slots: vec![Slot::Unset; n],
         });
         id
@@ -264,7 +366,8 @@ impl Graph {
         o
     }
 
-    pub(crate) fn set_proxy_uri(&mut self, o: ObjId, uri: Option<&str>) {
+    /// Sets or clears the proxy URI of an object (a loader's write: no journal entry).
+    pub fn set_proxy_uri(&mut self, o: ObjId, uri: Option<&str>) {
         self.objs[o.index()].proxy = uri.map(Into::into);
     }
 
@@ -482,6 +585,156 @@ impl Graph {
         self.objs[o.index()].slots[i] = s;
     }
 
+    // ---- the journal --------------------------------------------------------------------------
+
+    #[inline]
+    fn recording(&self) -> bool {
+        self.journal.is_some()
+    }
+
+    #[inline]
+    fn record(&mut self, o: ObjId, k: ChangeKind) {
+        if let Some(j) = self.journal.as_mut() {
+            j.push(o, k);
+        }
+    }
+
+    /// Writes a single-valued slot and records the change: `Set` with the effective values
+    /// before and after, or `Unset` (only the `unset` operation itself).
+    fn write_single(&mut self, o: ObjId, f: FeatureId, s: Slot, unset: bool) {
+        let old = self.recording().then(|| self.op_get(o, f).to_owned());
+        self.set_slot(o, f, s);
+        if let Some(old) = old {
+            let k = if unset {
+                ChangeKind::Unset { feature: f, old }
+            } else {
+                ChangeKind::Set {
+                    feature: f,
+                    old,
+                    new: self.op_get(o, f).to_owned(),
+                }
+            };
+            self.record(o, k);
+        }
+    }
+
+    /// Appends `x` to the reference list `o.f` (no inverse update) and records it.
+    fn push_ref(&mut self, o: ObjId, f: FeatureId, x: ObjId) {
+        let l = self.refs_mut(o, f);
+        let i = l.len();
+        l.push(x);
+        self.mark_set(o, f);
+        self.record(
+            o,
+            ChangeKind::Added {
+                feature: f,
+                index: i,
+                value: OwnedDatum::Obj(x),
+            },
+        );
+    }
+
+    /// Removes the first `x` from the reference list `o.f` (no inverse update) and records it.
+    fn remove_ref(&mut self, o: ObjId, f: FeatureId, x: ObjId) {
+        let l = self.refs_mut(o, f);
+        let i = l.iter().position(|y| *y == x);
+        if let Some(i) = i {
+            l.remove(i);
+        }
+        self.mark_set(o, f);
+        if let Some(i) = i {
+            self.record(
+                o,
+                ChangeKind::Removed {
+                    feature: f,
+                    index: i,
+                    value: OwnedDatum::Obj(x),
+                },
+            );
+        }
+    }
+
+    /// Sets the container field and records a change of it.
+    fn set_container_field(&mut self, o: ObjId, new: Option<(ObjId, FeatureId)>) {
+        let old = std::mem::replace(&mut self.objs[o.index()].container, new);
+        if old != new {
+            self.record(o, ChangeKind::Container { old, new });
+        }
+    }
+
+    /// Starts recording changes (a new, empty journal).
+    pub fn start_journal(&mut self) {
+        self.journal = Some(Journal::default());
+    }
+
+    /// The recorded changes; recording continues with an empty journal (if it was on).
+    pub fn take_journal(&mut self) -> Journal {
+        self.journal
+            .as_mut()
+            .map(std::mem::take)
+            .unwrap_or_default()
+    }
+
+    /// Stops recording; the changes recorded so far.
+    pub fn stop_journal(&mut self) -> Option<Journal> {
+        self.journal.take()
+    }
+
+    /// The journal, while recording.
+    pub fn journal(&self) -> Option<&Journal> {
+        self.journal.as_ref()
+    }
+
+    pub fn is_recording(&self) -> bool {
+        self.journal.is_some()
+    }
+
+    // ---- the id policy ------------------------------------------------------------------------
+
+    /// How objects created through [`ModelStore::create`] get an id. [`IdPolicy::Uuid`] sets one
+    /// on objects of the id class: PCM's `identifier::Identifier` (`id`) when that metamodel is
+    /// registered, else what [`Graph::set_id_target`] named.
+    pub fn set_id_policy(&mut self, p: IdPolicy) {
+        self.ids.policy = p;
+        self.ids.uuid = match p {
+            IdPolicy::None => None,
+            IdPolicy::Uuid { seed } => Some(UuidGen::new(seed)),
+        };
+        if self.ids.target.is_none() {
+            let m = &self.meta;
+            self.ids.target = m
+                .package_by_ns_uri("http://sdq.ipd.uka.de/Identifier/2.1")
+                .and_then(|p| m.class_by_name(p, "Identifier"))
+                .and_then(|c| m.feature_by_name(c, "id").map(|f| (c, f)));
+        }
+    }
+
+    pub fn id_policy(&self) -> IdPolicy {
+        self.ids.policy
+    }
+
+    /// The class whose new objects get an id under [`IdPolicy::Uuid`], and the id feature.
+    pub fn set_id_target(&mut self, class: ClassId, feature: FeatureId) {
+        self.ids.target = Some((class, feature));
+    }
+
+    /// Gives a new object of class `c` its id, if the policy says so.
+    fn assign_id(&mut self, o: ObjId, c: ClassId) {
+        let Some((target, f)) = self.ids.target else {
+            return;
+        };
+        if self.ids.uuid.is_none() || !self.meta.is_subclass(c, target) {
+            return;
+        }
+        let u = self
+            .ids
+            .uuid
+            .as_mut()
+            .map(UuidGen::next)
+            .unwrap_or_default();
+        let _ = self.op_set(o, f, Datum::Str(&u));
+    }
+
     // ---- EMF internals ----------------------------------------------------------------------
 
     /// `eBasicSetContainer`: sets the container, moving the object out of its resource's root
@@ -496,6 +749,7 @@ impl Graph {
                     let roots = &mut self.resources[r.index()].roots;
                     if let Some(i) = roots.iter().position(|x| *x == child) {
                         roots.remove(i);
+                        self.record(child, ChangeKind::RootRemoved { resource: r });
                     }
                     self.objs[child.index()].resource = None;
                     old_res = Some(r);
@@ -517,7 +771,7 @@ impl Graph {
         {
             self.detached(r, child);
         }
-        self.objs[child.index()].container = new;
+        self.set_container_field(child, new);
     }
 
     /// `ResourceImpl.detached`: drops the `xmi:id`s of the object and its contents.
@@ -542,13 +796,9 @@ impl Graph {
             return;
         };
         if self.meta.feature(f).is_many() {
-            let l = self.refs_mut(p, f);
-            if let Some(i) = l.iter().position(|x| *x == child) {
-                l.remove(i);
-            }
-            self.mark_set(p, f);
+            self.remove_ref(p, f, child);
         } else {
-            self.set_slot(p, f, Slot::Unset);
+            self.write_single(p, f, Slot::Unset, false);
         }
     }
 
@@ -562,11 +812,10 @@ impl Graph {
             self.basic_set_container(target, Some((source, f)));
         } else if let Some(g) = fi.opposite {
             if self.meta.feature(g).is_many() {
-                self.refs_mut(target, g).push(source);
-                self.mark_set(target, g);
+                self.push_ref(target, g, source);
             } else {
                 let old = self.single_ref(target, g);
-                self.set_slot(target, g, Slot::Ref(Some(source)));
+                self.write_single(target, g, Slot::Ref(Some(source)), false);
                 if let Some(old) = old
                     && old != source
                 {
@@ -586,13 +835,9 @@ impl Graph {
                 return;
             }
             if self.meta.feature(g).is_many() {
-                let l = self.refs_mut(target, g);
-                if let Some(i) = l.iter().position(|x| *x == source) {
-                    l.remove(i);
-                }
-                self.mark_set(target, g);
+                self.remove_ref(target, g, source);
             } else {
-                self.set_slot(target, g, Slot::Unset);
+                self.write_single(target, g, Slot::Unset, false);
             }
         }
     }
@@ -629,7 +874,7 @@ impl Graph {
             None if self.meta.feature(f).unsettable => Slot::Ref(None),
             None => Slot::Unset,
         };
-        self.set_slot(o, f, slot);
+        self.write_single(o, f, slot, false);
     }
 
     /// `eSet` of a container reference (`InternalSettingDelegateSingleContainer.dynamicSet`).
@@ -659,11 +904,10 @@ impl Graph {
         }
         if let Some(n) = new {
             if self.meta.feature(g).is_many() {
-                self.refs_mut(n, g).push(o);
-                self.mark_set(n, g);
+                self.push_ref(n, g, o);
             } else {
                 let old = self.single_ref(n, g);
-                self.set_slot(n, g, Slot::Ref(Some(o)));
+                self.write_single(n, g, Slot::Ref(Some(o)), false);
                 if let Some(old) = old
                     && old != o
                 {
@@ -758,7 +1002,9 @@ impl Graph {
                     !v.is_empty()
                 }
             }
-            Some(Slot::Ref(_)) => true,
+            // an explicit null counts only for an unsettable reference (a loader may store one
+            // for any reference)
+            Some(Slot::Ref(r)) => r.is_some() || fi.unsettable,
             Some(Slot::Data(Value::Null)) => true,
             Some(Slot::Data(v)) => {
                 fi.unsettable || !v.as_datum().java_equals(&self.default_datum(f))
@@ -808,7 +1054,7 @@ impl Graph {
         } else {
             Slot::Data(v.to_owned())
         };
-        self.set_slot(o, f, slot);
+        self.write_single(o, f, slot, false);
         Ok(())
     }
 
@@ -849,7 +1095,7 @@ impl Graph {
                 self.inverse_remove(old, o, f);
             }
         }
-        self.set_slot(o, f, Slot::Unset);
+        self.write_single(o, f, Slot::Unset, true);
         Ok(())
     }
 
@@ -953,16 +1199,35 @@ impl Graph {
                 let i = at.unwrap_or(l.len()).min(l.len());
                 l.insert(i, x);
                 self.mark_set(o, f);
+                self.record(
+                    o,
+                    ChangeKind::Added {
+                        feature: f,
+                        index: i,
+                        value: OwnedDatum::Obj(x),
+                    },
+                );
                 if self.has_inverse(f) {
                     self.inverse_add(x, o, f);
                 }
             }
             d => {
                 let val = d.to_owned();
+                let rec = self.recording().then(|| val.clone());
                 let l = self.datas_mut(o, f);
                 let i = at.unwrap_or(l.len()).min(l.len());
                 l.insert(i, val);
                 self.mark_set(o, f);
+                if let Some(value) = rec {
+                    self.record(
+                        o,
+                        ChangeKind::Added {
+                            feature: f,
+                            index: i,
+                            value,
+                        },
+                    );
+                }
             }
         }
     }
@@ -1003,12 +1268,28 @@ impl Graph {
         if self.meta.feature(f).kind == FeatureKind::Reference {
             let x = self.refs_mut(o, f).remove(i);
             self.mark_set(o, f);
+            self.record(
+                o,
+                ChangeKind::Removed {
+                    feature: f,
+                    index: i,
+                    value: OwnedDatum::Obj(x),
+                },
+            );
             if self.has_inverse(f) {
                 self.inverse_remove(x, o, f);
             }
         } else {
-            self.datas_mut(o, f).remove(i);
+            let value = self.datas_mut(o, f).remove(i);
             self.mark_set(o, f);
+            self.record(
+                o,
+                ChangeKind::Removed {
+                    feature: f,
+                    index: i,
+                    value,
+                },
+            );
         }
         Ok(())
     }
@@ -1051,6 +1332,15 @@ impl Graph {
             Datum::Obj(x) => {
                 let old = std::mem::replace(&mut self.refs_mut(o, f)[i], x);
                 self.mark_set(o, f);
+                self.record(
+                    o,
+                    ChangeKind::Replaced {
+                        feature: f,
+                        index: i,
+                        old: OwnedDatum::Obj(old),
+                        new: OwnedDatum::Obj(x),
+                    },
+                );
                 if old != x && self.has_inverse(f) {
                     self.inverse_remove(old, o, f);
                     self.inverse_add(x, o, f);
@@ -1058,8 +1348,20 @@ impl Graph {
             }
             d => {
                 let val = d.to_owned();
-                self.datas_mut(o, f)[i] = val;
+                let new = self.recording().then(|| val.clone());
+                let old = std::mem::replace(&mut self.datas_mut(o, f)[i], val);
                 self.mark_set(o, f);
+                if let Some(new) = new {
+                    self.record(
+                        o,
+                        ChangeKind::Replaced {
+                            feature: f,
+                            index: i,
+                            old,
+                            new,
+                        },
+                    );
+                }
             }
         }
         Ok(())
@@ -1074,17 +1376,40 @@ impl Graph {
         {
             return r;
         }
+        // recorded as removals from the end, so that the indexes stay valid when replayed
         if self.meta.feature(f).kind == FeatureKind::Reference {
             let old = std::mem::take(self.refs_mut(o, f));
             self.mark_set(o, f);
+            for (i, &x) in old.iter().enumerate().rev() {
+                self.record(
+                    o,
+                    ChangeKind::Removed {
+                        feature: f,
+                        index: i,
+                        value: OwnedDatum::Obj(x),
+                    },
+                );
+            }
             if self.has_inverse(f) {
                 for x in old {
                     self.inverse_remove(x, o, f);
                 }
             }
         } else {
-            self.datas_mut(o, f).clear();
+            let old = std::mem::take(self.datas_mut(o, f));
             self.mark_set(o, f);
+            if self.recording() {
+                for (i, value) in old.into_iter().enumerate().rev() {
+                    self.record(
+                        o,
+                        ChangeKind::Removed {
+                            feature: f,
+                            index: i,
+                            value,
+                        },
+                    );
+                }
+            }
         }
         Ok(())
     }
@@ -1127,6 +1452,14 @@ impl Graph {
             l.insert(to, x);
         }
         self.mark_set(o, f);
+        self.record(
+            o,
+            ChangeKind::Moved {
+                feature: f,
+                from,
+                to,
+            },
+        );
         Ok(())
     }
 
@@ -1154,39 +1487,40 @@ impl Graph {
                 )),
             };
         }
-        self.resources[r.index()].roots.insert(at.unwrap_or(len), o);
-        self.set_resource(o, Some(r));
-        Ok(true)
-    }
-
-    /// `eSetResource(resource)` after the object was added to / removed from a root list.
-    fn set_resource(&mut self, o: ObjId, r: Option<ResourceId>) {
-        let old = self.objs[o.index()].resource;
-        if let (Some(old), Some(_)) = (old, r) {
+        // eSetResource: out of the old root list, into the new one, out of a non-resolving
+        // container (recorded in this order)
+        let cr = self.resource_of_obj(o);
+        if let Some(old) = self.objs[o.index()].resource {
             let roots = &mut self.resources[old.index()].roots;
             if let Some(i) = roots.iter().position(|x| *x == o) {
                 roots.remove(i);
+                self.record(o, ChangeKind::RootRemoved { resource: old });
             }
             self.detached(old, o);
         }
-        if let Some((_, f)) = self.objs[o.index()].container {
-            if self.meta.feature(f).resolve_proxies {
-                // cross-resource containment: stays contained
-            } else {
-                let cr = self.resource_of_obj(o);
-                self.remove_from_container(o);
-                self.objs[o.index()].container = None;
-                if let Some(cr) = cr
-                    && Some(cr) != r
-                {
-                    self.detached(cr, o);
-                }
+        let i = at.unwrap_or(len);
+        self.resources[r.index()].roots.insert(i, o);
+        self.objs[o.index()].resource = Some(r);
+        self.record(
+            o,
+            ChangeKind::RootAdded {
+                resource: r,
+                index: i,
+            },
+        );
+        if let Some((_, f)) = self.objs[o.index()].container
+            && !self.meta.feature(f).resolve_proxies
+        {
+            // (a containment resolving proxies keeps the object: cross-resource containment)
+            self.remove_from_container(o);
+            self.set_container_field(o, None);
+            if let Some(cr) = cr
+                && cr != r
+            {
+                self.detached(cr, o);
             }
         }
-        if let (Some(old), None) = (old, r) {
-            self.detached(old, o);
-        }
-        self.objs[o.index()].resource = r;
+        Ok(true)
     }
 
     pub(crate) fn op_remove_root(&mut self, r: ResourceId, o: ObjId) -> bool {
@@ -1198,6 +1532,7 @@ impl Graph {
                     self.detached(r, o);
                     self.objs[o.index()].resource = None;
                 }
+                self.record(o, ChangeKind::RootRemoved { resource: r });
                 true
             }
             None => false,
@@ -1254,6 +1589,7 @@ impl Graph {
         if let Some(r) = self.objs[o.index()].resource {
             self.op_remove_root(r, o);
         }
+        self.record(o, ChangeKind::Deleted);
     }
 }
 
@@ -1326,12 +1662,15 @@ impl ModelStore for Graph {
     type Obj = ObjId;
 
     fn extend_meta(&mut self, meta: &MetaRegistry) -> bool {
+        if std::ptr::eq(meta, &*self.meta) {
+            return true;
+        }
         if !meta.extends(&self.meta) {
             return false;
         }
         // the registry of a dynamic resource set only grows: the new entries need no links
         // (they have no `EClass` objects) and no hooks (they are not Ecore's)
-        self.meta = meta.clone();
+        self.meta = Arc::new(meta.clone());
         true
     }
 
@@ -1441,7 +1780,12 @@ impl ModelStore for Graph {
         if ci.is_abstract || ci.is_interface {
             return Err(ModelError::Abstract(c));
         }
-        Ok(self.new_object(c))
+        let o = self.new_object(c);
+        self.record(o, ChangeKind::Created(c));
+        if self.ids.uuid.is_some() {
+            self.assign_id(o, c);
+        }
+        Ok(o)
     }
     fn set(&mut self, o: ObjId, f: FeatureId, v: Datum<'_, ObjId>) -> ModelResult<()> {
         self.op_set(o, f, v)

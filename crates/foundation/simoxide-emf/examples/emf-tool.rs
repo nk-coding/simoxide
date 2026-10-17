@@ -1,8 +1,8 @@
 //! Debugging aid: `cargo run -p qvto-emf --example emf-tool -- <conf> <model> [save|dump|errors]`
 //! (paths relative to the QVTo root (crates/qvto)).
-use qvto_emf::canon::dump;
-use qvto_emf::config::Config;
-use qvto_emf::xmi_save::{SaveOptions, save};
+use simoxide_emf::canon::dump;
+use simoxide_emf::config::Config;
+use simoxide_emf::xmi_save::{SaveOptions, save};
 
 fn main() {
     let a: Vec<String> = std::env::args().collect();

@@ -7,9 +7,9 @@
 //! `target/emf-oracle/suite` in the repository), mismatches show the first differing line.
 //! Skipped when the reference checkout (`reference/eclipse-qvto`) is missing.
 
-use qvto_emf::canon::{dump, first_difference, fnv64};
-use qvto_emf::config::Config;
-use qvto_emf::xmi_save::{SaveOptions, save};
+use simoxide_emf::canon::{dump, first_difference, fnv64};
+use simoxide_emf::config::Config;
+use simoxide_emf::xmi_save::{SaveOptions, save};
 use std::path::{Path, PathBuf};
 
 fn repo() -> PathBuf {

@@ -1,7 +1,7 @@
 //! The model-store contract suite on `Graph`, with the metamodel built programmatically.
 
-use qvto_emf::Graph;
 use qvto_model::contract::build_metamodel;
+use simoxide_emf::Graph;
 
 qvto_model::contract_tests!(|| {
     let mut g = Graph::new();
@@ -11,8 +11,8 @@ qvto_model::contract_tests!(|| {
 
 /// The same suite with the metamodel loaded from `contract.ecore` and registered.
 mod from_ecore {
-    use qvto_emf::ResourceSet;
     use qvto_model::contract::{CONTRACT_ECORE, Roles};
+    use simoxide_emf::ResourceSet;
 
     qvto_model::contract_tests!(|| {
         let mut rs = ResourceSet::new();

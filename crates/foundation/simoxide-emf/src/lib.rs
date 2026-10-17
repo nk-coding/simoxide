@@ -10,6 +10,9 @@ pub mod ecore;
 mod ecore_hooks;
 pub mod fragment;
 pub mod graph;
+pub mod ids;
+pub mod journal;
+mod load_ops;
 pub mod materialize;
 pub mod operations;
 pub mod register;
@@ -18,5 +21,7 @@ pub mod uri;
 pub mod xmi_load;
 pub mod xmi_save;
 
-pub use graph::{Graph, MetaLinks, ObjId, Resource, ResourceKind, Value};
+pub use graph::{Graph, MetaLinks, ObjId, Object, Resource, ResourceKind, Value};
+pub use ids::IdPolicy;
+pub use journal::{Change, ChangeKind, Journal, Summary};
 pub use resource_set::ResourceSet;

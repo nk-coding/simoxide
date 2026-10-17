@@ -10,7 +10,7 @@
 //!   register (EMF, OCL, QVTo jars; the test bundle; the samples plugin: [`ECLIPSE_REGISTERED`]),
 //!   plus every nsURI of the PCM configuration (`target/pcm/pcm.conf`; the oracle's warm-up pass
 //!   applied it process-wide before the recorded pass, so every case saw it), plus the case's
-//!   `mmfile`s. The `.ecore` files are found through `qvto-emf/tests/data/suite.conf` and
+//!   `mmfile`s. The `.ecore` files are found through `../foundation/simoxide-emf/tests/data/suite.conf` and
 //!   the PCM configuration;
 //! - unit resolution: the main unit's resolver as `UnitResolverFactory.Registry` picks it (the
 //!   runner's bundle factory: source containers of the bundles below `tests/`, or the case's
@@ -821,8 +821,11 @@ impl Harness {
         let mut notes = Vec::new();
 
         // the package registry
-        let mut conf = Config::read(&base.join("qvto-emf/tests/data/suite.conf"), &base)
-            .map_err(|e| format!("suite.conf: {e}"))?;
+        let mut conf = Config::read(
+            &base.join("../foundation/simoxide-emf/tests/data/suite.conf"),
+            &base,
+        )
+        .map_err(|e| format!("suite.conf: {e}"))?;
         let pcm_path = base.join(PCM_CONF);
         let mut pcm_ns: Vec<String> = Vec::new();
         let pcm_available = pcm_path.is_file();

@@ -3,8 +3,8 @@
 State: 2026-10-17. Written as a plan at qvto-rs `9459e5e`; this copy lives in SimOxide
 (`crates/qvto/docs/`) since the import.
 
-**Status (2026-10-17, branch `qvto-merge` from `spd`, not merged into `main`):** M0-M4 done, M5-M8
-open.
+**Status (2026-10-17, branch `qvto-merge` from `spd`, not merged into `main`):** M0-M4 and M5a done,
+M5b-M8 open.
 
 | Step | As built |
 |---|---|
@@ -15,14 +15,15 @@ open.
 | M3b | features: simoxide-sim `exact` (= `jdk-order`), fast always compiled (`fast` kept as a no-op); `Compat::Order` (`JdkHashOrder` / `InsertionOrder`) for `INNER`, BYTESIZE sums and finalisation; `DefaultCompat`; `SimErrorKind::ModeUnavailable`; qvto `compat` in qvto-runtime/-vm/qvto/-testkit/-cli/-simoxide with an uninhabited `JavaHashMap` stand-in in EPL builds; `MODE_UNAVAILABLE` run outcome; `exact` in simoxide-testkit/-reconf/-spd/-cli. Defaults EPL-only, CLI default mode fast. Tests enable `exact`/`compat` through dev-dependencies (so no `test-sim-epl` alias); EPL check by builds, `cargo tree` and the EPL `conform --engine qvto-fast` scoreboard. `LICENSES` sections 7 (no licence for the exact crate) and 8 (Eclipse QVTo/OCL) |
 | merge | `spd` merged twice (F2; then P1+S2 at `c8ee1d9`) |
 | M4 | `crates/foundation/simoxide-emf-core` from `qvto-model` (`git mv`; the QVTo crates keep `qvto_model::` through `qvto-model = { .., package = "simoxide-emf-core" }`); `seed` module: `StaticPackages` (packages with classifier order and locations, classes with complete `super_types` incl. Ecore's and the derived `supers`/`all_supers`/`all_features`/`id_attribute`, features with EMF's flags and the static readers' `kind`, data types, operations); `MetaRegistry::from_static` (the adapter's `registry.rs` logic, ids asserted), `resolve_static_ecore` (called by `qvto_emf::Graph::with_registry` after Ecore), `static_operations`, `static_top_packages`; `gen_meta.py` writes one `generated.rs` with `SEED` (main and ext tables merged, `generated_ext.rs` gone; the `class::`/`feat::`/`enums::` constants are byte-identical); `simoxide_model::meta` ids are the core's ids, the static lookups are extension traits (`meta::prelude::*`: `PcmMeta` with `def()`/`name()`, `PcmClass`, `PcmFeature`, `PcmEnum`, `PcmPackage`); the table types keep SimOxide's names as aliases of the seed types; the adapter's registry is `from_static`. Compile-time `Send + Sync` (`CompiledModel`) and `Clone + Send + Sync` (`Model`, the graph) assertions in `simoxide-sim/src/ir.rs`. The adapter's results on the 24 corpus cases recorded for M6 (`simoxide-reconf/tests/data/adapter-corpus`: journal as text with objects by key, dump, status, log; `qvto-simoxide/tests/record.rs`). Gates: fmt; clippy `-D warnings` default, `exact,hotspot-math`, `compat`; `cargo test --release --workspace --features exact` 525 passed (524 + the recording test), 0 failed; `golden.sh` identical (312 runs); corpus 132/132, corpus-fuzz 6/6; EMF goldens 165/165 (81 335 typed values); `cargo test-qvto` 211 passed (adapter registry test: equal to the `.ecore`-built registry; corpus 24/24); `conform` compat 542/542 strict, fast 542 / 537 strict (unchanged); sema 1 102/1 102; release check 0 opt-in crates for `simoxide-cli` and `qvto-cli` |
+| M5a | `crates/foundation/simoxide-emf` from `qvto-emf` (`git mv`; QVTo crates keep `qvto_emf::` through the package rename; paths of the oracle scripts, the reference runner, `SUITE_CONF` and the sema harness follow; no dependency on `qvto-runtime` any more: `Double`/`Float.toString` from `simoxide-jcompat`). Graph: registry behind `Arc` (`meta_mut` copies on write, `adopt_meta`, `meta_arc`, `empty_like` for cheap empty graphs), Ecore's hook table behind `Arc`, the derived-list cache in a `Mutex` (`Graph: Clone + Send + Sync`, tested), FxHash maps, `Index<ObjId>` with public `class`/`container`/`proxy`/`line`, resources with `name`/`path`/`failed`; the change journal (`journal.rs`: `Journal`, `Change`, `ChangeKind`, `Summary` with `ObjId`s) recorded inside the graph's EMF operations at the adapter's points (`Set` with effective values on both ends of opposites, `Added`/`Removed` at the list change, then the inverse updates, `Container`, root changes in `eSetResource`'s order, removals of `clear` from the end, `Deleted` last); the id policy (`ids.rs`: `IdPolicy`, the seeded UUID generator; the target class is PCM's `Identifier` or `set_id_target`); `load_ops.rs`: loader-level writes with the former `raw::Graph` semantics (`load_set_ref`, `load_add_ref`, ..., not recorded) and plain reads (`get_ref`, `get_refs`, `stored`, `is_stored`, `children`, `id`, `path_fragment`, `resource_contents_into`). `is_set` of an explicit null reference counts only for unsettable references (as the adapter). Gates: fmt, clippy (3 feature sets); `test-fdn` 91 passed (incl. the moved suite, 3 journal tests); `test-qvto` 138 passed (the 73 tests of `qvto-emf` moved to `test-fdn`; adapter corpus 24/24); `conform` 542/542 strict, fast 542/537; sema 1 102/1 102; release check 0/0. SimOxide is not touched by M5a |
 
-**M5 resumes here:** M5a: `git mv crates/qvto/qvto-emf crates/foundation/simoxide-emf` (package
-`simoxide-emf`, alias `qvto-emf = { .., package = "simoxide-emf" }`); registry behind `Arc`, the
-derived-list cache `Sync`, FxHash maps, the journal and id policy of the adapter in the graph
-(recorded at the same points as the adapter's `raw_part.rs`), source lines and the loader-level
-writes and reads SimOxide needs. M5b: SimOxide's `raw::Graph` becomes that graph (the PCM loader
-writes into it; `raw` keeps SimOxide's read helpers as an extension trait), the adapter's graph
-part runs on the graph's own `ModelStore`. Gates as in 5.2.
+**M5 resumes here (M5b):** SimOxide's `raw::Graph` becomes `simoxide_emf::Graph`: the PCM loader
+(`xmi.rs`, `load.rs`) writes through the graph's `load_*` operations (values stored as the
+adapter's view: `Datum` by the registry's data kind), `raw` keeps SimOxide's `Value` and read
+helpers as an extension trait, the parse cache copies object blocks, the builder ignores objects
+of other metamodels; the adapter's store runs on the graph's own `ModelStore` (one home: PRM, SPD
+and metamodel objects in the run's graph). Then M6 (delete `qvto-simoxide`, compare with the
+recorded journals). Gates as in 5.2.
 
 
 User decision (2026-10-17): all QVTo crates move into the SimOxide repository, nested in their

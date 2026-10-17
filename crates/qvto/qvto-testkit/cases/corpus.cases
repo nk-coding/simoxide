@@ -1,6 +1,6 @@
 # SimuLizar reconfiguration rules and SPD semantic transformations on PCM models (hand-written).
 # Material: qvto-testkit/corpus (tools/copy-corpus.sh). Metamodels: target/pcm/pcm.conf from
-# qvto-emf/tools/pcm-setup.sh target/pcm (PCM 5.2.2 .ecore files, SimuLizar and SPD metamodels), as
+# ../foundation/simoxide-emf/tools/pcm-setup.sh target/pcm (PCM 5.2.2 .ecore files, SimuLizar and SPD metamodels), as
 # dynamic EMF on both sides. Format: qvto-testkit/README.md. The Java runner is the oracle here:
 # besides the severity checks, the cases are compared with the recorded Java results.
 

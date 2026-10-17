@@ -1,9 +1,9 @@
 //! Registering metamodels from `.ecore` resources gives the same registry entries as building
 //! them directly, and the built-in Ecore entries are linked to the objects of Ecore's resource.
 
-use qvto_emf::ResourceSet;
 use qvto_model::contract::{CONTRACT_ECORE, CONTRACT_NS_URI, build_metamodel};
 use qvto_model::{Classifier, Datum, MetaRegistry, ModelStore};
+use simoxide_emf::ResourceSet;
 
 fn describe(reg: &MetaRegistry, p: qvto_model::PackageId) -> Vec<String> {
     let mut out = Vec::new();

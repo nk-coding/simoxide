@@ -19,7 +19,7 @@
 //! own metamodel that have the same properties.
 //!
 //! The expected behaviour was checked against EMF 2.41 (dynamic objects): `qvto-emf` runs the
-//! same scenarios as scripts on the Java side (`qvto-emf/oracle`).
+//! same scenarios as scripts on the Java side (`simoxide-emf/oracle`).
 
 use crate::{
     ClassId, Classifier, Datum, EnumId, EnumLiteral, FeatureId, FeatureKind, MetaRegistry,

@@ -202,14 +202,14 @@ fn normalize_big_integer(s: &str) -> Option<String> {
     Some(if neg { format!("-{d}") } else { d.to_string() })
 }
 
-/// Java `Double.toString` (JDK 19 and later), from `qvto_runtime::java::fmt`.
+/// Java `Double.toString` (JDK 19 and later), from `simoxide_jcompat::fmt`.
 pub fn java_double_to_string(d: f64) -> String {
-    qvto_runtime::java::fmt::double_to_string(d)
+    simoxide_jcompat::fmt::double_to_string(d)
 }
 
-/// Java `Float.toString` (JDK 19 and later), from `qvto_runtime::java::fmt`.
+/// Java `Float.toString` (JDK 19 and later), from `simoxide_jcompat::fmt`.
 pub fn java_float_to_string(f: f32) -> String {
-    qvto_runtime::java::fmt::float_to_string(f)
+    simoxide_jcompat::fmt::float_to_string(f)
 }
 
 #[cfg(test)]

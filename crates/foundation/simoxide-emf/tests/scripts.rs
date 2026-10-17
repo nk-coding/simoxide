@@ -10,12 +10,12 @@
 //! `<out>/results.tsv`. With `QVTO_EMF_ORACLE_SCRIPTS=<out>` mismatches show the first
 //! differing line.
 
-use qvto_emf::canon::{first_difference, fnv64};
-use qvto_emf::datatypes::java_double_to_string;
-use qvto_emf::xmi_save::{SaveOptions, save};
-use qvto_emf::{Graph, ObjId};
 use qvto_model::contract::Roles;
 use qvto_model::{ClassId, Datum, FeatureId, ModelError, ModelStore, ResourceId};
+use simoxide_emf::canon::{first_difference, fnv64};
+use simoxide_emf::datatypes::java_double_to_string;
+use simoxide_emf::xmi_save::{SaveOptions, save};
+use simoxide_emf::{Graph, ObjId};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -247,7 +247,7 @@ fn err(e: &ModelError) -> String {
 
 impl Runner {
     fn new() -> Runner {
-        let mut rs = qvto_emf::ResourceSet::new();
+        let mut rs = simoxide_emf::ResourceSet::new();
         let r = rs
             .load_text(
                 "http://qvto-rs/contract.ecore",
