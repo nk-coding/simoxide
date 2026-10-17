@@ -158,7 +158,8 @@ impl Amount {
         adj(1.0 / self.max, 1.0 / self.min)
     }
 
-    fn divide_long(&self, d: i64) -> Amount {
+    /// `Amount.divide(long)`.
+    pub fn divide_long(&self, d: i64) -> Amount {
         if let Some(a) = self.exact
             && d != 0
         {

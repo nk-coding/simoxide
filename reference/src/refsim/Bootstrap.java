@@ -89,6 +89,11 @@ public final class Bootstrap {
             }
         };
         EcorePlugin.ExtensionProcessor.process(noPluginXml);
+        // QVTo's resource factory for .qvto rules (SimuLizar's reconfiguration rules, patch P9): its
+        // plugin.xml names the extension as the localised "%qvtFileExtension", which the standalone
+        // registry leaves untranslated
+        org.eclipse.emf.ecore.resource.Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put("qvto",
+                new org.eclipse.m2m.internal.qvt.oml.runtime.resource.QvtOperationalResourceFactoryImpl());
         org.apache.log4j.BasicConfigurator.configure();
         org.apache.log4j.Logger.getRootLogger()
             .setLevel(org.apache.log4j.Level.toLevel(System.getProperty("refsim.log", "ERROR")));

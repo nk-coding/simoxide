@@ -51,6 +51,7 @@ pub use qvto_simoxide::{EXT_BASE, IdPolicy, Journal, Session, SimStore};
 #[cfg(feature = "spd")]
 mod adjust;
 mod host;
+mod process;
 mod qvt;
 mod rules;
 
@@ -61,6 +62,7 @@ pub use host::{
     ModelRef, NsBinding, Outcome, ParamDir, ParamInfo, QvtMode, QvtoCore, QvtoRun, ReconfError,
     RunConfig, Transformation, palladio_metamodels, resolve_mode,
 };
+pub use process::{PRM_URI, ReconfRecord, RuleRecord, RulesHost, RulesRun, RulesStats};
 pub use rules::{RuleSet, RulesOutcome};
 
 /// The simulator's change set of a journal: the changes of graph objects (handles below

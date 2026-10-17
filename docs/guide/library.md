@@ -179,6 +179,9 @@ let all = qvto.run_rules(&mut sim, &rules, &Invocation::simulizar()).map_err(|(_
   changes yet (`ChangeError::Unsupported`).
 - `dry_run` runs a transformation on a scratch copy, `with_scratch_store` reads one, and
   `with_store` edits the run's models with any `ModelStore` operation.
+- **SimuLizar's reconfiguration process.** `RulesRun` runs a simulation whose reconfiguration
+  process executes a `RuleSet` with SimuLizar's timing, runtime measurement values and result
+  ([Reconfiguration rules](reconfiguration.md#library)).
 
 ## Outputs
 

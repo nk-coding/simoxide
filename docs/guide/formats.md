@@ -183,3 +183,6 @@ normalised order, in emission order across all series.
   except `h30_middleware_stream`, whose calls pass the stream explicitly.
 - **Model files.** The last three keys are optional. Without them, the directory is searched for exactly
   one `.usagemodel`, one or more `.allocation` files and at most one `.monitorrepository`.
+- **Reconfiguration rules.** `"reconfiguration_rules": "rules"` names SimuLizar's rules folder, relative
+  to the model directory ([Reconfiguration rules](./reconfiguration.md)); `simoxide run` runs them with the
+  `reconfiguration` feature, `refsim` always.

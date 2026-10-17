@@ -88,7 +88,7 @@ public final class Main {
 
     private static void usage() {
         ERR.println("usage: refsim run --model <dir|files> [--seed N] [--max-sim-time T] "
-                + "[--max-measurements M] [--trace F] [--tape F] [--measurements F] [--linking]\n"
+                + "[--max-measurements M] [--trace F] [--tape F] [--measurements F] [--linking] [--rules DIR] [--seeds A:B]\n"
                 + "       refsim run --run-json corpus/<m>/run.json [--trace F] [--tape F] [--measurements F]\n"
                 + "       refsim batch <corpusDir> [--out DIR | --in-place] [--only a,b] [--repeat N] [--check]");
         System.exit(2);
@@ -106,6 +106,7 @@ public final class Main {
     private static int cmdRun(String[] a) throws Exception {
         RunSpec spec = new RunSpec();
         String trace = null, tape = null, meas = null;
+        Long seedFrom = null, seedTo = null;
         for (int i = 0; i < a.length; i++) {
             switch (a[i]) {
             case "--model":
@@ -122,6 +123,17 @@ public final class Main {
                 spec.maxMeasurements = r.maxMeasurements;
                 spec.simulateLinkingResources = r.simulateLinkingResources;
                 spec.simulateThroughputOfLinkingResources = r.simulateThroughputOfLinkingResources;
+                spec.rulesFolder = r.rulesFolder;
+                break;
+            }
+            case "--rules":
+                spec.rulesFolder = new File(a[++i]).getCanonicalFile();
+                break;
+            case "--seeds": {
+                // A:B -> seeds A..B one after the other in this JVM; {seed} in output paths
+                String[] ab = a[++i].split(":");
+                seedFrom = Long.parseLong(ab[0]);
+                seedTo = Long.parseLong(ab[ab.length - 1]);
                 break;
             }
             case "--seed":
@@ -152,6 +164,20 @@ public final class Main {
                 throw new IllegalArgumentException("unknown option " + a[i]);
             }
         }
+        if (seedFrom != null) {
+            int rc = 0;
+            for (long seed = seedFrom; seed <= seedTo; seed++) {
+                spec.seed = seed;
+                String sd = Long.toString(seed);
+                rc |= runOne(spec, trace == null ? null : trace.replace("{seed}", sd),
+                        tape == null ? null : tape.replace("{seed}", sd), meas == null ? null : meas.replace("{seed}", sd));
+            }
+            return rc;
+        }
+        return runOne(spec, trace, tape, meas);
+    }
+
+    private static int runOne(RunSpec spec, String trace, String tape, String meas) throws Exception {
         Writer tw = open(trace), pw = open(tape);
         Runner.Result r;
         try {

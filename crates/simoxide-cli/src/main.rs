@@ -1,8 +1,8 @@
 //! `simoxide`: run a PCM model with simoxide-sim (flags mirror `reference/refsim run`), or benchmark it.
 
 use simoxide_sim::{
-    CompiledModel, FlavourConfig, FlavourKind, Mode, Outputs, Quirks, RngMode, RunSpec, SimConfig,
-    Tape,
+    CompiledModel, FlavourConfig, FlavourKind, Mode, Outputs, Quirks, RngMode, RunResult, RunSpec,
+    SimConfig, Tape,
 };
 use std::io::BufWriter;
 use std::path::{Path, PathBuf};
@@ -31,6 +31,10 @@ const USAGE: &str = "usage:
              [--spd-log spd.jsonl] [--spd-log-all] [--spd-quirks fixed|slingshot|Q2,Q12,...]
              [--no-spd]   (scaling policies of a .spd next to the model; `spd` feature;
              P1: decisions only, adjustments are not executed)
+             [--rules DIR] [--rules-log rules.jsonl] [--qvto-mode auto|fast|compat]
+             (SimuLizar's reconfiguration rules: the .qvto files of DIR in file-name order, or
+             run.json's reconfiguration_rules; `reconfiguration` feature; QVTo's compat mode
+             needs a build with `exact` or `compat`)
   simoxide bench --model <dir> [--run-json run.json] [--runs N] [--threads T] [same run flags]
   simoxide load-bench --model <dir> [--run-json run.json] [--runs N]   (load + compile only)
   (with the `profile` feature, bench and load-bench take --profile out.svg|out.folded)";
@@ -63,6 +67,9 @@ struct Args {
     spd_log_all: bool,
     spd_quirks: Option<String>,
     no_spd: bool,
+    rules: Option<PathBuf>,
+    rules_log: Option<PathBuf>,
+    qvto_mode: Option<String>,
 }
 
 fn parse_args() -> Result<Args, String> {
@@ -96,6 +103,9 @@ fn parse_args() -> Result<Args, String> {
         spd_log_all: false,
         spd_quirks: None,
         no_spd: false,
+        rules: None,
+        rules_log: None,
+        qvto_mode: None,
     };
     while let Some(f) = it.next() {
         let mut val = || it.next().ok_or(format!("{f} needs a value"));
@@ -190,6 +200,9 @@ fn parse_args() -> Result<Args, String> {
             "--spd-log-all" => a.spd_log_all = true,
             "--spd-quirks" => a.spd_quirks = Some(val()?),
             "--no-spd" => a.no_spd = true,
+            "--rules" => a.rules = Some(val()?.into()),
+            "--rules-log" => a.rules_log = Some(val()?.into()),
+            "--qvto-mode" => a.qvto_mode = Some(val()?),
             "-h" | "--help" => return Err(USAGE.into()),
             o => return Err(format!("unknown flag {o}\n{USAGE}")),
         }
@@ -198,6 +211,11 @@ fn parse_args() -> Result<Args, String> {
 }
 
 fn setup(a: &Args) -> Result<(CompiledModel, SimConfig), String> {
+    setup_with_rules(a).map(|(cm, cfg, _)| (cm, cfg))
+}
+
+/// [`setup`] and the reconfiguration rules folder (`--rules`, else run.json's).
+fn setup_with_rules(a: &Args) -> Result<(CompiledModel, SimConfig, Option<PathBuf>), String> {
     let run_json = a.run_json.clone().or_else(|| {
         let p = a.model.as_ref()?.join("run.json");
         p.exists().then_some(p)
@@ -212,6 +230,10 @@ fn setup(a: &Args) -> Result<(CompiledModel, SimConfig), String> {
         None => RunSpec::default(),
     };
     let model = spec.load_model(&dir)?;
+    let rules = a
+        .rules
+        .clone()
+        .or_else(|| spec.reconfiguration_rules.as_ref().map(|r| dir.join(r)));
     let flavour = match a.flavour {
         FlavourKind::SimuLizar if !a.quirks.is_empty() => {
             return Err("--quirks needs --flavour slingshot".into());
@@ -261,7 +283,7 @@ fn setup(a: &Args) -> Result<(CompiledModel, SimConfig), String> {
         cfg.rng = RngMode::Replay(Arc::new(Tape::parse(&text)?));
         cfg.check_tape_origins = a.check_origins;
     }
-    Ok((cm, cfg))
+    Ok((cm, cfg, rules))
 }
 
 fn create(p: &Path) -> Result<Box<dyn std::io::Write>, String> {
@@ -270,7 +292,7 @@ fn create(p: &Path) -> Result<Box<dyn std::io::Write>, String> {
 }
 
 fn run(a: &Args) -> Result<(), String> {
-    let (cm, cfg) = setup(a)?;
+    let (cm, cfg, rules_dir) = setup_with_rules(a)?;
     for w in &cm.warnings {
         eprintln!("warning: {w}");
     }
@@ -279,7 +301,19 @@ fn run(a: &Args) -> Result<(), String> {
         tape: a.tape.as_deref().map(create).transpose()?,
     };
     let t0 = Instant::now();
-    let r = match spd::of(a, &cm)? {
+    let spd = spd::of(a, &cm)?;
+    if let Some(dir) = rules_dir {
+        if spd.is_some() {
+            return Err("reconfiguration rules and scaling policies in one run are not supported (use --no-spd)".into());
+        }
+        if a.flavour.is_slingshot() {
+            return Err("reconfiguration rules run in the SimuLizar flavour".into());
+        }
+        let t0 = Instant::now();
+        let r = rules::run(a, &cm, cfg, out, &dir)?;
+        return report(a, r, t0);
+    }
+    let r = match spd {
         Some(_) if a.flavour.is_slingshot() => {
             return Err(
                 "scaling policies in the Slingshot flavour are phase P3 (use --no-spd to ignore the .spd)"
@@ -289,6 +323,11 @@ fn run(a: &Args) -> Result<(), String> {
         Some(s) => spd::run(a, &cm, cfg, out, &s)?,
         None => simoxide_sim::run(&cm, cfg, out).map_err(|e| e.to_string())?,
     };
+    report(a, r, t0)
+}
+
+/// Writes the measurements and the summary line of a run.
+fn report(a: &Args, r: RunResult, t0: Instant) -> Result<(), String> {
     let dt = t0.elapsed();
     for w in &r.warnings {
         eprintln!("warning: {w}");
@@ -410,6 +449,141 @@ mod spd {
     }
 }
 
+/// SimuLizar's reconfiguration rules (`reconfiguration` feature): the run's reconfiguration
+/// process runs the rules of the folder (DESIGN-SPD R1).
+#[cfg(feature = "reconfiguration")]
+mod rules {
+    use super::{Args, create};
+    use simoxide_reconf::{QvtMode, QvtoCore, RuleSet, RulesHost, RulesRun, RunConfig};
+    use simoxide_sim::compat::Compat;
+    use simoxide_sim::{CompiledModel, Mode, Outputs, RunResult, SimConfig, Simulation};
+    use std::io::Write;
+    use std::path::Path;
+
+    fn go<C: Compat>(
+        a: &Args,
+        cm: &CompiledModel,
+        cfg: SimConfig,
+        out: Outputs,
+        dir: &Path,
+    ) -> Result<RunResult, String> {
+        let core = QvtoCore::new().map_err(|e| e.to_string())?;
+        let rules = RuleSet::load_dir(&core, dir).map_err(|e| e.to_string())?;
+        let mode = match a.qvto_mode.as_deref() {
+            None | Some("auto") => QvtMode::Auto,
+            Some("fast") => QvtMode::Fast,
+            Some("compat") => QvtMode::Compat,
+            Some(m) => {
+                return Err(format!(
+                    "--qvto-mode: expected auto, fast or compat, got {m}"
+                ));
+            }
+        };
+        let cfg_q = RunConfig {
+            mode,
+            ..RunConfig::default()
+        };
+        let mut host = RulesHost::new(&core, rules, cfg_q).map_err(|e| e.to_string())?;
+        if a.rules_log.is_some() {
+            host = host.keep_records();
+        }
+        let sim = Simulation::<C>::create(cm, cfg, out).map_err(|e| e.to_string())?;
+        let (res, mut host) = RulesRun::new(sim, host)
+            .finish()
+            .map_err(|e| e.to_string())?;
+        if let Some(p) = &a.rules_log {
+            let mut f = create(p)?;
+            for r in host.take_records() {
+                let rules: Vec<String> = r
+                    .rules
+                    .iter()
+                    .map(|x| {
+                        format!(
+                            "{{\"rule\":{},\"applied\":{},\"changed\":{},\"log\":{}}}",
+                            json_str(&x.name),
+                            x.succeeded,
+                            x.changed,
+                            json_str(&x.log)
+                        )
+                    })
+                    .collect();
+                writeln!(
+                    f,
+                    "{{\"t\":{},\"post_stop\":{},\"succeeded\":{},\"rules\":[{}]}}",
+                    r.at_ns as f64 / 1e9,
+                    r.post_stop,
+                    r.succeeded,
+                    rules.join(",")
+                )
+                .map_err(|e| format!("{}: {e}", p.display()))?;
+            }
+        }
+        let s = host.stats();
+        eprintln!(
+            "rules: {} rule(s), {} reconfiguration(s), {} succeeded, {} changed the model, {:.1} ms (PRM {:.1} ms)",
+            host.rules().rules.len(),
+            s.runs,
+            s.succeeded,
+            s.changed,
+            s.micros as f64 / 1e3,
+            s.prm_micros as f64 / 1e3
+        );
+        Ok(res)
+    }
+
+    fn json_str(s: &str) -> String {
+        let mut o = String::from("\"");
+        for c in s.chars() {
+            match c {
+                '"' => o.push_str("\\\""),
+                '\\' => o.push_str("\\\\"),
+                '\n' => o.push_str("\\n"),
+                c if (c as u32) < 0x20 => o.push_str(&format!("\\u{:04x}", c as u32)),
+                c => o.push(c),
+            }
+        }
+        o.push('"');
+        o
+    }
+
+    pub fn run(
+        a: &Args,
+        cm: &CompiledModel,
+        cfg: SimConfig,
+        out: Outputs,
+        dir: &Path,
+    ) -> Result<RunResult, String> {
+        match cfg.mode {
+            #[cfg(feature = "exact")]
+            Mode::Exact => go::<simoxide_sim::Exact>(a, cm, cfg, out, dir),
+            Mode::Fast => go::<simoxide_sim::Fast>(a, cm, cfg, out, dir),
+            #[cfg(not(feature = "exact"))]
+            m => Err(m.unavailable_reason().unwrap_or_default()),
+        }
+    }
+}
+
+/// Without the `reconfiguration` feature, rules cannot run.
+#[cfg(not(feature = "reconfiguration"))]
+mod rules {
+    use super::Args;
+    use simoxide_sim::{CompiledModel, Outputs, RunResult, SimConfig};
+    use std::path::Path;
+
+    pub fn run(
+        _: &Args,
+        _: &CompiledModel,
+        _: SimConfig,
+        _: Outputs,
+        dir: &Path,
+    ) -> Result<RunResult, String> {
+        Err(format!(
+            "reconfiguration rules ({}) need a build with the `reconfiguration` feature",
+            dir.display()
+        ))
+    }
+}
+
 /// Starts the sampling profiler if `--profile` was given.
 #[cfg(feature = "profile")]
 fn profiler(a: &Args) -> Result<Option<pprof::ProfilerGuard<'static>>, String> {
@@ -483,6 +657,9 @@ fn load_bench(a: &Args) -> Result<(), String> {
 }
 
 fn bench(a: &Args) -> Result<(), String> {
+    if a.rules.is_some() || a.rules_log.is_some() || a.qvto_mode.is_some() {
+        return Err("--rules, --rules-log and --qvto-mode are options of `run`".into());
+    }
     let t0 = Instant::now();
     let (cm, cfg) = setup(a)?;
     let t_compile = t0.elapsed();

@@ -30,6 +30,7 @@ export default defineConfig({
           { text: 'Getting started', link: '/guide/getting-started' },
           { text: 'Command line', link: '/guide/cli' },
           { text: 'Library API', link: '/guide/library' },
+          { text: 'Reconfiguration rules', link: '/guide/reconfiguration' },
           { text: 'Scaling policies (SPD)', link: '/guide/spd' },
           { text: 'Fast mode', link: '/guide/fast-mode' },
           { text: 'Slingshot flavour', link: '/guide/slingshot' },

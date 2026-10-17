@@ -1,0 +1,32 @@
+--- 5.2.2/Palladio-Analyzer-SimuLizar/bundles/org.palladiosimulator.simulizar.reconfiguration.qvto/src/org/palladiosimulator/simulizar/reconfiguration/qvto/util/ModelTransformationFactory.java
++++ patched/org/palladiosimulator/simulizar/reconfiguration/qvto/util/ModelTransformationFactory.java
+@@ -69,10 +69,26 @@
+      */
+     public QvtoModelTransformation createModelTransformation(URI transformationUri) {
+         // the EObject transformation should be the first in in the content list
+-        Resource transformationResource = this.resourceSet.getResource(Objects.requireNonNull(transformationUri), true);
++        // REFSIM (patch P9): compile the rule as QVTo's resource does (QvtOperationalResourceImpl.load:
++        // module with errors allowed, its modules as the contents), but as a deployed module from its
++        // file URI; the resource asks the Eclipse workspace first, which a flat classpath lacks
++        Objects.requireNonNull(transformationUri);
++        java.util.List<org.eclipse.emf.ecore.EObject> contents = new ArrayList<>();
++        try {
++            org.eclipse.m2m.internal.qvt.oml.runtime.project.QvtModule module =
++                    new org.eclipse.m2m.internal.qvt.oml.runtime.project.DeployedQvtModule(transformationUri,
++                            org.eclipse.emf.ecore.EPackage.Registry.INSTANCE);
++            org.eclipse.m2m.internal.qvt.oml.compiler.QvtCompilerOptions options =
++                    new org.eclipse.m2m.internal.qvt.oml.compiler.QvtCompilerOptions();
++            options.setModuleWithErrorAllowed(true);
++            module.setQvtCompilerOptions(options);
++            contents.addAll(module.getUnit().getModules());
++        } catch (org.eclipse.m2m.internal.qvt.oml.common.MdaException e) {
++            throw new IllegalArgumentException("QVTo transformation " + transformationUri + " could not be compiled", e);
++        }
+         OperationalTransformation transformation = null;
+-        if (!transformationResource.getContents().isEmpty()) {
+-            transformation = OPERATIONAL_TRANSFORMATION_SWITCH.doSwitch(transformationResource.getContents().get(0));
++        if (!contents.isEmpty()) {
++            transformation = OPERATIONAL_TRANSFORMATION_SWITCH.doSwitch(contents.get(0));
+         }
+         if (transformation == null) {
+             throw new IllegalArgumentException(

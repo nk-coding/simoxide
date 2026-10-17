@@ -272,6 +272,7 @@ pub(crate) fn recompile(
         unsupported.push("changed sliding windows (monitors): F4".to_string());
     }
     if old.prm_series != fresh.prm_series
+        || old.prm_meas != fresh.prm_meas
         || old.prm_passive.len() != fresh.prm_passive.len()
         || old.prm_any != fresh.prm_any
         || old.reconf_time_series != fresh.reconf_time_series
@@ -833,6 +834,7 @@ pub(crate) fn recompile(
         asmop_series,
         passive_mon,
         prm_series: old.prm_series.clone(),
+        prm_meas: old.prm_meas.clone(),
         prm_passive: old.prm_passive.clone(),
         prm_any: old.prm_any,
         reconf_time_series: old.reconf_time_series.clone(),

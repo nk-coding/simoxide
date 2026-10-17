@@ -27,6 +27,8 @@ qvto-testkit = { workspace = true, features = ["compat"] }
 qvto-runtime = { workspace = true, features = ["compat"] }
 qvto-emf.workspace = true
 qvto-paths.workspace = true
+# the reference's expected outputs (gzip'ed traces)
+simoxide-testkit = { path = "../simoxide-testkit" }
 
 [features]
 default = ["spd"]

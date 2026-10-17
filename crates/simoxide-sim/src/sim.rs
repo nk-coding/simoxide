@@ -43,11 +43,14 @@ use std::io::Write;
 mod calls;
 mod flat;
 mod hooks;
+mod reconf;
 mod runmodel;
 mod slingshot;
 mod state;
 
 pub use hooks::ObservedTuple;
+use reconf::{FinStep, Prm, Reconf, prm_tuple, prm_write, reconf_resume};
+pub use reconf::{PrmMeasurement, ReconfDue};
 pub use runmodel::RunModel;
 pub use state::{Detached, Pause, Phase, RunState, Status};
 use state::{NoPause, PauseWhen};
@@ -508,200 +511,6 @@ pub(crate) struct Sink {
     hooks: hooks::Hooks,
 }
 
-/// `Reconfigurator` / `ReconfigurationProcess` state (MEAS-7.2).
-#[derive(Default, Clone)]
-struct Reconf {
-    created: bool,
-    /// Its `Resume` note is pending (`isScheduled()`).
-    scheduled: bool,
-    /// `lastReconfigurationTime` (ns).
-    last_ns: i64,
-    /// The experiment has stopped: scheduling resumes the process synchronously.
-    stopped: bool,
-    /// `Reconfiguration Time Tuple` series (one tuple per run).
-    time_series: Vec<SeriesId>,
-    store: bool,
-    /// A synchronous run (after the stop) is in progress.
-    running: bool,
-    /// The process died: a PRM write during its own synchronous run scheduled it again.
-    error: Option<&'static str>,
-}
-
-/// PRM recorders (`triggersSelfAdaptations`, MEAS-7.2). The `Reconfigurator` observes the
-/// runtime measurement model: a change at a time after the last scheduling, while the process
-/// is not scheduled, creates the `ReconfigurationProcess` (once: a process id and a `spawn`
-/// line) and schedules its `Resume` at now. Each run reconfigures (successfully, without rules)
-/// and passivates; only a `Reconfiguration Time` monitor makes the runs visible.
-#[derive(Default, Clone)]
-struct Prm {
-    /// Series id -> indices into `recs`.
-    series: Vec<Vec<u32>>,
-    recs: Vec<PrmState>,
-}
-
-#[derive(Clone)]
-struct PrmState {
-    rec: PrmRec,
-    /// Tuples until the next aggregation check (`measurementsUntilNextAggregation`).
-    until: i64,
-    /// Buffered tuples (fixed size: the count, saturating at the buffer size).
-    buffered: i64,
-    /// Variable size: points in time of the buffered tuples.
-    times: std::collections::VecDeque<f64>,
-    /// Aggregates `Long` values (passive-resource state): the aggregation fails.
-    long_values: bool,
-}
-
-impl PrmState {
-    fn new(rec: PrmRec) -> PrmState {
-        let until = match rec {
-            PrmRec::FeedThrough => 0,
-            PrmRec::Fixed { freq, .. } | PrmRec::Variable { freq, .. } => freq,
-        };
-        PrmState {
-            rec,
-            until,
-            buffered: 0,
-            times: Default::default(),
-            long_values: false,
-        }
-    }
-
-    /// A tuple reaches the recorder: does it write into the PRM?
-    fn tuple(&mut self, t: f64) -> bool {
-        match self.rec {
-            PrmRec::FeedThrough => true,
-            PrmRec::Fixed { freq, n } => {
-                self.buffered = (self.buffered + 1).min(n);
-                self.until -= 1;
-                if self.until == 0 {
-                    self.until = freq;
-                    self.buffered == n
-                } else {
-                    false
-                }
-            }
-            PrmRec::Variable {
-                freq,
-                retro,
-                continuous,
-            } => {
-                use crate::windows::Amount;
-                self.times.push_back(t);
-                self.until -= 1;
-                if self.until != 0 {
-                    return false;
-                }
-                self.until = freq;
-                let r = Amount::of(retro);
-                let (first, last) = (self.times[0], self.times[self.times.len() - 1]);
-                // aggregationRequired: !last.minus(R).isLessThan(first)
-                if Amount::of(last).minus(&r).is_less_than(&Amount::of(first)) {
-                    return false;
-                }
-                // onPreAggregate: evict what lies more than R before the newest tuple
-                let old = |x: f64| Amount::of(last).minus(&Amount::of(x)).is_greater_than(&r);
-                if continuous {
-                    let mut polled = None;
-                    while self.times.front().is_some_and(|&x| old(x)) {
-                        polled = self.times.pop_front();
-                    }
-                    if let Some(x) = polled {
-                        self.times.push_front(x);
-                    }
-                } else {
-                    while self.times.front().is_some_and(|&x| old(x)) {
-                        self.times.pop_front();
-                    }
-                }
-                true
-            }
-        }
-    }
-}
-
-/// A PRM write at `now` (`Reconfigurator.checkAndExecuteReconfigurations`).
-#[cold]
-#[inline(never)]
-fn prm_write(meas: &mut Sink, trace: &mut Option<TraceOut>, now: i64) {
-    let r = &mut meas.reconf;
-    if !meas.prm_armed || now <= r.last_ns || r.scheduled {
-        return;
-    }
-    if !r.created {
-        r.created = true;
-        meas.next_pid += 1;
-        meas.reconf_pid = meas.next_pid;
-        if let Some(tr) = trace.as_mut() {
-            tr.spawn(
-                now,
-                meas.next_pid,
-                "ReconfigurationProcess",
-                "Reconfiguration Process",
-                meas.cur_pid,
-            );
-        }
-    }
-    if r.running {
-        // a write by the process's own run (a triggering Reconfiguration Time spec) before
-        // lastReconfigurationTime is updated: scheduleAt of a running process aborts the run
-        r.error = Some(
-            "IllegalStateException: Tried to schedule thread which was not suspended [Reconfiguration Process]",
-        );
-        meas.prm_armed = false;
-        if let Some(tr) = trace.as_mut() {
-            tr.pend(now, meas.reconf_pid);
-        }
-        return;
-    }
-    if r.stopped {
-        // scheduleAt(0) of a stopped experiment resumes the process right away (and
-        // lastReconfigurationTime is set after it returns)
-        r.running = true;
-        reconf_run(meas, trace, now);
-        meas.reconf.running = false;
-        meas.reconf.last_ns = now;
-    } else {
-        r.last_ns = now;
-        r.scheduled = true;
-        meas.events.insert(now, Ev::Reconf);
-    }
-}
-
-/// A run of the reconfiguration process: begin/end reconfiguration, which succeeds without
-/// rules; the reconfiguration time is 0.
-#[cold]
-#[inline(never)]
-fn reconf_run(meas: &mut Sink, trace: &mut Option<TraceOut>, now: i64) {
-    for i in 0..meas.reconf.time_series.len() {
-        let s = meas.reconf.time_series[i];
-        let store = meas.reconf.store;
-        emit(meas, trace, store, now, s, seconds(now), 0.0);
-    }
-}
-
-/// A tuple of series `s` reaches its PRM recorders.
-#[cold]
-#[inline(never)]
-fn prm_tuple(meas: &mut Sink, trace: &mut Option<TraceOut>, now: i64, s: SeriesId, t: f64) {
-    let Some(recs) = meas.prm.series.get(s as usize) else {
-        return;
-    };
-    let mut write = false;
-    for &r in recs {
-        let rec = &mut meas.prm.recs[r as usize];
-        if rec.tuple(t) {
-            if rec.long_values {
-                meas.error.get_or_insert(LONG_AGGREGATION_ERROR);
-            }
-            write = true;
-        }
-    }
-    if write {
-        prm_write(meas, trace, now);
-    }
-}
-
 // ------------------------------------------------------------------------------------------
 // measurement emission helpers (free functions so that disjoint fields can be borrowed)
 
@@ -729,7 +538,7 @@ fn emit(
         }
     }
     if meas.prm_armed {
-        prm_tuple(meas, trace, now, s, t);
+        prm_tuple(meas, trace, now, s, t, v);
     }
     if meas.hooks.observing {
         hooks::observe_tuple(&mut meas.hooks, now, s, t, v);
@@ -1034,7 +843,13 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 return Err(Box::new(e));
             }
         }
-        match self.event_loop(p) {
+        // a stop paused for a reconfiguration host goes on
+        let r = if self.st.meas.reconf.fin.is_some() {
+            self.finish_run(!P::NEVER)
+        } else {
+            self.event_loop(p)
+        };
+        match r {
             Ok(s) => Ok(s),
             Err(e) => self.fail(e),
         }
@@ -1084,7 +899,14 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 break;
             }
         }
-        self.finalise()?;
+        self.finish_run(!P::NEVER)
+    }
+
+    /// The stop and the end of the run (a host may pause the stop, see `finalise`).
+    fn finish_run(&mut self, pausable: bool) -> R<Status> {
+        if self.finalise(pausable)? == Status::Paused {
+            return Ok(Status::Paused);
+        }
         self.st.phase = Phase::Finished;
         Ok(Status::Finished)
     }
@@ -1180,18 +1002,21 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         // probe-framework decorators attach the PRM recorders after the initial state and
         // container-count tuples
         if cm.prm_any {
-            let prm = &mut self.st.meas.prm;
-            prm.series = vec![Vec::new(); cm.series.len()];
-            for &(s, rec) in &cm.prm_series {
-                prm.series[s as usize].push(prm.recs.len() as u32);
-                prm.recs.push(PrmState::new(rec));
-            }
+            self.st.meas.prm.attach(cm);
             self.st.meas.prm_armed = true;
+        }
+        if let Some((_, n)) = cm.container_count {
+            self.st.meas.reconf.containers = n;
         }
         // probe-framework decorators: sliding windows, first events at span(length) (MEAS-6.3)
         self.st.meas.series_windows = vec![Vec::new(); self.st.meas.m.series.len()];
         for (i, w) in cm.windows.iter().enumerate() {
-            self.st.meas.windows.push(Window::new(w.len, w.inc, true));
+            // time-driven aggregation of a discrete metric: DiscardAllElementsPriorToLowerBound
+            let keep_last = w.stat.is_none_or(|x| x.continuous);
+            self.st
+                .meas
+                .windows
+                .push(Window::new(w.len, w.inc, keep_last));
             if let Some(inp) = w.input {
                 self.st.meas.series_windows[inp as usize].push(i as u32);
             }
@@ -1283,50 +1108,107 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 && self.st.main_count >= self.st.cfg.max_measurements)
     }
 
-    fn finalise(&mut self) -> R<()> {
+    /// The stop (SIM-6.5, MEAS-10.1), step by step. With a reconfiguration host attached and
+    /// `pausable`, a run of the reconfiguration process triggered by a step makes it return
+    /// `Status::Paused` after that step; the next call continues with the next step.
+    fn finalise(&mut self, pausable: bool) -> R<Status> {
         if F::SLINGSHOT {
             self.ss_finalise();
-            return Ok(());
+            return Ok(Status::Finished);
         }
-        let cm = self.cm;
-        self.st.running = false;
-        self.st.meas.reconf.stopped = true;
         let now = self.st.now;
-        if let Some(t) = self.trace.as_mut() {
-            t.stop(now);
-        }
-        // simulationStop listeners: final partial windows
-        for i in 0..self.st.meas.windows.len() {
-            let eff = self.st.meas.windows[i].effective_length(F::Clock::secs(now));
-            if eff != 0.0 || eff.is_sign_negative() {
-                self.window_full(i);
-            }
-        }
-        // deactivateAllActiveResources: current queue lengths, then overall utilisation
-        for &ri in C::finalise_order(cm) {
-            let def = &cm.resources[ri as usize];
-            let rt = &mut self.st.res[ri as usize];
-            let per_core = def.policy == SchedulingPolicy::ProcessorSharing;
-            for inst in 0..def.instances as usize {
-                let q = if per_core {
-                    rt.shadow[inst]
-                } else {
-                    rt.shadow[0]
-                };
-                for &s in &def.state_series[inst] {
-                    emit(
-                        &mut self.st.meas,
-                        &mut self.trace,
-                        self.st.cfg.store_measurements,
-                        now,
-                        s,
-                        F::Clock::secs(now),
-                        q as f64,
-                    );
+        let mut step = match self.st.meas.reconf.fin.take() {
+            Some(step) => step,
+            None => {
+                self.st.running = false;
+                self.st.meas.reconf.stopped = true;
+                if let Some(t) = self.trace.as_mut() {
+                    t.stop(now);
                 }
+                FinStep::Windows(0)
             }
-            if let Some(s) = def.overall_series {
-                let f = busy_fraction(&rt.shadow, def.instances, per_core);
+        };
+        let host = self.st.meas.reconf.host;
+        loop {
+            step = match step {
+                // simulationStop listeners: final partial windows
+                FinStep::Windows(i) if i < self.st.meas.windows.len() => {
+                    let eff = self.st.meas.windows[i].effective_length(F::Clock::secs(now));
+                    if eff != 0.0 || eff.is_sign_negative() {
+                        self.window_full(i);
+                    }
+                    FinStep::Windows(i + 1)
+                }
+                FinStep::Windows(_) => {
+                    if host {
+                        // a reconfiguration may change the model before the deactivation ends
+                        self.st.meas.reconf.fin_order = C::finalise_order(self.cm).to_vec();
+                    }
+                    FinStep::Deactivate(0)
+                }
+                // deactivateAllActiveResources: current queue lengths, then overall utilisation
+                FinStep::Deactivate(j) => {
+                    let ri = if host {
+                        self.st.meas.reconf.fin_order.get(j).copied()
+                    } else {
+                        C::finalise_order(self.cm).get(j).copied()
+                    };
+                    match ri {
+                        Some(ri) => {
+                            self.deactivate(ri, now);
+                            FinStep::Deactivate(j + 1)
+                        }
+                        None => {
+                            self.st.meas.reconf.fin_order = Vec::new();
+                            self.drain()?;
+                            FinStep::Passive
+                        }
+                    }
+                }
+                // SimulatedBasicComponentInstance.cleanUp: processes still waiting at passive
+                // resources
+                FinStep::Passive => {
+                    let mut waiting = Vec::new();
+                    for p in &self.st.passives {
+                        waiting.extend(p.res.waiting().map(|(j, _)| j));
+                    }
+                    for k in waiting {
+                        self.activate(k)?;
+                    }
+                    FinStep::Done
+                }
+                FinStep::Done => break,
+            };
+            if pausable && self.st.meas.reconf.due.is_some() {
+                self.st.meas.reconf.fin = Some(step);
+                return Ok(Status::Paused);
+            }
+        }
+        let (u, n) = (self.st.rng.count(), self.st.meas.m.count);
+        if let Some(t) = self.trace.as_mut() {
+            t.finish_line(now, u, n);
+        }
+        // the reconfiguration process died after the stop; the run ends with its error
+        if let Some(e) = self.st.meas.reconf.error.or(self.st.meas.error) {
+            return self.err(e);
+        }
+        Ok(Status::Finished)
+    }
+
+    /// `deactivateAllActiveResources` for resource `ri`: its current queue lengths (state
+    /// tuples per instance), then the overall utilisation; its scheduler stops.
+    fn deactivate(&mut self, ri: ResIdx, now: i64) {
+        let cm = self.cm;
+        let def = &cm.resources[ri as usize];
+        let rt = &mut self.st.res[ri as usize];
+        let per_core = def.policy == SchedulingPolicy::ProcessorSharing;
+        for inst in 0..def.instances as usize {
+            let q = if per_core {
+                rt.shadow[inst]
+            } else {
+                rt.shadow[0]
+            };
+            for &s in &def.state_series[inst] {
                 emit(
                     &mut self.st.meas,
                     &mut self.trace,
@@ -1334,17 +1216,32 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     now,
                     s,
                     F::Clock::secs(now),
-                    f,
+                    q as f64,
                 );
             }
-            if let Some(s) = rt.sched.as_mut() {
-                s.stop();
-                if s.pending_wakeup().is_none() {
-                    self.st.meas.events.clear_timer(ri);
-                }
+        }
+        if let Some(s) = def.overall_series {
+            let f = busy_fraction(&rt.shadow, def.instances, per_core);
+            emit(
+                &mut self.st.meas,
+                &mut self.trace,
+                self.st.cfg.store_measurements,
+                now,
+                s,
+                F::Clock::secs(now),
+                f,
+            );
+        }
+        if let Some(s) = rt.sched.as_mut() {
+            s.stop();
+            if s.pending_wakeup().is_none() {
+                self.st.meas.events.clear_timer(ri);
             }
         }
-        // ResourceTableManager.waitForProcesses: drain in insertion order
+    }
+
+    /// `ResourceTableManager.waitForProcesses`: drain in insertion order.
+    fn drain(&mut self) -> R<()> {
         let mut table: Vec<(u64, u64)> = self
             .st
             .procs
@@ -1356,22 +1253,6 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         table.sort_unstable();
         for (_, k) in table {
             self.activate(k)?;
-        }
-        // SimulatedBasicComponentInstance.cleanUp: processes still waiting at passive resources
-        let mut waiting = Vec::new();
-        for p in &self.st.passives {
-            waiting.extend(p.res.waiting().map(|(j, _)| j));
-        }
-        for k in waiting {
-            self.activate(k)?;
-        }
-        let (u, n) = (self.st.rng.count(), self.st.meas.m.count);
-        if let Some(t) = self.trace.as_mut() {
-            t.finish_line(now, u, n);
-        }
-        // the reconfiguration process died after the stop; the run ends with its error
-        if let Some(e) = self.st.meas.reconf.error.or(self.st.meas.error) {
-            return self.err(e);
         }
         Ok(())
     }
@@ -1504,10 +1385,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
 
     fn dispatch(&mut self, ev: Ev) -> R<()> {
         match ev {
-            Ev::Reconf => {
-                self.st.meas.reconf.scheduled = false;
-                reconf_run(&mut self.st.meas, &mut self.trace, self.st.now);
-            }
+            Ev::Reconf => reconf_resume(&mut self.st.meas, &mut self.trace, self.st.now),
             Ev::External(tag) => self.st.meas.hooks.due.push(tag),
             Ev::Resume(k) => {
                 let (s, g) = unkey(k);
@@ -1586,8 +1464,22 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         let now_s = F::Clock::secs(self.st.now);
         let w = &mut self.st.meas.windows[i];
         let eff = w.effective_length(now_s);
-        let res = crate::windows::utilization(&w.data, w.lower, eff);
+        let res = match self.cm.windows[i].stat {
+            // time-driven aggregation (MEAS-7.5): the characterisation of the window's data
+            Some(stat) => {
+                let left = crate::windows::Amount::of(w.lower);
+                let length = crate::windows::Amount::of(eff);
+                let data = w.data.make_contiguous();
+                let v = crate::stats::aggregate(stat, data, left, left.plus(&length), length);
+                (0.0, v)
+            }
+            None => crate::windows::utilization(&w.data, w.lower, eff),
+        };
         w.move_on();
+        let pm = self.cm.windows[i].prm_meas;
+        if pm != u32::MAX {
+            self.st.meas.prm.values[pm as usize] = res.1;
+        }
         if let Some(out) = self.cm.windows[i].out {
             emit_out(
                 &mut self.st.meas,
@@ -2326,23 +2218,18 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         }
         let s = self.new_series(mp, metric);
         let mut attached = false;
-        for p in cm
+        for (i, p) in cm
             .prm_passive
             .iter()
-            .filter(|p| p.metric == metric && &*p.rep == rep)
+            .enumerate()
+            .filter(|(_, p)| p.metric == metric && &*p.rep == rep)
         {
             if let Some(e) = &p.invalid {
                 return self.err(e.to_string());
             }
-            let prm = &mut self.st.meas.prm;
-            if prm.series.len() <= s as usize {
-                prm.series.resize(s as usize + 1, Vec::new());
-            }
-            prm.series[s as usize].push(prm.recs.len() as u32);
-            let mut st = PrmState::new(p.rec);
+            let st = self.st.meas.prm.attach_passive(s, i as u32, p.rec);
             st.long_values = metric == metric_names::STATE_OF_PASSIVE_RESOURCE
                 && !matches!(p.rec, PrmRec::FeedThrough);
-            prm.recs.push(st);
             attached = true;
         }
         if attached {
