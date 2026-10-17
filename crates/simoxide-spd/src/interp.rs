@@ -72,13 +72,35 @@ pub struct AdjustmentRequest {
     pub id: u64,
     /// Index into [`SpdModel::policies`].
     pub policy: usize,
-    /// Index into [`Spd::contexts`].
+    /// Index into [`Spd::contexts`] (`usize::MAX` for an enforced request of an inactive
+    /// policy, which has no context).
     pub ctx: usize,
     /// Index into [`SpdModel::groups`].
     pub group: usize,
     pub adjustment: Adjustment,
     /// When the request was made (s).
     pub time: f64,
+    /// Requested by [`Spd::enforce`] (Slingshot's incoming policies at a resume), past the
+    /// policy's chain: its outcome changes no adjustor or group state.
+    pub enforced: bool,
+}
+
+/// The outcome of an executed adjustment, reported with [`Spd::adjusted_with`].
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct AdjustOutcome {
+    pub ok: bool,
+    /// Element counts of the target group before and after, if known.
+    pub size_before: Option<usize>,
+    pub size_after: Option<usize>,
+    /// The number of entries of Slingshot's `ModelAdjusted` change list, if the executor
+    /// computes it (`crate::adjusted::ModelAdjusted::changes`).
+    pub changes: Option<usize>,
+    /// The model summaries before and after (`crate::adjusted::summary`, JSON), if the
+    /// executor records them.
+    pub before: Option<Box<str>>,
+    pub after: Option<Box<str>>,
+    /// What changed (`ModelAdjusted`), if the executor computes it.
+    pub adjusted: Option<crate::adjusted::ModelAdjusted>,
 }
 
 /// What the interpreter needs from the simulation it runs in.
@@ -815,7 +837,27 @@ impl Spd {
         sizes: (Option<usize>, Option<usize>),
         log: &mut dyn Log,
     ) {
-        if ok && !self.quirks.q2_commit_on_request {
+        let out = AdjustOutcome {
+            ok,
+            size_before: sizes.0,
+            size_after: sizes.1,
+            ..AdjustOutcome::default()
+        };
+        self.adjusted_with(st, req, &out, now, log);
+    }
+
+    /// [`Spd::adjusted`] with the executor's whole outcome: Slingshot's change count and the
+    /// model summaries go into the log too. An enforced request ([`Spd::enforce`]) commits no
+    /// state.
+    pub fn adjusted_with(
+        &self,
+        st: &mut SpdState,
+        req: &AdjustmentRequest,
+        out: &AdjustOutcome,
+        now: f64,
+        log: &mut dyn Log,
+    ) {
+        if out.ok && !self.quirks.q2_commit_on_request && !req.enforced {
             self.commit(st, req.ctx, req.time);
         }
         if log.enabled() {
@@ -824,11 +866,39 @@ impl Spd {
                 t: now,
                 policy: p.id.clone(),
                 policy_name: p.name.clone(),
-                ok,
-                size_before: sizes.0,
-                size_after: sizes.1,
+                ok: out.ok,
+                changes: out.changes,
+                before: out.before.clone(),
+                after: out.after.clone(),
+                size_before: out.size_before,
+                size_after: out.size_after,
+                enforced: req.enforced,
             });
         }
+    }
+
+    /// An adjustment request of policy `policy` (index into [`SpdModel::policies`]) at `now`,
+    /// past its trigger and constraints (Slingshot's incoming policies of a resumed run,
+    /// `SnapshotInitFromBehaviour` schedules their `ModelAdjustmentRequested` directly). The
+    /// host queues it like a request of the chain; its outcome commits no adjustor state.
+    pub fn enforce(&self, st: &mut SpdState, policy: usize, now: f64) -> AdjustmentRequest {
+        let p = &self.model.policies[policy];
+        let req = AdjustmentRequest {
+            id: st.next_request,
+            policy,
+            ctx: self
+                .ctxs
+                .iter()
+                .position(|c| c.policy == policy)
+                .unwrap_or(usize::MAX),
+            group: p.group.unwrap_or(usize::MAX),
+            adjustment: p.adjustment,
+            time: now,
+            enforced: true,
+        };
+        st.next_request += 1;
+        st.requests += 1;
+        req
     }
 
     /// One handler invocation of policy context `c` for `ev`.
@@ -923,6 +993,7 @@ impl Spd {
                 group: ctx.group,
                 adjustment: self.model.policies[ctx.policy].adjustment,
                 time: ev.time(),
+                enforced: false,
             };
             st.next_request += 1;
             host.request(req);

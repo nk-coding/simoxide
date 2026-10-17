@@ -245,7 +245,7 @@ impl<'m, 's, C: Compat> SpdRun<'m, 's, C> {
         }
         let sim = Simulation::<C>::restore_snapshot(s, base, out)?;
         Ok(SpdRun {
-            series: series_points(sim.base_model()),
+            series: series_points(sim.compiled()),
             sim,
             spd,
             state: SpdState {

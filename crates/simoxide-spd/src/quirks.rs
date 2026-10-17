@@ -4,9 +4,11 @@
 //! Slingshot-exact mode turns all of them on ([`Quirks::slingshot`]). Fixed behaviours marked
 //! *provisional* follow a proposal of the quirks page that the user has not confirmed yet.
 //!
-//! Flags of quirks that live in the adjustment (Q5, Q6, Q7, Q8, Q14, Q16) belong to the
-//! adjustment phase (P2) and are not here, except Q4, whose arithmetic the in-chain group-size
-//! check of the fixed Q9 shares.
+//! Of the quirks that live in the adjustment, Q4, Q6 and Q7 are flags here: their fixed
+//! behaviours are patched copies of Slingshot's transformations, which the adjuster
+//! (`simoxide-reconf`) selects by these flags (the unchanged transformations run when they are
+//! on). Q8 and Q16 (set orders) follow QVTo's mode; Q5 and Q14 (removal of containers and their
+//! monitors) belong to the change path (phase F4).
 
 /// The compat flags of the interpreter. `Default` = all fixed.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -22,8 +24,18 @@ pub struct Quirks {
     /// Q4: a relative adjustment whose percentage gives 0 ignores `minAdjustmentValue`
     /// (`min(0, min)`). Fixed (provisional): a zero change stays zero, otherwise its magnitude
     /// is at least `minAdjustmentValue` in the direction of the percentage. Used by the
-    /// group-size check of the fixed Q9 (and by the adjustment in P2).
+    /// group-size check of the fixed Q9 and by the adjustment (the patched
+    /// `AdjustmentCalculator.qvto`).
     pub q4_relative_zero: bool,
+    /// Q6: after an adjustment every linking resource of the environment connects every
+    /// container (`ResourceEnvironmentTransformation.qvto`). Fixed (provisional): a new
+    /// container joins the links its unit is connected to; the other links keep their
+    /// containers; removed containers leave every link (patched transformation).
+    pub q6_all_links: bool,
+    /// Q7: a top-down scale-in removes the containers it empties only at the next enactment
+    /// (`TopDownTransformationInfrastructure.qvto`). Fixed (provisional): they are removed in
+    /// the same enactment, the transformation's own TODO (patched transformation).
+    pub q7_late_removal: bool,
     /// Q9: only thrashing constraints are target constraints of the chain. Fixed
     /// (provisional): `TargetGroupSizeConstraint`s are checked in the chain too, so a policy
     /// whose change would be clamped to zero is disregarded.
@@ -63,6 +75,8 @@ impl Quirks {
             q1_disregard_keeps_state: true,
             q2_commit_on_request: true,
             q4_relative_zero: true,
+            q6_all_links: true,
+            q7_late_removal: true,
             q9_no_size_check: true,
             q11_setup_error_drops_spd: true,
             q12_broken_composed: true,
@@ -86,6 +100,8 @@ impl Quirks {
                 "Q2" => q.q2_commit_on_request = true,
                 "Q3" => {}
                 "Q4" => q.q4_relative_zero = true,
+                "Q6" => q.q6_all_links = true,
+                "Q7" => q.q7_late_removal = true,
                 "Q9" => q.q9_no_size_check = true,
                 "Q11" => q.q11_setup_error_drops_spd = true,
                 "Q12" => q.q12_broken_composed = true,
@@ -94,7 +110,7 @@ impl Quirks {
                 other => {
                     return Err(format!(
                         "unknown SPD quirk {other:?} (expected fixed, slingshot or a list of \
-                         Q1, Q2, Q3, Q4, Q9, Q11, Q12, Q13, Q15)"
+                         Q1, Q2, Q3, Q4, Q6, Q7, Q9, Q11, Q12, Q13, Q15)"
                     ));
                 }
             }

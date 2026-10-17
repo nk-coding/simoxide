@@ -91,6 +91,7 @@ impl<C: Compat> Adjuster<C> for ReferenceAdjuster {
                 ok: true,
                 size_before: before,
                 size_after: before,
+                ..AdjustOutcome::default()
             });
         };
         let a = self.adjustments.remove(i);
@@ -117,6 +118,7 @@ impl<C: Compat> Adjuster<C> for ReferenceAdjuster {
             ok: a.ok,
             size_before: before,
             size_after: after,
+            ..AdjustOutcome::default()
         })
     }
 }
