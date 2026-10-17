@@ -73,8 +73,9 @@ the reference byte for byte (trace, random tape, measurements):
 | `sl_reconfiguration` | SimuLizar's `ReconfigurationSimulationTest`: the n-th user's response time is n | a resource demand |
 
 The default (EPL) build, which runs the fast simulator mode and QVTo's fast mode, matches the
-reference statistically: with 30 seeds per side (`reference/tools/rules-stat.sh`) no per-run
-statistic of these cases differs beyond what a comparison of the reference with itself shows.
+reference statistically (`reference/tools/rules-stat.sh`, 30 seeds per side): no per-run
+statistic differs, except Server2's mean response time in `lb_scaleout` with seeds 1-30, which a
+second set of 30 seeds does not reproduce (the scale-out time is heavy-tailed).
 
 Not runnable (also not in SimuLizar 5.2.2 headless): rules that use SimuLizar's action framework
 (`AdaptationBehavior.execute`: the power example's `switchToStandby`, the media store's horizontal
