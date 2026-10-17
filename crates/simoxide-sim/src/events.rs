@@ -26,6 +26,8 @@ pub(crate) enum Ev {
     Wake(ResIdx),
     /// `Resume` of the reconfiguration process (MEAS-7.2).
     Reconf,
+    /// An external note of a host layer (`sim::hooks`): records its tag.
+    External(u32),
 }
 
 #[derive(Clone, Copy)]

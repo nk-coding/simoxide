@@ -39,9 +39,11 @@ use std::io::Write;
 
 mod calls;
 mod flat;
+mod hooks;
 mod runmodel;
 mod state;
 
+pub use hooks::ObservedTuple;
 pub use runmodel::RunModel;
 pub use state::{Detached, Pause, Phase, RunState, Status};
 use state::{NoPause, PauseWhen};
@@ -481,6 +483,8 @@ pub(crate) struct Sink {
     /// The event list: runtime-measurement writes schedule the reconfiguration process from
     /// inside the measurement emission, at the point of the write (FIFO order of same-time notes).
     events: EventList,
+    /// External notes and observed series of host layers (`hooks`).
+    hooks: hooks::Hooks,
 }
 
 /// `Reconfigurator` / `ReconfigurationProcess` state (MEAS-7.2).
@@ -706,6 +710,9 @@ fn emit(
     if meas.prm_armed {
         prm_tuple(meas, trace, now, s, t);
     }
+    if meas.hooks.observing {
+        hooks::observe_tuple(&mut meas.hooks, now, s, t, v);
+    }
 }
 
 /// Emission of a window's aggregated tuple (written to its recorder, not fed back to windows).
@@ -725,6 +732,9 @@ fn emit_out(
     if let Some(tr) = trace.as_mut() {
         let def = &meas.m.series[s as usize];
         tr.meas(now, &def.mp, def.metric, t, v);
+    }
+    if meas.hooks.observing {
+        hooks::observe_tuple(&mut meas.hooks, now, s, t, v);
     }
 }
 
@@ -1425,6 +1435,7 @@ impl<'m, C: Compat> Simulation<'m, C> {
                 self.st.meas.reconf.scheduled = false;
                 reconf_run(&mut self.st.meas, &mut self.trace, self.st.now);
             }
+            Ev::External(tag) => self.st.meas.hooks.due.push(tag),
             Ev::Resume(k) => {
                 let (s, g) = unkey(k);
                 let p = &self.st.procs[s as usize];

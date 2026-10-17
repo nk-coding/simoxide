@@ -259,6 +259,7 @@ impl<C: Compat> RunState<C> {
                 ..Default::default()
             },
             events: EventList::default(),
+            hooks: Default::default(),
         };
         let max_depth = max_depth(&cfg.limits);
         RunState {
