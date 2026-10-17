@@ -69,7 +69,11 @@ impl<C: Compat, F: Flavour> Simulation<'_, C, F> {
     /// note is then queued before the notes of the initialisation.
     pub fn schedule_external(&mut self, at_ns: i64, tag: u32) -> Result<(), SimError> {
         // the flavour's clock (nanoseconds, or Slingshot's double seconds)
-        let at = F::Clock::from_ns(at_ns);
+        let mut at = F::Clock::from_ns(at_ns);
+        if at < self.st.now && F::Clock::to_ns(self.st.now) == at_ns {
+            // the current time in nanoseconds (Slingshot's double clock rounds): now
+            at = self.st.now;
+        }
         if at < self.st.now {
             let now_ns = F::Clock::to_ns(self.st.now);
             return Err(SimError {

@@ -393,9 +393,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             Some(r) => r,
             None => {
                 // Q37: the links touching either container (meant for removed containers); none
-                // at all throws
-                let fallback = self
-                    .quirk(Quirk::Q37)
+                // at all throws. Fixed: only when a side was removed from the environment by a
+                // model change (a draining container's requests in progress, MC-8: its links
+                // left with it, Slingshot's "the other one got deleted during scaling in")
+                let removed = |c: ContainerId| m.containers[c].environment.is_none();
+                let fallback = (self.quirk(Quirk::Q37) || removed(src) || removed(dst))
                     .then(|| {
                         cm.links.iter().copied().find(|&l| {
                             let c = &m.linking_resources[l].connected;

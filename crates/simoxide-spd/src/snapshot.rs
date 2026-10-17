@@ -277,7 +277,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
         let (state, requests, adjusted_ok) = read_spd_section(s, spd)?;
         let sim = Simulation::<C, F>::restore_snapshot(s, base, out)?;
         Ok(SpdRun {
-            series: series_points(sim.compiled()),
+            series: series_points(sim.compiled(), &sim.state().measurements().series),
             sim,
             spd,
             state,

@@ -260,6 +260,7 @@ fn spd_decision_logs_match_the_reference() {
 fn corpus_spd_is_byte_equal_at_level_e() {
     for name in [
         "spd_minimal",
+        "spd_same_instant",
         "spd_scale_in",
         "spd_service_group",
         "spd_time_policies",

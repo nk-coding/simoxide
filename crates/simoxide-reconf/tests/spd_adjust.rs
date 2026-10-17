@@ -540,3 +540,281 @@ fn slingshot_flavour_runs_the_adjustment() {
     let want = project_with_models(&refl).unwrap();
     compare("spd_minimal slingshot", &want, &log.to_jsonl());
 }
+
+/// A copy of `dir` (below the target directory) with `spd` as its `default.spd`.
+fn with_spd(dir: &Path, spd: &str) -> PathBuf {
+    static N: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+    let n = N.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let out = Path::new(env!("CARGO_TARGET_TMPDIR"))
+        .join(format!("spd-with-{}-{n}", std::process::id()))
+        .join(dir.file_name().unwrap());
+    std::fs::create_dir_all(&out).unwrap();
+    for e in std::fs::read_dir(dir).unwrap() {
+        let p = e.unwrap().path();
+        if p.is_file() {
+            std::fs::copy(&p, out.join(p.file_name().unwrap())).unwrap();
+        }
+    }
+    std::fs::write(out.join("default.spd"), spd).unwrap();
+    out
+}
+
+/// The minimal example's SPD with a second policy on the elastic infrastructure: CPU
+/// utilisation (MAX over the elements) above `percent` scales out by one, at most once per 30 s.
+fn cpu_spd(percent: f64) -> String {
+    format!(
+        r#"<?xml version="1.0" encoding="UTF-8"?>
+<spd:SPD xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:adjustments="http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0" xmlns:expectations="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Expectations/1.0" xmlns:policy="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0" xmlns:spd="http://palladiosimulator.org/ScalingPolicyDefinition/1.0" xmlns:stimuli="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Stimuli/1.0" xmlns:targets="http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0" xmlns:triggers="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0" id="_PKdecLwZEe6i2ICnm9lfkw">
+  <scalingPolicies id="_7VIU0MAgEe6AcKIPVXJsSw" entityName="Basic Point in Time Trigger" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="1"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_BH-dM8AhEe6AcKIPVXJsSw" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="20.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_p2CpuPolicy" entityName="cpu" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="1"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_p2CpuCooldown" cooldownTime="30.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_p2CpuTrigger" relationalOperator="GreaterThan">
+      <stimulus xsi:type="stimuli:CPUUtilization" aggregationOverElements="MAX"/>
+      <expectedValue xsi:type="expectations:ExpectedPercentage" value="{percent:.1}"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <targetGroups xsi:type="targets:ElasticInfrastructure" id="_DC8fM8pgEe6u3p81um7oyQ" entityName="EI TargetGroup">
+    <unit href="My.resourceenvironment#_GAeeUCpXEeKNWc2UWjbmuw"/>
+  </targetGroups>
+</spd:SPD>
+"#
+    )
+}
+
+/// The series keys (measurement series ids) the CPU policy's trigger has windows of (fixed
+/// Q13: one window per measuring point).
+fn cpu_windows(
+    r: &SpdRun<'_, '_, impl simoxide_sim::Compat, impl simoxide_sim::Flavour>,
+    spd: &Spd,
+) -> Vec<u32> {
+    let c = spd
+        .contexts()
+        .iter()
+        .position(|c| &*spd.model().policies[c.policy].name == "cpu")
+        .unwrap();
+    let mut keys = Vec::new();
+    for n in &r.state.policies[c].nodes {
+        if let simoxide_spd::NodeState::Leaf {
+            per_element: Some(p),
+            ..
+        } = n
+        {
+            keys.extend(p.elements.iter().map(|(k, _)| *k));
+        }
+    }
+    keys
+}
+
+/// The names of the containers whose CPU series `keys` are.
+fn series_containers(
+    r: &SpdRun<'_, '_, impl simoxide_sim::Compat, impl simoxide_sim::Flavour>,
+    keys: &[u32],
+) -> Vec<String> {
+    let series = &r.sim.state().measurements().series;
+    keys.iter()
+        .map(|&k| series[k as usize].mp.to_string())
+        .collect()
+}
+
+/// Measurement-triggered policies see new containers: after the time policy's scale-out at
+/// 20 s, the series of the monitors cloned for `AppServer_1` are observed and feed the CPU
+/// policy's trigger (one window per element: the unit's and the new container's), in both
+/// flavours (SimuLizar with `MonitorSync::Full`, which gives new monitors their utilisation
+/// windows; Slingshot by default, which interprets every new monitor). With a lower threshold the
+/// CPU policy keeps scaling out (cooldown 30 s) with the new containers in its view.
+#[test]
+fn measurement_triggers_see_new_containers() {
+    use simoxide_sim::{ChangeOptions, Fast, FlavourConfig, Mode, MonitorSync, Slingshot};
+    let c = case("spd_minimal");
+    let q = Quirks::fixed();
+    // Slingshot flavour: instantaneous utilisation of every CPU state change
+    let dir = with_spd(&c.model, &cpu_spd(100.0));
+    let model = RunSpec::default().load_model(&dir).unwrap();
+    let spd = spd_of(&model, q).unwrap().unwrap();
+    let cm = CompiledModel::compile_flavour(model, FlavourConfig::SLINGSHOT).unwrap();
+    let mut cfg = RunSpec::default().sim_config("p2");
+    cfg.mode = Mode::Fast;
+    cfg.seed = 1;
+    cfg.max_sim_time = 100;
+    let sim = Simulation::<Fast, Slingshot>::create(&cm, cfg.clone(), Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &spd).unwrap();
+    let mut adj = adjuster(q);
+    let mut log = VecLog::default();
+    r.run_until(&mut adj, &mut log, Some(19_000_000_000))
+        .unwrap();
+    let before = cpu_windows(&r, &spd);
+    r.run(&mut adj, &mut log).unwrap();
+    let after = cpu_windows(&r, &spd);
+    assert_eq!(before.len(), 1, "{before:?}");
+    assert_eq!(after.len(), 2, "{after:?}");
+    let new = &after[1];
+    assert!(
+        (*new as usize) >= cm.series.len(),
+        "a series the change appended"
+    );
+    eprintln!("slingshot: {:?}", series_containers(&r, &after));
+
+    // SimuLizar flavour, sliding-window utilisation of new monitors (`Full`)
+    let dir = simulizar_copy(&with_spd(&c.model, &cpu_spd(100.0)));
+    let model = RunSpec::default().load_model(&dir).unwrap();
+    let spd = spd_of(&model, q).unwrap().unwrap();
+    let cm = CompiledModel::compile(model).unwrap();
+    let mut cfg = RunSpec::default().sim_config("p2");
+    cfg.seed = 1;
+    cfg.max_sim_time = 100;
+    let mut sim = Simulation::<Exact>::new(&cm, cfg, Outputs::default()).unwrap();
+    sim.set_change_options(ChangeOptions {
+        monitors: MonitorSync::Full,
+        ..sim.change_options()
+    });
+    let mut r = SpdRun::new(sim, &spd).unwrap();
+    let mut adj = adjuster(q);
+    let mut log = VecLog::default();
+    r.run(&mut adj, &mut log).unwrap();
+    let after = cpu_windows(&r, &spd);
+    assert_eq!(after.len(), 2, "{after:?}");
+    assert!((after[1] as usize) >= cm.series.len());
+    eprintln!("simulizar: {:?}", series_containers(&r, &after));
+
+    // the CPU policy scales out (threshold 40 %)
+    let dir = with_spd(&c.model, &cpu_spd(40.0));
+    let model = RunSpec::default().load_model(&dir).unwrap();
+    let spd = spd_of(&model, q).unwrap().unwrap();
+    let cm = CompiledModel::compile_flavour(model, FlavourConfig::SLINGSHOT).unwrap();
+    let mut cfg = RunSpec::default().sim_config("p2");
+    cfg.mode = Mode::Fast;
+    cfg.seed = 1;
+    cfg.max_sim_time = 100;
+    let sim = Simulation::<Fast, Slingshot>::create(&cm, cfg, Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &spd).unwrap();
+    let mut adj = adjuster(q);
+    let mut log = VecLog::default();
+    r.run(&mut adj, &mut log).unwrap();
+    let a = adjust_records(&log.to_jsonl());
+    eprintln!(
+        "{:?}",
+        a.iter()
+            .map(|a| (a["t"].clone(), a["policy_name"].clone(), a["ok"].clone()))
+            .collect::<Vec<_>>()
+    );
+    assert!(
+        a.iter()
+            .any(|a| a["policy_name"] == "cpu" && a["ok"] == true)
+    );
+}
+
+/// V3 in the Slingshot flavour (fast mode with the fast mode's Slingshot quirks, so scale-in
+/// follows Q5 and calls over a removed container's link Q37, as in the reference): the decision
+/// logs of every `corpus-spd/` case equal the reference's, model summaries included.
+#[test]
+fn adjustments_equal_slingshot_in_the_slingshot_flavour() {
+    use simoxide_sim::flavour::Quirks as SsQuirks;
+    use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
+    for c in cases() {
+        let model = RunSpec::default().load_model(&c.model).unwrap();
+        let q = Quirks::slingshot();
+        let spd = spd_of(&model, q).unwrap().unwrap();
+        let cm =
+            CompiledModel::compile_flavour(model, FlavourConfig::slingshot(SsQuirks::all_fast()))
+                .unwrap();
+        let mut cfg = RunSpec::default().sim_config("p2");
+        cfg.mode = Mode::Fast;
+        cfg.seed = c.seed;
+        cfg.max_sim_time = c.sim_time;
+        let sim = Simulation::<Fast, Slingshot>::create(&cm, cfg, Outputs::default()).unwrap();
+        let mut r = SpdRun::new(sim, &spd).unwrap();
+        let mut log = VecLog::default();
+        r.run(&mut adjuster(q), &mut log)
+            .unwrap_or_else(|e| panic!("{}: {e:?}", c.name));
+        let refl = std::fs::read_to_string(&c.expected).unwrap();
+        compare(
+            &format!("{} slingshot", c.name),
+            &project_with_models(&refl).unwrap(),
+            &log.to_jsonl(),
+        );
+    }
+}
+
+/// The Slingshot flavour's fixed behaviour on a scale-in: the removed container drains, and its
+/// requests in progress reach the load balancer over a link of the remaining side (the
+/// transformation took the container off its links; Slingshot's fallback, which the fixed Q37
+/// keeps for removed containers). The run ends normally, every request finished.
+#[test]
+fn slingshot_flavour_drains_a_removed_container() {
+    use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
+    let c = case("spd_scale_in");
+    let model = RunSpec::default().load_model(&c.model).unwrap();
+    let q = Quirks::fixed();
+    let spd = spd_of(&model, q).unwrap().unwrap();
+    let cm = CompiledModel::compile_flavour(model, FlavourConfig::SLINGSHOT).unwrap();
+    let mut cfg = RunSpec::default().sim_config("p2");
+    cfg.mode = Mode::Fast;
+    cfg.seed = c.seed;
+    cfg.max_sim_time = c.sim_time;
+    let sim = Simulation::<Fast, Slingshot>::create(&cm, cfg, Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &spd).unwrap();
+    let mut log = VecLog::default();
+    r.run(&mut adjuster(q), &mut log).unwrap();
+    let a = adjust_records(&log.to_jsonl());
+    assert_eq!(a.len(), 2);
+    assert!(a.iter().all(|a| a["ok"] == true));
+    assert_eq!(
+        a[1]["after"]["target_groups"][0]["elements"],
+        serde_json::json!(["AppServer"])
+    );
+    let (res, ..) = r.finish().unwrap();
+    assert!(res.main_count > 0);
+}
+
+/// A V4 scenario in the Slingshot flavour (`reference/slingshot/models/spd_v4_cpu`: stochastic
+/// arrivals and demands, CPU-utilisation policies out above 80 % and in below 60 %, group size
+/// 1..4): requests at non-integral double times (Slingshot's clock), scale-outs and scale-ins
+/// (Q5 with Slingshot's quirks, drain with the fixed behaviour), the same log for the same seed.
+#[test]
+fn slingshot_flavour_runs_a_stochastic_cpu_scenario() {
+    use simoxide_sim::flavour::Quirks as SsQuirks;
+    use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
+    let dir = root().join("reference/slingshot/models/spd_v4_cpu");
+    for (sq, q) in [
+        (SsQuirks::all_fast(), Quirks::slingshot()),
+        (SsQuirks::NONE, Quirks::fixed()),
+    ] {
+        let model = RunSpec::default().load_model(&dir).unwrap();
+        let spd = spd_of(&model, q).unwrap().unwrap();
+        let cm = CompiledModel::compile_flavour(model, FlavourConfig::slingshot(sq)).unwrap();
+        let run = |seed: i64| {
+            let mut cfg = RunSpec::default().sim_config("p3");
+            cfg.mode = Mode::Fast;
+            cfg.seed = seed;
+            cfg.max_sim_time = 600;
+            let sim = Simulation::<Fast, Slingshot>::create(&cm, cfg, Outputs::default()).unwrap();
+            let mut r = SpdRun::new(sim, &spd).unwrap();
+            let mut log = VecLog::default();
+            r.run(&mut adjuster(q), &mut log).unwrap();
+            log.to_jsonl()
+        };
+        let (mut outs, mut ins) = (0, 0);
+        for seed in 1..=3 {
+            let l = run(seed);
+            assert_eq!(l, run(seed), "seed {seed}");
+            for a in adjust_records(&l) {
+                let n = |k: &str| {
+                    a[k]["target_groups"][0]["elements"]
+                        .as_array()
+                        .unwrap()
+                        .len()
+                };
+                outs += usize::from(n("after") > n("before"));
+                ins += usize::from(n("after") < n("before"));
+            }
+        }
+        assert!(outs > 0 && ins > 0, "{q:?}: {outs} out, {ins} in");
+    }
+}
