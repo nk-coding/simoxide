@@ -1,0 +1,14 @@
+-- Adds an empty resource container (its id comes from the run's id policy).
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+
+transformation addContainer(inout env : PCM_RES_ENV) {
+	main() {
+		var e := env.rootObjects()[ResourceEnvironment]->any(true);
+		var n := e.resourceContainer_ResourceEnvironment->size();
+		e.resourceContainer_ResourceEnvironment += object ResourceContainer {
+			entityName := 'added' + n.toString();
+		};
+		log('added' + n.toString());
+	}
+}

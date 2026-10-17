@@ -1,6 +1,6 @@
 [package]
 name = "simoxide-reconf"
-description = "Runtime model changes for SimOxide: change sets from the QVTo adapter's journal and direct edits, applied to a running simulation"
+description = "Runtime model changes for SimOxide: the QVTo host (transformations on a run's model, SimuLizar rule sets, SPD adjustments), change sets from journals and direct edits, applied to a running simulation"
 edition.workspace = true
 version.workspace = true
 repository.workspace = true
@@ -10,14 +10,32 @@ publish = false
 [dependencies]
 simoxide-model = { workspace = true }
 simoxide-sim = { workspace = true }
+simoxide-spd = { workspace = true, optional = true, features = ["sim"] }
 qvto-simoxide.workspace = true
 qvto-model.workspace = true
+qvto.workspace = true
+qvto-vm.workspace = true
+qvto-runtime.workspace = true
+qvto-sema.workspace = true
 
 [dev-dependencies]
 simoxide-sim = { workspace = true, features = ["fast", "exact"] }
 serde_json = "1"
+# the corpus test compares with the Java runner's results: compat mode and identity-hash tapes
+qvto-simoxide = { workspace = true, features = ["compat"] }
+qvto-testkit = { workspace = true, features = ["compat"] }
+qvto-runtime = { workspace = true, features = ["compat"] }
+qvto-emf.workspace = true
+qvto-paths.workspace = true
 
 [features]
-# The exact modes: SimuLizar-exact in simoxide-sim, and QVTo's compat mode for the rules
-# (Java orders of unordered features). No licence covers builds with it (LICENSES, section 7).
-exact = ["simoxide-sim/exact", "qvto-simoxide/compat"]
+default = ["spd"]
+# QVTo's compat mode (Eclipse's Java `HashMap` orders) for the transformations. No licence covers
+# builds with it (LICENSES, section 7).
+compat = ["qvto-simoxide/compat"]
+# The exact modes: SimuLizar-exact in simoxide-sim, and QVTo's compat mode for the
+# transformations (Java orders of unordered features). No licence covers builds with it
+# (LICENSES, section 7).
+exact = ["simoxide-sim/exact", "compat"]
+# The SPD adjuster (`QvtoAdjuster`, an implementation of `simoxide_spd::Adjuster`).
+spd = ["dep:simoxide-spd"]

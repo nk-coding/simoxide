@@ -903,11 +903,19 @@ dependencies = [
 name = "simoxide-reconf"
 version = "0.1.0"
 dependencies = [
+ "qvto",
+ "qvto-emf",
  "qvto-model",
+ "qvto-paths",
+ "qvto-runtime",
+ "qvto-sema",
  "qvto-simoxide",
+ "qvto-testkit",
+ "qvto-vm",
  "serde_json",
  "simoxide-model",
  "simoxide-sim",
+ "simoxide-spd",
 ]
 
 [[package]]

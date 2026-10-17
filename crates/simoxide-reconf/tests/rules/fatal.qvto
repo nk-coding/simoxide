@@ -1,0 +1,14 @@
+-- Changes the server's processing rate, then fails an `assert fatal`: SimuLizar's "not applied",
+-- with the change made before it in place.
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+
+transformation fatal(inout env : PCM_RES_ENV) {
+	main() {
+		var server := env.rootObjects()[ResourceEnvironment]->any(true)
+			.resourceContainer_ResourceEnvironment->select(c | c.entityName = 'ServerNode')->any(true);
+		server.activeResourceSpecifications_ResourceContainer->any(true)
+			.processingRate_ProcessingResourceSpecification.specification := '8.0';
+		assert fatal (false) with log('precondition does not hold');
+	}
+}

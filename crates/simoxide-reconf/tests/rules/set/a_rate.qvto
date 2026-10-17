@@ -1,0 +1,13 @@
+-- Runs first (file-name order): sets the server's processing rate.
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+
+transformation rate(inout env : PCM_RES_ENV) {
+	main() {
+		var server := env.rootObjects()[ResourceEnvironment]->any(true)
+			.resourceContainer_ResourceEnvironment->select(c | c.entityName = 'ServerNode')->any(true);
+		server.activeResourceSpecifications_ResourceContainer->any(true)
+			.processingRate_ProcessingResourceSpecification.specification := '4.0';
+		log('a: rate set');
+	}
+}

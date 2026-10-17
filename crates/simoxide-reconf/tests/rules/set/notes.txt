@@ -1,0 +1,1 @@
+Not a rule (RuleSet::load_dir takes the .qvto files only).

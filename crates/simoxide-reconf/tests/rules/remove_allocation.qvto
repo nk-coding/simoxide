@@ -1,0 +1,11 @@
+-- Removes the remote server's allocation context: SimuLizar's AllocationLookupSyncer throws (MC-3.3).
+modeltype PCM_ALLOC uses 'http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2';
+
+transformation removeAllocation(inout pcmAllocation : PCM_ALLOC) {
+	main() {
+		var a := pcmAllocation.rootObjects()[Allocation]->any(true);
+		var ac := a.allocationContexts_Allocation->select(c | c.entityName = 'Allocation_Assembly_RemoteServer')->any(true);
+		a.allocationContexts_Allocation := a.allocationContexts_Allocation->excluding(ac);
+		log('removed ' + ac.entityName);
+	}
+}

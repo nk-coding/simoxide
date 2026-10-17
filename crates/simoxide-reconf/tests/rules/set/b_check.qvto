@@ -1,0 +1,14 @@
+-- Runs second (file-name order): sees the rate the first rule set.
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+modeltype PCM_CORE uses 'http://palladiosimulator.org/PalladioComponentModel/Core/5.2';
+
+transformation check(in env : PCM_RES_ENV) {
+	main() {
+		var server := env.rootObjects()[ResourceEnvironment]->any(true)
+			.resourceContainer_ResourceEnvironment->select(c | c.entityName = 'ServerNode')->any(true);
+		var rate := server.activeResourceSpecifications_ResourceContainer->any(true)
+			.processingRate_ProcessingResourceSpecification.specification;
+		assert fatal (rate = '4.0') with log('rate is ' + rate);
+		log('b: rate is ' + rate);
+	}
+}

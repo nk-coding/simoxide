@@ -4,7 +4,9 @@
 //! [`SimStore`] (a `qvto_model::ModelStore` over SimOxide's `raw::Graph`) records every change
 //! in a [`Journal`]. Both kinds of change source go through it:
 //!
-//! - QVTo transformations (F3: the host that compiles and runs them on the run's graph);
+//! - QVTo transformations: the host ([`QvtoCore`] shared by all runs, [`QvtoRun`] per run,
+//!   created on first use), SimuLizar's rule folders ([`RuleSet`], [`QvtoRun::run_rules`]) and
+//!   SPD adjustments ([`QvtoAdjuster`], feature `spd`);
 //! - direct edits ([`Edit`]): a small API over the same store, for tests, snapshots and tools.
 //!
 //! [`change_set`] turns a journal into the simulator's [`ChangeSet`]; [`apply_journal`] and
@@ -40,9 +42,26 @@ use qvto_model::{
 };
 use simoxide_model::meta::{ClassId, FeatureId, class as mc, feat as mf};
 use simoxide_model::raw::{Graph, ObjId, Value};
-use simoxide_sim::{Change, ChangeError, ChangeKind, ChangeReport, ChangeSet, Compat, Simulation};
+use simoxide_sim::{
+    Change, ChangeError, ChangeKind, ChangeReport, ChangeSet, Compat, Flavour, Simulation,
+};
 
 pub use qvto_simoxide::{EXT_BASE, IdPolicy, Journal, Session, SimStore};
+
+#[cfg(feature = "spd")]
+mod adjust;
+mod host;
+mod qvt;
+mod rules;
+
+#[cfg(feature = "spd")]
+pub use adjust::{AdjustHooks, DefaultAdjustHooks, QvtoAdjuster};
+pub use host::{
+    AbortPolicy, Bind, CoreBuilder, FailedRunChanges, IdSourceFn, Imports, Invocation, InvokeHooks,
+    ModelRef, NsBinding, Outcome, ParamDir, ParamInfo, QvtMode, QvtoCore, QvtoRun, ReconfError,
+    RunConfig, Transformation, palladio_metamodels, resolve_mode,
+};
+pub use rules::{RuleSet, RulesOutcome};
 
 /// The simulator's change set of a journal: the changes of graph objects (handles below
 /// [`EXT_BASE`]), in order, with the object values of list changes.
@@ -94,8 +113,8 @@ pub fn change_set(j: &Journal) -> ChangeSet {
 
 /// Applies the changes recorded in `journal` (made on `graph`, a copy of the run's
 /// [`Simulation::model_graph`]) to the run.
-pub fn apply_journal<C: Compat>(
-    sim: &mut Simulation<'_, C>,
+pub fn apply_journal<C: Compat, F: Flavour>(
+    sim: &mut Simulation<'_, C, F>,
     graph: Graph,
     journal: &Journal,
 ) -> Result<ChangeReport, ChangeError> {
@@ -142,7 +161,10 @@ fn qf(f: FeatureId) -> QFeature {
 impl<'s> Edit<'s> {
     /// Starts an edit of `sim`'s current model; `session` records the journal (a session
     /// belongs to the run's graph: one per run, or a new one per edit).
-    pub fn new<C: Compat>(sim: &Simulation<'_, C>, session: &'s mut Session) -> Edit<'s> {
+    pub fn new<C: Compat, F: Flavour>(
+        sim: &Simulation<'_, C, F>,
+        session: &'s mut Session,
+    ) -> Edit<'s> {
         session.start_journal();
         Edit {
             graph: sim.model_graph().clone(),
@@ -167,9 +189,9 @@ impl<'s> Edit<'s> {
     }
 
     /// Applies the edits to `sim` ([`Simulation::apply_changes`]).
-    pub fn apply<C: Compat>(
+    pub fn apply<C: Compat, F: Flavour>(
         self,
-        sim: &mut Simulation<'_, C>,
+        sim: &mut Simulation<'_, C, F>,
     ) -> Result<ChangeReport, ChangeError> {
         let (g, cs) = self.finish();
         sim.apply_changes(g, &cs)

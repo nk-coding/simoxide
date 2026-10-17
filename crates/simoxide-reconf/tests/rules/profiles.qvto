@@ -1,0 +1,11 @@
+-- Calls a ProfilesLibrary operation (stereotypes): a stub in SimOxide that throws.
+import org.palladiosimulator.simulizar.action.repository.black.ProfilesLibrary;
+
+modeltype PCM_RES_ENV uses 'http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2';
+
+transformation profiles(in env : PCM_RES_ENV) {
+	main() {
+		var e := env.rootObjects()[ResourceEnvironment]->any(true);
+		log('stereotype: ' + e.hasAppliedStereotype('Elastic').toString());
+	}
+}
