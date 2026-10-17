@@ -582,6 +582,9 @@ pub struct CompiledModel {
     pub flavour: crate::flavour::FlavourConfig,
     /// The Slingshot flavour's tables (empty for SimuLizar).
     pub ss: SsTables,
+    /// Typed monitors of the run's start (the first ones of `model.monitors`): later ones were
+    /// added by runtime model changes (see [`Seed::start_monitors`]).
+    pub start_monitors: usize,
 }
 
 // A `CompiledModel` is shared between threads (`run_batch`, runs resumed on other threads) and
@@ -869,6 +872,12 @@ pub struct Seed {
     pub keys: Keys,
     pub progs: Vec<Prog>,
     pub series: Vec<SeriesDef>,
+    /// A recompilation after a runtime model change that honours only the monitors of the
+    /// run's start (`MonitorSync::Reference`): the number of typed monitors at the start. The
+    /// probe framework's start-time set-up (sliding windows, PRM recorders, reconfiguration
+    /// and container-count monitors) uses those monitors only; SimuLizar never looks at later
+    /// ones there (MC-6).
+    pub start_monitors: Option<usize>,
 }
 
 impl CompiledModel {
@@ -916,6 +925,7 @@ impl CompiledModel {
         let mut warnings = Vec::new();
 
         // ---------------------------------------------------------------- series registry
+        let start_monitors = seed.start_monitors;
         let mut series: Vec<SeriesDef> = seed.series;
         let mut series_map: HashMap<(String, &'static str), SeriesId> = series
             .iter()
@@ -946,6 +956,19 @@ impl CompiledModel {
         // container count, passive resources): none in the Slingshot flavour, which has its own
         // (`SsTables`, `docs/spec/slingshot/monitoring.md`)
         let sim_monitors: Vec<&Monitor> = if ss { Vec::new() } else { monitors.clone() };
+        let n_monitors = m.monitors.len();
+        let start: Vec<&Monitor> = match start_monitors {
+            Some(n) => {
+                let at_start: std::collections::HashSet<simoxide_model::raw::ObjId> =
+                    m.monitors.iter().take(n).map(|x| x.obj).collect();
+                sim_monitors
+                    .iter()
+                    .copied()
+                    .filter(|x| at_start.contains(&x.obj))
+                    .collect()
+            }
+            None => sim_monitors.clone(),
+        };
 
         // response time calculators: key(MP) -> series (later specs overwrite the probes)
         // (probes are looked up by `MonitorRepositoryUtil` measurement identifiers, i.e. by id
@@ -1683,7 +1706,7 @@ impl CompiledModel {
         // per window: its specification, measuring point and (time-driven aggregation) the
         // metric of the calculator it reads
         let mut window_src: Vec<WinSrc> = Vec::new();
-        for mon in sim_monitors.iter().filter(|x| x.activated) {
+        for mon in start.iter().filter(|x| x.activated) {
             for spec in &mon.specifications {
                 if let ProcessingType::TimeDrivenAggregation {
                     window_length,
@@ -1710,7 +1733,7 @@ impl CompiledModel {
             }
         }
         for wanted in [metric_ids::UTILIZATION_TUPLE, metric_ids::UTILIZATION] {
-            for mon in sim_monitors.iter().filter(|x| x.activated) {
+            for mon in start.iter().filter(|x| x.activated) {
                 for spec in &mon.specifications {
                     if metric_id(m, spec) != Some(wanted) {
                         continue;
@@ -1815,7 +1838,7 @@ impl CompiledModel {
         // number of resource containers (NumberOfResourceContainerTrackingListener), MEAS-7.3
         let mut reconf_time_series = Vec::new();
         let mut container_count = None;
-        for mon in sim_monitors.iter().filter(|x| x.activated) {
+        for mon in start.iter().filter(|x| x.activated) {
             let Some(mp) = mon.measuring_point.map(|x| &m.measuring_points[x]) else {
                 continue;
             };
@@ -1871,7 +1894,7 @@ impl CompiledModel {
         let mut prm_passive = Vec::new();
         let mut prm_meas: Vec<PrmMeas> = Vec::new();
         let mut cands: Vec<(u8, &Monitor, &MeasurementSpecification)> = Vec::new();
-        for mon in sim_monitors.iter().filter(|x| x.activated) {
+        for mon in start.iter().filter(|x| x.activated) {
             if mon.measuring_point.is_none() {
                 continue;
             }
@@ -2016,7 +2039,7 @@ impl CompiledModel {
         }
         // execution-result tuples (MEAS-7.4) need an explicit monitor with this metric; they are
         // textual (SUCCESS/FAILURE) and not produced here
-        if sim_monitors.iter().any(|mon| {
+        if start.iter().any(|mon| {
             mon.specifications
                 .iter()
                 .any(|s| metric_id(m, s) == Some(metric_ids::EXECUTION_RESULT_TYPE_TUPLE))
@@ -2161,6 +2184,7 @@ impl CompiledModel {
             model,
             flavour,
             ss: ss_tables,
+            start_monitors: start_monitors.unwrap_or(n_monitors),
         })
     }
 

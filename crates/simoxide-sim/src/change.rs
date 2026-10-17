@@ -440,6 +440,8 @@ pub(crate) fn recompile(
         keys: old.keys.clone(),
         progs: old.progs.clone(),
         series: run.series.to_vec(),
+        start_monitors: (!ss && opts.monitors == MonitorSync::Reference)
+            .then_some(old.start_monitors),
     };
     let fresh =
         CompiledModel::compile_seeded(m2, seed).map_err(|e| ChangeError::Invalid(vec![e.0]))?;
@@ -1479,6 +1481,7 @@ pub(crate) fn recompile(
         warnings,
         flavour: old.flavour,
         ss: ss_tables,
+        start_monitors: old.start_monitors,
     };
     report.micros = t0.elapsed().as_micros() as u64;
     Ok(Recompiled {

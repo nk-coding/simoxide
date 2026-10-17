@@ -10,12 +10,12 @@ A policy that fires produces an *adjustment request* (policy, target group, adju
 adjustment runs Slingshot's own transformation, `MainTransformation.qvto`, on the run's model
 (below, [Adjustments](#adjustments)) and the run continues on the changed model.
 
-::: warning What waits for phase F4
-Adjustments that *remove* elements (scale-in: containers, assembly and allocation contexts) and
-every adjustment in the Slingshot flavour are refused by the change path until phase F4; the
-run then ends with the refusal (`... cannot remove an allocation context`). New containers get
-no monitors yet (Slingshot clones the unit's monitors; F4), so measurement-triggered policies
-do not see their utilisation.
+::: tip Scale-in, monitors, flavours
+Scale-in drains the removed containers by default: their jobs and the requests in progress
+finish there, new requests go elsewhere ([Model changes](../spec/model-changes.md) MC-8; the Q5
+flag reproduces Slingshot's removal). The adjuster creates the monitors Slingshot clones for new
+containers, so their resources are measured from the adjustment on. Both flavours take the
+adjustments.
 :::
 
 ## What is supported
@@ -98,7 +98,7 @@ process.
 unit's assemblies, their allocation, connectors and a load-balancer branch; the branch
 probabilities become `1/n`. **Top-down** (a service group or competing consumers as the target)
 adds assemblies first and containers as the placement needs them. **Scale-in** removes the
-newest elements (F4, above).
+newest elements (drained, above).
 
 
 ## Fixed behaviour and compat flags
@@ -124,8 +124,8 @@ proposal that is not confirmed yet.
 The patched transformations are marked "PATCHED by SimOxide"; with the flag on, Slingshot's
 unchanged file runs (`--spd-quirks slingshot` runs Slingshot's bundle as it is). Q8 and Q16
 (the order of sets in the transformation) follow QVTo's mode: the ordered mode equals the
-reference's `det` order. Q5 and Q14 (what a scale-in does to jobs and monitors) belong to the
-change path (F4).
+reference's `det` order. Q5 and Q14 (what a scale-in does to jobs; population changes) belong to the
+change path (MC-8.4, MC-5.2).
 
 ## Decision log
 

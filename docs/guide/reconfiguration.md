@@ -63,10 +63,13 @@ those that changed the model, and the time spent in the rules.
    with their resources, linking-resource connections, new allocation contexts, connectors and
    assembly contexts ([Model changes](../spec/model-changes.md)).
 
-Changes that SimuLizar aborts on (removing an allocation context, `move` of a link list) end the
-run with an error, as in SimuLizar. Changes SimOxide does not support yet end the run with an error
-that names the rule: monitor changes, population and usage-scenario changes, structural changes of
-a behaviour (an action or branch added to a SEFF), an assembly context without an allocation.
+Every change kind is taken (population and usage scenarios, monitors as SimuLizar attaches them,
+structural changes of behaviours with executions in progress following the changed chain). With
+SimuLizar's removal (`ChangeOptions::simulizar()`, `removal keep`), changes that SimuLizar aborts on
+(removing an allocation context, `move` of a link list) end the run with an error, as in
+SimuLizar; by default removed containers drain. A change SimOxide refuses ends the run with an
+error that names the rule: an assembly context without an allocation, kept instructions that no
+longer fit a changed action ([Model changes](../spec/model-changes.md) MC-4.3, MC-8).
 
 ## Examples
 

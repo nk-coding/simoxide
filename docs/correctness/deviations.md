@@ -166,7 +166,7 @@ deviates as follows:
 - **Not reproduced**: several SEFFs for one signature are a run error (Slingshot starts all of
   them); a passive resource of an unallocated assembly context is created at first use (Slingshot:
   the request waits forever); two monitors with the same measuring point and metric share one series;
-  model changes (`Simulation::apply_changes`) are refused (phases F4, P3); a negative demand on
+  a negative demand on
   an FCFS resource or link is a run error (Slingshot's event constructor throws; processor sharing
   makes it a 1e-9 s job).
 - **Time** is Slingshot's `double` seconds (the trace and tape print them; `RunState::now_ns` and
@@ -210,10 +210,17 @@ differs from SimuLizar 5.2.2 itself:
   resource's deactivation, the drain, the passive-resource cleanup) has finished, on the runtime
   measurement values of the trigger; their tuples can come later in the trace than SimuLizar's,
   within that step (MEAS-7.2).
-- **Changes SimOxide does not support yet** (monitor, population and usage-scenario changes,
-  structural changes of an action) end the run with an error naming the rule; an assembly context
-  without allocation is refused at the change, SimuLizar fails only when a request reaches it.
-  Executions in progress inside a changed behaviour finish their old instructions (MC-4.3).
+- **Changes SimOxide refuses** end the run with an error naming the rule: an assembly context
+  without allocation is refused at the change (SimuLizar fails only when a request reaches it);
+  kept instructions of executions in progress that no longer fit their changed action (MC-4.3;
+  SimuLizar's Java iterator over the changed list may throw a `ConcurrentModificationException`
+  or go on).
+- **A rule's monitors**: `attachMonitors` runs when SimOxide applies the rule's changes, so a new
+  container also gets the calculators of monitors the rule created after it (SimuLizar: only
+  those created before it, MC-7.4).
+- **Removal default**: SimOxide drains removed containers by default (MC-8.2); SimuLizar keeps
+  them simulating and aborts on a removed allocation context (`ChangeOptions::simulizar()` or
+  `Removal::Keep` reproduces it). An aborted request (drain, abort) counts as a finished run.
 - **Passive-resource PRM measurements** join the runtime measurement model in the order of the
   monitors. SimuLizar's order comes from a `HashMap` of metric descriptions and a `HashSet` of
   suppliers (identity hashes; the reference keeps them in insertion order, patch P10). Both orders
@@ -242,11 +249,11 @@ running (`reconfiguration` feature):
   its unit's links only).
 - **Ids** of created objects are seeded UUIDs, not Slingshot's; the decision log shows created
   elements as `~Class:name`, as the reference runner does.
-- **Monitors of new containers** are counted in `changes` as Slingshot clones them, but not
-  created until phase F4: new containers have no measurement series.
-- **Scale-in and the Slingshot flavour**: the change path refuses removed containers and
-  allocation contexts, and every change in the Slingshot flavour, until phase F4; the run ends
-  with that error (Slingshot removes them; SimOxide's default will be to drain, Q5).
+- **Monitors of new containers**: the adjuster creates the copies `ModelAdjusted` lists
+  (`QvtoAdjuster::clone_monitors`, ids `_spd_g<generation>_mon<k>`, Slingshot draws UUIDs) right
+  after the transformation's change set, at the same instant.
+- **Scale-in**: removed containers drain by default (both flavours); Slingshot's behaviour (the
+  pending job aborted, the others lost) is the Q5 compat flag (MC-8.4).
 - **Enforced policies** at a resume run at the resume time behind the events already queued for
   it; Slingshot restarts the time base and schedules them first.
 - **Change steps at the resume of an SPD run** use the adjustments' QVTo state: a transformation
