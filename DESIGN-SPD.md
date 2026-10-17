@@ -1525,6 +1525,17 @@ MC-7 in `docs/spec/model-changes.md`; guide: `docs/guide/reconfiguration.md`):
 - **Costs.** PRM mirror 15 µs per reconfiguration; a rule run about 0.1 ms in QVTo's fast mode and
   1 ms in compat mode (the compat mode's per-run set-up, qvto-internal; the power case: 4 s fast vs
   37 s compat for 40 000 rule runs). The fast build runs `lb_outsource` with rules in 10 ms.
+- **Gates.** `golden.sh` identical (312 runs, `cargo build-exact`, against bae975d's binary);
+  `cargo test --release --workspace --features exact` 555 passed, 0 failed (543 before: +3
+  `stats`, +9 `rules_process`; QVTo's ignored reference material linked from the merge checkout
+  for the run); `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; fmt and clippy `-D warnings`
+  clean (workspace, all targets, default and `--features exact`; `simoxide-cli --features
+  reconfiguration`, also with `exact`; `simoxide-reconf --no-default-features`); release check:
+  `cargo tree -e normal` of `simoxide-cli` (also with `reconfiguration`) and `qvto-cli` lists no
+  opt-in crate. Quick timing of runs without rules (exact mode, long runs, medians of 5, shared
+  machine): within noise on models without PRM recorders; models with a time-driven aggregation
+  monitor pay for its window now collecting tuples and computing its statistic
+  (`t_reconf_tda` −8.7 %, `u_mediastore_own_monitors` −5.2 %, `h28_triggers_default` −2.8 %).
 - **Changes outside `simoxide-reconf`** (for the merge agent): `simoxide-sim`: `src/sim/reconf.rs`
   (new: PRM state and recorders moved out of `sim.rs`, the host API), `src/stats.rs` (new),
   `sim.rs` (start: PRM attach and container count; dispatch of `Ev::Reconf`; `emit` passes the
