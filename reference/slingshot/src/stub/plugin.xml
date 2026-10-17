@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.m2m.qvt.oml.javaBlackboxUnits">
+      <unit name="ProfilesLibrary" namespace="org.palladiosimulator.architecturaltemplates.catalog.black">
+         <library class="org.palladiosimulator.architecturaltemplates.catalog.black.ProfilesLibrary" name="ProfilesLibrary">
+            <metamodel nsURI="http://www.eclipse.org/emf/2002/Ecore"/>
+         </library>
+      </unit>
+   </extension>
+</plugin>

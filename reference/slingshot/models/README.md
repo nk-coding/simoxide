@@ -1,0 +1,10 @@
+# Models of the Slingshot reference runner
+
+| Directory | Source | Changes |
+|---|---|---|
+| `spd_minimal` | `Palladio-Documentation-Slingshot/examples/minimalexample` (commit `9444815`, 2024-09-13) | only the files the example's `default.experiments` uses as initial model; `default.slo` dropped (the SLO metamodel is not installed), `representations.aird`, `default.dlim`, `default.usageevolution`, `default.experiments` not copied |
+| `spd_scale_in` | `spd_minimal` | S0 probe of quirk Q5: second policy "Scale in at 80" (`StepAdjustment -1` at t = 80); the accounting demand raised from 2.0 to 9.0 so that several jobs are on `AppServer_1` when it is removed |
+
+Licence: the Palladio example models are distributed with the Palladio documentation; their
+licence (EPL-2.0 by Palladio convention) is pending confirmation with the maintainers (DESIGN-SPD
+decision U3). Do not publish outside this repository until confirmed.

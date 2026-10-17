@@ -41,3 +41,7 @@ __pycache__/
 /docs/node_modules/
 /docs/.vitepress/cache/
 /docs/.vitepress/dist/
+
+# Slingshot reference runner: build output, fresh installs, smoke outputs (reference/slingshot/setup.sh, install.sh)
+/reference/slingshot/build/
+/reference/slingshot/install/

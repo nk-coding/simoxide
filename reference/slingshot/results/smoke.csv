@@ -1,0 +1,10 @@
+model,sim_time,events,rows,trace_lines,stoex_draws,math_draws,spd_requests,det_cold_identical,det_warm_identical,instrumentation_neutral,stock_identical,stock_vs_det_measurements,cold_run_ms,cold_jvm_ms,warm_run_ms,warm_sim_ms,error
+spd_minimal,100,2468,200,2470,0,101,1,yes,yes,yes,no(trace.jsonl),yes,2648.0,3844,289.0,121.2,
+spd_scale_in,150,2570,176,2572,0,119,2,yes,yes,yes,no(trace.jsonl),yes,2415.3,3623,242.5,125.4,
+x_ss_minimal,1000,17687,1812,17689,453,0,0,yes,yes,yes,no(trace.jsonl),yes,2506.5,3569,272.2,118.5,
+x_ss_minimalexample,1000,20538,1248,20540,312,638,0,yes,yes,yes,yes,yes,2506.5,3630,380.5,189.9,
+x_ss_minimalexample_open_ps,1000,45995,3495,45997,0,1972,0,yes,yes,yes,no(trace.jsonl),yes,2873.6,3972,451.7,284.1,
+x_ss_delay,1000,6348,453,6350,453,0,0,yes,yes,yes,yes,yes,2316.1,3468,168.2,31.1,
+x_espresso,100,45267,5026,45269,0,0,0,yes,yes,yes,yes,no(measurements.csv),2271.3,3298,270.7,155.7,
+x_ss_mediastore,200000,23733,3902,23735,468,0,0,yes,yes,yes,no(trace.jsonl),yes,3449.2,4492,417.9,250.0,
+x_sl_mediastore,100000,2678,357,2680,51,11,0,yes,yes,yes,no(trace.jsonl),yes,2715.4,3727,280.7,100.9,

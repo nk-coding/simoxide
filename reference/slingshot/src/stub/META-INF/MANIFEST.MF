@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ProfilesLibrary stub
+Bundle-SymbolicName: org.palladiosimulator.architecturaltemplates.catalog;singleton:=true
+Bundle-Version: 5.2.2.stub
+Require-Bundle: org.eclipse.emf.ecore,org.eclipse.m2m.qvt.oml
+Export-Package: org.palladiosimulator.architecturaltemplates.catalog.black
