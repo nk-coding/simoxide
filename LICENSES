@@ -47,9 +47,8 @@ Used in:
   de.uka.ipd.sdq.featuremodel and de.uka.ipd.sdq.featureconfig) and completions.ecore (bundle
   org.palladiosimulator.analyzer.completions), copied verbatim from the 5.2.2 product (their
   bundle manifests declare the Apache License 2.0); runtimemeasurement.ecore from SimuLizar's
-  bundle org.palladiosimulator.simulizar.runtimemeasurement (also in
-  crates/qvto/qvto-simoxide/data/). Embedded by the QVTo host.
-- crates/simoxide-model/src/meta/generated.rs, generated_ext.rs: tables generated from the PCM,
+  bundle org.palladiosimulator.simulizar.runtimemeasurement. Embedded by the QVTo host.
+- crates/simoxide-model/src/meta/generated.rs: tables generated from the PCM,
   StoEx, probability-function, units, identifier, metric-specification, EDP2, monitor-repository
   and measuring-point metamodels (.ecore) of the 5.2.2 product (the SPD packages appended to the
   same tables: section 6).
@@ -165,7 +164,7 @@ Licence:   pending confirmation; the user is clarifying it with the maintainers.
            projects are EPL by convention.
 
 Used in:
-- crates/simoxide-model/src/meta/generated.rs, generated_ext.rs: the packages spd (with its 8
+- crates/simoxide-model/src/meta/generated.rs: the packages spd (with its 8
   subpackages), semanticspd and spdmeasuringpoint, appended after the 5.2.2 packages.
 - reference/oracles/pcm-model/golden-spd/: canonical dumps written by EMF with the generated SPD
   packages of the Slingshot jars (run-spd.sh), of SimOxide's own test model and of the models
@@ -203,7 +202,7 @@ Consequently no licence is granted for the crate (no `license` in its manifest, 
 false`), and builds that include it are for local use only and must not be distributed. It is
 pulled in only by the opt-in cargo features jdk-order, exact (simoxide-sim, simoxide-testkit,
 simoxide-cli, simoxide-reconf: SimuLizar's exact mode) and compat (qvto-runtime, qvto-vm, qvto,
-qvto-testkit, qvto-cli, qvto-simoxide: QVTo's compat mode). Default builds, and with them every
+qvto-testkit, qvto-cli: QVTo's compat mode). Default builds, and with them every
 release artefact, leave it out; the release check is
 
     cargo tree -e normal -p simoxide-cli    (and -p qvto-cli)

@@ -4,7 +4,7 @@ The EMF core shared by SimOxide and its QVTo engine (formerly `qvto-model`; the 
 import it as `qvto_model` through a package rename): metamodels resolved to dense ids, the
 `ModelStore` trait through which the QVTo VM reads and writes models with EMF's semantics, and
 the static seed of generated tables. No dependencies. Implementations of `ModelStore`: `qvto-emf`
-(own Ecore/XMI store) and `qvto-simoxide` (SimOxide's `raw::Graph`).
+(the EMF graph shared by SimOxide and QVTo).
 
 SimOxide's generated PCM tables (`simoxide-model/src/meta/generated.rs`, written by
 `simoxide-model/tools/gen_meta.py`) are a `seed::StaticPackages`. `MetaRegistry::from_static`
@@ -52,9 +52,8 @@ child in its resource), `EcoreUtil.delete`, `ECollections.setEList`, changeabili
 A store whose metamodel is fixed (generated tables) fills `contract::Roles` with features of its
 own metamodel that have the properties of the contract metamodel's features, and runs the same
 checks. The checks need all roles on one class with the contract's defaults, which no PCM class
-has; `qvto-simoxide` therefore runs the suite with the contract metamodel in place of SimOxide's
-(its graph code is registry-driven) and covers PCM's features with random scripts against
-`qvto-emf`.
+has; SimOxide's PCM graph is the same `simoxide-emf` graph, whose code is registry-driven, so the
+suite on that graph covers it.
 
 ## Verification
 

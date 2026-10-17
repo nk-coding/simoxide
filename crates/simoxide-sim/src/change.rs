@@ -3,7 +3,7 @@
 //!
 //! A running simulation reads only its [`CompiledModel`]. To change the model of a run between
 //! two events (`Simulation::apply_changes`), the run's model graph is edited (by a QVTo
-//! transformation through the `qvto-simoxide` adapter, or by direct edits through the same
+//! transformation on the model graph (the shared EMF graph), or by direct edits through the same
 //! adapter), the edits are described by a [`ChangeSet`] (the adapter's change journal), and
 //! [`recompile`] turns the changed graph into the run's next compiled model:
 //!
@@ -32,7 +32,7 @@ use std::collections::HashSet;
 use std::fmt;
 
 /// The changes of a change set, in the order they were made (the change journal of the
-/// `qvto-simoxide` adapter, or of direct edits through it). Objects are graph objects; changes
+/// model graph's journal, or of direct edits). Objects are graph objects; changes
 /// of objects outside the graph (the adapter's other home: runtime measurements, SPD models)
 /// are not part of it.
 ///

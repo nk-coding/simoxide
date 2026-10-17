@@ -608,21 +608,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "qvto-simoxide"
-version = "0.1.0"
-dependencies = [
- "qvto",
- "qvto-paths",
- "qvto-runtime",
- "qvto-sema",
- "qvto-testkit",
- "qvto-vm",
- "simoxide-emf",
- "simoxide-emf-core",
- "simoxide-model",
-]
-
-[[package]]
 name = "qvto-syntax"
 version = "0.1.0"
 dependencies = [
@@ -910,7 +895,6 @@ dependencies = [
  "qvto-paths",
  "qvto-runtime",
  "qvto-sema",
- "qvto-simoxide",
  "qvto-testkit",
  "qvto-vm",
  "serde_json",

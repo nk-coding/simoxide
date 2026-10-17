@@ -97,11 +97,10 @@ edited, and `Simulation::apply_changes` takes the changed graph with a `ChangeSe
 changes (the change journal of the edits):
 
 ```rust
-use simoxide_reconf::{Edit, Session};
+use simoxide_reconf::Edit;
 
 sim.run_until(Pause::After(60_000_000_000))?;
-let mut session = Session::new();               // the QVTo adapter's session: store + journal
-let mut e = Edit::new(&sim, &mut session);      // a copy of the run's graph, journal on
+let mut e = Edit::new(&sim);                    // a copy of the run's graph, journal on
 let server = e.find("_rc2").unwrap();
 let copy = e.clone_container(server, "_rc3", "Server 2")?;
 for link in e.links_of(server) {
@@ -112,9 +111,11 @@ let report = e.apply(&mut sim)?;                // ChangeReport: applied, ignore
 let result = sim.finish()?;
 ```
 
-- Edits go through the `qvto-simoxide` adapter's store (`simoxide-reconf`; `Edit::store()` gives
-  the full `ModelStore` API). A QVTo transformation run on the same store produces the same kind of
-  journal; `simoxide_reconf::apply_journal` applies it.
+- The model graph is the EMF graph SimOxide shares with its QVTo engine (`simoxide_emf::Graph`):
+  it is a `qvto_model::ModelStore` with EMF's semantics and records every change, side effects
+  included, in its journal. `Edit::store()` gives the graph with the full `ModelStore` API; a QVTo
+  transformation run on the graph produces the same kind of journal, and
+  `simoxide_reconf::apply_journal` applies it.
 - The run continues as SimuLizar 5.2.2 continues after such a change: its syncers' rules, gaps
   included, are on [Model changes](../spec/model-changes.md). Requests in progress keep their
   state. Changes SimuLizar aborts on, and changes not supported yet, return an error and leave the
@@ -154,8 +155,12 @@ let all = qvto.run_rules(&mut sim, &rules, &Invocation::simulizar()).map_err(|(_
   metamodel objects, and the metamodels SimuLizar and Slingshot register besides SimOxide's
   (runtime measurements, feature model and configuration, completions); compile each
   transformation once with it and share both between runs and threads. `QvtoRun` is a run's QVTo
-  state, created on first use (about 1 ms). Clone it with the run's fork (copy on write): new
-  objects then get the same ids in both.
+  state, created on first use: the run's model graph gets the core's metamodel objects (a copy
+  of the core's prototype, about 1 ms) and its id generator. Models of other metamodels
+  (`QvtoRun::load_model`, `create_model`: a runtime measurement model, ...) are resources of the
+  same graph and live with the run's model (`Simulation::set_model_graph` when only they
+  changed). Clone `QvtoRun` with the run's fork (copy on write): new objects then get the same
+  ids in both.
 - **Bindings.** By default every model parameter is bound as SimuLizar does: the models whose
   metamodel is the parameter's (`Bind::ByNsUri`); `Invocation::slingshot()` binds as Slingshot
   does; `Invocation::bind(name, Bind::Models(..))` names models (graph resources, or models of
@@ -178,7 +183,10 @@ let all = qvto.run_rules(&mut sim, &rules, &Invocation::simulizar()).map_err(|(_
 - **Flavours.** The host works with both flavours; the Slingshot flavour does not take model
   changes yet (`ChangeError::Unsupported`).
 - `dry_run` runs a transformation on a scratch copy, `with_scratch_store` reads one, and
-  `with_store` edits the run's models with any `ModelStore` operation.
+  `with_store` edits the run's models with any `ModelStore` operation (all on the graph:
+  `&mut simoxide_model::raw::Graph`, objects as `ObjId`). Outside a simulation,
+  `QvtoCore::attach` gives a loaded model graph the core's QVTo state and
+  `QvtoCore::load_model` loads other models into it.
 
 ## Outputs
 
@@ -222,6 +230,6 @@ collected in `RunResult::measurements`:
 | `simoxide-sched` | processor sharing, FCFS, delay and passive resources on DESMO-J nanosecond time |
 | `simoxide-sim` | IR compiler, event core, interpreter, measurements, batch and embedding API, exact and fast mode |
 | `simoxide-spd` | scaling policy definitions: Slingshot's filter-chain interpreter and its driver |
-| `simoxide-reconf` | runtime model changes: direct edits, the QVTo host (transformations, SimuLizar rule sets, SPD adjustments); QVTo through the `qvto-simoxide` adapter |
+| `simoxide-reconf` | runtime model changes: direct edits, the QVTo host (transformations, SimuLizar rule sets, SPD adjustments); QVTo directly on the model graph |
 | `simoxide-cli` | the `simoxide` and `simoxide-bench` binaries |
 | `simoxide-testkit` | differential testing: formats, diff, reference driver, model generator, `simoxide-fuzz`, exact-vs-fast statistics |

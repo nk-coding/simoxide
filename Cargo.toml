@@ -25,7 +25,6 @@ members = [
     "crates/qvto/qvto-paths",
     "crates/qvto/qvto-runtime",
     "crates/qvto/qvto-sema",
-    "crates/qvto/qvto-simoxide",
     "crates/qvto/qvto-syntax",
     "crates/qvto/qvto-testkit",
     "crates/qvto/qvto-types",
@@ -63,7 +62,6 @@ qvto-emf = { path = "crates/foundation/simoxide-emf", package = "simoxide-emf" }
 qvto-paths = { path = "crates/qvto/qvto-paths" }
 qvto-runtime = { path = "crates/qvto/qvto-runtime" }
 qvto-sema = { path = "crates/qvto/qvto-sema" }
-qvto-simoxide = { path = "crates/qvto/qvto-simoxide" }
 qvto-syntax = { path = "crates/qvto/qvto-syntax" }
 qvto-testkit = { path = "crates/qvto/qvto-testkit" }
 qvto-types = { path = "crates/qvto/qvto-types" }

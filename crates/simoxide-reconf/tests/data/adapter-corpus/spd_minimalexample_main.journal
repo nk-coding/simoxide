@@ -71,8 +71,8 @@ new7 container - -> new6 pcm.seff::AbstractBranchTransition.branchBehaviour_Bran
 new6 set pcm.seff::AbstractBranchTransition.branchBehaviour_BranchTransition Null -> new7
 default.repository#/0/@components__Repository.1/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.2 added pcm.seff::BranchAction.branches_Branch [1] new6
 new6 container - -> default.repository#/0/@components__Repository.1/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.2 pcm.seff::BranchAction.branches_Branch
-default.repository#/0/@components__Repository.1/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.2/@branches_Branch.0 set pcm.seff::ProbabilisticBranchTransition.branchProbability Double(1.0) -> Double(0.5)
 new6 set pcm.seff::ProbabilisticBranchTransition.branchProbability Double(1.0) -> Double(0.5)
+default.repository#/0/@components__Repository.1/@serviceEffectSpecifications__BasicComponent.0/@steps_Behaviour.2/@branches_Branch.0 set pcm.seff::ProbabilisticBranchTransition.branchProbability Double(1.0) -> Double(0.5)
 new11 created pcm.core.composition::AssemblyConnector
 new11 root-added extent:/1 [11]
 new11 set pcm.core.entity::NamedElement.entityName Str("aName") -> Str("Assembly_LoadBalancer_EspressoAccountingComponent_AssemblyContext_2")

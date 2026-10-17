@@ -13,7 +13,7 @@ as the separate repository qvto-rs and imported with its history (`git log -- cr
   mode.
 - **Bytecode.** Transformations compile to a register bytecode that a VM interprets.
 - **Embeddable.** The engine reads and writes models through a trait, so it runs on its own
-  Ecore/XMI layer and directly on SimOxide's model graph (`qvto-simoxide`).
+  Ecore/XMI layer, which is also SimOxide's model graph (`crates/foundation/simoxide-emf`).
 
 Status: `PLAN.md` (the qvto-rs milestone log, Q0-Q7, all done). The merge into SimOxide follows
 `docs/merge-into-simoxide.md` (steps M0-M8; status at its top).
@@ -56,7 +56,6 @@ it (`qvto-paths`), so make it by hand only before running a Java tool first:
 | `qvto-testkit` | conformance runner, differential testing, fuzz generators and regression cases |
 | `qvto-cli` | the `qvto` command |
 | `qvto-paths` | where tests, examples and tools find the QVTo root and the target directory |
-| `qvto-simoxide` | the store over SimOxide's model graph (`simoxide-model`), its metamodel registry, the change journal; the bridge until the shared EMF graph (merge steps M5/M6) |
 
 ## Building and testing
 
@@ -81,7 +80,7 @@ conformance and corpus tests; without them those tests skip.
 
 Modes and builds: the default build is EPL-only and has the fast and ordered modes
 (`Mode::default()` is `Fast`). Compat mode (Eclipse's `HashSet`/`HashMap` orders, HotSpot identity hashes) needs the
-cargo feature `compat` (qvto-runtime, qvto-vm, qvto, qvto-testkit, qvto-cli, qvto-simoxide),
+cargo feature `compat` (qvto-runtime, qvto-vm, qvto, qvto-testkit, qvto-cli),
 which links `simoxide-jcompat-exact`; no licence is granted for it, so such builds must not be
 distributed (the repository's `LICENSES`, section 7). A run in compat mode without the feature
 fails with `RunOutcome::code == MODE_UNAVAILABLE`; `qvto conform --engine qvto` and

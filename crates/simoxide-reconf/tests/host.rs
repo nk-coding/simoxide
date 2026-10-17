@@ -7,12 +7,12 @@
 mod common;
 
 use common::*;
-use qvto_simoxide::{ChangeKind, IdPolicy};
+use qvto_emf::{ChangeKind, IdPolicy};
 use simoxide_model::meta::feat as mf;
 use simoxide_model::raw::PcmGraph;
 use simoxide_reconf::{
     AbortPolicy, Bind, Edit, FailedRunChanges, Imports, Invocation, ModelRef, QvtMode, QvtoCore,
-    QvtoRun, ReconfError, RuleSet, RunConfig, Session, Transformation,
+    QvtoRun, ReconfError, RuleSet, RunConfig, Transformation,
 };
 use simoxide_sim::{
     ChangeError, CompiledModel, Fast, FlavourConfig, Mode, Outputs, Pause, SimConfig, Simulation,
@@ -162,7 +162,7 @@ fn with_at(cm: &CompiledModel, t: i64, f: impl FnOnce(&mut Simulation<'_>)) -> O
 }
 
 /// The ids of the resource containers created in a journal.
-fn new_ids(j: &qvto_simoxide::Journal) -> Vec<String> {
+fn new_ids(j: &qvto_emf::Journal) -> Vec<String> {
     j.changes
         .iter()
         .filter_map(|c| match &c.kind {
@@ -220,8 +220,7 @@ fn a_rule_mid_run_changes_the_simulation_like_a_direct_edit() {
     });
     // the same change as a direct edit (F2's path)
     let by_edit = with_at(&cm, 100, |sim| {
-        let mut session = Session::new();
-        let mut e = Edit::new(sim, &mut session);
+        let mut e = Edit::new(sim);
         let server = e.find("_h19_linking_resource_prs2").unwrap();
         e.set_rate(server, "4.0").unwrap();
         e.apply(sim).unwrap();
@@ -573,7 +572,8 @@ fn ids_follow_the_policy() {
 mod spd {
     use super::*;
     use qvto_model::{Datum, ModelStore};
-    use simoxide_reconf::{AdjustHooks, QvtoAdjuster, SimStore};
+    use simoxide_model::raw::Graph;
+    use simoxide_reconf::{AdjustHooks, QvtoAdjuster};
     use simoxide_sim::Exact;
     use simoxide_spd::log::VecLog;
     use simoxide_spd::sim::{SpdRun, spd_of};
@@ -583,15 +583,11 @@ mod spd {
     struct EnactPolicy;
 
     impl AdjustHooks for EnactPolicy {
-        fn before(&mut self, store: &mut SimStore<'_>, spd: &Spd, req: &AdjustmentRequest) {
+        fn before(&mut self, store: &mut Graph, spd: &Spd, req: &AdjustmentRequest) {
             let cfg = spd.model().configuration.expect("semantic configuration");
             let policy = spd.model().policies[req.policy].obj;
             store
-                .set(
-                    cfg.0,
-                    qvto_model::FeatureId(mf::Configuration_enactedPolicy.0),
-                    Datum::Obj(policy.0),
-                )
+                .set(cfg, mf::Configuration_enactedPolicy, Datum::Obj(policy))
                 .unwrap();
         }
     }
@@ -724,7 +720,7 @@ fn costs() {
     sim.run_until(Pause::After(100 * S)).unwrap();
     let mut run = QvtoRun::new(&core, RunConfig::default()).unwrap();
     let t0 = std::time::Instant::now();
-    run.create_model(&sim, "simoxide:/prm");
+    run.create_model(&mut sim, "simoxide:/prm");
     let t_state = t0.elapsed();
     let t0 = std::time::Instant::now();
     let _g = sim.model_graph().clone();

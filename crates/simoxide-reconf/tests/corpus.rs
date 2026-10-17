@@ -14,9 +14,10 @@
 mod common;
 
 use common::*;
+use qvto_emf::{IdPolicy, ObjId};
 use qvto_model::{ModelStore, ResourceId};
-use qvto_simoxide::{IdPolicy, Session, SimStore};
 use qvto_testkit::compare::renumber_extent_resources as renumber;
+use simoxide_model::raw::Graph;
 use simoxide_reconf::{
     Invocation, InvokeHooks, QvtMode, QvtoRun, ReconfError, RunConfig, Transformation,
 };
@@ -47,19 +48,12 @@ fn expected(id: &str, java_hashes: bool) -> &'static str {
     }
 }
 
-/// The transformation on the case's models loaded on their own (the adapter's set-up): the
-/// keyed journal.
+/// The transformation on the case's models loaded on their own (outside a simulation: the PCM
+/// documents by SimOxide's loader, the core's QVTo state attached, the other models loaded
+/// next to them): the keyed journal.
 fn standalone(c: &qvto_testkit::case::Case, t: &Transformation) -> Vec<String> {
     let _ = t;
     let root = qroot();
-    let mut session = Session::new();
-    session.resource_set_mut().add_alias(
-        "platform:/plugin/org.eclipse.emf.ecore/model/Ecore.ecore",
-        "http://www.eclipse.org/emf/2002/Ecore",
-    );
-    for (loc, text) in simoxide_reconf::palladio_metamodels() {
-        session.load_metamodel_text(loc, text).unwrap();
-    }
     let mut loader = simoxide_model::Loader::default();
     let mut kinds = Vec::new();
     for p in &c.inputs {
@@ -84,17 +78,15 @@ fn standalone(c: &qvto_testkit::case::Case, t: &Transformation) -> Vec<String> {
         }
     }
     let (mut graph, _) = loader.finish();
+    core().attach(&mut graph, IdPolicy::None);
     let mut inputs = Vec::new();
-    {
-        let mut store = session.store(&mut graph);
-        for (file, r) in &kinds {
-            inputs.push(match r {
-                Some(r) => store.graph_resource(*r).unwrap(),
-                None => store.load_model(file).unwrap(),
-            });
-        }
+    for (file, r) in &kinds {
+        inputs.push(match r {
+            Some(r) => *r,
+            None => core().load_model(&mut graph, file).unwrap(),
+        });
     }
-    // compile against this session's registry (equal to the core's)
+    // compile against the core's registry
     let path = c.path(&root, c.qvto.as_deref().unwrap());
     let files = match &c.import_root {
         Some(r) => qvto::units::FsResolver {
@@ -119,18 +111,18 @@ fn standalone(c: &qvto_testkit::case::Case, t: &Transformation) -> Vec<String> {
     let compiled = qvto::compile_with_metamodel(
         files.unit_source(&path).unwrap(),
         &bb,
-        session.meta().clone(),
-        &session.operations(),
-        &session.derivations(),
+        core().meta().clone(),
+        core().operations(),
+        core().derivations(),
     );
     let program = compiled.program.expect("compiles");
-    let mut store = SimStore::new(&mut graph, &mut session);
-    let keys = object_keys(&store);
-    let ids = load_tape(c).map(|t| id_source(&store, &t));
+    let store = &mut graph;
+    let keys = object_keys(store);
+    let ids = load_tape(c).map(|t| id_source(store, &t));
     let ir = &program.ir;
     let main = &ir.modules[ir.main_module.index()];
     let mut it = inputs.iter();
-    let args: Vec<Vec<u32>> = main
+    let args: Vec<Vec<ObjId>> = main
         .model_params
         .iter()
         .map(|mp| {
@@ -142,7 +134,7 @@ fn standalone(c: &qvto_testkit::case::Case, t: &Transformation) -> Vec<String> {
                 .unwrap_or_default()
         })
         .collect();
-    store.session().start_journal();
+    store.start_journal();
     let opts = qvto::RunOptions {
         mode: qvto_runtime::Mode::Compat,
         id_source: ids,
@@ -152,11 +144,11 @@ fn standalone(c: &qvto_testkit::case::Case, t: &Transformation) -> Vec<String> {
     let mut natives = qvto::blackbox::Natives::new();
     qvto::blackbox::palladio::register_simulation_time(&mut natives, || 0.0);
     {
-        let mut vm = qvto::Vm::new(&program, &mut store, opts);
+        let mut vm = qvto::Vm::new(&program, &mut *store, opts);
         vm.set_natives(std::rc::Rc::new(natives));
         vm.run_transformation(args);
     }
-    let j = store.session().take_journal();
+    let j = store.take_journal();
     keyed_journal(&keys, &j)
 }
 
@@ -181,7 +173,7 @@ fn corpus_rules_on_a_run_model_mid_run() {
             },
         )
         .unwrap();
-        let models = inputs(&c, &sim, &mut run);
+        let models = inputs(&c, &mut sim, &mut run);
         let inv = Invocation {
             binds: binds(&t, &models),
             config: c
@@ -198,7 +190,7 @@ fn corpus_rules_on_a_run_model_mid_run() {
         let jd = j.dump().unwrap_or("");
         let labels = dump_labels(jd);
         // a dry run: the transformation's result, compared with the Java runner's
-        let mut ids = |s: &SimStore<'_>| id_source(s, tape.as_ref().unwrap());
+        let mut ids = |s: &Graph| id_source(s, tape.as_ref().unwrap());
         let (dry, d) = run
             .dry_run(
                 &sim,
@@ -238,7 +230,7 @@ fn corpus_rules_on_a_run_model_mid_run() {
             }
         }
         // the run itself
-        let mut ids = |s: &SimStore<'_>| id_source(s, tape.as_ref().unwrap());
+        let mut ids = |s: &Graph| id_source(s, tape.as_ref().unwrap());
         let r = run.invoke_with(
             &mut sim,
             &t,

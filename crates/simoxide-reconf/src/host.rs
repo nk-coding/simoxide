@@ -22,16 +22,17 @@
 //! mode by default.
 
 use crate::change_set;
-use crate::qvt::{self, NativeSpec, RawOutcome, RunSession, Template};
+use crate::qvt::{self, NativeSpec, RawOutcome, Template};
+use qvto_emf::{IdPolicy, Journal, ObjId};
+use qvto_model::ModelStore;
 use qvto_runtime::Mode;
 use qvto_runtime::identity::IdentityHashSource;
 use qvto_sema::ir::Direction;
-use qvto_simoxide::{IdPolicy, Journal, SimStore};
 use simoxide_model::raw::{Graph, ResId};
 use simoxide_sim::{ChangeError, ChangeReport, Compat, Flavour, SimError, Simulation};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 /// QVTo's evaluation mode for the transformations of a run.
@@ -145,9 +146,8 @@ pub struct QvtoCore(Arc<CoreInner>);
 
 struct CoreInner {
     id: u64,
-    /// Cloned for each run (under the lock; a session holds a `RefCell` cache, so it is
-    /// `Send` but not `Sync`).
-    template: Mutex<Template>,
+    /// What a run's graph gets on its first QVTo use (registry, metamodel objects).
+    template: Template,
     meta: qvto_model::MetaRegistry,
     operations: Vec<qvto_model::MetaOperation>,
     derivations: Vec<qvto_model::MetaDerivation>,
@@ -194,7 +194,7 @@ impl CoreBuilder {
             meta: template.meta().clone(),
             operations: template.operations(),
             derivations: template.derivations(),
-            template: Mutex::new(template),
+            template,
             profile_keys,
         })))
     }
@@ -252,6 +252,17 @@ impl QvtoCore {
     /// The metamodel registry the transformations are compiled against.
     pub fn meta(&self) -> &qvto_model::MetaRegistry {
         &self.0.meta
+    }
+
+    /// The `EOperation`s of the registered metamodels (for compiling against [`QvtoCore::meta`]
+    /// outside the host).
+    pub fn operations(&self) -> &[qvto_model::MetaOperation] {
+        &self.0.operations
+    }
+
+    /// The OCL derivations of the registered metamodels' features.
+    pub fn derivations(&self) -> &[qvto_model::MetaDerivation] {
+        &self.0.derivations
     }
 
     /// Compiles the transformation in `path` (about 1 ms per SimuLizar rule).
@@ -358,12 +369,21 @@ impl QvtoCore {
         })))
     }
 
-    fn instantiate(&self, ids: IdPolicy) -> RunSession {
+    /// Gives a model graph the QVTo state of this core, once (the registry with the core's
+    /// metamodels, their metamodel objects for `eClass()`, the id policy of new objects): for
+    /// running the core's transformations on a graph outside a simulation. A run's graph gets
+    /// it on its first QVTo use.
+    pub fn attach(&self, g: &mut Graph, ids: IdPolicy) {
+        self.0.template.attach(g, ids);
+    }
+
+    /// Loads a model of another metamodel (e.g. a PRM file) into a graph with the QVTo state
+    /// ([`QvtoCore::attach`]), its references to the graph's documents resolved.
+    pub fn load_model(&self, g: &mut Graph, path: &Path) -> Result<ResId, ReconfError> {
         self.0
             .template
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .instantiate(ids)
+            .load_model(g, path)
+            .map_err(ReconfError::Load)
     }
 }
 
@@ -442,7 +462,8 @@ pub enum NsBinding {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ModelRef {
     Graph(ResId),
-    Loaded(u32),
+    /// A model loaded or created through the host (a resource of the run's graph as well).
+    Loaded(ResId),
     Uri(String),
 }
 
@@ -516,14 +537,14 @@ impl Invocation {
 }
 
 /// Makes the identity-hash source of a compat-mode run from the store before the run.
-pub type IdSourceFn<'h> = dyn FnMut(&SimStore<'_>) -> Box<dyn IdentityHashSource> + 'h;
+pub type IdSourceFn<'h> = dyn FnMut(&Graph) -> Box<dyn IdentityHashSource> + 'h;
 
 /// Hooks of a transformation run ([`QvtoRun::invoke_with`]).
 #[derive(Default)]
 pub struct InvokeHooks<'h> {
     /// Edits of the models before the run, recorded in the run's journal and applied with its
     /// changes (e.g. SPD's `Configuration.enactedPolicy`); the parameters are bound after it.
-    pub before: Option<&'h mut dyn FnMut(&mut SimStore<'_>)>,
+    pub before: Option<&'h mut dyn FnMut(&mut Graph)>,
     /// The identity hashes of the compat mode, given the store before the run (replaying a Java
     /// run's identity hashes for exact comparisons). Default: HotSpot's generator.
     pub ids: Option<&'h mut IdSourceFn<'h>>,
@@ -601,7 +622,7 @@ pub struct Outcome {
     pub change: Option<ChangeReport>,
     /// Per model parameter: the roots of its extent after the run (`out` and `inout`
     /// parameters; store handles, see [`QvtoRun::with_scratch_store`]), `None` for `in`.
-    pub extents: Vec<Option<Vec<u32>>>,
+    pub extents: Vec<Option<Vec<ObjId>>>,
     /// Wall time of the transformation run (µs).
     pub run_micros: u64,
 }
@@ -630,49 +651,27 @@ pub struct QvtoRun {
     state: Option<Box<PerRun>>,
 }
 
+#[derive(Clone)]
 struct PerRun {
-    /// Shared copy on write between the clones of a run's state (a fork pays for the copy of
-    /// the session, about 0.3-0.8 ms, only when it uses it).
-    session: Arc<Mutex<RunSession>>,
-    /// A copy of the simulation's model graph the transformations run on, with the
-    /// simulation's model it equals (generation and address of the compiled model). Dropped by
-    /// a clone and whenever it may differ; copied again when needed.
-    work: Option<(Graph, (u32, usize))>,
+    /// The graph the transformations run on: the simulation's model graph with the QVTo state
+    /// (metamodel objects, models of other metamodels such as the PRM, the id generator), and
+    /// the simulation state it belongs to. Shared copy on write between the clones of a run's
+    /// state (a fork copies it when it first changes it). Whenever only models of other
+    /// metamodels changed, the simulation gets it too (`Simulation::set_model_graph`), so that
+    /// they live with the run's model (forks, resumed runs, model changes).
+    work: Option<(Arc<Graph>, Fp)>,
     invocations: u64,
 }
 
-impl Clone for PerRun {
-    fn clone(&self) -> Self {
-        PerRun {
-            session: self.session.clone(),
-            work: None,
-            invocations: self.invocations,
-        }
-    }
-}
+/// Which simulation model a working graph belongs to: the model's generation, the compiled
+/// model and the model graph (addresses).
+type Fp = (u32, usize, usize);
 
-impl PerRun {
-    /// The session, unshared.
-    fn session(&mut self) -> &mut RunSession {
-        if Arc::get_mut(&mut self.session).is_none() {
-            let copy = lock(&self.session).clone();
-            self.session = Arc::new(Mutex::new(copy));
-        }
-        Arc::get_mut(&mut self.session)
-            .expect("unshared")
-            .get_mut()
-            .unwrap_or_else(|e| e.into_inner())
-    }
-}
-
-fn lock<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
-    m.lock().unwrap_or_else(|e| e.into_inner())
-}
-
-fn fingerprint<C: Compat, F: Flavour>(sim: &Simulation<'_, C, F>) -> (u32, usize) {
+fn fingerprint<C: Compat, F: Flavour>(sim: &Simulation<'_, C, F>) -> Fp {
     (
         sim.state().model().generation(),
         sim.compiled() as *const _ as usize,
+        sim.model_graph() as *const _ as usize,
     )
 }
 
@@ -718,59 +717,80 @@ impl QvtoRun {
         let ids = self.cfg.ids;
         let st = self.state.get_or_insert_with(|| {
             Box::new(PerRun {
-                session: Arc::new(Mutex::new(core.instantiate(ids))),
                 work: None,
                 invocations: 0,
             })
         });
         let fp = fingerprint(sim);
         if st.work.as_ref().is_none_or(|(_, f)| *f != fp) {
-            st.work = Some((sim.model_graph().clone(), fp));
+            let mut g = sim.model_graph().clone();
+            core.0.template.attach(&mut g, ids);
+            st.work = Some((Arc::new(g), fp));
         }
         st
     }
 
+    /// The working graph, unshared (copied when a fork shares it).
+    fn work_mut(&mut self) -> &mut Graph {
+        let st = self.state.as_mut().expect("per-run state");
+        Arc::make_mut(&mut st.work.as_mut().expect("work graph").0)
+    }
+
+    /// Hands the working graph to the simulation when only models of other metamodels changed
+    /// (see [`PerRun::work`]).
+    fn share_work<C: Compat, F: Flavour>(&mut self, sim: &mut Simulation<'_, C, F>) {
+        let Some(st) = self.state.as_mut() else {
+            return;
+        };
+        let Some((g, fp)) = st.work.as_mut() else {
+            return;
+        };
+        if sim.set_model_graph(g.clone()).is_ok() {
+            *fp = fingerprint(sim);
+        } else {
+            st.work = None;
+        }
+    }
+
     /// Loads a model of another metamodel than SimOxide's (e.g. a runtime measurement model)
-    /// into the run's QVTo state; its references to the model graph are linked. The returned
-    /// reference binds it ([`Bind::Models`]).
+    /// into the run's model graph; its references to the PCM documents are resolved. The
+    /// returned reference binds it ([`Bind::Models`]). The model lives with the run's model
+    /// from then on (forks, model changes).
     pub fn load_model<C: Compat, F: Flavour>(
         &mut self,
-        sim: &Simulation<'_, C, F>,
+        sim: &mut Simulation<'_, C, F>,
         path: &Path,
     ) -> Result<ModelRef, ReconfError> {
-        let st = self.prepare(sim);
-        let mut work = st.work.take().expect("work graph");
-        let r = st.session().load_model(&mut work.0, path);
-        st.work = Some(work);
-        r.map_err(ReconfError::Load)
+        self.prepare(sim);
+        let core = self.core.clone();
+        let r = core.0.template.load_model(self.work_mut(), path);
+        self.share_work(sim);
+        r.map(ModelRef::Loaded).map_err(ReconfError::Load)
     }
 
     /// A new, empty model for objects of other metamodels (e.g. the PRM the reconfiguration
     /// process fills, R1), filled with [`QvtoRun::with_store`].
     pub fn create_model<C: Compat, F: Flavour>(
         &mut self,
-        sim: &Simulation<'_, C, F>,
+        sim: &mut Simulation<'_, C, F>,
         uri: &str,
     ) -> ModelRef {
-        let st = self.prepare(sim);
-        let mut work = st.work.take().expect("work graph");
-        let r = st.session().create_model(&mut work.0, uri);
-        st.work = Some(work);
-        r
+        self.prepare(sim);
+        let r = self.work_mut().create_resource(uri);
+        self.share_work(sim);
+        ModelRef::Loaded(r)
     }
 
-    /// Runs `f` on the QVTo store over the run's model (any `qvto_model::ModelStore`
-    /// operation: writing runtime measurement values, setting SPD's `enactedPolicy`, ...).
-    /// Changes of graph objects are applied to the simulation like a transformation's.
+    /// Runs `f` on the run's model graph (any `qvto_model::ModelStore` operation: writing
+    /// runtime measurement values, setting SPD's `enactedPolicy`, ...). Changes of PCM objects
+    /// are applied to the simulation like a transformation's.
     pub fn with_store<C: Compat, F: Flavour, T>(
         &mut self,
         sim: &mut Simulation<'_, C, F>,
-        f: impl FnOnce(&mut SimStore<'_>) -> T,
+        f: impl FnOnce(&mut Graph) -> T,
     ) -> Result<(T, Option<ChangeReport>), ReconfError> {
-        let st = self.prepare(sim);
-        let mut work = st.work.take().expect("work graph");
-        let (t, journal) = st.session().with_store(&mut work.0, f);
-        st.work = Some(work);
+        self.prepare(sim);
+        let (t, journal) = qvt::with_journal(self.work_mut(), f);
         let raw = RawOutcome {
             severity: 0,
             code: 0,
@@ -783,16 +803,16 @@ impl QvtoRun {
         Ok((t, out.change))
     }
 
-    /// Runs `f` on a scratch copy of the run's model and QVTo state: for reading (dumps,
-    /// summaries, diffs) and for trying changes; nothing reaches the run.
+    /// Runs `f` on a scratch copy of the run's model graph (with the QVTo state): for reading
+    /// (dumps, summaries, diffs) and for trying changes; nothing reaches the run.
     pub fn with_scratch_store<C: Compat, F: Flavour, T>(
         &mut self,
         sim: &Simulation<'_, C, F>,
-        f: impl FnOnce(&mut SimStore<'_>) -> T,
+        f: impl FnOnce(&mut Graph) -> T,
     ) -> T {
         let st = self.prepare(sim);
-        let (g, _) = st.work.as_ref().expect("work graph");
-        lock(&st.session).scratch(g, f)
+        let mut g = (*st.work.as_ref().expect("work graph").0).clone();
+        f(&mut g)
     }
 
     /// Runs `t` on the run's model and applies its changes (see the module documentation).
@@ -823,34 +843,34 @@ impl QvtoRun {
         self.apply(sim, &t.0.name, raw, micros)
     }
 
-    /// Runs `t` like [`QvtoRun::invoke_with`] on a scratch copy of the run's model and QVTo
-    /// state, then `f` on the store after the run: the outcome (with
-    /// [`Outcome::change`] `None`) and what `f` returns; nothing reaches the run. For trying a
-    /// reconfiguration, and for inspecting a transformation's result (dumps, diffs).
+    /// Runs `t` like [`QvtoRun::invoke_with`] on a scratch copy of the run's model graph, then
+    /// `f` on that graph after the run: the outcome (with [`Outcome::change`] `None`) and what
+    /// `f` returns; nothing reaches the run. For trying a reconfiguration, and for inspecting a
+    /// transformation's result (dumps, diffs).
     pub fn dry_run<C: Compat, F: Flavour, T>(
         &mut self,
         sim: &Simulation<'_, C, F>,
         t: &Transformation,
         inv: &Invocation,
         hooks: InvokeHooks<'_>,
-        f: impl FnOnce(&mut SimStore<'_>, &Outcome) -> T,
+        f: impl FnOnce(&mut Graph, &Outcome) -> T,
     ) -> Result<(Outcome, T), ReconfError> {
         let mut scratch = None;
         let (raw, micros) = self.execute(sim, t, inv, hooks, Some(&mut scratch))?;
         let out = outcome(&t.0.name, raw, micros);
-        let (mut session, mut g) = scratch.expect("scratch state");
-        let r = session.scratch_in_place(&mut g, |s| f(s, &out));
+        let mut g: Graph = scratch.expect("scratch graph");
+        let r = f(&mut g, &out);
         Ok((out, r))
     }
 
-    /// Runs `t` on the working graph, or on copies stored in `scratch`.
+    /// Runs `t` on the working graph, or on a copy stored in `scratch`.
     fn execute<C: Compat, F: Flavour>(
         &mut self,
         sim: &Simulation<'_, C, F>,
         t: &Transformation,
         inv: &Invocation,
         hooks: InvokeHooks<'_>,
-        scratch: Option<&mut Option<(RunSession, Graph)>>,
+        scratch: Option<&mut Option<Graph>>,
     ) -> Result<(RawOutcome, u64), ReconfError> {
         if t.0.core != self.core.0.id {
             return Err(ReconfError::WrongCore);
@@ -872,31 +892,20 @@ impl QvtoRun {
             now_s,
             profile_keys: &core.0.profile_keys,
         };
-        let st = self.prepare(sim);
+        self.prepare(sim);
         let t0;
         let raw = match scratch {
             None => {
-                st.invocations += 1;
-                let mut work = st.work.take().expect("work graph");
-                let session = st.session();
+                self.state.as_mut().expect("per-run state").invocations += 1;
+                let g = self.work_mut();
                 t0 = Instant::now();
-                let r = session.run(
-                    &mut work.0,
-                    &t.0.program,
-                    &t.0.params,
-                    &binds,
-                    opts,
-                    &natives,
-                    hooks,
-                );
-                st.work = Some(work);
-                r
+                qvt::run(g, &t.0.program, &t.0.params, &binds, opts, &natives, hooks)
             }
             Some(slot) => {
-                let mut session = lock(&st.session).clone();
-                let mut g = st.work.as_ref().expect("work graph").0.clone();
+                let st = self.state.as_ref().expect("per-run state");
+                let mut g = (*st.work.as_ref().expect("work graph").0).clone();
                 t0 = Instant::now();
-                let r = session.run(
+                let r = qvt::run(
                     &mut g,
                     &t.0.program,
                     &t.0.params,
@@ -905,7 +914,7 @@ impl QvtoRun {
                     &natives,
                     hooks,
                 );
-                *slot = Some((session, g));
+                *slot = Some(g);
                 r
             }
         }
@@ -913,7 +922,9 @@ impl QvtoRun {
         Ok((raw, t0.elapsed().as_micros() as u64))
     }
 
-    /// Applies the graph changes of a run to the simulation (or drops them).
+    /// Applies the changes of a run to the simulation (or drops them): the changes of PCM
+    /// objects through the change path; changes of other models only, by handing the graph
+    /// over.
     fn apply<C: Compat, F: Flavour>(
         &mut self,
         sim: &mut Simulation<'_, C, F>,
@@ -923,19 +934,23 @@ impl QvtoRun {
     ) -> Result<Outcome, ReconfError> {
         let mut out = outcome(name, raw, micros);
         let succeeded = out.succeeded;
-        let cs = change_set(&out.journal);
-        if cs.is_empty() {
+        if out.journal.is_empty() {
+            return Ok(out);
+        }
+        if !succeeded && self.cfg.failed_runs == FailedRunChanges::Discard {
+            self.state.as_mut().expect("per-run state").work = None;
             return Ok(out);
         }
         let st = self.state.as_mut().expect("per-run state");
-        if !succeeded && self.cfg.failed_runs == FailedRunChanges::Discard {
-            st.work = None;
+        let (g, _) = st.work.as_ref().expect("work graph");
+        let cs = change_set(g, &out.journal);
+        if cs.is_empty() {
+            self.share_work(sim);
             return Ok(out);
         }
-        let (g, _) = st.work.as_ref().expect("work graph");
-        match sim.apply_changes(g.clone(), &cs) {
+        match sim.apply_changes((**g).clone(), &cs) {
             Ok(rep) => {
-                // the simulation's graph is the working graph now
+                // the simulation's graph equals the working graph now
                 if let Some((_, fp)) = st.work.as_mut() {
                     *fp = fingerprint(sim);
                 }

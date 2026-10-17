@@ -1,27 +1,26 @@
 //! Runtime model changes of SimOxide runs, from the QVTo side (`DESIGN-SPD.md` 5.3 and 5.5).
 //!
-//! The boundary to QVTo is the API of the `qvto-simoxide` adapter: a [`Session`] whose
-//! [`SimStore`] (a `qvto_model::ModelStore` over SimOxide's `raw::Graph`) records every change
-//! in a [`Journal`]. Both kinds of change source go through it:
+//! The QVTo engine runs on SimOxide's model graph itself (`simoxide_model::raw::Graph`, the
+//! shared EMF graph `simoxide_emf::Graph`): the graph is the `qvto_model::ModelStore`, and it
+//! records every change in its [`Journal`]. Both kinds of change source go through it:
 //!
 //! - QVTo transformations: the host ([`QvtoCore`] shared by all runs, [`QvtoRun`] per run,
 //!   created on first use), SimuLizar's rule folders ([`RuleSet`], [`QvtoRun::run_rules`]) and
 //!   SPD adjustments ([`QvtoAdjuster`], feature `spd`);
-//! - direct edits ([`Edit`]): a small API over the same store, for tests, snapshots and tools.
+//! - direct edits ([`Edit`]): a small API over the same graph, for tests, snapshots and tools.
 //!
 //! [`change_set`] turns a journal into the simulator's [`ChangeSet`]; [`apply_journal`] and
 //! [`Edit::apply`] hand the changed graph and its change set to
 //! [`Simulation::apply_changes`], which recompiles the run's model (rebuild and diff).
 //!
 //! ```no_run
-//! use simoxide_reconf::{Edit, Session};
+//! use simoxide_reconf::Edit;
 //! use simoxide_sim::{CompiledModel, Outputs, Pause, SimConfig, Simulation};
 //! let cm = CompiledModel::compile(simoxide_model::load_dir("corpus/h19_linking_resource").unwrap()).unwrap();
 //! let cfg = SimConfig { max_measurements: 1000, ..Default::default() };
 //! let mut sim = Simulation::new(&cm, cfg, Outputs::default()).unwrap();
 //! sim.run_until(Pause::After(50_000_000_000)).unwrap();
-//! let mut session = Session::new();
-//! let mut e = Edit::new(&sim, &mut session);
+//! let mut e = Edit::new(&sim);
 //! let server = e.find("_h19_linking_resource_rc2").unwrap();
 //! let copy = e.clone_container(server, "_rc3", "ServerNode2").unwrap();
 //! for link in e.links_of(server) {
@@ -33,21 +32,16 @@
 //! println!("{:?}", report.applied);
 //! let result = sim.finish().unwrap();
 //! ```
-//!
-//! It uses the QVTo adapter `qvto-simoxide` (crates/qvto) until the merge's steps M5/M6 move the
-//! journal and the store into the shared EMF graph; the API seen here stays.
 
-use qvto_model::{
-    ClassId as QClass, Datum, FeatureId as QFeature, ModelError, ModelStore, OwnedDatum,
-};
+use qvto_model::{Datum, ModelError, ModelStore, OwnedDatum};
 use simoxide_model::meta::prelude::*;
 use simoxide_model::meta::{ClassId, FeatureId, class as mc, feat as mf};
-use simoxide_model::raw::{Graph, ObjId, PcmGraph, Value};
+use simoxide_model::raw::{Graph, ObjId, PcmGraph, Value, is_pcm_class};
 use simoxide_sim::{
     Change, ChangeError, ChangeKind, ChangeReport, ChangeSet, Compat, Flavour, Simulation,
 };
 
-pub use qvto_simoxide::{EXT_BASE, IdPolicy, Journal, Session, SimStore};
+pub use qvto_emf::{IdPolicy, Journal};
 
 #[cfg(feature = "spd")]
 mod adjust;
@@ -64,50 +58,40 @@ pub use host::{
 };
 pub use rules::{RuleSet, RulesOutcome};
 
-/// The simulator's change set of a journal: the changes of graph objects (handles below
-/// [`EXT_BASE`]), in order, with the object values of list changes.
-pub fn change_set(j: &Journal) -> ChangeSet {
-    use qvto_simoxide::ChangeKind as J;
-    let obj = |d: &OwnedDatum<u32>| match d {
-        OwnedDatum::Obj(x) if *x < EXT_BASE => Some(ObjId(*x)),
+/// The simulator's change set of a journal recorded on `g`: the changes of objects of
+/// SimOxide's metamodels, in order, with the object values of list changes (objects of other
+/// metamodels in the same graph, such as the PRM, are not the simulator's).
+pub fn change_set(g: &Graph, j: &Journal) -> ChangeSet {
+    use qvto_emf::ChangeKind as J;
+    let pcm = |o: ObjId| (o.index() < g.object_count()) && is_pcm_class(g[o].class);
+    let obj = |d: &OwnedDatum<ObjId>| match d {
+        OwnedDatum::Obj(x) if pcm(*x) => Some(*x),
         _ => None,
     };
-    let f = |f: &QFeature| FeatureId(f.0);
     let mut cs = ChangeSet::new();
     for c in &j.changes {
-        if c.obj >= EXT_BASE {
+        if !pcm(c.obj) {
             continue;
         }
         let kind = match &c.kind {
-            J::Created(class) => ChangeKind::Created(ClassId(class.0)),
-            J::Set { feature, .. } => ChangeKind::Set {
-                feature: f(feature),
-            },
-            J::Unset { feature, .. } => ChangeKind::Unset {
-                feature: f(feature),
-            },
+            J::Created(class) => ChangeKind::Created(*class),
+            J::Set { feature, .. } => ChangeKind::Set { feature: *feature },
+            J::Unset { feature, .. } => ChangeKind::Unset { feature: *feature },
             J::Added { feature, value, .. } => ChangeKind::Added {
-                feature: f(feature),
+                feature: *feature,
                 value: obj(value),
             },
             J::Removed { feature, value, .. } => ChangeKind::Removed {
-                feature: f(feature),
+                feature: *feature,
                 value: obj(value),
             },
-            J::Replaced { feature, .. } => ChangeKind::Replaced {
-                feature: f(feature),
-            },
-            J::Moved { feature, .. } => ChangeKind::Moved {
-                feature: f(feature),
-            },
+            J::Replaced { feature, .. } => ChangeKind::Replaced { feature: *feature },
+            J::Moved { feature, .. } => ChangeKind::Moved { feature: *feature },
             J::Container { .. } => ChangeKind::Container,
             J::RootAdded { .. } | J::RootRemoved { .. } => ChangeKind::Root,
             J::Deleted => ChangeKind::Deleted,
         };
-        cs.changes.push(Change {
-            obj: ObjId(c.obj),
-            kind,
-        });
+        cs.changes.push(Change { obj: c.obj, kind });
     }
     cs
 }
@@ -119,7 +103,8 @@ pub fn apply_journal<C: Compat, F: Flavour>(
     graph: Graph,
     journal: &Journal,
 ) -> Result<ChangeReport, ChangeError> {
-    sim.apply_changes(graph, &change_set(journal))
+    let cs = change_set(&graph, journal);
+    sim.apply_changes(graph, &cs)
 }
 
 /// An error of an edit (the store's).
@@ -142,35 +127,20 @@ impl From<ModelError> for EditError {
 
 type R<T> = Result<T, EditError>;
 
-/// Direct edits of a run's model through the adapter's store, recorded in the session's
-/// journal: a copy of the run's graph, changed by [`Edit::store`] (any `ModelStore` operation)
-/// or the helpers, then applied with [`Edit::apply`]. Ids of new objects are given by the
-/// caller (they appear in traces and decide the resource registry's order).
-pub struct Edit<'s> {
+/// Direct edits of a run's model, recorded in the graph's journal: a copy of the run's graph,
+/// changed through [`Edit::store`] (any `ModelStore` operation) or the helpers, then applied
+/// with [`Edit::apply`]. Ids of new objects are given by the caller (they appear in traces and
+/// decide the resource registry's order).
+pub struct Edit {
     graph: Graph,
-    session: &'s mut Session,
 }
 
-fn qc(c: ClassId) -> QClass {
-    QClass(c.0)
-}
-
-fn qf(f: FeatureId) -> QFeature {
-    QFeature(f.0)
-}
-
-impl<'s> Edit<'s> {
-    /// Starts an edit of `sim`'s current model; `session` records the journal (a session
-    /// belongs to the run's graph: one per run, or a new one per edit).
-    pub fn new<C: Compat, F: Flavour>(
-        sim: &Simulation<'_, C, F>,
-        session: &'s mut Session,
-    ) -> Edit<'s> {
-        session.start_journal();
-        Edit {
-            graph: sim.model_graph().clone(),
-            session,
-        }
+impl Edit {
+    /// Starts an edit of `sim`'s current model.
+    pub fn new<C: Compat, F: Flavour>(sim: &Simulation<'_, C, F>) -> Edit {
+        let mut graph = sim.model_graph().clone();
+        graph.start_journal();
+        Edit { graph }
     }
 
     /// The graph as edited so far.
@@ -178,15 +148,16 @@ impl<'s> Edit<'s> {
         &self.graph
     }
 
-    /// The store over the edited graph (every change is recorded).
-    pub fn store(&mut self) -> SimStore<'_> {
-        self.session.store(&mut self.graph)
+    /// The edited graph as a model store (every change is recorded).
+    pub fn store(&mut self) -> &mut Graph {
+        &mut self.graph
     }
 
     /// The graph and the change set of the edits.
-    pub fn finish(self) -> (Graph, ChangeSet) {
-        let j = self.session.stop_journal().unwrap_or_default();
-        (self.graph, change_set(&j))
+    pub fn finish(mut self) -> (Graph, ChangeSet) {
+        let j = self.graph.stop_journal().unwrap_or_default();
+        let cs = change_set(&self.graph, &j);
+        (self.graph, cs)
     }
 
     /// Applies the edits to `sim` ([`Simulation::apply_changes`]).
@@ -209,16 +180,16 @@ impl<'s> Edit<'s> {
     /// `ProcessingResourceSpecification.processingRate`, a link's latency, a demand), creating
     /// the variable if needed.
     pub fn set_spec(&mut self, owner: ObjId, feature: FeatureId, spec: &str) -> R<()> {
-        let mut st = self.store();
-        let rv = match st.get(owner.0, qf(feature)) {
+        let st = &mut self.graph;
+        let rv = match st.get(owner, feature) {
             Datum::Obj(o) => o,
             _ => {
-                let rv = st.create(qc(mc::PCMRandomVariable))?;
-                st.set(owner.0, qf(feature), Datum::Obj(rv))?;
+                let rv = st.create(mc::PCMRandomVariable)?;
+                st.set(owner, feature, Datum::Obj(rv))?;
                 rv
             }
         };
-        st.set(rv, qf(mf::RandomVariable_specification), Datum::Str(spec))?;
+        st.set(rv, mf::RandomVariable_specification, Datum::Str(spec))?;
         Ok(())
     }
 
@@ -268,7 +239,7 @@ impl<'s> Edit<'s> {
                     mf::ProcessingResourceSpecification_requiredByContainer,
                 ]
                 .into_iter()
-                .filter(|&f| g.is_set(p, f))
+                .filter(|&f| g.is_stored(p, f))
                 .map(|f| (f, g.attr(p, f)))
                 .collect(),
                 refs: [
@@ -280,15 +251,15 @@ impl<'s> Edit<'s> {
                 .collect(),
             })
             .collect();
-        let mut st = self.store();
-        let c = st.create(qc(mc::ResourceContainer))?;
-        st.set(c, qf(mf::identifier_Identifier_id), Datum::Str(id))?;
-        st.set(c, qf(mf::NamedElement_entityName), Datum::Str(name))?;
+        let st = &mut self.graph;
+        let c = st.create(mc::ResourceContainer)?;
+        st.set(c, mf::identifier_Identifier_id, Datum::Str(id))?;
+        st.set(c, mf::NamedElement_entityName, Datum::Str(name))?;
         for (n, s) in specs.iter().enumerate() {
-            let p = st.create(qc(s.class))?;
+            let p = st.create(s.class)?;
             st.set(
                 p,
-                qf(mf::identifier_Identifier_id),
+                mf::identifier_Identifier_id,
                 Datum::Str(&format!("{id}_{n}")),
             )?;
             for (f, v) in &s.values {
@@ -298,34 +269,34 @@ impl<'s> Edit<'s> {
                     Value::Bool(b) => Datum::Bool(*b),
                     _ => continue,
                 };
-                st.set(p, qf(*f), d)?;
+                st.set(p, *f, d)?;
             }
             for (f, x) in &s.refs {
-                st.set(p, qf(*f), Datum::Obj(x.0))?;
+                st.set(p, *f, Datum::Obj(*x))?;
             }
             if let Some(rate) = &s.rate {
-                let rv = st.create(qc(mc::PCMRandomVariable))?;
-                st.set(rv, qf(mf::RandomVariable_specification), Datum::Str(rate))?;
+                let rv = st.create(mc::PCMRandomVariable)?;
+                st.set(rv, mf::RandomVariable_specification, Datum::Str(rate))?;
                 st.set(
                     p,
-                    qf(mf::ProcessingResourceSpecification_processingRate_ProcessingResourceSpecification),
+                    mf::ProcessingResourceSpecification_processingRate_ProcessingResourceSpecification,
                     Datum::Obj(rv),
                 )?;
             }
             st.add(
                 c,
-                qf(mf::ResourceContainer_activeResourceSpecifications_ResourceContainer),
+                mf::ResourceContainer_activeResourceSpecifications_ResourceContainer,
                 Datum::Obj(p),
                 None,
             )?;
         }
         st.add(
-            env.0,
-            qf(mf::ResourceEnvironment_resourceContainer_ResourceEnvironment),
+            env,
+            mf::ResourceEnvironment_resourceContainer_ResourceEnvironment,
             Datum::Obj(c),
             None,
         )?;
-        Ok(ObjId(c))
+        Ok(c)
     }
 
     /// The linking resources of `container`'s resource environment connected to it.
@@ -363,39 +334,39 @@ impl<'s> Edit<'s> {
             assembly,
             mf::AssemblyContext_encapsulatedComponent__AssemblyContext,
         );
-        let mut st = self.store();
-        let a = st.create(qc(mc::AssemblyContext))?;
-        st.set(a, qf(mf::identifier_Identifier_id), Datum::Str(id))?;
-        st.set(a, qf(mf::NamedElement_entityName), Datum::Str(name))?;
+        let st = &mut self.graph;
+        let a = st.create(mc::AssemblyContext)?;
+        st.set(a, mf::identifier_Identifier_id, Datum::Str(id))?;
+        st.set(a, mf::NamedElement_entityName, Datum::Str(name))?;
         if let Some(c) = component {
             st.set(
                 a,
-                qf(mf::AssemblyContext_encapsulatedComponent__AssemblyContext),
-                Datum::Obj(c.0),
+                mf::AssemblyContext_encapsulatedComponent__AssemblyContext,
+                Datum::Obj(c),
             )?;
         }
-        st.add(structure.0, qf(f), Datum::Obj(a), None)?;
-        Ok(ObjId(a))
+        st.add(structure, f, Datum::Obj(a), None)?;
+        Ok(a)
     }
 
     /// Sets a single-valued reference (e.g. an assembly connector's providing assembly context).
     pub fn set_ref(&mut self, o: ObjId, feature: FeatureId, target: ObjId) -> R<()> {
-        self.store().set(o.0, qf(feature), Datum::Obj(target.0))?;
+        self.graph.set(o, feature, Datum::Obj(target))?;
         Ok(())
     }
 
     /// Sets a `double` attribute (e.g. a branch probability).
     pub fn set_double(&mut self, o: ObjId, feature: FeatureId, v: f64) -> R<()> {
-        self.store().set(o.0, qf(feature), Datum::Double(v))?;
+        self.graph.set(o, feature, Datum::Double(v))?;
         Ok(())
     }
 
     /// Connects `container` to the linking resource `link`.
     pub fn connect(&mut self, link: ObjId, container: ObjId) -> R<()> {
-        self.store().add(
-            link.0,
-            qf(mf::LinkingResource_connectedResourceContainers_LinkingResource),
-            Datum::Obj(container.0),
+        self.graph.add(
+            link,
+            mf::LinkingResource_connectedResourceContainers_LinkingResource,
+            Datum::Obj(container),
             None,
         )?;
         Ok(())
@@ -412,34 +383,34 @@ impl<'s> Edit<'s> {
                 g[o].class.is_a(mc::Allocation) && g[o].container.is_none() && g[o].proxy.is_none()
             })
             .ok_or_else(|| EditError("no allocation".into()))?;
-        let mut st = self.store();
-        let a = st.create(qc(mc::AllocationContext))?;
-        st.set(a, qf(mf::identifier_Identifier_id), Datum::Str(id))?;
-        st.set(a, qf(mf::NamedElement_entityName), Datum::Str(id))?;
+        let st = &mut self.graph;
+        let a = st.create(mc::AllocationContext)?;
+        st.set(a, mf::identifier_Identifier_id, Datum::Str(id))?;
+        st.set(a, mf::NamedElement_entityName, Datum::Str(id))?;
         st.set(
             a,
-            qf(mf::AllocationContext_resourceContainer_AllocationContext),
-            Datum::Obj(container.0),
+            mf::AllocationContext_resourceContainer_AllocationContext,
+            Datum::Obj(container),
         )?;
         st.set(
             a,
-            qf(mf::AllocationContext_assemblyContext_AllocationContext),
-            Datum::Obj(assembly.0),
+            mf::AllocationContext_assemblyContext_AllocationContext,
+            Datum::Obj(assembly),
         )?;
         st.add(
-            allocation.0,
-            qf(mf::Allocation_allocationContexts_Allocation),
+            allocation,
+            mf::Allocation_allocationContexts_Allocation,
             Datum::Obj(a),
             None,
         )?;
-        Ok(ObjId(a))
+        Ok(a)
     }
 
     /// `EcoreUtil.delete` of an object: it leaves its container, and every reference to it is
     /// removed (or unset: for a resource container referenced by an allocation context that is
     /// an `UNSET` notification, on which SimuLizar's allocation syncer aborts).
     pub fn delete(&mut self, o: ObjId) {
-        self.store().delete(o.0);
+        self.graph.delete(o);
     }
 
     /// Removes a resource container from its resource environment (the references to it stay).
@@ -449,7 +420,7 @@ impl<'s> Edit<'s> {
                 "the container is not in a resource environment".into(),
             ));
         };
-        self.store().remove(env.0, qf(f), Datum::Obj(container.0))?;
+        self.graph.remove(env, f, Datum::Obj(container))?;
         Ok(())
     }
 }

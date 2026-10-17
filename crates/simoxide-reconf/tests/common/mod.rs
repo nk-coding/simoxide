@@ -5,12 +5,13 @@
 
 #![allow(dead_code)]
 
+use qvto_emf::{ChangeKind, Journal, ObjId};
 use qvto_model::{ModelStore, OwnedDatum, ResourceId};
 use qvto_runtime::IdentityKey;
 use qvto_runtime::identity::IdentityHashSource;
-use qvto_simoxide::{ChangeKind, EXT_BASE, Journal, SimStore};
 use qvto_testkit::case::Case;
 use qvto_testkit::fixture::{JavaResult, Tape, parse_tape};
+use simoxide_model::raw::Graph;
 use simoxide_reconf::{Bind, Imports, ModelRef, QvtoCore, QvtoRun, Transformation};
 use simoxide_sim::{CompiledModel, SimConfig, Simulation};
 use std::collections::{BTreeMap, HashMap};
@@ -144,7 +145,7 @@ pub fn is_graph_document(text: &str) -> bool {
 /// loaded into the run's QVTo state. Positional, like the corpus's Java driver.
 pub fn inputs<C: simoxide_sim::Compat>(
     c: &Case,
-    sim: &Simulation<'_, C>,
+    sim: &mut Simulation<'_, C>,
     run: &mut QvtoRun,
 ) -> Vec<ModelRef> {
     let mut out = Vec::new();
@@ -184,8 +185,8 @@ pub fn binds(t: &Transformation, models: &[ModelRef]) -> Vec<(String, Bind)> {
     v
 }
 
-/// Keys of the store's objects as the tape and the journals name them (`<label>#<path>`).
-pub fn object_keys(s: &SimStore<'_>) -> HashMap<u32, String> {
+/// Keys of the graph's objects as the tape and the journals name them (`<label>#<path>`).
+pub fn object_keys(s: &Graph) -> HashMap<ObjId, String> {
     let mut out = HashMap::new();
     for r in 0..s.resource_count() {
         let r = ResourceId(r as u32);
@@ -216,9 +217,9 @@ impl IdentityHashSource for Recovered {
 
 /// The Java run's identity hashes (as the conformance engine replays them): objects that exist
 /// before the run by key, created objects in the Java thread's draw order.
-pub fn id_source(s: &SimStore<'_>, tape: &Tape) -> Box<dyn IdentityHashSource> {
-    let keys: HashMap<String, u32> = object_keys(s).into_iter().map(|(o, k)| (k, o)).collect();
-    let graph_objs = s.graph().object_count() as u32;
+pub fn id_source(s: &Graph, tape: &Tape) -> Box<dyn IdentityHashSource> {
+    let keys: HashMap<String, u32> = object_keys(s).into_iter().map(|(o, k)| (k, o.0)).collect();
+    let graph_objs = s.object_count() as u32;
     let existed = move |i: u32| i < graph_objs;
     let mut by_obj: HashMap<u32, i32> = HashMap::new();
     let mut others: Vec<i32> = Vec::new();
@@ -264,22 +265,22 @@ pub fn id_source(s: &SimStore<'_>, tape: &Tape) -> Box<dyn IdentityHashSource> {
 
 /// A journal with objects named by their keys before the run (`new#<n>` for created objects,
 /// in creation order), comparable between two stores of the same models.
-pub fn keyed_journal(keys: &HashMap<u32, String>, j: &Journal) -> Vec<String> {
-    let mut created: HashMap<u32, String> = HashMap::new();
+pub fn keyed_journal(keys: &HashMap<ObjId, String>, j: &Journal) -> Vec<String> {
+    let mut created: HashMap<ObjId, String> = HashMap::new();
     for c in &j.changes {
         if let ChangeKind::Created(_) = c.kind {
             let n = created.len();
             created.insert(c.obj, format!("new#{n}"));
         }
     }
-    let name = |o: u32| -> String {
+    let name = |o: ObjId| -> String {
         created
             .get(&o)
             .or_else(|| keys.get(&o))
             .cloned()
-            .unwrap_or_else(|| format!("?{}", if o >= EXT_BASE { "ext" } else { "graph" }))
+            .unwrap_or_else(|| "?".to_string())
     };
-    let val = |d: &OwnedDatum<u32>| -> String {
+    let val = |d: &OwnedDatum<ObjId>| -> String {
         match d {
             OwnedDatum::Obj(o) => name(*o),
             d => format!("{d:?}"),
@@ -335,7 +336,7 @@ pub fn keyed_journal(keys: &HashMap<u32, String>, j: &Journal) -> Vec<String> {
 /// The dump the Java runner writes (`dump models`): each out/inout extent into a resource
 /// `extent<i>.xmi`, then the model resources by label; only the resources whose labels are in
 /// `labels` (the Java dump's: the simulation's graph holds more models).
-pub fn dump(s: &mut SimStore<'_>, extents: &[Option<Vec<u32>>], labels: &[String]) -> String {
+pub fn dump(s: &mut Graph, extents: &[Option<Vec<ObjId>>], labels: &[String]) -> String {
     let before = s.resource_count();
     let mut dumped = Vec::new();
     for (i, e) in extents.iter().enumerate() {
