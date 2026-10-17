@@ -16,6 +16,7 @@ code comments cite the rule identifiers.
 | [Random numbers](./random.md) | `RND-*` | the random stream, distribution sampling, PMF and PDF literals, branches |
 | [Schedulers](./scheduler.md) | | processor sharing, FCFS, delay and passive resources |
 | [Model changes](./model-changes.md) | `MC-*` | what a change of the models at run time does (SimuLizar's syncers and their gaps) |
+| [HPA autoscaling](./hpa.md) | `HPA-*` | Kubernetes' horizontal pod autoscaler on SPD target groups: what SimOxide models and simplifies |
 
 Deliberate differences are on [Deviations](../correctness/deviations.md); SimuLizar's bugs, which
 SimOxide reproduces, on [Reference bugs](../correctness/reference-bugs.md).

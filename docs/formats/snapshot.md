@@ -56,6 +56,7 @@ and the `serde` derives on the engine's types); it is versioned with SimOxide, n
 | `model` | `simoxide-sim`, after model changes | the run's own model |
 | `spd` | `simoxide-spd` (`SpdRun`, `SsxSpd`) | the SPD interpreter's state |
 | `spd-ssx` | `simoxide-spd` (`SsxSpd`) | the Slingshot-exact SPD layer's own state |
+| `hpa` | `simoxide-spd` (`SpdRun` with autoscalers) | the HPA controller's state |
 | `rules` | `simoxide-reconf` (`RulesRun`) | the reconfiguration host's state |
 | `qvto` | `simoxide-reconf` (`QvtoRun::snapshot_section`), for hosts of their own | a run's QVTo state |
 
@@ -172,6 +173,14 @@ The Slingshot-exact SPD layer (`simoxide_spd::ssx::SsxSpd`) next to `spd`: per e
 its resolved measuring point (kind with object ids, class name) and metric, or that it is not
 resolved yet or not a policy's. They are resolved on the model of a series' first measurement,
 so they are kept rather than resolved again on the restored model.
+
+### `hpa`
+
+Next to `spd` in a run with HPA autoscalers ([Autoscaling (HPA)](../guide/hpa.md)): the
+autoscalers' names (checked on restore) and per autoscaler its spec (changed parameters
+included), the controller's recommendations and scale events, the starting pods' ready times, the
+ready pods (element ids, start and ready times), the busy-time readings of the window start, the
+queued goal and the counters. The engine's busy-time integrals are part of `engine`.
 
 ### `rules`
 
