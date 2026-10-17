@@ -1545,6 +1545,16 @@ F4 (listed below).
   scale-in), the Slingshot flavour (`slingshot_flavour_waits_for_f4`), monitors of new containers
   (counted in `changes`, not created; then measurement-triggered policies on new containers),
   add-and-remove in one adjustment.
+- **Gates.** `golden.sh` identical (312 runs, `cargo build-exact`, against `spd` fb03e7d);
+  `cargo test --release --workspace --features exact` 574 passed, 0 failed (566 before; +6
+  `spd_adjust`, +2 `spd` unit tests; `simoxide-cli`'s `spd_cli` runs with `reconfiguration`);
+  `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; `cargo conform --suite all` 589/589 (fast
+  584, ordered 583, unchanged), sema oracle unchanged, `test-qvto` 90; fmt and clippy `-D
+  warnings` clean (default, `exact,hotspot-math`, `compat`; `simoxide-cli` with
+  `reconfiguration` and `exact,reconfiguration`; `simoxide-reconf` and `simoxide-spd` without
+  default features); release check: 0 opt-in crates in `simoxide-cli` and `qvto-cli`. Timing
+  deferred; sanity: the CLI runs the minimal example with its adjustment (core, compilation, run)
+  in 13 ms wall.
 - **For X2d and P3.** `simoxide_spd::adjusted` (`Before`, `ModelAdjusted` with new/deleted
   container names for `spd_adjusted`, `monitor_clones` for the `MonitorChange`s, `summary`),
   `QvtoAdjuster::spd` callable from any `Simulation<C, F>` (`Adjuster<C, F>`), `SpdRun` over any
