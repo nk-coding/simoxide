@@ -2090,7 +2090,7 @@ together with the immutable `Arc<CompiledModel>`. Then:
 - **Gates.** `golden.sh` identical (312 runs, exact build with `hotspot-math`, against `spd`
   59484b7's binary); `cargo test --release --workspace --features exact` 586 passed, 0 failed (563
   before: +4 `simoxide-model` persist, +9 `simoxide-sim` snapshot, +2 `simoxide-spd`, +3
-  `simoxide-reconf`, +6 `simoxide-cli`; QVTo's ignored reference material linked from the merge
+  `simoxide-reconf`, +5 `simoxide-cli` (+1 with `reconfiguration`); QVTo's ignored reference material linked from the merge
   checkout for the run); `simoxide-fuzz corpus` 132/132 and corpus-fuzz 6/6; fmt and clippy
   `-D warnings` clean (workspace, all targets, default and `--features exact`; `simoxide-cli` with
   `reconfiguration`, with `exact,reconfiguration`, without default features; `simoxide-reconf` and
