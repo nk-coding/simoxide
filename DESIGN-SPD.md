@@ -3044,6 +3044,17 @@ Why this format:
     - plus the ignored cost measurement.
   - `simoxide-cli/tests/hpa_cli.rs`: run, pause, resume, `--hpa-set`, `hpa` change lines, the
     refusals.
+- **Gates.** `golden.sh` identical (312 runs, `cargo build-exact`); `cargo test --release
+  --workspace --features exact` 634 passed, 0 failed (612 before; +13 `hpa` unit tests, +9
+  `hpa.rs`), 40 ignored; corpus 132/132, corpus-fuzz 6/6; `slingshot_exact` 89 of 90 byte-equal
+  (unchanged); `corpus-spd` 5/5 (V3 and level E); CLI tests with `reconfiguration` pass (`hpa_cli`
+  new); `conform` compat 589/589, fast 589/584, ordered 583 (+6 `java-fails-equal`), unchanged;
+  fmt; clippy `-D warnings` (workspace default, `exact,hotspot-math`, `compat`; the CLI with
+  `reconfiguration`, `exact,reconfiguration`, without defaults; `simoxide-spd` and
+  `simoxide-reconf` without defaults, where a dead-code warning of `RulesRun::parts_mut` from
+  before was fixed); release check 0 opt-in crates (`simoxide-cli`, also with `reconfiguration`,
+  `qvto-cli`); `npm run build` of the docs clean. Every test, harness and measurement ran under
+  `prlimit --as=10 GB`.
 - **Cost** (fast mode, the ignored test `cost_per_scaling_step`, one core of the VM at load
   about 1): generated models of `k` V4-like services, each with its own load balancer, target
   group and HPA, step from 0.2 to 2 offered cores per service.
