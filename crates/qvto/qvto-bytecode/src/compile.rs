@@ -2533,6 +2533,18 @@ impl<'a> Builder<'a> {
                 }
                 let mut inv = Vec::new();
                 let target = lp.target.map(|t| self.local(t));
+                // `src[T]` alone: the VM filters a collection in one step (the loop below
+                // stays for other sources)
+                if !one
+                    && lp.body.is_none()
+                    && lp.cond.is_none()
+                    && target.is_none()
+                    && lp.iterators.len() == 1
+                    && let Some(ty) = lp.filter_type
+                {
+                    let site = self.site(Site::FilterKind { src, acc, ty })?;
+                    ends.push(self.jump(Insn::FilterKind { site, target: 0 }));
+                }
                 let filter = match lp.filter_type {
                     Some(t) => Some(self.site(Site::Type(t))?),
                     None => None,

@@ -85,6 +85,12 @@ pub enum Site {
         order: Box<[u16]>,
     },
     Type(TypeId),
+    /// `src[ty]` without a condition (`Insn::FilterKind`): the source and result registers.
+    FilterKind {
+        src: Reg,
+        acc: Reg,
+        ty: TypeId,
+    },
     Object {
         class: ClassId,
         extent: Option<ModelParamRef>,

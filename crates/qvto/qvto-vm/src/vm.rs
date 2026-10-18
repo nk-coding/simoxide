@@ -203,6 +203,9 @@ pub struct LateTask {
     pub source: Value,
 }
 
+/// Entries of [`Vm::filter_memo`].
+const FILTER_MEMO: usize = 16;
+
 /// The state of one run.
 pub struct Vm<'a, S: ModelStore>
 where
@@ -254,6 +257,10 @@ where
     /// [`ModelStore::version`] is `prop_cache_version`.
     pub(crate) prop_cache: HashMap<(u32, qvto_model::FeatureId), Value>,
     pub(crate) prop_cache_version: u64,
+    /// Recent results of `src[T]` (`Insn::FilterKind`) by source collection and type: a
+    /// shared collection value never changes (writes copy it), so the filter of the same value
+    /// is the same. Bags are not kept (their count cells are drawn per copy).
+    pub(crate) filter_memo: Vec<(Rc<Coll>, TypeId, Value)>,
     /// The intermediate extent of each transformation (`getIntermediateExtent`).
     pub(crate) interm_extents: HashMap<u32, usize>,
     /// The records of the input trace of an incremental update.
@@ -359,6 +366,7 @@ where
             static_vals: HashMap::default(),
             prop_cache: HashMap::default(),
             prop_cache_version: 0,
+            filter_memo: Vec::new(),
             interm_extents: HashMap::default(),
             inc_trace: Vec::new(),
             nested: Vec::new(),
@@ -1286,6 +1294,39 @@ where
                     let v = r!(self, base, src).clone();
                     w!(self, base, dst) = Value::Bool(self.qvt_kind_of(&v, t));
                 }
+                Insn::FilterKind { site, target } => {
+                    let Site::FilterKind { src, acc, ty } = chunk.sites[site as usize] else {
+                        unreachable!()
+                    };
+                    // the loop charges a step per element: it runs when steps are limited
+                    if self.opts.step_limit.is_none()
+                        && let Value::Coll(c) = &r!(self, base, src)
+                    {
+                        let c = c.clone();
+                        let hit = self
+                            .filter_memo
+                            .iter()
+                            .find(|(s, t, _)| *t == ty && Rc::ptr_eq(s, &c))
+                            .map(|(_, _, v)| v.clone());
+                        let out = match hit {
+                            Some(v) => v,
+                            None => {
+                                let mut out = std::mem::take(&mut w!(self, base, acc));
+                                self.filter_kind(&c, ty, &mut out);
+                                if !matches!(&*c, Coll::Bag(_)) {
+                                    if self.filter_memo.len() >= FILTER_MEMO {
+                                        self.filter_memo.remove(0);
+                                    }
+                                    self.filter_memo.push((c, ty, out.clone()));
+                                }
+                                out
+                            }
+                        };
+                        w!(self, base, acc) = out;
+                        pc = target as usize;
+                        continue;
+                    }
+                }
                 Insn::ObjectInit { var, site } => {
                     set_pc!();
                     let Site::Object {
@@ -1383,6 +1424,36 @@ where
         let x = self.regs[base + a as usize].clone();
         let y = self.regs[base + b as usize].clone();
         self.prim_call(prim, op, vec![x, y])
+    }
+
+    /// What the loop of `src[ty]` adds to `out` (`Insn::FilterKind`): the non-null elements
+    /// of kind `ty` in iteration order, each as `Insn::Push` adds it. A set into an
+    /// insertion-ordered set of the same kind keeps the elements' hashes (they are unique and
+    /// were hashed when the source was made, so no identity hash is drawn either way).
+    fn filter_kind(&self, src: &Coll, ty: TypeId, out: &mut Value) {
+        use qvto_runtime::coll::Index;
+        if let Value::Coll(o) = out
+            && o.is_empty()
+        {
+            let o = Rc::make_mut(o);
+            match (src, o) {
+                (Coll::OrderedSet(s), Coll::OrderedSet(d))
+                | (Coll::Set(Index::Linked(s)), Coll::Set(Index::Linked(d))) => {
+                    for (v, h) in s.iter_hashed() {
+                        if !v.is_null() && self.qvt_kind_of(v, ty) {
+                            d.push_hashed(v.clone(), (), h);
+                        }
+                    }
+                    return;
+                }
+                _ => {}
+            }
+        }
+        for v in src.iter() {
+            if !v.is_null() && self.qvt_kind_of(v, ty) {
+                push(out, v.clone(), &self.env);
+            }
+        }
     }
 
     /// `createNewCollectionOfSameKind` (QVTo's: List and Dict keep their kind).

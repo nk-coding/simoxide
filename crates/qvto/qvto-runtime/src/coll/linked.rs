@@ -109,6 +109,17 @@ impl<V> LinkedMap<V> {
         Ok(())
     }
 
+    /// The keys in insertion order with their table hashes.
+    pub fn iter_hashed(&self) -> impl Iterator<Item = (&Value, u64)> + '_ {
+        self.entries.iter().flatten().map(|e| (&e.key, e.hash))
+    }
+
+    /// Appends a key that is not present, with its table hash (as [`LinkedMap::iter_hashed`]
+    /// gives it for a map hashed by the same environment): an insert without hashing it again.
+    pub fn push_hashed(&mut self, k: Value, v: V, h: u64) {
+        self.push_new(k, v, h);
+    }
+
     fn push_new(&mut self, k: Value, v: V, h: u64) {
         let i = self.entries.len() as u32;
         self.entries.push(Some(Entry {

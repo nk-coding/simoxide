@@ -91,6 +91,7 @@ fn insn(p: &Program, c: &Chunk, i: &crate::Insn) -> String {
                 | NewTuple { site: x, .. }
                 | SortBy { site: x, .. }
                 | KindTest { site: x, .. }
+                | FilterKind { site: x, .. }
                 | ObjectInit { site: x, .. }
                 | Resolve { site: x, .. }
                 | LateResolve { site: x, .. }

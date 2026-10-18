@@ -408,6 +408,14 @@ pub enum Insn {
         src: Reg,
         site: u16,
     },
+    /// The loop of a plain typed `xselect` (`src[T]`, `Site::FilterKind`) in one step: when
+    /// `src` holds a collection, its non-null elements of kind `T` are added to `acc` (the
+    /// empty result) in iteration order, as the loop that follows would add them, and execution
+    /// continues at `target`; otherwise nothing happens and the loop runs.
+    FilterKind {
+        site: u16,
+        target: u32,
+    },
 
     // ---- objects, traces ------------------------------------------------------------------
     /// `object x : T @ m {...}`: keeps the variable's object when it is non-null (it must
@@ -477,6 +485,7 @@ impl Insn {
             | Insn::JumpIfNotBool { target, .. }
             | Insn::JumpIfFastMode { target }
             | Insn::IterNext { target, .. }
+            | Insn::FilterKind { target, .. }
             | Insn::ClosureNext { target, .. } => Some(target),
             _ => None,
         }
@@ -495,6 +504,7 @@ impl Insn {
             | Insn::JumpIfNotBool { target, .. }
             | Insn::JumpIfFastMode { target }
             | Insn::IterNext { target, .. }
+            | Insn::FilterKind { target, .. }
             | Insn::ClosureNext { target, .. } => *target = t,
             _ => panic!("not a jump: {self:?}"),
         }
