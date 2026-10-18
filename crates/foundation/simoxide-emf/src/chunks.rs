@@ -11,7 +11,6 @@ use std::sync::Arc;
 /// Elements per frozen chunk.
 const CHUNK: usize = 256;
 
-#[derive(Debug)]
 pub(crate) struct ChunkVec<T> {
     /// The frozen prefix: `frozen` elements, all chunks full except possibly the last.
     chunks: Vec<Arc<Vec<T>>>,
@@ -19,6 +18,17 @@ pub(crate) struct ChunkVec<T> {
     tail: Vec<T>,
     /// Mutable accesses and pushes so far (see [`ChunkVec::writes`]).
     writes: u64,
+}
+
+/// The elements only: the write counter is no part of the value.
+impl<T: std::fmt::Debug> std::fmt::Debug for ChunkVec<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ChunkVec")
+            .field("chunks", &self.chunks)
+            .field("frozen", &self.frozen)
+            .field("tail", &self.tail)
+            .finish()
+    }
 }
 
 impl<T> Default for ChunkVec<T> {
