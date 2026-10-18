@@ -3091,13 +3091,128 @@ Why this format:
     `maxReplicas` pods per window: a one-day run of 20 services with 10 replicas each could
     create about 58 000 pods, past the guard. Realistic profiles create far fewer: the step test
     creates about ten in 30 minutes.
-- **Proposed next (native fast path for plain replica scaling).** Not needed at MiSArch's size,
-  but it is the way to make long, scale-heavy runs cheap and bounded:
+- **Proposed next (native fast path for plain replica scaling): declined** (user, 2026-10-18:
+  no native fast paths or HPA-specific workarounds; only general improvements that every
+  reconfiguration gets). The proposal was:
   1. an incremental syncer for the replica change kind (append a container, its resources,
      allocation, assembly, connectors and branch; set branch probabilities), with the same model
      changes as the transformation, checked against it on the corpus;
   2. reuse of drained tombstones for later scale-outs (a pod pool per group), so the model is
      bounded by `maxReplicas` instead of the pods created.
+
+  What was profiled and built instead: the next item.
+
+**Cost of a scaling step at MiSArch's size (as built, 2026-10-18, branch `perf-change`).**
+
+- **Why.** With the HPA, a MiSArch evaluation of the architecture optimisation took 2.5-4 s
+  alone and 4-12 s with 16 at once, about 30 times an analytic evaluation of P10. The question
+  was whether the change path (rebuild and diff, tombstones) was the cause, and whether
+  incremental syncers or tombstone compaction would win the time back.
+- **Profile.** One evaluation each of four MiSArch designs (models of
+  `palladio-architecture-optimization-hpa/models`: the 720 s peak hour 1× → 3× → 1×, HPA at
+  Kubernetes' defaults, target 0.7), through the plugin's `dynamic::run` in a harness with timers
+  around every phase of a step and `pprof` sampling (perf events are not available on the VM).
+  Per step, `main`:
+
+  | Design | Model objects | Steps | Step | QVTo | Change path | of which typed model rebuild + validate | Evaluation | Steps of it |
+  |---|---|---|---|---|---|---|---|---|
+  | knee (3 services) | 13 249 | 24 | 8.0 ms | 3.2 ms | 4.4 ms | 2.5 ms | 2.61 s, 19.4 M events | 7.4 % |
+  | today's cut (16) | 13 217 | 25 | 8.1 ms | 3.1 ms | 4.4 ms | 2.5 ms | 2.30 s, 16.1 M events | 8.8 % |
+  | neutral seed | 12 112 | 12 | 61 ms | 53 ms | 5.8 ms | 3.3 ms | 2.60 s, 12.0 M events | 28 % |
+  | monolith | 12 952 | 12 | 94 ms | 86 ms | 6.5 ms | 3.7 ms | 2.88 s, 11.0 M events | 39 % |
+
+  - The change path of a step: typed model rebuild (`build_order_after` 0.4, `build_in_order`
+    1.2, `validate` 0.9 ms), `compile_seeded` 0.45, merge 0.2, `plan_code` 0.2, dropping the
+    previous run model 0.9 ms; graph copies 0.15 ms. Linear in the model, as F2 said.
+  - **The evaluation's time is the simulation**: 60-92 % in the event loop. A dynamic run
+    simulates 11-19 million events (∫ factor dt = 1 110 load-seconds); the plugin's static
+    `eval` simulates 0.36 million in 0.17 s. That, not the change path, is the factor of 30.
+  - **Coarse cuts pay for QVTo.** Slingshot's transformation is quadratic in the pod's
+    assemblies and the system's connectors: `System::modifySystemModel` runs
+    `self.connectors__ComposedStructure[AssemblyConnector]->exists(...)` once per assembly of the
+    group, and `Wiring` filters all connectors per new connector (an instruction count put 48 %
+    of the monolith's QVTo instructions on that one line). Every iteration copied the connector
+    list into a new set (hashing and inserting each element) and filtered it again.
+  - **Tombstones do not pile up.** 13-15 pods are created per evaluation (the cap is 400). The
+    graph grows by 9 % (knee: 13 249 → 14 413 objects, 13 tombstoned pods) and the rebuild
+    stays between 2.4 and 3.5 ms per step over the run (one step 5.3 ms), with no trend. A coarse cut's pod is larger (the monolith's about
+    650 objects), so its graph grows from 12 952 to 21 356 objects and its rebuild from 3.1 to
+    5.4 ms, about 40 % of it tombstones at the end: 10-20 ms per evaluation, under 1 %.
+- **Decisions from the profile.**
+  - **No incremental syncers.** Replacing rebuild and diff by incremental per-kind syncers saves
+    at most the whole change path: 4.4 ms of an 8 ms step, 0.1 s of a 2.6 s evaluation (4 %),
+    for a second implementation of the builder's, the validation's and the compiler's
+    derivations (inverse lists, paths, the allocation trie, series) that every gate would have to
+    hold to the rebuild. Not worth it at this size; F4's note stands.
+  - **No tombstone compaction**: under 1 % (above), and a safe point with index remapping in
+    snapshots and forks for that is not justified.
+  - **Instead, general QVTo improvements** (every reconfiguration runs QVTo: SimuLizar rules, SPD,
+    HPA; nothing is HPA-specific, nothing bypasses the transformation).
+- **Built** (commits on `perf-change`):
+  1. **List reads are reused while the store is unchanged.** `ModelStore::version` (new,
+     default `None`): the shared graph counts every write through its object table
+     (`ChunkVec::writes`, incremented in `IndexMut` and `push`, the only way to change an object;
+     not part of `Debug`). The VM keeps the collections `get_prop` made of many-valued features
+     (`Vm::prop_cache`, by object and feature) while the version stays the same, and clears them
+     at the first read after a write. Reading a list gives a copy (Eclipse's
+     `CollectionUtil`); a shared value is never changed (writes copy it), and its elements were
+     hashed when it was made, so no identity hash is drawn more or less than before, also in compat
+     mode. Bags are not kept: each copy draws `MutableInteger` cells.
+  2. **Typed `xselect` in one step.** `src[T]` without a condition compiles to the new
+     instruction `FilterKind` (`Site::FilterKind`) in front of its loop: when `src` holds a
+     collection the VM filters it natively in iteration order, as the loop's pushes would, and
+     skips the loop; otherwise (no collection, or a step limit, which the loop charges per
+     element) the loop runs. A set into an insertion-ordered set of the same kind keeps the
+     elements' table hashes (`LinkedMap::iter_hashed`/`push_hashed`), again drawing no identity
+     hash. The last 16 results are kept by source value and type (`Vm::filter_memo`; a shared
+     value never changes; no bags), so the same `connectors[AssemblyConnector]` read in a loop
+     without writes is filtered once.
+  3. Smaller: `Coll::from_values` reserves its insertion-ordered storage (a Java `HashMap`'s
+     capacity decides its order, so compat sets are not pre-sized); `RunEnv::identity_hash` skips
+     the alias lookup when there are no aliases.
+
+  Files: `foundation/simoxide-emf-core/src/store.rs`, `foundation/simoxide-emf/src/{chunks,graph}.rs`,
+  `qvto/qvto-bytecode/src/{insn,program,compile,disasm}.rs`, `qvto/qvto-vm/src/{vm,objects,env}.rs`,
+  `qvto/qvto-runtime/src/coll/{mod,linked}.rs`. No file of `simoxide-sim`, `simoxide-spd` or
+  `simoxide-reconf` changed.
+- **Test.** `qvto/tests/run.rs` `list_reads_and_typed_xselect_follow_model_changes`: a list read
+  again after an addition and a removal sees them, an earlier read and a changed copy keep their
+  values, and `[T]` over an OrderedSet, Sequence (with null), Bag and Set gives the loop's result
+  (the same program with a step limit runs the loop), in fast, ordered and compat mode. It fails
+  when the version does not change on writes.
+- **Gates** (all byte-identical to `main` 1ef232f): workspace tests `--features exact` 646 passed,
+  0 failed, 40 ignored (with `target/pcm`); `golden.sh` identical (312 runs, against a `main`
+  build); `simoxide-fuzz corpus` 132/132, corpus-fuzz 6/6; `slingshot_exact` 89 of 90 byte-equal
+  (88 of 90 E/T/C-equal with the EPL build, `compare_exact.sh`); `corpus-spd` 5/5; snapshot,
+  fork and resume tests (in the workspace tests) and CLI tests with `reconfiguration` 17;
+  `test-qvto` 91 (90 + 1), `test-fdn` 93; `conform` compat 589/589, fast 589/584, ordered 583 + 6
+  `java-fails-equal`; `spd-replay` 13/13; the plugin's 32 + 6 tests against this branch (own
+  target directory); the plugin's `hpa --json` and `eval --json` outputs equal `main`'s on the four
+  designs; fmt; clippy `-D warnings` (workspace, workspace with `exact,hotspot-math`, the QVTo
+  crates with `compat`); release check 0 opt-in crates. Every test, harness and measurement ran
+  under `prlimit --as=10 GB`.
+- **Before/after** (plugin binaries built from `main` and from this branch, alternating, 3 runs
+  each; per step from the harness's timers; one VM core per run, load 1-2):
+
+  | Design | Evaluation `main` → branch | Step | QVTo per step | Change path per step | 16 at once (evaluations/s) |
+  |---|---|---|---|---|---|
+  | knee | 2.89 → 2.79 s | 8.0 → 7.7 ms | 3.2 → 2.7 ms | 4.4 → 4.5 ms | 4.08 → 4.16 |
+  | today's cut | 2.43 → 2.42 s | 8.1 → 7.9 ms | 3.1 → 2.7 ms | 4.4 → 4.5 ms | |
+  | neutral seed | 2.67 → 2.21 s | 61 → 35 ms | 53 → 26 ms | 5.8 → 6.6 ms | |
+  | monolith | 2.85 → 2.26 s | 94 → 46 ms | 86 → 39 ms | 6.5 → 5.9 ms | 4.05 → 4.96 |
+
+  The change-path differences are noise (it did not change). The static evaluation (`eval`,
+  no HPA): 167.4 → 166.3 ms (knee, 10 runs each), 88.6 → 88.2 ms (monolith): no regression.
+- **What remains.**
+  - The simulation: 70-92 % of an evaluation after the change, 11-19 million events per run.
+    Hot spots (sampled): virtual-time processor sharing (`factor`, the heap) about 11 %, SEFF
+    and call steps, the HPA's busy integral (`busy_fraction` counts busy cores per state change)
+    about 2 %. Shorter profiles or fewer measured requests are the levers there, not the change
+    path.
+  - QVTo in coarse cuts: 26-39 ms per step remain, the transformation's own quadratic loops
+    (single-valued property reads, the `exists` bodies, set building of `select` results).
+  - The change path: 4.4-6.6 ms per step, linear in the model; tombstones add under 1 % per
+    evaluation at these profiles. A run near the pod cap (400) would roughly double it.
 
 **Integration note: the MiSArch architecture optimisation (a later, separate project).**
 

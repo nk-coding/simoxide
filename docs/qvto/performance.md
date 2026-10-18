@@ -77,5 +77,11 @@ In SimOxide, a reconfiguration rule run costs about 0.1 ms in ordered mode
   identity-hash tables.
 - Tables the VM would otherwise compute per call (the overriding chain, library classes) are
   computed once per program.
+- A many-valued feature read again while the store is unchanged (`ModelStore::version`, which
+  the shared graph keeps) gives the collection of the earlier read, not a new copy; a typed
+  `xselect` (`coll[T]`) filters a collection in one instruction and keeps its last results by
+  source value. Neither draws an identity hash Java would not draw, so compat mode is unchanged.
+  Loops over a model's lists (Slingshot's `MainTransformation` on a large system: half the time
+  per adjustment, `DESIGN-SPD.md` §5.10) gain most.
 
 Profiling: build with `--features profile` and pass `qvto bench --profile out.svg`.
