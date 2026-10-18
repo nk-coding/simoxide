@@ -265,7 +265,14 @@ impl Coll {
         values: I,
         env: &dyn HashEnv,
     ) -> Coll {
+        let values = values.into_iter();
         let mut r = Coll::new_of(kind, env);
+        // insertion-ordered storage only: a Java `HashMap`'s capacity decides its bucket order
+        match &mut r {
+            Coll::OrderedSet(m) | Coll::Set(Index::Linked(m)) => m.reserve(values.size_hint().0),
+            Coll::Sequence(v) => v.reserve(values.size_hint().0),
+            _ => {}
+        }
         for v in values {
             r.add(v, env);
         }

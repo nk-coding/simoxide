@@ -62,6 +62,14 @@ impl<V> LinkedMap<V> {
             left: self.len,
         }
     }
+    /// Room for `n` more entries (the capacity is not observable: iteration follows the
+    /// entries).
+    pub fn reserve(&mut self, n: usize) {
+        self.entries.reserve(n);
+        let entries = &self.entries;
+        self.table
+            .reserve(n, |&j| entries[j as usize].as_ref().map_or(0, |e| e.hash));
+    }
     pub fn clear(&mut self) {
         self.table.clear();
         self.entries.clear();

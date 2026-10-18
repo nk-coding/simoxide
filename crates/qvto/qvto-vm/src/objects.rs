@@ -700,11 +700,27 @@ where
             let d = self.store.get(h, f);
             return Ok(self.attr_value(f, d));
         }
+        let kind = CollKind::of_feature(fi.ordered, fi.unique);
+        // Reading a list gives a new collection of its values (`CollectionUtil`'s copy). While
+        // the store has not changed, the copy of an earlier read is equal and reused (values
+        // are immutable, writes copy): its elements were hashed when it was made, so no
+        // identity hash is drawn either way. Bags draw count cells per copy, so they are not.
+        let version = match kind {
+            CollKind::Bag => None,
+            _ => self.store.version(),
+        };
+        if let Some(v) = version {
+            if v != self.prop_cache_version {
+                self.prop_cache.clear();
+                self.prop_cache_version = v;
+            } else if let Some(c) = self.prop_cache.get(&(r.index(), f)) {
+                return Ok(c.clone());
+            }
+        }
         let mut ds = Vec::new();
         self.store.get_list(h, f, &mut ds);
         let items: Vec<Value> = ds.into_iter().map(|d| self.datum(d)).collect();
-        let kind = CollKind::of_feature(fi.ordered, fi.unique);
-        Ok(match kind {
+        let value = match kind {
             CollKind::Sequence => Value::Coll(Rc::new(Coll::Sequence(items))),
             k => {
                 let rk = match k {
@@ -714,7 +730,11 @@ where
                 };
                 Value::Coll(Rc::new(Coll::from_values(rk, items, &self.env)))
             }
-        })
+        };
+        if version.is_some() {
+            self.prop_cache.insert((r.index(), f), value.clone());
+        }
+        Ok(value)
     }
 
     /// The OCL type of a feature (`getOCLType`): the element type, or a collection of the

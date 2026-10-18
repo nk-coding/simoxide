@@ -58,7 +58,11 @@ impl HashEnv for RunEnv {
         self.mode
     }
     fn identity_hash(&self, key: IdentityKey) -> i32 {
-        let key = self.aliases.get(&key).copied().unwrap_or(key);
+        let key = if self.aliases.is_empty() {
+            key
+        } else {
+            self.aliases.get(&key).copied().unwrap_or(key)
+        };
         if self.memo {
             self.ids.borrow_mut().get(key)
         } else {

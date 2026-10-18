@@ -130,6 +130,13 @@ pub trait ModelStore {
     fn resource_count(&self) -> usize;
     fn resource_uri(&self, r: ResourceId) -> &str;
     fn roots(&self, r: ResourceId) -> &[Self::Obj];
+    /// A version of the objects' values: `Some(v)` if the store keeps one, which changes
+    /// whenever a value of an object may have changed (through any write, including the side
+    /// effects on opposites and containers). While it stays the same, reading a feature gives
+    /// the same values, so a reader may reuse what it read. `None` (the default): no version.
+    fn version(&self) -> Option<u64> {
+        None
+    }
 
     // ---- writing ----
     fn create(&mut self, c: ClassId) -> ModelResult<Self::Obj>;

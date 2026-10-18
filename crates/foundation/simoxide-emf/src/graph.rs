@@ -1802,6 +1802,11 @@ impl ModelStore for Graph {
     fn roots(&self, r: ResourceId) -> &[ObjId] {
         &self.resources[r.index()].roots
     }
+    /// Every change of an object (values, container, resource) writes through the object
+    /// table, which counts its writes.
+    fn version(&self) -> Option<u64> {
+        Some(self.objs.writes())
+    }
     fn create(&mut self, c: ClassId) -> ModelResult<ObjId> {
         let ci = self.meta.class(c);
         if ci.is_abstract || ci.is_interface {

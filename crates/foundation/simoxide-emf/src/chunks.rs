@@ -17,6 +17,8 @@ pub(crate) struct ChunkVec<T> {
     chunks: Vec<Arc<Vec<T>>>,
     frozen: usize,
     tail: Vec<T>,
+    /// Mutable accesses and pushes so far (see [`ChunkVec::writes`]).
+    writes: u64,
 }
 
 impl<T> Default for ChunkVec<T> {
@@ -25,6 +27,7 @@ impl<T> Default for ChunkVec<T> {
             chunks: Vec::new(),
             frozen: 0,
             tail: Vec::new(),
+            writes: 0,
         }
     }
 }
@@ -35,6 +38,7 @@ impl<T: Clone> Clone for ChunkVec<T> {
             chunks: self.chunks.clone(),
             frozen: self.frozen,
             tail: self.tail.clone(),
+            writes: self.writes,
         }
     }
 }
@@ -47,7 +51,15 @@ impl<T: Clone> ChunkVec<T> {
 
     #[inline]
     pub fn push(&mut self, x: T) {
+        self.writes = self.writes.wrapping_add(1);
         self.tail.push(x);
+    }
+
+    /// A counter of the pushes and mutable element accesses so far: while it stays the same,
+    /// no element changed (every write to an element goes through `IndexMut`).
+    #[inline]
+    pub fn writes(&self) -> u64 {
+        self.writes
     }
 
     pub fn reserve(&mut self, n: usize) {
@@ -142,6 +154,7 @@ impl<T> Index<usize> for ChunkVec<T> {
 impl<T: Clone> IndexMut<usize> for ChunkVec<T> {
     #[inline]
     fn index_mut(&mut self, i: usize) -> &mut T {
+        self.writes = self.writes.wrapping_add(1);
         if i >= self.frozen {
             &mut self.tail[i - self.frozen]
         } else {

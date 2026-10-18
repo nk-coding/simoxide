@@ -250,6 +250,10 @@ where
     pub(crate) interm_vals: HashMap<(u32, qvto_model::FeatureId), Value>,
     /// Values of `static` intermediate features (`IntermediateStaticFieldAdapter`).
     pub(crate) static_vals: HashMap<qvto_model::FeatureId, Value>,
+    /// Many-valued features of store objects as read (`get_prop`), valid while the store's
+    /// [`ModelStore::version`] is `prop_cache_version`.
+    pub(crate) prop_cache: HashMap<(u32, qvto_model::FeatureId), Value>,
+    pub(crate) prop_cache_version: u64,
     /// The intermediate extent of each transformation (`getIntermediateExtent`).
     pub(crate) interm_extents: HashMap<u32, usize>,
     /// The records of the input trace of an incremental update.
@@ -353,6 +357,8 @@ where
             interm_info: crate::objects::IntermInfo::default(),
             interm_vals: HashMap::default(),
             static_vals: HashMap::default(),
+            prop_cache: HashMap::default(),
+            prop_cache_version: 0,
             interm_extents: HashMap::default(),
             inc_trace: Vec::new(),
             nested: Vec::new(),
