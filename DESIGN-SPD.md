@@ -3178,13 +3178,14 @@ Why this format:
   `qvto/qvto-bytecode/src/{insn,program,compile,disasm}.rs`, `qvto/qvto-vm/src/{vm,objects,env}.rs`,
   `qvto/qvto-runtime/src/coll/{mod,linked}.rs`. No file of `simoxide-sim`, `simoxide-spd` or
   `simoxide-reconf` changed.
-- **Test.** `qvto/tests/run.rs` `list_reads_and_typed_xselect_follow_model_changes`: a list read
-  again after an addition and a removal sees them, an earlier read and a changed copy keep their
+- **Test.** `qvto/tests/run.rs` `list_reads_and_typed_xselect_follow_model_changes` (lists of
+  nine and ten classifiers, so that they are kept): a list read again after an addition and a
+  removal sees them, an earlier read and a changed copy keep their
   values, and `[T]` over an OrderedSet, Sequence (with null), Bag and Set gives the loop's result
   (the same program with a step limit runs the loop), in fast, ordered and compat mode. It fails
   when the version does not change on writes.
-- **Gates** (all byte-identical to `main` 1ef232f): workspace tests `--features exact` 646 passed,
-  0 failed, 40 ignored (with `target/pcm`); `golden.sh` identical (312 runs, against a `main`
+- **Gates** (all byte-identical to `main` 1ef232f): workspace tests `--features exact` 647 passed
+  (646 + the new test), 0 failed, 40 ignored (with `target/pcm`); `golden.sh` identical (312 runs, against a `main`
   build); `simoxide-fuzz corpus` 132/132, corpus-fuzz 6/6; `slingshot_exact` 89 of 90 byte-equal
   (88 of 90 E/T/C-equal with the EPL build, `compare_exact.sh`); `corpus-spd` 5/5; snapshot,
   fork and resume tests (in the workspace tests) and CLI tests with `reconfiguration` 17;
