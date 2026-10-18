@@ -3135,9 +3135,10 @@ Why this format:
     list into a new set (hashing and inserting each element) and filtered it again.
   - **Tombstones do not pile up.** 13-15 pods are created per evaluation (the cap is 400). The
     graph grows by 9 % (knee: 13 249 → 14 413 objects, 13 tombstoned pods) and the rebuild
-    stays between 2.4 and 3.5 ms per step over the run (one step 5.3 ms), with no trend. A coarse cut's pod is larger (the monolith's about
-    650 objects), so its graph grows from 12 952 to 21 356 objects and its rebuild from 3.1 to
-    5.4 ms, about 40 % of it tombstones at the end: 10-20 ms per evaluation, under 1 %.
+    stays between 2.4 and 3.5 ms per step over the run (one step 5.3 ms), with no trend. A
+    coarse cut's pod is larger (the monolith's about 650 objects), so its graph grows from
+    12 952 to 21 356 objects and its rebuild from 3.1 to 5.4 ms, about 40 % of it tombstones at
+    the end: 10-20 ms per evaluation, under 1 %.
 - **Decisions from the profile.**
   - **No incremental syncers.** Replacing rebuild and diff by incremental per-kind syncers saves
     at most the whole change path: 4.4 ms of an 8 ms step, 0.1 s of a 2.6 s evaluation (4 %),
@@ -3180,13 +3181,12 @@ Why this format:
   `simoxide-reconf` changed.
 - **Test.** `qvto/tests/run.rs` `list_reads_and_typed_xselect_follow_model_changes` (lists of
   nine and ten classifiers, so that they are kept): a list read again after an addition and a
-  removal sees them, an earlier read and a changed copy keep their
-  values, and `[T]` over an OrderedSet, Sequence (with null), Bag and Set gives the loop's result
+  removal sees them, an earlier read and a changed copy keep their values, and `[T]` over an OrderedSet, Sequence (with null), Bag and Set gives the loop's result
   (the same program with a step limit runs the loop), in fast, ordered and compat mode. It fails
   when the version does not change on writes.
 - **Gates** (all byte-identical to `main` 1ef232f): workspace tests `--features exact` 647 passed
-  (646 + the new test), 0 failed, 40 ignored (with `target/pcm`); `golden.sh` identical (312 runs, against a `main`
-  build); `simoxide-fuzz corpus` 132/132, corpus-fuzz 6/6; `slingshot_exact` 89 of 90 byte-equal
+  (646 + the new test), 0 failed, 40 ignored (with `target/pcm`); `golden.sh` identical (312
+  runs, against a `main` build); `simoxide-fuzz corpus` 132/132, corpus-fuzz 6/6; `slingshot_exact` 89 of 90 byte-equal
   (88 of 90 E/T/C-equal with the EPL build, `compare_exact.sh`); `corpus-spd` 5/5; snapshot,
   fork and resume tests (in the workspace tests) and CLI tests with `reconfiguration` 17;
   `test-qvto` 91 (90 + 1), `test-fdn` 93; `conform` compat 589/589, fast 589/584, ordered 583 + 6
@@ -3218,7 +3218,7 @@ Why this format:
     and call steps, the HPA's busy integral (`busy_fraction` counts busy cores per state change)
     about 2 %. Shorter profiles or fewer measured requests are the levers there, not the change
     path.
-  - QVTo in coarse cuts: 26-39 ms per step remain, the transformation's own quadratic loops
+  - QVTo in coarse cuts: 26-46 ms per step remain, the transformation's own quadratic loops
     (single-valued property reads, the `exists` bodies, set building of `select` results).
   - The change path: 4.4-6.6 ms per step, linear in the model; tombstones add under 1 % per
     evaluation at these profiles. A run near the pod cap (400) would roughly double it.
