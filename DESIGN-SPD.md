@@ -3153,11 +3153,14 @@ Why this format:
      default `None`): the shared graph counts every write through its object table
      (`ChunkVec::writes`, incremented in `IndexMut` and `push`, the only way to change an object;
      not part of `Debug`). The VM keeps the collections `get_prop` made of many-valued features
-     (`Vm::prop_cache`, by object and feature) while the version stays the same, and clears them
-     at the first read after a write. Reading a list gives a copy (Eclipse's
-     `CollectionUtil`); a shared value is never changed (writes copy it), and its elements were
-     hashed when it was made, so no identity hash is drawn more or less than before, also in compat
-     mode. Bags are not kept: each copy draws `MutableInteger` cells.
+     of eight or more elements (`Vm::prop_cache`: 1 024 slots, direct-mapped by object and
+     feature, each entry with the version it was read at) and gives an entry back while the
+     version is still its own. Reading a list gives a copy (Eclipse's `CollectionUtil`); a
+     shared value is never changed (writes copy it), and its elements were hashed when it was
+     made, so no identity hash is drawn more or less than before, also in compat mode. Bags are
+     not kept: each copy draws `MutableInteger` cells. Short lists are copied faster than looked
+     up, and a map of every list read made a large read-only query (`qvto bench` B5
+     `b5_query_x100`) 6-11 % slower; the small table does not.
   2. **Typed `xselect` in one step.** `src[T]` without a condition compiles to the new
      instruction `FilterKind` (`Site::FilterKind`) in front of its loop: when `src` holds a
      collection the VM filters it natively in iteration order, as the loop's pushes would, and
@@ -3191,18 +3194,23 @@ Why this format:
   designs; fmt; clippy `-D warnings` (workspace, workspace with `exact,hotspot-math`, the QVTo
   crates with `compat`); release check 0 opt-in crates. Every test, harness and measurement ran
   under `prlimit --as=10 GB`.
-- **Before/after** (plugin binaries built from `main` and from this branch, alternating, 3 runs
-  each; per step from the harness's timers; one VM core per run, load 1-2):
+- **Before/after** (the final code; plugin binaries built from `main` and from this branch,
+  alternating, 6 runs each, `hpa --json`'s `wallMs` and `adjustMs`; QVTo per step from the
+  harness's timers; load 2-6, so absolute times are about 10 % above a quiet VM's; an earlier
+  round on a quiet VM gave the same ratios):
 
-  | Design | Evaluation `main` → branch | Step | QVTo per step | Change path per step | 16 at once (evaluations/s) |
-  |---|---|---|---|---|---|
-  | knee | 2.89 → 2.79 s | 8.0 → 7.7 ms | 3.2 → 2.7 ms | 4.4 → 4.5 ms | 4.08 → 4.16 |
-  | today's cut | 2.43 → 2.42 s | 8.1 → 7.9 ms | 3.1 → 2.7 ms | 4.4 → 4.5 ms | |
-  | neutral seed | 2.67 → 2.21 s | 61 → 35 ms | 53 → 26 ms | 5.8 → 6.6 ms | |
-  | monolith | 2.85 → 2.26 s | 94 → 46 ms | 86 → 39 ms | 6.5 → 5.9 ms | 4.05 → 4.96 |
+  | Design | Evaluation `main` → branch | Step | QVTo per step | 16 at once (evaluations/s) |
+  |---|---|---|---|---|
+  | knee | 2.89 → 2.84 s | 12.1 → 11.2 ms | 4.5 → 3.5 ms | 3.80 → 3.87 |
+  | today's cut | 2.56 → 2.51 s | 10.8 → 10.2 ms | 3.8 → 3.6 ms | |
+  | neutral seed | 2.88 → 2.49 s (−14 %) | 77 → 47 ms | 58 → 26 ms | |
+  | monolith | 3.08 → 2.52 s (−18 %) | 116 → 66 ms | 89 → 46 ms | 3.80 → 4.54 (+19 %) |
 
-  The change-path differences are noise (it did not change). The static evaluation (`eval`,
-  no HPA): 167.4 → 166.3 ms (knee, 10 runs each), 88.6 → 88.2 ms (monolith): no regression.
+  The change path is unchanged (4.4-6.5 ms per step on a quiet VM). The static evaluation
+  (`eval`, no HPA, 10 runs each): knee 209.9 → 209.8 ms, today's cut 205.9 → 203.8 ms, monolith
+  105.1 → 100.9 ms: no regression. `qvto bench` B2-B6 (ordered mode, 3 rounds, best of each):
+  geometric means 0.99, 0.99, 1.00, 1.00, 0.99 of `main`'s; single workloads within ±12 %
+  (noise of sub-millisecond runs).
 - **What remains.**
   - The simulation: 70-92 % of an evaluation after the change, 11-19 million events per run.
     Hot spots (sampled): virtual-time processor sharing (`factor`, the heap) about 11 %, SEFF
