@@ -174,6 +174,8 @@ pub struct RunState<C: Compat = crate::compat::DefaultCompat, F: Flavour = SimuL
     pub(super) steps: u64,
     pub(super) next_step_check: u64,
     pub(super) next_event_check: u64,
+    /// The load profile's run state (`crate::load`; `None`: no profile).
+    pub(super) lp: Option<Box<crate::load::LoadRun>>,
     /// `Limits::max_stack_depth` (`usize::MAX` if unlimited).
     pub(super) max_depth: usize,
     // ------------------------------------------------------------------ within an event
@@ -235,6 +237,7 @@ impl<C: Compat, F: Flavour> Clone for RunState<C, F> {
             steps: self.steps,
             next_step_check: self.next_step_check,
             next_event_check: self.next_event_check,
+            lp: self.lp.clone(),
             max_depth: self.max_depth,
             nesting: self.nesting,
             direct: self.direct,
@@ -316,6 +319,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             steps: 0,
             next_step_check: 0,
             next_event_check: 0,
+            lp: None,
             max_depth,
             nesting: 0,
             direct: 0,
@@ -368,6 +372,12 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
     /// Live processes (users, workload drivers, forked behaviours).
     pub fn live_processes(&self) -> usize {
         self.procs.len() - self.free.len()
+    }
+
+    /// The load profile's factor of usage scenario `scen` (index of
+    /// `CompiledModel::scenarios`) now; `None` without a profile ([`crate::load`]).
+    pub fn load_factor(&self, scen: usize) -> Option<f64> {
+        self.lp.as_ref().map(|lp| lp.factor(scen))
     }
 
     /// Whether the state was created with a trace (see [`Simulation::resume`]).

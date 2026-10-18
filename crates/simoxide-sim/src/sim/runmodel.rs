@@ -716,21 +716,7 @@ impl<C: Compat, F: Flavour> Simulation<'_, C, F> {
                         self.st.procs[unkey(k).0 as usize].ss_flags |= STOP_REQUESTED;
                     }
                 }
-                WorkloadOp::Population { scen, to } => {
-                    let users = self.closed_users(scen);
-                    let n = users.len() as i64;
-                    let to = to.max(0);
-                    if n > to {
-                        // `ClosedWorkload.stopUsers`: the oldest users leave after their run
-                        for &k in &users[..(n - to) as usize] {
-                            self.st.procs[unkey(k).0 as usize].ss_flags |= STOP_REQUESTED;
-                        }
-                    }
-                    for _ in n..to {
-                        let k = self.spawn(PKind::ClosedUser, Cont::ClosedUser { scen, st: 0 })?;
-                        self.activate(k)?;
-                    }
-                }
+                WorkloadOp::Population { scen, to } => self.set_population(scen, to)?,
             }
         }
         // new sliding windows start at the change
@@ -801,7 +787,7 @@ impl<C: Compat, F: Flavour> Simulation<'_, C, F> {
 
     /// The closed-workload users of scenario `scen` that have not been asked to stop, oldest
     /// first.
-    fn closed_users(&self, scen: u32) -> Vec<u64> {
+    pub(super) fn closed_users(&self, scen: u32) -> Vec<u64> {
         let mut v: Vec<(u64, u64)> = self
             .st
             .procs

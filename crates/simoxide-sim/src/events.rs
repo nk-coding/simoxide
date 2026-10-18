@@ -32,6 +32,8 @@ pub(crate) enum Ev {
     Stale(ResIdx),
     /// An external note of a host layer (`sim::hooks`): records its tag.
     External(u32),
+    /// A step of the load profile (`crate::load`): applies the points due now.
+    Load,
 }
 
 #[derive(Clone, Copy)]

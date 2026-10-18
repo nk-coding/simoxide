@@ -68,7 +68,7 @@ Everything a run changes, as of a point between two events:
 
 - configuration: run name, seed, stop conditions, RNG mode with the replayed tape (uniforms,
   origins, `s` records), processor-sharing algorithm, livelock guard, `Limits` without the
-  wall-clock deadline and the cancellation flag, mode;
+  wall-clock deadline and the cancellation flag, mode, the load profile;
 - phase, the error of a failed run, `traced`;
 - clock and counters: current time (the flavour's encoding: integer ns, or the bits of the double
   seconds), events, livelock-guard counters, finished usage-scenario runs, interpreter steps and
@@ -88,7 +88,9 @@ Everything a run changes, as of a point between two events:
   values, the reconfiguration process, the event list (the heap of notes and the resource timer
   slots, with the FIFO sequence counter), host hooks (external notes, observed tuples);
 - resolution caches (provided-role calls, call sites, entry-level calls), warnings, the run
-  model's generation.
+  model's generation;
+- with a load profile: per usage scenario its points, the next one and the current factor, and
+  an open workload's pending arrival ([Load profiles](../guide/load-profile.md)).
 
 What is zero or empty between events (nesting counters, allocation pools) is not written.
 

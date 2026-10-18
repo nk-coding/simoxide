@@ -9,7 +9,7 @@ code comments cite the rule identifiers.
 | Page | Rules | Content |
 |---|---|---|
 | [Simulation core](./simulation.md) | `SIM-*`, `ND-*` | engine, nanosecond time, event list, process model, stop conditions, initialisation order, sources of nondeterminism |
-| [Workloads](./workloads.md) | `WL-*` | usage model interpretation, open and closed workloads |
+| [Workloads](./workloads.md) | `WL-*`, `LP-*` | usage model interpretation, open and closed workloads; SimOxide's load profiles |
 | [Actions](./actions.md) | `ACT-*` | RDSEFF actions, composition, parameters and stack frames, passive resources, forks, linking resources |
 | [Measurements](./measurements.md) | `MEAS-*` | what is measured, when, and in which order |
 | [Stochastic expressions](./stoex.md) | | parser, types, evaluation, Java arithmetic |

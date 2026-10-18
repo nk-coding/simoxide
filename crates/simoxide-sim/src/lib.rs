@@ -35,6 +35,7 @@ pub mod javafmt;
 #[cfg(feature = "exact")]
 pub mod javahash;
 mod javarand;
+pub mod load;
 pub mod meas;
 pub mod rng;
 pub mod sim;
@@ -57,6 +58,7 @@ pub use flavour::{
     Flavour, FlavourConfig, FlavourKind, Quirk, Quirks, SimuLizar, Slingshot, Support,
 };
 pub use ir::{CompileError, CompiledModel};
+pub use load::{LoadEntry, LoadProfile};
 pub use meas::{Measurements, SeriesSummary};
 pub use rng::{RngMode, Tape};
 pub use sim::watch::{Condition, Watch};

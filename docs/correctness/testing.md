@@ -19,6 +19,7 @@ harness are described in [Test kit](../development/testkit.md).
 | Engine shortcuts | `crates/simoxide-sim/tests/literal_engine.rs` | DESMO-J's literal event sequence | same; more: `LITERAL_N=1000` |
 | Pause, fork and resume | `crates/simoxide-sim/tests/fork.rs` | the uninterrupted run | same; `FORK_FILTER=a,b` |
 | Model changes, no-op | `crates/simoxide-sim/tests/model_change.rs` | the uninterrupted run | same |
+| Load profiles | `crates/simoxide-sim/tests/load_profile.rs` | the model with the scaled rate; arrival times derived by hand; the uninterrupted run | same |
 | Model changes | `crates/simoxide-reconf/tests/changes.rs` | the changed model run from the start; SimuLizar's syncer rules | same |
 | Robustness (untrusted input) | `crates/simoxide-sim/tests/robustness.rs` | no panic; errors of the right kind | same; more: `ROBUST_N=100000 ROBUST_SEED=n` |
 | Model generator | `crates/simoxide-testkit/tests/modelgen.rs` | models load without errors; every feature occurs | same |

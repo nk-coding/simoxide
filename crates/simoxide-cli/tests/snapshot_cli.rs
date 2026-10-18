@@ -262,3 +262,67 @@ fn a_slingshot_exact_spd_run_resumes_with_its_decision_log() {
         &["--spd-log"],
     );
 }
+
+/// A model directory with a load profile (`*.loadprofile.json`, docs/guide/load-profile.md):
+/// the profile is read with the model, its state is part of the snapshot, and the resumed run
+/// continues it; `--no-load-profile` and `--load-profile FILE` choose another one.
+#[test]
+fn a_load_profile_is_read_and_resumed() {
+    let d = tmp("lp-model");
+    let src = root().join("corpus/h05_open_workload");
+    for e in std::fs::read_dir(&src).unwrap().flatten() {
+        if e.path().is_file() {
+            // a server fast enough for every load of the profile
+            let t = std::fs::read_to_string(e.path()).unwrap().replace(
+                "processingRate_ProcessingResourceSpecification specification=\"1.0\"",
+                "processingRate_ProcessingResourceSpecification specification=\"100.0\"",
+            );
+            std::fs::write(d.join(e.file_name()), t).unwrap();
+        }
+    }
+    std::fs::write(
+        d.join("steps.loadprofile.json"),
+        r#"{"points": [[0, 0.5], [30, 2.0], [60, 0.25], [90, 1.5]]}"#,
+    )
+    .unwrap();
+    check(
+        "load-profile",
+        &d,
+        &["--max-sim-time", "120", "--max-measurements", "-1"],
+        &["40", "75"],
+        &[],
+    );
+    let rows = |extra: &[&str]| -> usize {
+        let m = d.join("lp.csv");
+        let model = d.to_string_lossy().into_owned();
+        let ms = m.to_string_lossy().into_owned();
+        let mut args = vec![
+            "run",
+            "--model",
+            &model,
+            "--max-sim-time",
+            "120",
+            "--max-measurements",
+            "-1",
+            "--measurements",
+            &ms,
+        ];
+        args.extend(extra);
+        simoxide(&args);
+        read(&m)
+            .lines()
+            .filter(|l| l.starts_with("UsageScenario"))
+            .count()
+    };
+    let with = rows(&[]);
+    let without = rows(&["--no-load-profile"]);
+    let other = d.join("double.json");
+    std::fs::write(&other, r#"{"points": [[0, 2.0]]}"#).unwrap();
+    let double = rows(&["--load-profile", &other.to_string_lossy()]);
+    // 4 arrivals/s for 120 s: about 480; the profile's mean factor is 1.0625; doubled: 960
+    let all = format!("with {with}, without {without}, doubled {double}");
+    assert!((400..560).contains(&without), "{all}");
+    assert!((420..600).contains(&with) && with != without, "{all}");
+    assert!((850..1070).contains(&double), "{all}");
+    std::fs::remove_dir_all(&d).unwrap();
+}

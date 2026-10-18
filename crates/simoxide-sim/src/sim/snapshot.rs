@@ -287,6 +287,7 @@ pub(crate) struct ConfigImage {
     max_events: u64,
     max_steps: u64,
     mode: Mode,
+    load_profile: Option<crate::load::LoadProfile>,
 }
 
 impl From<&SimConfig> for ConfigImage {
@@ -325,6 +326,7 @@ impl From<&SimConfig> for ConfigImage {
             max_events: c.limits.max_events,
             max_steps: c.limits.max_steps,
             mode: c.mode,
+            load_profile: c.load_profile.as_deref().cloned(),
         }
     }
 }
@@ -365,6 +367,7 @@ impl From<ConfigImage> for SimConfig {
                 cancel: None,
             },
             mode: c.mode,
+            load_profile: c.load_profile.map(Arc::new),
         }
     }
 }
@@ -413,6 +416,8 @@ struct EngineImage<K: Clock> {
     steps: u64,
     next_step_check: u64,
     next_event_check: u64,
+    /// The load profile's run state (`crate::load`).
+    lp: Option<crate::load::LoadRun>,
 }
 
 /// The section `model` as written (borrowing the compiled model).
@@ -601,6 +606,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             steps: self.steps,
             next_step_check: self.next_step_check,
             next_event_check: self.next_event_check,
+            lp: self.lp.as_deref().cloned(),
         })
     }
 
@@ -790,6 +796,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             steps: img.steps,
             next_step_check: img.next_step_check,
             next_event_check: img.next_event_check,
+            lp: img.lp.map(Box::new),
             max_depth,
             nesting: 0,
             direct: 0,

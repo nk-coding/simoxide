@@ -102,8 +102,9 @@ ones.
 
 Pauses, snapshots and `resume` work as for any SPD run ([Snapshots](./snapshots.md)): the snapshot
 gets the section `hpa`, and the resume needs the same configuration. A time-varying load is a
-sequence of pauses with change files (`arrival-rate WORKLOAD RATE`), or the library's
-`run_until` plus `ChangeFile::apply`.
+[load profile](./load-profile.md) (`--load-profile`, or `SimConfig::load_profile` in the
+library): the load steps run inside the simulation. Pauses with change files (`arrival-rate
+WORKLOAD RATE`), or the library's `run_until` plus `ChangeFile::apply`, work too.
 
 ## Decision log
 

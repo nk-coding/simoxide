@@ -127,3 +127,37 @@ synchronously (measurements, [measurements](./measurements.md)); it has no other
 | Loop | iteration count (Integer) | once on entering the loop |
 | Branch | 1 × `random()` | on entering the branch |
 | EntryLevelSystemCall | input characterisations (then output after return) | on call / on return |
+
+## LP Load profiles
+
+A load profile (`crates/simoxide-sim/src/load.rs`, [Load profiles](../guide/load-profile.md)) is
+SimOxide's own: SimuLizar has no time-varying workload of this kind. Without a profile none of
+these rules applies and every run is as above.
+
+- **LP-1** A profile is a list of step functions `(time, factor)`, each for some usage scenarios
+  (by id, else by entity name) or all of them; a later function overrides an earlier one for its
+  scenarios. Times strictly increase and are not negative; factors are finite and positive. A
+  scenario's factor is 1 before its first point. The profile is resolved against the compiled
+  model when the simulation is created: an unknown name is a model error at t = 0.
+- **LP-2** Open workload: the generator (WL-2.2) holds `ia / factor` instead of `ia`, with the
+  scenario's factor at the draw. At a step at `t` from factor `f` to `f'`, a pending arrival at
+  `t_w > t` moves to `t + (t_w − t) · f / f'` (the flavour's clock: `span` of the scaled rest in
+  SimuLizar, one double addition in Slingshot). The old wake-up becomes stale (the generator
+  process gets a new generation); no random number is drawn. An arrival due at `t` itself draws
+  its next interval with `f'` if the step's event comes first, else it is moved like a pending
+  one. So the arrival process runs in operational time `∫ factor dt`.
+- **LP-3** Closed workload: at the start the population is `round(population · factor(0))`
+  (half away from zero). At a step the population becomes `round(population · factor)`: new
+  users start at the step (WL-3.1: `Resume` at now, no initial think time); surplus users leave
+  after their current run and think time, oldest first (`ClosedWorkload.setPopulation`, as a
+  population change of the model, MC-5.2).
+- **LP-4** The points at time 0 apply before the start. Each later distinct time is one event
+  (`Ev::Load`), inserted at the start in time order behind the start's events, FIFO with other
+  notes at that time (SIM-2.3). It counts as an event; it writes no trace line. After the stop
+  (SIM-6.5) a step does nothing.
+- **LP-5** A model change (a change file, a reconfiguration rule, an SPD adjustment) changes the
+  model's workload: the profile then scales the changed inter-arrival time or population. A usage
+  scenario created by a change has factor 1.
+- **LP-6** The profile and its run state (each scenario's next point and factor, the open
+  workloads' pending arrivals) are part of forks and snapshots (section `engine`). The
+  Slingshot-exact engine refuses a profile.

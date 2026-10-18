@@ -36,6 +36,9 @@ const USAGE: &str = "usage:
              groups: the *.hpa / *.hpa.json files next to the model, or FILE; their decisions
              go to --spd-log; `spd` feature, adjustments with `reconfiguration`;
              docs/guide/hpa.md)
+             [--load-profile FILE.loadprofile.json] [--no-load-profile]   (a time-varying load:
+             per usage scenario, steps of a factor on the arrival rate or the population; the
+             *.loadprofile.json files next to the model, or FILE; docs/guide/load-profile.md)
              [--rules DIR] [--rules-log rules.jsonl] [--qvto-mode auto|ordered|fast|compat]
              (SimuLizar's reconfiguration rules: the .qvto files of DIR in file-name order, or
              run.json's reconfiguration_rules; `reconfiguration` feature; QVTo's compat mode
@@ -105,6 +108,9 @@ struct Args {
     hpa: Option<PathBuf>,
     no_hpa: bool,
     hpa_set: Vec<String>,
+    /// `--load-profile FILE`, `--no-load-profile`.
+    load_profile: Option<PathBuf>,
+    no_load_profile: bool,
     rules: Option<PathBuf>,
     rules_log: Option<PathBuf>,
     qvto_mode: Option<String>,
@@ -168,6 +174,8 @@ fn parse_args() -> Result<Args, String> {
         hpa: None,
         no_hpa: false,
         hpa_set: Vec::new(),
+        load_profile: None,
+        no_load_profile: false,
         rules: None,
         rules_log: None,
         qvto_mode: None,
@@ -294,6 +302,8 @@ fn parse_args() -> Result<Args, String> {
             "--hpa" => a.hpa = Some(val()?.into()),
             "--no-hpa" => a.no_hpa = true,
             "--hpa-set" => a.hpa_set.push(val()?),
+            "--load-profile" => a.load_profile = Some(val()?.into()),
+            "--no-load-profile" => a.no_load_profile = true,
             "--rules" => a.rules = Some(val()?.into()),
             "--rules-log" => a.rules_log = Some(val()?.into()),
             "--qvto-mode" => a.qvto_mode = Some(val()?),
@@ -434,6 +444,14 @@ fn setup_with_rules(a: &Args) -> Result<(CompiledModel, SimConfig, Option<PathBu
         let text = std::fs::read_to_string(r).map_err(|e| format!("{}: {e}", r.display()))?;
         cfg.rng = RngMode::Replay(Arc::new(Tape::parse(&text)?));
         cfg.check_tape_origins = a.check_origins;
+    }
+    // the load profile: --load-profile FILE, else the directory's *.loadprofile.json files
+    if !a.no_load_profile {
+        let p = match &a.load_profile {
+            Some(f) => Some(simoxide_sim::LoadProfile::load_file(f)?),
+            None => simoxide_sim::LoadProfile::load_dir(&dir)?,
+        };
+        cfg.load_profile = p.map(Arc::new);
     }
     Ok((cm, cfg, rules))
 }

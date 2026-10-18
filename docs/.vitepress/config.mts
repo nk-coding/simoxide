@@ -61,6 +61,7 @@ export default defineConfig({
             { text: 'Reconfiguration rules', link: '/guide/reconfiguration' },
             { text: 'Scaling policies (SPD)', link: '/guide/spd' },
             { text: 'Autoscaling (HPA)', link: '/guide/hpa' },
+            { text: 'Load profiles', link: '/guide/load-profile' },
             { text: 'Fast mode', link: '/guide/fast-mode' },
             { text: 'Slingshot flavour', link: '/guide/slingshot' },
             { text: 'Supported models', link: '/guide/scope' },

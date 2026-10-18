@@ -3130,9 +3130,26 @@ Why this format:
     SCENARIO λ·factor_k` for each of the 36 scenarios, then `model_changed()`. The tests do
     this; it keeps the run deterministic and snapshot-able. `LoadLevel { factor, weight }`
     becomes a step profile: levels in a chosen order, each for `weight · T`.
-  - **next** (about a day): a native load profile in SimOxide, a list of `(t, factor)` applied
-    as change sets at external notes inside `SpdRun`, so the plugin passes the profile instead
-    of driving pauses.
+  - **built** (2026-10-18, branch `load-profile`): a native load profile in the engine
+    (`simoxide_sim::LoadProfile`, `SimConfig::load_profile`, `--load-profile`; spec `LP-*` on
+    `docs/spec/workloads.md`, guide `docs/guide/load-profile.md`). Per usage scenario a step
+    function `(t, factor)`: an open workload's inter-arrival times are divided by the factor and
+    a pending arrival moves at a step (operational time, no extra draw); a closed workload's
+    population is scaled. The steps are engine events (`Ev::Load`), not change sets, so they
+    cost no model change and work in plain `simoxide_sim::run` as well as inside `SpdRun`; the
+    state is part of forks and snapshots. The plugin passes the profile instead of driving
+    pauses. Tests: `simoxide-sim/tests/load_profile.rs` (7: a unit profile changes no output, a
+    constant factor equals the scaled rate byte for byte, arrivals at steps up and down by hand
+    in both flavours and modes, rates and closed populations follow the profile, pause, fork and
+    snapshot continue identically, errors), 2 unit tests, `hpa.rs`
+    `a_load_profile_drives_the_autoscaler`, `snapshot_cli.rs` `a_load_profile_is_read_and_resumed`.
+    Gates: `golden.sh` identical (312 runs); workspace tests `--features exact` 645 passed (634 +
+    11), 0 failed, 40 ignored; `simoxide-fuzz corpus` 132/132, corpus-fuzz 6/6; `slingshot_exact`
+    89 of 90; `corpus-spd` equal; `conform` compat 589/589, fast 584, ordered 583 (+6), unchanged;
+    fmt; clippy `-D warnings` (workspace default, `exact,hotspot-math`, `compat`; the CLI with
+    `reconfiguration`, `exact,reconfiguration` and without defaults; `simoxide-spd`,
+    `simoxide-reconf`, `simoxide-sim` without defaults); CLI tests with `reconfiguration` 17;
+    release check 0 opt-in crates; docs build clean.
 - **Objectives from a dynamic run** (all from `HpaSummary`, the decision log and the
   measurements):
   - **cost**: ready-replica-seconds per service, times the price per replica and second (plus

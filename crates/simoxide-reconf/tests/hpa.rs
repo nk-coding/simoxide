@@ -272,6 +272,40 @@ fn a_load_step_scales_out_within_syncs_and_in_after_the_window() {
     assert!(res.measurements.to_csv().contains("Response Time"));
 }
 
+/// The same step as a load profile of the run (`simoxide_sim::LoadProfile`, no pauses): the
+/// arrival rate times 10 from 300 s to 900 s. The autoscaler behaves as with the change files.
+#[test]
+fn a_load_profile_drives_the_autoscaler() {
+    let dir = model_dir(0.2, &hpa_json("", "", ""), true);
+    let s = setup(&dir);
+    let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
+    let mut cfg = sim_cfg(1, 1800);
+    cfg.load_profile = Some(std::sync::Arc::new(simoxide_sim::LoadProfile::uniform(
+        vec![(300.0, 10.0), (900.0, 1.0)],
+    )));
+    let sim = Simulation::<Fast>::create(&s.cm, cfg, Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &s.spd).unwrap().with_hpa(&hpa).unwrap();
+    let mut adj = adjuster();
+    let mut log = VecLog::default();
+    r.run(&mut adj, &mut log).unwrap();
+    assert_eq!(r.sim.state().load_factor(0), Some(1.0));
+    let sum = r.hpa_summary();
+    let recs = records(&log, "hpa");
+    let at = |time: f64| recs.iter().find(|r| t(r) == time).unwrap();
+    assert!(int(at(315.0), "desired") > int(at(315.0), "current"));
+    assert!(int(at(360.0), "desired") >= 8, "{}", at(360.0));
+    let all = rescales(&log);
+    assert!(
+        !all.iter().any(|&(time, ..)| (450.0..900.0).contains(&time)),
+        "{all:?}"
+    );
+    check_stabilisation(&log, 300.0);
+    let first_down = all.iter().find(|&&(_, c, d)| d < c).unwrap().0;
+    assert!(first_down > 1000.0, "{first_down}");
+    assert!(sum[0].ready <= 3, "{sum:?}");
+    assert_eq!(sum[0].failed, 0);
+}
+
 /// A ramp from 0.5 to 4.5 offered cores in 60 s steps: the replica count follows the load up
 /// without a scale-down, to about the load / 0.5.
 #[test]

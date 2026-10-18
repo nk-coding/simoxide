@@ -43,6 +43,7 @@ use std::io::Write;
 mod calls;
 mod flat;
 mod hooks;
+mod loadstep;
 mod reconf;
 mod removal;
 mod runmodel;
@@ -90,6 +91,10 @@ pub struct SimConfig {
     /// Exact (default) or fast mode ([`crate::compat`]). [`crate::run`] and [`crate::run_batch`]
     /// dispatch on it; [`Simulation::create`] checks it against its policy type.
     pub mode: Mode,
+    /// A time-varying load ([`crate::load`], `docs/guide/load-profile.md`): per usage scenario,
+    /// a step function of a factor on the arrival rate or the population. `None`: the model's
+    /// workloads as they are.
+    pub load_profile: Option<std::sync::Arc<crate::load::LoadProfile>>,
 }
 
 /// Resource limits of one run. A run that exceeds one stops with a [`SimError`] of kind
@@ -172,6 +177,7 @@ impl Default for SimConfig {
             max_events_per_instant: DEFAULT_MAX_EVENTS_PER_INSTANT,
             limits: Limits::default(),
             mode: Mode::default(),
+            load_profile: None,
         }
     }
 }
@@ -763,13 +769,26 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             kind: SimErrorKind::Model,
         })?;
         let traced = out.trace.is_some();
+        // the load profile, resolved against the model's usage scenarios (LP-1)
+        let lp = match &cfg.load_profile {
+            Some(p) => Some(Box::new(
+                crate::load::LoadRun::new(p, cm, F::Clock::at_secs).map_err(|m| SimError {
+                    message: m,
+                    at_ns: 0,
+                    kind: SimErrorKind::Model,
+                })?,
+            )),
+            None => None,
+        };
+        let mut st = RunState::new(cm, cfg, traced, rng);
+        st.lp = lp;
         Ok(Simulation {
             base: cm,
             cm,
             code: cm.code.get(traced),
             trace: out.trace.map(|w| TraceOut::new(w, F::Clock::secs)),
             tape: out.tape,
-            st: RunState::new(cm, cfg, traced, rng),
+            st,
         })
     }
 
@@ -1095,6 +1114,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     self.activate(k)?;
                 }
                 CWorkload::Closed { population, .. } => {
+                    // a load profile scales the population from the start (LP-3)
+                    let population = match &self.st.lp {
+                        Some(lp) => crate::load::scaled_population(population, lp.factor(i)),
+                        None => population,
+                    };
                     for _ in 0..population.max(0) {
                         let k = self.spawn(
                             PKind::ClosedUser,
@@ -1106,6 +1130,12 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         self.activate(k)?;
                     }
                 }
+            }
+        }
+        // the load profile's later steps are events (LP-4)
+        if let Some(lp) = &self.st.lp {
+            for t in lp.pending_times() {
+                self.st.meas.events.insert(t, Ev::Load);
             }
         }
         self.st.count_seen = self.st.main_count;
@@ -1459,6 +1489,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         match ev {
             Ev::Reconf => reconf_resume(&mut self.st.meas, &mut self.trace, self.st.now),
             Ev::External(tag) => self.st.meas.hooks.due.push(tag),
+            Ev::Load => self.load_step()?,
             Ev::Resume(k) => {
                 let (s, g) = unkey(k);
                 let p = &self.st.procs[s as usize];
@@ -2596,7 +2627,17 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         unreachable!()
                     };
                     let ia = self.eval_f64(inter_arrival, None, Origin::Plain("interarrival"))?;
-                    if self.hold(s, ia)? {
+                    // a load profile: `factor` times as many arrivals (LP-2)
+                    let d = match self.st.lp.as_deref() {
+                        Some(lp) => ia / lp.factor(scen as usize),
+                        None => ia,
+                    };
+                    if self.hold(s, d)? {
+                        if let Some(lp) = self.st.lp.as_deref_mut()
+                            && let Some(w) = lp.wake.get_mut(scen as usize)
+                        {
+                            *w = Some((s, F::Clock::after(self.st.now, d)));
+                        }
                         return Ok(Flow::Wait);
                     }
                 } else {
