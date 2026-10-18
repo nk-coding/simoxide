@@ -413,30 +413,35 @@ fn log_with(text: &str, opts: qvto::RunOptions) -> String {
 fn list_reads_and_typed_xselect_follow_model_changes() {
     // a list read again after a change sees the change, an earlier read keeps its values; `[T]`
     // gives what its loop gives (the loop runs when steps are limited), for every source kind
+    // (lists of eight and more elements are the ones the VM keeps)
     let text = "modeltype E uses ecore('http://www.eclipse.org/emf/2002/Ecore');
 transformation t(out o : E);
 main() {
   var p := object EPackage { name := 'p' };
-  var a := object EClass { name := 'A' };
+  var i := 0;
+  while (i < 8) { p.eClassifiers += object EClass { name := 'C' + i.toString() }; i := i + 1; };
   var d := object EDataType { name := 'D' };
-  p.eClassifiers += a;
   p.eClassifiers += d;
+  var a := p.eClassifiers->first().oclAsType(EClass);
   var first := p.eClassifiers;
-  log('first', first.name);
-  log('classes', p.eClassifiers[EClass].name);
-  log('again', p.eClassifiers[EClass].name);
+  log('first', first->size());
+  log('classes', p.eClassifiers[EClass]->size());
+  log('again', p.eClassifiers[EClass]->size());
   var b := object EClass { name := 'B' };
   p.eClassifiers += b;
-  log('after add', p.eClassifiers.name);
-  log('classes after add', p.eClassifiers[EClass].name);
-  log('first unchanged', first.name);
+  log('after add', p.eClassifiers->size());
+  log('last', p.eClassifiers->last().name);
+  log('classes after add', p.eClassifiers[EClass]->size());
+  log('first unchanged', first->size());
   var copy := p.eClassifiers;
   copy += object EEnum { name := 'E' };
-  log('copy', copy.name);
-  log('model', p.eClassifiers.name);
+  log('copy', copy->size());
+  log('model', p.eClassifiers->size());
   p.eClassifiers := p.eClassifiers->excluding(b);
-  log('after remove', p.eClassifiers.name);
+  log('after remove', p.eClassifiers->size());
   log('classes after remove', p.eClassifiers[EClass].name);
+  d.name := 'D2';
+  log('renamed', p.eClassifiers[EDataType].name);
   log('seq', Sequence{a, null, d, b, a}[EClass].name);
   log('bag', Bag{a, d, a, b}[EClass]->size());
   log('set', Set{a, d, b}[EClassifier]->size());
@@ -462,20 +467,22 @@ main() {
         );
         assert_eq!(log, looped, "{mode:?}");
         for line in [
-            "first, data: [A, D]",
-            "classes, data: [A]",
-            "again, data: [A]",
-            "after add, data: [A, D, B]",
-            "classes after add, data: [A, B]",
-            "first unchanged, data: [A, D]",
-            "copy, data: [A, D, B, E]",
-            "model, data: [A, D, B]",
-            "after remove, data: [A, D]",
-            "classes after remove, data: [A]",
-            "seq, data: [A, B, A]",
+            "first, data: 9",
+            "classes, data: 8",
+            "again, data: 8",
+            "after add, data: 10",
+            "last, data: B",
+            "classes after add, data: 9",
+            "first unchanged, data: 9",
+            "copy, data: 11",
+            "model, data: 10",
+            "after remove, data: 9",
+            "classes after remove, data: [C0, C1, C2, C3, C4, C5, C6, C7]",
+            "renamed, data: [D2]",
+            "seq, data: [C0, B, C0]",
             "bag, data: 3",
             "set, data: 3",
-            "oset, data: [B, A]",
+            "oset, data: [B, C0]",
             "none, data: 0",
             "supers, data: 0",
         ] {

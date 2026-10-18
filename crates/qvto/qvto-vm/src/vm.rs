@@ -253,10 +253,10 @@ where
     pub(crate) interm_vals: HashMap<(u32, qvto_model::FeatureId), Value>,
     /// Values of `static` intermediate features (`IntermediateStaticFieldAdapter`).
     pub(crate) static_vals: HashMap<qvto_model::FeatureId, Value>,
-    /// Many-valued features of store objects as read (`get_prop`), valid while the store's
-    /// [`ModelStore::version`] is `prop_cache_version`.
-    pub(crate) prop_cache: HashMap<(u32, qvto_model::FeatureId), Value>,
-    pub(crate) prop_cache_version: u64,
+    /// Many-valued features of store objects as read (`get_prop`): a direct-mapped table by
+    /// object and feature, each entry valid while the store's [`ModelStore::version`] is the
+    /// entry's.
+    pub(crate) prop_cache: Vec<Option<crate::objects::PropEntry>>,
     /// Recent results of `src[T]` (`Insn::FilterKind`) by source collection and type: a
     /// shared collection value never changes (writes copy it), so the filter of the same value
     /// is the same. Bags are not kept (their count cells are drawn per copy).
@@ -364,8 +364,7 @@ where
             interm_info: crate::objects::IntermInfo::default(),
             interm_vals: HashMap::default(),
             static_vals: HashMap::default(),
-            prop_cache: HashMap::default(),
-            prop_cache_version: 0,
+            prop_cache: Vec::new(),
             filter_memo: Vec::new(),
             interm_extents: HashMap::default(),
             inc_trace: Vec::new(),

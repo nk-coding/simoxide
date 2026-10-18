@@ -17,6 +17,24 @@ use qvto_types::{CollKind, Type, TypeId};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+/// Lists shorter than this are not kept by `Vm::prop_cache`.
+const PROP_CACHE_MIN_LEN: usize = 8;
+/// Slots of `Vm::prop_cache` (a power of two).
+const PROP_CACHE_SLOTS: usize = 1024;
+
+/// A list read kept by `Vm::prop_cache`: the store version, object, feature and value.
+pub(crate) struct PropEntry {
+    version: u64,
+    obj: u32,
+    feature: FeatureId,
+    value: Value,
+}
+
+fn prop_slot(obj: u32, f: FeatureId) -> usize {
+    let h = ((obj as u64) << 32 | f.0 as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15);
+    (h >> 54) as usize & (PROP_CACHE_SLOTS - 1)
+}
+
 /// Which classes have engine-local instances: QVTo's library classes, the exception classes
 /// of the program, and its intermediate classes unless the store took them
 /// ([`IntermInfo::in_store`]).
@@ -701,24 +719,27 @@ where
             return Ok(self.attr_value(f, d));
         }
         let kind = CollKind::of_feature(fi.ordered, fi.unique);
+        let mut ds = Vec::new();
+        self.store.get_list(h, f, &mut ds);
         // Reading a list gives a new collection of its values (`CollectionUtil`'s copy). While
         // the store has not changed, the copy of an earlier read is equal and reused (values
         // are immutable, writes copy): its elements were hashed when it was made, so no
-        // identity hash is drawn either way. Bags draw count cells per copy, so they are not.
+        // identity hash is drawn either way. Bags draw count cells per copy, so they are not
+        // kept; short lists are copied faster than looked up.
         let version = match kind {
             CollKind::Bag => None,
+            _ if ds.len() < PROP_CACHE_MIN_LEN => None,
             _ => self.store.version(),
         };
-        if let Some(v) = version {
-            if v != self.prop_cache_version {
-                self.prop_cache.clear();
-                self.prop_cache_version = v;
-            } else if let Some(c) = self.prop_cache.get(&(r.index(), f)) {
-                return Ok(c.clone());
-            }
+        let slot = prop_slot(r.index(), f);
+        if let Some(v) = version
+            && let Some(Some(e)) = self.prop_cache.get(slot)
+            && e.version == v
+            && e.obj == r.index()
+            && e.feature == f
+        {
+            return Ok(e.value.clone());
         }
-        let mut ds = Vec::new();
-        self.store.get_list(h, f, &mut ds);
         let items: Vec<Value> = ds.into_iter().map(|d| self.datum(d)).collect();
         let value = match kind {
             CollKind::Sequence => Value::Coll(Rc::new(Coll::Sequence(items))),
@@ -731,8 +752,16 @@ where
                 Value::Coll(Rc::new(Coll::from_values(rk, items, &self.env)))
             }
         };
-        if version.is_some() {
-            self.prop_cache.insert((r.index(), f), value.clone());
+        if let Some(v) = version {
+            if self.prop_cache.is_empty() {
+                self.prop_cache.resize_with(PROP_CACHE_SLOTS, || None);
+            }
+            self.prop_cache[slot] = Some(PropEntry {
+                version: v,
+                obj: r.index(),
+                feature: f,
+                value: value.clone(),
+            });
         }
         Ok(value)
     }
