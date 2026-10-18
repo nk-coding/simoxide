@@ -807,28 +807,52 @@ fn services_model(k: usize, rate: f64) -> PathBuf {
         ));
     }
     let files = [
-        ("default.repository", format!(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<repository:Repository {xmi} xmlns:repository=\"http://palladiosimulator.org/PalladioComponentModel/Repository/5.2\" xmlns:seff=\"http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2\" id=\"_repo\" entityName=\"repository\">\n{repo}</repository:Repository>\n"
-        )),
-        ("default.system", format!(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<system:System {xmi} xmlns:composition=\"http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2\" xmlns:repository=\"http://palladiosimulator.org/PalladioComponentModel/Repository/5.2\" xmlns:system=\"http://palladiosimulator.org/PalladioComponentModel/System/5.2\" id=\"_sys\" entityName=\"services\">\n{sys}</system:System>\n"
-        )),
-        ("My.resourceenvironment", format!(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<resourceenvironment:ResourceEnvironment {xmi} xmlns:resourceenvironment=\"http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2\">\n{env}</resourceenvironment:ResourceEnvironment>\n"
-        )),
-        ("default.allocation", format!(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<allocation:Allocation {xmi} xmlns:allocation=\"http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2\" id=\"_alloc\" entityName=\"allocation\">\n  <targetResourceEnvironment_Allocation href=\"My.resourceenvironment#/\"/>\n  <system_Allocation href=\"default.system#_sys\"/>\n{alloc}</allocation:Allocation>\n"
-        )),
-        ("default.usagemodel", format!(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<usagemodel:UsageModel {xmi} xmlns:usagemodel=\"http://palladiosimulator.org/PalladioComponentModel/UsageModel/5.2\">\n{usage}</usagemodel:UsageModel>\n"
-        )),
-        ("default.spd", format!(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<spd:SPD {xmi} xmlns:spd=\"http://palladiosimulator.org/ScalingPolicyDefinition/1.0\" xmlns:targets=\"http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0\" id=\"_spd\">\n{spd}</spd:SPD>\n"
-        )),
-        ("default.semanticspd", format!(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<semanticspd:Configuration {xmi} xmlns:semanticspd=\"http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0\">\n  <spd href=\"default.spd#_spd\"/>\n{sem}  <allocation href=\"default.allocation#_alloc\"/>\n  <system href=\"default.system#_sys\"/>\n  <resourceEnvironment href=\"My.resourceenvironment#/0\"/>\n  <repository href=\"default.repository#_repo\"/>\n</semanticspd:Configuration>\n"
-        )),
-        ("services.hpa.json", format!("{{\"items\":[{}]}}", hpa.join(",\n"))),
+        (
+            "default.repository",
+            format!(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<repository:Repository {xmi} xmlns:repository=\"http://palladiosimulator.org/PalladioComponentModel/Repository/5.2\" xmlns:seff=\"http://palladiosimulator.org/PalladioComponentModel/SEFF/5.2\" id=\"_repo\" entityName=\"repository\">\n{repo}</repository:Repository>\n"
+            ),
+        ),
+        (
+            "default.system",
+            format!(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<system:System {xmi} xmlns:composition=\"http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2\" xmlns:repository=\"http://palladiosimulator.org/PalladioComponentModel/Repository/5.2\" xmlns:system=\"http://palladiosimulator.org/PalladioComponentModel/System/5.2\" id=\"_sys\" entityName=\"services\">\n{sys}</system:System>\n"
+            ),
+        ),
+        (
+            "My.resourceenvironment",
+            format!(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<resourceenvironment:ResourceEnvironment {xmi} xmlns:resourceenvironment=\"http://palladiosimulator.org/PalladioComponentModel/ResourceEnvironment/5.2\">\n{env}</resourceenvironment:ResourceEnvironment>\n"
+            ),
+        ),
+        (
+            "default.allocation",
+            format!(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<allocation:Allocation {xmi} xmlns:allocation=\"http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2\" id=\"_alloc\" entityName=\"allocation\">\n  <targetResourceEnvironment_Allocation href=\"My.resourceenvironment#/\"/>\n  <system_Allocation href=\"default.system#_sys\"/>\n{alloc}</allocation:Allocation>\n"
+            ),
+        ),
+        (
+            "default.usagemodel",
+            format!(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<usagemodel:UsageModel {xmi} xmlns:usagemodel=\"http://palladiosimulator.org/PalladioComponentModel/UsageModel/5.2\">\n{usage}</usagemodel:UsageModel>\n"
+            ),
+        ),
+        (
+            "default.spd",
+            format!(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<spd:SPD {xmi} xmlns:spd=\"http://palladiosimulator.org/ScalingPolicyDefinition/1.0\" xmlns:targets=\"http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0\" id=\"_spd\">\n{spd}</spd:SPD>\n"
+            ),
+        ),
+        (
+            "default.semanticspd",
+            format!(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<semanticspd:Configuration {xmi} xmlns:semanticspd=\"http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0\">\n  <spd href=\"default.spd#_spd\"/>\n{sem}  <allocation href=\"default.allocation#_alloc\"/>\n  <system href=\"default.system#_sys\"/>\n  <resourceEnvironment href=\"My.resourceenvironment#/0\"/>\n  <repository href=\"default.repository#_repo\"/>\n</semanticspd:Configuration>\n"
+            ),
+        ),
+        (
+            "services.hpa.json",
+            format!("{{\"items\":[{}]}}", hpa.join(",\n")),
+        ),
     ];
     for (name, text) in files {
         std::fs::write(out.join(name), text).unwrap();
@@ -864,14 +888,15 @@ impl<C: Compat, F: Flavour> simoxide_spd::sim::Adjuster<C, F> for Timed {
 fn cost_per_scaling_step() {
     let t0 = std::time::Instant::now();
     let core = QvtoCore::new().unwrap();
-    let inner = QvtoAdjuster::spd(&core, &SpdAdjust::new(&Quirks::fixed())).unwrap();
-    println!("QVTo set-up (core, MainTransformation): {:.1} ms", t0.elapsed().as_secs_f64() * 1e3);
+    let _ = QvtoAdjuster::spd(&core, &SpdAdjust::new(&Quirks::fixed())).unwrap();
+    println!(
+        "QVTo set-up (core, MainTransformation): {:.1} ms",
+        t0.elapsed().as_secs_f64() * 1e3
+    );
     for k in [1, 10, 30, 40] {
         let dir = services_model(k, 0.4);
         let model = RunSpec::default().load_model(&dir).unwrap();
         let objects = model.graph.object_count();
-        let typed = model.repositories.len(); // touch
-        let _ = typed;
         let s = setup(&dir);
         let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
         let sim = Simulation::<Fast>::create(&s.cm, sim_cfg(1, 900), Outputs::default()).unwrap();

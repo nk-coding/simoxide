@@ -373,6 +373,7 @@ impl<'m, C: Compat, F: Flavour> RulesRun<'m, C, F> {
     }
 
     /// The simulation and the host, both mutable.
+    #[cfg_attr(not(feature = "snapshot"), allow(dead_code))]
     pub(crate) fn parts_mut(&mut self) -> (&mut Simulation<'m, C, F>, &mut RulesHost) {
         (&mut self.sim, &mut self.host)
     }
