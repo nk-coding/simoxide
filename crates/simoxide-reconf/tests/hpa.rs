@@ -687,6 +687,12 @@ fn parameters_change_at_a_pause() {
 /// its own load balancer, an open workload of `Exp(rate)`, 0.5 s mean demand), each an elastic
 /// infrastructure with an HPA (CPU 50 %, 1..8 replicas). `k = 40`: about 2 300 objects.
 fn services_model(k: usize, rate: f64) -> PathBuf {
+    services_model_with(k, rate, false)
+}
+
+/// [`services_model`]; with `backend`, every service calls a `Backend` component (its own
+/// container, not scaled) after its work, so requests in progress on a pod make calls.
+fn services_model_with(k: usize, rate: f64, backend: bool) -> PathBuf {
     const CPU: &str = "pathmap://PCM_MODELS/Palladio.resourcetype#_oro4gG3fEdy4YaaT-RYrLQ";
     const FCFS: &str = "pathmap://PCM_MODELS/Palladio.resourcetype#FCFS";
     const LAN: &str = "pathmap://PCM_MODELS/Palladio.resourcetype#_o3sScH2AEdyH8uerKnHYug";
@@ -709,13 +715,35 @@ fn services_model(k: usize, rate: f64) -> PathBuf {
     );
     for i in 0..k {
         let s = format!("_s{i}");
+        let (last, after, backend_call, backend_role) = if backend {
+            (
+                format!("{s}_bcall"),
+                format!("{s}_bcall"),
+                format!(
+                    r#"<steps_Behaviour xsi:type="seff:ExternalCallAction" id="{s}_bcall" entityName="callBackend{i}" predecessor_AbstractAction="{s}_ia" successor_AbstractAction="{s}_stop" calledService_ExternalService="_backend_sig" role_ExternalService="{s}_breq"/>
+      "#
+                ),
+                format!(
+                    r#"<requiredRoles_InterfaceRequiringEntity xsi:type="repository:OperationRequiredRole" id="{s}_breq" entityName="Service{i}.Backend" requiredInterface__OperationRequiredRole="_backend_if"/>
+    "#
+                ),
+            )
+        } else {
+            (
+                format!("{s}_ia"),
+                format!("{s}_stop"),
+                String::new(),
+                String::new(),
+            )
+        };
         repo += &format!(
             r#"  <components__Repository xsi:type="repository:BasicComponent" id="{s}_comp" entityName="Service{i}">
     <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="{s}_prov" entityName="Service{i}.Provided" providedInterface__OperationProvidedRole="{s}_if"/>
+    {backend_role}
     <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="{s}_seff" describedService__SEFF="{s}_sig">
       <steps_Behaviour xsi:type="seff:StartAction" id="{s}_start" successor_AbstractAction="{s}_ia"/>
-      <steps_Behaviour xsi:type="seff:StopAction" id="{s}_stop" predecessor_AbstractAction="{s}_ia"/>
-      <steps_Behaviour xsi:type="seff:InternalAction" id="{s}_ia" entityName="work{i}" predecessor_AbstractAction="{s}_start" successor_AbstractAction="{s}_stop">
+      <steps_Behaviour xsi:type="seff:StopAction" id="{s}_stop" predecessor_AbstractAction="{last}"/>
+      {backend_call}<steps_Behaviour xsi:type="seff:InternalAction" id="{s}_ia" entityName="work{i}" predecessor_AbstractAction="{s}_start" successor_AbstractAction="{after}">
         <resourceDemand_Action>
           <specification_ParametericResourceDemand specification="Exp(2.0)"/>
           <requiredResource_ParametricResourceDemand href="{CPU}"/>
@@ -764,8 +792,18 @@ fn services_model(k: usize, rate: f64) -> PathBuf {
   </providedRoles_InterfaceProvidingEntity>
 "#
         );
+        if backend {
+            sys += &format!(
+                r#"  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="{s}_bconn" entityName="ToBackend{i}" requiringAssemblyContext_AssemblyConnector="{s}_ac" providingAssemblyContext_AssemblyConnector="_backend_ac">
+    <providedRole_AssemblyConnector href="default.repository#_backend_prov"/>
+    <requiredRole_AssemblyConnector href="default.repository#{s}_breq"/>
+  </connectors__ComposedStructure>
+"#
+            );
+        }
+        let link_backend = if backend { " _backend_rc" } else { "" };
         env += &format!(
-            r#"  <linkingResources__ResourceEnvironment id="{s}_link" entityName="Link{i}" connectedResourceContainers_LinkingResource="{s}_rc {s}_lbrc">
+            r#"  <linkingResources__ResourceEnvironment id="{s}_link" entityName="Link{i}" connectedResourceContainers_LinkingResource="{s}_rc {s}_lbrc{link_backend}">
     <communicationLinkResourceSpecifications_LinkingResource id="{s}_linkspec">
       <communicationLinkResourceType_CommunicationLinkResourceSpecification href="{LAN}"/>
       <latency_CommunicationLinkResourceSpecification specification="0.0"/>
@@ -840,6 +878,46 @@ fn services_model(k: usize, rate: f64) -> PathBuf {
   "metrics":[{{"type":"Resource","resource":{{"name":"cpu","target":{{"type":"Utilization","averageUtilization":50}}}}}}]}}}}"#
         ));
     }
+    if backend {
+        repo += &format!(
+            r#"  <components__Repository xsi:type="repository:BasicComponent" id="_backend_comp" entityName="Backend">
+    <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_backend_prov" entityName="Backend.Provided" providedInterface__OperationProvidedRole="_backend_if"/>
+    <serviceEffectSpecifications__BasicComponent xsi:type="seff:ResourceDemandingSEFF" id="_backend_seff" describedService__SEFF="_backend_sig">
+      <steps_Behaviour xsi:type="seff:StartAction" id="_backend_start" successor_AbstractAction="_backend_ia"/>
+      <steps_Behaviour xsi:type="seff:StopAction" id="_backend_stop" predecessor_AbstractAction="_backend_ia"/>
+      <steps_Behaviour xsi:type="seff:InternalAction" id="_backend_ia" entityName="backendWork" predecessor_AbstractAction="_backend_start" successor_AbstractAction="_backend_stop">
+        <resourceDemand_Action>
+          <specification_ParametericResourceDemand specification="Exp(20.0)"/>
+          <requiredResource_ParametricResourceDemand href="{CPU}"/>
+        </resourceDemand_Action>
+      </steps_Behaviour>
+    </serviceEffectSpecifications__BasicComponent>
+  </components__Repository>
+  <interfaces__Repository xsi:type="repository:OperationInterface" id="_backend_if" entityName="BackendInterface">
+    <signatures__OperationInterface id="_backend_sig" entityName="backend"/>
+  </interfaces__Repository>
+"#
+        );
+        sys += r#"  <assemblyContexts__ComposedStructure id="_backend_ac" entityName="Assembly_Backend">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="default.repository#_backend_comp"/>
+  </assemblyContexts__ComposedStructure>
+"#;
+        env += &format!(
+            r#"  <resourceContainer_ResourceEnvironment id="_backend_rc" entityName="BackendServer">
+    <activeResourceSpecifications_ResourceContainer id="_backend_cpu" numberOfReplicas="8">
+      <schedulingPolicy href="{FCFS}"/>
+      <activeResourceType_ActiveResourceSpecification href="{CPU}"/>
+      <processingRate_ProcessingResourceSpecification specification="100.0"/>
+    </activeResourceSpecifications_ResourceContainer>
+  </resourceContainer_ResourceEnvironment>
+"#
+        );
+        alloc += r#"  <allocationContexts_Allocation id="_backend_alloc" entityName="Allocation_Backend">
+    <resourceContainer_AllocationContext href="My.resourceenvironment#_backend_rc"/>
+    <assemblyContext_AllocationContext href="default.system#_backend_ac"/>
+  </allocationContexts_Allocation>
+"#;
+    }
     let files = [
         (
             "default.repository",
@@ -892,6 +970,52 @@ fn services_model(k: usize, rate: f64) -> PathBuf {
         std::fs::write(out.join(name), text).unwrap();
     }
     out
+}
+
+/// Scale-in while requests are in progress on the removed pods, whose service then calls a
+/// backend (MC-8.2: a removed assembly context's calls resolve over the connectors it had).
+/// Each pod's work is a 0.5 s demand, then a call; a step from 2 to 0.2 offered cores leaves
+/// requests on the pods the scale-in removes. The run completes, the removed pods' requests
+/// finish (no request is lost: every arrival before the end completes or is still running),
+/// and the scale-in happened.
+#[test]
+fn a_scale_in_drains_pods_whose_requests_make_calls() {
+    let dir = services_model_with(1, 4.0, true);
+    let hpa_cfg = r#"{"items":[{"metadata":{"name":"svc0"},"spec":{"scaleTargetRef":{"name":"svc0"},"minReplicas":1,"maxReplicas":8,
+  "metrics":[{"type":"Resource","resource":{"name":"cpu","target":{"type":"Utilization","averageUtilization":50}}}],
+  "behavior":{"scaleDown":{"stabilizationWindowSeconds":0}}}}]}"#;
+    std::fs::write(dir.join("services.hpa.json"), hpa_cfg).unwrap();
+    let s = setup(&dir);
+    let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
+    let mut cfg = sim_cfg(3, 900);
+    cfg.load_profile = Some(std::sync::Arc::new(simoxide_sim::LoadProfile::uniform(
+        vec![(300.0, 0.1), (600.0, 1.0)],
+    )));
+    let sim = Simulation::<Fast>::create(&s.cm, cfg, Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &s.spd).unwrap().with_hpa(&hpa).unwrap();
+    let mut adj = adjuster();
+    let mut log = VecLog::default();
+    r.run_until(&mut adj, &mut log, Some(650 * S)).unwrap();
+    let before = r.sim.state().main_count();
+    r.run(&mut adj, &mut log).unwrap();
+    let downs: Vec<_> = rescales(&log)
+        .into_iter()
+        .filter(|&(_, c, d)| d < c)
+        .collect();
+    assert!(!downs.is_empty(), "no scale-in: {:?}", rescales(&log));
+    assert!(
+        downs.iter().any(|&(t, ..)| (300.0..600.0).contains(&t)),
+        "{downs:?}"
+    );
+    let sum = r.hpa_summary();
+    assert_eq!(sum[0].failed, 0);
+    let (res, _, _) = r.finish().unwrap();
+    // requests keep completing after the scale-ins (about 4 per second at the end)
+    assert!(
+        res.main_count > before + 500,
+        "{} after {before}",
+        res.main_count
+    );
 }
 
 /// Times the adjustments of an inner adjuster.

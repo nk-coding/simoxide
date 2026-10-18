@@ -2509,10 +2509,14 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             return self.err("Required delegation of the system cannot be simulated");
         }
         let acid = AssemblyContextId(ac);
-        if m.assembly_contexts[acid].parent.is_none() {
-            return self.err("Required delegation of the system cannot be simulated");
-        }
-        let conn = if self.quirk(crate::flavour::Quirk::Q20) {
+        let conn = if m.assembly_contexts[acid].parent.is_none() {
+            // an assembly context that left its structure: a request in progress there calls
+            // over the connectors it had (MC-8.2)
+            match cm.drain_conn.get(&(acid, role)) {
+                Some(&c) => Some(c),
+                None => return self.err("Required delegation of the system cannot be simulated"),
+            }
+        } else if self.quirk(crate::flavour::Quirk::Q20) {
             // Q20: the first assembly connector of the system with this required role id,
             // whatever the requiring assembly context (SS-ACT-2.2)
             cm.ss.sys_req_conn.get(&m.roles[role].id).copied()

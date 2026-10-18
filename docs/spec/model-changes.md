@@ -216,7 +216,10 @@ Defaults (`ChangeOptions::for_flavour`): `Drain` (Slingshot with the Q5 flag: `S
   leaves the environment keep simulating and serving; MC-2.3 and MC-3.3 abort.
 - **MC-8.2 Drain** (the default, both flavours): the resources finish the jobs they have and
   serve the requests that were in progress at the change, their later demands included (a
-  request is a usage-scenario run; forked behaviours belong to it). A request that starts after
+  request is a usage-scenario run; forked behaviours belong to it). Their later calls are
+  included too: an assembly context that left its structure (with its connectors, as an SPD
+  scale-in removes a pod's assemblies) calls over the connectors it had when it left; without
+  such a connector the call fails as in SimuLizar ("Required delegation of the system"). A request that starts after
   the change and still reaches them is aborted (MC-8.6). Once idle with no such request left
   they are gone: no final deactivation tuples (SIM-6.5). Routing away is the model's part (a
   removed allocation context, a branch probability).

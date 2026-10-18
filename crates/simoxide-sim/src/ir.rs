@@ -462,6 +462,14 @@ pub struct CompiledModel {
         serde(with = "crate::snapshot::serde_util::sorted")
     )]
     pub req_conn: FxMap<(AssemblyContextId, RoleId), ConnectorId>,
+    /// `(assembly context, required role)` -> the connector it had when it left its structure
+    /// (a model change removed both, MC-8.2): the calls of its requests in progress resolve over
+    /// it. Empty for a model without removed assembly contexts.
+    #[cfg_attr(
+        feature = "snapshot",
+        serde(default, with = "crate::snapshot::serde_util::sorted")
+    )]
+    pub drain_conn: FxMap<(AssemblyContextId, RoleId), ConnectorId>,
     /// `(component, signature id key)` -> SEFFs describing that signature (by id string).
     #[cfg_attr(
         feature = "snapshot",
@@ -1420,6 +1428,35 @@ impl CompiledModel {
                 }
             }
         }
+        // removed assembly contexts (tombstones of a model change) keep the connectors they had
+        let mut drain_conn = FxMap::default();
+        if m.assembly_contexts.iter().any(|a| a.parent.is_none()) {
+            let live: std::collections::HashSet<ConnectorId> = m
+                .structures
+                .iter()
+                .flat_map(|st| st.connectors.iter().copied())
+                .collect();
+            for (c, conn) in m.connectors.iter_ids() {
+                if live.contains(&c) {
+                    continue;
+                }
+                match &conn.kind {
+                    ConnectorKind::Assembly {
+                        requiring: Some(a),
+                        required_role: Some(r),
+                        ..
+                    }
+                    | ConnectorKind::AssemblyInfrastructure {
+                        requiring: Some(a),
+                        required_role: Some(r),
+                        ..
+                    } if m.assembly_contexts[*a].parent.is_none() => {
+                        drain_conn.entry((*a, *r)).or_insert(c);
+                    }
+                    _ => {}
+                }
+            }
+        }
         check_composition(m, m.systems[system].structure)?;
         // allocation: FQ path -> container (later entries overwrite; AllocationLookupSyncer)
         let mut alloc: FxMap<Box<[u32]>, ContainerId> = FxMap::default();
@@ -2139,6 +2176,7 @@ impl CompiledModel {
             system,
             prov_deleg,
             req_conn,
+            drain_conn,
             seff_for,
             sig_key,
             alloc,

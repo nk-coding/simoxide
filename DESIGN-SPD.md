@@ -3018,6 +3018,17 @@ Why this format:
   autoscaler.
 - Flavours: SimuLizar (exact and fast) and Slingshot fast. The Slingshot-exact engine refuses the
   HPA. It has its own SPD layer (`SsxSpd`), and the HPA has no reference to be exact against.
+- **Found and fixed** (2026-10-18, branch `hpa-drain`, by the MiSArch HPA project): a scale-in
+  of a pod whose requests in progress still make calls (a service that calls others) stopped
+  the run with "Required delegation of the system cannot be simulated": the transformation
+  removes the pod's assemblies with their connectors, and a call from a removed assembly found
+  no connector. Drain (MC-8.2) now covers calls: `CompiledModel::drain_conn` keeps the
+  connectors of removed assembly contexts, and their calls resolve over them (test
+  `a_scale_in_drains_pods_whose_requests_make_calls`). Models without removed assembly
+  contexts are unchanged. Gates: `golden.sh` identical (312); workspace tests `--features exact`
+  646 passed (645 + 1), 0 failed, 40 ignored; corpus 132/132, corpus-fuzz 6/6; `slingshot_exact`
+  89 of 90; `conform` compat 589/589, fast 584, ordered 583, unchanged; CLI tests with
+  `reconfiguration` 17; fmt, clippy as for the load profile; release check 0; docs build clean.
 - **Found and fixed** (pre-existing, `simoxide-reconf`): a restored run whose model changed
   through a change file before its next adjustment lost the restored QVTo state. The id
   generator restarted and the transformation reused ids ("new resource container ... has the id

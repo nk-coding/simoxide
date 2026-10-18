@@ -154,8 +154,9 @@ server fills `behavior` only when one is given [D].
   - then ready pods, through the absolute adjustment, which removes the newest elements.
 
   Removed containers drain by default ([Model changes](./model-changes.md) MC-8): their requests
-  in progress finish and new requests go elsewhere, as a terminating pod's endpoints leave the
-  Service.
+  in progress finish, including the calls they still make to other services (a terminating
+  pod's graceful shutdown), and new requests go elsewhere, as a terminating pod's endpoints
+  leave the Service.
 - **HPA-6.3** The adjustment writes the desired count into the autoscaler's inactive SPD policy
   (`_simoxide_hpa_<name>`, an `AbsoluteAdjustment`) and enacts it. A group-size constraint of
   the SPD still clamps it. The outcome changes no SPD constraint state. A failed adjustment is
