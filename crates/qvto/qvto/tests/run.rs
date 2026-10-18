@@ -371,3 +371,115 @@ main() {
          sorted, data: [2, 3, 1]\nn, data: 6\npure, data: [3, 2, 1]\n"
     );
 }
+
+/// Runs a transformation with the given options; returns the log (asserting success).
+fn log_with(text: &str, opts: qvto::RunOptions) -> String {
+    let mut rs = ResourceSet::new();
+    let _ = rs.ecore_resource();
+    let meta = rs.graph.meta_mut().clone();
+    let main = UnitSource {
+        key: "mem:t".into(),
+        qualified_name: "t".into(),
+        file_name: "t.qvto".into(),
+        path: None,
+        text: Rc::from(text),
+        blackbox: None,
+    };
+    let c = qvto::compile(main, &NoImports, meta);
+    let problems: Vec<String> = c
+        .units
+        .iter()
+        .flat_map(|u| u.problems.iter().map(|p| p.message.clone()))
+        .collect();
+    let program = c
+        .program
+        .unwrap_or_else(|| panic!("no program: {problems:#?}"));
+    let n = program.ir.modules[program.ir.main_module.index()]
+        .model_params
+        .len();
+    let mut vm = qvto::Vm::new(&program, &mut rs.graph, opts);
+    let out = vm.run_transformation(vec![Vec::new(); n]);
+    assert_eq!(
+        (out.severity, out.code),
+        (0, 0),
+        "{}\n{}",
+        out.message,
+        vm.log
+    );
+    vm.log.clone()
+}
+
+#[test]
+fn list_reads_and_typed_xselect_follow_model_changes() {
+    // a list read again after a change sees the change, an earlier read keeps its values; `[T]`
+    // gives what its loop gives (the loop runs when steps are limited), for every source kind
+    let text = "modeltype E uses ecore('http://www.eclipse.org/emf/2002/Ecore');
+transformation t(out o : E);
+main() {
+  var p := object EPackage { name := 'p' };
+  var a := object EClass { name := 'A' };
+  var d := object EDataType { name := 'D' };
+  p.eClassifiers += a;
+  p.eClassifiers += d;
+  var first := p.eClassifiers;
+  log('first', first.name);
+  log('classes', p.eClassifiers[EClass].name);
+  log('again', p.eClassifiers[EClass].name);
+  var b := object EClass { name := 'B' };
+  p.eClassifiers += b;
+  log('after add', p.eClassifiers.name);
+  log('classes after add', p.eClassifiers[EClass].name);
+  log('first unchanged', first.name);
+  var copy := p.eClassifiers;
+  copy += object EEnum { name := 'E' };
+  log('copy', copy.name);
+  log('model', p.eClassifiers.name);
+  p.eClassifiers := p.eClassifiers->excluding(b);
+  log('after remove', p.eClassifiers.name);
+  log('classes after remove', p.eClassifiers[EClass].name);
+  log('seq', Sequence{a, null, d, b, a}[EClass].name);
+  log('bag', Bag{a, d, a, b}[EClass]->size());
+  log('set', Set{a, d, b}[EClassifier]->size());
+  log('oset', OrderedSet{d, b, a}[EClass].name);
+  log('none', p.eClassifiers[EEnum]->size());
+  log('supers', a.eSuperTypes[EClass]->size());
+}";
+    for mode in [qvto::Mode::Fast, qvto::Mode::Ordered]
+        .into_iter()
+        .chain(qvto::Mode::Compat.available().then_some(qvto::Mode::Compat))
+    {
+        let opts = || qvto::RunOptions {
+            mode,
+            ..qvto::RunOptions::default()
+        };
+        let log = log_with(text, opts());
+        let looped = log_with(
+            text,
+            qvto::RunOptions {
+                step_limit: Some(1 << 40),
+                ..opts()
+            },
+        );
+        assert_eq!(log, looped, "{mode:?}");
+        for line in [
+            "first, data: [A, D]",
+            "classes, data: [A]",
+            "again, data: [A]",
+            "after add, data: [A, D, B]",
+            "classes after add, data: [A, B]",
+            "first unchanged, data: [A, D]",
+            "copy, data: [A, D, B, E]",
+            "model, data: [A, D, B]",
+            "after remove, data: [A, D]",
+            "classes after remove, data: [A]",
+            "seq, data: [A, B, A]",
+            "bag, data: 3",
+            "set, data: 3",
+            "oset, data: [B, A]",
+            "none, data: 0",
+            "supers, data: 0",
+        ] {
+            assert!(log.lines().any(|l| l == line), "{mode:?}: {line}\n{log}");
+        }
+    }
+}
