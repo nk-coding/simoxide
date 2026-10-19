@@ -51,6 +51,7 @@ mod slingshot;
 #[cfg(feature = "snapshot")]
 pub(crate) mod snapshot;
 mod state;
+mod streams;
 pub mod watch;
 
 pub use hooks::ObservedTuple;
@@ -95,6 +96,11 @@ pub struct SimConfig {
     /// a step function of a factor on the arrival rate or the population. `None`: the model's
     /// workloads as they are.
     pub load_profile: Option<std::sync::Arc<crate::load::LoadProfile>>,
+    /// Common random numbers across models with the same usage model (`docs/spec/random.md`
+    /// RND-11, fast mode only): the usage model draws from streams of its own, one per usage
+    /// scenario for the arrivals and one per user for its behaviour and think times, seeded from
+    /// `seed`, the scenario's id and the user's number. `false` (default): one stream per run.
+    pub usage_streams: bool,
 }
 
 /// Resource limits of one run. A run that exceeds one stops with a [`SimError`] of kind
@@ -178,6 +184,7 @@ impl Default for SimConfig {
             limits: Limits::default(),
             mode: Mode::default(),
             load_profile: None,
+            usage_streams: false,
         }
     }
 }
@@ -752,6 +759,13 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 kind: SimErrorKind::Model,
             });
         }
+        if cfg.usage_streams && C::MODE != Mode::Fast {
+            return Err(SimError {
+                message: "usage streams (SimConfig::usage_streams, RND-11) need the fast mode: the exact mode reproduces the reference's single stream".into(),
+                at_ns: 0,
+                kind: SimErrorKind::Model,
+            });
+        }
         let mut cfg = cfg;
         if F::SLINGSHOT {
             Self::ss_check(cm, &mut cfg)?;
@@ -780,8 +794,10 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             )),
             None => None,
         };
+        let us = cfg.usage_streams.then(Box::default);
         let mut st = RunState::new(cm, cfg, traced, rng);
         st.lp = lp;
+        st.us = us;
         Ok(Simulation {
             base: cm,
             cm,
@@ -1407,6 +1423,13 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 (self.st.procs.len() - 1) as u32
             }
         };
+        match (kind, self.st.procs[slot as usize].data.conts.last()) {
+            (PKind::OpenUser, Some(&Cont::OpenUser { scen, .. }))
+            | (PKind::ClosedUser, Some(&Cont::ClosedUser { scen, .. })) => {
+                self.us_new_user(scen, slot)
+            }
+            _ => {}
+        }
         if let Some(t) = self.trace.as_mut() {
             let (k, n) = match kind {
                 PKind::OpenGen => ("OpenWorkload", "OpenWorkloadUserMaturationChamber"),
@@ -1695,6 +1718,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         let spare = std::mem::replace(&mut p.data, data);
         self.st.spare_data.push(spare);
         self.st.free.push(s);
+        self.us_end(s);
         if let Some(t) = self.trace.as_mut() {
             t.pend(self.st.now, pid);
         }
@@ -2630,7 +2654,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     else {
                         unreachable!()
                     };
-                    let ia = self.eval_f64(inter_arrival, None, Origin::Plain("interarrival"))?;
+                    let ia = self.with_stream(streams::Who::Arrivals(scen), |x| {
+                        x.eval_f64(inter_arrival, None, Origin::Plain("interarrival"))
+                    })?;
                     // a load profile: `factor` times as many arrivals (LP-2)
                     let d = match self.st.lp.as_deref() {
                         Some(lp) => ia / lp.factor(scen as usize),
@@ -2684,7 +2710,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     else {
                         unreachable!()
                     };
-                    let tt = self.eval_f64(think_time, None, Origin::Plain("think"))?;
+                    let tt = self.with_stream(streams::Who::User(s), |x| {
+                        x.eval_f64(think_time, None, Origin::Plain("think"))
+                    })?;
                     if self.hold(s, tt)? {
                         return Ok(Flow::Wait);
                     }
@@ -2698,7 +2726,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     else {
                         unreachable!()
                     };
-                    let tt = self.eval_f64(think_time, None, Origin::Plain("think"))?;
+                    let tt = self.with_stream(streams::Who::User(s), |x| {
+                        x.eval_f64(think_time, None, Origin::Plain("think"))
+                    })?;
                     if self.hold(s, tt)? {
                         return Ok(Flow::Wait);
                     }

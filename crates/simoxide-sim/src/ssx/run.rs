@@ -164,6 +164,13 @@ impl<'m> SsxRun<'m> {
                 kind: SimErrorKind::Model,
             });
         }
+        if cfg.usage_streams {
+            return Err(SimError {
+                message: "the Slingshot-exact engine has no usage streams (RND-11): run the slingshot or simulizar flavour in fast mode".into(),
+                at_ns: 0,
+                kind: SimErrorKind::Model,
+            });
+        }
         if cfg.max_sim_time <= 0 {
             return Err(SimError {
                 message: "the Slingshot-exact mode needs a simulation time (Slingshot's simTime is its only stop condition, SS-RUN-5)".into(),

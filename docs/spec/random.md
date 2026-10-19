@@ -293,3 +293,42 @@ functions of RND-3 to RND-7. SimOxide's opt-in [fast mode](../guide/fast-mode.md
 with other algorithms for the same distributions (`simoxide_random::fast`, feature `fast`). It
 is not bit-exact; see [Deviations](../correctness/deviations.md). Everything above describes the
 exact mode.
+
+## RND-11 Usage streams (opt-in, fast mode; not the reference)
+
+`SimConfig::usage_streams` (CLI `--usage-streams`; `crates/simoxide-sim/src/sim/streams.rs`)
+gives **common random numbers** across models that share a usage model. With RND-1's single
+stream, a fixed seed reproduces a run of one model, but two models that differ anywhere in the
+system (another demand distribution, an extra branch or call, another allocation) draw a
+different number of uniforms between two users; from then on the users arrive at other times and
+take other paths. Comparisons of designs then carry the full sampling noise of both runs.
+
+With usage streams the usage model draws from streams of its own:
+
+- **RND-11.1** Each usage scenario has an **arrival stream**, seeded with
+  `mix(mix(seed) ^ fnv1a(scenario id))` (`mix` = SplitMix64's finaliser, `fnv1a` = 64-bit FNV-1a
+  over the id's bytes). The open workload's inter-arrival times (WL-2.2) come from it.
+- **RND-11.2** Each user has a **user stream**, seeded with `mix(scenarioSeed ^ mix(k + 1))`
+  for the scenario's `k`-th user (0-based, in creation order: open users in arrival order;
+  closed users at the start, at load-profile steps and at population changes). Everything the
+  user's usage behaviour draws comes from it: delays (WL-4.3), loop counts (WL-4.4), branch
+  choices (WL-4.5, also Slingshot's `Math.random()` choice in fast mode), the input and output
+  characterisations of entry-level system calls (WL-4.6), and a closed user's think times
+  (WL-3.2). A closed user keeps its stream for its whole life.
+- **RND-11.3** Everything else (SEFF actions, resource demands, failures, reconfiguration) draws
+  from the run's stream as before.
+- **RND-11.4** Hence two runs with the same seed and the same usage model (same scenario ids,
+  same behaviours) see the same arrivals, and every user (by its number) the same delays, choices
+  and think times, whatever the system does. A load profile (LP-2) keeps this: it moves arrivals
+  in operational time without drawing. What remains different is what depends on the system:
+  response times, and through them a closed user's start times and the instants at which an
+  open user takes its later steps.
+- **RND-11.5** Fast mode only; the exact mode and the Slingshot-exact engine refuse it (model
+  error at t = 0). The streams are part of forks and snapshots. `RunResult::uniforms` counts the
+  run's stream only. Without the option nothing changes.
+- **RND-11.6** Why per user and not one usage stream: users interleave by their response times,
+  so a single usage stream would hand the same numbers to different users in different designs.
+  The technique is synchronisation by dedicated streams (Law, *Simulation Modeling and
+  Analysis*, 5th ed., §11.2.3).
+
+Tests: `crates/simoxide-sim/tests/usage_streams.rs`.

@@ -2,6 +2,7 @@
 //! behaviours, including the actions that complete inside the behaviour's own continuation
 //! (internal actions, external calls, entry-level system calls, delays).
 
+use super::streams::Who;
 use super::*;
 use crate::code::{NO_TYPE, SOp, UOp};
 
@@ -177,8 +178,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         return self.err("external call without signature");
                     };
                     let aid = &cm.action_ids[a.index()];
-                    let fin =
-                        self.input_frame(inputs, d.frames.last(), Origin::Elem("param", aid))?;
+                    let fin = self.with_stream(Who::User(s), |x| {
+                        x.input_frame(inputs, d.frames.last(), Origin::Elem("param", aid))
+                    })?;
                     d.frames.push(fin);
                     let c = d.acs.pop().unwrap_or((SYSTEM_AC, ROOT_PATH));
                     let Some(Cont::SBeh { caller, .. }) = d.conts.last_mut() else {
@@ -606,7 +608,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 }
                 UOp::Delay(a, prog) => {
                     let aid = &cm.uaction_ids[a.index()];
-                    let dl = self.eval_f64(prog, None, Origin::Elem("delay", aid))?;
+                    let dl = self.with_stream(Who::User(s), |x| {
+                        x.eval_f64(prog, None, Origin::Elem("delay", aid))
+                    })?;
                     if self.hold(s, dl)? {
                         return Ok(Flow::Wait);
                     }
@@ -691,12 +695,14 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         let aid = &cm.uaction_ids[a.index()];
                         let mut target = d.frames.pop().unwrap_or_default();
                         self.st.pool.unshare(&mut target);
-                        let r = self.fill(
-                            outputs,
-                            res.as_ref(),
-                            frame_mut(&mut target),
-                            Origin::Elem("return", aid),
-                        );
+                        let r = self.with_stream(Who::User(s), |x| {
+                            x.fill(
+                                outputs,
+                                res.as_ref(),
+                                frame_mut(&mut target),
+                                Origin::Elem("return", aid),
+                            )
+                        });
                         d.frames.push(target);
                         r?;
                     }
@@ -736,6 +742,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                             behaviours,
                             sels,
                         } => {
+                            self.us_swap(Who::User(s));
                             let idx = if F::SLINGSHOT {
                                 // Slingshot's Math.random() stream (SS-WL-4.2)
                                 if cum.is_empty() {
@@ -757,6 +764,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                                 self.st.rng.restore_origin(prev);
                                 idx
                             };
+                            self.us_swap(Who::User(s));
                             let Some(i) = idx else {
                                 return self.err("branch: no transition selected");
                             };
@@ -769,7 +777,10 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                             d.conts.push(self.ubeh(b));
                         }
                         CUAct::Loop { count, body } => {
-                            let n = self.eval_i32(*count, None, Origin::Elem("loop", aid))?;
+                            let count = *count;
+                            let n = self.with_stream(Who::User(s), |x| {
+                                x.eval_i32(count, None, Origin::Elem("loop", aid))
+                            })?;
                             if n <= 0 && self.quirk(crate::flavour::Quirk::Q19) {
                                 return self.err(slingshot::Q19_USAGE);
                             }

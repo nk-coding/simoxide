@@ -39,6 +39,9 @@ const USAGE: &str = "usage:
              [--load-profile FILE.loadprofile.json] [--no-load-profile]   (a time-varying load:
              per usage scenario, steps of a factor on the arrival rate or the population; the
              *.loadprofile.json files next to the model, or FILE; docs/guide/load-profile.md)
+             [--usage-streams]   (fast mode: the usage model draws from streams of its own, per
+             scenario and per user, so models with the same usage model and seed see the same
+             users: common random numbers; docs/spec/random.md RND-11)
              [--rules DIR] [--rules-log rules.jsonl] [--qvto-mode auto|ordered|fast|compat]
              (SimuLizar's reconfiguration rules: the .qvto files of DIR in file-name order, or
              run.json's reconfiguration_rules; `reconfiguration` feature; QVTo's compat mode
@@ -111,6 +114,7 @@ struct Args {
     /// `--load-profile FILE`, `--no-load-profile`.
     load_profile: Option<PathBuf>,
     no_load_profile: bool,
+    usage_streams: bool,
     rules: Option<PathBuf>,
     rules_log: Option<PathBuf>,
     qvto_mode: Option<String>,
@@ -176,6 +180,7 @@ fn parse_args() -> Result<Args, String> {
         hpa_set: Vec::new(),
         load_profile: None,
         no_load_profile: false,
+        usage_streams: false,
         rules: None,
         rules_log: None,
         qvto_mode: None,
@@ -304,6 +309,7 @@ fn parse_args() -> Result<Args, String> {
             "--hpa-set" => a.hpa_set.push(val()?),
             "--load-profile" => a.load_profile = Some(val()?.into()),
             "--no-load-profile" => a.no_load_profile = true,
+            "--usage-streams" => a.usage_streams = true,
             "--rules" => a.rules = Some(val()?.into()),
             "--rules-log" => a.rules_log = Some(val()?.into()),
             "--qvto-mode" => a.qvto_mode = Some(val()?),
@@ -453,6 +459,7 @@ fn setup_with_rules(a: &Args) -> Result<(CompiledModel, SimConfig, Option<PathBu
         };
         cfg.load_profile = p.map(Arc::new);
     }
+    cfg.usage_streams = a.usage_streams;
     Ok((cm, cfg, rules))
 }
 

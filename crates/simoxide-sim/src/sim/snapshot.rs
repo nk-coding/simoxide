@@ -288,6 +288,7 @@ pub(crate) struct ConfigImage {
     max_steps: u64,
     mode: Mode,
     load_profile: Option<crate::load::LoadProfile>,
+    usage_streams: bool,
 }
 
 impl From<&SimConfig> for ConfigImage {
@@ -327,6 +328,7 @@ impl From<&SimConfig> for ConfigImage {
             max_steps: c.limits.max_steps,
             mode: c.mode,
             load_profile: c.load_profile.as_deref().cloned(),
+            usage_streams: c.usage_streams,
         }
     }
 }
@@ -368,6 +370,7 @@ impl From<ConfigImage> for SimConfig {
             },
             mode: c.mode,
             load_profile: c.load_profile.map(Arc::new),
+            usage_streams: c.usage_streams,
         }
     }
 }
@@ -418,6 +421,17 @@ struct EngineImage<K: Clock> {
     next_event_check: u64,
     /// The load profile's run state (`crate::load`).
     lp: Option<crate::load::LoadRun>,
+    /// The usage streams (`super::streams`).
+    us: Option<UsageStreamsImage>,
+}
+
+/// The usage streams of a run (`super::streams::UsageStreams`).
+#[derive(Serialize, Deserialize)]
+struct UsageStreamsImage {
+    /// Per scenario: seed, arrival stream, users created.
+    scen: Vec<Option<(u64, RngImage, u64)>>,
+    /// Per process slot: the user's stream.
+    user: Vec<Option<RngImage>>,
 }
 
 /// The section `model` as written (borrowing the compiled model).
@@ -607,6 +621,18 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             next_step_check: self.next_step_check,
             next_event_check: self.next_event_check,
             lp: self.lp.as_deref().cloned(),
+            us: self.us.as_deref().map(|u| UsageStreamsImage {
+                scen: u
+                    .scen
+                    .iter()
+                    .map(|x| x.as_ref().map(|x| (x.seed, x.arrivals.save(), x.users)))
+                    .collect(),
+                user: u
+                    .user
+                    .iter()
+                    .map(|x| x.as_ref().map(SimRng::save))
+                    .collect(),
+            }),
         })
     }
 
@@ -728,6 +754,30 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
         }
         let cfg: SimConfig = img.cfg.into();
         let rng = C::Rng::load(img.rng, &cfg).map_err(restore)?;
+        let us = match img.us {
+            None => None,
+            Some(u) => {
+                let mut scen = Vec::with_capacity(u.scen.len());
+                for x in u.scen {
+                    scen.push(match x {
+                        None => None,
+                        Some((seed, r, users)) => Some(super::streams::ScenStreams {
+                            seed,
+                            arrivals: C::Rng::load(r, &cfg).map_err(restore)?,
+                            users,
+                        }),
+                    });
+                }
+                let mut user = Vec::with_capacity(u.user.len());
+                for x in u.user {
+                    user.push(match x {
+                        None => None,
+                        Some(r) => Some(C::Rng::load(r, &cfg).map_err(restore)?),
+                    });
+                }
+                Some(Box::new(super::streams::UsageStreams { scen, user }))
+            }
+        };
         let frames = Rebuilt::new(img.frames).map_err(SnapshotError::Corrupt)?;
         let empty = frames.frame(img.empty).map_err(SnapshotError::Corrupt)?;
         let mut procs = Vec::with_capacity(img.procs.len());
@@ -797,6 +847,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             next_step_check: img.next_step_check,
             next_event_check: img.next_event_check,
             lp: img.lp.map(Box::new),
+            us,
             max_depth,
             nesting: 0,
             direct: 0,

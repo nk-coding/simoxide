@@ -137,6 +137,14 @@ pending at the same instant (it reorders simultaneous events; in tie-heavy model
 passive-resource waiting times and reconfiguration counts systematically) and the virtual-time
 processor sharing (below).
 
+### Usage streams
+
+`SimConfig::usage_streams` (CLI `--usage-streams`, fast mode only) gives the usage model streams
+of its own, one per usage scenario for the arrivals and one per user for its behaviour and think
+times, so that models with the same usage model and seed see the same users (common random
+numbers across designs). The reference has one stream per run. Rules:
+[RND-11](../spec/random.md#rnd-11-usage-streams-opt-in-fast-mode-not-the-reference).
+
 ### Slingshot flavour
 
 `--flavour slingshot` ([Slingshot flavour](../guide/slingshot.md)) follows Slingshot's semantics in
