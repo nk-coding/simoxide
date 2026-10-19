@@ -97,9 +97,10 @@ pub struct SimConfig {
     /// workloads as they are.
     pub load_profile: Option<std::sync::Arc<crate::load::LoadProfile>>,
     /// Common random numbers across models with the same usage model (`docs/spec/random.md`
-    /// RND-11, fast mode only): the usage model draws from streams of its own, one per usage
-    /// scenario for the arrivals and one per user for its behaviour and think times, seeded from
-    /// `seed`, the scenario's id and the user's number. `false` (default): one stream per run.
+    /// RND-11, fast mode only): draws come from streams per source, one per usage scenario for
+    /// the arrivals and, per user, one for its behaviour and think times and one for the system
+    /// work of its requests, seeded from `seed`, the scenario's id and the user's number.
+    /// `false` (default): one stream per run.
     pub usage_streams: bool,
 }
 
@@ -1423,12 +1424,16 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 (self.st.procs.len() - 1) as u32
             }
         };
-        match (kind, self.st.procs[slot as usize].data.conts.last()) {
-            (PKind::OpenUser, Some(&Cont::OpenUser { scen, .. }))
-            | (PKind::ClosedUser, Some(&Cont::ClosedUser { scen, .. })) => {
-                self.us_new_user(scen, slot)
-            }
-            _ => {}
+        if self.st.us.is_some() {
+            let scen = match self.st.procs[slot as usize].data.conts.last() {
+                Some(
+                    &Cont::OpenUser { scen, .. }
+                    | &Cont::ClosedUser { scen, .. }
+                    | &Cont::OpenGen { scen, .. },
+                ) => Some(scen),
+                _ => None,
+            };
+            self.us_spawned(slot, kind, scen);
         }
         if let Some(t) = self.trace.as_mut() {
             let (k, n) = match kind {
@@ -1674,6 +1679,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             self.st.meas.cur_pid = p.pid;
             std::mem::replace(&mut p.data, spare)
         };
+        self.us_enter(s);
         let r = loop {
             self.st.steps += 1;
             if self.st.steps >= self.st.next_step_check
@@ -1697,6 +1703,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 Err(e) => break Err(e),
             }
         };
+        self.us_leave(s);
         self.st.meas.cur_pid = prev_pid;
         self.st.nesting -= 1;
         r
@@ -2654,9 +2661,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     else {
                         unreachable!()
                     };
-                    let ia = self.with_stream(streams::Who::Arrivals(scen), |x| {
-                        x.eval_f64(inter_arrival, None, Origin::Plain("interarrival"))
-                    })?;
+                    let ia = self.eval_f64(inter_arrival, None, Origin::Plain("interarrival"))?;
                     // a load profile: `factor` times as many arrivals (LP-2)
                     let d = match self.st.lp.as_deref() {
                         Some(lp) => ia / lp.factor(scen as usize),

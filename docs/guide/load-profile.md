@@ -84,7 +84,7 @@ let r = simoxide_sim::run(&cm, cfg, Outputs::default())?;
 To compare two models (two designs of the same system) under the same users, run both with the
 same seed and `--usage-streams` (`SimConfig::usage_streams`, fast mode): the usage model then
 draws from streams of its own, per scenario for the arrivals and per user for delays, branch
-choices, loop counts and think times, so both runs see the same arrivals and every user the same
-path ([RND-11](../spec/random.md#rnd-11-usage-streams-opt-in-fast-mode-not-the-reference)). A
+choices, loop counts and think times (and one per user for the system work of its requests), so
+both runs see the same arrivals and every user the same path ([RND-11](../spec/random.md#rnd-11-usage-streams-opt-in-fast-mode-not-the-reference)). A
 load profile keeps this. A session model with one usage scenario per user class and a profile
 per class varies both the volume and the mix of the load over time.

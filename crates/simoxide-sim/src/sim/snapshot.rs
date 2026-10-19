@@ -430,8 +430,8 @@ struct EngineImage<K: Clock> {
 struct UsageStreamsImage {
     /// Per scenario: seed, arrival stream, users created.
     scen: Vec<Option<(u64, RngImage, u64)>>,
-    /// Per process slot: the user's stream.
-    user: Vec<Option<RngImage>>,
+    /// Per process slot: behaviour stream, request stream, generator's scenario.
+    slots: Vec<Option<(Option<RngImage>, Option<RngImage>, Option<u32>)>>,
 }
 
 /// The section `model` as written (borrowing the compiled model).
@@ -627,10 +627,18 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
                     .iter()
                     .map(|x| x.as_ref().map(|x| (x.seed, x.arrivals.save(), x.users)))
                     .collect(),
-                user: u
-                    .user
+                slots: u
+                    .slots
                     .iter()
-                    .map(|x| x.as_ref().map(SimRng::save))
+                    .map(|x| {
+                        x.as_ref().map(|x| {
+                            (
+                                x.behaviour.as_ref().map(SimRng::save),
+                                x.request.as_ref().map(SimRng::save),
+                                x.generator,
+                            )
+                        })
+                    })
                     .collect(),
             }),
         })
@@ -768,14 +776,26 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
                         }),
                     });
                 }
-                let mut user = Vec::with_capacity(u.user.len());
-                for x in u.user {
-                    user.push(match x {
+                let load = |r: Option<RngImage>| -> Result<Option<C::Rng>, SnapshotError> {
+                    r.map(|r| C::Rng::load(r, &cfg).map_err(restore))
+                        .transpose()
+                };
+                let mut slots = Vec::with_capacity(u.slots.len());
+                for x in u.slots {
+                    slots.push(match x {
                         None => None,
-                        Some(r) => Some(C::Rng::load(r, &cfg).map_err(restore)?),
+                        Some((b, r, generator)) => Some(super::streams::SlotStreams {
+                            behaviour: load(b)?,
+                            request: load(r)?,
+                            generator,
+                        }),
                     });
                 }
-                Some(Box::new(super::streams::UsageStreams { scen, user }))
+                Some(Box::new(super::streams::UsageStreams {
+                    scen,
+                    slots,
+                    active: Vec::new(),
+                }))
             }
         };
         let frames = Rebuilt::new(img.frames).map_err(SnapshotError::Corrupt)?;

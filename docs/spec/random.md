@@ -303,32 +303,40 @@ system (another demand distribution, an extra branch or call, another allocation
 different number of uniforms between two users; from then on the users arrive at other times and
 take other paths. Comparisons of designs then carry the full sampling noise of both runs.
 
-With usage streams the usage model draws from streams of its own:
+With usage streams, draws come from streams per source:
 
-- **RND-11.1** Each usage scenario has an **arrival stream**, seeded with
+- **RND-11.1 Arrival stream.** Each usage scenario has one, seeded with
   `mix(mix(seed) ^ fnv1a(scenario id))` (`mix` = SplitMix64's finaliser, `fnv1a` = 64-bit FNV-1a
-  over the id's bytes). The open workload's inter-arrival times (WL-2.2) come from it.
-- **RND-11.2** Each user has a **user stream**, seeded with `mix(scenarioSeed ^ mix(k + 1))`
+  over the id's bytes). The open workload's generator (WL-2.2) draws its inter-arrival times from
+  it.
+- **RND-11.2 Behaviour stream.** Each user has one, seeded with `mix(scenarioSeed ^ mix(k + 1))`
   for the scenario's `k`-th user (0-based, in creation order: open users in arrival order;
   closed users at the start, at load-profile steps and at population changes). Everything the
   user's usage behaviour draws comes from it: delays (WL-4.3), loop counts (WL-4.4), branch
   choices (WL-4.5, also Slingshot's `Math.random()` choice in fast mode), the input and output
   characterisations of entry-level system calls (WL-4.6), and a closed user's think times
-  (WL-3.2). A closed user keeps its stream for its whole life.
-- **RND-11.3** Everything else (SEFF actions, resource demands, failures, reconfiguration) draws
-  from the run's stream as before.
-- **RND-11.4** Hence two runs with the same seed and the same usage model (same scenario ids,
-  same behaviours) see the same arrivals, and every user (by its number) the same delays, choices
-  and think times, whatever the system does. A load profile (LP-2) keeps this: it moves arrivals
-  in operational time without drawing. What remains different is what depends on the system:
-  response times, and through them a closed user's start times and the instants at which an
-  open user takes its later steps.
-- **RND-11.5** Fast mode only; the exact mode and the Slingshot-exact engine refuse it (model
+  (WL-3.2). A closed user keeps its streams for its whole life.
+- **RND-11.3 Request stream.** Each user also has one (seeded from its behaviour seed): every
+  other draw while the user's process runs, i.e. the system work of its calls (SEFF actions,
+  resource demands, link failures). A forked behaviour gets a request stream of its own, seeded
+  from one draw of the running process's stream when it is created.
+- **RND-11.4** Draws outside processes (reconfiguration rules, scaling policies, model changes)
+  use the run's stream.
+- **RND-11.5 Consequences.** Two runs with the same seed and the same usage model (same scenario
+  ids and behaviours) see the same arrivals, and every user (by its number) the same delays,
+  choices and think times, whatever the system does. A user's request draws stay aligned as far
+  as the two systems execute the same actions for it (with the fast mode's samplers, the same
+  stream position gives monotonically coupled samples of `Exp` with different rates), and a
+  difference in one user's requests shifts no other user's numbers. A load profile (LP-2) keeps
+  all this: it moves arrivals in operational time without drawing. On corpus model h22 (open),
+  the variance over 24 seeds of the difference in mean response time between two designs (25 %
+  more demand on one operation) is 5.7 times smaller than with one stream, and the mean over
+  200 seeds agrees with the single stream within its standard error (no bias).
+- **RND-11.6** Fast mode only; the exact mode and the Slingshot-exact engine refuse it (model
   error at t = 0). The streams are part of forks and snapshots. `RunResult::uniforms` counts the
   run's stream only. Without the option nothing changes.
-- **RND-11.6** Why per user and not one usage stream: users interleave by their response times,
-  so a single usage stream would hand the same numbers to different users in different designs.
-  The technique is synchronisation by dedicated streams (Law, *Simulation Modeling and
-  Analysis*, 5th ed., §11.2.3).
+- **RND-11.7** Why per user: users interleave by their response times, so one usage stream would
+  hand the same numbers to different users in different designs. The technique is synchronisation
+  by dedicated streams (Law, *Simulation Modeling and Analysis*, 5th ed., §11.2).
 
 Tests: `crates/simoxide-sim/tests/usage_streams.rs`.

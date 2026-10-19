@@ -7,6 +7,7 @@
 //!   branch choices and loop counts in both designs, and the open workload's arrivals are the
 //!   same; with one stream per run they are not;
 //! * a load profile keeps them the same;
+//! * the difference between two designs varies much less over seeds, without bias;
 //! * paused, forked and snapshotted runs continue like the uninterrupted run;
 //! * the exact mode and the Slingshot-exact engine refuse usage streams.
 
@@ -283,4 +284,75 @@ fn off_by_default_and_unchanged() {
     let a = trace_of::<SimuLizar>(&cm, cfg(true, 60));
     assert_eq!(a, trace_of::<SimuLizar>(&cm, cfg(true, 60)));
     assert_ne!(a, trace_of::<SimuLizar>(&cm, cfg(false, 60)));
+}
+
+/// Mean of the usage scenario's response times of a run.
+fn mean_rt(cm: &CompiledModel, c: SimConfig) -> f64 {
+    let r = Simulation::<Fast>::create(cm, c, Outputs::default())
+        .unwrap()
+        .finish()
+        .unwrap();
+    let i = r
+        .measurements
+        .series
+        .iter()
+        .position(|s| s.mp.starts_with("UsageScenario") && s.metric.starts_with("Response Time"))
+        .expect("a usage-scenario response-time series");
+    let rows = &r.measurements.rows[i];
+    rows.iter().map(|x| x.1).sum::<f64>() / rows.len() as f64
+}
+
+/// What the streams are for: the difference between two designs, estimated from one run of
+/// each with the same seed, varies much less over seeds (fixed seeds: deterministic). The second
+/// design has 25 % more demand on the write operation.
+#[test]
+fn the_difference_between_designs_varies_less() {
+    let a = model(true, false, FlavourConfig::SIMULIZAR);
+    let b = compile(
+        &[
+            OPEN,
+            (
+                r#"specification="Exp(10.0)""#,
+                r#"specification="Exp(8.0)""#,
+            ),
+        ],
+        FlavourConfig::SIMULIZAR,
+    );
+    let var_of_diff = |streams: bool| {
+        let d: Vec<f64> = (1..=24)
+            .map(|seed| {
+                let mut c = cfg(streams, 200);
+                c.seed = seed;
+                mean_rt(&a, c.clone()) - mean_rt(&b, c)
+            })
+            .collect();
+        let m = d.iter().sum::<f64>() / d.len() as f64;
+        d.iter().map(|x| (x - m).powi(2)).sum::<f64>() / (d.len() - 1) as f64
+    };
+    let (with, without) = (var_of_diff(true), var_of_diff(false));
+    eprintln!("variance of the difference: {with:.3e} with usage streams, {without:.3e} without");
+    assert!(with < 0.2 * without, "{with} vs {without}");
+}
+
+/// No bias: the mean over seeds of a run's mean response time is the same with and without
+/// usage streams (within the sampling error).
+#[test]
+#[ignore = "statistical check, about 10 s in release"]
+fn no_bias() {
+    let b = model(true, true, FlavourConfig::SIMULIZAR);
+    let stats = |streams: bool| {
+        let v: Vec<f64> = (1..=200)
+            .map(|seed| {
+                let mut c = cfg(streams, 200);
+                c.seed = seed;
+                mean_rt(&b, c)
+            })
+            .collect();
+        let m = v.iter().sum::<f64>() / v.len() as f64;
+        let var = v.iter().map(|x| (x - m).powi(2)).sum::<f64>() / (v.len() - 1) as f64;
+        (m, (var / v.len() as f64).sqrt())
+    };
+    let ((m1, s1), (m0, s0)) = (stats(true), stats(false));
+    eprintln!("mean {m1:.4} ± {s1:.4} with usage streams, {m0:.4} ± {s0:.4} without");
+    assert!((m1 - m0).abs() < 3.0 * (s1 * s1 + s0 * s0).sqrt());
 }
