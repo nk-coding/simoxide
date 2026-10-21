@@ -1,7 +1,7 @@
 #!/bin/bash
 # Regenerates the SPD goldens of crates/simoxide-model: ./run-spd.sh [list] [out dir]
 # Like run.sh, plus the generated SPD packages from the Slingshot jars (org.palladiosimulator.spd,
-# .spd.semantic, .spd.measuringpoint 1.0.0.202609010039; licence pending confirmation, see LICENSES).
+# .spd.semantic, .spd.measuringpoint 1.0.0.202609010039; EPL-2.0, see LICENSES section 6).
 # The list (spd-models.txt: name TAB directory relative to this one) names directories with
 # .spd/.semanticspd files.
 set -e

@@ -2,9 +2,9 @@
 //! the run's model, as `SpdAdjustmentBehavior` runs it.
 //!
 //! - **Transformations.** Slingshot's transformation bundle (17 units, Palladio-Addons-SPD-Metamodel
-//!   at a pinned commit) is embedded in the binary: the licence-headed copies of
-//!   `crates/qvto/qvto-testkit/corpus/spd/transformations` ("licence pending confirmation",
-//!   `DESIGN-SPD.md` U3: nothing is published until confirmed). Three units have patched copies
+//!   at a pinned commit, EPL-2.0) is embedded in the binary: the origin-headed copies of
+//!   `crates/qvto/qvto-testkit/corpus/spd/transformations` (source, commit, licence;
+//!   `LICENSES` section 6). Three units have patched copies
 //!   for the provisional fixed behaviours of the quirks Q4, Q6 and Q7
 //!   (`transformations/spd-fixed`); [`SpdVariant`] picks the unchanged unit when the quirk's
 //!   compat flag is on, so [`simoxide_spd::Quirks::slingshot`] runs Slingshot's bundle as it is.
@@ -410,7 +410,7 @@ mod tests {
         for (q, qn, _) in FIXED {
             assert!(f.text(qn).unwrap().contains("PATCHED by SimOxide"), "{q}");
             assert!(!s.text(qn).unwrap().contains("PATCHED"), "{q}");
-            assert!(s.text(qn).unwrap().contains("Licence pending confirmation"));
+            assert!(s.text(qn).unwrap().contains("EPL-2.0"));
         }
         let only_q6 = SpdVariant {
             q6: true,
@@ -429,7 +429,7 @@ mod tests {
                 .contains("PATCHED")
         );
         for (qn, _, text) in TRANSFORMATIONS {
-            assert!(text.contains("Licence pending confirmation"), "{qn}");
+            assert!(text.contains("EPL-2.0"), "{qn}");
         }
     }
 

@@ -1,5 +1,5 @@
 // Copied from Palladio-Addons-SPD-Metamodel (commit 95cdb0b677276f5d14c3001b89705a17d8fb690f),
-// bundles/org.palladiosimulator.spd.semantic.transformations/transformations/spd/topdown/TopDownTransformationInfrastructure.qvto. Licence pending confirmation (DESIGN-SPD U3); do not publish.
+// bundles/org.palladiosimulator.spd.semantic.transformations/transformations/spd/topdown/TopDownTransformationInfrastructure.qvto. EPL-2.0 (LICENSE added upstream in 93b6582).
 // PATCHED by SimOxide (DESIGN-SPD P2): the provisional fixed behaviour of quirk Q7 (top-down scale-in removes emptied containers).
 // SimOxide runs this copy unless the compat flag Q7 is on; the unchanged file runs then. Provisional
 // (docs/spec/slingshot/quirks.md: proposed, not confirmed). Changes are marked `SimOxide Q7`.
