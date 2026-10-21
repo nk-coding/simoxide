@@ -45,9 +45,20 @@ Used in:
   commit 2fd5f42 of Palladio-Core-Commons, 6.0 nightly) for the Slingshot-exact mode.
 - crates/simoxide-sim/src/ssx/: the Slingshot-exact mode reproduces the behaviour of Slingshot's
   handlers statement by statement (Palladio-Analyzer-Slingshot, commit 8bf9adc). The code is
-  written anew, no Slingshot source is copied; the Slingshot repository declares no licence, so
-  its terms are pending confirmation with the Palladio maintainers like section 6 (design
-  decision U3 of DESIGN-SPD.md).
+  written anew, no Slingshot source is copied. Slingshot is licensed under the Eclipse Public
+  License 2.0: https://github.com/PalladioSimulator/Palladio-Analyzer-Slingshot added its LICENSE
+  (EPL-2.0) in commit 4e2339c (2026-10-19), merged as 1bb601f (2026-10-20, pull request #59; the
+  README: "licensed under the Eclipse Public License 2.0 (EPL-2.0)"). Between 8bf9adc and 1bb601f
+  only LICENSE, README.md and the development target platform changed, so the code SimOxide
+  follows is the code published under EPL-2.0. The repository now also holds the bundles of the
+  former extension repositories SimOxide reads (PCM core, monitoring, SPD interpreter; those
+  archived repositories themselves declare no licence). Copyright: Palladiosimulator.org and the
+  Slingshot contributors.
+- reference/slingshot/patches/: an unmodified copy (orig/) and a modified copy (src/, edits
+  marked "SimOxide reference patch S0-P2") of Slingshot's ProcessorSharingResource.java (bundle
+  org.palladiosimulator.analyzer.slingshot.behavior.resourcesimulation, commit 8bf9adc, identical
+  at 1bb601f), EPL-2.0. The upstream file carries no header; the modified copy stays under
+  EPL-2.0 like the rest of SimOxide. It is compiled only into the local reference runner.
 - crates/simoxide-model/models/: Palladio.resourcetype, PrimitiveTypes.repository,
   FailureTypes.repository, Glassfish.repository, default_event_middleware.repository and
   commonMetrics.metricspec, copied verbatim from the 5.2.2 product.
@@ -164,7 +175,9 @@ is not an option either, because only the copyright holders could relicense the 
 - corpus/x_ss_*: models from the Slingshot end-to-end tests
   (https://github.com/PalladioSimulator/Palladio-Analyzer-Slingshot-E2E-Tests).
 
-Neither repository declares a licence. The models are used as test input only.
+Neither repository declares a licence (checked again on 2026-10-21: no LICENSE file on any
+branch; the E2E tests are archived). Slingshot's own EPL-2.0 (section 1) does not cover them. The
+models are used as test input only.
 
 
 6. Palladio SPD metamodels (scaling policy definitions) -- LICENCE PENDING CONFIRMATION
@@ -180,7 +193,10 @@ Copyright: Palladiosimulator.org and its contributors
 Licence:   pending confirmation; the user is clarifying it with the maintainers. The repository
            has no LICENSE file and its feature.xml carries the template text; the bundles'
            MANIFEST.MF declare "Bundle-License: The Apache License, Version 2.0"; Palladio
-           projects are EPL by convention.
+           projects are EPL by convention. Checked again on 2026-10-21: Slingshot itself is now
+           EPL-2.0 (section 1), but neither this repository nor
+           https://github.com/PalladioSimulator/Palladio-Documentation-Slingshot (commit 9444815,
+           the minimal example) has a LICENSE file on any branch, so the restrictions below stay.
 
 Used in:
 - crates/simoxide-model/src/meta/generated.rs: the packages spd (with its 8

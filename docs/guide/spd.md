@@ -97,9 +97,10 @@ Each executed request runs `MainTransformation.qvto` as Slingshot's
    log). The target groups' members are read from the changed model.
 
 A transformation that fails (`assert fatal`) reports `ok: false`; what it changed before stays
-(Slingshot transforms in place). The transformations are embedded in SimOxide (Slingshot's
-transformation bundle at a pinned commit, licence pending confirmation) and compiled once per
-process.
+(Slingshot transforms in place). The transformations are embedded in SimOxide (the bundle
+`org.palladiosimulator.spd.semantic.transformations` of Palladio-Addons-SPD-Metamodel at a pinned
+commit; unlike Slingshot itself, which is EPL-2.0, that repository has no licence yet, so its
+licence is pending confirmation) and compiled once per process.
 
 **Scale-out** appends copies of the unit container (`<unit>_<n>`), each with a copy of the
 unit's assemblies, their allocation, connectors and a load-balancer branch; the branch

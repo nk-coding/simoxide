@@ -13,4 +13,6 @@
 
 Licence: the Palladio example models are distributed with the Palladio documentation; their
 licence (EPL-2.0 by Palladio convention) is pending confirmation with the maintainers (DESIGN-SPD
-decision U3). Do not publish outside this repository until confirmed.
+decision U3). Slingshot itself is EPL-2.0 since 2026-10-20 (`LICENSES` section 1), but
+Palladio-Documentation-Slingshot and Palladio-Addons-SPD-Metamodel still had no licence on
+2026-10-21. Do not publish outside this repository until confirmed.
