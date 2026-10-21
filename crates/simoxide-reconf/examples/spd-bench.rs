@@ -105,7 +105,9 @@ fn one<C: Compat, F: Flavour>(c: &Ctx, phase: &str, i: usize) -> Result<(), Stri
         drop((fork, fadj));
         // snapshot: the run's sections plus the QVTo state, to bytes
         let s0 = Instant::now();
-        let mut s = r.snapshot_value(Encoding::Postcard).map_err(|e| e.to_string())?;
+        let mut s = r
+            .snapshot_value(Encoding::Postcard)
+            .map_err(|e| e.to_string())?;
         s.sections.push(
             adj.inner
                 .run
@@ -131,7 +133,16 @@ fn one<C: Compat, F: Flavour>(c: &Ctx, phase: &str, i: usize) -> Result<(), Stri
         r2.run(&mut adj2, &mut NoLog).map_err(e)?;
         let (res2, _, _) = r2.finish().map_err(e)?;
         let t_cont = c0.elapsed();
-        snap_line = Some((t_fork, t_ser, bytes.len(), t_de, t_res, t_cont, res2, adj2.n));
+        snap_line = Some((
+            t_fork,
+            t_ser,
+            bytes.len(),
+            t_de,
+            t_res,
+            t_cont,
+            res2,
+            adj2.n,
+        ));
     }
     r.run(&mut adj, &mut NoLog).map_err(e)?;
     let (res, _, sum) = r.finish().map_err(e)?;
@@ -167,10 +178,17 @@ fn one<C: Compat, F: Flavour>(c: &Ctx, phase: &str, i: usize) -> Result<(), Stri
 
 fn main() -> Result<(), String> {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let dir = PathBuf::from(args.first().ok_or("usage: spd-bench MODEL_DIR [key=value ...]")?);
+    let dir = PathBuf::from(
+        args.first()
+            .ok_or("usage: spd-bench MODEL_DIR [key=value ...]")?,
+    );
     let a: HashMap<&str, &str> = args[1..].iter().filter_map(|s| s.split_once('=')).collect();
     let get = |k: &str, d: &str| a.get(k).copied().unwrap_or(d).to_string();
-    let num = |k: &str, d: i64| get(k, &d.to_string()).parse::<i64>().map_err(|e| format!("{k}: {e}"));
+    let num = |k: &str, d: i64| {
+        get(k, &d.to_string())
+            .parse::<i64>()
+            .map_err(|e| format!("{k}: {e}"))
+    };
     let slingshot = get("flavour", "slingshot") == "slingshot";
     let mode = match get("mode", "fast").as_str() {
         "fast" => Mode::Fast,
