@@ -48,17 +48,17 @@ always simulated (SS-ACT-7.2), the release that does not wait (SS-ACT-8.3).
 
 ## The exact mode {#exact-mode}
 
-The Slingshot-exact mode (`--flavour slingshot-exact`, design phase X2) runs every flag, Q17 and
+The Slingshot-exact mode (`--flavour slingshot-exact`) runs every flag, Q17 and
 Q18 included, by emulating Slingshot's handlers: each quirk that throws ("up to the throw" below)
 throws in the same handler with the same exception class, and the handler is disposed with the
 side effects it had made (draws, frames pushed or popped, cursor moves, measurements). Checked on
 the 22 Slingshot corpus cases with handler errors plus two Q37 cases
 ([SS-X-8](./exact.md#ss-x-8-the-slingshot-exact-corpus); `crates/simoxide-sim/tests/slingshot_exact.rs`,
-`handler_errors_match_the_reference`). The SPD quirks Q1–Q16 are the SPD interpreter's (X2d).
+`handler_errors_match_the_reference`). The SPD quirks Q1–Q16 are the SPD interpreter's, all on in this mode.
 
 ## Compat flags in SimOxide {#compat-flags}
 
-SimOxide's Slingshot flavour (fast mode, design phase S2; [Slingshot flavour](../../guide/slingshot.md))
+SimOxide's Slingshot flavour (`--flavour slingshot`, here called the fast mode; [Slingshot-compatible mode](../../guide/slingshot.md))
 has one flag per quirk: `--quirks Q26,Q29`, `--quirks fast` (every flag the fast mode supports),
 `--quirks list`; in the library `simoxide_sim::Quirks` / `Quirk::Q26` in
 `FlavourConfig::slingshot(..)`. Without a flag the fixed behaviour of the table above applies.
@@ -66,7 +66,7 @@ has one flag per quirk: `--quirks Q26,Q29`, `--quirks fast` (every flag the fast
 
 | # | Fast mode | Notes |
 |---|---|---|
-| Q1–Q16 | SPD | the SPD interpreter's flags (`simoxide_spd::Quirks`, `simoxide run --spd-quirks`, phase P1; Q5–Q8, Q14, Q16 with the adjustment, P2); `simoxide_sim::Quirks` carries the same numbers so that P3 can drive both from one set |
+| Q1–Q16 | SPD | the SPD interpreter's flags (`simoxide_spd::Quirks`, `simoxide run --spd-quirks`; Q5–Q8, Q14, Q16 act through the adjustment); `simoxide_sim::Quirks` carries the same numbers so that one set drives both |
 | Q17 | refused | concurrent demands with a shared cursor need the exact mode's handler steps; refused for models with an internal action with two or more demands. The exact mode (`--flavour slingshot-exact`) reproduces it |
 | Q18 | refused | handler disposal is the exact mode's: there every handler has a disposed bit, the throwing handler keeps the side effects up to the throw and never runs again |
 | Q19 | up to the throw | SEFF loop count 0: body once, then a run error; negative count and usage-loop count ≤ 0: run error at the loop |
