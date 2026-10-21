@@ -288,6 +288,17 @@ specifications are used to implement the standard and are not redistributed. See
 crates/qvto/DESIGN.md, "Licensing".
 
 
+9. Eclipse Modeling Framework (Ecore metamodel, crates/foundation/simoxide-emf)
+------------------------------------------------------------------------------
+
+Source:    https://github.com/eclipse-emf/org.eclipse.emf (the runtime EcorePackage)
+Copyright: the Eclipse EMF contributors
+Licence:   Eclipse Public License 2.0
+
+Used in: crates/foundation/simoxide-emf/models/Ecore.ecore (EMF's EcorePackage as saved by the
+Java oracle), which simoxide-emf bootstraps from and the QVTo benchmark b5_copy_Ecore reads.
+
+
 Open issues
 -----------
 
