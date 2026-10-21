@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'SimOxide',
   description:
-    'A byte-exact, much faster Rust port of the Palladio simulator SimuLizar 5.2.2, with a QVTo engine',
+    'A Rust simulator for Palladio models, compatible with SimuLizar 5.2.2 and Slingshot, with a QVTo engine',
   // GitHub Pages serves the site under /simoxide/ (set by .github/workflows/docs.yml)
   base: process.env.DOCS_BASE ?? '/',
   cleanUrls: true,
@@ -12,14 +12,17 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Guide', link: '/guide/introduction' },
-      { text: 'Performance', link: '/performance/' },
-      { text: 'Correctness', link: '/correctness/' },
+      { text: 'Modes', link: '/guide/modes' },
       { text: 'Semantics', link: '/spec/' },
+      { text: 'Correctness', link: '/correctness/' },
+      { text: 'Performance', link: '/performance/' },
       { text: 'QVTo', link: '/qvto/' },
       {
         text: 'More',
         items: [
-          { text: 'Reference simulator', link: '/reference-simulator/refsim' },
+          { text: 'Slingshot semantics', link: '/spec/slingshot/' },
+          { text: 'Reference simulators', link: '/reference-simulator/refsim' },
+          { text: 'Licensing', link: '/guide/licensing' },
           { text: 'Development', link: '/development/contributing' },
         ],
       },
@@ -45,32 +48,55 @@ export default defineConfig({
             { text: 'Foundation crates', link: '/development/foundation' },
             { text: 'Reconfiguration rules', link: '/guide/reconfiguration' },
             { text: 'Scaling policies (SPD)', link: '/guide/spd' },
+            { text: 'SimOxide licensing', link: '/guide/licensing' },
             { text: 'Contributing', link: '/development/contributing' },
           ],
         },
       ],
       '/': [
         {
-          text: 'Guide',
+          text: 'Start',
           items: [
             { text: 'Introduction', link: '/guide/introduction' },
             { text: 'Getting started', link: '/guide/getting-started' },
-            { text: 'Command line', link: '/guide/cli' },
-            { text: 'Library API', link: '/guide/library' },
-            { text: 'Snapshots', link: '/guide/snapshots' },
-            { text: 'Reconfiguration rules', link: '/guide/reconfiguration' },
-            { text: 'Scaling policies (SPD)', link: '/guide/spd' },
-            { text: 'Autoscaling (HPA)', link: '/guide/hpa' },
-            { text: 'Load profiles', link: '/guide/load-profile' },
-            { text: 'Fast mode', link: '/guide/fast-mode' },
-            { text: 'Slingshot flavour', link: '/guide/slingshot' },
-            { text: 'Supported models', link: '/guide/scope' },
-            { text: 'Output formats', link: '/guide/formats' },
-            { text: 'Snapshot format', link: '/formats/snapshot' },
+            { text: 'Modes and features', link: '/guide/modes' },
           ],
         },
         {
+          text: 'Simulation',
+          items: [
+            { text: 'Supported models', link: '/guide/scope' },
+            { text: 'Fast mode', link: '/guide/fast-mode' },
+            { text: 'Slingshot-compatible mode', link: '/guide/slingshot' },
+            { text: 'Load profiles', link: '/guide/load-profile' },
+          ],
+        },
+        {
+          text: 'Runtime changes',
+          items: [
+            { text: 'Reconfiguration rules', link: '/guide/reconfiguration' },
+            { text: 'Scaling policies (SPD)', link: '/guide/spd' },
+            { text: 'Autoscaling (HPA)', link: '/guide/hpa' },
+            { text: 'Snapshots, forks, changes', link: '/guide/snapshots' },
+          ],
+        },
+        {
+          text: 'Interfaces',
+          items: [
+            { text: 'Command line', link: '/guide/cli' },
+            { text: 'Library API', link: '/guide/library' },
+            { text: 'Output formats', link: '/guide/formats' },
+            { text: 'Snapshot format', link: '/formats/snapshot' },
+            { text: 'QVTo engine', link: '/qvto/' },
+          ],
+        },
+        {
+          text: 'Licensing',
+          items: [{ text: 'Licensing and third party', link: '/guide/licensing' }],
+        },
+        {
           text: 'Performance',
+          collapsed: true,
           items: [
             { text: 'Overview', link: '/performance/' },
             { text: 'Comparison in detail', link: '/performance/comparison' },
@@ -79,6 +105,7 @@ export default defineConfig({
         },
         {
           text: 'Correctness',
+          collapsed: true,
           items: [
             { text: 'Exactness and evidence', link: '/correctness/' },
             { text: 'Testing', link: '/correctness/testing' },
@@ -120,7 +147,7 @@ export default defineConfig({
           ],
         },
         {
-          text: 'Reference simulator',
+          text: 'Reference simulators',
           collapsed: true,
           items: [
             { text: 'refsim', link: '/reference-simulator/refsim' },
