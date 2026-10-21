@@ -203,8 +203,9 @@ Benchmark B1 of the reconfiguration design (`DESIGN-SPD.md` §6): SimOxide's
 [Slingshot flavour](../guide/slingshot.md) (fast mode, fixed behaviour) and its Slingshot-exact
 mode against stock Slingshot, on plain models and on Slingshot's scaling-policy (SPD) examples.
 Measured on 2026-10-21 on the quiet 25-core, 34 GB VM (AMD Ryzen 9 9950X3D), each benchmark process
-alone, 3 processes per configuration with seeds 1 to 3 (`bench/compare/spd/b1.sh`; every table and
-the raw figures in `bench/compare/results/2026-10-21-b1/summary.md`).
+alone, 3 processes per configuration with seeds 1 to 3, re-run after the fixed SPD `AVERAGE` windows
+and the faster XMI loading (`bench/compare/spd/b1.sh`; every table and the raw figures in
+`bench/compare/results/2026-10-21-b1/summary.md`).
 
 - **Slingshot**: the nightly of 2026-09-01 through the S0 reference runner in Equinox
   (`reference/slingshot/run.sh --stock`, seeded, no instrumentation or measurement output),
@@ -213,22 +214,22 @@ the raw figures in `bench/compare/results/2026-10-21-b1/summary.md`).
 - **SimOxide**: per run, load and compile the model and simulate (`simoxide-compare`, as above);
   SPD runs with `spd-bench` (`crates/simoxide-reconf/examples`), which creates the simulation with
   its scaling policies on a compiled model and times the adjustments; the QVTo engine is set up
-  once per process (12.5 to 14 ms).
+  once per process (10.7 to 15.4 ms).
 
 **Plain models, warm per run** (median):
 
 | model | simulated s | Slingshot flavour | Slingshot-exact | Slingshot | Slingshot / Slingshot flavour | Slingshot / Slingshot-exact |
 |---|---|---|---|---|---|---|
-| `x_ss_minimal` | 1 000 | 0.27 ms | 0.61 ms | 134 ms | 490× | 219× |
-| `x_ss_minimal` | 100 000 | 8.8 ms | 42.7 ms | 6.62 s | 755× | 155× |
-| `x_espresso` | 100 | 0.39 ms | 1.53 ms | 182 ms | 464× | 119× |
-| `x_espresso` | 2 000 | 4.7 ms | 26.5 ms | 2.85 s | 607× | 107× |
-| `x_ss_mediastore` | 2·10^5 | 1.18 ms | 1.8 ms | 267 ms | 226× | 148× |
-| `x_ss_mediastore` | 10^7 | 7.0 ms | 36.9 ms | 9.02 s | 1 285× | 244× |
+| `x_ss_minimal` | 1 000 | 0.24 ms | 0.62 ms | 123 ms | 515× | 198× |
+| `x_ss_minimal` | 100 000 | 8.6 ms | 42.1 ms | 5.06 s | 591× | 120× |
+| `x_espresso` | 100 | 0.41 ms | 1.53 ms | 179 ms | 442× | 117× |
+| `x_espresso` | 2 000 | 4.6 ms | 25.8 ms | 2.39 s | 518× | 93× |
+| `x_ss_mediastore` | 2·10^5 | 1.21 ms | 1.84 ms | 249 ms | 206× | 135× |
+| `x_ss_mediastore` | 10^7 | 7.3 ms | 38.5 ms | 7.78 s | 1 073× | 202× |
 
-Cold one-shot (process start to results): SimOxide 7 to 164 ms (`simoxide run`, writing
-`measurements.csv`), Slingshot 3.3 to 13.9 s (JVM and Equinox start-up plus the first run). Peak
-RSS: 6 to 12 MB against 0.8 to 1.3 GB. The Slingshot-exact mode replays Slingshot's whole event
+Cold one-shot (process start to results): SimOxide 4.4 to 88 ms (`simoxide run`, writing
+`measurements.csv`), Slingshot 2.8 to 12.5 s (JVM and Equinox start-up plus the first run). Peak
+RSS: 6 to 13 MB against 0.76 to 1.4 GB. The Slingshot-exact mode replays Slingshot's whole event
 cascade (14 times the events on `x_ss_mediastore`) and is 1.5 to 6 times slower than the Slingshot flavour.
 Results: the Slingshot-exact mode and stock Slingshot (seed 1) finished the same requests with the
 same mean response time on all six runs (e.g. 937 requests, 21 303 s on `x_ss_mediastore` long);
@@ -238,34 +239,34 @@ the Slingshot flavour draws its own random numbers and differs within noise (938
 
 | model | adjustments | Slingshot flavour, fixed | Slingshot flavour, Slingshot's quirks | Slingshot | Slingshot / Slingshot's quirks |
 |---|---|---|---|---|---|
-| `spd_minimal` | 1 | 0.98 ms | 1.0 ms | 133 ms | 133× |
-| `spd_scale_in` | 2 | 1.41 ms | 1.46 ms | 136 ms | 93× |
-| `spd_service_group` | 3 | 2.61 ms | 2.61 ms | 140 ms | 54× |
-| `spd_same_instant` | 2 (quirks: 4) | 1.49 ms | 2.65 ms | 138 ms | 52× |
-| `spd_time_policies` | 4 (quirks: 8) | 2.67 ms | 4.12 ms | 146 ms | 35× |
-| `spd_v4_cpu` (CPU utilisation) | 2 (quirks: 15 to 17) | 1.69 ms | 10.5 ms | 610 ms | 58× |
-| `spd_v4_rt` (response time) | 0 (quirks: 3 to 5) | 0.21 ms | 3.58 ms | 528 ms | 147× |
+| `spd_minimal` | 1 | 0.91 ms | 0.92 ms | 130 ms | 142× |
+| `spd_scale_in` | 2 | 1.33 ms | 1.36 ms | 139 ms | 103× |
+| `spd_service_group` | 3 | 2.65 ms | 2.54 ms | 147 ms | 58× |
+| `spd_same_instant` | 2 (quirks: 4) | 1.40 ms | 2.67 ms | 145 ms | 54× |
+| `spd_time_policies` | 4 (quirks: 8) | 2.61 ms | 3.88 ms | 151 ms | 39× |
+| `spd_v4_cpu` (CPU utilisation) | 15 to 16 (quirks: 15 to 17) | 10.6 ms | 10.3 ms | 601 ms | 59× |
+| `spd_v4_rt` (response time) | 0 (quirks: 3 to 5) | 0.22 ms | 3.44 ms | 506 ms | 147× |
 
 - "Slingshot's quirks" runs the flavour with the compat flags stock Slingshot has
   (`--quirks fast --spd-quirks slingshot`): it makes Slingshot's decisions (16 adjustments in
   Slingshot's own `spd_v4_cpu` run, 15 to 17 here); the fixed default scales less (for example, a
-  scaling policy no longer reacts to another policy's time event, Q15). Its 2 adjustments on
-  `spd_v4_cpu` came from two defects of the fixed per-container windows (Q13), fixed after this
-  measurement: a new container's EMA was decayed over the run before it existed and counted at
-  once (the group scaled in 2.5 s after scaling out), and a removed container's last value stayed
-  in the average. The fixed default now makes 15 or 16 (seeds 1 to 3); the times in the table
-  are those of the 2 adjustments.
-- An adjustment costs 0.5 to 0.9 ms (QVTo `MainTransformation` plus the change path) and takes 78
-  to 98 % of a short SPD run. Slingshot's per-run time includes its adjustments; it is not
+  scaling policy no longer reacts to another policy's time event, Q15). On `spd_v4_cpu` the fixed
+  default makes about as many adjustments as Slingshot (15 or 16 over seeds 1 to 3, Slingshot 16),
+  at the same speed as with the quirks (57× faster than Slingshot). (The first B1 run that day
+  measured 2 adjustments there, from two defects of the fixed per-container windows, Q13, fixed
+  since: a new container's EMA was decayed over the run before it existed, and a removed
+  container's last value stayed in the average.)
+- An adjustment costs 0.5 to 1.0 ms (QVTo `MainTransformation` plus the change path) and takes 87
+  to 97 % of an SPD run that adjusts. Slingshot's per-run time includes its adjustments; it is not
   instrumented to separate them.
-- Cold one-shot: `simoxide run` with the SPD 20 to 53 ms (including the QVTo set-up), Slingshot 3.2
-  to 4.2 s. Peak RSS 13 to 15 MB against 0.63 to 0.69 GB.
+- Cold one-shot: `simoxide run` with the SPD 21 to 55 ms (including the QVTo set-up), Slingshot 3.3
+  to 4.3 s. Peak RSS 12 to 16 MB against 0.63 to 0.72 GB.
 - The SimuLizar flavour runs the same models (with time-driven utilisation monitors, which
-  SimuLizar needs) at the same speed. In this measurement it did not scale `spd_v4_cpu` at all:
-  Slingshot's EMA decays its value by `exp(-Δt/60)` per sample to account for the time without
-  samples, which its event-driven samples leave idle; applied to 10 s sliding-window tuples it
-  capped the EMA at 52 % of the utilisation, below the 80 % threshold. Fixed after the
-  measurement (sliding-window samples decay only over uncovered time): 8 to 11 adjustments.
+  SimuLizar needs) at the same speed. On `spd_v4_cpu` it makes 9 or 10 adjustments (fast; 6.2 ms
+  per run): its 10 s sliding windows smooth the utilisation, so it crosses the thresholds less
+  often than the Slingshot flavour. Slingshot's EMA decay per sample stands for the idle time
+  between Slingshot's event-driven samples; on sliding-window samples it decays only over time
+  they do not cover (without that, the first B1 run that day saw no adjustment at all).
 - Not measured: Slingshot's snapshots (its initialisation extension needs the MENTOR application,
   which is not installed, `DESIGN-SPD.md` U7). SimOxide's snapshot and fork costs are in
   [Engine performance](./engine.md#runtime-changes-spd-and-snapshots).
@@ -276,12 +277,12 @@ JVM):
 
 | case | simulated s | reconfigurations | SimOxide (run, exact) | of it in rules | refsim warm | refsim first run in JVM |
 |---|---|---|---|---|---|---|
-| `lb_outsource` | 1 000 | 99 | 17.7 ms | 8.4 ms | 1.94 s | 7.6 s |
-| `lb_rules_qvto` | 1 000 | 99 | 107 ms | 95 ms | 2.05 s | 7.7 s |
-| `power_rules_qvto` | 2 000 | about 13 000 | 1.11 s | 1.08 s | 5.72 s | 12.0 s |
+| `lb_outsource` | 1 000 | 99 | 17.6 ms | 8.2 ms | 1.94 s | 7.4 s |
+| `lb_rules_qvto` | 1 000 | 99 | 102 ms | 88 ms | 2.06 s | 7.9 s |
+| `power_rules_qvto` | 2 000 | about 13 000 | 1.11 s | 1.07 s | 6.69 s | 13.1 s |
 
 The power example evaluates its rules about 13 000 times; at about 80 µs per evaluation SimOxide
-spends almost all its time in the QVTo engine, so its lead shrinks to 5×.
+spends almost all its time in the QVTo engine, so its lead shrinks to 6×.
 
 ## Fairness caveats
 

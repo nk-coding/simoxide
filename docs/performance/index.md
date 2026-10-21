@@ -90,13 +90,13 @@ benchmark they were: on every benchmark model and length (seed 1), SimuLizar on 
 
 Against stock Slingshot (benchmark B1, 25-core VM, 2026-10-21; [details](./comparison.md#slingshot-flavour-and-spd-against-slingshot)):
 
-- SimOxide's [Slingshot flavour](../guide/slingshot.md) is 230 to 1 290 times faster per warm
+- SimOxide's [Slingshot flavour](../guide/slingshot.md) is 210 to 1 070 times faster per warm
   run on Slingshot's models, its Slingshot-exact mode, which replays Slingshot's whole event
-  cascade and gives the same results, 110 to 240 times.
+  cascade and gives the same results, 90 to 200 times.
 - With scaling policies (Slingshot's SPD examples, Slingshot's decisions), a warm run takes 1 to
-  10 ms against 130 to 610 ms (35 to 150 times faster); an adjustment through Slingshot's own QVTo
-  transformation costs 0.5 to 0.9 ms. A one-shot run takes 20 to 50 ms instead of 3 to 4 s.
-- A fork of a running SPD simulation costs 3 to 19 µs, a snapshot 0.1 to 0.8 ms; Slingshot's
+  10 ms against 130 to 600 ms (39 to 150 times faster); an adjustment through Slingshot's own QVTo
+  transformation costs 0.5 to 1.0 ms. A one-shot run takes 20 to 55 ms instead of 3 to 4 s.
+- A fork of a running SPD simulation costs 3 to 25 µs, a snapshot 0.1 to 0.8 ms; Slingshot's
   snapshots could not be measured (they need the MENTOR application).
 
 ## SimOxide on its own

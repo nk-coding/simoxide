@@ -3419,6 +3419,14 @@ runner, `--stock`; SimOxide's `simoxide-compare` with `flavour=`/`simMode=`, and
     `per_element_retain`), `spd_adjust::cpu_utilisation_policies_scale_in_both_flavours` (fails
     before the fix: no adjustment in the SimuLizar flavour), `unit::q13_ema_emit_slot` adapted
     (its window starts at the first sample).
+  - B1 re-run (the same evening at `4e620a6`, with the fix and the XMI loading follow-up
+    `85f90bd`; `bench/compare/results/2026-10-21-b1/` now holds it): `spd_v4_cpu` warm per run
+    1.69 ms → 10.6 ms in the Slingshot flavour (2 → 16 adjustments; 57× faster than Slingshot,
+    as with its quirks, 10.3 ms), 0.26 ms → 6.2 ms in the SimuLizar flavour (0 → 9). The other
+    SPD rows within noise (0.91-2.65 ms; with quirks 39-147×); an adjustment 0.5-1.0 ms, 87-97 %
+    of an SPD run that adjusts. Plain models: the Slingshot flavour 206-1 073× (Slingshot's own
+    long runs were 15-25 % faster than in the first run, SimOxide's unchanged), Slingshot-exact
+    93-202×; cold one-shot 4.4-88 ms (was 7-164 ms, the loading follow-up).
 
 ## 7. Phased plan
 

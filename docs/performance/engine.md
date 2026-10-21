@@ -223,16 +223,16 @@ benchmark B1, `bench/compare/spd/b1.sh`; results in `bench/compare/results/2026-
 | What | Cost |
 |---|---|
 | Fork of a run halfway (`simoxide-bench fork`, `Simulation::snapshot`, measurements counted) | 0.3 to 3 µs (11 µs with 117 live processes); with stored rows the rows dominate: MediaStore, 1.1 M tuples, 0.6 ms |
-| Fork of an SPD run with its QVTo state (`SpdRun::fork` + `QvtoAdjuster::fork_spd`) | 3 to 19 µs: 53 000 to 330 000 forks/s |
-| Snapshot of an SPD run to bytes (postcard, with the QVTo section) / from bytes / restore | 84 to 780 µs for 2.7 to 137 KB / 6 to 111 µs / 74 to 1 010 µs; every restored run ends exactly as the uninterrupted one |
+| Fork of an SPD run with its QVTo state (`SpdRun::fork` + `QvtoAdjuster::fork_spd`) | 3 to 25 µs: 40 000 to 345 000 forks/s |
+| Snapshot of an SPD run to bytes (postcard, with the QVTo section) / from bytes / restore | 82 to 840 µs for 2.7 to 152 KB / 6 to 141 µs / 72 to 1 040 µs; every restored run ends exactly as the uninterrupted one |
 | Snapshot file of a long MediaStore run through the CLI (`--pause-at`, `--snapshot`) | 1.3 MB (`x_ss_mediastore`) and 0.75 MB (`x_sl_mediastore`), about 4 ms more than the uninterrupted run |
 | Runtime model change (`simoxide-bench change`: graph copy, rebuild, recompile, merge) | MediaStore (1 220 objects) 0.32 ms; small models 28 to 57 µs; generated size 10 0.13 to 0.14 ms |
-| SPD adjustment (Slingshot's `MainTransformation` plus the change path), SPD example models | 0.5 to 0.9 ms; the QVTo set-up (core and `MainTransformation`) once per process 12.5 to 14 ms |
+| SPD adjustment (Slingshot's `MainTransformation` plus the change path), SPD example models | 0.5 to 1.0 ms; the QVTo set-up (core and `MainTransformation`) once per process 10.7 to 15.4 ms |
 | HPA scaling step at MiSArch's size (30 services, 2 279 objects; `tests/hpa.rs cost_per_scaling_step`, 3 runs) | 2.4 ms per adjustment (2.35 to 4.1), of which the change path 1.6 to 2.5 ms; 40 services 3.0 to 3.5 ms; the whole 900 s run with 114 adjustments 0.32 to 0.52 s |
 | SimuLizar reconfiguration rules (power example, 2 000 s, 13 349 reconfigurations) | 1.1 s of rules (about 80 µs per reconfiguration, the PRM mirror 8 µs of it) in QVTo's ordered, fast and compat modes alike |
 
 A short SPD run is mostly adjustments: on the SPD examples (100 to 600 s simulated, 1 to 17
-adjustments) 78 to 98 % of a 1 to 10 ms run is spent in them.
+adjustments) 87 to 97 % of a 0.9 to 11 ms run is spent in them.
 
 ## Slingshot flavour
 

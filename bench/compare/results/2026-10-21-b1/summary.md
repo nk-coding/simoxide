@@ -4,34 +4,34 @@ Warm per-run wall time, median over all measured runs of the processes (p10–p9
 
 | model | len | sim. s | SimOxide Slingshot flavour (fast) | SimOxide Slingshot-exact | SimOxide SimuLizar flavour (exact) | SimOxide SimuLizar flavour (fast) | Slingshot (stock nightly, S0 runner) | Slingshot / Slingshot flavour | Slingshot / Slingshot-exact |
 |---|---|---|---|---|---|---|---|---|---|
-| `x_espresso` | short | 100 | 392 µs (352 µs–476 µs) | 1.53 ms (1.47 ms–1.61 ms) | 392 µs (360 µs–473 µs) | 410 µs (365 µs–492 µs) | 182 ms (166 ms–288 ms) | 464× | 119× |
-| `x_espresso` | long | 2000 | 4.69 ms (4.58 ms–5 ms) | 26.5 ms (25.7 ms–28.4 ms) | 4.84 ms (4.72 ms–5.29 ms) | 4.94 ms (4.7 ms–5.33 ms) | 2.85 s (2.68 s–2.99 s) | 607× | 107× |
-| `x_ss_mediastore` | short | 200000 | 1.18 ms (1.12 ms–1.27 ms) | 1.8 ms (1.73 ms–1.89 ms) | 1.22 ms (1.16 ms–1.3 ms) | 1.22 ms (1.15 ms–1.31 ms) | 267 ms (234 ms–376 ms) | 226× | 148× |
-| `x_ss_mediastore` | long | 1e+07 | 7.02 ms (6.83 ms–7.92 ms) | 36.9 ms (35.6 ms–41 ms) | 7.52 ms (7.28 ms–8.33 ms) | 7.54 ms (7.18 ms–8.21 ms) | 9.02 s (8.68 s–9.26 s) | 1 285× | 244× |
-| `x_ss_minimal` | short | 1000 | 274 µs (214 µs–346 µs) | 611 µs (560 µs–676 µs) | 242 µs (218 µs–322 µs) | 242 µs (214 µs–329 µs) | 134 ms (106 ms–237 ms) | 490× | 219× |
-| `x_ss_minimal` | long | 100000 | 8.76 ms (8.39 ms–10.3 ms) | 42.7 ms (41.6 ms–47.4 ms) | 9.07 ms (8.88 ms–9.66 ms) | 9.38 ms (8.98 ms–12 ms) | 6.62 s (6.41 s–7.06 s) | 755× | 155× |
+| `x_espresso` | short | 100 | 406 µs (345 µs–492 µs) | 1.53 ms (1.48 ms–1.62 ms) | 422 µs (365 µs–497 µs) | 425 µs (356 µs–509 µs) | 179 ms (162 ms–201 ms) | 442× | 117× |
+| `x_espresso` | long | 2000 | 4.62 ms (4.52 ms–5.15 ms) | 25.8 ms (25.2 ms–26.5 ms) | 4.81 ms (4.7 ms–5.1 ms) | 4.8 ms (4.66 ms–5.23 ms) | 2.39 s (2.33 s–2.5 s) | 518× | 93× |
+| `x_ss_mediastore` | short | 200000 | 1.21 ms (1.15 ms–1.3 ms) | 1.84 ms (1.76 ms–1.96 ms) | 1.24 ms (1.18 ms–1.33 ms) | 1.2 ms (1.14 ms–1.27 ms) | 249 ms (233 ms–269 ms) | 206× | 135× |
+| `x_ss_mediastore` | long | 1e+07 | 7.25 ms (6.97 ms–7.65 ms) | 38.5 ms (36.3 ms–40.1 ms) | 7.41 ms (7.25 ms–7.89 ms) | 7.35 ms (7.22 ms–7.72 ms) | 7.78 s (7.58 s–8.97 s) | 1 073× | 202× |
+| `x_ss_minimal` | short | 1000 | 239 µs (203 µs–314 µs) | 622 µs (549 µs–713 µs) | 306 µs (248 µs–373 µs) | 258 µs (213 µs–337 µs) | 123 ms (103 ms–157 ms) | 515× | 198× |
+| `x_ss_minimal` | long | 100000 | 8.56 ms (8.39 ms–9.52 ms) | 42.1 ms (41.3 ms–43.2 ms) | 8.92 ms (8.47 ms–9.63 ms) | 8.94 ms (8.69 ms–9.63 ms) | 5.06 s (5.01 s–5.32 s) | 591× | 120× |
 
 **Cold one-shot** (process start to results, median of the processes; SimOxide: `simoxide run` with `--measurements`; Slingshot: the JVM's uptime when the S0 runner starts, i.e. JVM and Equinox start-up, plus its first run) and **first run in the JVM** (Slingshot, excluding JVM and Equinox start-up), peak RSS of the warm processes:
 
 | model | len | SimOxide Slingshot flavour (fast) | SimOxide Slingshot-exact | SimOxide SimuLizar flavour (exact) | SimOxide SimuLizar flavour (fast) | Slingshot (stock nightly, S0 runner) | Slingshot first run in JVM | peak RSS SimOxide (Slingshot flavour) / Slingshot |
 |---|---|---|---|---|---|---|---|---|
-| `x_espresso` | short | 13.2 ms | 10.8 ms | 10.3 ms | 10.1 ms | 3.36 s | 2.37 s | 6 MB / 886 MB |
-| `x_espresso` | long | 37.7 ms | 66 ms | 40.7 ms | 38.9 ms | 6.5 s | 5.52 s | 9 MB / 1268 MB |
-| `x_ss_mediastore` | short | 10.3 ms | 11.6 ms | 12.1 ms | 10.8 ms | 4.31 s | 3.33 s | 8 MB / 832 MB |
-| `x_ss_mediastore` | long | 66.7 ms | 164 ms | 83.7 ms | 98.4 ms | 13.9 s | 12.9 s | 12 MB / 1303 MB |
-| `x_ss_minimal` | short | 7.76 ms | 9.12 ms | 6.94 ms | 7.93 ms | 3.25 s | 2.28 s | 6 MB / 777 MB |
-| `x_ss_minimal` | long | 102 ms | 110 ms | 106 ms | 86.8 ms | 10.5 s | 9.55 s | 12 MB / 1333 MB |
+| `x_espresso` | short | 5.96 ms | 6.5 ms | 5.28 ms | 5.05 ms | 2.98 s | 2.11 s | 6 MB / 900 MB |
+| `x_espresso` | long | 26.7 ms | 46.2 ms | 24.4 ms | 25.4 ms | 5.42 s | 4.57 s | 9 MB / 1268 MB |
+| `x_ss_mediastore` | short | 5.91 ms | 6.31 ms | 5.48 ms | 5.39 ms | 4.01 s | 3.1 s | 8 MB / 837 MB |
+| `x_ss_mediastore` | long | 45.4 ms | 73 ms | 48.1 ms | 52.5 ms | 12.5 s | 11.6 s | 13 MB / 1275 MB |
+| `x_ss_minimal` | short | 4.75 ms | 4.9 ms | 4.37 ms | 4.52 ms | 2.8 s | 1.93 s | 6 MB / 756 MB |
+| `x_ss_minimal` | long | 68.5 ms | 79 ms | 87.5 ms | 62.2 ms | 8.68 s | 7.81 s | 12 MB / 1413 MB |
 
 **Simulation only** (SimOxide: the run without loading and compiling, median `sim_ms` of the warm runs) against Slingshot's warm run (which includes its model loading, about 10 % of it):
 
 | model | len | SimOxide Slingshot flavour (fast) | SimOxide Slingshot-exact | SimOxide SimuLizar flavour (exact) | SimOxide SimuLizar flavour (fast) |
 |---|---|---|---|---|---|
-| `x_espresso` | short | 194 µs | 1.28 ms | 201 µs | 204 µs |
-| `x_espresso` | long | 4.09 ms | 25.5 ms | 4.23 ms | 4.32 ms |
-| `x_ss_mediastore` | short | 113 µs | 717 µs | 127 µs | 120 µs |
-| `x_ss_mediastore` | long | 4.87 ms | 34.5 ms | 5.24 ms | 5.24 ms |
-| `x_ss_minimal` | short | 70 µs | 414 µs | 78 µs | 75 µs |
-| `x_ss_minimal` | long | 7.39 ms | 41.2 ms | 7.77 ms | 7.93 ms |
+| `x_espresso` | short | 201 µs | 1.29 ms | 223 µs | 216 µs |
+| `x_espresso` | long | 4.06 ms | 24.9 ms | 4.26 ms | 4.23 ms |
+| `x_ss_mediastore` | short | 112 µs | 736 µs | 128 µs | 120 µs |
+| `x_ss_mediastore` | long | 4.98 ms | 35.9 ms | 5.19 ms | 5.11 ms |
+| `x_ss_minimal` | short | 70 µs | 424 µs | 88 µs | 81 µs |
+| `x_ss_minimal` | long | 7.29 ms | 40.8 ms | 7.64 ms | 7.7 ms |
 
 **Results** (seed 1; usage-scenario requests and mean response time): SimOxide's runs per flavour and mode, and one Slingshot run with measurements (stock Slingshot draws branch decisions from `Math.random()`, so it is not reproducible per seed):
 
@@ -50,37 +50,37 @@ Warm per-run wall time (median; p10–p90), SimOxide: `spd-bench` (simulation cr
 
 | model | sim. s | Slingshot flavour (fast) | adj | in adj. | SimuLizar flavour (fast) | adj | in adj. | SimuLizar flavour (exact) | Slingshot | Slingshot / Slingshot flavour | sim. s/s Slingshot flavour | sim. s/s Slingshot |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `spd_minimal` | 100 | 979 µs (924 µs–1.07 ms) | 1 | 88 % | 994 µs (941 µs–1.07 ms) | 1 | 88 % | 1.02 ms (940 µs–1.08 ms) | 133 ms (110 ms–195 ms) | 136× | 102 145 | 753 |
-| `spd_same_instant` | 100 | 1.49 ms (1.41 ms–1.64 ms) | 2 | 94 % | 1.49 ms (1.4 ms–1.58 ms) | 2 | 94 % | 1.55 ms (1.46 ms–1.73 ms) | 138 ms (109 ms–199 ms) | 93× | 67 114 | 725 |
-| `spd_scale_in` | 150 | 1.41 ms (1.33 ms–1.51 ms) | 2 | 93 % | 1.48 ms (1.38 ms–1.6 ms) | 2 | 91 % | 1.5 ms (1.41 ms–1.63 ms) | 136 ms (108 ms–200 ms) | 97× | 106 686 | 1 105 |
-| `spd_service_group` | 100 | 2.61 ms (2.53 ms–2.76 ms) | 3 | 97 % | 2.67 ms (2.54 ms–2.91 ms) | 3 | 97 % | 2.62 ms (2.53 ms–2.8 ms) | 140 ms (115 ms–208 ms) | 54× | 38 263 | 712 |
-| `spd_time_policies` | 100 | 2.67 ms (2.54 ms–2.84 ms) | 4 | 97 % | 2.7 ms (2.56 ms–2.86 ms) | 4 | 97 % | 2.67 ms (2.53 ms–3.01 ms) | 146 ms (114 ms–204 ms) | 55× | 37 425 | 685 |
-| `spd_v4_cpu` | 600 | 1.69 ms (1.62 ms–1.77 ms) | 2 | 78 % | 256 µs (230 µs–292 µs) | 0 | 0 % | 304 µs (254 µs–352 µs) | 610 ms (465 ms–710 ms) | 362× | 355 977 | 983 |
-| `spd_v4_rt` | 600 | 214 µs (199 µs–262 µs) | 0 | 0 % | 265 µs (251 µs–307 µs) | 0 | 0 % | 298 µs (265 µs–334 µs) | 528 ms (433 ms–707 ms) | 2 473× | 2 810 304 | 1 137 |
+| `spd_minimal` | 100 | 914 µs (858 µs–981 µs) | 1 | 87 % | 956 µs (892 µs–1.06 ms) | 1 | 88 % | 952 µs (884 µs–1.01 ms) | 130 ms (111 ms–196 ms) | 143× | 109 409 | 766 |
+| `spd_same_instant` | 100 | 1.4 ms (1.32 ms–1.52 ms) | 2 | 94 % | 1.42 ms (1.35 ms–1.52 ms) | 2 | 93 % | 1.41 ms (1.34 ms–1.49 ms) | 145 ms (114 ms–203 ms) | 103× | 71 378 | 691 |
+| `spd_scale_in` | 150 | 1.33 ms (1.27 ms–1.41 ms) | 2 | 92 % | 1.38 ms (1.31 ms–1.49 ms) | 2 | 92 % | 1.36 ms (1.29 ms–1.47 ms) | 139 ms (113 ms–210 ms) | 105× | 113 080 | 1 078 |
+| `spd_service_group` | 100 | 2.65 ms (2.42 ms–2.84 ms) | 3 | 97 % | 2.49 ms (2.42 ms–2.7 ms) | 3 | 97 % | 2.54 ms (2.43 ms–2.67 ms) | 147 ms (123 ms–206 ms) | 56× | 37 722 | 679 |
+| `spd_time_policies` | 100 | 2.61 ms (2.43 ms–2.75 ms) | 4 | 97 % | 2.56 ms (2.43 ms–2.79 ms) | 4 | 97 % | 2.55 ms (2.42 ms–2.78 ms) | 151 ms (112 ms–201 ms) | 58× | 38 329 | 661 |
+| `spd_v4_cpu` | 600 | 10.6 ms (10.3 ms–11.3 ms) | 16 | 93 % | 6.15 ms (5.92 ms–6.83 ms) | 9 | 94 % | 6.08 ms (5.17 ms–6.91 ms) | 601 ms (474 ms–698 ms) | 57× | 56 652 | 999 |
+| `spd_v4_rt` | 600 | 220 µs (199 µs–268 µs) | 0 | 0 % | 263 µs (241 µs–316 µs) | 0 | 0 % | 295 µs (266 µs–331 µs) | 506 ms (449 ms–687 ms) | 2 298× | 2 727 273 | 1 187 |
 
 Per adjustment (SimOxide, QVTo `MainTransformation` plus the change path, mean over all measured runs), QVTo set-up per process, cold one-shot `simoxide run` (incl. QVTo set-up), Slingshot cold (JVM with Equinox, first run) and peak RSS:
 
 | model | ms per adjustment, Slingshot flavour | ms per adjustment, SimuLizar flavour | QVTo set-up ms | cold `simoxide run` Slingshot flavour / Slingshot-exact / SimuLizar exact | Slingshot cold process | Slingshot first run in JVM | peak RSS SimOxide / Slingshot |
 |---|---|---|---|---|---|---|---|
-| `spd_minimal` | 0.874 | 0.885 | 12.8 | 22.6 ms / 25.6 ms / 20.1 ms | 3.26 s | 2.27 s | 15 MB / 639 MB |
-| `spd_same_instant` | 0.718 | 0.710 | 13.8 | 28.4 ms / 33.1 ms / 27.6 ms | 3.29 s | 2.3 s | 15 MB / 634 MB |
-| `spd_scale_in` | 0.663 | 0.717 | 12.5 | 27.3 ms / 28 ms / 27 ms | 3.4 s | 2.29 s | 15 MB / 655 MB |
-| `spd_service_group` | 0.853 | 0.878 | 14.0 | 32.2 ms / 33.7 ms / 30.5 ms | 3.23 s | 2.26 s | 15 MB / 635 MB |
-| `spd_time_policies` | 0.652 | 0.657 | 13.0 | 28.7 ms / 32.5 ms / 28.6 ms | 3.39 s | 2.4 s | 15 MB / 669 MB |
-| `spd_v4_cpu` | 0.664 | 0.000 | 13.1 | 29.2 ms / 52.9 ms / 21.2 ms | 4.21 s | 3.21 s | 15 MB / 686 MB |
-| `spd_v4_rt` | 0.000 | 0.000 | 13.8 | 21.2 ms / 34.8 ms / 29.7 ms | 3.93 s | 2.99 s | 13 MB / 693 MB |
+| `spd_minimal` | 0.814 | 1.005 | 10.7 | 33 ms / 30.8 ms / 30.1 ms | 3.37 s | 2.36 s | 15 MB / 658 MB |
+| `spd_same_instant` | 0.661 | 0.666 | 14.0 | 31.1 ms / 34.3 ms / 31.3 ms | 3.46 s | 2.38 s | 15 MB / 654 MB |
+| `spd_scale_in` | 0.614 | 0.687 | 14.5 | 31.6 ms / 30.2 ms / 29.8 ms | 3.32 s | 2.33 s | 15 MB / 634 MB |
+| `spd_service_group` | 0.884 | 0.824 | 12.8 | 30.5 ms / 31.6 ms / 29.6 ms | 3.44 s | 2.42 s | 15 MB / 630 MB |
+| `spd_time_policies` | 0.635 | 0.651 | 15.4 | 32.9 ms / 36.8 ms / 32.9 ms | 3.34 s | 2.34 s | 15 MB / 686 MB |
+| `spd_v4_cpu` | 0.638 | 0.641 | 15.2 | 42.6 ms / 54.8 ms / 29.3 ms | 4.34 s | 3.37 s | 16 MB / 699 MB |
+| `spd_v4_rt` | 0.000 | 0.000 | 14.2 | 25 ms / 37 ms / 21.1 ms | 4 s | 2.95 s | 12 MB / 719 MB |
 
-**With stock Slingshot's quirks** (Slingshot flavour, fast, `quirks=fast spdQuirks=slingshot` as in `reference/slingshot/spd-stat.sh`: the decisions stock Slingshot makes; the fixed default above scales `spd_v4_cpu` 2 times in 600 s, Slingshot about 16 times; see the note below the results):
+**With stock Slingshot's quirks** (Slingshot flavour, fast, `quirks=fast spdQuirks=slingshot` as in `reference/slingshot/spd-stat.sh`: the decisions stock Slingshot makes, Slingshot itself scales `spd_v4_cpu` about 16 times in 600 s):
 
 | model | warm per run | adjustments (min–max) | in adj. | ms per adjustment | requests (min–max) | Slingshot / this |
 |---|---|---|---|---|---|---|
-| `spd_minimal` | 998 µs | 1–1 | 88 % | 0.894 | 33–33 | 133× |
-| `spd_same_instant` | 2.65 ms | 4–4 | 96 % | 0.644 | 33–33 | 52× |
-| `spd_scale_in` | 1.46 ms | 2–2 | 92 % | 0.679 | 18–19 | 93× |
-| `spd_service_group` | 2.61 ms | 3–3 | 97 % | 0.875 | 33–33 | 54× |
-| `spd_time_policies` | 4.12 ms | 8–8 | 98 % | 0.516 | 33–33 | 35× |
-| `spd_v4_cpu` | 10.5 ms | 15–17 | 94 % | 0.626 | 455–502 | 58× |
-| `spd_v4_rt` | 3.58 ms | 3–5 | 88 % | 0.717 | 464–492 | 147× |
+| `spd_minimal` | 921 µs | 1–1 | 87 % | 0.813 | 33–33 | 142× |
+| `spd_same_instant` | 2.67 ms | 4–4 | 96 % | 0.644 | 33–33 | 54× |
+| `spd_scale_in` | 1.36 ms | 2–2 | 91 % | 0.618 | 18–19 | 103× |
+| `spd_service_group` | 2.54 ms | 3–3 | 95 % | 0.839 | 33–33 | 58× |
+| `spd_time_policies` | 3.88 ms | 8–8 | 97 % | 0.482 | 33–33 | 39× |
+| `spd_v4_cpu` | 10.3 ms | 15–17 | 93 % | 0.619 | 455–502 | 59× |
+| `spd_v4_rt` | 3.44 ms | 3–5 | 88 % | 0.659 | 464–492 | 147× |
 
 **Results** (seed 1): SimOxide's adjustments and finished requests per run (all seeds: min–max), and Slingshot's adjustments in its SPD log (one instrumented run, unseedable branch decisions):
 
@@ -91,22 +91,8 @@ Per adjustment (SimOxide, QVTo `MainTransformation` plus the change path, mean o
 | `spd_scale_in` | 2–2, 20–22 | 2–2, 20–22 | 2, 19 |
 | `spd_service_group` | 3–3, 33–33 | 3–3, 33–33 | 3, 33 |
 | `spd_time_policies` | 4–4, 33–33 | 4–4, 33–33 | 8, 33 |
-| `spd_v4_cpu` | 2–2, 288–307 | 0–0, 284–307 | 16, 533 |
+| `spd_v4_cpu` | 15–16, 455–496 | 9–10, 455–498 | 16, 533 |
 | `spd_v4_rt` | 0–0, 284–307 | 0–0, 284–307 | 2, 534 |
-
-**Note (added after the run, branch `spd-cpu`).** The `spd_v4_cpu` rows of the fixed default
-show three defects of SimOxide's `AVERAGE` aggregation, not intended semantics (`DESIGN-SPD.md`
-§6, "B1 follow-up"). SimuLizar flavour, 0 adjustments: Slingshot's EMA decays its value by
-`exp(-Δt/60)` at every sample, which by its Javadoc stands for the idle time between
-Slingshot's event-driven utilisation samples; applied to 10 s sliding-window tuples it capped
-the EMA at 52 % of the utilisation, so the 80 % threshold was never reached. Slingshot flavour,
-2 adjustments: a new container's per-element window (fixed Q13) was decayed over the whole run
-before it existed and counted at once, so the group scaled in 2.5 s after scaling out, and the
-removed container's last value then stayed in the average (between 60 and 80 %) for the rest of
-the run. With the fixes (seeds 1–3, fast): Slingshot flavour 15–16 adjustments, 455–496
-requests; SimuLizar flavour 9–10 adjustments, 459–500 requests (exact: 8–11); with Slingshot's
-quirks unchanged (15–17). The timings above are those of the old decisions and were not
-re-measured.
 
 ### Snapshots of SPD runs (halfway)
 
@@ -114,27 +100,27 @@ Median of 10 runs (`spd-bench snapshotAt`): fork = the run and its QVTo state in
 
 | model | flavour, mode | fork µs | forks/s | serialize µs | bytes | deserialize µs | restore µs | continue | restored run ends as uninterrupted |
 |---|---|---|---|---|---|---|---|---|---|
-| `spd_minimal` | simulizar-exact | 3.5 | 281 690 | 89 | 5 746 | 8 | 74 | 929 µs | yes |
-| `spd_minimal` | slingshot-fast | 3.0 | 327 869 | 84 | 2 741 | 6 | 74 | 966 µs | yes |
-| `spd_same_instant` | simulizar-exact | 3.5 | 285 714 | 95 | 5 782 | 8 | 81 | 1.48 ms | yes |
-| `spd_same_instant` | slingshot-fast | 4.0 | 253 165 | 91 | 2 781 | 7 | 80 | 1.39 ms | yes |
-| `spd_scale_in` | simulizar-exact | 8.8 | 113 636 | 733 | 114 825 | 92 | 978 | 445 µs | yes |
-| `spd_scale_in` | slingshot-fast | 7.0 | 141 844 | 664 | 111 064 | 86 | 875 | 401 µs | yes |
-| `spd_service_group` | simulizar-exact | 18.8 | 53 333 | 750 | 128 006 | 100 | 980 | 753 µs | yes |
-| `spd_service_group` | slingshot-fast | 18.8 | 53 191 | 780 | 125 299 | 97 | 1013 | 791 µs | yes |
-| `spd_time_policies` | simulizar-exact | 16.4 | 60 976 | 728 | 117 391 | 93 | 966 | 1.61 ms | yes |
-| `spd_time_policies` | slingshot-fast | 15.3 | 65 147 | 702 | 113 627 | 89 | 904 | 1.56 ms | yes |
-| `spd_v4_cpu` | simulizar-exact | 8.2 | 121 212 | 133 | 22 209 | 19 | 94 | 145 µs | yes |
-| `spd_v4_cpu` | slingshot-fast | 12.7 | 78 740 | 782 | 136 799 | 111 | 986 | 198 µs | yes |
-| `spd_v4_rt` | simulizar-exact | 8.3 | 120 482 | 133 | 22 058 | 19 | 94 | 154 µs | yes |
-| `spd_v4_rt` | slingshot-fast | 10.1 | 98 522 | 154 | 29 363 | 28 | 106 | 130 µs | yes |
+| `spd_minimal` | simulizar-exact | 3.9 | 256 410 | 93 | 5 746 | 9 | 78 | 904 µs | yes |
+| `spd_minimal` | slingshot-fast | 2.9 | 344 828 | 82 | 2 741 | 6 | 72 | 885 µs | yes |
+| `spd_same_instant` | simulizar-exact | 4.2 | 235 294 | 94 | 5 782 | 10 | 82 | 1.34 ms | yes |
+| `spd_same_instant` | slingshot-fast | 3.1 | 322 581 | 86 | 2 781 | 6 | 74 | 1.32 ms | yes |
+| `spd_scale_in` | simulizar-exact | 7.9 | 126 582 | 691 | 114 825 | 89 | 825 | 425 µs | yes |
+| `spd_scale_in` | slingshot-fast | 8.6 | 115 607 | 699 | 111 064 | 89 | 861 | 452 µs | yes |
+| `spd_service_group` | simulizar-exact | 18.4 | 54 201 | 760 | 128 006 | 99 | 908 | 760 µs | yes |
+| `spd_service_group` | slingshot-fast | 19.9 | 50 251 | 809 | 125 299 | 100 | 982 | 814 µs | yes |
+| `spd_time_policies` | simulizar-exact | 17.5 | 57 143 | 759 | 117 391 | 95 | 936 | 1.69 ms | yes |
+| `spd_time_policies` | slingshot-fast | 15.3 | 65 359 | 733 | 113 627 | 89 | 866 | 1.6 ms | yes |
+| `spd_v4_cpu` | simulizar-exact | 24.6 | 40 568 | 789 | 134 601 | 107 | 994 | 3.54 ms | yes |
+| `spd_v4_cpu` | slingshot-fast | 8.6 | 115 607 | 838 | 151 636 | 141 | 1037 | 6.21 ms | yes |
+| `spd_v4_rt` | simulizar-exact | 6.8 | 147 059 | 134 | 22 058 | 18 | 95 | 148 µs | yes |
+| `spd_v4_rt` | slingshot-fast | 10.7 | 93 458 | 154 | 29 363 | 26 | 100 | 140 µs | yes |
 
 Snapshot files through the CLI (exact mode, long run, pause halfway; process wall, median of the processes):
 
 | model | uninterrupted run | run to the pause + write snapshot | snapshot bytes | `simoxide resume` to the end |
 |---|---|---|---|---|
-| `x_sl_mediastore` | 13.7 ms | 18.6 ms | 750 551 | 15.8 ms |
-| `x_ss_mediastore` | 18.6 ms | 22.5 ms | 1 335 542 | 24 ms |
+| `x_sl_mediastore` | 15.6 ms | 18.1 ms | 750 551 | 18.3 ms |
+| `x_ss_mediastore` | 18.9 ms | 19.3 ms | 1 335 542 | 22.6 ms |
 
 `simoxide-bench fork --reps 5 --mode exact` (plain models, halfway through the long run):
 
@@ -142,18 +128,18 @@ Snapshot files through the CLI (exact mode, long run, pause halfway; process wal
 mode exact, flavour simulizar, quirks none
 | benchmark | events at fork | live processes | snapshot µs | detach µs | into_state + resume µs | tuples stored | snapshot µs (stored) | detach µs (stored) |
 |---|---|---|---|---|---|---|---|---|
-| mediastore | 409999 | 1 | 1.6 | 1.9 | 0.1 | 1110010 | 620.7 | 631.9 |
-| espresso | 40015 | 30 | 2.8 | 7.9 | 0.1 | 60038 | 19.5 | 21.3 |
-| h13 passive | 62944 | 6 | 0.6 | 1.2 | 0.1 | 170210 | 41.6 | 39.8 |
-| fork (x_pem_fork) | 159997 | 1 | 0.5 | 0.7 | 0.1 | 150000 | 34.6 | 34.9 |
-| fork sync (h11) | 149999 | 1 | 0.7 | 0.8 | 0.1 | 230002 | 55.7 | 53.6 |
-| call chain (h14) | 110000 | 3 | 0.8 | 1.4 | 0.1 | 169999 | 39.6 | 40.4 |
-| nested subsystem | 40001 | 1 | 0.5 | 0.6 | 0.1 | 60004 | 13.3 | 13.7 |
-| StoEx dists (h21) | 75419 | 4 | 0.6 | 1.1 | 0.1 | 109378 | 25.5 | 26.1 |
-| INNER coll. (h27) | 20017 | 3 | 0.4 | 1.3 | 0.1 | 26267 | 4.0 | 4.7 |
-| PS 4 cores, ~20 jobs | 50007 | 117 | 11.3 | 28.7 | 0.1 | 79808 | 30.7 | 49.6 |
-| generated s10 (#5) | 18017 | 3 | 0.7 | 1.4 | 0.1 | 31037 | 6.2 | 6.7 |
-| generated s10 (#6) | 7513 | 16 | 2.6 | 10.5 | 0.1 | 19477 | 5.7 | 13.7 |
+| mediastore | 409999 | 1 | 1.6 | 1.9 | 0.1 | 1110010 | 611.8 | 495.9 |
+| espresso | 40015 | 30 | 2.9 | 7.7 | 0.1 | 60038 | 15.9 | 21.6 |
+| h13 passive | 62944 | 6 | 0.6 | 1.3 | 0.1 | 170210 | 40.5 | 40.2 |
+| fork (x_pem_fork) | 159997 | 1 | 0.5 | 0.7 | 0.1 | 150000 | 36.7 | 35.1 |
+| fork sync (h11) | 149999 | 1 | 0.7 | 1.0 | 0.1 | 230002 | 54.0 | 54.4 |
+| call chain (h14) | 110000 | 3 | 0.6 | 1.5 | 0.1 | 169999 | 39.5 | 40.9 |
+| nested subsystem | 40001 | 1 | 0.5 | 0.7 | 0.1 | 60004 | 16.4 | 13.5 |
+| StoEx dists (h21) | 75419 | 4 | 0.5 | 1.1 | 0.1 | 109378 | 26.1 | 26.2 |
+| INNER coll. (h27) | 20017 | 3 | 0.4 | 1.4 | 0.1 | 26267 | 4.6 | 5.5 |
+| PS 4 cores, ~20 jobs | 50007 | 117 | 11.4 | 30.5 | 0.1 | 79808 | 31.3 | 49.7 |
+| generated s10 (#5) | 18017 | 3 | 0.7 | 1.4 | 0.1 | 31037 | 6.3 | 6.8 |
+| generated s10 (#6) | 7513 | 16 | 2.6 | 10.4 | 0.1 | 19477 | 6.0 | 13.3 |
 ```
 
 `simoxide-bench fork --reps 5 --mode fast` (plain models, halfway through the long run):
@@ -162,18 +148,18 @@ mode exact, flavour simulizar, quirks none
 mode fast, flavour simulizar, quirks none
 | benchmark | events at fork | live processes | snapshot µs | detach µs | into_state + resume µs | tuples stored | snapshot µs (stored) | detach µs (stored) |
 |---|---|---|---|---|---|---|---|---|
-| mediastore | 409999 | 1 | 1.5 | 1.8 | 0.1 | 1110010 | 649.3 | 460.9 |
-| espresso | 40015 | 30 | 2.8 | 7.6 | 0.1 | 60038 | 16.8 | 20.7 |
-| h13 passive | 62922 | 6 | 0.5 | 1.0 | 0.1 | 170128 | 34.3 | 34.4 |
-| fork (x_pem_fork) | 160000 | 5 | 0.5 | 0.7 | 0.1 | 150003 | 34.5 | 30.3 |
-| fork sync (h11) | 149999 | 7 | 1.1 | 1.8 | 0.1 | 229998 | 57.6 | 46.9 |
-| call chain (h14) | 109999 | 1 | 0.5 | 0.4 | 0.1 | 170003 | 36.4 | 34.3 |
-| nested subsystem | 40001 | 1 | 0.3 | 0.4 | 0.1 | 60004 | 12.6 | 13.6 |
-| StoEx dists (h21) | 75463 | 2 | 0.4 | 0.5 | 0.1 | 109446 | 25.8 | 25.7 |
-| INNER coll. (h27) | 20046 | 3 | 0.3 | 1.1 | 0.1 | 26321 | 4.8 | 5.7 |
-| PS 4 cores, ~20 jobs | 50022 | 54 | 5.6 | 13.0 | 0.1 | 79944 | 21.9 | 31.0 |
-| generated s10 (#5) | 18017 | 3 | 0.5 | 1.3 | 0.1 | 31035 | 6.8 | 8.0 |
-| generated s10 (#6) | 6713 | 11 | 2.5 | 7.7 | 0.1 | 17224 | 5.3 | 10.9 |
+| mediastore | 409999 | 1 | 1.5 | 1.8 | 0.1 | 1110010 | 628.3 | 580.9 |
+| espresso | 40015 | 30 | 2.5 | 7.4 | 0.1 | 60038 | 16.5 | 21.1 |
+| h13 passive | 62922 | 6 | 0.5 | 1.1 | 0.1 | 170128 | 49.2 | 39.8 |
+| fork (x_pem_fork) | 160000 | 5 | 0.5 | 0.7 | 0.1 | 150003 | 35.0 | 35.4 |
+| fork sync (h11) | 149999 | 7 | 1.0 | 2.1 | 0.1 | 229998 | 55.2 | 55.8 |
+| call chain (h14) | 109999 | 1 | 0.4 | 0.5 | 0.1 | 170003 | 39.0 | 38.7 |
+| nested subsystem | 40001 | 1 | 0.3 | 0.4 | 0.1 | 60004 | 13.4 | 13.7 |
+| StoEx dists (h21) | 75463 | 2 | 0.3 | 0.6 | 0.1 | 109446 | 26.2 | 25.9 |
+| INNER coll. (h27) | 20046 | 3 | 0.3 | 1.1 | 0.1 | 26321 | 4.3 | 6.8 |
+| PS 4 cores, ~20 jobs | 50022 | 54 | 4.7 | 13.3 | 0.1 | 79944 | 25.3 | 31.3 |
+| generated s10 (#5) | 18017 | 3 | 0.5 | 1.3 | 0.1 | 31035 | 6.5 | 7.2 |
+| generated s10 (#6) | 6713 | 11 | 2.5 | 7.4 | 0.1 | 17224 | 5.0 | 10.5 |
 ```
 
 ### SimuLizar reconfiguration rules
@@ -182,15 +168,15 @@ SimOxide: `simoxide run` per process (QVTo ordered mode unless stated): process 
 
 | case | simulator | process wall | run wall | reconfigurations | in rules ms (PRM ms) | refsim first / warm run |
 |---|---|---|---|---|---|---|
-| `lb_outsource` | refsim | 29.6 s | – | nan | nan (nan) | 7.59 s / 1.94 s |
-| `lb_outsource` | simoxide-exact | 30 ms | 17.7 ms | 99 | 8.4 (3.1) | – / – |
-| `lb_outsource` | simoxide-exact-compat | 26.4 ms | 18.5 ms | 99 | 8.9 (3.0) | – / – |
-| `lb_outsource` | simoxide-fast | 25.8 ms | 17.5 ms | 99 | 9.1 (3.0) | – / – |
-| `lb_rules_qvto` | refsim | 30.9 s | – | nan | nan (nan) | 7.74 s / 2.05 s |
-| `lb_rules_qvto` | simoxide-exact | 114 ms | 107 ms | 99 | 94.8 (2.7) | – / – |
-| `lb_rules_qvto` | simoxide-exact-compat | 124 ms | 114 ms | 99 | 95.5 (3.8) | – / – |
-| `lb_rules_qvto` | simoxide-fast | 115 ms | 106 ms | 99 | 91.4 (3.0) | – / – |
-| `power_rules_qvto` | refsim | 69.7 s | – | nan | nan (nan) | 12 s / 5.72 s |
-| `power_rules_qvto` | simoxide-exact | 1.12 s | 1.11 s | 12945 | 1083.8 (99.5) | – / – |
-| `power_rules_qvto` | simoxide-exact-compat | 1.1 s | 1.1 s | 12945 | 1071.3 (96.5) | – / – |
-| `power_rules_qvto` | simoxide-fast | 1.08 s | 1.08 s | 12859 | 1053.4 (92.7) | – / – |
+| `lb_outsource` | refsim | 29.2 s | – | nan | nan (nan) | 7.35 s / 1.94 s |
+| `lb_outsource` | simoxide-exact | 26 ms | 17.6 ms | 99 | 8.2 (2.6) | – / – |
+| `lb_outsource` | simoxide-exact-compat | 27.7 ms | 18.6 ms | 99 | 8.7 (2.8) | – / – |
+| `lb_outsource` | simoxide-fast | 29 ms | 19.2 ms | 99 | 8.6 (3.1) | – / – |
+| `lb_rules_qvto` | refsim | 31.1 s | – | nan | nan (nan) | 7.87 s / 2.06 s |
+| `lb_rules_qvto` | simoxide-exact | 112 ms | 102 ms | 99 | 88.4 (3.1) | – / – |
+| `lb_rules_qvto` | simoxide-exact-compat | 115 ms | 105 ms | 99 | 90.0 (2.9) | – / – |
+| `lb_rules_qvto` | simoxide-fast | 110 ms | 101 ms | 99 | 88.2 (2.8) | – / – |
+| `power_rules_qvto` | refsim | 81.7 s | – | nan | nan (nan) | 13.1 s / 6.69 s |
+| `power_rules_qvto` | simoxide-exact | 1.12 s | 1.11 s | 12945 | 1067.0 (98.9) | – / – |
+| `power_rules_qvto` | simoxide-exact-compat | 1.18 s | 1.17 s | 12945 | 1132.6 (101.3) | – / – |
+| `power_rules_qvto` | simoxide-fast | 1.17 s | 1.15 s | 12859 | 1108.6 (103.9) | – / – |

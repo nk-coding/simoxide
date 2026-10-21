@@ -1,5 +1,9 @@
 # Benchmark B1 (DESIGN-SPD.md §6), 2026-10-21
 
+Re-run the same evening at 4e620a6, after the fixed SPD `AVERAGE` windows (e2b2e0a: `spd_v4_cpu` now
+scales in both flavours) and the faster XMI loading (85f90bd); the first run's figures are in git history
+(commit 4e620a6 and earlier).
+
 Machine: AMD Ryzen 9 9950X3D VM, 25 cores, 34 GB, Linux 6.8; OpenJDK 21.0.12 (Slingshot, refsim, `-Xmx4g`,
 G1); SimOxide release builds (`simoxide-compare` driver, `simoxide` CLI with
 `exact,hotspot-math,reconfiguration`, the `spd-bench` example of `simoxide-reconf`). Every benchmark process

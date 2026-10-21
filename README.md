@@ -11,7 +11,7 @@ autoscaling, on its own QVTo engine.
   queueing theory. The Slingshot-exact mode equals the deterministic Slingshot event for event on
   its 90-case corpus.
 - **Fast.** A warm run is 250 to 2 600 times faster than stock SimuLizar 5.2.2 on its default
-  DESMO-J engine, 240 to 3 300 times faster on its optional SSJ engine, and 230 to 1 300
+  DESMO-J engine, 240 to 3 300 times faster on its optional SSJ engine, and 210 to 1 100
   times faster than Slingshot; a one-shot run takes milliseconds instead of seconds. On 22 cores
   SimOxide completes over 5 000 MediaStore evaluations per second at 64 MB; the best JVM
   configuration completes 17 at 19 GB.
