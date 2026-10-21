@@ -86,12 +86,26 @@ random streams but keep time as a floating-point number instead of nanoseconds a
 simultaneous events differently, so their results need not be identical to DESMO-J's. In this
 benchmark they were: on every benchmark model and length (seed 1), SimuLizar on SSJ gave the same request counts and mean response times as on DESMO-J and as SimOxide, and SimuCom on SSJ the same request counts as on DESMO-J and mean response times equal to a relative 2·10^-9 (SSJ's floating-point clock).
 
+## Slingshot flavour and autoscaling
+
+Against stock Slingshot (benchmark B1, 25-core VM, 2026-10-21; [details](./comparison.md#slingshot-flavour-and-spd-against-slingshot)):
+
+- SimOxide's [Slingshot flavour](../guide/slingshot.md) is 230 to 1 290 times faster per warm
+  run on Slingshot's models, its Slingshot-exact mode, which replays Slingshot's whole event
+  cascade and gives the same results, 110 to 240 times.
+- With scaling policies (Slingshot's SPD examples, Slingshot's decisions), a warm run takes 1 to
+  10 ms against 130 to 610 ms (35 to 150 times faster); an adjustment through Slingshot's own QVTo
+  transformation costs 0.5 to 0.9 ms. A one-shot run takes 20 to 50 ms instead of 3 to 4 s.
+- A fork of a running SPD simulation costs 3 to 19 µs, a snapshot 0.1 to 0.8 ms; Slingshot's
+  snapshots could not be measured (they need the MENTOR application).
+
 ## SimOxide on its own
 
 For SimOxide's own benchmark suite (events per second, allocations, thread scaling, the fast
-mode) and the design choices behind the numbers, see [Engine performance](./engine.md). In
-short: 6 to 31 million events per second on one core, about 13x on 22 threads, a live heap of
-6 to 130 KiB per simulation, and up to 3.4 times more on distribution-heavy models in
+mode, runtime changes, snapshots) and the design choices behind the numbers, see
+[Engine performance](./engine.md). In short (25-core VM, 2026-10-21): 6 to 29 million events per
+second on one core, 12.6x on 22 threads and 13.5x on 25, a live heap of 6 to 130 KiB per
+simulation, and up to 3.4 times more on distribution-heavy models in
 [fast mode](../guide/fast-mode.md).
 
 ## When these numbers were taken
@@ -101,4 +115,6 @@ were measured on 2026-09-29 on the same machine with the same harness; their ver
 changed since. `bench/compare/run-all.sh` reproduces everything (about 3.5 hours;
 `SIMS=simoxide` re-measures SimOxide alone in a few minutes). The SSJ rows were measured on
 2026-10-21 on a 25-core, 34 GB VM of the same CPU by `bench/compare/ssj/run.sh` (3 h 40 min),
-together with SimOxide and SimuLizar and SimuCom on DESMO-J.
+together with SimOxide and SimuLizar and SimuCom on DESMO-J. The Slingshot-flavour, SPD and engine
+figures were measured on the same 25-core VM on 2026-10-21 (`bench/compare/spd/b1.sh`,
+`bench/compare/engine.sh`).

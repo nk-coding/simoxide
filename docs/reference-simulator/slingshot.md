@@ -225,7 +225,11 @@ own errors. In `det` mode, runs with and without it give identical measurements 
   - "cold run" is the first run in a JVM (class loading, Guice, QVTo compilation);
   - "JVM" is the whole process including Equinox start-up;
   - "warm run" is the median wall time of runs 2 to 6 in one JVM.
-  - They are indicative only; benchmark B1 repeats them on a quiet machine.
+  - They are indicative only. Benchmark B1 repeated them on a quiet 25-core VM (2026-10-21,
+    stock mode, [details](../performance/comparison.md#slingshot-flavour-and-spd-against-slingshot)):
+    first run in a JVM 2.3 s (`x_ss_minimal`, `x_espresso`, `spd_minimal`) to 3.3 s
+    (`x_ss_mediastore`), 3.3 to 4.3 s for the JVM; warm runs 133 ms (`spd_minimal`), 134 ms
+    (`x_ss_minimal`), 182 ms (`x_espresso`) and 267 ms (`x_ss_mediastore`), after 10 warm-up runs.
 - `x_sl_mediastore` uses `bench/compare/models/x_sl_mediastore_ss` (explicit acquire demands).
   `x_pem_fork` and `h11_fork_sync` are not run: Slingshot cannot run synchronous forks.
 

@@ -144,7 +144,8 @@ println!("{:?}", host.stats());
 ## Cost
 
 A run without rules is unchanged (the host is attached only with rules). With rules, the PRM
-mirror costs about 15 µs per reconfiguration; a rule run about 0.1 ms in QVTo's ordered (default)
-and fast modes and about 1 ms in compat mode on the load balancer example (the compat mode's per-run
-set-up): the power example's 13 349 reconfigurations take 1.4 s of rules in ordered mode, 42 s in
-compat mode.
+mirror costs about 8 µs per reconfiguration and a rule evaluation about 80 µs, in QVTo's ordered
+(default), fast and compat modes alike: the power example's 13 349 reconfigurations (2 000 s, seed
+1) take 1.1 s of rules in ordered and in compat mode (measured 2026-10-21 on a quiet 25-core VM,
+[Engine performance](../performance/engine.md#runtime-changes-spd-and-snapshots); the 42 s of compat
+mode measured earlier no longer occur).

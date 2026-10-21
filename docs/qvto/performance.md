@@ -33,36 +33,41 @@ priority (the JVM inherits the affinity) and repeat; the report prints the load 
 
 ## Results
 
-Measured at milestone Q5b (2026-10-17) on a shared, loaded machine, pinned to two cores; expect
-±20 % between repetitions. The table per workload is in `crates/qvto/qvto-cli/README.md`,
-"Results".
+Measured on 2026-10-21 in SimOxide (the engine on SimOxide's shared model graph) on a quiet
+AMD Ryzen 9 9950X3D VM (25 cores, 34 GB), pinned to two cores; Eclipse QVTo 3.11 on OpenJDK 21
+(`bench/compare/engine.sh`, report in
+`bench/compare/results/2026-10-21-engine/qvto-bench.md`). Run times are medians of 30 runs.
 
-| Workload | This engine | vs Eclipse, warm JVM | vs Eclipse, first run in a fresh JVM |
+| Workload | This engine (compat and fast mode) | vs Eclipse, warm JVM | vs Eclipse, first run in a fresh JVM |
 |---|---|---:|---:|
-| B2 one rule run (corpus models ×1, ×10) | 0.09-0.12 ms | 4-11× | 180-400× |
-| B2 with 100 times the containers | 0.3-0.45 ms | 2-7× | 80-160× |
-| B2 series (per run, same model) | 5-35 µs | 4-18× | |
-| B3 SPD `MainTransformation` | 0.23-0.86 ms | 4.5-11× | 125-210× |
-| B4 SimpleUML to RDB (sample, ×10, ×100) | 0.2 / 1.5 / 21 ms | 13× / 9× / 2.7× | 30-250× |
-| B5 Ecore copy by mappings (`Ecore.ecore`, 4 250, 42 500 objects) | 0.24 / 8.9 / 181 ms | 7× / 2.7× / 2.1× | 7-290× |
-| B5 `deepclone`, queries | | 1.4-6× | 5-100× |
-| B6 micro benchmarks | | 2.8-23×; sets built in loops 200-2 800× | |
-| B1 suite cases | | median 5.8×, p90 14× | |
-| compile | 0.1-0.9 ms per rule file; 7-8 ms for the 18 SPD units | 3-20× | 100-1 000× |
+| B2 one rule run (corpus models ×1, ×10) | 0.075-0.11 ms | 4-13× | 160-410× |
+| B2 with 100 times the containers | 0.22-0.44 ms | 1.8-5.4× | 90-185× |
+| B2 series (per run, same model) | 13-33 µs | 2.7-5.5× | |
+| B3 SPD `MainTransformation` (×1 and ×10, ×100) | 0.17-0.26 / 0.6-0.72 ms | 5.5-15× | 100-290× |
+| B4 SimpleUML to RDB (sample, ×10, ×100) | 0.21 / 1.6 / 17-19 ms | 9.6-21× / 7.5× / 2.7× | 27-230× |
+| B5 Ecore copy by mappings (4 250, 42 500 objects) | 8.4 / 152-175 ms | 2.8× / 2.5× | 7-45× |
+| B5 `deepclone`, queries | | 1.1-4.8× | 5-70× |
+| B6 micro benchmarks | | 2.2-50×; sets built in loops 240-3 300× | |
+| compile | 0.3-0.6 ms per rule file; 6.5-7.2 ms for the 18 SPD units | 3-20× | 300-1 000× |
 
+- Against the measurement before the merge (Q5b, 2026-10-17, a shared and loaded machine) the
+  engine is as fast or faster: rule runs 0.08-0.1 ms (then 0.09-0.12), the SPD
+  `MainTransformation` 0.17-0.72 ms (then 0.23-0.86), the big Ecore copies 152-175 ms (then
+  181 ms). The warm JVM ratios are partly smaller because Eclipse QVTo ran faster on the quiet
+  machine.
 - Fresh runs of small rules are dominated by cold caches: the models were just loaded. A second
-  run on the same model takes a third of the time, which is SimOxide's case (the series rows).
+  run on the same model takes a sixth to a third of the time, which is SimOxide's case (the
+  series rows).
 - On large models (B4 ×100, B5 ×10 and ×100) the time goes to model access and allocation.
-  There the engine is 2 to 3 times faster than a warm JVM.
-- Fast mode is 1.0 to 1.4 times faster than compat mode on hash-heavy workloads, and equal
-  elsewhere. Ordered mode costs the same as fast mode.
-- About 10 % of the suite cases run slower than in a warm JVM. They are transformations of a few
-  microseconds, measured on cold, freshly loaded models.
+  There the engine is 2.5 to 3 times faster than a warm JVM.
+- Fast mode runs these workloads 0.9 to 1.2 times as fast as compat mode (ordered mode was not run).
+- Not re-measured: the B1 suite cases (`--suite eclipse`; Q5b: median 5.8× a warm JVM, about 10 %
+  of the cases slower, transformations of a few microseconds on cold, freshly loaded models) and
+  `b5_copy_Ecore`, whose input `qvto-emf/models/Ecore.ecore` no longer exists after the merge.
 
-These numbers were measured before the merge into SimOxide, on the engine's own EMF graph. The
-graph is now SimOxide's model graph too ([Foundation crates](../development/foundation.md)).
-In SimOxide, a reconfiguration rule run costs about 0.1 ms in ordered mode
-([Reconfiguration rules](../guide/reconfiguration.md#cost)).
+In SimOxide, a reconfiguration rule run costs about 0.1 ms (80 µs per evaluation on the power
+example, [Reconfiguration rules](../guide/reconfiguration.md#cost)) and an SPD adjustment 0.5 to
+0.9 ms including the model change ([Engine performance](../performance/engine.md#runtime-changes-spd-and-snapshots)).
 
 ## What makes it fast
 

@@ -25,7 +25,7 @@ features:
   - title: 240 to 3 300 times faster
     details: Than stock SimuLizar 5.2.2 per warm run, on either of its simulation engines (DESMO-J or SSJ). A one-shot run takes milliseconds instead of seconds; 22 cores complete over 5 000 MediaStore evaluations per second.
   - title: Small and stable
-    details: A few MB per process, no warm-up, no leaks, no global state. 13x on 22 threads.
+    details: A few MB per process, no warm-up, no leaks, no global state. 12.6x on 22 threads.
   - title: Embeddable
     details: A library that loads models from memory, runs batches in parallel and bounds untrusted input with limits.
   - title: Fast mode
