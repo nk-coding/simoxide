@@ -32,7 +32,7 @@ byte.
 | Policies | active policies in model order; inactive ones are skipped |
 | Triggers | `SimpleFireOnValue` on `SimulationTime`, `OperationResponseTime`, `CPUUtilization`, `TaskCount`, `QueueLength`; `ComposedTrigger` (AND, OR, XOR) |
 | Expectations | `ExpectedTime`, `ExpectedPercentage` (compared as `value / 100`), `ExpectedCount`, `NoExpectation` |
-| Aggregation | `AVERAGE`: exponential moving average (60 s, emit every 10 s, α = 0.2); `MAX`, `MIN`, `MEDIAN`, `SUM`: the last 10 values |
+| Aggregation | `AVERAGE`: exponential moving average (60 s, emit every 10 s, α = 0.2, decayed over the time between samples that no sample covers); `MAX`, `MIN`, `MEDIAN`, `SUM`: the last 10 values |
 | Policy constraints | `CooldownConstraint`, `IntervalConstraint` |
 | Target constraints | `ThrashingConstraint`; `TargetGroupSizeConstraint` (checked in the chain by default, see Q9) |
 | Target groups | `ElasticInfrastructure`, `ServiceGroup`, `CompetingConsumersGroup` |
@@ -44,7 +44,13 @@ expected time; measurement triggers read the tuples of the series of the monitor
 
 In the SimuLizar flavour the measurements are SimuLizar's: utilisation is the sliding-window
 utilisation of the monitor, not Slingshot's instantaneous sample. There is no reference for
-this combination. Slingshot's own monitor repositories often declare utilisation monitors
+this combination. Slingshot's `AVERAGE` EMA multiplies its value by `exp(-Δt/60)` at every
+sample, a correction for its own utilisation samples, which are taken only when a job arrives
+or leaves: the time without a sample counts as idle. A sliding-window tuple already describes
+its window, so for it only the time between samples that no window covers decays (none with
+the usual `windowLength = windowIncrement`). Without this the EMA of a CPU busy all the time,
+sampled every 10 s, settled at 52 % and an "above 80 %" policy could never fire (`spd_v4_cpu`
+made no adjustment in 600 s; now 8 to 11, seeds 1 to 3). Slingshot's own monitor repositories often declare utilisation monitors
 without a `TimeDriven` processing type, which the SimuLizar flavour rejects; the Slingshot
 flavours (`--flavour slingshot`, `slingshot-exact`) take them, as Slingshot ignores processing
 types ([Monitoring](../spec/slingshot/monitoring.md)).
@@ -130,14 +136,14 @@ proposal that is not confirmed yet.
 |---|---|---|
 | Q1 | a disregard does not restore the adjustor state | restored; no filter before the adjustor changes the state, so both behave the same |
 | Q2 | constraint state (cooldown, last enactment) changes when the request is made | changes only when the adjustment succeeds |
-| Q3 | AVERAGE is an EMA, the others use the last 10 values | kept (*provisional*) |
+| Q3 | AVERAGE is an EMA, the others use the last 10 values | kept (*provisional*); sliding-window samples (SimuLizar flavour) decay only over uncovered time |
 | Q4 | a relative change below the minimum ignores `minAdjustmentValue` when it is not positive | 0 stays 0, otherwise at least `minAdjustmentValue` in the direction of the percentage (*provisional*; the Q9 check and a patched `AdjustmentCalculator.qvto`) |
 | Q6 | after an adjustment every linking resource connects every container | a new container joins the links its unit is connected to, appended; other links keep their containers (*provisional*; patched `ResourceEnvironmentTransformation.qvto`) |
 | Q7 | a top-down scale-in removes the containers it empties one enactment late | removed in the same enactment (*provisional*; patched `TopDownTransformationInfrastructure.qvto`) |
 | Q9 | only thrashing constraints are in the chain | group-size constraints too: a policy whose change would be clamped to zero is disregarded (*provisional*) |
 | Q11 | an unsupported stimulus or trigger throws at set-up: the whole SPD is dropped | a configuration error naming it |
 | Q12 | composed triggers: AND resumes after a failed child, OR never evaluates its children and parks the chain, XOR inverts after the first child; two measurement stimulus kinds run the chain twice | AND / OR / XOR (exactly one) of the children's results, every child evaluated, one evaluation per event |
-| Q13 | all elements of the group feed one window; any measurement reaching the checker reads it; reading consumes the EMA's emit slot | one window per measuring point, the aggregation over their values; only the stimulus' metric is evaluated; the slot is consumed when the policy fires (*provisional*) |
+| Q13 | all elements of the group feed one window; any measurement reaching the checker reads it; reading consumes the EMA's emit slot | one window per measuring point, the aggregation over their values; a window starts with its element's first sample (an EMA is ready 60 s later) and is dropped when its container leaves the group; only the stimulus' metric is evaluated; the slot is consumed when the policy fires (*provisional*) |
 | Q15 | every policy of a target group receives every time event of the group | only its own |
 
 The patched transformations are marked "PATCHED by SimOxide"; with the flag on, Slingshot's

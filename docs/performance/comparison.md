@@ -249,16 +249,23 @@ the Slingshot flavour draws its own random numbers and differs within noise (938
 - "Slingshot's quirks" runs the flavour with the compat flags stock Slingshot has
   (`--quirks fast --spd-quirks slingshot`): it makes Slingshot's decisions (16 adjustments in
   Slingshot's own `spd_v4_cpu` run, 15 to 17 here); the fixed default scales less (for example, a
-  scaling policy no longer reacts to another policy's time event, Q15).
+  scaling policy no longer reacts to another policy's time event, Q15). Its 2 adjustments on
+  `spd_v4_cpu` came from two defects of the fixed per-container windows (Q13), fixed after this
+  measurement: a new container's EMA was decayed over the run before it existed and counted at
+  once (the group scaled in 2.5 s after scaling out), and a removed container's last value stayed
+  in the average. The fixed default now makes 15 or 16 (seeds 1 to 3); the times in the table
+  are those of the 2 adjustments.
 - An adjustment costs 0.5 to 0.9 ms (QVTo `MainTransformation` plus the change path) and takes 78
   to 98 % of a short SPD run. Slingshot's per-run time includes its adjustments; it is not
   instrumented to separate them.
 - Cold one-shot: `simoxide run` with the SPD 20 to 53 ms (including the QVTo set-up), Slingshot 3.2
   to 4.2 s. Peak RSS 13 to 15 MB against 0.63 to 0.69 GB.
 - The SimuLizar flavour runs the same models (with time-driven utilisation monitors, which
-  SimuLizar needs) at the same speed. It does not scale `spd_v4_cpu` at all: with the fixed
-  behaviour, the CPU trigger never sees the 80 % threshold (0 adjustments in 600 s, the Slingshot
-  flavour 2). Noted, not investigated.
+  SimuLizar needs) at the same speed. In this measurement it did not scale `spd_v4_cpu` at all:
+  Slingshot's EMA decays its value by `exp(-Δt/60)` per sample to account for the time without
+  samples, which its event-driven samples leave idle; applied to 10 s sliding-window tuples it
+  capped the EMA at 52 % of the utilisation, below the 80 % threshold. Fixed after the
+  measurement (sliding-window samples decay only over uncovered time): 8 to 11 adjustments.
 - Not measured: Slingshot's snapshots (its initialisation extension needs the MENTOR application,
   which is not installed, `DESIGN-SPD.md` U7). SimOxide's snapshot and fork costs are in
   [Engine performance](./engine.md#runtime-changes-spd-and-snapshots).

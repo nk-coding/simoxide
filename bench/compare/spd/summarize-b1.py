@@ -307,8 +307,8 @@ for m in spd_models:
 
 if any(k[0] == SPDQ for k in spd):
     md.append("\n**With stock Slingshot's quirks** (Slingshot flavour, fast, `quirks=fast spdQuirks=slingshot` as in "
-              "`reference/slingshot/spd-stat.sh`: the decisions stock Slingshot makes; the fixed default above scales "
-              "`spd_v4_cpu` 2 times in 600 s, Slingshot about 16 times):\n")
+              "`reference/slingshot/spd-stat.sh`: the decisions stock Slingshot makes, Slingshot itself scales "
+              "`spd_v4_cpu` about 16 times in 600 s):\n")
     md.append("| model | warm per run | adjustments (min–max) | in adj. | ms per adjustment | requests (min–max) | Slingshot / this |")
     md.append("|---|---|---|---|---|---|---|")
     for m in spd_models:
