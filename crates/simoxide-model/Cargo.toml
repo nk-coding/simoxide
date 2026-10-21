@@ -16,6 +16,8 @@ memchr = "2"
 serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
+# third-party models behind git submodules: skip without them (third_party/README.md)
+simoxide-thirdparty.workspace = true
 serde_json = "1"
 
 [[example]]

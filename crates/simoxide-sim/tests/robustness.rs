@@ -312,7 +312,12 @@ fn mutated_models_never_panic() {
         .ok()
         .and_then(|s| s.parse().ok())
         .unwrap_or(600);
-    let bases: Vec<_> = MUTATION_BASES.iter().map(|b| (*b, files(b))).collect();
+    // without the third-party submodules the bases in them are left out (third_party/README.md)
+    let bases: Vec<_> = MUTATION_BASES
+        .iter()
+        .filter(|b| simoxide_thirdparty::skip_unless_available(&corpus(b)))
+        .map(|b| (*b, files(b)))
+        .collect();
     let seed: u64 = std::env::var("ROBUST_SEED")
         .ok()
         .and_then(|s| s.parse().ok())

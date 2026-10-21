@@ -20,6 +20,8 @@ fn entries() -> Vec<(String, PathBuf)> {
             let (n, d) = l.split_once('\t').expect("name<TAB>dir");
             (n.to_string(), oracle_dir().join(d))
         })
+        // the Slingshot example is a git submodule (third_party/README.md)
+        .filter(|(_, d)| simoxide_thirdparty::skip_unless_available(d))
         .collect()
 }
 
@@ -54,7 +56,7 @@ fn golden(name: &str) -> String {
 #[test]
 fn spd_models_match_emf() {
     let es = entries();
-    assert!(es.len() >= 3);
+    assert!(es.len() >= 3 || !simoxide_thirdparty::all_available());
     for (name, dir) in &es {
         let (g, _) = load(dir).finish();
         let dump = canon::dump(&g, false);

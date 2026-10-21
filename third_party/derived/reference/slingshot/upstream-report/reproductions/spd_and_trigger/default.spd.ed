@@ -1,0 +1,14 @@
+5,7c
+    <scalingTrigger xsi:type="triggers:ComposedTrigger" id="_simoxideComposed01" logicalOperator="AND">
+      <scalingtrigger xsi:type="triggers:SimpleFireOnValue" id="_simoxideChild50" relationalOperator="EqualTo">
+        <stimulus xsi:type="stimuli:SimulationTime"/>
+        <expectedValue xsi:type="expectations:ExpectedTime" value="50.0"/>
+      </scalingtrigger>
+      <scalingtrigger xsi:type="triggers:SimpleFireOnValue" id="_simoxideChild70" relationalOperator="EqualTo">
+        <stimulus xsi:type="stimuli:SimulationTime"/>
+        <expectedValue xsi:type="expectations:ExpectedTime" value="70.0"/>
+      </scalingtrigger>
+.
+3c
+  <scalingPolicies id="_7VIU0MAgEe6AcKIPVXJsSw" entityName="AND of t == 50 and t == 70" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+.

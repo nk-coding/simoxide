@@ -26,12 +26,17 @@ fn model_dirs() -> Vec<PathBuf> {
         };
         let mut ds: Vec<PathBuf> = rd
             .filter_map(|e| e.ok().map(|e| e.path()))
-            .filter(|p| p.is_dir())
+            .filter(|p| p.is_dir() && simoxide_thirdparty::skip_unless_available(p))
             .collect();
         ds.sort();
         dirs.extend(ds);
     }
-    assert!(dirs.len() > 100, "{} model directories", dirs.len());
+    // fewer without the third-party submodules (third_party/README.md)
+    assert!(
+        dirs.len() > 100 || !simoxide_thirdparty::all_available(),
+        "{} model directories",
+        dirs.len()
+    );
     dirs
 }
 
@@ -70,7 +75,7 @@ fn every_model_directory_round_trips() {
         check(&d.display().to_string(), &g);
         n += 1;
     }
-    assert!(n > 100, "{n}");
+    assert!(n > 100 || !simoxide_thirdparty::all_available(), "{n}");
 }
 
 /// Detached objects (removed, never attached), a moved object, set-but-empty values,

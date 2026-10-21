@@ -221,6 +221,9 @@ fn outputs(
 
 #[test]
 fn the_engine_on_the_graph_equals_the_adapter() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let data = root().join("crates/simoxide-reconf/tests/data/adapter-corpus");
     let mut failures = Vec::new();
     let mut n = 0;

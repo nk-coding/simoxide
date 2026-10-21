@@ -2,7 +2,7 @@
 
 Report issues: R5.
 
-**Source.** Palladio-Example-Models `Acquire_Example` (commit `4a8dc45`, 2026-01-26); `refsim.monitorrepository` and `refsim.measuringpoint` added by SimOxide. **Licence pending confirmation** (Palladio example model).
+**Source.** Palladio-Example-Models `Acquire_Example` (commit `4a8dc45`, 2026-01-26); `refsim.monitorrepository` and `refsim.measuringpoint` added by SimOxide. No licence declared upstream. The model files are links into the git submodule `third_party/palladio-example-models` (no licence declared upstream, so not distributed here; `git submodule update --init`, `third_party/README.md`).
 
 ## Model
 

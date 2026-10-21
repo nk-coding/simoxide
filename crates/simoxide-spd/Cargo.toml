@@ -29,6 +29,8 @@ snapshot = ["sim", "dep:serde", "simoxide-sim/snapshot"]
 exact = ["sim", "simoxide-sim/exact"]
 
 [dev-dependencies]
+# third-party models behind git submodules: skip without them (third_party/README.md)
+simoxide-thirdparty.workspace = true
 simoxide-sim = { workspace = true, features = ["fast", "exact", "snapshot"] }
 # the snapshot tests
 simoxide-spd = { path = ".", features = ["snapshot"] }

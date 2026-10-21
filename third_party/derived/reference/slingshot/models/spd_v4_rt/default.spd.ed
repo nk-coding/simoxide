@@ -1,0 +1,15 @@
+10a
+    <targetConstraints xsi:type="target:TargetGroupSizeConstraint" id="_v4Size" minSize="1" maxSize="4"/>
+.
+5,7c
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_v4RtOutCd" cooldownTime="30.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_v4RtOutT" relationalOperator="GreaterThan">
+      <stimulus xsi:type="stimuli:OperationResponseTime">
+        <operationSignature href="default.repository#_KjhikgzkEeCFg86gxKwVPw"/>
+      </stimulus>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="20.0"/>
+.
+2,3c
+<spd:SPD xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:adjustments="http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0" xmlns:expectations="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Expectations/1.0" xmlns:policy="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0" xmlns:target="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0" xmlns:spd="http://palladiosimulator.org/ScalingPolicyDefinition/1.0" xmlns:stimuli="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Stimuli/1.0" xmlns:targets="http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0" xmlns:triggers="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0" id="_PKdecLwZEe6i2ICnm9lfkw">
+  <scalingPolicies id="_v4RtOut" entityName="rt out" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+.

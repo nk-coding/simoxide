@@ -235,6 +235,12 @@ fn conform(args: &[String]) {
     if suites.is_empty() {
         die("no case files");
     }
+    // the SPD suite's models derived from Slingshot's example (git submodule, third_party/README.md)
+    for (dest, err) in simoxide_thirdparty::ensure() {
+        if suites.iter().any(|(n, _, _)| n == "spd") {
+            eprintln!("warning: {}: {err}", dest.display());
+        }
+    }
     match o.sub.as_deref() {
         Some("record") => {
             let mut differ = 0;

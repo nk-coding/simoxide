@@ -119,6 +119,9 @@ fn exact_only_quirks_are_refused() {
 /// The x_ss corpus models: byte-identical to `det` with the compat flags (seeds 1-3).
 #[test]
 fn x_ss_models_equal_the_det_reference() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let res = root().join("reference/slingshot/results/s2");
     let mut n = 0;
     for (model, sim_time) in [
@@ -150,6 +153,9 @@ fn x_ss_models_equal_the_det_reference() {
 /// The fixed behaviour differs from Slingshot exactly where a quirk is documented.
 #[test]
 fn fixed_behaviour_differs_where_documented() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let probe = |n: &str| root().join("reference/slingshot/models/probes").join(n);
     // Q29: entry-level call and system-operation monitors are honoured
     let fixed = run_csv(&probe("ss_monitors"), Quirks::NONE, 1, 4).unwrap();
@@ -214,6 +220,9 @@ fn fixed_behaviour_differs_where_documented() {
 /// RNG modes): the run state includes the branch stream.
 #[test]
 fn slingshot_fork_equals_the_uninterrupted_run() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = root().join("corpus/x_ss_minimalexample_open_ps");
     let cm = compile(&dir, Quirks::all_fast());
     for mode in [Mode::Exact, Mode::Fast] {
@@ -261,6 +270,9 @@ fn slingshot_fork_equals_the_uninterrupted_run() {
 /// The measurement-observer hook sees exactly the recorded tuples of the observed series.
 #[test]
 fn observed_series_see_every_tuple() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = root().join("corpus/x_ss_minimal");
     let cm = compile(&dir, Quirks::all_fast());
     let rt = cm
@@ -298,6 +310,9 @@ fn observed_series_see_every_tuple() {
 /// Flavour and model must agree; quirk flags need the Slingshot flavour.
 #[test]
 fn flavour_mismatch_is_an_error() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = root().join("corpus/x_ss_minimal");
     let model = RunSpec::default().load_model(&dir).unwrap();
     assert!(

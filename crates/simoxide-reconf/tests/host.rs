@@ -604,6 +604,9 @@ mod spd {
     /// in the reference runner's `adjust` record.
     #[test]
     fn spd_adjustment_end_to_end() {
+        if !simoxide_thirdparty::skip_unless_all_available() {
+            return;
+        }
         let dir = root().join("reference/slingshot/models/spd_minimal");
         let mut files: Vec<PathBuf> = std::fs::read_dir(&dir)
             .unwrap()

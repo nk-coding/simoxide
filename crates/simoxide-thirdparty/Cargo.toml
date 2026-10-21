@@ -1,0 +1,10 @@
+[package]
+name = "simoxide-thirdparty"
+description = "Third-party test models referenced through git submodules (third_party/): availability checks and the derived (modified) files"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]

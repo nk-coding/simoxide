@@ -154,6 +154,9 @@ fn the_slingshot_flavour_resumes_too() {
 #[cfg(feature = "spd")]
 #[test]
 fn an_spd_run_resumes_with_its_decision_log() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     // the SPD example without its monitors (they need the Slingshot flavour's monitor kinds)
     let src = root().join("reference/slingshot/models/spd_time_policies");
     let d = tmp("spd-model");
@@ -224,6 +227,9 @@ fn resume_refuses_another_model() {
 /// written and resumed by new processes, a JSON hop and a pause within one instant included.
 #[test]
 fn the_slingshot_exact_engine_resumes_too() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     check(
         "ssx",
         &root().join("corpus/x_ss_mediastore"),
@@ -247,6 +253,9 @@ fn the_slingshot_exact_engine_resumes_too() {
 #[cfg(feature = "spd")]
 #[test]
 fn a_slingshot_exact_spd_run_resumes_with_its_decision_log() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     check(
         "ssx-spd",
         &root().join("reference/slingshot/models/spd_scale_in"),

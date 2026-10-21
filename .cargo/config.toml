@@ -6,7 +6,7 @@
 # and 7). The tests turn them on through their dev-dependencies.
 [alias]
 # SimOxide's crates, release (the corpus and golden tests compare bit for bit)
-test-sim = "test --release -p simoxide-hotspot-math -p simoxide-model -p simoxide-stoex -p simoxide-random -p simoxide-sched -p simoxide-sim -p simoxide-testkit -p simoxide-cli -p simoxide-reconf -p simoxide-spd"
+test-sim = "test --release -p simoxide-hotspot-math -p simoxide-model -p simoxide-stoex -p simoxide-random -p simoxide-sched -p simoxide-sim -p simoxide-testkit -p simoxide-cli -p simoxide-reconf -p simoxide-spd -p simoxide-thirdparty"
 # the foundation crates
 test-fdn = "test --release -p simoxide-jcompat -p simoxide-jcompat-exact -p simoxide-emf-core -p simoxide-emf"
 # the QVTo crates (debug build, as in qvto-rs)

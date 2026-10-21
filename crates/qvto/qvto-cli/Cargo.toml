@@ -13,6 +13,8 @@ path = "src/main.rs"
 
 [dependencies]
 qvto.workspace = true
+# derives the SPD suite's models from the git submodule third_party/slingshot-docs
+simoxide-thirdparty.workspace = true
 qvto-testkit.workspace = true
 qvto-emf.workspace = true
 qvto-sema.workspace = true

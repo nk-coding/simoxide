@@ -139,6 +139,9 @@ fn compare(name: &str, want: &[Value], got: &str) {
 /// included, in QVTo's ordered and fast modes.
 #[test]
 fn adjustments_equal_slingshot() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let cases = cases();
     assert!(cases.len() >= 3, "{} cases", cases.len());
     for c in &cases {
@@ -214,6 +217,9 @@ fn adjust_records(log: &str) -> Vec<Value> {
 /// MC-2.3), everything else as in Slingshot; the time-policy model runs to its end.
 #[test]
 fn fixed_behaviour_runs_the_patched_transformations() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let c = case("spd_minimal");
     let (got, err) = run(&c, Quirks::fixed(), QvtMode::InsertionOrderSets);
     assert_eq!(err, None);
@@ -250,6 +256,9 @@ fn fixed_behaviour_runs_the_patched_transformations() {
 /// measurements equal; a restored run writes the bytes it was read from.
 #[test]
 fn snapshots_with_adjustments_continue_identically() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     use simoxide_sim::snapshot::{Encoding, Snapshot};
     // the fixed behaviour of spd_time_policies scales in (F4)
     for (name, q) in [
@@ -314,6 +323,9 @@ fn snapshots_with_adjustments_continue_identically() {
 /// run is about the same size.
 #[test]
 fn repeated_adjustments_grow_the_model_by_one_replica_each() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let c = case("spd_minimal");
     let q = Quirks::fixed();
     let s = setup(&c, q);
@@ -448,6 +460,9 @@ fn dry(
 /// - everything else equal (a plain step).
 #[test]
 fn patched_transformations_fix_their_quirk() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     use simoxide_model::meta::feat as mf;
     use simoxide_reconf::SpdVariant;
     let fixed = SpdVariant::fixed();
@@ -512,6 +527,9 @@ fn patched_transformations_fix_their_quirk() {
 /// summaries included, equals the reference's. (Measurements: P3.)
 #[test]
 fn slingshot_flavour_runs_the_adjustment() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
     let c = case("spd_minimal");
     let model = RunSpec::default().load_model(&c.model).unwrap();
@@ -631,6 +649,9 @@ fn series_containers(
 /// CPU policy keeps scaling out (cooldown 30 s) with the new containers in its view.
 #[test]
 fn measurement_triggers_see_new_containers() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     use simoxide_sim::{ChangeOptions, Fast, FlavourConfig, Mode, MonitorSync, Slingshot};
     let c = case("spd_minimal");
     let q = Quirks::fixed();
@@ -715,6 +736,9 @@ fn measurement_triggers_see_new_containers() {
 /// logs of every `corpus-spd/` case equal the reference's, model summaries included.
 #[test]
 fn adjustments_equal_slingshot_in_the_slingshot_flavour() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     use simoxide_sim::flavour::Quirks as SsQuirks;
     use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
     for c in cases() {
@@ -748,6 +772,9 @@ fn adjustments_equal_slingshot_in_the_slingshot_flavour() {
 /// keeps for removed containers). The run ends normally, every request finished.
 #[test]
 fn slingshot_flavour_drains_a_removed_container() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
     let c = case("spd_scale_in");
     let model = RunSpec::default().load_model(&c.model).unwrap();
@@ -779,6 +806,9 @@ fn slingshot_flavour_drains_a_removed_container() {
 /// (Q5 with Slingshot's quirks, drain with the fixed behaviour), the same log for the same seed.
 #[test]
 fn slingshot_flavour_runs_a_stochastic_cpu_scenario() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     use simoxide_sim::flavour::Quirks as SsQuirks;
     use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
     let dir = root().join("reference/slingshot/models/spd_v4_cpu");

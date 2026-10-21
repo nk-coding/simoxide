@@ -838,8 +838,8 @@ Names marked *foundation* follow the merge design.
 - The Slingshot-exact mode needs `java.util.Random`'s LCG for the `Math.random()` stream. Its
   algorithm and constants are given in the API specification, so it can be written from the
   specification, without GPL code.
-- Embedded SPD `.qvto` and `.ecore` files carry their source repository and revision, and a
-  "licence pending confirmation" note (U3).
+- Embedded SPD `.qvto` and `.ecore` files carry their source repository and revision, and their
+  licence, EPL-2.0 (U3, resolved 2026-10-21).
 
 ```
 foundation         (shared with QVTo) EMF registry + object graph + XMI, Java compat
@@ -1529,8 +1529,8 @@ MC-8, MC-9; guides `library.md`, `reconfiguration.md`, `snapshots.md` "Change fi
 - **Transformations.**
   - `[TR]` (18 files, 3 534 lines; 15 reachable from Main, 2 506 lines) are embedded with
     `include_str!` and pinned to a commit.
-  - Each embedded file is marked with its source repository, its revision and "licence pending
-    confirmation" (U3).
+  - Each embedded file is marked with its source repository, its revision and its licence
+    (EPL-2.0; U3).
   - The importer resolves `pcm.helpers.*` and `spd.*` against the embedded tree.
   - `ProfilesLibrary` is registered with stub implementations that report an error if called.
     The main path never calls them.
@@ -1684,8 +1684,7 @@ F4 (listed below).
 
 - **Transformations** (`simoxide-reconf/src/spd.rs`): the 17 units of Slingshot's bundle are
   embedded with `include_str!` from the licence-headed copies in
-  `crates/qvto/qvto-testkit/corpus/spd/transformations` (U3: source, revision, "licence pending
-  confirmation"); an in-memory `UnitResolver` resolves `pcm.helpers.*`/`spd.*`. Patched copies
+  `crates/qvto/qvto-testkit/corpus/spd/transformations` (U3: source, revision, EPL-2.0); an in-memory `UnitResolver` resolves `pcm.helpers.*`/`spd.*`. Patched copies
   for the provisional fixed behaviours in `simoxide-reconf/transformations/spd-fixed` (headed
   "PATCHED by SimOxide", changes marked `SimOxide Qn`): Q4 `AdjustmentCalculator` (0 stays 0,
   otherwise at least the minimum in the percentage's direction, as P1's arithmetic), Q6
@@ -3435,7 +3434,7 @@ Decided on 2026-10-17 (U3-U6, U12-U14); the others are still open.
 |---|---|---|
 | U1 | Merge `qvto-adapter` and later `spd` into SimOxide `main`; when | merge `qvto-adapter` with F0, `spd` per phase |
 | U2 | *Decided*: QVTo moves into the SimOxide repository with shared foundation crates. Still open: whether `reconfiguration`/`spd`/`snapshot` stay optional cargo features (smaller default builds) or are always on | optional features, on in the CLI build |
-| U3 | *Decided*: the user discusses licensing of Slingshot's transformations and the SPD `.ecore` files with the Palladio maintainers personally. Development proceeds. *Partly resolved 2026-10-21*: Palladio-Analyzer-Slingshot is EPL-2.0 (LICENSE added in 4e2339c, 2026-10-19, merged as 1bb601f, PR #59, 2026-10-20), so the Slingshot-exact mode (`ssx/`, a behavioural port) and the patched `ProcessorSharingResource` in `reference/slingshot/patches` are EPL-2.0 material like SimuLizar (`LICENSES` §1). Still without a licence on 2026-10-21: Palladio-Addons-SPD-Metamodel (the `.ecore` files and the semantic `.qvto` transformations) and Palladio-Documentation-Slingshot (the minimal example), so the markings below stay for them (`LICENSES` §6) | embedded `.qvto`/`.ecore` files (and the SPD example models in `reference/slingshot/models`) are marked with source repository, revision and "licence pending confirmation"; nothing is published until confirmed |
+| U3 | *Decided*: the user discusses licensing of Slingshot's transformations and the SPD `.ecore` files with the Palladio maintainers personally. Development proceeds. *Partly resolved 2026-10-21*: Palladio-Analyzer-Slingshot is EPL-2.0 (LICENSE added in 4e2339c, 2026-10-19, merged as 1bb601f, PR #59, 2026-10-20), so the Slingshot-exact mode (`ssx/`, a behavioural port) and the patched `ProcessorSharingResource` in `reference/slingshot/patches` are EPL-2.0 material like SimuLizar (`LICENSES` §1). *Resolved 2026-10-21* for Palladio-Addons-SPD-Metamodel: EPL-2.0 (LICENSE added in PR #47, merged as 93b6582; between 95cdb0b, the commit SimOxide copied, and 93b6582 only LICENSE and README.md changed), so the `.ecore`-generated tables and the semantic `.qvto` transformations are EPL-2.0 material (`LICENSES` §6). Palladio-Documentation-Slingshot (the minimal example) still has no licence: it is a git submodule (`third_party/slingshot-docs`) and not distributed; the example models in `reference/slingshot/models` and the qvto-testkit SPD corpus link to it or are derived from it at setup (`LICENSES` §5, `third_party/README.md`) | embedded `.qvto` files carry an origin comment (source repository, revision, EPL-2.0); the example's files are referenced, not copied |
 | U4 | *Decided*: **both** a Slingshot-exact mode and a fast mode | exact: the same events, random draws and measurements as the S0 runner's `det` Slingshot (seeded randomness, deterministic same-time order, instrumentation), like the SimuLizar-exact mode against refsim; fast: semantics only, statistically equal. The S0 patches are the basis: minimal, documented, switchable (`--stock`) |
 | U5 | *Decided*: Slingshot bugs are **fixed by default**; a compat flag per documented quirk (Q1-Q37) reproduces it | the exact mode against the patched Slingshot runs with all quirk flags on; the SimuLizar flavour with SPD uses fixed semantics. What "fixed" means: U13 |
 | U6 | *Decided*: SPD in **both flavours** (SimuLizar and Slingshot) | the SimuLizar-flavour SPD has no reference; it is the earliest usable autoscaling and shares all code |

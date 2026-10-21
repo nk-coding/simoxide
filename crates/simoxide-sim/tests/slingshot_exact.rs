@@ -145,6 +145,16 @@ fn compare_in(corpus: &str, name: &str) -> (bool, bool, bool, String) {
     (e, t, c, first)
 }
 
+/// Whether the model of a `corpus-ss`/`corpus-spd` case is available (its third-party models are
+/// git submodules, third_party/README.md); prints the skip otherwise.
+fn case_available(corpus: &str, name: &str) -> bool {
+    let case: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(root().join(corpus).join(name).join("case.json")).unwrap(),
+    )
+    .unwrap();
+    simoxide_thirdparty::skip_unless_available(&root().join(case["model"].as_str().unwrap()))
+}
+
 #[test]
 fn corpus_ss_is_byte_equal_at_level_e() {
     let mut names: Vec<String> = std::fs::read_dir(root().join("corpus-ss"))
@@ -152,9 +162,14 @@ fn corpus_ss_is_byte_equal_at_level_e() {
         .filter_map(|e| e.ok())
         .filter(|e| e.path().join("case.json").exists())
         .map(|e| e.file_name().to_string_lossy().into_owned())
+        .filter(|n| case_available("corpus-ss", n))
         .collect();
     names.sort();
-    assert!(names.len() >= 88, "corpus-ss has {} cases", names.len());
+    assert!(
+        names.len() >= 88 || !simoxide_thirdparty::all_available(),
+        "corpus-ss has {} cases",
+        names.len()
+    );
     let mut failures = Vec::new();
     let mut equal = 0;
     for n in &names {
@@ -184,6 +199,9 @@ fn corpus_ss_is_byte_equal_at_level_e() {
 /// The exact mode is deterministic (two runs, same bytes).
 #[test]
 fn exact_mode_is_deterministic() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     for n in [
         "x_ss_mediastore",
         "ss_two_demands",
@@ -211,7 +229,10 @@ fn handler_errors_match_the_reference() {
         let Ok(text) = std::fs::read_to_string(&errors) else {
             continue;
         };
-        if text.trim().is_empty() || KNOWN.iter().any(|k| k.0 == name) {
+        if text.trim().is_empty()
+            || KNOWN.iter().any(|k| k.0 == name)
+            || !case_available("corpus-ss", &name)
+        {
             continue;
         }
         let want: Vec<&str> = text.lines().map(|l| l.split(':').next().unwrap()).collect();
@@ -226,13 +247,19 @@ fn handler_errors_match_the_reference() {
         assert_eq!(got, want, "{name}: {:#?}", o.warnings);
         checked += 1;
     }
-    assert!(checked >= 22, "{checked} cases with handler errors");
+    assert!(
+        checked >= 22 || !simoxide_thirdparty::all_available(),
+        "{checked} cases with handler errors"
+    );
 }
 
 /// The SPD cases: the decision log (evaluations, requests, adjustments with their change counts
 /// and model summaries) equals the reference's `spd.jsonl` (`simoxide_spd::log::project_with_models`).
 #[test]
 fn spd_decision_logs_match_the_reference() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let mut checked = 0;
     for (corpus, name) in [
         ("corpus-ss", "spd_minimal"),
@@ -258,6 +285,9 @@ fn spd_decision_logs_match_the_reference() {
 /// tape reference compares projection and measurements).
 #[test]
 fn corpus_spd_is_byte_equal_at_level_e() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     for name in [
         "spd_minimal",
         "spd_same_instant",

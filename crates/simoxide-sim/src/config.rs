@@ -148,6 +148,24 @@ impl RunSpec {
     /// single `.usagemodel`, its `.allocation` files and optional `.monitorrepository`; then the
     /// directory's [`SPD_EXTENSIONS`] files.
     pub fn load_model(&self, dir: &Path) -> Result<simoxide_model::Model, String> {
+        // a link to a missing file (SimOxide's third-party test models are links into git
+        // submodules, third_party/README.md): say so instead of failing on an unresolved reference
+        if let Ok(rd) = std::fs::read_dir(dir) {
+            let mut dangling: Vec<PathBuf> = rd
+                .filter_map(|e| e.ok().map(|e| e.path()))
+                .filter(|p| p.is_symlink() && !p.exists())
+                .collect();
+            dangling.sort();
+            if let Some(p) = dangling.first() {
+                return Err(format!(
+                    "{}: link to a missing file ({}); a git submodule that is not checked out? (git submodule update --init)",
+                    p.display(),
+                    std::fs::read_link(p)
+                        .map(|t| t.display().to_string())
+                        .unwrap_or_default()
+                ));
+            }
+        }
         let mut files: Vec<PathBuf> = Vec::new();
         let list = |ext: &str| -> Result<Vec<PathBuf>, String> {
             let mut v: Vec<PathBuf> = std::fs::read_dir(dir)

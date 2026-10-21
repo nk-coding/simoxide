@@ -4,10 +4,13 @@
 #   qvto-testkit/tools/copy-corpus.sh [repos-dir]
 # Sources, revisions used for the committed copy:
 #   Palladio-Analyzer-SimuLizar        2718d73a1f236d5cae10313c2022c6528a99e805 (EPL-2.0)
-#   Palladio-Addons-SPD-Metamodel      95cdb0b677276f5d14c3001b89705a17d8fb690f (licence pending
-#   Palladio-Documentation-Slingshot   94448159e75f33edfb98e960ad244018b97e37d4  confirmation,
-#                                      DESIGN-SPD U3 and LICENSES section 6: do not publish)
+#   Palladio-Addons-SPD-Metamodel      95cdb0b677276f5d14c3001b89705a17d8fb690f (EPL-2.0 since
+#                                      93b6582; LICENSES section 6)
+#   Palladio-Documentation-Slingshot   94448159e75f33edfb98e960ad244018b97e37d4 (no licence declared:
+#                                      the submodule third_party/slingshot-docs; LICENSES section 5)
 # The SPD files get a header naming their source, revision and licence status.
+# Slingshot's minimal example comes from the submodule third_party/slingshot-docs and is not kept as
+# a copy: its files (header, enacted policy) are recorded as derived files (third_party/README.md).
 set -e
 R=${1:-/home/devbox/workspace/old/palladio-research/repos}
 S=$R/Palladio-Analyzer-SimuLizar
@@ -79,7 +82,7 @@ prm $O/simulizar/powerconsumption/prm-low.xmi 0.5 "$PMP#//@measuringPoints.0" "$
 # SPD semantic transformations and Slingshot's minimal example
 cp -r $R/Palladio-Addons-SPD-Metamodel/bundles/org.palladiosimulator.spd.semantic.transformations/transformations $O/spd/
 rm -rf $O/spd/transformations/archive
-M=$R/Palladio-Documentation-Slingshot/examples/minimalexample
+M=../../third_party/slingshot-docs/examples/minimalexample
 cp $M/default.allocation $M/default.system $M/default.repository $M/default.usagemodel $M/My.resourceenvironment \
 	$M/default.spd $M/default.measuringpoint $M/default.monitorrepository $O/spd/minimalexample/
 # Slingshot sets the enacted policy before running MainTransformation (SpdAdjustmentBehavior)
@@ -92,6 +95,10 @@ for f in $O/spd/minimalexample/*; do
 done
 (cd $O/spd/transformations && find . -name '*.qvto' | sort) | while read -r f; do
 	f=${f#./}
-	sed -i "1i // Copied from Palladio-Addons-SPD-Metamodel (commit 95cdb0b677276f5d14c3001b89705a17d8fb690f),\\n// bundles/org.palladiosimulator.spd.semantic.transformations/transformations/$f. Licence pending confirmation (DESIGN-SPD U3); do not publish." "$O/spd/transformations/$f"
+	sed -i "1i // Copied from Palladio-Addons-SPD-Metamodel (commit 95cdb0b677276f5d14c3001b89705a17d8fb690f),\\n// bundles/org.palladiosimulator.spd.semantic.transformations/transformations/$f. EPL-2.0 (LICENSE added upstream in 93b6582)." "$O/spd/transformations/$f"
+done
+# the example's files: derived from the submodule, not committed (third_party/derived.txt)
+for f in $O/spd/minimalexample/*; do
+	cargo run -q -p simoxide-thirdparty -- record "$f" "$M/$(basename $f)"
 done
 du -sh $O

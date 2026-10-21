@@ -810,9 +810,9 @@ tools/project.py /tmp/c                        # projection.jsonl, projection-m.
 |---|---|---|
 | `ss_*` | generated for this study (SimOxide `tools/probegen.py`); `ss_delay_livelock`, `ss_link_failure`, `ss_link_unconnected` are hand-edited variants | EPL-2.0 (SimOxide) |
 | `h*` | hand-made SimOxide corpus models | EPL-2.0 (SimOxide) |
-| `x_espresso` | espresso example (Palladio-Documentation-Slingshot minimal example without SPD), SimOxide monitor repository added | licence pending confirmation |
-| `x_pem_acquire` | Palladio-Example-Models `Acquire_Example` (`4a8dc45`), SimOxide monitor repository added | licence pending confirmation |
-| `spd_*` | Palladio-Documentation-Slingshot `examples/minimalexample` (`9444815`); `spd_scale_in`, `spd_or_trigger`, `spd_and_trigger` are variants | licence pending confirmation |
+| `x_espresso` | espresso example (Palladio-Addons-ExperimentAutomation; the Palladio-Documentation-Slingshot minimal example without SPD), SimOxide monitor repository added | EPL-2.0 |
+| `x_pem_acquire` | Palladio-Example-Models `Acquire_Example` (`4a8dc45`), SimOxide monitor repository added | no licence declared; model files linked from the git submodule `third_party/palladio-example-models`, not distributed |
+| `spd_*` | Palladio-Documentation-Slingshot `examples/minimalexample` (`9444815`); `spd_scale_in`, `spd_or_trigger`, `spd_and_trigger` are variants | no licence declared; linked from (or derived at setup from) the git submodule `third_party/slingshot-docs`, not distributed |
 
 The per-folder READMEs give the exact changes.
 

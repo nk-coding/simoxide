@@ -610,6 +610,7 @@ dependencies = [
  "simoxide-emf",
  "simoxide-emf-core",
  "simoxide-oraclekit",
+ "simoxide-thirdparty",
 ]
 
 [[package]]
@@ -658,6 +659,7 @@ dependencies = [
  "simoxide-emf-core",
  "simoxide-jcompat-exact",
  "simoxide-oraclekit",
+ "simoxide-thirdparty",
 ]
 
 [[package]]
@@ -867,6 +869,7 @@ dependencies = [
  "simoxide-reconf",
  "simoxide-sim",
  "simoxide-spd",
+ "simoxide-thirdparty",
 ]
 
 [[package]]
@@ -914,6 +917,7 @@ dependencies = [
  "simoxide-emf",
  "simoxide-emf-core",
  "simoxide-jcompat",
+ "simoxide-thirdparty",
 ]
 
 [[package]]
@@ -951,6 +955,7 @@ dependencies = [
  "simoxide-sim",
  "simoxide-spd",
  "simoxide-testkit",
+ "simoxide-thirdparty",
 ]
 
 [[package]]
@@ -978,6 +983,7 @@ dependencies = [
  "simoxide-spd",
  "simoxide-stoex",
  "simoxide-testkit",
+ "simoxide-thirdparty",
 ]
 
 [[package]]
@@ -991,6 +997,7 @@ dependencies = [
  "simoxide-model",
  "simoxide-sim",
  "simoxide-spd",
+ "simoxide-thirdparty",
 ]
 
 [[package]]
@@ -1016,7 +1023,12 @@ dependencies = [
  "simoxide-oraclekit",
  "simoxide-random",
  "simoxide-sim",
+ "simoxide-thirdparty",
 ]
+
+[[package]]
+name = "simoxide-thirdparty"
+version = "0.1.0"
 
 [[package]]
 name = "slab"

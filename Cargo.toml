@@ -19,6 +19,7 @@ members = [
     "crates/simoxide-spd",
     "crates/simoxide-stoex",
     "crates/simoxide-testkit",
+    "crates/simoxide-thirdparty",
     # the QVTo engine (crates/qvto/README.md)
     "crates/qvto/qvto",
     "crates/qvto/qvto-bytecode",
@@ -56,6 +57,8 @@ simoxide-sim = { path = "crates/simoxide-sim", version = "0.1.0", default-featur
 simoxide-reconf = { path = "crates/simoxide-reconf", version = "0.1.0" }
 simoxide-spd = { path = "crates/simoxide-spd", version = "0.1.0", default-features = false }
 simoxide-stoex = { path = "crates/simoxide-stoex", version = "0.1.0", default-features = false }
+# third-party test models behind git submodules (third_party/README.md; test infrastructure)
+simoxide-thirdparty = { path = "crates/simoxide-thirdparty" }
 # QVTo (not published: `publish = false`)
 qvto = { path = "crates/qvto/qvto" }
 qvto-bytecode = { path = "crates/qvto/qvto-bytecode" }

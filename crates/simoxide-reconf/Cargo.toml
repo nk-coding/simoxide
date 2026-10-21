@@ -21,6 +21,8 @@ qvto-sema.workspace = true
 serde = { version = "1", features = ["derive"], optional = true }
 
 [dev-dependencies]
+# third-party models behind git submodules: skip without them (third_party/README.md)
+simoxide-thirdparty.workspace = true
 simoxide-sim = { workspace = true, features = ["fast", "exact", "snapshot"] }
 # the snapshot tests
 simoxide-reconf = { path = ".", features = ["snapshot"] }

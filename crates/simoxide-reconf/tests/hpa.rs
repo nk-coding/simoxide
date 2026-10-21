@@ -232,6 +232,9 @@ fn directions(log: &VecLog) -> String {
 /// waits the 300 s stabilisation window before it scales in, then stays small.
 #[test]
 fn a_load_step_scales_out_within_syncs_and_in_after_the_window() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = model_dir(0.2, &hpa_json("", "", ""), true);
     let s = setup(&dir);
     let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
@@ -276,6 +279,9 @@ fn a_load_step_scales_out_within_syncs_and_in_after_the_window() {
 /// arrival rate times 10 from 300 s to 900 s. The autoscaler behaves as with the change files.
 #[test]
 fn a_load_profile_drives_the_autoscaler() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = model_dir(0.2, &hpa_json("", "", ""), true);
     let s = setup(&dir);
     let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
@@ -310,6 +316,9 @@ fn a_load_profile_drives_the_autoscaler() {
 /// without a scale-down, to about the load / 0.5.
 #[test]
 fn a_load_ramp_scales_out_monotonically() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = model_dir(0.25, &hpa_json("", "", ""), true);
     let s = setup(&dir);
     let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
@@ -326,6 +335,9 @@ fn a_load_ramp_scales_out_monotonically() {
 /// later.
 #[test]
 fn starting_pods_are_unready_until_their_delay() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = model_dir(0.2, &hpa_json("", "", r#""startupDelay":"40s""#), true);
     let s = setup(&dir);
     let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
@@ -362,6 +374,9 @@ fn starting_pods_are_unready_until_their_delay() {
 /// Scaling policies (HPA-5.2): at most one pod per 15 s up.
 #[test]
 fn behavior_policies_limit_the_rate() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let spec =
         r#","behavior":{"scaleUp":{"policies":[{"type":"Pods","value":1,"periodSeconds":15}]}}"#;
     let dir = model_dir(0.2, &hpa_json("", spec, ""), true);
@@ -382,6 +397,9 @@ fn behavior_policies_limit_the_rate() {
 /// The Slingshot flavour (fast mode): the same controller on Slingshot's engine, deterministic.
 #[test]
 fn the_slingshot_flavour_scales_too() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = model_dir(0.2, &hpa_json("", "", r#""startupDelay":"20s""#), false);
     let s = setup_flavour(&dir, FlavourConfig::slingshot(SsQuirks::NONE));
     let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
@@ -432,6 +450,9 @@ fn strip(log: &VecLog) -> VecLog {
 /// a restored run writes the bytes it was read from.
 #[test]
 fn forks_and_snapshots_continue_identically() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = model_dir(0.2, &hpa_json("", "", r#""startupDelay":"25s""#), true);
     let s = setup(&dir);
     let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
@@ -512,6 +533,9 @@ fn forks_and_snapshots_continue_identically() {
 /// `maxCreatedPods` stops a run that creates too many.
 #[test]
 fn growth_is_bounded_per_created_pod() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let spec = r#","behavior":{"scaleDown":{"stabilizationWindowSeconds":0}}"#;
     let dir = model_dir(0.2, &hpa_json("", spec, r#""startupDelay":"5s""#), true);
     let s = setup(&dir);
@@ -628,6 +652,9 @@ fn growth_is_bounded_per_created_pod() {
 /// The configuration is checked against the SPD.
 #[test]
 fn configuration_errors() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = model_dir(0.2, &hpa_json("", "", ""), false);
     let mut model = RunSpec::default().load_model(&dir).unwrap();
     let bad = HpaConfig::from_json(
@@ -658,6 +685,9 @@ fn configuration_errors() {
 /// files' `hpa` lines): a lower maximum scales in at the next sync.
 #[test]
 fn parameters_change_at_a_pause() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = model_dir(2.0, &hpa_json("", "", ""), true);
     let s = setup(&dir);
     let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();

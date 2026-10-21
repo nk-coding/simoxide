@@ -352,6 +352,9 @@ fn pauses(n: u64, sim_time: i64) -> Vec<Pause> {
 
 #[test]
 fn snapshots_continue_like_the_uninterrupted_run() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let core = QvtoCore::new().unwrap();
     let mut failures = Vec::new();
     let mut checked = 0;
@@ -393,6 +396,9 @@ fn snapshots_continue_like_the_uninterrupted_run() {
 /// and so does the run they were forked from.
 #[test]
 fn forks_and_detached_runs_continue_like_the_uninterrupted_run() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let core = QvtoCore::new().unwrap();
     let mut failures = Vec::new();
     let mut checked = 0;
@@ -545,6 +551,9 @@ fn bytes_of(run: &mut SsxRun<'_>) -> Vec<u8> {
 /// that never holds runs to the end unchanged.
 #[test]
 fn pause_conditions_pause_where_event_counts_pause() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     use simoxide_sim::sim::watch::parse_condition;
     let core = QvtoCore::new().unwrap();
     let c = load(&root().join("corpus-ss/x_ss_mediastore"));
@@ -597,6 +606,9 @@ fn pause_conditions_pause_where_event_counts_pause() {
 /// effect; option lines are refused and leave the run unchanged.
 #[test]
 fn changes_at_a_resume_equal_the_change_at_the_pause() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     use simoxide_reconf::ChangeFile;
     let core = QvtoCore::new().unwrap();
     let c = load(&root().join("corpus-ss/x_ss_mediastore"));

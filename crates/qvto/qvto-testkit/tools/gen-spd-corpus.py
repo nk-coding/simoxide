@@ -24,8 +24,16 @@ them, except in the `*-noid` state, which keeps the dynamic-EMF null ids. Path r
 rewritten to ids, and IDREFs to objects in no resource (EMF saves a reference to a removed object
 so) are dropped. Every case has `resolve-all` (Palladio resolves the models' proxies at load).
 
-Licence: the models are derived from the SPD example and metamodel, whose licence is pending
-confirmation (DESIGN-SPD U3, LICENSES section 6); every generated file says so. Do not publish.
+Files derived from the example (q1/min and the q1/s_min_* states, except default.spd) are not
+committed: at the end the script records each as the example's file in the submodule
+third_party/slingshot-docs plus an ed script (`simoxide-thirdparty record`, third_party/README.md).
+MIN_SRC (the example with header and enacted policy) is itself derived: run
+`cargo run -q -p simoxide-thirdparty -- setup` first.
+
+Licence: the SPD metamodel and transformations are EPL-2.0 (LICENSES section 6); the minimal
+example declares no licence (LICENSES section 5), so the files derived from it stay out of the
+repository (above). The generated files' header text is kept unchanged, so that regenerating
+reproduces today's files byte for byte.
 """
 import json
 import os
@@ -863,7 +871,25 @@ def main():
                 "# licence pending confirmation, DESIGN-SPD U3). The transformations bind the models by\n"
                 "# nsURI in Slingshot; here positionally, in the signature's order.\n\n")
         f.write("\n".join(blocks[c[0]] for c in CASES_DEF))
+    record_derived()
     print(f"{len(CASES_DEF)} cases in {CASES}; states: {', '.join(sorted(done_states))}")
+
+
+EXAMPLE = "../../third_party/slingshot-docs/examples/minimalexample"
+
+
+def record_derived():
+    """Records the files derived from the example as ed scripts against the submodule."""
+    for d in sorted(os.listdir(Q1)):
+        if not (d == "min" or d.startswith("s_min")):
+            continue
+        for f in sorted(os.listdir(os.path.join(Q1, d))):
+            if f == "default.spd":
+                continue  # spd_model: SimOxide's own
+            src = os.path.join(EXAMPLE, f if not f.endswith(".semanticspd") else "default.semanticspd")
+            if os.path.isfile(src):
+                subprocess.run(["cargo", "run", "-q", "-p", "simoxide-thirdparty", "--", "record",
+                                os.path.join(Q1, d, f), src], check=True)
 
 
 if __name__ == "__main__":

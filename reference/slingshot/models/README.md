@@ -11,8 +11,10 @@
 | `spd_same_instant` | `spd_minimal` | P2 corpus model: a scale-out by two and a scale-in by one at the same instant (t = 50 s, two time-triggered policies; with Q15 each also reacts to the other's time event) |
 | `spd_v4_cpu`, `spd_v4_rt` | `spd_minimal` | P3 statistical scenarios (V4, `spd-stat.sh`): arrivals `Exp(0.8)`, the accounting demand `Exp(0.5)`, group size 1..4; `spd_v4_cpu`: CPU utilisation (AVERAGE) above 80 % scales out (cooldown 30 s), below 60 % in (cooldown 60 s); `spd_v4_rt`: the load balancer's operation response time above 20 s scales out (cooldown 30 s) |
 
-Licence: the Palladio example models are distributed with the Palladio documentation; their
-licence (EPL-2.0 by Palladio convention) is pending confirmation with the maintainers (DESIGN-SPD
-decision U3). Slingshot itself is EPL-2.0 since 2026-10-20 (`LICENSES` section 1), but
-Palladio-Documentation-Slingshot and Palladio-Addons-SPD-Metamodel still had no licence on
-2026-10-21. Do not publish outside this repository until confirmed.
+Licence: Palladio-Documentation-Slingshot declares no licence (checked 2026-10-21), so its
+minimal example is not distributed here: the `spd_*` model files are links into the git
+submodule `third_party/slingshot-docs`, and the files SimOxide changed (`default.spd`, and the
+demands and arrival rates in `default.repository` / `default.usagemodel` of `spd_scale_in` and
+`spd_v4_*`) are derived from the upstream file plus SimOxide's change at setup
+(`third_party/README.md`, `LICENSES` section 5). The SPD metamodel is EPL-2.0 (`LICENSES` section
+6). The probes and `x2` are SimOxide's own.

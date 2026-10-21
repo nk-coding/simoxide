@@ -22,4 +22,6 @@ qvto-model.workspace = true
 compat = ["dep:simoxide-jcompat-exact"]
 
 [dev-dependencies]
+# third-party models behind git submodules: skip without them (third_party/README.md)
+simoxide-thirdparty.workspace = true
 qvto-testkit = { path = ".", features = ["compat"] }

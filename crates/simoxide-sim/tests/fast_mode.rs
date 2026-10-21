@@ -39,13 +39,21 @@ fn model_dirs() -> Vec<PathBuf> {
         };
         for e in rd.flatten() {
             let p = e.path();
-            if p.join("run.json").is_file() && !p.join("REFERENCE-ERROR.txt").is_file() {
+            if p.join("run.json").is_file()
+                && !p.join("REFERENCE-ERROR.txt").is_file()
+                && simoxide_thirdparty::skip_unless_available(&p)
+            {
                 v.push(p);
             }
         }
     }
     v.sort();
-    assert!(v.len() > 80, "{} model directories", v.len());
+    // fewer without the third-party submodules (third_party/README.md)
+    assert!(
+        v.len() > 80 || !simoxide_thirdparty::all_available(),
+        "{} model directories",
+        v.len()
+    );
     v
 }
 
@@ -238,7 +246,10 @@ fn fast_engine_equals_exact_engine_on_every_model_directory() {
             }
         }
     }
-    assert!(deterministic >= 20, "{deterministic} deterministic runs");
+    assert!(
+        deterministic >= 20 || !simoxide_thirdparty::all_available(),
+        "{deterministic} deterministic runs"
+    );
 }
 
 /// The same on generated models with every generator feature (heavy load, ties, double

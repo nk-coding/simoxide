@@ -1,0 +1,65 @@
+10a
+    <targetConstraints xsi:type="target:ThrashingConstraint" minimumTimeNoThrashing="15.0"/>
+    <targetConstraints xsi:type="target:TargetGroupSizeConstraint" minSize="1" maxSize="3"/>
+.
+9a
+  <scalingPolicies id="_tpAbs60" entityName="Absolute 3 at 60" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:AbsoluteAdjustment" goalValue="3"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_tpAbs60T" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="60.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_tpRel" entityName="Relative 50 %, repeated interval" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:RelativeAdjustment" percentageGrowthValue="50" minAdjustmentValue="1"/>
+    <policyConstraints xsi:type="policy:IntervalConstraint" offset="5.0" intervalDuration="20.0" repeat="true"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_tpRelT" relationalOperator="GreaterThan">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="0.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_tpInactive" entityName="Inactive at 70" active="false" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="5"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_tpInactiveT" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="70.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_tpIn77" entityName="In at 77" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="-1"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_tpIn77T" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="77.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+.
+5c
+    <policyConstraints xsi:type="policy:CooldownConstraint" cooldownTime="25.0" maxScalingOperations="1"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_tpOut20T" relationalOperator="GreaterThanOrEqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="20.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_tpIn30" entityName="In at 30 (thrashing)" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="-1"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_tpIn30T" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="30.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_tpIn40" entityName="In at 40 (interval 35-45)" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="-1"/>
+    <policyConstraints xsi:type="policy:IntervalConstraint" offset="35.0" intervalDuration="10.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_tpIn40T" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="40.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_tpInLe50" entityName="In up to 50" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="-1"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_tpInLe50T" relationalOperator="LessThanOrEqualTo">
+.
+2,3c
+<spd:SPD xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:adjustments="http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0" xmlns:expectations="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Expectations/1.0" xmlns:policy="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0" xmlns:spd="http://palladiosimulator.org/ScalingPolicyDefinition/1.0" xmlns:stimuli="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Stimuli/1.0" xmlns:target="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0" xmlns:targets="http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0" xmlns:triggers="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0" id="_PKdecLwZEe6i2ICnm9lfkw">
+  <scalingPolicies id="_tpOut20" entityName="Out from 20, cooldown 25 max 1" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+.

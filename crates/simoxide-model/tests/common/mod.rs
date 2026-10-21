@@ -60,6 +60,22 @@ fn local_dir(name: &str, dir: &str) -> String {
     for (prefix, marker, base) in [
         ("corpus_", "/corpus/", root.join("../../corpus")),
         ("case_", "/tests/xmi-cases/", root.join("tests/xmi-cases")),
+        // repositories that are git submodules here (third_party/README.md), same commits
+        (
+            "Palladio-Example-Models_",
+            "/Palladio-Example-Models/",
+            root.join("../../third_party/palladio-example-models"),
+        ),
+        (
+            "Palladio-Analyzer-Slingshot-E2E-Tests_",
+            "/Palladio-Analyzer-Slingshot-E2E-Tests/",
+            root.join("../../third_party/slingshot-e2e-tests"),
+        ),
+        (
+            "Palladio-Documentation-Slingshot_",
+            "/Palladio-Documentation-Slingshot/",
+            root.join("../../third_party/slingshot-docs"),
+        ),
     ] {
         if name.starts_with(prefix)
             && let Some((_, rest)) = dir.rsplit_once(marker)
@@ -70,7 +86,8 @@ fn local_dir(name: &str, dir: &str) -> String {
     dir.to_string()
 }
 
-/// Entries of `models.txt` whose directory exists (the Palladio repos may be absent).
+/// Entries of `models.txt` whose directory exists (the Palladio repos may be absent) and whose
+/// third-party models are checked out.
 pub fn entries() -> Vec<Entry> {
     let list = std::fs::read_to_string(oracle_dir().join("models.txt"))
         .expect("models.txt of the simoxide-model oracle");
@@ -86,6 +103,10 @@ pub fn entries() -> Vec<Entry> {
             local_dir(name, dir)
         };
         if dir != "-" && !Path::new(dir).is_dir() {
+            continue;
+        }
+        // links into third-party submodules that are not checked out
+        if dir != "-" && !simoxide_thirdparty::skip_unless_available(Path::new(dir)) {
             continue;
         }
         let golden =

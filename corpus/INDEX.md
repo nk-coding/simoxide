@@ -8,8 +8,10 @@ the patched reference; files > 256 KiB are stored as `.gz`, `gzip -n`).
   (`reference/src/refsim/corpus/HandMade.java`), and `FEATURES.txt` describes each one.
 - `x_*`: external example models, imported by `reference/import-external.sh` from
   `reference/external-models.txt`. That list also records the skipped models and why.
-  - Sources: `repos/Palladio-Example-Models` (`pem`), SimuLizar tests and examples (`sl`), Slingshot E2E
+  - Sources: `third_party/palladio-example-models` (`pem`), SimuLizar tests and examples (`sl`), Slingshot E2E
     (`ss`), and the work-simucom espresso and SimuLizar MediaStore copies.
+  - The model files of `x_pem_*` and `x_ss_*` are links into the git submodules `third_party/` (not
+    distributed; `git submodule update --init`, `third_party/README.md`).
   - These models get the refsim default monitors (`refsim.monitorrepository`: FeedThrough response time,
     active/passive resource metrics; see `Monitors.java`). The models' own monitors are not used.
 - Regenerate expected outputs: `reference/regen-expected.sh`. Check them: `reference/regen-expected.sh --check`.

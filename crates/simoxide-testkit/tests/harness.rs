@@ -47,7 +47,11 @@ fn opts(filter: &str) -> HarnessOptions {
 fn echo_simulator_passes() {
     let mut sim = FnSim::new("echo", echo);
     let r = corpus::run_corpus(&mut sim, &opts("h0,x_ss_minimal"));
-    assert!(r.cases.len() >= 20, "{}", r.table());
+    assert!(
+        r.cases.len() >= 20 || !simoxide_thirdparty::all_available(),
+        "{}",
+        r.table()
+    );
     assert_eq!(r.failed(), 0, "{}", r.table());
     r.assert_all_pass();
 }

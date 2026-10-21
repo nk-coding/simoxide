@@ -1,0 +1,9 @@
+9a
+  <scalingPolicies id="_simoxideScaleInPolicy0001" entityName="Scale in at 80" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="-1"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_simoxideScaleInTrigger001" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="80.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+.

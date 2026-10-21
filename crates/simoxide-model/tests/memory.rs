@@ -17,7 +17,7 @@ fn model_dirs() -> Vec<PathBuf> {
         };
         let mut ds: Vec<PathBuf> = rd
             .filter_map(|e| e.ok().map(|e| e.path()))
-            .filter(|p| p.is_dir())
+            .filter(|p| p.is_dir() && simoxide_thirdparty::skip_unless_available(p))
             .collect();
         ds.sort();
         dirs.extend(ds);

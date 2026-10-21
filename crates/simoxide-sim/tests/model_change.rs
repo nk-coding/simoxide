@@ -33,13 +33,18 @@ fn model_dirs() -> Vec<PathBuf> {
         };
         for e in rd.flatten() {
             let p = e.path();
-            if p.join("run.json").is_file() {
+            if p.join("run.json").is_file() && simoxide_thirdparty::skip_unless_available(&p) {
                 v.push(p);
             }
         }
     }
     v.sort();
-    assert!(v.len() > 80, "{} model directories", v.len());
+    // fewer without the third-party submodules (third_party/README.md)
+    assert!(
+        v.len() > 80 || !simoxide_thirdparty::all_available(),
+        "{} model directories",
+        v.len()
+    );
     v
 }
 
@@ -217,7 +222,10 @@ fn check_all<C: Compat>(mode: Mode, tape: bool) {
         }
         n += 1;
     }
-    assert!(n > 80, "{n} models");
+    assert!(
+        n > 80 || !simoxide_thirdparty::all_available(),
+        "{n} models"
+    );
 }
 
 #[test]

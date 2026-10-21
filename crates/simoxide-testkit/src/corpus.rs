@@ -87,7 +87,9 @@ pub fn matches_filter(name: &str, filter: Option<&str>) -> bool {
     }
 }
 
-/// Entries of a corpus directory (subdirectories with `run.json`), sorted by name.
+/// Entries of a corpus directory (subdirectories with `run.json`), sorted by name. Entries whose
+/// third-party models are not checked out are skipped with a message on stderr
+/// ([`simoxide_thirdparty::skip_unless_available`]).
 pub fn list(corpus: &Path, filter: Option<&str>) -> std::io::Result<Vec<Entry>> {
     let mut v = Vec::new();
     for e in std::fs::read_dir(corpus)? {
@@ -99,6 +101,10 @@ pub fn list(corpus: &Path, filter: Option<&str>) -> std::io::Result<Vec<Entry>> 
         }
         let name = p.file_name().unwrap().to_string_lossy().into_owned();
         if !matches_filter(&name, filter) {
+            continue;
+        }
+        // model files in a git submodule that is not checked out (third_party/README.md)
+        if !simoxide_thirdparty::skip_unless_available(&p) {
             continue;
         }
         let config = RunConfig::load(&rj).map_err(std::io::Error::other)?;

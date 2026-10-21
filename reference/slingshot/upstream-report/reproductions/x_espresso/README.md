@@ -2,7 +2,7 @@
 
 Report issues: D2.
 
-**Source.** Espresso example model (the model of Palladio-Documentation-Slingshot `examples/minimalexample` without SPD), copied from the Palladio research work directory (`work-simucom/models/espresso`). `refsim.monitorrepository` and `refsim.measuringpoint` were added by SimOxide (default monitors). **Licence pending confirmation** (Palladio example model).
+**Source.** Espresso example model (the model of Palladio-Documentation-Slingshot `examples/minimalexample` without SPD), copied from the Palladio research work directory (`work-simucom/models/espresso`). `refsim.monitorrepository` and `refsim.measuringpoint` were added by SimOxide (default monitors). The model is the espresso example of Palladio-Addons-ExperimentAutomation (`bundles/org.palladiosimulator.experimentautomation.examples.espresso/model`, same ids), EPL-2.0.
 
 ## Model
 

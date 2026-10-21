@@ -168,51 +168,72 @@ contributors of the EPL code could do that, and it would not cover the Apache-2.
 is not an option either, because only the copyright holders could relicense the stubs.
 
 
-5. Example models with undeclared licences
-------------------------------------------
+5. Example models with undeclared licences: referenced as git submodules, not distributed
+-----------------------------------------------------------------------------------------
 
-- corpus/x_pem_*: models from https://github.com/PalladioSimulator/Palladio-Example-Models.
-- corpus/x_ss_*: models from the Slingshot end-to-end tests
-  (https://github.com/PalladioSimulator/Palladio-Analyzer-Slingshot-E2E-Tests).
+Neither repository below declares a licence (checked again on 2026-10-21: no LICENSE file on any
+branch; the Slingshot E2E tests are archived), and Slingshot's own EPL-2.0 (section 1) does not
+cover them. SimOxide therefore does not distribute their files: they are git submodules under
+third_party/, pinned to the commits SimOxide's test material was made from, and the repository
+only refers to them (third_party/README.md). A checkout without the submodules builds and tests;
+the tests that need these models skip.
 
-Neither repository declares a licence (checked again on 2026-10-21: no LICENSE file on any
-branch; the E2E tests are archived). Slingshot's own EPL-2.0 (section 1) does not cover them. The
-models are used as test input only.
+- https://github.com/PalladioSimulator/Palladio-Example-Models, commit
+  4a8dc455216774435fefd42965b848851f7658ee (third_party/palladio-example-models): the model files
+  of corpus/x_pem_* and reference/slingshot/upstream-report/reproductions/x_pem_acquire are
+  relative links into it; six files of x_pem_replicated_composite and x_pem_subsystem(_nested)
+  are derived from it with the ids EMF generated at import inserted (see below); the model files
+  of crates/simoxide-sim/tests/models/u_heuristics_own_monitors (SimpleHeuristicsExample_Example)
+  and u_linking_own_monitors (LinkingResource_Test) link into it too.
+- https://github.com/PalladioSimulator/Palladio-Analyzer-Slingshot-E2E-Tests, commit
+  fd3e916d7cb522059efb29e1565068b99cb2bf64 (third_party/slingshot-e2e-tests): the model files of
+  corpus/x_ss_* are links into it.
+- https://github.com/PalladioSimulator/Palladio-Documentation-Slingshot, commit
+  94448159e75f33edfb98e960ad244018b97e37d4 (third_party/slingshot-docs): Slingshot's minimal
+  example (examples/minimalexample). reference/slingshot/models/spd_* and
+  reference/slingshot/upstream-report/reproductions/spd_* link to its files; where SimOxide
+  changed a file (its own scaling policies, demands, arrival rates; the provenance headers and
+  the derived SPD adjustment corpus in crates/qvto/qvto-testkit/corpus/spd/minimalexample and
+  q1/min, q1/s_min_*), only SimOxide's change is in the repository, as an ed script applied to
+  the upstream file (third_party/derived.txt, third_party/derived/).
+
+SimOxide's own files stay in the repository: the run configurations (run.json, case.json), the
+refsim monitors (refsim.monitorrepository, refsim.measuringpoint), READMEs and the simulation
+outputs and model dumps (expected/, observed/, reference/oracles/pcm-model/golden*/, the QVTo
+fixtures and adapter-corpus dumps). Commits before the submodules were introduced (from 7fb3380)
+still contain copies of these models.
 
 
-6. Palladio SPD metamodels (scaling policy definitions) -- LICENCE PENDING CONFIRMATION
--------------------------------------------------------------------------------------
+6. Palladio SPD metamodels and semantic transformations
+-------------------------------------------------------
 
 Source:    https://github.com/PalladioSimulator/Palladio-Addons-SPD-Metamodel, commit
            95cdb0b677276f5d14c3001b89705a17d8fb690f (2026-08-18): bundles
            org.palladiosimulator.spd (model/SPD.ecore), org.palladiosimulator.spd.semantic
-           (model/semantic.ecore) and org.palladiosimulator.spd.measuringpoint
-           (model/spdmeasuringpoint.ecore). The generator reads them from the Slingshot product
+           (model/semantic.ecore), org.palladiosimulator.spd.measuringpoint
+           (model/spdmeasuringpoint.ecore) and org.palladiosimulator.spd.semantic.transformations
+           (transformations/). The generator reads the .ecore files from the Slingshot product
            jars, version 1.0.0.202609010039, whose .ecore files are byte-identical to that commit.
-Copyright: Palladiosimulator.org and its contributors
-Licence:   pending confirmation; the user is clarifying it with the maintainers. The repository
-           has no LICENSE file and its feature.xml carries the template text; the bundles'
-           MANIFEST.MF declare "Bundle-License: The Apache License, Version 2.0"; Palladio
-           projects are EPL by convention. Checked again on 2026-10-21: Slingshot itself is now
-           EPL-2.0 (section 1), but neither this repository nor
-           https://github.com/PalladioSimulator/Palladio-Documentation-Slingshot (commit 9444815,
-           the minimal example) has a LICENSE file on any branch, so the restrictions below stay.
+Copyright: Palladiosimulator.org and contributors
+Licence:   Eclipse Public License 2.0. The repository added its LICENSE (EPL-2.0) in pull request
+           #47, merged on 2026-10-21 as 93b6582ecebaf69cf025f624ca45fdb55a6d9655; between 95cdb0b
+           and 93b6582 only LICENSE and README.md changed, so the files SimOxide takes are the
+           files published under EPL-2.0.
 
 Used in:
-- crates/simoxide-model/src/meta/generated.rs: the packages spd (with its 8
-  subpackages), semanticspd and spdmeasuringpoint, appended after the 5.2.2 packages.
+- crates/simoxide-model/src/meta/generated.rs: the packages spd (with its 8 subpackages),
+  semanticspd and spdmeasuringpoint, appended after the 5.2.2 packages (tables generated from
+  the .ecore files by crates/simoxide-model/tools/gen_meta.py).
+- crates/qvto/qvto-testkit/corpus/spd/transformations/: copies of the semantic transformations
+  (17 units; a two-line origin comment at the top of each), embedded by simoxide-reconf.
+- crates/simoxide-reconf/transformations/spd-fixed/: modified copies of three units
+  (AdjustmentCalculator, ResourceEnvironmentTransformation, TopDownTransformationInfrastructure;
+  the changes are marked "PATCHED by SimOxide"), EPL-2.0 like the originals.
 - reference/oracles/pcm-model/golden-spd/: canonical dumps written by EMF with the generated SPD
-  packages of the Slingshot jars (run-spd.sh), of SimOxide's own test model and of the models
-  in reference/slingshot/models (licence status in their README).
-- crates/qvto/qvto-testkit/corpus/spd/: copies of the SPD semantic transformations
-  (bundles/org.palladiosimulator.spd.semantic.transformations/transformations, same commit) and
-  of Slingshot's minimal example (Palladio-Documentation-Slingshot, commit
-  94448159e75f33edfb98e960ad244018b97e37d4), and the SPD adjustment corpus derived from them
-  (corpus/spd/q1, generated by tools/gen-spd-corpus.py); with cases/spd.cases and the Java
-  runner's results fixtures/java-spd*.txt. The model, transformation and case files carry a
-  header with their source, revision and "licence pending confirmation" (the fixture bundles
-  have no comment syntax: this entry covers them); the material stays local and is not
-  published.
+  packages of the Slingshot jars (run-spd.sh).
+- crates/qvto/qvto-testkit/corpus/spd/q1/, cases/spd.cases and fixtures/java-spd*.txt: the SPD
+  adjustment corpus (tools/gen-spd-corpus.py) and the Java runner's results on it; its models
+  derived from Slingshot's minimal example are handled as in section 5.
 
 
 7. Opt-in exactness crate simoxide-jcompat-exact -- NO LICENCE GRANTED
@@ -270,16 +291,14 @@ Open issues
 - simoxide-jcompat-exact (section 7): no licence is granted; builds with the features exact or
   compat must not be distributed.
 
-- SPD metamodels (section 6): the licence of the generated SPD tables is not confirmed yet.
-
 - HotSpot LIBM port (section 4): binaries built with the feature "hotspot-math" must not be
   distributed; only the EPL (default) build may be distributed as a binary. An independent implementation
   cannot replace the port: HotSpot's Math.exp is not correctly rounded on about 0.25 % of
   arguments and Math.log on about 1e-5, so matching it bit for bit requires its algorithm and
   constants. Without the feature, the exact mode matches the reference only until the first draw
   that hits such an argument.
-- The example models of section 5 have no declared licence; ask the authors before
-  redistributing them.
+- The example models of section 5 have no declared licence; they are referenced as git
+  submodules and not distributed. Ask the authors before redistributing them.
 - The optional cargo feature "profile" of simoxide-cli pulls in inferno (CDDL-1.0) through pprof;
   binaries built with it include CDDL-licensed code.
 

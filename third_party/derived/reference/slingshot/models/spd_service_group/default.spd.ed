@@ -1,0 +1,25 @@
+11a
+  </targetGroups>
+  <targetGroups xsi:type="targets:ServiceGroup" id="_sxSgTargetGroup" entityName="SG Accounting">
+    <unitAssembly href="default.system#_9c3KwCHcEd6lJo4DCALHMw"/>
+.
+7c
+      <expectedValue xsi:type="expectations:ExpectedTime" value="60.0"/>
+.
+3c
+  <scalingPolicies id="_sxSgPolicyPlus1At20" entityName="SG +1 at 20" active="true" targetGroup="_sxSgTargetGroup">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="1"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_sxSgTrigger20" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="20.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_sxSgPolicyPlus2At40" entityName="SG +2 at 40" active="true" targetGroup="_sxSgTargetGroup">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="2"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_sxSgTrigger40" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="40.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_7VIU0MAgEe6AcKIPVXJsSw" entityName="EI +1 at 60" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+.

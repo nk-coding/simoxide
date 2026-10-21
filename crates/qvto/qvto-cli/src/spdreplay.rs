@@ -393,6 +393,9 @@ mod tests {
     /// summaries `SpdObserver` recorded in Slingshot.
     #[test]
     fn ordered_mode_equals_the_det_slingshot_runs() {
+        if !simoxide_thirdparty::skip_unless_all_available() {
+            return;
+        }
         let root = qvto_paths::root();
         if !root.join("target/pcm/pcm.conf").is_file() {
             eprintln!(

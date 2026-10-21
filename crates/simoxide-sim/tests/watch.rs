@@ -124,6 +124,9 @@ fn time_conditions<C: Compat, F: Flavour>(what: &str, cm: &CompiledModel, cfg: &
 
 #[test]
 fn time_and_event_conditions_pause_where_pause_does() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let (cm, cfg) = load("corpus/h06_closed_think", FlavourConfig::SIMULIZAR);
     time_conditions::<Exact, SimuLizar>("h06 exact", &cm, &cfg);
     time_conditions::<Fast, SimuLizar>("h06 fast", &cm, &cfg);
@@ -147,6 +150,9 @@ fn sel(metric: &str, point: &str) -> SeriesSel {
 
 #[test]
 fn series_conditions_pause_right_after_the_tuple() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let (cm, cfg) = load("corpus/h06_closed_think", FlavourConfig::SIMULIZAR);
     let cfg = SimConfig {
         max_measurements: 400,

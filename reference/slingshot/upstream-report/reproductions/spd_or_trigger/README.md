@@ -2,7 +2,7 @@
 
 Report issues: S2.
 
-**Source.** Palladio-Documentation-Slingshot `examples/minimalexample` (commit `9444815`, 2024-09-13): the files its `default.experiments` uses as initial model; `default.slo`, `representations.aird`, `default.dlim`, `default.usageevolution`, `default.experiments` not copied. **Licence pending confirmation** (Palladio example models, EPL-2.0 by convention). Variant made for this report.
+**Source.** Palladio-Documentation-Slingshot `examples/minimalexample` (commit `9444815`, 2024-09-13): the files its `default.experiments` uses as initial model; `default.slo`, `representations.aird`, `default.dlim`, `default.usageevolution`, `default.experiments` not copied. No licence declared upstream. The model files are links into the git submodule `third_party/slingshot-docs`, or derived from its files plus SimOxide's change at setup (no licence declared upstream, so not distributed here; `git submodule update --init`, `cargo run -q -p simoxide-thirdparty -- setup`, `third_party/README.md`). Variant made for this report.
 
 **Changes.** `default.spd`: the policy's trigger replaced by a `ComposedTrigger` with `logicalOperator="OR"` of two `SimpleFireOnValue` triggers on `SimulationTime`: `EqualTo` 50.0 and `EqualTo` 70.0.
 

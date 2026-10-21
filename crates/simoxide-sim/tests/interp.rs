@@ -30,7 +30,7 @@ fn dirs(rel: &str) -> Vec<PathBuf> {
     let mut v: Vec<PathBuf> = std::fs::read_dir(root().join(rel))
         .unwrap()
         .filter_map(|e| e.ok().map(|e| e.path()))
-        .filter(|p| p.join("run.json").is_file())
+        .filter(|p| p.join("run.json").is_file() && simoxide_thirdparty::skip_unless_available(p))
         .collect();
     v.sort();
     v

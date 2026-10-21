@@ -44,9 +44,21 @@
 - Documentation describes the current state, short and factual. Semantics rules keep their
   identifiers (`SIM-4.4a`, `ACT-7.3`, `REF-7`, ...): code comments cite them.
 
+## Third-party test models
+
+Some example models (Palladio-Example-Models, the Slingshot end-to-end tests and Slingshot's
+minimal example) declare no licence and are not part of the repository: they are git submodules
+under `third_party/` (`third_party/README.md`). Clone with `git clone --recurse-submodules`, or run
+`git submodule update --init` in a clone. `cargo build` does not need them; the tests that read
+them skip without them (they pass and print `skipped (third-party): ...`, visible with
+`cargo test -- --nocapture`). Run the guardrails with the
+submodules and `SIMOXIDE_REQUIRE_THIRD_PARTY=1`, which turns these skips into failures. Scripts and
+the Java runners that read the SPD example variants need the derived files once:
+`cargo run -q -p simoxide-thirdparty -- setup`.
+
 ## Guardrails
 
-Run after every change to the simulator:
+Run after every change to the simulator (with the submodules, see above):
 
 1. `cargo test --release --workspace` (includes the corpus in both modes, `tests/bugs.rs` and
    `tests/literal_engine.rs`).

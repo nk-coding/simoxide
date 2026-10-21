@@ -592,12 +592,26 @@ impl Loader {
         let mut files: Vec<PathBuf> = std::fs::read_dir(&dir)?
             .filter_map(|e| e.ok().map(|e| e.path()))
             .filter(|p| {
-                p.is_file()
-                    && p.extension()
-                        .and_then(|e| e.to_str())
-                        .is_some_and(|e| MODEL_EXTENSIONS.contains(&e))
+                p.extension()
+                    .and_then(|e| e.to_str())
+                    .is_some_and(|e| MODEL_EXTENSIONS.contains(&e))
             })
             .collect();
+        // a link to a missing file: say so instead of skipping it (SimOxide's third-party test
+        // models are links into git submodules, third_party/README.md)
+        if let Some(p) = files.iter().find(|p| p.is_symlink() && !p.exists()) {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!(
+                    "{}: link to a missing file ({}); a git submodule that is not checked out? (git submodule update --init)",
+                    p.display(),
+                    std::fs::read_link(p)
+                        .map(|t| t.display().to_string())
+                        .unwrap_or_default()
+                ),
+            ));
+        }
+        files.retain(|p| p.is_file());
         files.sort();
         Ok(files.into_iter().map(|f| self.load_file(f)).collect())
     }

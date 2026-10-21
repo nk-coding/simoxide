@@ -1,0 +1,9 @@
+[submodule "third_party/palladio-example-models"]
+	path = third_party/palladio-example-models
+	url = https://github.com/PalladioSimulator/Palladio-Example-Models.git
+[submodule "third_party/slingshot-e2e-tests"]
+	path = third_party/slingshot-e2e-tests
+	url = https://github.com/PalladioSimulator/Palladio-Analyzer-Slingshot-E2E-Tests.git
+[submodule "third_party/slingshot-docs"]
+	path = third_party/slingshot-docs
+	url = https://github.com/PalladioSimulator/Palladio-Documentation-Slingshot.git

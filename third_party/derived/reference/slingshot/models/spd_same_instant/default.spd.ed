@@ -1,0 +1,13 @@
+5a
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="50.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_sxSameInstantMinus1" entityName="-1 at 50" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="-1"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_sxSameInstantTrigger" relationalOperator="EqualTo">
+.
+3,4c
+  <scalingPolicies id="_7VIU0MAgEe6AcKIPVXJsSw" entityName="+2 at 50" active="true" targetGroup="_DC8fM8pgEe6u3p81um7oyQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="2"/>
+.

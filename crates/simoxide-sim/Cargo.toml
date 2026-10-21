@@ -40,6 +40,8 @@ hotspot-math = ["simoxide-random/hotspot-math", "simoxide-stoex/hotspot-math"]
 snapshot = ["dep:serde", "dep:postcard", "simoxide-sched/serde", "simoxide-model/serde"]
 
 [dev-dependencies]
+# third-party models behind git submodules: skip without them (third_party/README.md)
+simoxide-thirdparty.workspace = true
 simoxide-testkit = { path = "../simoxide-testkit" }
 # the tests check the exact mode (byte-identical to the reference)
 simoxide-sim = { path = ".", features = ["exact", "snapshot"] }

@@ -38,13 +38,18 @@ fn model_dirs() -> Vec<PathBuf> {
         };
         for e in rd.flatten() {
             let p = e.path();
-            if p.join("run.json").is_file() {
+            if p.join("run.json").is_file() && simoxide_thirdparty::skip_unless_available(&p) {
                 v.push(p);
             }
         }
     }
     v.sort();
-    assert!(v.len() > 80, "{} model directories", v.len());
+    // fewer without the third-party submodules (third_party/README.md)
+    assert!(
+        v.len() > 80 || !simoxide_thirdparty::all_available(),
+        "{} model directories",
+        v.len()
+    );
     v
 }
 
@@ -339,7 +344,10 @@ fn snapshots_continue_like_the_uninterrupted_run_exact() {
     }
     eprintln!("exact: {models_done} models, {n} snapshots");
     if filter().is_none() {
-        assert!(models_done > 100, "{models_done}");
+        assert!(
+            models_done > 100 || !simoxide_thirdparty::all_available(),
+            "{models_done}"
+        );
     }
 }
 
@@ -358,7 +366,10 @@ fn snapshots_continue_like_the_uninterrupted_run_fast() {
     }
     eprintln!("fast: {models_done} models, {n} snapshots");
     if filter().is_none() {
-        assert!(models_done > 100, "{models_done}");
+        assert!(
+            models_done > 100 || !simoxide_thirdparty::all_available(),
+            "{models_done}"
+        );
     }
 }
 
@@ -403,7 +414,10 @@ fn snapshots_continue_like_the_uninterrupted_run_slingshot() {
     }
     eprintln!("slingshot: {models_done} models, {n} snapshots");
     if filter().is_none() {
-        assert!(models_done > 50, "{models_done}");
+        assert!(
+            models_done > 50 || !simoxide_thirdparty::all_available(),
+            "{models_done}"
+        );
     }
 }
 
@@ -439,7 +453,7 @@ fn snapshots_of_the_literal_engine_and_of_tape_replays() {
         n += check_model::<Exact, SimuLizar>(name, cm, &cfg, ALL, i as u64, Encoding::Postcard);
     }
     if filter().is_none() {
-        assert!(n > 100, "{n}");
+        assert!(n > 100 || !simoxide_thirdparty::all_available(), "{n}");
     }
 }
 
@@ -492,7 +506,7 @@ fn snapshots_after_model_changes() {
     }
     eprintln!("model changes: {n} runs");
     if filter().is_none() {
-        assert!(n > 150, "{n}");
+        assert!(n > 150 || !simoxide_thirdparty::all_available(), "{n}");
     }
 }
 

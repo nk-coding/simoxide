@@ -154,6 +154,9 @@ fn standalone(c: &qvto_testkit::case::Case, t: &Transformation) -> Vec<String> {
 
 #[test]
 fn corpus_rules_on_a_run_model_mid_run() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let java = java();
     let mut report = Vec::new();
     let mut failures = Vec::new();

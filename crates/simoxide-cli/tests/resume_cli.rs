@@ -155,6 +155,9 @@ fn a_pause_condition_pauses_and_the_run_resumes() {
 #[cfg(not(feature = "reconfiguration"))]
 #[test]
 fn changes_need_the_reconfiguration_feature() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let d = tmp("nofeature");
     let snap = mediastore_snapshot(&d);
     let model = root().join(MS).to_string_lossy().into_owned();
@@ -473,6 +476,9 @@ fn explore_is_deterministic() {
 /// condition across three processes equals the uninterrupted run (trace, tape, measurements).
 #[test]
 fn the_slingshot_exact_engine_pauses_on_conditions() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let d = tmp("ssx-when");
     let p = |f: &str| d.join(f).to_string_lossy().into_owned();
     let model = root()

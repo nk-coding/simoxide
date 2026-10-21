@@ -18,7 +18,12 @@ fn entries() -> Vec<corpus::Entry> {
 #[test]
 fn corpus_files_roundtrip_byte_identical() {
     let es = entries();
-    assert!(es.len() >= 61, "corpus has {} entries", es.len());
+    // fewer without the third-party submodules (third_party/README.md)
+    assert!(
+        es.len() >= 61 || !simoxide_thirdparty::all_available(),
+        "corpus has {} entries",
+        es.len()
+    );
     let mut lines = 0usize;
     for e in &es {
         let x = e.expected().unwrap();

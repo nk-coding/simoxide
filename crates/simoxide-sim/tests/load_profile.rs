@@ -142,6 +142,9 @@ fn arrivals(r: &RunResult) -> Vec<f64> {
 
 #[test]
 fn a_unit_profile_changes_nothing() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     for (name, edits) in [
         ("h05_open_workload", &[][..]),
         ("h02_ps_ties", &[][..]),

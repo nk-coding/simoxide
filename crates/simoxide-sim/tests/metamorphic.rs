@@ -87,7 +87,7 @@ fn models(tag: &str) -> Vec<(String, PathBuf, RunSpec)> {
     let mut dirs: Vec<PathBuf> = std::fs::read_dir(&root)
         .unwrap()
         .filter_map(|e| e.ok().map(|e| e.path()))
-        .filter(|p| p.join("run.json").exists())
+        .filter(|p| p.join("run.json").exists() && simoxide_thirdparty::skip_unless_available(p))
         .collect();
     dirs.sort();
     for d in dirs {

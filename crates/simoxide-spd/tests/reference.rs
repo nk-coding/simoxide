@@ -216,6 +216,9 @@ fn run_snapshotted(dir: &Path, sim_time: i64, quirks: Quirks, reference: &str) -
 /// The SPD models of the comparison with snapshots on the way: the same decision logs.
 #[test]
 fn snapshots_keep_the_decision_log() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     for (name, dir, reference, t) in cases().into_iter().take(5) {
         let refs = std::fs::read_to_string(&reference).unwrap();
         for q in [Quirks::slingshot(), Quirks::fixed()] {
@@ -291,6 +294,9 @@ fn cases() -> Vec<(String, PathBuf, PathBuf, i64)> {
 
 #[test]
 fn decision_log_equals_reference_with_compat_flags() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let cases = cases();
     assert!(cases.len() >= 24, "{} cases", cases.len());
     let mut with_spd = 0;
@@ -315,6 +321,9 @@ const MIN_POLICY: &str = r#"{"k":"policy","id":"_7VIU0MAgEe6AcKIPVXJsSw","name":
 
 #[test]
 fn fixed_behaviour_minimal_and_scale_in() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     // spd_minimal: no quirk is involved, the fixed log equals the reference
     let r = reproductions();
     let refl = std::fs::read_to_string(r.join("spd_minimal/observed/spd.jsonl")).unwrap();
@@ -348,6 +357,9 @@ fn fixed_behaviour_minimal_and_scale_in() {
 
 #[test]
 fn fixed_behaviour_composed_triggers() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let r = reproductions();
     // OR(t == 50, t == 70): two adjustments
     let refl = std::fs::read_to_string(r.join("spd_or_trigger/observed/spd.jsonl")).unwrap();
@@ -408,6 +420,9 @@ fn fixed_behaviour_composed_triggers() {
 /// enactment was absolute); Rel never (0 > 0 on its own event at 0).
 #[test]
 fn fixed_behaviour_time_policies() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = root().join("reference/slingshot/models/spd_time_policies");
     let refl = std::fs::read_to_string(dir.join("expected/spd.jsonl")).unwrap();
     let got = project(&run(&dir, 100, Quirks::fixed(), &refl)).unwrap();

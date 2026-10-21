@@ -307,6 +307,9 @@ fn cases() -> Vec<Case> {
 
 #[test]
 fn a_change_file_at_resume_equals_the_edit_in_process() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     for c in cases() {
         let (cm, cfg) = load(c.dir, c.cfg);
         for mode in [Mode::Exact, Mode::Fast] {
@@ -371,6 +374,9 @@ fn refused_changes_leave_the_run_unchanged() {
 /// run goes on unchanged.
 #[test]
 fn the_slingshot_flavour_takes_changes_at_resume() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let dir = root().join("corpus/x_ss_minimal");
     let spec = RunSpec::load(&dir.join("run.json")).unwrap();
     let cm = CompiledModel::compile_flavour(
@@ -639,6 +645,9 @@ const EXPLORE_VARIANTS: &[(&str, &str)] = &[
 /// it; the variant the change path refuses reports its error.
 #[test]
 fn exploration_is_deterministic() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
     let (cm, cfg) = load("corpus/x_pem_screencast_ms", |c| {
         c.max_measurements = -1;
         c.max_sim_time = 12000;

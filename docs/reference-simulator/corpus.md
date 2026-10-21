@@ -17,7 +17,10 @@ network flags ([Output formats §5](../guide/formats.md#_5-run-configuration-run
   tests and examples (`x_sl_*`), Slingshot end-to-end tests (`x_ss_*`) and the espresso example.
   They get the refsim default monitors (`refsim.monitorrepository`: FeedThrough response times,
   active and passive resource metrics); their own monitors are not used. Their licences are
-  listed in `LICENSES`.
+  listed in `LICENSES`. The model files of `x_pem_*` and `x_ss_*` (no licence declared upstream)
+  are links into the git submodules `third_party/palladio-example-models` and
+  `third_party/slingshot-e2e-tests`; without `git submodule update --init` these directories are
+  skipped (`third_party/README.md`).
 
 Further model directories:
 

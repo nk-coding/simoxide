@@ -20,6 +20,8 @@ for line in open(os.path.join(ref, 'external-models.txt')):
     if line.startswith('#') or not line.strip():
         continue
     name, src, *_ = line.rstrip('\n').split('|')
+    src = src.replace('third_party/palladio-example-models/', 'repos/Palladio-Example-Models/')
+    src = src.replace('third_party/slingshot-e2e-tests/', 'repos/Palladio-Analyzer-Slingshot-E2E-Tests/')
     src = src.replace('repos/Palladio-Analyzer-Slingshot-E2E-Tests/bundles/org.palladiosimulator.analyzer.slingshot.e2e.helpers/src/main/resources/', 'Slingshot-E2E:')
     src = src.replace('repos/Palladio-Analyzer-SimuLizar/tests/org.palladiosimulator.simulizar.tests/testmodels/', 'SimuLizar-tests:')
     src = src.replace('repos/Palladio-Analyzer-SimuLizar/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.', 'SimuLizar-examples:')
@@ -36,7 +38,8 @@ def features(d):
     for f in sorted(os.listdir(d)):
         if f.endswith(('.repository', '.system', '.usagemodel', '.resourceenvironment', '.allocation')):
             txt += open(os.path.join(d, f), encoding='utf-8', errors='replace').read()
-    types = set(re.findall(r'xsi:type="(?:seff|usagemodel|repository|subsystem|seff_performance):([A-Za-z]+)"', txt))
+    # any namespace prefix: the linked upstream files use EMF's generated ones too (`_1:`, `pcm.subsystem:`)
+    types = set(re.findall(r'xsi:type="[\w.]+:([A-Za-z]+)"', txt))
     out = []
     wl = [t for t in ('OpenWorkload', 'ClosedWorkload') if t in types]
     out += [w.replace('Workload', ' workload').lower() for w in wl]
@@ -47,7 +50,7 @@ def features(d):
         out.append('guarded branch')
     if 'ProbabilisticBranchTransition' in types:
         out.append('probabilistic branch')
-    out += ['usage ' + t for t in ('Delay', 'Branch', 'Loop') if 'usagemodel:' + t in txt]
+    out += ['usage ' + t for t in ('Delay', 'Branch', 'Loop') if t in types]
     if 'infrastructureCall__Action' in txt:
         out.append('InfrastructureCall')
     if 'resourceCall__Action' in txt:
@@ -107,8 +110,10 @@ the patched reference; files > 256 KiB are stored as `.gz`, `gzip -n`).
   (`reference/src/refsim/corpus/HandMade.java`), and `FEATURES.txt` describes each one.
 - `x_*`: external example models, imported by `reference/import-external.sh` from
   `reference/external-models.txt`. That list also records the skipped models and why.
-  - Sources: `repos/Palladio-Example-Models` (`pem`), SimuLizar tests and examples (`sl`), Slingshot E2E
+  - Sources: `third_party/palladio-example-models` (`pem`), SimuLizar tests and examples (`sl`), Slingshot E2E
     (`ss`), and the work-simucom espresso and SimuLizar MediaStore copies.
+  - The model files of `x_pem_*` and `x_ss_*` are links into the git submodules `third_party/` (not
+    distributed; `git submodule update --init`, `third_party/README.md`).
   - These models get the refsim default monitors (`refsim.monitorrepository`: FeedThrough response time,
     active/passive resource metrics; see `Monitors.java`). The models' own monitors are not used.
 - Regenerate expected outputs: `reference/regen-expected.sh`. Check them: `reference/regen-expected.sh --check`.
