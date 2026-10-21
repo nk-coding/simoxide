@@ -46,7 +46,7 @@ VM with the same CPU; where they changed by more than the noise, the text says s
 Events are DESMO-J-equivalent event notes, so events/s compares models with each other. Against
 2026-09-30 the simulation figures are unchanged within noise (±3 %); loading is 20 to 25 % slower
 on the larger models (mediastore 609 → 749 µs) since the loader moved onto the graph shared with
-the QVTo engine ([Loading](#loading)).
+the QVTo engine; the follow-up of [Loading](#loading) recovers about half of that.
 Requests are finished usage-scenario runs, which compares the two modes. Counting measurements
 instead of storing them is up to 23 % faster (mediastore stores 2.2 million tuples per long run).
 
@@ -112,18 +112,40 @@ CLI runs they are most of the cost of a short run.
 
 | Model | Objects | From disk µs | From memory µs | With a warm `ParseCache` µs |
 |---|---|---|---|---|
-| mediastore (x_sl_mediastore) | 1 220 | 644 | 613 | 258 |
-| screencast (x_pem_screencast_ms) | 623 | 308 | 288 | 143 |
-| h01_ps_single | 158 | 76 | 59 | 53 |
-| generated, size 10 (gen_s6) | 974 | 418 | 398 | 184 |
+| mediastore (x_sl_mediastore) | 1 220 | 593 | 566 | 225 |
+| screencast (x_pem_screencast_ms) | 623 | 288 | 267 | 126 |
+| h01_ps_single | 158 | 72 | 56 | 50 |
+| generated, size 10 (gen_s6) | 974 | 386 | 364 | 158 |
 
 Best of 300, including typed-model build and validation (`cargo run --release -p simoxide-model
---example load-bench`), median of three invocations, one core of the 25-core VM (2026-10-21). On
-2026-09-30 (22-core VM) the same table read 532 / 513 / 188 µs for mediastore, 268 / 245 / 94,
-71 / 51 / 31 and 358 / 331 / 118: loading is 15 to 25 % slower from disk and memory and up to 70 %
-slower with a warm `ParseCache` since the loader moved onto the graph shared with the QVTo engine
-(merge step M5, whose gate was 5 %). Not investigated further here. XML tokenising takes about 45 µs of mediastore's time; creating objects,
-setting values and resolving references most of the rest; typed build and validation 90 µs.
+--example load-bench`), median of five invocations, one core of the 25-core VM (2026-10-21, after
+the loading follow-up below). On the same machine the 2026-09-30 state (`b3090c6`) reads 523 / 514
+/ 195 µs for mediastore, 261 / 240 / 111, 69 / 51 / 46 and 350 / 327 / 135, and the state before
+the follow-up 622 / 591 / 255, 309 / 278 / 142, 75 / 58 / 52 and 406 / 384 / 180 (engine.sh of the
+same day: 644 / 613 / 258 ...). Loading is now 4 to 14 % slower than on 2026-09-30 from disk and
+memory and 8 to 17 % with a warm `ParseCache` (before the follow-up 8 to 19 % and 13 to 34 %).
+
+The regression came with merge step M5b (its gate was 5 %; the bisection puts all of it there,
+M6b's copy-on-write chunks are neutral): the loader writes into the graph shared with the QVTo
+engine, whose objects hold a slot for every feature of their class (mediastore: 8 880 slots, 2 781
+of them set), where SimOxide's own graph had kept only the set ones. Every object, proxies
+included, got all its slots up front (`vec![Slot::Unset; n]`, an element-wise clone: 33 ns per
+object), a `ParseCache` splice copied them all slot by slot (the derived `Clone`, one call per
+slot, then a second pass to shift ids), and proxy resolution asked every feature of every object
+for its references. The follow-up: an object stores its slots only up to the last one written (a
+proxy none; reading past them is unset, the debug output still lists every slot), copies shift
+ids in the same pass and inline the unset and single-reference slots, `MetaRegistry::slot` is one
+lookup in a per-class open-addressing table instead of a block search for features of multiply
+inherited classes, and `resolve_all` reads an object's stored references in one pass over its
+slots. Allocations per load are back at the 2026-09-30 level (mediastore 5 990 / 5 132 against
+5 786 / 5 120). What remains is the graph's indirections on every read (a slot lookup costs about
+1.6 ns against 1.0 ns in the old graph; the builder, validation and proxy resolution make tens of
+thousands) and, for the largest model in the benchmark loop, glibc returning freed memory to the
+system between loads (about 30 µs of mediastore's time; not with
+`GLIBC_TUNABLES=glibc.malloc.trim_threshold=...`). The QVTo benchmark (`qvto bench`) is unchanged
+by the follow-up (geomean 0.98 compat, 1.00 fast). XML tokenising takes about 45 µs of
+mediastore's time; creating objects, setting values and resolving references most of the rest;
+typed build and validation about 90 µs.
 
 ## Design
 
