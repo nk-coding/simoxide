@@ -86,7 +86,10 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for NoAdjustment {
     }
 }
 
-/// The measuring point and metric of each compiled series, as far as SPD reads them.
+/// The measuring point, metric and covered time span of each compiled series, as far as SPD
+/// reads them. The span is the length of the sliding window whose output the series is
+/// (SimuLizar's windowed utilisation, MEAS-6), else 0 (instantaneous samples):
+/// [`Measurement::covers`].
 ///
 /// `series`: the run's measurement series (`Measurements::series`: the compiled model's, plus
 /// those a model change appended, e.g. the monitors cloned for a new container); `cm` the run's
@@ -94,11 +97,18 @@ impl<C: Compat, F: Flavour> Adjuster<C, F> for NoAdjustment {
 pub(crate) fn series_points(
     cm: &CompiledModel,
     series: &[simoxide_sim::ir::SeriesDef],
-) -> Vec<Option<(PointRef, Metric)>> {
+) -> Vec<Option<(PointRef, Metric, f64)>> {
     let m = &cm.model;
+    let mut covers = vec![0.0f64; series.len()];
+    for w in &cm.windows {
+        if let Some(c) = w.out.and_then(|o| covers.get_mut(o as usize)) {
+            *c = w.len;
+        }
+    }
     series
         .iter()
-        .map(|s| {
+        .zip(covers)
+        .map(|(s, covers)| {
             let metric = match s.metric {
                 metric_names::RESPONSE_TIME => Metric::ResponseTime,
                 metric_names::UTILIZATION => Metric::Utilization,
@@ -106,7 +116,7 @@ pub(crate) fn series_points(
                 metric_names::STATE_OF_PASSIVE_RESOURCE => Metric::PassiveResourceState,
                 _ => return None,
             };
-            Some((point_of_key(m, &s.mp), metric))
+            Some((point_of_key(m, &s.mp), metric, covers))
         })
         .collect()
 }
@@ -183,7 +193,7 @@ pub struct SpdRun<'m, 's, C: Compat, F: Flavour = SimuLizar> {
     pub sim: Simulation<'m, C, F>,
     pub(crate) spd: &'s Spd,
     pub state: SpdState,
-    pub(crate) series: Vec<Option<(PointRef, Metric)>>,
+    pub(crate) series: Vec<Option<(PointRef, Metric, f64)>>,
     /// Requests by note tag (`REQUEST | index`); taken when dispatched.
     pub(crate) requests: Vec<Option<AdjustmentRequest>>,
     pub(crate) adjusted_ok: u64,
@@ -230,7 +240,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
         let series = series_points(cm, &sim.state().measurements().series);
         let metrics = spd.metrics();
         for (i, s) in series.iter().enumerate() {
-            if let Some((_, m)) = s
+            if let Some((_, m, _)) = s
                 && metrics.contains(m)
             {
                 sim.observe_series(i as u32);
@@ -344,7 +354,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
         let series = series_points(self.sim.compiled(), defs);
         let metrics = self.spd.metrics();
         for (i, s) in series.iter().enumerate().skip(self.series.len()) {
-            if let Some((_, m)) = s
+            if let Some((_, m, _)) = s
                 && metrics.contains(m)
             {
                 self.sim.observe_series(i as u32);
@@ -397,7 +407,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
         }
         let tuples = self.sim.take_observed();
         for o in tuples {
-            let Some((point, metric)) = self.series[o.series as usize] else {
+            let Some((point, metric, covers)) = self.series[o.series as usize] else {
                 continue;
             };
             let m = Measurement {
@@ -406,6 +416,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
                 point_in_time: o.t,
                 value: o.v,
                 source: o.series,
+                covers,
             };
             let mut host = Host {
                 sim: &mut self.sim,

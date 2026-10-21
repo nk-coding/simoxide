@@ -3373,8 +3373,10 @@ runner, `--stock`; SimOxide's `simoxide-compare` with `flavour=`/`simMode=`, and
   Slingshot's side: not measured (MENTOR not installed, U7).
 - Rules against refsim (stock SimuLizar cannot run them on the flat classpath): 110× (`lb_outsource`),
   19× (`lb_rules_qvto`), 5× (`power_rules_qvto`: 13 349 reconfigurations, 1.1 s in rules).
-- Anomalies, noted and not investigated: in the SimuLizar flavour (time-driven utilisation monitors)
-  `spd_v4_cpu` never scales out; XMI loading is 15-25 % slower than on 2026-09-30 (M5's gate was 5 %),
+- Anomalies: in the SimuLizar flavour (time-driven utilisation monitors) `spd_v4_cpu` never
+  scales out, and the fixed default of the Slingshot flavour scales it twice (Slingshot 16):
+  three defects of the AVERAGE aggregation, fixed after B1 (below, "B1 follow-up"). Noted and not
+  investigated: XMI loading is 15-25 % slower than on 2026-09-30 (M5's gate was 5 %),
   up to 70 % with a warm `ParseCache`.
 - Earlier figures re-measured: the Slingshot flavour's `x_ss_mediastore` 200 000 s now 0.11 ms of
   simulation (S2 said 0.25 ms; 1.2 ms with loading), `x_espresso` 100 s 0.19 ms (0.31 ms); Slingshot
@@ -3383,6 +3385,40 @@ runner, `--stock`; SimOxide's `simoxide-compare` with `flavour=`/`simMode=`, and
   costs`, warm runs): core 2.6-2.8 ms, compile 0.36-0.40 ms, per-run state 0.74-0.86 ms, rule run
   146-177 µs, change 0.29-0.35 ms (the first test run in a fresh process about twice that). Rules in
   QVTo's compat mode now cost the same as in ordered mode (power example 1.1 s, was 42 s).
+- **B1 follow-up: CPU-utilisation policies with the fixed behaviour** (branch `spd-cpu`). B1's
+  `spd_v4_cpu` (one container offered 1.6 cores; AVERAGE CPU above 80 % out, below 60 % in) made
+  0 adjustments in the SimuLizar flavour and 2 in the Slingshot flavour's fixed default (Slingshot
+  16, the flavour with Slingshot's quirks 15-17). Measurements reached the triggers in both; the
+  causes were in the aggregation (`simoxide-spd/src/aggregate.rs`):
+  - *SimuLizar flavour:* Slingshot's EMA multiplies its value by `exp(-Δt/60)` per sample. Its
+    Javadoc states the intent: Slingshot samples utilisation only when a job arrives or leaves,
+    so the time without samples is taken as idle. SimuLizar's utilisation tuples are 10 s
+    sliding windows that already cover that time; decayed anyway, a constant utilisation `x`
+    settled at `0.2 f / (1 - 0.8 f) x = 0.52 x` (`f = e^(-1/6)`), so "above 80 %" never held
+    and "below 60 %" always did (blocked by the group's minimum size). Fixed:
+    `Measurement::covers` (the window length of a sliding-window series, from the compiled
+    windows; 0 for instantaneous samples) and the EMA decays only over `max(0, Δt - covers)`.
+    Slingshot flavours: `covers = 0`, unchanged.
+  - *Fixed Q13, both flavours:* a per-element EMA started at `t = 0`, so the first sample of a
+    container added at `t` was decayed by `e^(-t/60)` and, being past 60 s, counted at once: the
+    average dropped and the in-policy scaled in 2.5 s after the scale-out (60.0 s out, 62.6 s
+    in). Fixed: a window starts with its element's first sample (`Ema::start`), an EMA is ready
+    60 s later. And the window of a removed container stayed in the average with its last value
+    for the rest of the run (between 60 and 80 %: no further adjustment). Fixed: elements keep
+    their container, windows of containers no longer in the group are dropped before the
+    trigger reads them (`PerElement::retain`).
+  - Adjustments in 600 s, seeds 1-3 (fast; SimuLizar exact in brackets): SimuLizar flavour
+    0 → 9, 10, 9 (11, 9, 8); Slingshot flavour fixed 2 → 16, 15, 16 (with only the window start
+    fixed: 12, 6, 10); with Slingshot's quirks 15, 17, 15, unchanged (Q13 compat keeps
+    Slingshot's single window). The SimuLizar flavour scales less than Slingshot: its 10 s
+    windows smooth the utilisation, so it crosses the thresholds less often.
+  - Unchanged: the Slingshot-exact engine and every compat-flag run, the plain models (no SPD).
+    Snapshots of SPD runs carry the new fields (`Ema::start`, the element's container), so
+    older SPD snapshots do not restore.
+  - Tests: `aggregate` unit tests (`ema_covered_samples`, `per_element_window_starts_with_element`,
+    `per_element_retain`), `spd_adjust::cpu_utilisation_policies_scale_in_both_flavours` (fails
+    before the fix: no adjustment in the SimuLizar flavour), `unit::q13_ema_emit_slot` adapted
+    (its window starts at the first sample).
 
 ## 7. Phased plan
 

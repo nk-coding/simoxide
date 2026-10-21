@@ -70,7 +70,7 @@ Per adjustment (SimOxide, QVTo `MainTransformation` plus the change path, mean o
 | `spd_v4_cpu` | 0.664 | 0.000 | 13.1 | 29.2 ms / 52.9 ms / 21.2 ms | 4.21 s | 3.21 s | 15 MB / 686 MB |
 | `spd_v4_rt` | 0.000 | 0.000 | 13.8 | 21.2 ms / 34.8 ms / 29.7 ms | 3.93 s | 2.99 s | 13 MB / 693 MB |
 
-**With stock Slingshot's quirks** (Slingshot flavour, fast, `quirks=fast spdQuirks=slingshot` as in `reference/slingshot/spd-stat.sh`: the decisions stock Slingshot makes; the fixed default above scales `spd_v4_cpu` 2 times in 600 s, Slingshot about 16 times):
+**With stock Slingshot's quirks** (Slingshot flavour, fast, `quirks=fast spdQuirks=slingshot` as in `reference/slingshot/spd-stat.sh`: the decisions stock Slingshot makes; the fixed default above scales `spd_v4_cpu` 2 times in 600 s, Slingshot about 16 times; see the note below the results):
 
 | model | warm per run | adjustments (min–max) | in adj. | ms per adjustment | requests (min–max) | Slingshot / this |
 |---|---|---|---|---|---|---|
@@ -93,6 +93,20 @@ Per adjustment (SimOxide, QVTo `MainTransformation` plus the change path, mean o
 | `spd_time_policies` | 4–4, 33–33 | 4–4, 33–33 | 8, 33 |
 | `spd_v4_cpu` | 2–2, 288–307 | 0–0, 284–307 | 16, 533 |
 | `spd_v4_rt` | 0–0, 284–307 | 0–0, 284–307 | 2, 534 |
+
+**Note (added after the run, branch `spd-cpu`).** The `spd_v4_cpu` rows of the fixed default
+show three defects of SimOxide's `AVERAGE` aggregation, not intended semantics (`DESIGN-SPD.md`
+§6, "B1 follow-up"). SimuLizar flavour, 0 adjustments: Slingshot's EMA decays its value by
+`exp(-Δt/60)` at every sample, which by its Javadoc stands for the idle time between
+Slingshot's event-driven utilisation samples; applied to 10 s sliding-window tuples it capped
+the EMA at 52 % of the utilisation, so the 80 % threshold was never reached. Slingshot flavour,
+2 adjustments: a new container's per-element window (fixed Q13) was decayed over the whole run
+before it existed and counted at once, so the group scaled in 2.5 s after scaling out, and the
+removed container's last value then stayed in the average (between 60 and 80 %) for the rest of
+the run. With the fixes (seeds 1–3, fast): Slingshot flavour 15–16 adjustments, 455–496
+requests; SimuLizar flavour 9–10 adjustments, 459–500 requests (exact: 8–11); with Slingshot's
+quirks unchanged (15–17). The timings above are those of the old decisions and were not
+re-measured.
 
 ### Snapshots of SPD runs (halfway)
 

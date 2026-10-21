@@ -206,6 +206,7 @@ fn cpu(container: ObjId, metric: Metric, t: f64, v: f64, source: u32) -> Measure
         point_in_time: t,
         value: v,
         source,
+        covers: 0.0,
     }
 }
 
@@ -916,8 +917,9 @@ fn q13_ema_emit_slot() {
     r.measure(71.5, cpu(UNIT, Metric::Utilization, 71.5, 1.0, 0));
     assert_eq!(r.fired(0), vec![71.5]);
 
+    // fixed: the element's window starts with its first sample (here t = 0)
     let mut r = Run::new(mk(), Quirks::fixed());
-    for t in [30.0, 60.0, 61.0] {
+    for t in [0.0, 30.0, 60.0, 61.0] {
         r.measure(t, cpu(UNIT, Metric::Utilization, t, 1.0, 0));
     }
     // the slot was not consumed at 61: fires at 66
@@ -1004,6 +1006,7 @@ fn response_time_trigger() {
         point_in_time: 1.0,
         value: v,
         source: 0,
+        covers: 0.0,
     };
     r.measure(1.0, rt(1.0, sig));
     r.measure(2.0, rt(3.0, sig));
