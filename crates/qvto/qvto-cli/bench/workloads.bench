@@ -330,7 +330,7 @@ end
 case b5_copy_Ecore
 kind bench
 qvto qvto-cli/bench/ecore/EcoreCopy.qvto
-in qvto-emf/models/Ecore.ecore
+in ../foundation/simoxide-emf/models/Ecore.ecore
 bench group B5
 bench note Ecore.ecore itself
 end
