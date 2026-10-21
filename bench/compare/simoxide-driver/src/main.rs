@@ -1,7 +1,12 @@
 //! SimOxide driver of bench/compare: the same `key=value` arguments and `RESULT` / `PAR` lines as
 //! the JVM drivers (`bench/compare/java/common/cmp/Harness.java`).
 //!
-//! `model=DIR simTime=T maxMeas=M seed=S warmup=W runs=R threads=T [mode=reload|batch]`
+//! `model=DIR simTime=T maxMeas=M seed=S warmup=W runs=R threads=T [mode=reload|batch]
+//! [simMode=exact|fast] [flavour=simulizar|slingshot|slingshot-exact]`
+//!
+//! * `simMode` (default `exact`, byte-identical to SimuLizar) and `flavour` (default `simulizar`)
+//!   select the simulation; `sim=` is printed as `simoxide`, or `simoxide-<flavour>-<simMode>` when
+//!   either is given (DESIGN-SPD.md §6, B1).
 //!
 //! * `mode=reload` (default): every run loads the XMI files from disk, compiles the model,
 //!   simulates with stored measurements and computes the summaries, like a JVM driver's run
@@ -9,7 +14,7 @@
 //!   a shared counter.
 //! * `mode=batch`: load and compile once, then `simoxide_sim::run_batch` (the embedding API's way).
 
-use simoxide_sim::{CompiledModel, RunSpec, SimConfig, Simulation};
+use simoxide_sim::{CompiledModel, FlavourConfig, Mode, RunSpec, SimConfig};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -32,8 +37,19 @@ struct Res {
 fn load(dir: &Path, a: &HashMap<String, String>, seed_offset: i64) -> Result<(CompiledModel, SimConfig), String> {
     let spec = RunSpec::default();
     let model = spec.load_model(dir)?;
-    let cm = CompiledModel::compile(model).map_err(|e| e.to_string())?;
+    let flavour = match a.get("flavour").map(String::as_str) {
+        None | Some("simulizar") => FlavourConfig::SIMULIZAR,
+        Some("slingshot") => FlavourConfig::slingshot(Default::default()),
+        Some("slingshot-exact") => FlavourConfig::slingshot_exact(),
+        Some(f) => return Err(format!("flavour {f}")),
+    };
+    let cm = CompiledModel::compile_flavour(model, flavour).map_err(|e| e.to_string())?;
     let mut cfg = spec.sim_config("cmp");
+    cfg.mode = match a.get("simMode").map(String::as_str) {
+        None | Some("exact") => Mode::Exact,
+        Some("fast") => Mode::Fast,
+        Some(m) => return Err(format!("simMode {m}")),
+    };
     cfg.seed = a.get("seed").map_or(Ok(1), |s| s.parse()).map_err(|e| format!("seed: {e}"))?;
     cfg.max_sim_time = a.get("simTime").map_or(Ok(-1), |s| s.parse()).map_err(|e| format!("simTime: {e}"))?;
     cfg.max_measurements = a.get("maxMeas").map_or(Ok(-1), |s| s.parse()).map_err(|e| format!("maxMeas: {e}"))?;
@@ -46,7 +62,7 @@ fn load(dir: &Path, a: &HashMap<String, String>, seed_offset: i64) -> Result<(Co
 
 fn simulate(cm: &CompiledModel, cfg: SimConfig, r: &mut Res) {
     let t = Instant::now();
-    match Simulation::new(cm, cfg, Default::default()).and_then(|s| s.run()) {
+    match simoxide_sim::run(cm, cfg, Default::default()) {
         Ok(out) => {
             r.sim_ms = t.elapsed().as_secs_f64() * 1e3;
             r.events = out.events as i64;
@@ -80,9 +96,9 @@ fn epoch_ms() -> u128 {
     std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis()
 }
 
-fn print(model: &str, phase: &str, i: usize, r: &Res) {
+fn print(sim: &str, model: &str, phase: &str, i: usize, r: &Res) {
     println!(
-        "RESULT sim=simoxide model={model} phase={phase} run={i} wall_ms={:.3} sim_ms={:.3} requests={} mean_rt={:.6} sim_end={:.3} events={} t_end_ms={:.1}{}",
+        "RESULT sim={sim} model={model} phase={phase} run={i} wall_ms={:.3} sim_ms={:.3} requests={} mean_rt={:.6} sim_end={:.3} events={} t_end_ms={:.1}{}",
         r.wall_ms,
         r.sim_ms,
         r.requests,
@@ -108,9 +124,18 @@ fn main() {
     let batch = a.get("mode").is_some_and(|m| m == "batch");
 
     let duration: f64 = a.get("duration").map_or(0.0, |v| v.parse().expect("duration"));
-    let sim_name = if batch { "simoxide-batch" } else { "simoxide" };
+    let variant = (a.contains_key("flavour") || a.contains_key("simMode")).then(|| {
+        format!(
+            "-{}-{}",
+            a.get("flavour").map_or("simulizar", String::as_str),
+            a.get("simMode").map_or("exact", String::as_str)
+        )
+    });
+    let base = if batch { "simoxide-batch" } else { "simoxide" };
+    let sim_name = format!("{base}{}", variant.as_deref().unwrap_or(""));
+    let rsim = format!("simoxide{}", variant.as_deref().unwrap_or(""));
     for w in 0..warmup {
-        print(&model, "warm", w, &one_run(&dir, &a, w));
+        print(&rsim, &model, "warm", w, &one_run(&dir, &a, w));
     }
     let t0 = Instant::now();
     let epoch0 = epoch_ms();
@@ -178,7 +203,7 @@ fn main() {
     let wall = t0.elapsed().as_secs_f64() * 1e3;
     v.sort_by_key(|x| x.0);
     for (i, r) in &v {
-        print(&model, "run", *i, r);
+        print(&rsim, &model, "run", *i, r);
     }
     let n = v.len();
     println!(

@@ -5,8 +5,12 @@
 //! ```sh
 //! cargo run --release -p simoxide-reconf --example spd-bench -- MODEL_DIR \
 //!     [flavour=simulizar|slingshot] [mode=fast|exact] [simTime=S] [seed=N] [warmup=W] [runs=R] \
-//!     [snapshotAt=S]
+//!     [snapshotAt=S] [quirks=LIST] [spdQuirks=fixed|slingshot|LIST]
 //! ```
+//!
+//! `quirks` are the Slingshot flavour's compat flags (`simoxide run --quirks`, e.g. `fast`), `spdQuirks`
+//! the SPD interpreter's (`--spd-quirks`; default `fixed`); `quirks=fast spdQuirks=slingshot` is what
+//! stock Slingshot does (`reference/slingshot/spd-stat.sh`).
 //!
 //! Prints one `SETUP` line (QVTo core and `MainTransformation`, once per process), one `RUN` line
 //! per run (`wall_ms` from the simulation's creation to its result, `adjust_ms` inside the
@@ -181,11 +185,18 @@ fn main() -> Result<(), String> {
 
     let t0 = Instant::now();
     let model = RunSpec::default().load_model(&dir)?;
-    let spd = spd_of(&model, Quirks::fixed())
+    let spd_quirks = match a.get("spdQuirks") {
+        Some(q) => Quirks::parse(q)?,
+        None => Quirks::fixed(),
+    };
+    let spd = spd_of(&model, spd_quirks)
         .map_err(|e| e.to_string())?
         .ok_or("the model has no SPD")?;
     let flavour = if slingshot {
-        FlavourConfig::slingshot(Default::default())
+        FlavourConfig::slingshot(match a.get("quirks") {
+            Some(q) => simoxide_sim::Quirks::parse(q)?,
+            None => Default::default(),
+        })
     } else {
         FlavourConfig::SIMULIZAR
     };

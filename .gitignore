@@ -18,6 +18,10 @@
 /bench/compare/results/raw.csv
 /bench/compare/results/sus_runs.csv
 /bench/compare/results/raw-archive/
+# dated sessions (results/<date>-*/): summaries kept, raw output not
+/bench/compare/results/*/raw/
+# B1 work directory (bench/compare/spd/b1.sh): model copies, Slingshot outputs, raw logs
+/bench/compare/spd/work/
 
 # Profiling output
 *.folded
