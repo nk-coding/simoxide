@@ -61,6 +61,11 @@ pub struct Measurement {
     pub value: f64,
     /// The host's key of the measuring point (series); the fixed Q13 keeps one window per key.
     pub source: u32,
+    /// The time span (s) the value describes, ending at `point_in_time`: the window length of
+    /// a sliding-window tuple (the SimuLizar flavour's utilisation, MEAS-6), 0 for an
+    /// instantaneous sample (Slingshot's). The `AVERAGE` EMA treats only the time not covered
+    /// by the samples as idle ([`crate::aggregate::Ema::aggregate`]).
+    pub covers: f64,
 }
 
 /// An adjustment the interpreter requests: the output of a policy whose chain passed
@@ -1094,7 +1099,27 @@ impl Spd {
                 }
             },
             Filter::Trigger => {
-                let PolicyState { nodes, .. } = &mut st.policies[c];
+                let SpdState {
+                    policies,
+                    membership,
+                    ..
+                } = st;
+                let PolicyState { nodes, .. } = &mut policies[c];
+                if !self.quirks.q13_merged_samples {
+                    // fixed Q13: elements that left the group (removed containers) drop out
+                    let group = &self.model.groups[ctx.group];
+                    for n in nodes.iter_mut() {
+                        if let NodeState::Leaf {
+                            per_element: Some(p),
+                            ..
+                        } = n
+                        {
+                            p.retain(|k| {
+                                container_in_group(membership, group, ObjId(k)).unwrap_or(true)
+                            });
+                        }
+                    }
+                }
                 if self.quirks.q12_broken_composed {
                     self.node_compat(ctx, nodes, ctx.root, Some(ev))
                 } else {
@@ -1307,7 +1332,7 @@ impl Spd {
                 if let Some(w) = window {
                     // Q13 compat: one window; getResult for every event reaching the checker
                     if m.metric == metric {
-                        w.aggregate(m.point_in_time, m.value);
+                        w.aggregate(m.point_in_time, m.value, m.covers);
                     }
                     if !w.emittable() {
                         return FRes::Disregard(Reason::NotEmittable);
@@ -1322,7 +1347,12 @@ impl Spd {
                     if m.metric != metric {
                         return FRes::Disregard(Reason::NotStimulusMetric);
                     }
-                    p.aggregate(m.source, m.point_in_time, m.value);
+                    let container = match m.point.kind {
+                        PointKind::ActiveResource { container }
+                        | PointKind::Container { container } => Some(container.0),
+                        _ => None,
+                    };
+                    p.aggregate(m.source, container, m.point_in_time, m.value, m.covers);
                     if !p.emittable() {
                         return FRes::Disregard(Reason::NotEmittable);
                     }

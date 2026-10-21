@@ -624,7 +624,7 @@ fn cpu_windows(
             ..
         } = n
         {
-            keys.extend(p.elements.iter().map(|(k, _)| *k));
+            keys.extend(p.elements.iter().map(|e| e.key));
         }
     }
     keys
@@ -846,5 +846,102 @@ fn slingshot_flavour_runs_a_stochastic_cpu_scenario() {
             }
         }
         assert!(outs > 0 && ins > 0, "{q:?}: {outs} out, {ins} in");
+    }
+}
+
+/// `spd_v4_cpu` (P3/V4: CPU utilisation, `AVERAGE`, above 80 % out, below 60 % in, group 1..4;
+/// one container is offered 1.6 cores) scales in both flavours with the fixed behaviour:
+///
+/// * SimuLizar flavour: the EMA is fed by 10 s sliding-window utilisation, which already covers
+///   the time between its samples. Treating that time as idle (Slingshot's correction for its
+///   event-driven samples) capped the EMA at 52 % of the utilisation: 0 adjustments.
+/// * Slingshot flavour: a new container's window starts with its first sample (it was decayed
+///   over the whole run before and counted at once, so the average dropped and the group
+///   scaled in 2.5 s after scaling out), and a removed container's window leaves the average
+///   (its last value was kept for the rest of the run): 2 adjustments before, Slingshot makes
+///   about 16.
+#[test]
+fn cpu_utilisation_policies_scale_in_both_flavours() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
+    use simoxide_sim::{Fast, FlavourConfig, Mode, Slingshot};
+    let dir = root().join("reference/slingshot/models/spd_v4_cpu");
+    let q = Quirks::fixed();
+    let summary = |log: &VecLog| {
+        adjust_records(&log.to_jsonl())
+            .iter()
+            .map(|a| {
+                assert_eq!(a["ok"], true);
+                (
+                    a["policy_name"].as_str().unwrap().to_string(),
+                    a["t"].as_f64().unwrap(),
+                )
+            })
+            .collect::<Vec<_>>()
+    };
+    let check = |flavour: &str, a: &[(String, f64)], at_least: usize| {
+        eprintln!("{flavour}: {a:?}");
+        assert!(a.len() >= at_least, "{flavour}: {a:?}");
+        assert_eq!(a[0].0, "cpu out", "{flavour}");
+        // no scale-in right after the first scale-out: the new container's window is not
+        // ready for a window length (60 s)
+        assert!(
+            a[1].0 == "cpu out" || a[1].1 - a[0].1 > 60.0,
+            "{flavour}: {a:?}"
+        );
+    };
+
+    // SimuLizar flavour (time-driven utilisation monitors, 10 s windows)
+    let model = RunSpec::default()
+        .load_model(&simulizar_copy(&dir))
+        .unwrap();
+    let spd = spd_of(&model, q).unwrap().unwrap();
+    let cm = CompiledModel::compile(model).unwrap();
+    let mut cfg = RunSpec::default().sim_config("v4");
+    cfg.seed = 1;
+    cfg.max_sim_time = 600;
+    let sim = Simulation::<Exact>::new(&cm, cfg, Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &spd).unwrap();
+    let mut log = VecLog::default();
+    r.run(&mut adjuster(q), &mut log).unwrap();
+    let a = summary(&log);
+    check("simulizar", &a, 4);
+    assert!(a.iter().any(|(p, _)| p == "cpu in"), "{a:?}");
+
+    // Slingshot flavour (instantaneous samples), fast mode
+    let model = RunSpec::default().load_model(&dir).unwrap();
+    let spd = spd_of(&model, q).unwrap().unwrap();
+    let cm = CompiledModel::compile_flavour(model, FlavourConfig::SLINGSHOT).unwrap();
+    let mut cfg = RunSpec::default().sim_config("v4");
+    cfg.mode = Mode::Fast;
+    cfg.seed = 1;
+    cfg.max_sim_time = 600;
+    let sim = Simulation::<Fast, Slingshot>::create(&cm, cfg, Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &spd).unwrap();
+    let mut log = VecLog::default();
+    r.run(&mut adjuster(q), &mut log).unwrap();
+    let a = summary(&log);
+    check("slingshot", &a, 8);
+    // the windows are those of the group's current containers
+    let group = &spd.model().groups[0];
+    let size = r.state.membership.group_size(group).unwrap();
+    let c = spd
+        .contexts()
+        .iter()
+        .position(|c| &*spd.model().policies[c.policy].name == "cpu out")
+        .unwrap();
+    for n in &r.state.policies[c].nodes {
+        if let simoxide_spd::NodeState::Leaf {
+            per_element: Some(p),
+            ..
+        } = n
+        {
+            assert!(
+                p.elements.len() <= size,
+                "{} windows, {size} containers",
+                p.elements.len()
+            );
+        }
     }
 }

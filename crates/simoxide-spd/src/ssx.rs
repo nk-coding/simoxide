@@ -218,6 +218,8 @@ impl SpdHooks for SsxSpd<'_, '_> {
             point_in_time: m.point_in_time,
             value: m.value,
             source: m.series,
+            // Slingshot's samples are instantaneous (no sliding windows)
+            covers: 0.0,
         };
         let mut h = Host {
             now,
