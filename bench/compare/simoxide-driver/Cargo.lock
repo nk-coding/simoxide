@@ -97,16 +97,50 @@ dependencies = [
 ]
 
 [[package]]
+name = "simoxide-emf"
+version = "0.1.0"
+dependencies = [
+ "memchr",
+ "quick-xml",
+ "simoxide-emf-core",
+ "simoxide-jcompat",
+]
+
+[[package]]
+name = "simoxide-emf-core"
+version = "0.1.0"
+
+[[package]]
+name = "simoxide-jcompat"
+version = "0.1.0"
+dependencies = [
+ "ryu",
+]
+
+[[package]]
+name = "simoxide-jcompat-exact"
+version = "0.1.0"
+dependencies = [
+ "simoxide-jcompat",
+]
+
+[[package]]
 name = "simoxide-model"
 version = "0.1.0"
 dependencies = [
  "memchr",
  "quick-xml",
+ "simoxide-emf",
+ "simoxide-emf-core",
+ "simoxide-jcompat",
 ]
 
 [[package]]
 name = "simoxide-random"
 version = "0.1.0"
+dependencies = [
+ "simoxide-jcompat",
+]
 
 [[package]]
 name = "simoxide-sched"
@@ -116,8 +150,9 @@ version = "0.1.0"
 name = "simoxide-sim"
 version = "0.1.0"
 dependencies = [
- "ryu",
  "serde_json",
+ "simoxide-jcompat",
+ "simoxide-jcompat-exact",
  "simoxide-model",
  "simoxide-random",
  "simoxide-sched",
@@ -128,6 +163,7 @@ dependencies = [
 name = "simoxide-stoex"
 version = "0.1.0"
 dependencies = [
+ "simoxide-jcompat",
  "simoxide-random",
 ]
 

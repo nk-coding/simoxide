@@ -6,7 +6,8 @@ set -e
 C="$(cd "$(dirname "$0")" && pwd)"
 source "$C/env.sh"
 ( cd "$C/simoxide-driver" && CARGO_TARGET_DIR="${CMP_CARGO_TARGET:-$R/target/compare}" cargo build --release -q )
-( cd "$R" && cargo build --release -q -p simoxide-cli )
+# the CLI (cold runs) in exact mode like the driver; a local build, not distributed
+( cd "$R" && cargo build --release -q -p simoxide-cli --features "${SIMOXIDE_FEATURES:-exact,hotspot-math}" )
 [ -f "$R/reference/build/classes-base/refsim/Main.class" ] || "$R/reference/build.sh"
 "$R/reference/tools/classpath.sh" > /dev/null
 rm -rf "$B"; mkdir -p "$B"/{refsim,simulizar,slingshot}

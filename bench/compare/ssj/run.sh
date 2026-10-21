@@ -43,7 +43,7 @@ for p in $PHASES; do
   case $p in
     build)
       ( cd "$C/simoxide-driver" && CARGO_TARGET_DIR="${CMP_CARGO_TARGET:-$R/target/compare}" cargo build --release -q ) &&
-      ( cd "$R" && cargo build --release -q -p simoxide-cli ) &&
+      ( cd "$R" && cargo build --release -q -p simoxide-cli --features "${SIMOXIDE_FEATURES:-exact,hotspot-math}" ) &&
       "$SSJ_HOME/setup.sh" || { echo "build failed" >&2; exit 1; } ;;
     extra) [ -n "$EXTRA_MODELS" ] && MODELS="$EXTRA_MODELS" "$C/run-all.sh" cold warm ;;
     summary) "$C/run-all.sh" summary && python3 -I "$SSJ_HOME/docs-numbers.py" "$OUT" ;;

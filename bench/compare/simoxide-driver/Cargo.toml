@@ -9,7 +9,8 @@ publish = false
 [workspace]
 
 [dependencies]
-simoxide-sim = { path = "../../../crates/simoxide-sim" }
+# exact mode (byte-identical to SimuLizar), as on the website; a local build, not distributed
+simoxide-sim = { path = "../../../crates/simoxide-sim", features = ["exact"] }
 
 # identical to the SimOxide workspace release profile (simoxide is built with it)
 [profile.release]
