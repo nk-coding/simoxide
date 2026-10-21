@@ -221,7 +221,18 @@ pub fn record(
         all.extend(std::mem::take(&mut a));
         a = all;
     }
-    let text = fixture::write_bundle(&a);
+    // cases on third-party models keep only the digest of their dump (third_party/README.md)
+    let digested: std::collections::BTreeSet<String> = crate::case::read_cases(&run.cases)
+        .map_err(|e| format!("{}: {e}", run.cases.display()))?
+        .iter()
+        .filter(|c| {
+            c.inputs
+                .iter()
+                .any(|i| simoxide_thirdparty::uses_third_party(&c.path(&run.base, i)))
+        })
+        .map(|c| c.id.clone())
+        .collect();
+    let text = fixture::write_bundle(&a, &|id| digested.contains(id));
     let mut differences = Vec::new();
     let mut unstable_skipped = 0;
     let what = match write {

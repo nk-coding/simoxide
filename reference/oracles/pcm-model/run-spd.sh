@@ -14,4 +14,7 @@ CP=build/classes:$(cat build/classpath.txt)
 for b in org.palladiosimulator.spd_1 org.palladiosimulator.spd.semantic_1 org.palladiosimulator.spd.measuringpoint_1; do
   CP=$CP:$(ls "$SPD"/$b*.jar | tail -1)
 done
-exec ${JAVA:-java} ${JVM_OPTS:--Xmx2g} -cp "$CP" SpdOracle "$P" "${1:-spd-models.txt}" "${2:-golden-spd}"
+${JAVA:-java} ${JVM_OPTS:--Xmx2g} -cp "$CP" SpdOracle "$P" "${1:-spd-models.txt}" "${2:-golden-spd}"
+# the dumps of third-party models are git-ignored; their digests are committed (third_party/README.md)
+OUT_ABS="$(cd "${2:-golden-spd}" && pwd)"
+(cd ../../.. && cargo run -q -p simoxide-thirdparty -- digests "$OUT_ABS")

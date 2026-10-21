@@ -325,14 +325,20 @@ pub fn differential_with(
             .as_ref()
             .map(|out| canon::dump(&out.rs.graph, &out.dumped()))
             .unwrap_or_default();
-        let mine = renumber_extent_resources(&mine);
-        let theirs = renumber_extent_resources(java.dump().unwrap_or(""));
-        let (mine, theirs) = (mine.as_str(), theirs.as_str());
-        if mine == theirs {
+        if java.dump_equals(&mine) {
             Aspect::Equal
         } else if unstable.contains(&"dump") {
             Aspect::Unstable
+        } else if java.dump_digest().is_some() {
+            Aspect::Differs(
+                "differs from the digest of the Java dump (third-party models: the fixture keeps \
+                 only the digest; the full dump is in the cache of `qvto conform record`)"
+                    .into(),
+            )
         } else {
+            let mine = renumber_extent_resources(&mine);
+            let theirs = renumber_extent_resources(java.dump().unwrap_or(""));
+            let (mine, theirs) = (mine.as_str(), theirs.as_str());
             match canon::first_difference(theirs, mine) {
                 Some((n, a, b)) => Aspect::Differs(format!("line {n}: java {a} | engine {b}")),
                 None => Aspect::Equal,

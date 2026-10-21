@@ -192,3 +192,48 @@ fn identity_hash_tapes_follow_the_thread_sequence() {
         "model-object hashes in sequence: {model_found}/{model_assigned}"
     );
 }
+
+/// The committed fixtures keep only the digest of an output dump exactly for the cases on
+/// third-party models (an input links into a submodule or is derived from one,
+/// third_party/README.md), as `qvto conform record` writes them.
+#[test]
+fn fixtures_digest_exactly_the_dumps_of_third_party_cases() {
+    let root = root();
+    let mut digested = 0;
+    for (cases, fixture) in [
+        (paths::ECLIPSE_CASES, paths::ECLIPSE_FIXTURE),
+        (paths::CORPUS_CASES, paths::CORPUS_FIXTURE),
+        (paths::FUZZ_CASES, paths::FUZZ_FIXTURE),
+        (paths::SPD_CASES, paths::SPD_FIXTURE),
+    ] {
+        let cases = read_cases(&root.join(cases)).unwrap();
+        for f in [fixture.to_string(), paths::det_fixture(fixture)] {
+            let Ok(text) = std::fs::read_to_string(root.join(&f)) else {
+                continue;
+            };
+            let java = read_bundle(&text).unwrap();
+            for c in &cases {
+                let Some(j) = java.get(&c.id) else {
+                    continue;
+                };
+                let tp = c
+                    .inputs
+                    .iter()
+                    .any(|i| simoxide_thirdparty::uses_third_party(&c.path(&root, i)));
+                if tp {
+                    assert!(
+                        j.dump().is_none(),
+                        "{f} {}: dump of third-party models",
+                        c.id
+                    );
+                }
+                if j.dump_digest().is_some() {
+                    assert!(tp, "{f} {}: digest, but no third-party input", c.id);
+                    digested += 1;
+                }
+            }
+        }
+    }
+    assert!(digested > 0);
+    eprintln!("{digested} digested dumps");
+}

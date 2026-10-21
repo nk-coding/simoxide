@@ -289,9 +289,27 @@ fn the_engine_on_the_graph_equals_the_adapter() {
         let read = |ext: &str| {
             std::fs::read_to_string(data.join(format!("{}.{ext}", c.id))).expect("recorded")
         };
+        // a case on third-party models: only the digest of its dump (`<id>.dump.digest`,
+        // third_party/README.md; PARITY_OUT writes the dump)
+        let dump_digest = std::fs::read_to_string(data.join(format!("{}.dump.digest", c.id)))
+            .ok()
+            .map(|t| simoxide_thirdparty::Digest::parse(&t).expect("dump digest"));
+        if let Some(d) = &dump_digest
+            && !d.matches(&dump)
+        {
+            failures.push(format!("{}: dump differs from the recorded digest", c.id));
+        }
         for (what, got, want) in [
             ("journal", &text, read("journal")),
-            ("dump", &dump, read("dump")),
+            (
+                "dump",
+                &dump,
+                if dump_digest.is_some() {
+                    dump.clone()
+                } else {
+                    read("dump")
+                },
+            ),
             ("status and log", &status, read("status")),
         ] {
             if *got != want {

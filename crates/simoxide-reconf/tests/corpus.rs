@@ -190,8 +190,8 @@ fn corpus_rules_on_a_run_model_mid_run() {
         let tape = load_tape(&c);
         let j = &java[&c.id];
         let unstable = j.unstable();
-        let jd = j.dump().unwrap_or("");
-        let labels = dump_labels(jd);
+        // the resource lines (a case on third-party models has only the dump's digest)
+        let labels = dump_labels(&j.dump_resource_lines().join("\n"));
         // a dry run: the transformation's result, compared with the Java runner's
         let mut ids = |s: &Graph| id_source(s, tape.as_ref().unwrap());
         let (dry, d) = run
@@ -210,9 +210,14 @@ fn corpus_rules_on_a_run_model_mid_run() {
         // the Java run's identity hashes decide orders in compat mode: without them (no
         // cached Java runs, `target/qvto-testkit/java`) only the journals are compared
         if tape.is_some() {
-            if renumber(&d) != renumber(jd) && !unstable.contains(&"dump") {
-                let diff = qvto_emf::canon::first_difference(&renumber(jd), &renumber(&d));
-                diffs.push(format!("dump vs java: {diff:?}"));
+            if !j.dump_equals(&d) && !unstable.contains(&"dump") {
+                match j.dump() {
+                    Some(jd) => {
+                        let diff = qvto_emf::canon::first_difference(&renumber(jd), &renumber(&d));
+                        diffs.push(format!("dump vs java: {diff:?}"));
+                    }
+                    None => diffs.push("dump vs java: differs from the digest".into()),
+                }
             }
             if dry.log != j.log() && !unstable.contains(&"log") {
                 diffs.push(format!("log: {:?} vs java {:?}", dry.log, j.log()));

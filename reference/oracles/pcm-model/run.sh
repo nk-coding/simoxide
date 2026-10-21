@@ -11,4 +11,7 @@ P=${PALLADIO_PLUGINS:-$PRDIR/work-simucom/palladio-5.2.2/plugins}
 LIST=${1:-models.txt}
 OUT=${2:-golden}
 [ -f "$LIST" ] || python3 collect_models.py
-exec ${JAVA:-java} -cp "build/classes:$(cat build/classpath.txt)" PcmModelOracle "$P" "$LIST" "$OUT"
+${JAVA:-java} -cp "build/classes:$(cat build/classpath.txt)" PcmModelOracle "$P" "$LIST" "$OUT"
+# the dumps of third-party models are git-ignored; their digests are committed (third_party/README.md)
+OUT_ABS="$(cd "$OUT" && pwd)"
+(cd ../../.. && cargo run -q -p simoxide-thirdparty -- digests "$OUT_ABS")

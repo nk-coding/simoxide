@@ -199,9 +199,12 @@ the tests that need these models skip.
 
 SimOxide's own files stay in the repository: the run configurations (run.json, case.json), the
 refsim monitors (refsim.monitorrepository, refsim.measuringpoint), READMEs and the simulation
-outputs and model dumps (expected/, observed/, reference/oracles/pcm-model/golden*/, the QVTo
-fixtures and adapter-corpus dumps). Commits before the submodules were introduced (from 7fb3380)
-still contain copies of these models.
+outputs (expected/, observed/). Dumps that reproduce these models in full (the canonical EMF
+dumps in reference/oracles/pcm-model/golden*/, the Java runner's output dumps in the QVTo
+fixtures and the adapter corpus) are not distributed either: only their SHA-256 digests are
+committed, and the tests produce the dumps from the submodules (third_party/README.md, "Dumps").
+The repository history was rewritten so that no commit contains copies or such dumps of these
+models.
 
 
 6. Palladio SPD metamodels and semantic transformations

@@ -15,6 +15,13 @@
 //! Tests that read such material call [`check`] (or [`skip_unless_available`]) first: without the
 //! submodules they skip with a message naming the setup command, and with
 //! `SIMOXIDE_REQUIRE_THIRD_PARTY=1` they fail instead (for CI and before regenerating outputs).
+//!
+//! Outputs that reproduce such a model in full (canonical model dumps, transformation output
+//! dumps) are not committed either, only their digests ([`digest`]).
+
+pub mod digest;
+
+pub use digest::Digest;
 
 use std::fs;
 use std::io;
@@ -79,6 +86,52 @@ pub fn submodule_of(path: &Path) -> Option<&'static Submodule> {
     let root = workspace_root();
     let rel = path.strip_prefix(&root).unwrap_or(path);
     SUBMODULES.iter().find(|s| rel.starts_with(s.path))
+}
+
+/// Whether `path` (a file or directory, absolute or relative to the root) is or holds
+/// third-party material: it lies in a submodule, is a derived file or a link into a submodule,
+/// or (a directory) directly contains one. Decides which outputs are kept as digests only.
+pub fn uses_third_party(path: &Path) -> bool {
+    let root = workspace_root();
+    let abs = normalize(&if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        root.join(path)
+    });
+    let is_tp = |p: &Path| -> bool {
+        let rel = p.strip_prefix(&root).unwrap_or(p);
+        if submodule_of(rel).is_some() {
+            return true;
+        }
+        if let Ok(m) = manifest()
+            && m.iter().any(|d| d.dest == rel)
+        {
+            return true;
+        }
+        if fs::symlink_metadata(p).is_ok_and(|m| m.file_type().is_symlink()) {
+            let target = fs::read_link(p).unwrap_or_default();
+            let resolved = normalize(&p.parent().map(|d| d.join(&target)).unwrap_or(target));
+            return SUBMODULES
+                .iter()
+                .any(|s| resolved.starts_with(root.join(s.path)));
+        }
+        false
+    };
+    if is_tp(&abs) {
+        return true;
+    }
+    if !abs.is_dir() {
+        return false;
+    }
+    if let Ok(m) = manifest() {
+        let rel = abs.strip_prefix(&root).unwrap_or(&abs);
+        if m.iter().any(|d| d.dest.parent() == Some(rel)) {
+            return true;
+        }
+    }
+    fs::read_dir(&abs)
+        .map(|it| it.flatten().any(|e| is_tp(&e.path())))
+        .unwrap_or(false)
 }
 
 /// A derived file: an upstream file with a SimOxide change.

@@ -39,7 +39,7 @@ in CI and before regenerating expected outputs, so that a missing checkout canno
   - The `corpus/x_pem_*`, `corpus/x_ss_*` and `u_*` copies had been written by `refsim import` (EMF load
     and save: line width 120, features in metamodel order, fragment paths replaced by ids,
     namespace prefixes renamed). The links point at the upstream files instead; both load into the
-    same model (the canonical dumps in `reference/oracles/pcm-model/golden/` and every expected
+    same model (the canonical dumps of `reference/oracles/pcm-model` and every expected
     output are unchanged), so the re-save is not repeated. One exception: where the upstream file
     has elements without an `id`, EMF generated one at import and the outputs name it. Those
     files are derived (below) with exactly these ids inserted, nothing else:
@@ -67,6 +67,29 @@ in CI and before regenerating expected outputs, so that a missing checkout canno
     (`*.semanticspd`, variants of the example's), and the chained states (outputs of Slingshot's
     MainTransformation run by the Java runner, then ids assigned). `q1/*/default.spd` and the
     `q1/full` models are SimOxide's own and stay committed.
+
+## Dumps
+
+Outputs that reproduce one of these models in full are not committed either; the repository
+keeps their SHA-256 and length, and the tests produce the dump from the submodules and compare
+digests (`simoxide_thirdparty::digest`). Without the submodules these tests skip like the
+others; small results (simulation outputs, metrics, journals, logs) stay committed.
+
+| Directory | Committed | Full dump written by |
+|---|---|---|
+| `reference/oracles/pcm-model/golden/` | `third-party.digests` for `Palladio-Example-Models_*`, `Palladio-Analyzer-Slingshot-E2E-Tests_*`, `Palladio-Documentation-Slingshot_*`, `corpus_x_pem_*`, `corpus_x_ss_*` (the EMF dumps of the other models stay) | `run.sh` (Java, EMF 5.2.2 jars: `reference/README.md`) |
+| `reference/oracles/pcm-model/golden-spd/` | `third-party.digests` for `slingshot_spd_*` (`spd_basic.jsonl` stays) | `run-spd.sh` (Java, plus the Slingshot SPD jars) |
+| `crates/qvto/qvto-testkit/fixtures/java-{corpus,spd}{,-det}.txt` | `out.jsonl.digest` in place of `out.jsonl` for the cases with a third-party input (`spd_minimalexample_main`, `spd_min*`): digest of the dump with renumbered extent resources, and its resource lines | `qvto conform record` (Java runner; the full results stay in `target/qvto-testkit/java*`) |
+| `crates/simoxide-reconf/tests/data/adapter-corpus/` | `spd_minimalexample_main.dump.digest` (journal, status and log stay) | `PARITY_OUT=DIR` with the parity test |
+
+The full dumps are git-ignored where the oracles write them, and a full `golden*/<name>.jsonl`
+takes precedence over the digest in the tests (to see the first difference). After running an
+oracle, `cargo run -q -p simoxide-thirdparty -- digests reference/oracles/pcm-model/golden`
+(`run.sh` and `run-spd.sh` do it) rewrites the digests; `qvto conform record` writes the
+fixtures' digests itself. Which outputs are third-party is decided from the inputs
+(`simoxide_thirdparty::uses_third_party`, `digest::THIRD_PARTY_DUMPS`); the tests
+`third_party_dumps_are_digests` (simoxide-model) and
+`fixtures_digest_exactly_the_dumps_of_third_party_cases` (qvto-testkit) check it.
 
 ## Changing a derived file
 

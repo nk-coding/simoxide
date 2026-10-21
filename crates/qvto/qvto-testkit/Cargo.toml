@@ -15,6 +15,9 @@ qvto-paths.workspace = true
 simoxide-oraclekit.workspace = true
 qvto-emf.workspace = true
 qvto-model.workspace = true
+# third-party models behind git submodules (third_party/README.md): their output dumps are kept
+# as digests in the fixtures; tests skip without them
+simoxide-thirdparty.workspace = true
 
 [features]
 # Compat mode: Eclipse QVTo's collection orders and identity hashes (simoxide-jcompat-exact; no
@@ -22,6 +25,4 @@ qvto-model.workspace = true
 compat = ["dep:simoxide-jcompat-exact"]
 
 [dev-dependencies]
-# third-party models behind git submodules: skip without them (third_party/README.md)
-simoxide-thirdparty.workspace = true
 qvto-testkit = { path = ".", features = ["compat"] }

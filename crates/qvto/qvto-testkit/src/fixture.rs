@@ -14,8 +14,15 @@
 //! ```
 //!
 //! Each content is followed by a newline that is not part of it.
+//!
+//! For a case on third-party models (an input links into a submodule or is derived from one,
+//! `third_party/README.md`), the bundle holds `out.jsonl.digest` in place of `out.jsonl`: the
+//! digest of the dump with renumbered extent resources and the dump's resource lines
+//! ([`dump_digest_text`]). The full dump stays in the result directory (the cache).
 
+use crate::compare::renumber_extent_resources;
 use simoxide_oraclekit::results::{self, CaseFiles, Files};
+use simoxide_thirdparty::Digest;
 use std::collections::BTreeMap;
 use std::path::Path;
 
@@ -27,6 +34,22 @@ pub const FIXTURE_FILES: [&str; 5] = [
     "stack.txt",
     "diag.txt",
 ];
+
+/// In a bundle, in place of `out.jsonl` for cases on third-party models.
+pub const DUMP_DIGEST: &str = "out.jsonl.digest";
+
+/// The `out.jsonl.digest` of a dump: `sha256` and `bytes` of the dump with renumbered extent
+/// resources ([`renumber_extent_resources`]), then each `{"resource":...}` line of the dump as
+/// `resource<TAB>line`.
+pub fn dump_digest_text(dump: &str) -> String {
+    let mut s = Digest::of(&renumber_extent_resources(dump)).to_text();
+    for l in dump.lines().filter(|l| l.starts_with("{\"resource\":")) {
+        s.push_str("resource\t");
+        s.push_str(l);
+        s.push('\n');
+    }
+    s
+}
 
 /// A compile problem as the Java runner reports it.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -82,8 +105,39 @@ impl JavaResult {
         self.get("exception").filter(|e| *e != "-")
     }
 
+    /// The output dump (`None` for a case on third-party models: [`JavaResult::dump_digest`]).
     pub fn dump(&self) -> Option<&str> {
         self.file("out.jsonl")
+    }
+
+    /// The digest that stands for the dump of a case on third-party models.
+    pub fn dump_digest(&self) -> Option<Digest> {
+        Digest::parse(self.file(DUMP_DIGEST)?)
+    }
+
+    /// The `{"resource":...}` lines of the dump (also of a digested one).
+    pub fn dump_resource_lines(&self) -> Vec<&str> {
+        if let Some(d) = self.file(DUMP_DIGEST) {
+            return d
+                .lines()
+                .filter_map(|l| l.strip_prefix("resource\t"))
+                .collect();
+        }
+        self.dump()
+            .unwrap_or("")
+            .lines()
+            .filter(|l| l.starts_with("{\"resource\":"))
+            .collect()
+    }
+
+    /// Whether `mine` is the Java dump, both with renumbered extent resources (by digest for a
+    /// case on third-party models; a missing dump counts as empty).
+    pub fn dump_equals(&self, mine: &str) -> bool {
+        let mine = renumber_extent_resources(mine);
+        match self.dump_digest() {
+            Some(d) => d.matches(&mine),
+            None => mine == renumber_extent_resources(self.dump().unwrap_or("")),
+        }
     }
 
     pub fn log(&self) -> &str {
@@ -157,14 +211,32 @@ pub fn read_result_dir(dir: &Path) -> std::io::Result<BTreeMap<String, JavaResul
 const HEADER: &str = "qvto-testkit java fixture 1\n";
 
 /// Writes a fixture bundle: the [`FIXTURE_FILES`] of every case, empty files and timings left
-/// out.
-pub fn write_bundle(results: &BTreeMap<String, JavaResult>) -> String {
+/// out; for the cases in `digested` (on third-party models) the dump's digest in place of the
+/// dump.
+pub fn write_bundle(
+    results: &BTreeMap<String, JavaResult>,
+    digested: &dyn Fn(&str) -> bool,
+) -> String {
     let mut s = String::from(HEADER);
     for (id, r) in results {
         s.push_str("@case ");
         s.push_str(id);
         s.push('\n');
         for f in FIXTURE_FILES {
+            if f == "out.jsonl" {
+                let digest = match r.files.get(f).filter(|t| !t.is_empty()) {
+                    Some(d) if digested(id) => Some(dump_digest_text(d)),
+                    Some(_) => None,
+                    // a digest read from a bundle
+                    None => r.files.get(DUMP_DIGEST).cloned(),
+                };
+                if let Some(t) = digest {
+                    s.push_str(&format!("@file {DUMP_DIGEST} {}\n", t.len()));
+                    s.push_str(&t);
+                    s.push('\n');
+                    continue;
+                }
+            }
             let text = r.files.get(f).map(|t| {
                 if f == "result.txt" {
                     // timings vary from run to run; they stay in the cache
@@ -306,11 +378,39 @@ mod tests {
                 files: BTreeMap::new(),
             },
         );
-        let b = write_bundle(&m);
+        let b = write_bundle(&m, &|_| false);
         let r = read_bundle(&b).unwrap();
         assert_eq!(r.len(), 2);
         assert_eq!(r["a"].files, m["a"].files);
         assert_eq!(r["a"].verdict(), "pass");
         assert_eq!(r["a"].problems()[0].message, "msg\twith tab \\ and\nline");
+    }
+
+    #[test]
+    fn digested_dumps() {
+        let dump = "{\"resource\":\"extent:/7\",\"roots\":1}\n{\"path\":\"/0\",\"ref\":\"extent:/7#/0\"}\n";
+        let mut files = BTreeMap::new();
+        files.insert("out.jsonl".to_string(), dump.to_string());
+        let mut m = BTreeMap::new();
+        m.insert(
+            "t".to_string(),
+            JavaResult {
+                id: "t".into(),
+                files,
+            },
+        );
+        let b = write_bundle(&m, &|id| id == "t");
+        assert!(!b.contains("\"path\""), "{b}");
+        let r = read_bundle(&b).unwrap();
+        assert_eq!(r["t"].dump(), None);
+        assert!(r["t"].dump_equals(dump));
+        assert!(r["t"].dump_equals(&dump.replace("/7", "/3")));
+        assert!(!r["t"].dump_equals("{}\n"));
+        assert_eq!(
+            r["t"].dump_resource_lines(),
+            vec!["{\"resource\":\"extent:/7\",\"roots\":1}"]
+        );
+        // a digest read from a bundle is written again as it is
+        assert_eq!(write_bundle(&r, &|_| false), b);
     }
 }

@@ -1,0 +1,5 @@
+# Canonical dumps of third-party models (third_party/README.md, "Dumps"): the dumps are not
+# committed, only their digests. name<TAB>header line<TAB>sha256 of the rest<TAB>its length in bytes.
+# Written by `simoxide-thirdparty digests DIR` from the dumps the oracle wrote (run.sh, run-spd.sh).
+slingshot_spd_minimal	{"emf_errors":0}	115d3a76e8fc6ff032b364af00cdfde2f0807af38cf62a1840d22526bee1f78f	23238
+slingshot_spd_scale_in	{"emf_errors":0}	39f3f4375e28e28ee74cb4f4db84cfa1a561e0f44b32ea148d9b4e75b4bf7df7	24008

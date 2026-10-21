@@ -45,12 +45,23 @@ fn load(dir: &Path) -> Loader {
     l
 }
 
-fn golden(name: &str) -> String {
-    let p = oracle_dir()
-        .join("golden-spd")
-        .join(format!("{name}.jsonl"));
-    let g = std::fs::read_to_string(p).expect("golden (run-spd.sh)");
-    g.split_once('\n').unwrap().1.to_string()
+enum Golden {
+    Text(String),
+    /// A third-party model (third_party/README.md, "Dumps"): only the digest is committed
+    /// (`golden-spd/third-party.digests`); `run-spd.sh` writes the dump itself.
+    Digest(simoxide_thirdparty::Digest),
+}
+
+fn golden(name: &str) -> Golden {
+    let dir = oracle_dir().join("golden-spd");
+    if let Ok(g) = std::fs::read_to_string(dir.join(format!("{name}.jsonl"))) {
+        return Golden::Text(g.split_once('\n').unwrap().1.to_string());
+    }
+    let digests = simoxide_thirdparty::digest::read_digests(&dir).unwrap();
+    let d = digests
+        .get(name)
+        .unwrap_or_else(|| panic!("{name}: no golden (run-spd.sh)"));
+    Golden::Digest(d.digest.clone())
 }
 
 #[test]
@@ -60,11 +71,19 @@ fn spd_models_match_emf() {
     for (name, dir) in &es {
         let (g, _) = load(dir).finish();
         let dump = canon::dump(&g, false);
-        let want = golden(name);
-        for (i, (a, b)) in want.lines().zip(dump.lines()).enumerate() {
-            assert_eq!(a, b, "{name}: line {}", i + 2);
+        match golden(name) {
+            Golden::Text(want) => {
+                for (i, (a, b)) in want.lines().zip(dump.lines()).enumerate() {
+                    assert_eq!(a, b, "{name}: line {}", i + 2);
+                }
+                assert_eq!(want.lines().count(), dump.lines().count(), "{name}");
+            }
+            Golden::Digest(d) => assert!(
+                d.matches(&dump),
+                "{name}: differs from the digest of EMF's dump (golden-spd/third-party.digests; \
+                 run-spd.sh writes the dump itself)"
+            ),
         }
-        assert_eq!(want.lines().count(), dump.lines().count(), "{name}");
     }
 }
 

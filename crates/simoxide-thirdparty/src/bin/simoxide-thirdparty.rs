@@ -5,6 +5,7 @@
 //! simoxide-thirdparty check [PATH..]   exit 1 with a message if material under PATH is unavailable
 //! simoxide-thirdparty record DEST SRC  store DEST (a modified copy of SRC) as SRC + ed script
 //! simoxide-thirdparty verify           every derived file equals SRC + script, every link resolves
+//! simoxide-thirdparty digests DIR..    DIR/third-party.digests from the third-party dumps DIR/*.jsonl
 //! ```
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -32,8 +33,19 @@ fn main() -> ExitCode {
         }
         Some("record") if args.len() == 3 => record(Path::new(&args[1]), Path::new(&args[2])),
         Some("verify") => verify(),
+        Some("digests") if args.len() > 1 => args[1..].iter().try_for_each(|d| {
+            let dir = abs(Path::new(d));
+            let n = simoxide_thirdparty::digest::write_digests(&dir)
+                .map_err(|e| format!("{}: {e}", dir.display()))?;
+            println!(
+                "{}: digests of {n} third-party dumps",
+                dir.join(simoxide_thirdparty::digest::DIGESTS).display()
+            );
+            Ok(())
+        }),
         _ => Err(
-            "usage: simoxide-thirdparty setup | check [PATH..] | record DEST SRC | verify".into(),
+            "usage: simoxide-thirdparty setup | check [PATH..] | record DEST SRC | verify | digests DIR.."
+                .into(),
         ),
     };
     match r {

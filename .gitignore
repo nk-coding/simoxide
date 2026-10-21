@@ -49,6 +49,15 @@ __pycache__/
 # Slingshot reference runner: build output, fresh installs, smoke outputs (reference/slingshot/setup.sh, install.sh)
 /reference/slingshot/build/
 /reference/slingshot/install/
+# full dumps of third-party models: only their digests are committed (third_party/README.md, "Dumps")
+/reference/oracles/pcm-model/golden/Palladio-Example-Models_*.jsonl
+/reference/oracles/pcm-model/golden/Palladio-Analyzer-Slingshot-E2E-Tests_*.jsonl
+/reference/oracles/pcm-model/golden/Palladio-Documentation-Slingshot_*.jsonl
+/reference/oracles/pcm-model/golden/corpus_x_pem_*.jsonl
+/reference/oracles/pcm-model/golden/corpus_x_ss_*.jsonl
+/reference/oracles/pcm-model/golden-spd/slingshot_spd_*.jsonl
+/crates/simoxide-reconf/tests/data/adapter-corpus/spd_minimalexample_main.dump
+
 # >>> third_party derived files (simoxide-thirdparty record; do not edit)
 /corpus/x_pem_replicated_composite/default.allocation
 /corpus/x_pem_replicated_composite/default.repository

@@ -29,17 +29,25 @@ fn generic_graph_matches_emf() {
     let mut checked = 0;
     let mut failures = Vec::new();
     for e in common::entries() {
-        let Some(golden) = e.golden_body() else {
+        if e.golden.is_none() {
             failures.push(format!(
                 "{}: no golden file (run reference/oracles/pcm-model/run.sh)",
                 e.name
             ));
             continue;
-        };
+        }
         let (g, _) = e.loader(LoadOptions::strict()).finish();
         let dump = canon::dump(&g, e.is_bundled());
-        if dump != golden {
-            failures.push(format!("{}: {}", e.name, first_difference(golden, &dump)));
+        if e.golden_matches(&dump) != Some(true) {
+            failures.push(match e.golden_body() {
+                Some(golden) => format!("{}: {}", e.name, first_difference(golden, &dump)),
+                // third-party model: only the digest of EMF's dump is committed
+                None => format!(
+                    "{}: differs from the digest of EMF's dump (golden/third-party.digests; \
+                     reference/oracles/pcm-model/run.sh writes the dump itself)",
+                    e.name
+                ),
+            });
         }
         checked += 1;
     }
@@ -119,8 +127,21 @@ fn typed_model_matches_emf() {
     let mut checked_values = 0usize;
     let mut failures = Vec::new();
     for e in common::entries() {
-        let Some(golden) = e.golden_body() else {
-            continue;
+        let digest_dump;
+        let golden = match (&e.golden, e.golden_body()) {
+            (None, _) => continue,
+            (_, Some(g)) => g,
+            // a third-party model: EMF's dump is the loader's if the digests agree
+            // (`generic_graph_matches_emf` reports it otherwise)
+            (Some(_), None) => {
+                let (g, _) = e.loader(LoadOptions::strict()).finish();
+                digest_dump = canon::dump(&g, e.is_bundled());
+                if e.golden_matches(&digest_dump) != Some(true) {
+                    failures.push(format!("{}: differs from the digest of EMF's dump", e.name));
+                    continue;
+                }
+                digest_dump.as_str()
+            }
         };
         let (objs, paths) = parse_golden(golden);
         let m = e.loader(LoadOptions::strict()).build();
@@ -223,4 +244,39 @@ fn typed_model_matches_emf() {
         failures.join("\n")
     );
     eprintln!("{checked_models} models, {checked_values} typed values identical to EMF");
+}
+
+/// The dumps of third-party models are committed as digests only: exactly the `models.txt`
+/// entries whose directory holds third-party material have a third-party name
+/// (`simoxide_thirdparty::digest::THIRD_PARTY_DUMPS`), and none of their dumps is committed.
+#[test]
+fn third_party_dumps_are_digests() {
+    use simoxide_thirdparty::digest::{is_third_party_dump, read_digests};
+    let golden = common::oracle_dir().join("golden");
+    let digests = read_digests(&golden).unwrap();
+    let list = std::fs::read_to_string(common::oracle_dir().join("models.txt")).unwrap();
+    let mut n = 0;
+    for line in list
+        .lines()
+        .filter(|l| !l.trim().is_empty() && !l.starts_with('#'))
+    {
+        let (name, dir) = line.split_once('\t').unwrap();
+        if dir == "-" {
+            continue;
+        }
+        let dir = common::local_dir(name, dir);
+        if !std::path::Path::new(&dir).is_dir() {
+            continue;
+        }
+        let tp = simoxide_thirdparty::uses_third_party(std::path::Path::new(&dir));
+        assert_eq!(tp, is_third_party_dump(name), "{name} ({dir})");
+        if tp {
+            assert!(digests.contains_key(name), "{name}: no digest");
+            n += 1;
+        }
+    }
+    eprintln!("{n} third-party models with digests");
+    for name in digests.keys() {
+        assert!(is_third_party_dump(name), "{name}");
+    }
 }
