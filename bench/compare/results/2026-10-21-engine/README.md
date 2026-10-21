@@ -8,5 +8,7 @@ of that build); `qvto` with `--profile release-unwind --features compat`.
 
 `bench/compare/engine.sh` (all phases, about 10 minutes) wrote `raw/` (git-ignored); `summary.md` is
 `summarize-engine.py`'s digest, `qvto-bench.md` the QVTo report (`qvto bench --java --java-cold`).
-Not measured: `b5_copy_Ecore` (its input `crates/qvto/qvto-emf/models/Ecore.ecore` no longer exists
-after the merge into SimOxide), the B1 suite cases (`--suite eclipse`).
+Not measured: the B1 suite cases (`--suite eclipse`). `b5_copy_Ecore` failed in this run (its input
+path still named `qvto-emf/models/Ecore.ecore`, which the merge had moved to
+`crates/foundation/simoxide-emf/models/Ecore.ecore`); its row in `qvto-bench.md` comes from a later
+run of the whole suite with the path fixed (load average 1 to 3).

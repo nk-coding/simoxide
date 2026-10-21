@@ -45,7 +45,7 @@ AMD Ryzen 9 9950X3D VM (25 cores, 34 GB), pinned to two cores; Eclipse QVTo 3.11
 | B2 series (per run, same model) | 13-33 µs | 2.7-5.5× | |
 | B3 SPD `MainTransformation` (×1 and ×10, ×100) | 0.17-0.26 / 0.6-0.72 ms | 5.5-15× | 100-290× |
 | B4 SimpleUML to RDB (sample, ×10, ×100) | 0.21 / 1.6 / 17-19 ms | 9.6-21× / 7.5× / 2.7× | 27-230× |
-| B5 Ecore copy by mappings (4 250, 42 500 objects) | 8.4 / 152-175 ms | 2.8× / 2.5× | 7-45× |
+| B5 Ecore copy by mappings (`Ecore.ecore`, 4 250, 42 500 objects) | 0.26 / 8.4 / 152-175 ms | 10× / 2.8× / 2.5× | 7-240× |
 | B5 `deepclone`, queries | | 1.1-4.8× | 5-70× |
 | B6 micro benchmarks | | 2.2-50×; sets built in loops 240-3 300× | |
 | compile | 0.3-0.6 ms per rule file; 6.5-7.2 ms for the 18 SPD units | 3-20× | 300-1 000× |
@@ -53,7 +53,8 @@ AMD Ryzen 9 9950X3D VM (25 cores, 34 GB), pinned to two cores; Eclipse QVTo 3.11
 - Against the measurement before the merge (Q5b, 2026-10-17, a shared and loaded machine) the
   engine is as fast or faster: rule runs 0.08-0.1 ms (then 0.09-0.12), the SPD
   `MainTransformation` 0.17-0.72 ms (then 0.23-0.86), the big Ecore copies 152-175 ms (then
-  181 ms). The warm JVM ratios are partly smaller because Eclipse QVTo ran faster on the quiet
+  181 ms); the copy of `Ecore.ecore` takes 0.26 ms (then 0.24; measured in a separate run of the
+  suite the same day, after its input path was fixed). The warm JVM ratios are partly smaller because Eclipse QVTo ran faster on the quiet
   machine.
 - Fresh runs of small rules are dominated by cold caches: the models were just loaded. A second
   run on the same model takes a sixth to a third of the time, which is SimOxide's case (the
@@ -62,8 +63,7 @@ AMD Ryzen 9 9950X3D VM (25 cores, 34 GB), pinned to two cores; Eclipse QVTo 3.11
   There the engine is 2.5 to 3 times faster than a warm JVM.
 - Fast mode runs these workloads 0.9 to 1.2 times as fast as compat mode (ordered mode was not run).
 - Not re-measured: the B1 suite cases (`--suite eclipse`; Q5b: median 5.8× a warm JVM, about 10 %
-  of the cases slower, transformations of a few microseconds on cold, freshly loaded models) and
-  `b5_copy_Ecore`, whose input `qvto-emf/models/Ecore.ecore` no longer exists after the merge.
+  of the cases slower, transformations of a few microseconds on cold, freshly loaded models).
 
 In SimOxide, a reconfiguration rule run costs about 0.1 ms (80 µs per evaluation on the power
 example, [Reconfiguration rules](../guide/reconfiguration.md#cost)) and an SPD adjustment 0.5 to
