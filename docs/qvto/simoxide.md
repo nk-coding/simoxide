@@ -73,8 +73,8 @@ models SimOxide loaded, with no copy and no adapter:
 | Use | Default mode | Why |
 |---|---|---|
 | SimuLizar rules (`RulesHost`, `simoxide run --rules`) | ordered | the patched SimuLizar reference iterates QVTo's and OCL's sets in insertion order (patch P10), so ordered mode equals it byte for byte, in every build |
-| `QvtoRun::invoke`, and SPD adjustments through `QvtoAdjuster` (`RunConfig::mode` = `QvtMode::Auto`) | compat in builds with `compat` or `exact`, else fast | Eclipse's models in an exact build |
-| the same with `QvtMode::InsertionOrderSets` | ordered | the Slingshot reference runner's `det` rule: `qvto spd-replay` equals its recorded adjustments on 13 of 13 |
+| `QvtoRun::invoke`, and SPD adjustments through `QvtoAdjuster` (`RunConfig::mode` = `QvtMode::Auto`) in the library | compat in builds with `compat` or `exact`, else fast | Eclipse's models in an exact build |
+| the same with `QvtMode::InsertionOrderSets`; the CLI's SPD and HPA adjustments (`--qvto-mode auto`) | ordered | the Slingshot reference runner's `det` rule: `qvto spd-replay` equals its recorded adjustments on 13 of 13 |
 
 `simoxide run --qvto-mode auto|ordered|fast|compat` overrides the mode of the rules. Compat mode
 needs the feature `compat` (or `exact`, which turns it on). Without it the mode is unavailable
