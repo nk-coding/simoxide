@@ -21,7 +21,7 @@ use simoxide_model::raw::Graph;
 use simoxide_reconf::{
     Invocation, InvokeHooks, QvtMode, QvtoRun, ReconfError, RunConfig, Transformation,
 };
-use simoxide_sim::{ChangeError, Outputs, Pause, Simulation};
+use simoxide_sim::{ChangeError, ChangeOptions, Outputs, Pause, Simulation};
 
 /// What the change path does with each case's changes, mid-run: `none` (the rule changed
 /// nothing: below its threshold), `applied`, or `invalid` (refused, the run unchanged: the
@@ -163,6 +163,9 @@ fn corpus_rules_on_a_run_model_mid_run() {
     for c in cases() {
         let cm = sim_model(&c);
         let mut sim = Simulation::new(&cm, sim_config(), Outputs::default()).unwrap();
+        // SimuLizar's syncers (keep removed resources, abort where SimuLizar throws): the
+        // default change options (drain) apply the moves SimuLizar aborts on (MC-2.3)
+        sim.set_change_options(ChangeOptions::simulizar());
         // mid-run: half of the simulated time
         sim.run_until(Pause::After(100_000_000_000)).unwrap();
         let events_before = sim.state().events();
