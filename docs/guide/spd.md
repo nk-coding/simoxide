@@ -46,13 +46,25 @@ In the SimuLizar flavour the measurements are SimuLizar's: utilisation is the sl
 utilisation of the monitor, not Slingshot's instantaneous sample. There is no reference for
 this combination. Slingshot's own monitor repositories often declare utilisation monitors
 without a `TimeDriven` processing type, which the SimuLizar flavour rejects; the Slingshot
-flavour (phase S2) will take them.
+flavours (`--flavour slingshot`, `slingshot-exact`) take them, as Slingshot ignores processing
+types ([Monitoring](../spec/slingshot/monitoring.md)).
 
 ## Command line
 
-```text
-simoxide run --model DIR --max-sim-time 100 --spd-log spd.jsonl
+```sh
+# Slingshot's minimal example with a time-triggered scale-out at t = 50 s
+# (needs the submodules and a build with --features reconfiguration)
+git submodule update --init && cargo run -q -p simoxide-thirdparty -- setup
+cargo build --release -p simoxide-cli --features reconfiguration
+./target/release/simoxide run --model reference/slingshot/models/spd_minimal \
+    --flavour slingshot --max-sim-time 100 --max-measurements -1 --spd-log spd.jsonl
+# the same in Slingshot's event cascade, byte-equal to the reference runner
+./target/release/simoxide run --model reference/slingshot/models/spd_minimal \
+    --flavour slingshot-exact --seed 1 --max-sim-time 100 --spd-log spd.jsonl
 ```
+
+`corpus-spd/` lists more SPD models (`case.json` names the model directory, simulated time and
+seed) with the reference runner's outputs.
 
 | Flag | Meaning |
 |---|---|

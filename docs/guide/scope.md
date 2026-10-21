@@ -1,7 +1,11 @@
 # Supported models
 
 SimOxide implements the static performance simulation of SimuLizar 5.2.2 with the DESMO-J
-engine, the default schedulers and the default measurements.
+engine, the default schedulers and the default measurements, the same models with Slingshot's
+semantics ([Slingshot-compatible mode](./slingshot.md)), and runtime model changes: SimuLizar's
+reconfiguration rules, Slingshot's scaling policies, HPA autoscaling and change files. This page
+lists the model constructs; which feature works in which mode is on
+[Modes and features](./modes.md).
 
 ## Supported
 
@@ -41,8 +45,23 @@ rules](./reconfiguration.md)): rate, latency, demand, branch-probability and oth
 new resource containers, resources, link connections, assembly contexts, allocation contexts and
 connectors; connector rewiring.
 
+**Scaling policies (SPD)**: Slingshot's `.spd`/`.semanticspd` with `SimpleFireOnValue` and
+composed triggers, cooldown, interval, thrashing and group-size constraints, elastic
+infrastructure, service groups and competing consumers; the adjustments run Slingshot's own QVTo
+transformations ([Scaling policies](./spd.md#what-is-supported)).
+
+**HPA autoscaling**: Kubernetes `autoscaling/v2` `HorizontalPodAutoscaler` objects with one CPU
+utilisation target, behaviour policies and stabilisation, scaling SPD target groups
+([Autoscaling (HPA)](./hpa.md)).
+
+**Load profiles**: step functions of the arrival rate or population per usage scenario
+(SimOxide's own format; [Load profiles](./load-profile.md)).
+
+**Model changes at a pause**: change files and QVTo transformations
+([Resume with changes](./snapshots.md#resume-with-changes)).
+
 **Stop conditions.** Maximum simulated time and maximum number of measurements (finished
-usage-scenario runs).
+usage-scenario runs). The Slingshot-exact mode stops at the simulated time only.
 
 **Reference aborts.** Where SimuLizar aborts with an exception, SimOxide reports the same error
 at the same simulated time, after the same trace.
@@ -55,6 +74,10 @@ at the same simulated time, after the same trace.
   framework, and rule changes that create or remove monitors, change the population or usage
   scenarios, or change a behaviour's structure (`DESIGN-SPD.md` F4).
 - SimuCom code generation.
+- Palladio's usage evolution (DLIM); load profiles are the alternative.
+- In SPD: `SimpleFireOnTrend`, `NumberOfElements`, memory, HDD and network stimuli (Slingshot
+  has no checker for them either).
+- Reading or writing Slingshot's `.snapshot` files; SimOxide's snapshots have their own format.
 - EDP2 output. The output is a plain measurement CSV or the in-memory `Measurements`.
 - `ExecutionResult` tuples. The reference runner cannot record them, so they cannot be verified;
   SimOxide warns when a monitor asks for them.

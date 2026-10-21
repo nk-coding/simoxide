@@ -42,7 +42,10 @@ simoxide snapshot-info ms-300.snap   # the header (JSON)
   started with `--trace` must be resumed with one (or its lines are discarded); a tape can be
   added or dropped at any pause (exact mode).
 - Scaling policies: a run with a `.spd` resumes with its interpreter state; the compat flags of
-  `--spd-quirks` are kept in the snapshot and used again.
+  `--spd-quirks` are kept in the snapshot and used again. HPA autoscalers (section `hpa`) need
+  the same configuration at the resume and can be changed with `--hpa-set`
+  ([Autoscaling (HPA)](./hpa.md#command-line)); a load profile and its position are part of the
+  run state ([Load profiles](./load-profile.md)).
 - Reconfiguration rules (`reconfiguration` feature): resume with the same rules (`--rules DIR` or
   the model's `run.json`); the rules' names are checked.
 - The Slingshot-exact engine (`--flavour slingshot-exact`) pauses, snapshots and resumes the
@@ -166,8 +169,10 @@ simoxide resume ms-120.snap --model corpus/x_sl_mediastore \
   (`rules replaced: [...] -> [...]`; the QVTo state, the runtime measurement mirror and the
   statistics continue); on a snapshot without rules, the rules are added from the resume on.
 - `--enforce POLICY,...`: enforce scaling policies at the resume, past their triggers and
-  constraints (Slingshot's "incoming policies"). This needs the SPD adjustment phase (P2): today
-  the names are checked and the resume stops with an error.
+  constraints (Slingshot's "incoming policies"), by name or id. Their adjustments run at the
+  resume time, after the events already queued for it, and appear in the decision log with
+  `"enforced":true` ([Scaling policies](./spd.md#command-line)). Not in the Slingshot-exact
+  engine.
 - The result is deterministic: the same snapshot and the same changes give the same
   continuation, byte for byte. It equals the uninterrupted run that applies the same changes at
   the pause (`Simulation::apply_changes`, `QvtoRun::invoke`, `RulesHost::replace_rules`).
@@ -287,7 +292,8 @@ if let Some(f) = watch.fired() {
 - Rules: `RulesHost::replace_rules`, `RulesRun::restore_snapshot_replacing` (other rules than the
   snapshot's), `RulesRun::new(restored_sim, host)` (rules added).
 - SPD: `SpdRun::model_changed` (the target groups' membership after a change),
-  `SpdRun::enforce_policies` (P2: returns `EnforceError::Unsupported` until then).
+  `SpdRun::enforce_policies` (queues enforced requests; `EnforceError` for an unknown policy or
+  one without a target group).
 - `simoxide_reconf::explore` (restores in parallel threads, `Variant`, `VariantResult`) and
   `compare` (the table).
 
@@ -333,8 +339,8 @@ their sharing), `SsxRun::detach()` gives the state as a `Send` value (`SsxState`
 `SsxRun::attach` continues on any thread, `SsxState::{serialize, deserialize}` work on a state
 alone. Same state, same bytes; a restored state writes the bytes it was read from.
 
-## What a snapshot is not (yet)
+## What a snapshot is not
 
-- Enforced scaling policies at a resume wait for the SPD adjustment phase (P2).
-- No interchange with Slingshot's `.snapshot` files (phase N3; DESIGN-SPD.md 5.7, "N3a spike").
+- No interchange with Slingshot's `.snapshot` files. A spike found an export feasible but lossy
+  (`DESIGN-SPD.md` 5.7, "N3a spike"); it is not built.
 - A snapshot holds SimOxide's internal run state: it is read by the same SimOxide version only.

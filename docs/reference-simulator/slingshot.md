@@ -2,7 +2,8 @@
 
 `reference/slingshot/` runs the Slingshot nightly headless, with or without SPD (Scaling Policy
 Definitions), and writes outputs that SimOxide can be compared with. It is the oracle of
-SimOxide's planned Slingshot flavour (design: `DESIGN-SPD.md` on branch `spd`, phase S0). Like
+SimOxide's Slingshot flavour ([Slingshot-compatible mode](../guide/slingshot.md); design:
+`DESIGN-SPD.md`, phase S0). Like
 [refsim](./refsim.md) it needs only `javac`, `jar`, Python 3 and a shell.
 
 It has two modes:

@@ -1,9 +1,15 @@
 # Fast mode
 
-The default **exact mode** reproduces the reference's random numbers and events bit for bit. The
-opt-in **fast mode** keeps the model semantics and the statistics but draws its random numbers
-differently: a faster generator and standard samplers instead of the reference's numerical
-inverse CDFs. Its runs are reproducible per seed, but they are not the reference's runs.
+The **exact mode** (`--mode exact`, only in the exact build) reproduces the reference's random
+numbers and events bit for bit. The **fast mode** (`--mode fast`, the default and the only mode
+of the distributable EPL build) keeps the model semantics and the statistics but draws its random
+numbers differently: a faster generator and standard samplers instead of the reference's
+numerical inverse CDFs. Its runs are reproducible per seed, but they are not the reference's
+runs.
+
+The mode is independent of the flavour: `--flavour simulizar` and `--flavour slingshot` run in
+either mode; `--flavour slingshot-exact` always uses the Slingshot reference runner's random
+streams and ignores `--mode` ([Modes and features](./modes.md)).
 
 ```sh
 ./target/release/simoxide run --model corpus/x_sl_mediastore --mode fast --measurements m.csv
@@ -60,3 +66,7 @@ See [Engine performance](../performance/engine.md#fast-mode) for the per-model n
 - The mode is a compile-time policy (`simoxide_sim::compat`): the simulator is monomorphized per
   mode, and the choice costs nothing per event.
 - `RunResult::uniforms` counts samples in fast mode, not uniforms.
+- `--usage-streams` (`SimConfig::usage_streams`, fast mode only) gives the usage model random
+  streams of its own, so that two designs run with the same seed see the same users (common
+  random numbers; [Load profiles](./load-profile.md#comparing-designs-usage-streams),
+  [RND-11](../spec/random.md#rnd-11-usage-streams-opt-in-fast-mode-not-the-reference)).

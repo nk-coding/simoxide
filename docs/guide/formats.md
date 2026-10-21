@@ -14,6 +14,19 @@ per run, in the format `palladio-trace/1`. In the reference they come from hooks
 Two runs agree if and only if the files are byte-identical. When they differ, the first differing trace line
 localises the divergence.
 
+Other files SimOxide reads or writes:
+
+| File | Format |
+|---|---|
+| `--flavour slingshot-exact`: `--trace`, `--tape` | the level-E event projection and the tape projection of the Slingshot runner ([SS-X-2](../spec/slingshot/exact.md#ss-x-2-the-projection)) |
+| `--spd-log` | SPD and HPA decision log, JSON lines ([Scaling policies](./spd.md#decision-log), [HPA](./hpa.md#decision-log)) |
+| `--rules-log` | one JSON line per run of SimuLizar's reconfiguration process ([Reconfiguration rules](./reconfiguration.md#the-rules-log)) |
+| `--snapshot` | a paused run ([Snapshot format](../formats/snapshot.md)) |
+| `*.hpa.json` | HPA autoscalers ([Autoscaling (HPA)](./hpa.md#the-configuration-file)) |
+| `*.loadprofile.json` | load profiles ([Load profiles](./load-profile.md#the-file)) |
+| `*.changes` | change files for `resume --change` ([Change files](./snapshots.md#change-files)) |
+| `run.json` | run configuration (§5 below) |
+
 ## 1. Common rules
 
 - **JSON lines.** UTF-8, `\n` terminated, no spaces, keys in the order listed below. Strings escape `"` `\`

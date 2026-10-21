@@ -21,5 +21,5 @@ code comments cite the rule identifiers.
 Deliberate differences are on [Deviations](../correctness/deviations.md); SimuLizar's bugs, which
 SimOxide reproduces, on [Reference bugs](../correctness/reference-bugs.md).
 
-The planned Slingshot flavour has its own specification: [Semantics of Slingshot](./slingshot/index.md)
-(rules `SS-*`).
+The Slingshot-compatible mode has its own specification: [Semantics of Slingshot](./slingshot/index.md)
+(rules `SS-*`). How to use the modes: [Modes and features](../guide/modes.md).

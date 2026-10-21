@@ -22,12 +22,17 @@
 | `crates/simoxide-sched` | processor sharing, FCFS, delay and passive resources |
 | `crates/simoxide-sim` | IR compiler, event core, interpreter, measurements, batch and embedding API |
 | `crates/simoxide-cli` | `simoxide`, `simoxide-bench`, `bench/golden.sh` |
-| `crates/simoxide-reconf` | runtime model changes: the QVTo host (transformations, SimuLizar's rules, SPD adjustments), journal to change set, direct edits |
+| `crates/simoxide-spd` | scaling policies: Slingshot's SPD interpreter, its driver `SpdRun`, the HPA controller |
+| `crates/simoxide-reconf` | runtime model changes: the QVTo host (transformations, SimuLizar's rules, SPD adjustments), journal to change set, direct edits, change files, exploration |
+| `crates/simoxide-thirdparty` | the third-party test models behind git submodules: availability checks, derived files, digests ([Licensing](../guide/licensing.md#third-party-test-models)) |
 | `crates/simoxide-testkit` | differential testing, model generator, `simoxide-fuzz` |
 | `crates/simoxide-oraclekit` | what the Java reference harnesses share: warm-JVM batch driver, seed agent, result directories, comparisons (`reference/oraclekit/` on the Java side) |
 | `crates/qvto/` | the QVTo engine (`qvto-*` crates, its reference runner and oracles; [QVTo engine](../qvto/), [Development](../qvto/development.md)) |
-| `reference/` | [refsim](../reference-simulator/refsim.md), patches, component oracles |
+| `reference/` | [refsim](../reference-simulator/refsim.md), patches, component oracles; `reference/slingshot/`: the [Slingshot runner](../reference-simulator/slingshot.md) |
 | `corpus/`, `corpus-fuzz/` | models with the reference's expected outputs; saved fuzz cases |
+| `corpus-ss/`, `corpus-spd/`, `corpus-rules/` | the Slingshot-exact corpus, the SPD corpus, SimuLizar's reconfiguration-rule cases |
+| `third_party/` | git submodules with example models that declare no licence; `derived/` and `derived.txt`: SimOxide's changes to them |
+| `DESIGN-SPD.md` | design of the Slingshot mode, SPD, HPA, model changes and snapshots, with the phase log |
 | `bench/compare/` | the comparison with the other Palladio simulators |
 | `docs/` | this site (VitePress); `docs/spec/` is the semantics specification |
 | `history/` | the development log and plans, also qvto-rs's milestone log; not maintained |
@@ -54,7 +59,8 @@ them skip without them (they pass and print `skipped (third-party): ...`, visibl
 `cargo test -- --nocapture`). Run the guardrails with the
 submodules and `SIMOXIDE_REQUIRE_THIRD_PARTY=1`, which turns these skips into failures. Scripts and
 the Java runners that read the SPD example variants need the derived files once:
-`cargo run -q -p simoxide-thirdparty -- setup`.
+`cargo run -q -p simoxide-thirdparty -- setup`. The commands and how to change a derived file are
+on [Licensing](../guide/licensing.md#simoxide-thirdparty).
 
 ## Guardrails
 

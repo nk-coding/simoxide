@@ -3,12 +3,15 @@ layout: home
 
 hero:
   name: SimOxide
-  text: SimuLizar 5.2.2, byte for byte, in Rust
+  text: SimuLizar and Slingshot, byte for byte, in Rust
   tagline: The Palladio performance simulator, reproduced exactly and two to three orders of magnitude faster.
   actions:
     - theme: brand
       text: Get started
       link: /guide/getting-started
+    - theme: alt
+      text: Modes and features
+      link: /guide/modes
     - theme: alt
       text: Performance
       link: /performance/
@@ -26,6 +29,18 @@ features:
     details: Than stock SimuLizar 5.2.2 per warm run, on either of its simulation engines (DESMO-J or SSJ). A one-shot run takes milliseconds instead of seconds; 22 cores complete over 5 000 MediaStore evaluations per second.
   - title: Small and stable
     details: A few MB per process, no warm-up, no leaks, no global state. 12.6x on 22 threads.
+  - title: Slingshot-compatible
+    details: Slingshot's semantics with its bugs fixed or reproduced flag by flag, or its event bus replayed handler by handler, byte-equal to the deterministic Slingshot on its corpus.
+    link: /guide/slingshot
+    linkText: Slingshot mode
+  - title: Autoscaling
+    details: Slingshot's scaling policies (SPD) with its own QVTo adjustments, Kubernetes-style HPA autoscalers, SimuLizar's reconfiguration rules, and time-varying load profiles.
+    link: /guide/spd
+    linkText: Scaling policies
+  - title: Snapshots and forks
+    details: Pause a run between two events, fork it, write it to a file, change the model, and continue elsewhere, byte-equal to the uninterrupted run.
+    link: /guide/snapshots
+    linkText: Snapshots
   - title: Embeddable
     details: A library that loads models from memory, runs batches in parallel and bounds untrusted input with limits.
   - title: Fast mode

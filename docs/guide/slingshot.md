@@ -1,11 +1,21 @@
-# Slingshot flavour
+# Slingshot-compatible mode
 
 By default SimOxide simulates like **SimuLizar 5.2.2**. The **Slingshot flavour** simulates like
 the Palladio simulator **Slingshot** (nightly `1.0.0.202609010045`) instead: its event timing, its
 resources, its monitors, its random streams. The rules it follows are the
-[Slingshot semantics](../spec/slingshot/index.md) (`SS-*`).
+[Slingshot semantics](../spec/slingshot/index.md) (`SS-*`). It comes in two variants:
+
+| `--flavour` | What it reproduces | Checked against |
+|---|---|---|
+| `slingshot` | Slingshot's semantics, not its event bus; Slingshot's bugs fixed unless a compat flag (`--quirks`) asks for them | stock Slingshot, statistically; with `--mode exact --quirks fast`, the deterministic reference runner byte for byte on most models |
+| `slingshot-exact` | Slingshot's event bus handler by handler, every quirk included (also its disposed handlers) | the deterministic reference runner (`det`), byte for byte: event projection, random tape, measurements |
+
+Both are in the default (EPL) build; Slingshot is EPL-2.0 and the exact variant needs no opt-in
+code ([Licensing](./licensing.md)). An overview of all modes is on
+[Modes and features](./modes.md).
 
 ```sh
+# corpus/x_ss_* link into a git submodule: git submodule update --init (Licensing page)
 ./target/release/simoxide run --model corpus/x_ss_minimal --flavour slingshot \
     --max-sim-time 1000 --max-measurements -1 --measurements m.csv
 # reproduce Slingshot's bugs as well (compat flags):
@@ -13,13 +23,12 @@ resources, its monitors, its random streams. The rules it follows are the
 ./target/release/simoxide run --quirks list          # the flags
 ```
 
-This is the flavour's **fast mode** (design phase S2): it reproduces the semantics that change
-results, not Slingshot's event bus. The **Slingshot-exact mode** (`--flavour slingshot-exact`,
-below) reproduces Slingshot's bus cascade and disposed handlers event for event. In the fast mode
-both RNG modes work:
-`--mode exact` draws StoEx values from the reference's MT19937 stream and branch decisions from
+The `slingshot` flavour reproduces the semantics that change results, not Slingshot's event bus.
+Both random-number modes work with it: `--mode fast` (the default) draws everything from the
+fast generator ([Fast mode](./fast-mode.md)); `--mode exact` (exact build only) draws StoEx
+values from the reference's MT19937 stream and branch decisions from
 `java.util.Random(seed + 1000003)`, as the [Slingshot runner](../reference-simulator/slingshot.md)
-seeds them; `--mode fast` draws everything from the fast generator ([Fast mode](./fast-mode.md)).
+seeds them.
 
 ## The exact mode
 
@@ -29,7 +38,7 @@ seeds them; `--mode fast` draws everything from the fast generator ([Fast mode](
     --trace projection.jsonl --tape tape-projection.jsonl
 ```
 
-`--flavour slingshot-exact` runs Slingshot's event bus handler by handler (design phase X2):
+`--flavour slingshot-exact` runs Slingshot's event bus handler by handler:
 the same events in the same order at the same `double` times as the
 [reference runner](../reference-simulator/slingshot.md) in its `det` mode, with every quirk
 (`--quirks` must be empty or `all`), including Slingshot's disposed handlers (Q18): a handler
@@ -41,13 +50,13 @@ MT19937 for StoEx, `java.util.Random(seed + 1000003)` for branches and link fail
 projection of [exact comparison](../spec/slingshot/exact.md#ss-x-2-the-projection), so that both
 can be compared byte for byte with the reference's `tools/project.py` output; the measurements
 are the reference's `measurements.csv`. It works in the default (EPL) build. It is several times
-slower than the fast mode (one step per Slingshot event) and still far faster than Slingshot.
+slower than `--flavour slingshot` (one step per Slingshot event) and still far faster than Slingshot.
 How close it is: [Slingshot flavour correctness](../correctness/slingshot.md#the-exact-mode).
 In the library: `CompiledModel::compile_flavour(model, FlavourConfig::slingshot_exact())` and
 `simoxide_sim::run` (or `simoxide_sim::ssx::run`).
 
-With a `.spd` next to the model the exact mode runs the scaling policies on Slingshot's bus
-(design phase X2d): the time events, one subscriber per policy and stimulus, the adjustment
+With a `.spd` next to the model the exact mode runs the scaling policies on Slingshot's bus:
+the time events, one subscriber per policy and stimulus, the adjustment
 (Slingshot's `MainTransformation` in QVTo's ordered mode, built with the CLI feature
 `reconfiguration`; without it the run makes the decisions only) and the `ModelAdjusted`
 subscribers; every SPD quirk is on (`--spd-quirks` must be empty or `slingshot`), `--spd-log`
@@ -108,28 +117,28 @@ contexts, new monitors probed, removed containers drained (the Q5 flag: Slingsho
 
 ## Slingshot bugs: fixed by default, flags to reproduce them
 
-Where Slingshot is buggy, the flavour does by default what SimuLizar does (design decision U13):
+Where Slingshot is buggy, the flavour does by default what SimuLizar does:
 asynchronous forks run, delay resources work, the demands of one internal action are served one
 after the other, loop count 0 skips the body, response-time monitors are honoured, a throwing
 handler is a run error. Each documented quirk `Q1`–`Q37` has a compat flag that reproduces it
-(decision U5); the list with the fixed behaviour of each is on [Quirks](../spec/slingshot/quirks.md).
+(`--quirks`); the list with the fixed behaviour of each is on [Quirks](../spec/slingshot/quirks.md).
 
 | `--quirks` | Meaning |
 |---|---|
 | `none` (default) | the fixed behaviour of every quirk |
 | `Q26,Q29` | these quirks |
-| `fast` | every quirk the fast mode reproduces (all but Q17 and Q18) |
+| `fast` | every quirk `--flavour slingshot` reproduces (all but Q17 and Q18) |
 | `fast,-Q32` | `fast` without Q32 |
-| `all` | all 37 (refused by the fast mode, which cannot reproduce Q17 and Q18; the exact mode, `--flavour slingshot-exact`, always runs all) |
+| `all` | all 37 (refused by `--flavour slingshot`, which cannot reproduce Q17 and Q18; the exact mode, `--flavour slingshot-exact`, always runs all) |
 
-How far the fast mode reproduces a quirk (`--quirks list` prints it):
+How far `--flavour slingshot` reproduces a quirk (`--quirks list` prints it):
 
 - **Full**: as Slingshot.
-- **UpToThrow**: the quirk's behaviour up to the exception Slingshot throws; there the fast mode
+- **UpToThrow**: the quirk's behaviour up to the exception Slingshot throws; there `--flavour slingshot`
   stops with a run error. What Slingshot does next (it disposes the handler and runs on, Q18) is
   the exact mode's.
-- **Spd**: an SPD quirk (Q1–Q16), read by the SPD interpreter (design phases P1–P3).
-- **ExactOnly** (Q17, Q18): refused in the fast mode; the exact mode reproduces them.
+- **Spd**: an SPD quirk (Q1–Q16), read by the SPD interpreter (`--spd-quirks`, [Scaling policies](./spd.md#fixed-behaviour-and-compat-flags)).
+- **ExactOnly** (Q17, Q18): refused by `--flavour slingshot`; `slingshot-exact` reproduces them.
 
 ## How close is it?
 
@@ -137,7 +146,7 @@ With `--quirks fast` and `--mode exact`, the measurements are byte-identical to 
 runner's deterministic (`det`) mode on 16 of the 20 [probe models](../spec/slingshot/index.md)
 (the other four have Slingshot handler errors) and on the Slingshot corpus models `x_ss_minimal`,
 `x_ss_delay`, `x_ss_minimalexample`, `x_ss_minimalexample_open_ps` and `x_ss_mediastore` (seeds 1
-to 3). On `x_espresso`, a model full of same-time ties, the fast mode's same-time order differs from
+to 3). On `x_espresso`, a model full of same-time ties, the `slingshot` flavour's same-time order differs from
 Slingshot's event cascade; it is statistically equal to stock Slingshot. Details:
 [Slingshot flavour correctness](../correctness/slingshot.md).
 

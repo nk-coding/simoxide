@@ -1,4 +1,4 @@
-# QVTo engine (qvto-rs)
+# QVTo engine (`crates/qvto`, formerly qvto-rs)
 
 A QVT Operational Mappings (QVTo) engine in Rust, part of the SimOxide workspace. It runs
 transformations as Eclipse QVTo 3.11 on classic Eclipse OCL does, compiled to a register

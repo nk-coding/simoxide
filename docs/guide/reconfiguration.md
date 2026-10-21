@@ -76,7 +76,7 @@ longer fit a changed action ([Model changes](../spec/model-changes.md) MC-4.3, M
 `corpus-rules/` holds SimuLizar's reconfiguration examples and SimOxide's own
 (`reference/import-rules-examples.sh`) with the outputs of the patched SimuLizar reference. In
 SimOxide's exact build (`simoxide-sim`'s `exact` and `hotspot-math`; the QVTo side needs no opt-in
-crate since R2) all of them equal the reference byte for byte (trace, random tape, measurements):
+crate, as its ordered mode equals the reference) all of them equal the reference byte for byte (trace, random tape, measurements):
 
 | Case | Model and rules | Changes |
 |---|---|---|

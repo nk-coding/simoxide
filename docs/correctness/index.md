@@ -1,5 +1,10 @@
 # Exactness and evidence
 
+This page is about the SimuLizar-compatible exact mode. The Slingshot-compatible mode is checked
+on [Slingshot flavour](./slingshot.md); SimuLizar's reconfiguration rules on
+[Reconfiguration rules](../guide/reconfiguration.md#examples); the SPD adjustments and the QVTo
+engine on [Testing](./testing.md) and [QVTo conformance](../qvto/conformance.md).
+
 ## The claim
 
 For a [supported model](../guide/scope.md), a seed and the stop conditions, SimOxide's exact mode
@@ -35,9 +40,12 @@ How each layer works and how to rerun it: [Testing](./testing.md).
 
 ## Caveats
 
-- **Bit-exact `Math.log`/`Math.exp` need the feature `hotspot-math`** (default in `simoxide-cli`
-  and `simoxide-testkit`, off in the libraries). The port of HotSpot's intrinsics is
-  GPL-2.0-only, so binaries built with it must not be distributed. Without it, `log` and `exp`
+- **The exact mode needs the exact build.** `--mode exact` exists only with the feature `exact`,
+  and bit-exact `Math.log`/`Math.exp` need the feature `hotspot-math` as well (both off by
+  default; `cargo build-exact` turns them on, the tests turn them on through their
+  dev-dependencies). The port of HotSpot's intrinsics is GPL-2.0-only and `exact` links code for
+  which no licence is granted, so such binaries must not be distributed
+  ([Licensing](../guide/licensing.md)). Without it, `log` and `exp`
   are correctly rounded and differ from
   HotSpot by one ulp on rare inputs
   ([Deviations](./deviations.md#math-log-and-math-exp-without-hotspot-math)). The results on this

@@ -48,17 +48,17 @@ always simulated (SS-ACT-7.2), the release that does not wait (SS-ACT-8.3).
 
 ## The exact mode {#exact-mode}
 
-The Slingshot-exact mode (`--flavour slingshot-exact`, design phase X2) runs every flag, Q17 and
+The Slingshot-exact mode (`--flavour slingshot-exact`) runs every flag, Q17 and
 Q18 included, by emulating Slingshot's handlers: each quirk that throws ("up to the throw" below)
 throws in the same handler with the same exception class, and the handler is disposed with the
 side effects it had made (draws, frames pushed or popped, cursor moves, measurements). Checked on
 the 22 Slingshot corpus cases with handler errors plus two Q37 cases
 ([SS-X-8](./exact.md#ss-x-8-the-slingshot-exact-corpus); `crates/simoxide-sim/tests/slingshot_exact.rs`,
-`handler_errors_match_the_reference`). The SPD quirks Q1–Q16 are the SPD interpreter's (X2d).
+`handler_errors_match_the_reference`). The SPD quirks Q1–Q16 are the SPD interpreter's, all on in this mode.
 
 ## Compat flags in SimOxide {#compat-flags}
 
-SimOxide's Slingshot flavour (fast mode, design phase S2; [Slingshot flavour](../../guide/slingshot.md))
+SimOxide's Slingshot flavour (`--flavour slingshot`, here called the fast mode; [Slingshot-compatible mode](../../guide/slingshot.md))
 has one flag per quirk: `--quirks Q26,Q29`, `--quirks fast` (every flag the fast mode supports),
 `--quirks list`; in the library `simoxide_sim::Quirks` / `Quirk::Q26` in
 `FlavourConfig::slingshot(..)`. Without a flag the fixed behaviour of the table above applies.
@@ -66,7 +66,7 @@ has one flag per quirk: `--quirks Q26,Q29`, `--quirks fast` (every flag the fast
 
 | # | Fast mode | Notes |
 |---|---|---|
-| Q1–Q16 | SPD | the SPD interpreter's flags (`simoxide_spd::Quirks`, `simoxide run --spd-quirks`, phase P1; Q5–Q8, Q14, Q16 with the adjustment, P2); `simoxide_sim::Quirks` carries the same numbers so that P3 can drive both from one set |
+| Q1–Q16 | SPD | the SPD interpreter's flags (`simoxide_spd::Quirks`, `simoxide run --spd-quirks`; Q5–Q8, Q14, Q16 act through the adjustment); `simoxide_sim::Quirks` carries the same numbers so that one set drives both |
 | Q17 | refused | concurrent demands with a shared cursor need the exact mode's handler steps; refused for models with an internal action with two or more demands. The exact mode (`--flavour slingshot-exact`) reproduces it |
 | Q18 | refused | handler disposal is the exact mode's: there every handler has a disposed bit, the throwing handler keeps the side effects up to the throw and never runs again |
 | Q19 | up to the throw | SEFF loop count 0: body once, then a run error; negative count and usage-loop count ≤ 0: run error at the loop |
@@ -234,7 +234,7 @@ when the flag is off; the unchanged transformations run under the flag.
 | Q5 | scale-in aborts one job, loses the others | SS-SPD-5.4 | defined in the design (§5.3): drain |
 | Q6 | every link connects every container after an adjustment | SS-SPD-4.2 | proposed (P2): a new container joins the links of the unit container (appended); other links unchanged; removed containers leave every link. P2: `Quirks::q6_all_links`, the patched `ResourceEnvironmentTransformation.qvto`, *provisional* |
 | Q7 | top-down scale-in removes emptied containers one enactment late | SS-SPD-4.2 | proposed (P2): removed in the same enactment (the transformation's own TODO). P2: `Quirks::q7_late_removal`, the patched `TopDownTransformationInfrastructure.qvto`, *provisional* |
-| Q8 | top-down placement `->any(true)`: Java-hash order | SS-SPD-4.2 | qvto-rs deterministic order (documented deviation, §5.5); the Slingshot-exact mode uses QVTo's ordered mode, which equals the `det` runner's insertion order |
+| Q8 | top-down placement `->any(true)`: Java-hash order | SS-SPD-4.2 | the QVTo engine's deterministic insertion order (documented deviation, `DESIGN-SPD.md` §5.5); the Slingshot-exact mode uses QVTo's ordered mode, which equals the `det` runner's insertion order |
 | Q9 | only thrashing constraints in the chain | SS-SPD-1.4 | proposed (P1): the `TargetGroupSizeConstraint` is also checked in the chain, so a policy whose change would be clamped to zero is disregarded (and changes no constraint state). P1: `Quirks::q9_no_size_check`, *provisional*. |
 | Q10 | static fields in `TargetGroupUtils` | – | not reproduced (no shared JVM state in SimOxide) |
 | Q11 | unsupported stimuli: NPE at set-up | SS-SPD-2.2 | defined: a configuration error naming the stimulus. P1: `Quirks::q11_setup_error_drops_spd` (also wrong expectation types, CPU percentages outside 0-100, `QueueLength` outside competing-consumer groups). |
