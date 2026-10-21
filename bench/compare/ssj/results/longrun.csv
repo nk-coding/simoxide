@@ -1,0 +1,7 @@
+sim,model,sim_time_s,finished,timeout,process_wall_s,run_wall_s,requests,mean_rt,requests_per_s,simsec_per_s,warm_long_simsec_per_s,ratio_vs_warm_long,refsim_inrun_simsec_per_s_first_vs_last_min,rss_mb_max,gc_pause_share,rss_mb_at_20s,rss_mb_before_end
+simoxide,x_ss_mediastore,1000000000.0,True,False,0.892317,0.888,94202,21230.553995,106027.9,1125538007.2,1301066874.8,0.865,,323,,,
+simoxide,x_ss_mediastore,5000000000.0,True,False,4.681172,4.678,471282,21218.666048,100741.7,1068804503.7,1301066874.8,0.821,,1591,,,826
+simucom-ssj,x_ss_mediastore,300000000.0,True,False,186.160779,182.643,28256,21233.830111029267,154.7,1642548.6,1486878.3,1.105,,2918,0.0226,1186,2849
+simucom,x_ss_mediastore,300000000.0,True,False,179.724452,176.352,28256,21233.830111031595,160.2,1701143.2,1435029.1,1.185,,3204,0.0248,1345,3173
+simulizar-ssj,x_ss_mediastore,200000000.0,True,False,173.154466,171.51,18846,21223.665067,109.9,1166110.4,1052934.4,1.107,,1837,0.0144,1036,1837
+simulizar,x_ss_mediastore,200000000.0,True,False,212.82567,210.949,18846,21223.665067,89.3,948098.4,1040761.5,0.911,,1648,0.0139,950,1642

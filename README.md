@@ -7,7 +7,8 @@ default schedulers and the default measurements.
   the same event trace, the same random draws and the same `measurements.csv`, SimuLizar's bugs
   included. Checked on 66 corpus models, about 12 000 generated models, component oracles and
   queueing theory.
-- **Fast.** A warm run is 250 to 2 400 times faster than stock SimuLizar 5.2.2 and 180 to 1 000
+- **Fast.** A warm run is 250 to 2 600 times faster than stock SimuLizar 5.2.2 on its default
+  DESMO-J engine, 240 to 3 300 times faster on its optional SSJ engine, and 180 to 1 000
   times faster than Slingshot; a one-shot run takes milliseconds instead of seconds. On 22 cores
   SimOxide completes over 5 000 MediaStore evaluations per second at 64 MB; the best JVM
   configuration completes 17 at 19 GB.

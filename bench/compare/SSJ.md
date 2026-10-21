@@ -4,7 +4,11 @@ SimOxide reproduces SimuLizar 5.2.2 on its default simulation engine, DESMO-J, a
 `docs/performance/comparison.md` measures SimuLizar and SimuCom on DESMO-J. Palladio has a second engine,
 SSJ (Stochastic Simulation in Java), which is expected to be faster. This directory adds SimuLizar and
 SimuCom on SSJ to the same benchmark, so that the speed-ups on the website are also stated against
-Palladio's faster engine. Everything here is set up; the full run has **not** been made yet.
+Palladio's faster engine. The full run was made on 2026-10-21 on a 25-core, 34 GB VM (AMD Ryzen 9 9950X3D, the CPU of the
+website's 22-core VM; all-core phases with `PAR_WORKERS=22`), 16:56–20:38: results in `ssj/results/`
+(summaries and tables; raw logs git-ignored), on the website in `docs/performance/` ("Palladio on the
+SSJ engine"). Outcome: SSJ is not faster than DESMO-J (warm SimuLizar runs 78 to 126 % of the
+DESMO-J time, median 97 %), and both engines gave identical results per seed on every benchmark model.
 
 ## How Palladio selects the engine
 
@@ -111,7 +115,7 @@ generated package clash, not investigated further). `ssj/ext.sh` therefore leave
 `mean_rt` describe one scenario only (the last one they find), so the sanity table is not meaningful for
 `x_misarch`; timing is unaffected.
 
-## Running the full comparison (later, on a quiet machine)
+## Running the full comparison (on a quiet machine)
 
 ```sh
 bench/compare/ssj/run.sh            # build cold warm sus1 susN longrun par extra summary

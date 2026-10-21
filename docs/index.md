@@ -22,8 +22,8 @@ hero:
 features:
   - title: Byte-identical
     details: The same event trace, random draws and measurements as the reference for every supported model, reference bugs included. Checked on 66 corpus models and about 12 000 generated models.
-  - title: 250 to 2 400 times faster
-    details: Than stock SimuLizar 5.2.2 per warm run. A one-shot run takes milliseconds instead of seconds; 22 cores complete over 5 000 MediaStore evaluations per second.
+  - title: 240 to 3 300 times faster
+    details: Than stock SimuLizar 5.2.2 per warm run, on either of its simulation engines (DESMO-J or SSJ). A one-shot run takes milliseconds instead of seconds; 22 cores complete over 5 000 MediaStore evaluations per second.
   - title: Small and stable
     details: A few MB per process, no warm-up, no leaks, no global state. 13x on 22 threads.
   - title: Embeddable

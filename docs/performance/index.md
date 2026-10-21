@@ -4,20 +4,27 @@ SimOxide produces the same results as SimuLizar 5.2.2 and is two to three orders
 faster than every other Palladio simulator, on one core and on all cores. It also has no
 warm-up, does not leak and needs a few MB of memory instead of GBs.
 
-All numbers on this page come from one machine (AMD Ryzen 9 9950X3D VM, 22 cores, 34 GB) and one
-benchmark harness, `bench/compare/`. Every simulator runs the same model files for the same
+The numbers on this page come from one benchmark harness, `bench/compare/`, in two sessions on
+VMs with the same CPU (AMD Ryzen 9 9950X3D): the main session on 22 cores and 34 GB
+(2026-09-29/30), and the SSJ session on 25 cores and 34 GB (2026-10-21), which measured
+SimuLizar and SimuCom on the SSJ engine side by side with SimOxide and both on DESMO-J again (its
+all-core runs used 22 workers too). Every simulator runs the same model files for the same
 simulated time. The method and every table are on [Comparison in detail](./comparison.md).
 
 ## At a glance
+
+Rows marked "on SSJ": SSJ session (25-core VM, 2026-10-21); all other rows: main session (22-core VM).
 
 | Simulator | Status | Warm run, SimOxide is faster by | Cold start to results | One core, MediaStore | All 22 cores, MediaStore |
 |---|---|---|---|---|---|
 | **SimOxide** | this project | – | 4 to 10 ms (short runs) | **426 runs/s** | **5 396 runs/s** at 64 MB |
 | SimuLizar 5.2.2 (stock) | supported | 256× to 2 420× | 5.4 to 17 s | 0.50 runs/s | 11.3 runs/s at 26 GB, then killed; 4.1 runs/s in one JVM (collapses) |
+| SimuLizar 5.2.2 (stock) on SSJ | supported, optional engine | 238× to 3 271× | 5.59 to 17.8 s | 0.487 runs/s | 13.6 runs/s at 23.8 GB (22 processes), killed; 3.96 runs/s at 13.4 GB (in one JVM), 9 failed runs |
 | SimuLizar 5.2.2 + virtual threads | patched | 222× to 1 270× | 5.5 to 17 s | 0.53 runs/s | 9.7 runs/s at 13 GB, 8 failed runs |
 | refsim (deterministic SimuLizar) | this project's reference | 222× to 2 240× | 5.5 to 16 s | 0.57 runs/s | 17 runs/s at 19 GB |
 | Slingshot (nightly 2026-09-01) | actively developed | 182× to 1 030× | 2.7 to 13 s | 0.61 runs/s | 9.4 runs/s at 15 GB |
 | SimuCom 5.2.2 (repaired) | deprecated | 237× to 2 100× | 7.9 to 16 s | 0.45 runs/s | – |
+| SimuCom 5.2.2 (repaired) on SSJ | deprecated, optional engine | 208× to 2 866× | 8.24 to 17.4 s | 0.447 runs/s | – |
 | EventSim 5.1 | archived, unsupported | 76× to 340× | 3.8 to 7.5 s | 0.66 runs/s, degrading | – |
 
 - **Warm run**: one simulation in a long-lived, warmed-up process, from the model files to the
@@ -27,6 +34,14 @@ simulated time. The method and every table are on [Comparison in detail](./compa
   (about 190 requests each), back to back with a new seed per run.
 - **All cores**: the same, with the best configuration each simulator supports (threads,
   processes or isolated class loaders).
+- **On SSJ**: SimuLizar and SimuCom run on an abstract simulation engine with two
+  implementations, DESMO-J (the default, and the only one in the Palladio product) and SSJ
+  (Stochastic Simulation in Java), an optional bundle of the same release that was expected to
+  be faster. SimOxide reproduces DESMO-J, so exactness is checked against DESMO-J, but its speed
+  is compared with both engines. SSJ is not faster: a warm SimuLizar run on SSJ takes 78 to 126 %
+  (median 97 %) and a warm SimuCom run 85 to 132 % (median 99 %) of the time on DESMO-J. The SSJ rows come from a separate
+  session (2026-10-21, 25 cores, 34 GB) that measured SimOxide and both engines side by side; see
+  [Palladio on the SSJ engine](./comparison.md#palladio-on-the-ssj-engine).
 
 ## What this means in practice
 
@@ -54,6 +69,7 @@ simulated time. The method and every table are on [Comparison in detail](./compa
 | refsim | flat; its patches reset the per-run static state |
 | Slingshot | flat throughput, but leaks about 0.86 threads per run |
 | SimuCom | flat; code generation costs 0.3 to 1.5 s per model change |
+| SimuLizar and SimuCom on SSJ | flat throughput on one core, but SSJ never releases the threads of users parked at the end of a run: espresso grows from 1 255 to 10 551 threads in 344 SimuLizar runs (DESMO-J: 110 → 400). With 22 threads in one JVM SimuLizar collapses as on DESMO-J (9 failed runs); 22 processes exceed the memory limit |
 | EventSim | degrades within minutes (espresso: 4.9 to 1.0 runs/s in 2 minutes) |
 
 ## Beyond speed
@@ -64,6 +80,11 @@ simulated time. The method and every table are on [Comparison in detail](./compa
 | Reproducible per seed | yes | refsim only | no: branch decisions use the unseedable `Math.random()` | yes |
 | Runs every benchmark model | yes | yes | no: fails on synchronous forks, needs an extra demand on acquire and release | yes |
 | Parallel runs in one process | yes, no shared state | only with workarounds, not reproducible | isolated class loaders | – |
+
+The SimuLizar family column is for the DESMO-J engine. On SSJ, SimuLizar and SimuCom draw the same
+random streams but keep time as a floating-point number instead of nanoseconds and can order
+simultaneous events differently, so their results need not be identical to DESMO-J's. In this
+benchmark they were: on every benchmark model and length (seed 1), SimuLizar on SSJ gave the same request counts and mean response times as on DESMO-J and as SimOxide, and SimuCom on SSJ the same request counts as on DESMO-J and mean response times equal to a relative 2·10^-9 (SSJ's floating-point clock).
 
 ## SimOxide on its own
 
@@ -78,4 +99,6 @@ short: 6 to 31 million events per second on one core, about 13x on 22 threads, a
 SimOxide was measured on 2026-09-30 at the current state of the repository. The JVM simulators
 were measured on 2026-09-29 on the same machine with the same harness; their versions have not
 changed since. `bench/compare/run-all.sh` reproduces everything (about 3.5 hours;
-`SIMS=simoxide` re-measures SimOxide alone in a few minutes).
+`SIMS=simoxide` re-measures SimOxide alone in a few minutes). The SSJ rows were measured on
+2026-10-21 on a 25-core, 34 GB VM of the same CPU by `bench/compare/ssj/run.sh` (3 h 40 min),
+together with SimOxide and SimuLizar and SimuCom on DESMO-J.

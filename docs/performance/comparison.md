@@ -21,6 +21,8 @@ The comparison measures:
 | **SimuLizar + VT** | stock plus a one-class virtual-thread patch (`-Dpalladio.virtualThreads=true`) | | OpenJDK 21 | same driver |
 | **Slingshot** | event-bus Palladio simulator (University of Stuttgart, actively developed) | nightly 2026-09-01, SSJ, EDP2 in memory | OpenJDK 21, `-Xmx4g` | `java/slingshot/CompareSlingshot` around `SlingshotRunner`, flat classpath; the seeded RNG is injected into the global StoEx factory. Cold runs also in Equinox |
 | **SimuCom** | deprecated code-generating simulator | Palladio 5.2.2 with a repaired headless workflow (below) | Temurin 17 (5.2.2's JDT cannot use Java 21), `-Xmx4g` | `simucom/run-simucom.sh`, own OSGi application |
+| **SimuLizar stock on SSJ** | stock SimuLizar 5.2.2 on the SSJ engine (below) | 5.2.2 product jars plus the release's SSJ engine bundle 5.2.2 and SSJ 3.3.1 | OpenJDK 21, `-Xmx4g` | the SimuLizar driver with the SSJ engine factory (`engine=ssj`); cold runs also in the product's OSGi runtime, engine chosen by preference |
+| **SimuCom on SSJ** | SimuCom 5.2.2 on the SSJ engine | as SimuCom, plus the two SSJ bundles | Temurin 17, `-Xmx4g` | `simucom/run-simucom.sh`, engine chosen by preference |
 | **EventSim** | archived (2022), unsupported; a historical data point | 5.1.0 on Palladio 5.1 | Temurin 11 | `eventsim.sh`, with an in-memory counting store instead of R |
 
 Not included: the PCM2LQN/LQNS solver, which is analytical, and ProtoCom, which generates
@@ -33,6 +35,20 @@ it rewrites the moved packages in the generated code, adds headless versions of 
 5.2.2 made abstract, adds a missing bundle requirement and declares the missing project nature
 again. SimuCom ignores the monitor repository and records its built-in sensors. With the same
 seed it reproduces SimuLizar's request counts and mean response times exactly.
+
+**SSJ engine.** SimuLizar and SimuCom do not schedule events themselves: they run on Palladio's
+abstract simulation engine (`de.uka.ipd.sdq.simulation.abstractsimengine`), which has two
+implementations. DESMO-J is the default and the only one shipped in the Palladio 5.2.2 product;
+SimOxide reproduces it. SSJ (Stochastic Simulation in Java, Université de Montréal) is an
+optional bundle of the same release (`org.palladiosimulator.simulation.abstractsimengine.ssj`
+5.2.2 with the library `ca.umontreal.iro.simul.ssj` 3.3.1, from the 5.2.2 update site), with its
+own event list (a splay tree) and floating-point clock; it was expected to be the faster engine.
+Both simulators pick the engine from the
+preference `de.uka.ipd.sdq.simulation/simulationEngineField` (Eclipse: Preferences → Palladio
+Simulation); the benchmark sets it through the OSGi configuration, and the flat-classpath
+SimuLizar driver injects the engine factory directly. Comparing SimOxide only with DESMO-J would
+overstate its speed-up if SSJ were much faster, so SimuLizar and SimuCom were measured on both
+engines ([Palladio on the SSJ engine](#palladio-on-the-ssj-engine)).
 
 **Machine.** AMD Ryzen 9 9950X3D VM: 22 cores, 1 thread per core, 34 GB RAM, Linux 6.8. Each
 benchmark process runs alone: the scripts wait until the machine has at most 2 runnable tasks.
@@ -152,6 +168,35 @@ logs. "SimOxide speed-up" is the other simulator's time divided by SimOxide's.
   10^10 s crosses 2^63 ns (292 years), wraps around as in Java and aborts with the reference's
   error.
 
+## Palladio on the SSJ engine
+
+SimuLizar and SimuCom on SSJ were measured in a separate session (2026-10-21; AMD Ryzen 9 9950X3D
+VM with 25 cores and 34 GB; the all-core runs with 22 workers, as above) together with
+SimOxide and with SimuLizar and SimuCom on DESMO-J, with the same models, simulated times, phases
+and drivers as above (`bench/compare/ssj/run.sh`). Within the session, every pair of engines ran
+alternately per model and length on the same machine, so the SSJ to DESMO-J ratios do not depend
+on the session. Additional model: `x_misarch`, a generated PCM model of the MiSArch microservice
+system (34 containers, 1 146 actions, 38 open workloads, asynchronous forks), run for 36 s and
+361 s of simulated time. SimuCom cannot generate compilable code for it (entity names such as
+`createUser@user` or `return`; with Java-safe names, a package clash remains), so it is left out.
+
+- **SSJ against DESMO-J**: SSJ is not faster. A warm SimuLizar run takes 78 to 126 % (median
+  97 %) and a warm SimuCom run 85 to 132 % (median 99 %) of the time on DESMO-J; cold runs 92 to
+  117 %. SSJ is slower on the fork-heavy `x_pem_fork` (127 % long) and on `x_misarch` (119 to
+  124 %): it starts a new thread per simulated process where DESMO-J reuses pooled threads.
+- **SimOxide speed-up** on SSJ: 238× to 3 271× (SimuLizar) and 208× to 2 866×
+  (SimuCom) per warm run, against 253× to 2 588× and 241× to 2 169× on
+  DESMO-J in the same session.
+- **Results**: on every benchmark model and length (seed 1), SimuLizar on SSJ gave the same request counts and mean response times as on DESMO-J and as SimOxide, and SimuCom on SSJ the same request counts as on DESMO-J and mean response times equal to a relative 2·10^-9 (SSJ's floating-point clock). The sanity table's `x_misarch` rows are not comparable: the drivers report one of its 38 usage scenarios, not the same one.
+- **Sustained runs**: on one core both engines are flat (MediaStore: 0.487 runs/s on SSJ, 0.48 on
+  DESMO-J; no failed runs). On all cores, 22 SimuLizar processes on SSJ reach 13.6 runs/s before
+  the memory watchdog kills them at 24 GB (DESMO-J: 8.4 runs/s, also killed); 22 threads in one
+  JVM collapse on both engines (SSJ: 3.96 runs/s, 9 failed runs; DESMO-J: 4.92 runs/s, 13 failed).
+
+<!--@include: ../../bench/compare/ssj/results/tables.md-->
+
+<!--@include: ../../bench/compare/ssj/results/tables_sustained.md-->
+
 ## Fairness caveats
 
 - **Same work only within the SimuLizar family.** SimOxide, refsim, stock SimuLizar, SimuLizar +
@@ -181,6 +226,20 @@ logs. "SimOxide speed-up" is the other simulator's time divided by SimOxide's.
   summaries of each batch on one thread while the other cores idle, so it reaches only about half
   the throughput of 22 threads that each reload the model. Its row is left out of the table (it
   is in `sus_summary.csv`). With short espresso runs, batch and reload are equal.
+- **SSJ is not DESMO-J.** The two engines get the same random streams (the generator belongs to
+  the simulation configuration, not to the engine), but SSJ keeps simulated time as a `double` in
+  seconds where DESMO-J counts nanoseconds, and orders simultaneous events by its own event list.
+  After a first difference the runs would follow different sample paths, so on SSJ the
+  SimuLizar family is only guaranteed to match DESMO-J (and SimOxide) statistically; in this
+  benchmark they matched: on every benchmark model and length (seed 1), SimuLizar on SSJ gave the same request counts and mean response times as on DESMO-J and as SimOxide, and SimuCom on SSJ the same request counts as on DESMO-J and mean response times equal to a relative 2·10^-9 (SSJ's floating-point clock). SSJ also ends a run at the maximum simulated time with a
+  plain `Simulator.stop()`, without the engine-independent `stop()` that DESMO-J calls; the
+  simulation model is then not finalised (no stop listeners, no resource deactivation), and the
+  threads of simulated users parked at the end are never released: on `x_espresso` (30 users),
+  SimuLizar on SSJ grows by about 30 threads per run in a long-lived JVM, on DESMO-J it stays flat.
+  In the sustained one-core runs this shows as thread growth, not as lost throughput: on
+  `x_espresso`, SimuLizar on SSJ grows from 1 255 to 10 551 threads in 344 runs and SimuCom on SSJ
+  from 756 to 7 507 in 248 runs (DESMO-J: 110 → 400 and 152 → 157), at 1.7 and 2.8 GB RSS; no
+  run failed and no thread limit was reached (`ulimit -u` 62 128).
 
 ## Reproducing
 
@@ -190,6 +249,7 @@ bench/compare/run-all.sh par                   # parallel throughput
 bench/compare/run-all.sh summary               # only re-aggregate results/raw/
 SIMS="simoxide slingshot" MODELS=x_espresso LENS=short bench/compare/run-all.sh cold warm summary
 SIMS=simoxide MEM_FLOOR_KB=2000000 bench/compare/run-all.sh cold warm par sus1 susN longrun summary
+bench/compare/ssj/run.sh                       # SimOxide, SimuLizar and SimuCom on DESMO-J and SSJ (bench/compare/SSJ.md)
 ```
 
 Each phase resumes: a benchmark process whose log ends with `rc=0` is not run again. The raw logs
