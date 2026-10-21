@@ -1,16 +1,16 @@
 # Semantics of Slingshot
 
 These pages specify what the Palladio simulator **Slingshot** does when it simulates a model,
-precisely enough to implement SimOxide's planned **Slingshot flavour** in both of its modes
-(design `DESIGN-SPD.md` on branch `spd`, decisions U4 and U5):
+precisely enough to implement SimOxide's **Slingshot flavour** in both of its modes
+(design: `DESIGN-SPD.md`, decisions U4 and U5):
 
 - **Slingshot-exact**: the same event projection, random draws and measurements, byte for byte, as
   the deterministic Slingshot of the reference runner (`reference/slingshot`, `det` mode,
   [Slingshot runner](../../reference-simulator/slingshot.md));
 - **fast**: the same semantics, statistically equal results.
 
-SimOxide implements the flavour's fast mode ([Slingshot flavour](../../guide/slingshot.md), phase S2
-of the design); the exact mode is phase X2. These pages are its specification, like the [SimuLizar pages](../index.md) are for the SimuLizar mode. The rules are
+SimOxide implements both: `--flavour slingshot` and `--flavour slingshot-exact`
+([Slingshot-compatible mode](../../guide/slingshot.md)). These pages are its specification, like the [SimuLizar pages](../index.md) are for the SimuLizar mode. The rules are
 extracted from the Slingshot sources with file and line references, and wherever possible each rule
 has a **probe**: a small model in `reference/slingshot/models/probes/` whose recorded `det` outputs
 demonstrate it.

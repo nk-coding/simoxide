@@ -46,7 +46,8 @@ In the SimuLizar flavour the measurements are SimuLizar's: utilisation is the sl
 utilisation of the monitor, not Slingshot's instantaneous sample. There is no reference for
 this combination. Slingshot's own monitor repositories often declare utilisation monitors
 without a `TimeDriven` processing type, which the SimuLizar flavour rejects; the Slingshot
-flavour (phase S2) will take them.
+flavours (`--flavour slingshot`, `slingshot-exact`) take them, as Slingshot ignores processing
+types ([Monitoring](../spec/slingshot/monitoring.md)).
 
 ## Command line
 

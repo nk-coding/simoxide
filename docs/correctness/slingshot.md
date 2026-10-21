@@ -1,6 +1,6 @@
 # Slingshot flavour
 
-What the [Slingshot flavour](../guide/slingshot.md) (fast mode, design phase S2) is checked against,
+What the [Slingshot flavour](../guide/slingshot.md) (`--flavour slingshot`) is checked against,
 and how close it is. The oracle is the [Slingshot reference runner](../reference-simulator/slingshot.md):
 its `det` mode (seeded, insertion-ordered same-time events) for exact comparisons, its `stock` mode
 (the unmodified nightly, same-time order random per run) for statistics.
@@ -105,7 +105,7 @@ the three SPD cases of `corpus-ss/`) are byte-equal to the `det` runner at level
 
 ## The exact mode
 
-The Slingshot-exact mode (`--flavour slingshot-exact`, design phase X2) is compared with the
+The Slingshot-exact mode (`--flavour slingshot-exact`) is compared with the
 Slingshot-exact corpus `corpus-ss/` ([SS-X-8](../spec/slingshot/exact.md#ss-x-8-the-slingshot-exact-corpus)):
 90 cases (the 20 probes, the 3 SPD examples, the 38 clean corpus models, 25 failure models, 2
 runs that end before t = 0, and 2 cases for quirk Q37), each with the `det` runner's outputs. A

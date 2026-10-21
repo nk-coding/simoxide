@@ -3,11 +3,24 @@
 `simoxide-sim` is the simulator as a library. It has no global mutable state and needs no file
 system access, so it can be embedded in a service, for example behind a JVM.
 
-By default the library contains no GPL code: its exact mode uses correctly rounded `Math.log` and
-`Math.exp`, which can make it drift from the reference
-([Deviations](../correctness/deviations.md#math-log-and-math-exp-without-hotspot-math)). The
-feature `hotspot-math` makes it bit-exact but links GPL-2.0-only code, and a program built with it
-must not be distributed (see `LICENSES`).
+With default features the library is EPL-2.0 only: the fast mode in both flavours and the
+Slingshot-exact engine. The SimuLizar-exact mode needs the feature `exact` (links
+`simoxide-jcompat-exact`, for which no licence is granted); without `hotspot-math` it uses
+correctly rounded `Math.log` and `Math.exp`, which can make it drift from the reference
+([Deviations](../correctness/deviations.md#math-log-and-math-exp-without-hotspot-math)).
+`hotspot-math` makes it bit-exact but links GPL-2.0-only code. A program built with either
+must not be distributed ([Licensing](./licensing.md)).
+
+Use the crates as git or path dependencies (`simoxide-reconf` and the QVTo crates are `publish = false`):
+
+```toml
+[dependencies]
+simoxide-sim = { git = "https://github.com/nk-coding/simoxide", features = ["snapshot"] }
+simoxide-model = { git = "https://github.com/nk-coding/simoxide" }
+# runtime model changes, QVTo, SPD adjustments
+simoxide-reconf = { git = "https://github.com/nk-coding/simoxide", features = ["spd", "snapshot"] }
+simoxide-spd = { git = "https://github.com/nk-coding/simoxide", features = ["snapshot"] }
+```
 
 ## One run from memory
 
@@ -47,7 +60,11 @@ A runnable version is `crates/simoxide-sim/examples/embed.rs`. `simulate_memory_
 3. Run it as often as needed:
    - `run_batch(&cm, &configs, threads)` runs a list of configurations in parallel;
    - `simoxide_sim::run(&cm, cfg, outputs)` runs one configuration in the mode `cfg.mode`;
-   - `Simulation::new(&cm, cfg, outputs)?.run()` runs one configuration in exact mode.
+   - `Simulation::<Fast>::create(&cm, cfg, outputs)?.run()` (any build) or
+     `Simulation::new(&cm, cfg, outputs)?.run()` (exact mode, feature `exact`) runs one
+     configuration with a compile-time mode; `Simulation::<C, Slingshot>` is the Slingshot
+     flavour, `simoxide_sim::ssx::SsxRun` the Slingshot-exact engine
+     ([Slingshot-compatible mode](./slingshot.md#the-exact-mode)).
 
 Every `SimConfig` carries its own seed, stop conditions, mode and `Limits`. Cancellation is an
 `Arc<AtomicBool>` in `Limits::cancel`. The only per-thread state is a set of memos of pure
@@ -193,10 +210,13 @@ let all = qvto.run_rules(&mut sim, &rules, &Invocation::simulizar()).map_err(|(_
   the run going instead).
 - **Natives.** `getSimulationTime()` is the run's clock. Palladio's `ProfilesLibrary`
   (stereotypes) is a stub that throws.
-- **Modes.** The default build runs QVTo's fast mode: Eclipse's semantics, with sets and
-  `->any` in a deterministic insertion order instead of Java's hash order. A build with the
-  feature `compat` (or `exact`) runs Eclipse's compat mode, whose models equal Eclipse QVTo's;
-  `QvtMode::Compat` in other builds is `ReconfError::ModeUnavailable`.
+- **Modes.** `RunConfig::mode` (`QvtMode`): `Auto` (the default) is QVTo's fast mode in the
+  default build and compat mode in builds with the feature `compat` (or `exact`);
+  `InsertionOrderSets` is the ordered mode, which the CLI uses for rules and SPD adjustments
+  because it equals both references. Fast and ordered mode keep Eclipse's semantics with sets and
+  `->any` in a deterministic insertion order instead of Java's hash order; compat mode's models
+  equal Eclipse QVTo's; `QvtMode::Compat` in other builds is `ReconfError::ModeUnavailable`
+  ([QVTo modes](../qvto/index.md#modes)).
 - **SPD.** `QvtoAdjuster` (feature `spd`) executes the SPD interpreter's adjustment requests
   with a transformation such as Slingshot's `MainTransformation.qvto` ([SPD](spd.md)).
 - **Flavours.** The host works with both flavours; both take model changes (the
@@ -260,3 +280,4 @@ collected in `RunResult::measurements`:
 | `simoxide-emf-core`, `simoxide-emf` | EMF's metamodel registry and the model graph shared by SimOxide and QVTo: XMI, resource sets, change journal ([Foundation crates](../development/foundation.md)) |
 | `qvto`, `qvto-syntax`, `qvto-types`, `qvto-sema`, `qvto-bytecode`, `qvto-runtime`, `qvto-vm` | the QVTo engine: the facade `qvto` and its pipeline ([QVTo architecture](../qvto/architecture.md)) |
 | `qvto-testkit`, `qvto-cli`, `qvto-paths` | QVTo's conformance harness, the `qvto` command, data paths |
+| `simoxide-thirdparty` | test infrastructure: availability of the third-party models behind git submodules, the derived files, digests ([Licensing](./licensing.md#third-party-test-models)) |
