@@ -115,7 +115,7 @@ fast mode.
   reference runner (`spd_minimal`, `spd_scale_in`, `spd_time_policies`, the `spd_or_trigger`
   and `spd_and_trigger` reproductions, the 20 probes) equals the runner's `spd.jsonl` (det
   mode), projected, with all compat flags on: 83 records on the five SPD models. The adjustment
-  is not executed (phase P2): a test double reports the reference's outcome of each adjustment
+  is not executed in this crate (it is `simoxide-reconf`'s, below): a test double reports the reference's outcome of each adjustment
   (success, the target group's size after it). With the fixed behaviour the logs equal what
   the evident intent gives (derived by hand per model).
 - `tests/sim.rs`: in a simoxide-sim run the observers deliver the measurements the triggers
