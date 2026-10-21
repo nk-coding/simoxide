@@ -48,7 +48,7 @@ impl std::fmt::Display for ObjId {
 /// A stored data value (never `Obj`).
 pub type Value = OwnedDatum<ObjId>;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub(crate) enum Slot {
     Unset,
     /// Single-valued data; `Value::Null` is EMF's `NIL` (an explicit null).
@@ -60,9 +60,35 @@ pub(crate) enum Slot {
     Refs(Vec<ObjId>, bool),
 }
 
+/// Most slots of a dense object are unset or single references: their copies are inlined, the
+/// others are copied out of line (the derived `Clone` was one call per slot).
+impl Clone for Slot {
+    #[inline(always)]
+    fn clone(&self) -> Self {
+        match self {
+            Slot::Unset => Slot::Unset,
+            Slot::Ref(r) => Slot::Ref(*r),
+            s => s.clone_owned(),
+        }
+    }
+}
+
+impl Slot {
+    #[inline(never)]
+    fn clone_owned(&self) -> Self {
+        match self {
+            Slot::Data(v) => Slot::Data(v.clone()),
+            Slot::Datas(v, set) => Slot::Datas(v.clone(), *set),
+            Slot::Refs(v, set) => Slot::Refs(v.clone(), *set),
+            Slot::Unset => Slot::Unset,
+            Slot::Ref(r) => Slot::Ref(*r),
+        }
+    }
+}
+
 /// An object: read its fields through [`Graph`]'s `Index` (`g[o].class`); every write goes
 /// through the graph.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Object {
     pub class: ClassId,
     /// `eContainer()` and `eContainmentFeature()`.
@@ -73,7 +99,113 @@ pub struct Object {
     pub proxy: Option<Box<str>>,
     /// 1-based line of the object's start tag in the document it was loaded from (0: unknown).
     pub line: u32,
-    pub(crate) slots: Vec<Slot>,
+    /// The slots of the class's features (`all_features` order) up to the last one written;
+    /// the others are unset. Most objects set few of their features, proxies none: they are
+    /// created without slots, and copies of them copy only what was written.
+    slots: Vec<Slot>,
+    /// The number of slots of the class.
+    width: u32,
+}
+
+static UNSET: Slot = Slot::Unset;
+
+impl Object {
+    pub(crate) fn new(class: ClassId, width: usize) -> Self {
+        Object {
+            class,
+            container: None,
+            resource: None,
+            proxy: None,
+            line: 0,
+            slots: Vec::new(),
+            width: width as u32,
+        }
+    }
+
+    /// Slot `i` (`i` below the class's width).
+    #[inline]
+    pub(crate) fn slot_at(&self, i: usize) -> &Slot {
+        self.slots.get(i).unwrap_or(&UNSET)
+    }
+
+    /// Slot `i` for writing.
+    #[inline]
+    pub(crate) fn slot_mut(&mut self, i: usize) -> &mut Slot {
+        if i >= self.slots.len() {
+            self.grow(i);
+        }
+        &mut self.slots[i]
+    }
+
+    /// Slot `i` for writing if it was written before (`None`: it is unset).
+    #[inline]
+    pub(crate) fn written_slot_mut(&mut self, i: usize) -> Option<&mut Slot> {
+        self.slots.get_mut(i)
+    }
+
+    /// The slots written so far (a prefix of the class's slots; the rest are unset).
+    #[inline]
+    pub(crate) fn written_slots(&self) -> &[Slot] {
+        &self.slots
+    }
+
+    #[cold]
+    fn grow(&mut self, i: usize) {
+        debug_assert!(i < self.width as usize);
+        if self.slots.capacity() == 0 {
+            self.slots.reserve_exact(self.width as usize);
+        }
+        self.slots.resize_with(i + 1, || Slot::Unset);
+    }
+
+    /// A copy whose object ids are mapped by `f`, in one pass over the slots.
+    pub(crate) fn shifted(&self, f: impl Fn(ObjId) -> ObjId) -> Object {
+        Object {
+            class: self.class,
+            container: self.container.map(|(c, feat)| (f(c), feat)),
+            resource: self.resource,
+            proxy: self.proxy.clone(),
+            line: self.line,
+            slots: self
+                .slots
+                .iter()
+                .map(|s| match s {
+                    Slot::Unset => Slot::Unset,
+                    Slot::Ref(x) => Slot::Ref(x.map(&f)),
+                    Slot::Refs(v, set) => Slot::Refs(v.iter().map(|x| f(*x)).collect(), *set),
+                    s => s.clone(),
+                })
+                .collect(),
+            width: self.width,
+        }
+    }
+}
+
+/// As derived, with every slot of the class (the unwritten ones unset).
+impl std::fmt::Debug for Object {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let unwritten = (self.width as usize).saturating_sub(self.slots.len());
+        let slots = DebugSlots(&self.slots, unwritten);
+        f.debug_struct("Object")
+            .field("class", &self.class)
+            .field("container", &self.container)
+            .field("resource", &self.resource)
+            .field("proxy", &self.proxy)
+            .field("line", &self.line)
+            .field("slots", &slots)
+            .finish()
+    }
+}
+
+struct DebugSlots<'a>(&'a [Slot], usize);
+
+impl std::fmt::Debug for DebugSlots<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list()
+            .entries(self.0)
+            .entries(std::iter::repeat_n(&UNSET, self.1))
+            .finish()
+    }
 }
 
 /// How a resource is read and written (`XMIResourceFactoryImpl` or `EcoreResourceFactoryImpl`).
@@ -375,14 +507,7 @@ impl Graph {
     pub(crate) fn new_object(&mut self, class: ClassId) -> ObjId {
         let n = self.meta.class(class).all_features.len();
         let id = ObjId(self.objs.len() as u32);
-        self.objs.push(Object {
-            class,
-            container: None,
-            resource: None,
-            proxy: None,
-            line: 0,
-            slots: vec![Slot::Unset; n],
-        });
+        self.objs.push(Object::new(class, n));
         id
     }
 
@@ -459,7 +584,7 @@ impl Graph {
     #[inline]
     pub(crate) fn slot(&self, o: ObjId, f: FeatureId) -> Option<&Slot> {
         let i = self.meta.slot(self.objs[o.index()].class, f)?;
-        Some(&self.objs[o.index()].slots[i])
+        Some(self.objs[o.index()].slot_at(i))
     }
 
     /// Records a change of `o` (invalidates the derived lists if it is an Ecore object).
@@ -565,7 +690,7 @@ impl Graph {
     fn refs_mut(&mut self, o: ObjId, f: FeatureId) -> &mut Vec<ObjId> {
         self.touch(o);
         let i = self.slot_index(o, f).expect("feature of class");
-        let s = &mut self.objs[o.index()].slots[i];
+        let s = self.objs[o.index()].slot_mut(i);
         if !matches!(s, Slot::Refs(..)) {
             *s = Slot::Refs(Vec::new(), false);
         }
@@ -578,7 +703,7 @@ impl Graph {
     fn datas_mut(&mut self, o: ObjId, f: FeatureId) -> &mut Vec<Value> {
         self.touch(o);
         let i = self.slot_index(o, f).expect("feature of class");
-        let s = &mut self.objs[o.index()].slots[i];
+        let s = self.objs[o.index()].slot_mut(i);
         if !matches!(s, Slot::Datas(..)) {
             *s = Slot::Datas(Vec::new(), false);
         }
@@ -592,7 +717,7 @@ impl Graph {
     fn mark_set(&mut self, o: ObjId, f: FeatureId) {
         self.touch(o);
         if let Ok(i) = self.slot_index(o, f) {
-            match &mut self.objs[o.index()].slots[i] {
+            match self.objs[o.index()].slot_mut(i) {
                 Slot::Refs(_, b) | Slot::Datas(_, b) => *b = true,
                 s @ Slot::Unset => {
                     *s = if self.meta.feature(f).kind == FeatureKind::Reference {
@@ -609,7 +734,7 @@ impl Graph {
     fn set_slot(&mut self, o: ObjId, f: FeatureId, s: Slot) {
         self.touch(o);
         let i = self.slot_index(o, f).expect("feature of class");
-        self.objs[o.index()].slots[i] = s;
+        *self.objs[o.index()].slot_mut(i) = s;
     }
 
     // ---- the journal --------------------------------------------------------------------------
@@ -1101,9 +1226,10 @@ impl Graph {
         if fi.is_many() {
             self.op_clear(o, f)?;
             let i = self.slot_index(o, f)?;
-            match &mut self.objs[o.index()].slots[i] {
-                Slot::Refs(_, b) | Slot::Datas(_, b) => *b = false,
-                _ => {}
+            if let Some(Slot::Refs(_, b) | Slot::Datas(_, b)) =
+                self.objs[o.index()].written_slot_mut(i)
+            {
+                *b = false;
             }
             return Ok(());
         }

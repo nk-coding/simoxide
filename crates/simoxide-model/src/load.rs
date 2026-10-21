@@ -788,12 +788,11 @@ impl Loader {
                 slots.clear();
                 // the references that hold something, in feature order
                 let g = &self.g;
-                slots.extend(g[o].class.features().filter(|&f| {
-                    !f.is_attribute()
-                        && !f.is_containment()
-                        && !f.is_container()
-                        && !g.get_refs(o, f).is_empty()
-                }));
+                slots.extend(
+                    g.stored_refs(o)
+                        .map(|(f, _)| f)
+                        .filter(|&f| !f.is_containment() && !f.is_container()),
+                );
                 for &f in &slots {
                     targets.clear();
                     targets.extend(

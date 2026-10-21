@@ -384,9 +384,9 @@ impl Graph {
         };
         self.touch(holder);
         self.touch(t);
-        match &mut self.objs[holder.index()].slots[i] {
-            Slot::Ref(r) if *r == Some(p) => *r = Some(t),
-            Slot::Refs(v, _) => {
+        match self.objs[holder.index()].written_slot_mut(i) {
+            Some(Slot::Ref(r)) if *r == Some(p) => *r = Some(t),
+            Some(Slot::Refs(v, _)) => {
                 for x in v.iter_mut() {
                     if *x == p {
                         *x = t;

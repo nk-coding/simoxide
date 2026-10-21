@@ -242,9 +242,8 @@ pub struct MetaRegistry {
     by_ns_uri: HashMap<Box<str>, PackageId>,
     /// Ecore's `EObject`, the implicit supertype of every class, once Ecore is registered.
     eobject: Option<ClassId>,
-    /// Per feature: its slot when it is the same in every finished class that has it (single
-    /// inheritance), else `u32::MAX`; recomputed by `finish_classes`.
-    fixed_slots: Vec<u32>,
+    /// The slot of every feature in every finished class, recomputed by `finish_classes`.
+    slots: SlotTable,
     /// The static tables the registry was seeded from ([`MetaRegistry::from_static`]).
     seed: Option<&'static StaticPackages>,
     /// Their Ecore references until [`MetaRegistry::resolve_static_ecore`].
@@ -403,20 +402,22 @@ impl MetaRegistry {
     /// Slot of `f` in objects of class `c` (its index in `c`'s `all_features`).
     #[inline]
     pub fn slot(&self, c: ClassId, f: FeatureId) -> Option<usize> {
-        let fi = &self.features[f.index()];
-        let ci = &self.classes[c.index()];
-        if let Some(&s) = self.fixed_slots.get(f.index())
-            && s != u32::MAX
-        {
-            // the owner's block is in `c` exactly when the owner is `c` or a supertype of it
-            let i = fi.owner.index();
-            return ci
-                .supertype_bits
-                .get(i / 64)
-                .is_some_and(|w| w & (1u64 << (i % 64)) != 0)
-                .then_some(s as usize);
+        match self.slots.get(c, f) {
+            Some(s) => s,
+            None => self.slot_by_blocks(c, f),
         }
-        let base = ci.blocks.iter().find(|(o, _)| *o == fi.owner)?.1;
+    }
+
+    /// [`MetaRegistry::slot`] from the class's blocks (classes or features the table does not
+    /// cover yet).
+    #[cold]
+    fn slot_by_blocks(&self, c: ClassId, f: FeatureId) -> Option<usize> {
+        let fi = &self.features[f.index()];
+        let base = self.classes[c.index()]
+            .blocks
+            .iter()
+            .find(|(o, _)| *o == fi.owner)?
+            .1;
         Some(base as usize + fi.local_index as usize)
     }
 
@@ -641,7 +642,7 @@ impl MetaRegistry {
     /// marked too).
     pub fn unfinish_class(&mut self, c: ClassId) {
         self.classes[c.index()].finished = false;
-        self.fixed_slots.clear();
+        self.slots = SlotTable::default();
     }
 
     /// Computes the derived tables of every class that is not finished yet. Classes of one batch
@@ -663,42 +664,12 @@ impl MetaRegistry {
         for &c in &pending {
             self.finish_one(c, &mut state, words, &mut errors);
         }
-        self.compute_fixed_slots();
+        self.slots = SlotTable::new(&self.classes, &self.features);
         if errors.is_empty() {
             Ok(())
         } else {
             Err(MetaError(errors.join("; ")))
         }
-    }
-
-    /// The slots of features that have the same slot in every finished class (see
-    /// `fixed_slots`); the others are looked up by the owner's block.
-    fn compute_fixed_slots(&mut self) {
-        const UNSEEN: u32 = u32::MAX - 1;
-        let mut fixed = vec![UNSEEN; self.features.len()];
-        for ci in self.classes.iter().filter(|c| c.finished) {
-            for &(owner, base) in ci.blocks.iter() {
-                for &f in &self.classes[owner.index()].features {
-                    let s = base + self.features[f.index()].local_index;
-                    let e = &mut fixed[f.index()];
-                    if *e == UNSEEN {
-                        *e = s;
-                    } else if *e != s {
-                        *e = u32::MAX;
-                    }
-                }
-            }
-        }
-        for e in &mut fixed {
-            if *e == UNSEEN {
-                *e = u32::MAX;
-            }
-        }
-        // classes that are not finished have no blocks: their lookups take the slow path
-        if self.classes.iter().any(|c| !c.finished) {
-            fixed.clear();
-        }
-        self.fixed_slots = fixed;
     }
 
     fn finish_one(&mut self, c: ClassId, state: &mut [u8], words: usize, errors: &mut Vec<String>) {
@@ -783,6 +754,83 @@ impl MetaRegistry {
         ci.supertype_bits = bits.into();
         ci.finished = true;
         state[c.index()] = 2;
+    }
+}
+
+/// `slot(class, feature)` in O(1): per finished class a small open-addressing table of its
+/// features (a power of two at least twice their number, hashed by feature id), all in one
+/// array; a class's entry gives its table's offset and size. Classes without an entry (not
+/// finished when the table was built) and features added since are looked up by blocks.
+#[derive(Clone, Debug, Default)]
+struct SlotTable {
+    /// Per class: offset of its table in `entries` and the table's mask (`u32::MAX` offset:
+    /// none).
+    classes: Vec<(u32, u32)>,
+    /// `(feature, slot)`; `u32::MAX` feature: empty.
+    entries: Vec<(u32, u32)>,
+    /// Features that existed when the table was built.
+    features: u32,
+}
+
+impl SlotTable {
+    const EMPTY: u32 = u32::MAX;
+
+    fn new(classes: &[ClassInfo], features: &[FeatureInfo]) -> Self {
+        let mut t = SlotTable {
+            classes: Vec::with_capacity(classes.len()),
+            entries: Vec::new(),
+            features: features.len() as u32,
+        };
+        for ci in classes {
+            if !ci.finished {
+                t.classes.push((Self::EMPTY, 0));
+                continue;
+            }
+            let n = ci.all_features.len();
+            let size = (2 * n).next_power_of_two().max(2);
+            let off = t.entries.len();
+            t.entries.resize(off + size, (Self::EMPTY, 0));
+            let mask = size - 1;
+            for &(owner, base) in ci.blocks.iter() {
+                for &f in &classes[owner.index()].features {
+                    let slot = base + features[f.index()].local_index;
+                    let mut i = Self::hash(f) & mask;
+                    while t.entries[off + i].0 != Self::EMPTY {
+                        i = (i + 1) & mask;
+                    }
+                    t.entries[off + i] = (f.0, slot);
+                }
+            }
+            t.classes.push((off as u32, mask as u32));
+        }
+        t
+    }
+
+    #[inline]
+    fn hash(f: FeatureId) -> usize {
+        // Fibonacci hashing: a class's features are runs of consecutive ids
+        (f.0.wrapping_mul(0x9E37_79B9) >> 16) as usize
+    }
+
+    /// `Some(slot)` if the table covers `c` and `f`, `None` if it does not.
+    #[inline]
+    fn get(&self, c: ClassId, f: FeatureId) -> Option<Option<usize>> {
+        let &(off, mask) = self.classes.get(c.index())?;
+        if off == Self::EMPTY || f.0 >= self.features {
+            return None;
+        }
+        let (off, mask) = (off as usize, mask as usize);
+        let mut i = Self::hash(f) & mask;
+        loop {
+            let (g, s) = self.entries[off + i];
+            if g == f.0 {
+                return Some(Some(s as usize));
+            }
+            if g == Self::EMPTY {
+                return Some(None);
+            }
+            i = (i + 1) & mask;
+        }
     }
 }
 

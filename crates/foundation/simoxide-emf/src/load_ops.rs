@@ -110,6 +110,21 @@ impl Graph {
         }
     }
 
+    /// The references of `o` that hold something, in feature order, with their targets (one
+    /// pass over the object's slots: no per-feature lookup).
+    pub fn stored_refs(&self, o: ObjId) -> impl Iterator<Item = (FeatureId, &[ObjId])> + '_ {
+        let obj = &self.objs[o.index()];
+        let features = &self.meta.class(obj.class).all_features;
+        obj.written_slots()
+            .iter()
+            .zip(features.iter())
+            .filter_map(|(s, &f)| match s {
+                Slot::Refs(v, _) if !v.is_empty() => Some((f, v.as_slice())),
+                Slot::Ref(Some(r)) => Some((f, std::slice::from_ref(r))),
+                _ => None,
+            })
+    }
+
     /// The children of `o` in `eContents` order, with their containment feature.
     pub fn children(&self, o: ObjId) -> impl Iterator<Item = (FeatureId, ObjId)> + '_ {
         self.meta
@@ -336,9 +351,9 @@ impl Graph {
         let Some(i) = self.meta.slot(self.objs[holder.index()].class, f) else {
             return;
         };
-        match &mut self.objs[holder.index()].slots[i] {
-            Slot::Ref(r) if *r == Some(p) => *r = Some(t),
-            Slot::Refs(v, _) => {
+        match self.objs[holder.index()].written_slot_mut(i) {
+            Some(Slot::Ref(r)) if *r == Some(p) => *r = Some(t),
+            Some(Slot::Refs(v, _)) => {
                 for x in v.iter_mut() {
                     if *x == p {
                         *x = t;
@@ -360,7 +375,7 @@ impl Graph {
             .meta
             .slot(self.objs[o.index()].class, f)
             .expect("feature of the object's class");
-        &mut self.objs[o.index()].slots[i]
+        self.objs[o.index()].slot_mut(i)
     }
 
     /// `eInverseRemove` while loading: `o.f` drops `other`.
@@ -377,7 +392,7 @@ impl Graph {
                 l.remove(i);
             }
         } else if let Some(i) = self.meta.slot(self.objs[o.index()].class, f)
-            && let Slot::Ref(r) = &mut self.objs[o.index()].slots[i]
+            && let Some(Slot::Ref(r)) = self.objs[o.index()].written_slot_mut(i)
             && *r == Some(other)
         {
             *r = None;
@@ -450,17 +465,6 @@ impl ObjectBlock {
     }
 }
 
-fn shift_object(o: &mut crate::graph::Object, f: impl Fn(ObjId) -> ObjId) {
-    o.container = o.container.map(|(c, feat)| (f(c), feat));
-    for s in &mut o.slots {
-        match s {
-            Slot::Ref(Some(x)) => *x = f(*x),
-            Slot::Refs(v, _) => v.iter_mut().for_each(|x| *x = f(*x)),
-            _ => {}
-        }
-    }
-}
-
 impl Graph {
     /// The objects from `first` on (all of resource `r`'s, nothing else) with `r`'s roots and
     /// `xmi:id`s, as a block with ids from 0.
@@ -470,11 +474,7 @@ impl Graph {
         let objs = self
             .objs
             .iter_from(first)
-            .map(|o| {
-                let mut o = o.clone();
-                shift_object(&mut o, shift);
-                o
-            })
+            .map(|o| o.shifted(shift))
             .collect();
         let res = &self.resources[r.index()];
         let ids = res.ids.as_ref().map(|m| crate::graph::IdMaps {
@@ -505,8 +505,7 @@ impl Graph {
         let shift = |o: ObjId| ObjId(o.0 + off);
         self.objs.reserve(b.objs.len());
         for o in &b.objs {
-            let mut o = o.clone();
-            shift_object(&mut o, shift);
+            let mut o = o.shifted(shift);
             if o.resource.is_some() {
                 o.resource = Some(r);
             }
@@ -543,8 +542,7 @@ impl Graph {
         let rshift = |r: ResourceId| ResourceId(r.0 + roff);
         self.objs.reserve(other.objs.len());
         for o in other.objs.iter() {
-            let mut o = o.clone();
-            shift_object(&mut o, shift);
+            let mut o = o.shifted(shift);
             o.resource = o.resource.map(rshift);
             self.objs.push(o);
         }
@@ -630,8 +628,7 @@ impl Graph {
         let shift = |o: ObjId| ObjId(o.0 + obj_off);
         let rshift = |x: ResourceId| ResourceId(x.0 + res_off);
         for (i, o) in other.objs.iter().enumerate() {
-            let mut o = o.clone();
-            shift_object(&mut o, shift);
+            let mut o = o.shifted(shift);
             o.resource = o.resource.map(rshift);
             self.objs[obj_off as usize + i] = o;
         }
@@ -667,13 +664,8 @@ impl Graph {
     pub fn reset_object(&mut self, o: ObjId, c: ClassId) {
         let n = self.meta.class(c).all_features.len();
         let line = self.objs[o.index()].line;
-        self.objs[o.index()] = crate::graph::Object {
-            class: c,
-            container: None,
-            resource: None,
-            proxy: None,
-            line,
-            slots: vec![Slot::Unset; n],
-        };
+        let mut fresh = crate::graph::Object::new(c, n);
+        fresh.line = line;
+        self.objs[o.index()] = fresh;
     }
 }

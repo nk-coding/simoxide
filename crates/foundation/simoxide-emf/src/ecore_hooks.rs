@@ -451,8 +451,8 @@ pub(crate) fn set(
             let ci = g.slot_index(o, e.classifier_instance_class_name).unwrap();
             let ti = g.slot_index(o, e.classifier_instance_type_name).unwrap();
             g.touch(o);
-            g.objs[o.index()].slots[ci] = to_slot(cn);
-            g.objs[o.index()].slots[ti] = to_slot(tn);
+            *g.objs[o.index()].slot_mut(ci) = to_slot(cn);
+            *g.objs[o.index()].slot_mut(ti) = to_slot(tn);
             Ok(())
         }
         Hook::Derived => read_only(f),
