@@ -3325,6 +3325,8 @@ This extends `bench/compare/` with the same method: warm, cold, sustained, paral
   - First times, from the S0 smoke run on a shared VM (indicative only):
     - 2.3-3.4 s for a cold run, 3.3-4.5 s for the whole process;
     - 0.17-0.45 s warm, for 2 500 to 46 000 bus events.
+    - On the quiet machine (B1): 2.3-3.3 s for the first run, 3.3-4.3 s with the JVM, 0.13-0.27 s
+      warm (short runs).
 - **Workloads**:
   1. Non-SPD: `x_ss_minimal`, `x_espresso`, `x_ss_mediastore` in the Slingshot flavour vs
      Slingshot (like for like semantics), short and long.
@@ -3351,6 +3353,36 @@ This extends `bench/compare/` with the same method: warm, cold, sustained, paral
   - Slingshot's SPD adjustment includes its EMF/QVTo cost, as SimOxide's includes qvto-rs.
   - State that Slingshot results are not reproducible (`Math.random`).
   - Same models, same simulated time.
+
+**B1 as built (2026-10-21).** Quiet 25-core, 34 GB VM (AMD Ryzen 9 9950X3D), each benchmark process
+alone, 3 processes per configuration (seeds 1-3). `bench/compare/spd/b1.sh` (Slingshot via the S0
+runner, `--stock`; SimOxide's `simoxide-compare` with `flavour=`/`simMode=`, and the new
+`spd-bench` example of `simoxide-reconf`), `bench/compare/engine.sh`; results in
+`bench/compare/results/2026-10-21-{b1,engine}/`.
+
+- Plain models, warm per run (load, compile, run): the Slingshot flavour 226-1 285× faster than
+  stock Slingshot, the Slingshot-exact mode 107-244× (same requests and mean response time as stock
+  Slingshot on all six runs). Cold: 7-164 ms against 3.3-13.9 s; peak RSS 6-12 MB against 0.8-1.3 GB.
+- SPD examples: 1-10 ms per warm run against 130-610 ms; with Slingshot's quirks (`--quirks fast
+  --spd-quirks slingshot`) the flavour makes Slingshot's decisions (15-17 adjustments on `spd_v4_cpu`,
+  Slingshot 16) and is 35-147× faster; with the fixed default 54-2 470× (fewer adjustments). An
+  adjustment costs 0.5-0.9 ms, 78-98 % of a short SPD run; QVTo set-up 12.5-14 ms per process.
+  Slingshot's adjustment share is not instrumented.
+- Snapshots of SPD runs: fork 3-19 µs (53 000-330 000 forks/s), serialize 84-780 µs (2.7-137 KB),
+  deserialize 6-111 µs, restore 74-1 010 µs; every restored run ends as the uninterrupted one.
+  Slingshot's side: not measured (MENTOR not installed, U7).
+- Rules against refsim (stock SimuLizar cannot run them on the flat classpath): 110× (`lb_outsource`),
+  19× (`lb_rules_qvto`), 5× (`power_rules_qvto`: 13 349 reconfigurations, 1.1 s in rules).
+- Anomalies, noted and not investigated: in the SimuLizar flavour (time-driven utilisation monitors)
+  `spd_v4_cpu` never scales out; XMI loading is 15-25 % slower than on 2026-09-30 (M5's gate was 5 %),
+  up to 70 % with a warm `ParseCache`.
+- Earlier figures re-measured: the Slingshot flavour's `x_ss_mediastore` 200 000 s now 0.11 ms of
+  simulation (S2 said 0.25 ms; 1.2 ms with loading), `x_espresso` 100 s 0.19 ms (0.31 ms); Slingshot
+  warm 267 and 182 ms (smoke: 418 and 271 ms). HPA step at k = 30 (§5.10): 2.4 ms per adjustment
+  (2.35-4.1 over 3 runs; was 3.2 ms), QVTo set-up 10-15 ms (11 ms). Host costs (`tests/host.rs
+  costs`, warm runs): core 2.6-2.8 ms, compile 0.36-0.40 ms, per-run state 0.74-0.86 ms, rule run
+  146-177 µs, change 0.29-0.35 ms (the first test run in a fresh process about twice that). Rules in
+  QVTo's compat mode now cost the same as in ordered mode (power example 1.1 s, was 42 s).
 
 ## 7. Phased plan
 
@@ -3381,7 +3413,7 @@ An "agent phase" is a unit one agent can finish and verify on its own. Larger ph
 | **N1** | *Done 2026-10-17* (findings: 5.7 "N1 as built"). Snapshot serialisation: serde of `RunState`, XMI writer for the overlay, versioned format | F1, F2 | 1.5 w | met: serialize → deserialize → identical continuation, byte for byte, on every model directory in exact and fast mode and both flavours (Slingshot-exact engine: refused, no pause yet; done later, 5.7 "ssx snapshots as built"), after model changes, with SPD, with SimuLizar rules and a QVTo state; deterministic bytes |
 | **N2** | *Done 2026-10-17* (findings: 5.7 "N2 as built"; enforced policies built in P2, 5.4 "P2 as built"). Pause/resume API with change sets, enforced policies, snapshot conditions (duration, trigger, threshold) | N1, P2 | 1 w | met: resume-with-change tests (change files, QVTo transformations, rule sets; byte-equal to the in-process change, exact and fast; the Slingshot flavour refuses until F4); pause-condition tests; fork-based exploration example (`explore.rs`, `simoxide explore`), deterministic |
 | **N3** | Slingshot `.snapshot`/`.config`/`.state` interop: a: spike on the format mapping; b: export/import. *a done 2026-10-17: go for the fast flavour, export first, lossy* (5.7 "N3a spike"; real `.snapshot`s written and read back on 8 of 10 models; the MENTOR app is not available locally) | N2, S2 | a: 3 d; b: 2-3 w (export + `.config` + lite `.state`: 2.5-3 w; both directions 4-5 w) | a: met (verdict in 5.7); b: round trip with the MENTOR app on a model (if U7) |
-| **B1** | Benchmarks of §6 (both Slingshot modes) and docs pages | S2, X2, P3, N2 | 1-1.5 w | tables in `docs/performance/` |
+| **B1** | *Done 2026-10-21* (findings: §6 "B1 as built"). Benchmarks of §6 (both Slingshot modes) and docs pages | S2, X2, P3, N2 | 1-1.5 w | met: tables in `docs/performance/` (comparison "Slingshot flavour and SPD against Slingshot", engine "Runtime changes, SPD and snapshots"); Slingshot's snapshot side not measured (MENTOR, U7) |
 | **D** | Docs: guide pages (SPD, reconfiguration, snapshots, flavours), spec rules, deviations | continuous | +10 % | — |
 
 **Parallelism** (2-3 agents at a time):
