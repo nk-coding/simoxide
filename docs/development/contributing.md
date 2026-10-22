@@ -64,7 +64,10 @@ on [Licensing](../guide/licensing.md#simoxide-thirdparty).
 
 ## Guardrails
 
-Run after every change to the simulator (with the submodules, see above):
+Run after every change to the simulator (with the submodules, see above). CI
+(`.github/workflows/tests.yml`) runs `cargo fmt --check`, `cargo test-sim` and `cargo test-fdn`
+with the submodules and `SIMOXIDE_REQUIRE_THIRD_PARTY=1` on every push to main and every pull
+request; the other steps stay manual.
 
 1. `cargo test --release --workspace` (includes the corpus in both modes, `tests/bugs.rs` and
    `tests/literal_engine.rs`).
