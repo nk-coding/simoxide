@@ -183,6 +183,17 @@ impl<C: Compat, F: Flavour> Simulation<'_, C, F> {
         Some((b.since, b.acc + b.frac * (now - b.t).max(0.0)))
     }
 
+    /// [`Simulation::busy_integral`] up to `at_ns` instead of now (not before now): the
+    /// integral the resource has at that time if no event changes it before, e.g. after
+    /// [`Simulation::run_until`]`(Pause::Before(at_ns))` (the busy fraction holds until the next
+    /// event). Reads at fixed instants without an event there.
+    pub fn busy_integral_at(&self, ri: ResIdx, at_ns: i64) -> Option<(f64, f64)> {
+        let b = (*self.st.meas.hooks.busy.get(ri as usize)?)?;
+        let now = F::Clock::secs(self.st.now);
+        let at = (at_ns as f64 / 1e9).max(now);
+        Some((b.since, b.acc + b.frac * (at - b.t).max(0.0)))
+    }
+
     /// The current busy fraction of resource `ri` (its overall-utilisation probe's value).
     fn busy_fraction_now(&self, ri: ResIdx) -> f64 {
         let def = &self.cm.resources[ri as usize];
