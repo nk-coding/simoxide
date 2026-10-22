@@ -23,8 +23,8 @@ use crate::interp::{AdjustmentRequest, Measurement, Metric, Spd, SpdHost, SpdSta
 use crate::log::Log;
 use crate::model::{Membership, PointKind, PointRef, SpdError, SpdModel};
 use crate::quirks::Quirks;
-use simoxide_model::Model;
 use simoxide_model::raw::ObjId;
+use simoxide_model::{ContainerId, Model};
 use simoxide_sim::compat::Compat;
 use simoxide_sim::flavour::{Flavour, SimuLizar};
 use simoxide_sim::ir::metric_names;
@@ -200,6 +200,9 @@ pub struct SpdRun<'m, 's, C: Compat, F: Flavour = SimuLizar> {
     /// The HPA's autoscalers (`crate::hpa`, [`SpdRun::with_hpa`]) and their run state.
     pub(crate) hpa: Option<&'s crate::hpa::Hpa>,
     pub(crate) hpa_state: crate::hpa::run::HpaState,
+    /// Every container that was an element of an elastic infrastructure while this run
+    /// observed it, with the infrastructure's unit ([`SpdRun::container_units`]).
+    pub(crate) units: Vec<(ContainerId, ContainerId)>,
 }
 
 struct Host<'a, 'm, C: Compat, F: Flavour> {
@@ -255,7 +258,9 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             adjusted_ok: 0,
             hpa: None,
             hpa_state: Default::default(),
+            units: Vec::new(),
         };
+        run.note_units();
         let mut host = Host {
             sim: &mut run.sim,
             requests: &mut run.requests,
@@ -329,6 +334,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             adjusted_ok: self.adjusted_ok,
             hpa: self.hpa,
             hpa_state: self.hpa_state.clone(),
+            units: self.units.clone(),
         })
     }
 
@@ -342,6 +348,44 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
         };
         let r = self.sim.finish()?;
         Ok((r, self.state, summary))
+    }
+
+    /// The containers that were elements of an elastic infrastructure (a scaled-out copy of the
+    /// unit, or the unit itself) at the start or after an adjustment or model change of this
+    /// run, each with the infrastructure's unit: (element, unit), in the order first seen. A
+    /// copy removed again stays listed, so that what the run recorded about it (e.g. the
+    /// synchronous paths of `SimConfig::sync_paths`) can be mapped to its unit. A run restored
+    /// from a snapshot lists what it saw since.
+    pub fn container_units(&self) -> &[(ContainerId, ContainerId)] {
+        &self.units
+    }
+
+    /// Adds the current elements of the elastic infrastructures to [`SpdRun::container_units`].
+    pub(crate) fn note_units(&mut self) {
+        let m = &self.sim.compiled().model;
+        let by_obj = |o: ObjId| {
+            m.containers
+                .iter_ids()
+                .find(|(_, c)| c.obj == o)
+                .map(|(i, _)| i)
+        };
+        for cfg in &self.state.membership.cfgs {
+            let crate::model::GroupCfg::ElasticInfrastructure {
+                unit: Some(u),
+                elements,
+            } = cfg
+            else {
+                continue;
+            };
+            let Some(unit) = by_obj(*u) else { continue };
+            for &e in elements {
+                if let Some(c) = by_obj(e)
+                    && !self.units.iter().any(|x| x.0 == c)
+                {
+                    self.units.push((c, unit));
+                }
+            }
+        }
     }
 
     /// After a model change: maps the series of the changed model (new containers' monitors
@@ -377,6 +421,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
                 if out.ok {
                     self.adjusted_ok += 1;
                 }
+                self.note_units();
                 self.observe_new_series();
                 let now = self.sim.state().now_ns() as f64 / 1e9;
                 self.spd

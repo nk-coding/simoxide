@@ -335,7 +335,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             }
         };
         let sim = Simulation::<C, F>::restore_snapshot(s, base, out)?;
-        Ok(SpdRun {
+        let mut run = SpdRun {
             series: series_points(sim.compiled(), &sim.state().measurements().series),
             sim,
             spd,
@@ -344,7 +344,10 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             adjusted_ok,
             hpa,
             hpa_state,
-        })
+            units: Vec::new(),
+        };
+        run.note_units();
+        Ok(run)
     }
 
     /// Whether snapshot `s` holds autoscalers' state.

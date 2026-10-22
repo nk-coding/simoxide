@@ -47,6 +47,7 @@ impl<C: Compat, F: Flavour> SpdRun<'_, '_, C, F> {
         self.state.membership =
             Membership::from_graph(&self.sim.compiled().model.graph, self.spd.model());
         self.observe_new_series();
+        self.note_units();
         self.hpa_model_changed();
     }
 

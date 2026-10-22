@@ -1048,6 +1048,63 @@ fn a_scale_in_drains_pods_whose_requests_make_calls() {
     );
 }
 
+/// `SpdRun::container_units` maps every pod an elastic infrastructure had (also those removed
+/// again) to its unit, so that what the run recorded per container (here the synchronous paths
+/// of `SimConfig::sync_paths`, MEAS-13) can be read per scaled container.
+#[test]
+fn scaled_out_pods_map_to_their_unit() {
+    let dir = services_model_with(1, 4.0, true);
+    let hpa_cfg = r#"{"items":[{"metadata":{"name":"svc0"},"spec":{"scaleTargetRef":{"name":"svc0"},"minReplicas":1,"maxReplicas":8,
+  "metrics":[{"type":"Resource","resource":{"name":"cpu","target":{"type":"Utilization","averageUtilization":50}}}],
+  "behavior":{"scaleDown":{"stabilizationWindowSeconds":0}}}}]}"#;
+    std::fs::write(dir.join("services.hpa.json"), hpa_cfg).unwrap();
+    let s = setup(&dir);
+    let hpa = Hpa::new(&s.cfg, &s.spd).unwrap();
+    let mut cfg = sim_cfg(3, 900);
+    cfg.sync_paths = true;
+    cfg.load_profile = Some(std::sync::Arc::new(simoxide_sim::LoadProfile::uniform(
+        vec![(300.0, 0.1), (600.0, 1.0)],
+    )));
+    let base: Vec<String> =
+        s.cm.model
+            .containers
+            .iter()
+            .map(|c| c.id.to_string())
+            .collect();
+    let sim = Simulation::<Fast>::create(&s.cm, cfg, Outputs::default()).unwrap();
+    let mut r = SpdRun::new(sim, &s.spd).unwrap().with_hpa(&hpa).unwrap();
+    let mut adj = adjuster();
+    let mut log = VecLog::default();
+    r.run(&mut adj, &mut log).unwrap();
+    let cm = r.sim.compiled();
+    let id = |c: simoxide_model::ContainerId| cm.model.containers[c].id.to_string();
+    let units: Vec<(String, String)> = r
+        .container_units()
+        .iter()
+        .map(|&(e, u)| (id(e), id(u)))
+        .collect();
+    let unit = &units[0].1;
+    assert!(base.contains(unit), "{unit}");
+    assert!(units.iter().all(|(_, u)| u == unit), "{units:?}");
+    assert!(units.len() >= 3, "the group scaled out: {units:?}");
+    assert!(
+        units.len() > r.hpa_summary()[0].ready as usize,
+        "pods removed again stay listed"
+    );
+    let paths = r.sim.state().sync_paths(cm).unwrap();
+    let mut on_pods = 0;
+    for p in &paths {
+        for &c in &p.containers {
+            let c = id(c);
+            if !base.contains(&c) {
+                assert!(units.iter().any(|(e, _)| *e == c), "{c} is a pod");
+                on_pods += p.sessions;
+            }
+        }
+    }
+    assert!(on_pods > 100, "sessions served by created pods: {on_pods}");
+}
+
 /// Times the adjustments of an inner adjuster.
 struct Timed {
     inner: QvtoAdjuster,
