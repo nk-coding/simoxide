@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<semanticspd:Configuration xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:semanticspd="http://palladiosimulator.org/ScalingPolicyDefinitionSemantic/1.0">
+  <spd href="../ThesisExp.spd#_pBBvMIICEe6xSLC-LdkjPQ"/>
+  <targetCfgs xsi:type="semanticspd:ElasticInfrastructureCfg">
+    <unit href="../../rm.resourceenvironment#_q8E_AAxpEeuG0YlooJbPiA"/>
+    <elements href="../../rm.resourceenvironment#_q8E_AAxpEeuG0YlooJbPiA"/>
+    <linkingResource href="../../rm.resourceenvironment#_tN8T8AxpEeuG0YlooJbPiA"/>
+    <resourceEnvironment href="../../rm.resourceenvironment#/"/>
+  </targetCfgs>
+  <targetCfgs xsi:type="semanticspd:ServiceGroupCfg">
+    <unit href="../../rm.system#_zEvqgBYeEeyTBLpRqyumrw"/>
+    <elements href="../../rm.system#_zEvqgBYeEeyTBLpRqyumrw"/>
+    <loadBalancingAssembly href="../../rm.system#_swrqgBr5Ee6kYtTTkxxYZQ"/>
+  </targetCfgs>
+  <targetCfgs xsi:type="semanticspd:ServiceGroupCfg">
+    <unit href="../../rm.system#_ySz3QBYeEeyTBLpRqyumrw"/>
+    <elements href="../../rm.system#_ySz3QBYeEeyTBLpRqyumrw"/>
+    <loadBalancingAssembly href="../../rm.system#_rIFVABr5Ee6kYtTTkxxYZQ"/>
+  </targetCfgs>
+  <targetCfgs xsi:type="semanticspd:CompetingConsumersGroupCfg">
+    <unit href="../../rm.system#_vmn90BYeEeyTBLpRqyumrw"/>
+    <elements href="../../rm.system#_vmn90BYeEeyTBLpRqyumrw"/>
+    <brokerAssembly href="../../rm.system#_0sIfEBYeEeyTBLpRqyumrw"/>
+    <unitQueues name="conversion-request">
+      <passiveResourceQueueMessages href="../../rm.repository#_xRtXeE7FEeypatfX75Y3Yg"/>
+      <usageScenarioForConsumption href="../../rm.usagemodel#_B17vwCXqEeyoRe0c4nmT0g"/>
+    </unitQueues>
+    <unitQueues name="data-available">
+      <passiveResourceQueueMessages href="../../rm.repository#_JgLzGDM6EeyaraHENifBmA"/>
+      <usageScenarioForConsumption href="../../rm.usagemodel#_Hs1AUBe1Eeybf7rGWS87vg"/>
+    </unitQueues>
+  </targetCfgs>
+  <allocation href="../../rm.allocation#_cpSykBLPEeu8HvFyDMmd-w"/>
+  <system href="../../rm.system#_ccfrQBYeEeyTBLpRqyumrw"/>
+  <resourceEnvironment href="../../rm.resourceenvironment#/"/>
+  <repository href="../../rm.repository#_SRM7UPZdEeqHU66RnBytqw"/>
+</semanticspd:Configuration>

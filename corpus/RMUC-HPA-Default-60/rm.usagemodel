@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="ASCII"?>
+<usagemodel:UsageModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:usagemodel="http://palladiosimulator.org/PalladioComponentModel/UsageModel/5.2">
+  <usageScenario_UsageModel id="_KX07cBLREeu8HvFyDMmd-w" entityName="VesselUsageScenario">
+    <scenarioBehaviour_UsageScenario id="_jswcABLUEeu8HvFyDMmd-w" entityName="VesselScenarioBehaviour">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_GdzeBBYsEey3DYSSPBHHJQ" successor="_9RwaoBYqEey3DYSSPBHHJQ"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_9RwaoBYqEey3DYSSPBHHJQ" entityName="sendTelemetryData" successor="_IlzFQxYsEey3DYSSPBHHJQ" predecessor="_GdzeBBYsEey3DYSSPBHHJQ">
+        <providedRole_EntryLevelSystemCall href="rm.system#_gokNoBYfEeyTBLpRqyumrw"/>
+        <operationSignature__EntryLevelSystemCall href="rm.repository#_sL4fYPaDEeqHU66RnBytqw"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_IlzFQxYsEey3DYSSPBHHJQ" predecessor="_9RwaoBYqEey3DYSSPBHHJQ"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:ClosedWorkload" population="50">
+      <thinkTime_ClosedWorkload specification="Exp (0.2)"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_Hs1AUBe1Eeybf7rGWS87vg" entityName="dataProcessingDataAvailableQueueConsuming">
+    <scenarioBehaviour_UsageScenario id="_WwdXkBe1Eeybf7rGWS87vg">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_XJkbJBe1Eeybf7rGWS87vg" successor="_KeNu8DiJEe6yP5jv9POz2g"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_ZcVH8xe1Eeybf7rGWS87vg" predecessor="_KeNu8DiJEe6yP5jv9POz2g"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Branch" id="_KeNu8DiJEe6yP5jv9POz2g" entityName="Branch1" successor="_ZcVH8xe1Eeybf7rGWS87vg" predecessor="_XJkbJBe1Eeybf7rGWS87vg">
+        <branchTransitions_Branch branchProbability="1.0">
+          <branchedBehaviour_BranchTransition id="_PAj4wDiJEe6yP5jv9POz2g">
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_PAj4wTiJEe6yP5jv9POz2g" successor="_ZCUsgBe1Eeybf7rGWS87vg"/>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_PAj4wjiJEe6yP5jv9POz2g" predecessor="_ZCUsgBe1Eeybf7rGWS87vg"/>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_ZCUsgBe1Eeybf7rGWS87vg" entityName="triggerOnDataAvailableQueueConsumption" successor="_PAj4wjiJEe6yP5jv9POz2g" predecessor="_PAj4wTiJEe6yP5jv9POz2g">
+              <providedRole_EntryLevelSystemCall href="rm.system#_djTrMCXpEeyoRe0c4nmT0g"/>
+              <operationSignature__EntryLevelSystemCall href="rm.repository#_xDarABVlEeybTaJk9S9mJw"/>
+            </actions_ScenarioBehaviour>
+          </branchedBehaviour_BranchTransition>
+        </branchTransitions_Branch>
+      </actions_ScenarioBehaviour>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:ClosedWorkload" population="1">
+      <thinkTime_ClosedWorkload specification="0"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_B17vwCXqEeyoRe0c4nmT0g" entityName="dataProcessingOnConversionRequestQueueConsuming">
+    <scenarioBehaviour_UsageScenario id="_GGkegCXqEeyoRe0c4nmT0g">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_KKltlCXqEeyoRe0c4nmT0g" successor="_IWueADiJEe6yP5jv9POz2g"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_KowQQyXqEeyoRe0c4nmT0g" predecessor="_IWueADiJEe6yP5jv9POz2g"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Branch" id="_IWueADiJEe6yP5jv9POz2g" entityName="Branch1" successor="_KowQQyXqEeyoRe0c4nmT0g" predecessor="_KKltlCXqEeyoRe0c4nmT0g">
+        <branchTransitions_Branch branchProbability="1.0">
+          <branchedBehaviour_BranchTransition id="_bu07IDiJEe6yP5jv9POz2g">
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_bu07ITiJEe6yP5jv9POz2g" successor="_LDoOYCXqEeyoRe0c4nmT0g"/>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_bu1iMDiJEe6yP5jv9POz2g" predecessor="_LDoOYCXqEeyoRe0c4nmT0g"/>
+            <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_LDoOYCXqEeyoRe0c4nmT0g" entityName="triggerConversionRequestQueueConsumption" successor="_bu1iMDiJEe6yP5jv9POz2g" predecessor="_bu07ITiJEe6yP5jv9POz2g">
+              <providedRole_EntryLevelSystemCall href="rm.system#_djTrMCXpEeyoRe0c4nmT0g"/>
+              <operationSignature__EntryLevelSystemCall href="rm.repository#_2Kc2QBVlEeybTaJk9S9mJw"/>
+            </actions_ScenarioBehaviour>
+          </branchedBehaviour_BranchTransition>
+        </branchTransitions_Branch>
+      </actions_ScenarioBehaviour>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:ClosedWorkload" population="1">
+      <thinkTime_ClosedWorkload specification="10"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+  <usageScenario_UsageModel id="_Y1tP0Pr6Ee2HGboV_yvcZw" entityName="dataProviderGetTelemetryData">
+    <scenarioBehaviour_UsageScenario id="_fLV8MPr6Ee2HGboV_yvcZw">
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Start" id="_yJXP9Pr7Ee2kT5JXAHeU9w" successor="_4HpMQPr7Ee2kT5JXAHeU9w"/>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:EntryLevelSystemCall" id="_4HpMQPr7Ee2kT5JXAHeU9w" successor="_yx7Ew_r7Ee2kT5JXAHeU9w" predecessor="_yJXP9Pr7Ee2kT5JXAHeU9w">
+        <providedRole_EntryLevelSystemCall href="rm.system#_kWHdcBYfEeyTBLpRqyumrw"/>
+        <operationSignature__EntryLevelSystemCall href="rm.repository#_JxTd4BViEeybTaJk9S9mJw"/>
+      </actions_ScenarioBehaviour>
+      <actions_ScenarioBehaviour xsi:type="usagemodel:Stop" id="_yx7Ew_r7Ee2kT5JXAHeU9w" predecessor="_4HpMQPr7Ee2kT5JXAHeU9w"/>
+    </scenarioBehaviour_UsageScenario>
+    <workload_UsageScenario xsi:type="usagemodel:ClosedWorkload" population="10">
+      <thinkTime_ClosedWorkload specification="5"/>
+    </workload_UsageScenario>
+  </usageScenario_UsageModel>
+</usagemodel:UsageModel>

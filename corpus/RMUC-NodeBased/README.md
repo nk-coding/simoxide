@@ -1,0 +1,1 @@
+<img src="./new Assembly Diagram.svg">

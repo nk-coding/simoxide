@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spd:SPD xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:adjustments="http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0" xmlns:expectations="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Expectations/1.0" xmlns:policy="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0" xmlns:spd="http://palladiosimulator.org/ScalingPolicyDefinition/1.0" xmlns:stimuli="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Stimuli/1.0" xmlns:target="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0" xmlns:targets="http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0" xmlns:triggers="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0" id="_7wzngI3IEe6Vt_T2z50ung" entityName="decentralized-hpa-default-60">
+  <scalingPolicies id="_9hC2EI3IEe6Vt_T2z50ung" entityName="scaleOutDeviceCommunication" active="true" targetGroup="_Sntt0o3JEe6Vt_T2z50ung">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="1"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_aBHfYZ5TEe6NWsTytBN72g" cooldownTime="180.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_PPE5I55TEe6NWsTytBN72g" relationalOperator="GreaterThan">
+      <stimulus xsi:type="stimuli:CPUUtilization"/>
+      <expectedValue xsi:type="expectations:ExpectedPercentage" value="61.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_KuVWwI3JEe6Vt_T2z50ung" entityName="scaleInDeviceCommunication" active="true" targetGroup="_Sntt0o3JEe6Vt_T2z50ung">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="-1"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_yUlqUZ5TEe6NWsTytBN72g" cooldownTime="180.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_UKWgU55TEe6NWsTytBN72g" relationalOperator="LessThan">
+      <stimulus xsi:type="stimuli:CPUUtilization"/>
+      <expectedValue xsi:type="expectations:ExpectedPercentage" value="59.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_C9IEQI3JEe6Vt_T2z50ung" entityName="scaleOutDataProvider" active="false" targetGroup="_UHF14o3JEe6Vt_T2z50ung">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="1"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_05l2UZ5WEe6NWsTytBN72g" cooldownTime="180.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_smk-o55TEe6NWsTytBN72g" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="5.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_PEgFwI3JEe6Vt_T2z50ung" entityName="scaleInDataProvider" active="false" targetGroup="_UHF14o3JEe6Vt_T2z50ung">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="-2"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_IiU30J5UEe6NWsTytBN72g" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="10.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_Ey7IQI3JEe6Vt_T2z50ung" entityName="scaleOutDataProcessing" active="true" targetGroup="_lCSLs43JEe6Vt_T2z50ung">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="1"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_2OVbsZ5WEe6NWsTytBN72g" cooldownTime="180.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_2eRAA55UEe6NWsTytBN72g" relationalOperator="GreaterThan">
+      <stimulus xsi:type="stimuli:CPUUtilization"/>
+      <expectedValue xsi:type="expectations:ExpectedPercentage" value="61.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_QtxwsI3JEe6Vt_T2z50ung" entityName="scaleInDataProcessing" active="true" targetGroup="_lCSLs43JEe6Vt_T2z50ung">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="-2"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_3pSWwZ5WEe6NWsTytBN72g" cooldownTime="180.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_3v8qU55UEe6NWsTytBN72g" relationalOperator="LessThan">
+      <stimulus xsi:type="stimuli:CPUUtilization"/>
+      <expectedValue xsi:type="expectations:ExpectedPercentage" value="59.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_FTJv4EtxEfCdUb7WbIbpyg" entityName="scaleOutTwice" active="false" targetGroup="_UHF14o3JEe6Vt_T2z50ung">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="1"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_KhmKs0txEfCdUb7WbIbpyg" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="8.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <targetGroups xsi:type="targets:ServiceGroup" id="_Sntt0o3JEe6Vt_T2z50ung" entityName="DeviceCommunication">
+    <targetConstraints xsi:type="target:ThrashingConstraint" id="_2kYEgZ5TEe6NWsTytBN72g" minimumTimeNoThrashing="180.0"/>
+    <targetConstraints xsi:type="target:TargetGroupSizeConstraint" id="_PPis8J80Ee6iyv-D9JqF2w" minSize="1" maxSize="4"/>
+    <unitAssembly href="rm.system#_zEvqgBYeEeyTBLpRqyumrw"/>
+  </targetGroups>
+  <targetGroups xsi:type="targets:ServiceGroup" id="_UHF14o3JEe6Vt_T2z50ung" entityName="DataProvider">
+    <targetConstraints xsi:type="target:TargetGroupSizeConstraint" id="_QrJvUJ80Ee6iyv-D9JqF2w" minSize="1" maxSize="4"/>
+    <unitAssembly href="rm.system#_ySz3QBYeEeyTBLpRqyumrw"/>
+  </targetGroups>
+  <targetGroups xsi:type="targets:CompetingConsumersGroup" id="_lCSLs43JEe6Vt_T2z50ung" entityName="DataProcessing">
+    <targetConstraints xsi:type="target:ThrashingConstraint" id="_y0s4UZ5UEe6NWsTytBN72g" minimumTimeNoThrashing="180.0"/>
+    <targetConstraints xsi:type="target:TargetGroupSizeConstraint" id="_RsepcJ80Ee6iyv-D9JqF2w" minSize="1" maxSize="4"/>
+    <unitAssembly href="rm.system#_vmn90BYeEeyTBLpRqyumrw"/>
+  </targetGroups>
+  <targetGroups xsi:type="targets:ElasticInfrastructure" id="_yj8z4UtyEfCdUb7WbIbpyg">
+    <unit href="rm.resourceenvironment#_q8E_AAxpEeuG0YlooJbPiA"/>
+  </targetGroups>
+</spd:SPD>

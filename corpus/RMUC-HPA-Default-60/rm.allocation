@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ASCII"?>
+<allocation:Allocation xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:allocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2" xsi:schemaLocation="http://palladiosimulator.org/PalladioComponentModel/Allocation/5.2 http://palladiosimulator.org/PalladioComponentModel/5.2#//allocation" id="_cpSykBLPEeu8HvFyDMmd-w" entityName="RemoteMeasuringAllocationKubernetes">
+  <targetResourceEnvironment_Allocation href="rm.resourceenvironment#/"/>
+  <system_Allocation href="rm.system#_ccfrQBYeEeyTBLpRqyumrw"/>
+  <allocationContexts_Allocation id="_wASBsBYjEeyTBLpRqyumrw" entityName="DeviceCommunicationAllocation">
+    <resourceContainer_AllocationContext href="rm.resourceenvironment#_q8E_AAxpEeuG0YlooJbPiA"/>
+    <assemblyContext_AllocationContext href="rm.system#_zEvqgBYeEeyTBLpRqyumrw"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_39P4QBYjEeyTBLpRqyumrw" entityName="DataProcessingAllocation">
+    <resourceContainer_AllocationContext href="rm.resourceenvironment#_q8E_AAxpEeuG0YlooJbPiA"/>
+    <assemblyContext_AllocationContext href="rm.system#_vmn90BYeEeyTBLpRqyumrw"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_7NHtkBYjEeyTBLpRqyumrw" entityName="DataProviderAllocation">
+    <resourceContainer_AllocationContext href="rm.resourceenvironment#_q8E_AAxpEeuG0YlooJbPiA"/>
+    <assemblyContext_AllocationContext href="rm.system#_ySz3QBYeEeyTBLpRqyumrw"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_-k8lABYjEeyTBLpRqyumrw" entityName="MongoDBAllocation">
+    <resourceContainer_AllocationContext href="rm.resourceenvironment#_sPQeIAxpEeuG0YlooJbPiA"/>
+    <assemblyContext_AllocationContext href="rm.system#_z2110BYeEeyTBLpRqyumrw"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_B7cmwBYkEeyTBLpRqyumrw" entityName="RabbitBrokerAllocation">
+    <resourceContainer_AllocationContext href="rm.resourceenvironment#_rkDS8BLVEeu8HvFyDMmd-w"/>
+    <assemblyContext_AllocationContext href="rm.system#_0sIfEBYeEeyTBLpRqyumrw"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_E7qLUBr7Ee6kYtTTkxxYZQ" entityName="LoadBalancer_DeviceCommunication">
+    <resourceContainer_AllocationContext href="rm.resourceenvironment#_mGQLgBZnEe6jPe1PCVUBhg"/>
+    <assemblyContext_AllocationContext href="rm.system#_swrqgBr5Ee6kYtTTkxxYZQ"/>
+  </allocationContexts_Allocation>
+  <allocationContexts_Allocation id="_IH42wBr7Ee6kYtTTkxxYZQ" entityName="LoadBalancer_DataProvider">
+    <resourceContainer_AllocationContext href="rm.resourceenvironment#_mGQLgBZnEe6jPe1PCVUBhg"/>
+    <assemblyContext_AllocationContext href="rm.system#_rIFVABr5Ee6kYtTTkxxYZQ"/>
+  </allocationContexts_Allocation>
+</allocation:Allocation>

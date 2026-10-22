@@ -167,6 +167,23 @@ pub fn point_of_key(m: &Model, key: &str) -> PointRef {
             kind: PointKind::Environment,
             class: "ResourceEnvironmentMeasuringPoint",
         },
+        "AssemblyPassiveResourceMeasuringPoint" => {
+            let assembly = parts
+                .first()
+                .and_then(|id| m.assembly_contexts.iter().find(|a| &*a.id == *id))
+                .map(|a| a.obj);
+            let passive = parts
+                .get(1)
+                .and_then(|id| m.passive_resources.iter().find(|p| &*p.id == *id))
+                .map(|p| p.obj);
+            match (assembly, passive) {
+                (Some(assembly), Some(passive)) => PointRef {
+                    kind: PointKind::AssemblyPassiveResource { assembly, passive },
+                    class: "AssemblyPassiveResourceMeasuringPoint",
+                },
+                _ => other("AssemblyPassiveResourceMeasuringPoint"),
+            }
+        }
         "UsageScenarioMeasuringPoint" => other("UsageScenarioMeasuringPoint"),
         "EntryLevelSystemCallMeasuringPoint" => other("EntryLevelSystemCallMeasuringPoint"),
         "ExternalCallActionMeasuringPoint" => other("ExternalCallActionMeasuringPoint"),

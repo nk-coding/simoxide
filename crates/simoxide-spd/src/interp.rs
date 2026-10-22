@@ -1191,6 +1191,32 @@ impl Spd {
                 }
             }
             Filter::Adjustor => {
+                // A step that cannot change the group size (e.g. scale-in at minSize) must not
+                // request an adjustment: under Q2 that would still commit cooldown/thrashing and
+                // block a later opposite policy (App-Metrics QueueLength scale-in before scale-out).
+                // Q9 may omit TargetGroupSizeConstraintFilter; still reject a true no-op here.
+                let g = &self.model.groups[ctx.group];
+                if let Some(size) = st.membership.group_size(g) {
+                    let adj = &self.model.policies[ctx.policy].adjustment;
+                    if let Ok(ch) =
+                        adjust::desired_change(adj, size as i64, self.quirks.q4_relative_zero)
+                    {
+                        let ch = g
+                            .constraints
+                            .iter()
+                            .find_map(|c| match *c {
+                                TargetConstraint::Size { min, max } => Some((min, max)),
+                                _ => None,
+                            })
+                            .map(|(min, max)| {
+                                adjust::clamp(ch, size as i64, min, max).unwrap_or(ch)
+                            })
+                            .unwrap_or(ch);
+                        if adjust::effective_change(ch, size as i64) == 0 {
+                            return FRes::Disregard(Reason::GroupSizeZero { size });
+                        }
+                    }
+                }
                 if self.quirks.q2_commit_on_request {
                     self.commit(st, c, t);
                 }

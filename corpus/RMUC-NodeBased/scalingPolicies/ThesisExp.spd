@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spd:SPD xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:adjustments="http://palladiosimulator.org/ScalingPolicyDefinition/Adjustments/1.0" xmlns:expectations="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Expectations/1.0" xmlns:policy="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Policy/1.0" xmlns:spd="http://palladiosimulator.org/ScalingPolicyDefinition/1.0" xmlns:stimuli="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/Stimuli/1.0" xmlns:target="http://palladiosimulator.org/ScalingPolicyDefinition/Constraints/Target/1.0" xmlns:targets="http://palladiosimulator.org/ScalingPolicyDefinition/Targets/1.0" xmlns:triggers="http://palladiosimulator.org/ScalingPolicyDefinition/Triggers/1.0" id="_pBBvMIICEe6xSLC-LdkjPQ" entityName="experiments-nodeBased">
+  <scalingPolicies id="_ZZp6II1lEe6Vt_T2z50ung" entityName="nodeBasedUtilizationScaleOut-40" targetGroup="_qLTxAYICEe6xSLC-LdkjPQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="1"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_XOuKoY3IEe6Vt_T2z50ung" cooldownTime="10.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_kEmZ441lEe6Vt_T2z50ung" relationalOperator="GreaterThan">
+      <stimulus xsi:type="stimuli:CPUUtilization"/>
+      <expectedValue xsi:type="expectations:ExpectedPercentage" value="40.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_umOdIIICEe6xSLC-LdkjPQ" entityName="nodeBasedUtilizationScaleOut-60" targetGroup="_qLTxAYICEe6xSLC-LdkjPQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="1"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_z3tIYYIDEe6mEMB9aurCeA" cooldownTime="10.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_4C-rc4ICEe6xSLC-LdkjPQ" relationalOperator="GreaterThan">
+      <stimulus xsi:type="stimuli:CPUUtilization"/>
+      <expectedValue xsi:type="expectations:ExpectedPercentage" value="60.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_kff8UILUEe6wr5aNqIDpTw" entityName="max" targetGroup="_qLTxAYICEe6xSLC-LdkjPQ">
+    <adjustmentType xsi:type="adjustments:AbsoluteAdjustment" goalValue="4"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_n-2YE4LUEe6wr5aNqIDpTw" relationalOperator="EqualTo">
+      <stimulus xsi:type="stimuli:SimulationTime"/>
+      <expectedValue xsi:type="expectations:ExpectedTime" value="10.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_bbLQgI1mEe6Vt_T2z50ung" entityName="nodeBasedUtilizationScaleOut-40-eager" targetGroup="_qLTxAYICEe6xSLC-LdkjPQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="2"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_bjt08Y3IEe6Vt_T2z50ung" cooldownTime="10.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_ogoD041mEe6Vt_T2z50ung" relationalOperator="GreaterThan">
+      <stimulus xsi:type="stimuli:CPUUtilization"/>
+      <expectedValue xsi:type="expectations:ExpectedPercentage" value="40.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <scalingPolicies id="_QHsvgI3GEe6Vt_T2z50ung" entityName="nodeBasedUtilizationScaleOut-60-eager" targetGroup="_qLTxAYICEe6xSLC-LdkjPQ">
+    <adjustmentType xsi:type="adjustments:StepAdjustment" stepValue="2"/>
+    <policyConstraints xsi:type="policy:CooldownConstraint" id="_cpdVAY3IEe6Vt_T2z50ung" cooldownTime="10.0"/>
+    <scalingTrigger xsi:type="triggers:SimpleFireOnValue" id="_UndfY43GEe6Vt_T2z50ung" relationalOperator="GreaterThan">
+      <stimulus xsi:type="stimuli:CPUUtilization"/>
+      <expectedValue xsi:type="expectations:ExpectedPercentage" value="60.0"/>
+    </scalingTrigger>
+  </scalingPolicies>
+  <targetGroups xsi:type="targets:ElasticInfrastructure" id="_qLTxAYICEe6xSLC-LdkjPQ" entityName="myinfra">
+    <targetConstraints xsi:type="target:TargetGroupSizeConstraint" id="_Cu17wIIEEe6oyujPXe-rZw" minSize="1" maxSize="4"/>
+    <unit href="../rm.resourceenvironment#_q8E_AAxpEeuG0YlooJbPiA"/>
+  </targetGroups>
+</spd:SPD>

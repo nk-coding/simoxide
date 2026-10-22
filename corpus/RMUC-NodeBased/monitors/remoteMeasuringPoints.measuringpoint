@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.palladiosimulator.edp2.models:MeasuringPointRepository xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:spdmeasuringpoint="http://palladiosimulator.org/PCM/SPDMeasuringPoint/1.0" id="_TnzcMC28EeyjP44s5BVooA">
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Assembly_RabbitBroker.dataAvailableQueueSpots" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.repository#_1nbMGBeyEeybf7rGWS87vg">
+    <assembly href="../rm.system#_0sIfEBYeEeyTBLpRqyumrw"/>
+    <passiveResource href="../rm.repository#_1nbMGBeyEeybf7rGWS87vg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Assembly_RabbitBroker.conversionRequestQueueSpots" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.repository#_Q5ipCCUSEeyBxdqLFnzF4w">
+    <assembly href="../rm.system#_0sIfEBYeEeyTBLpRqyumrw"/>
+    <passiveResource href="../rm.repository#_Q5ipCCUSEeyBxdqLFnzF4w"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Assembly_RabbitBroker.conversionRequestReplyQueueSpots" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.repository#_YvyRaBe9Eeybf7rGWS87vg">
+    <assembly href="../rm.system#_0sIfEBYeEeyTBLpRqyumrw"/>
+    <passiveResource href="../rm.repository#_YvyRaBe9Eeybf7rGWS87vg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Assembly_RabbitBroker.dataAvailableQueueMessages" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.repository#_JgLzGDM6EeyaraHENifBmA">
+    <assembly href="../rm.system#_0sIfEBYeEeyTBLpRqyumrw"/>
+    <passiveResource href="../rm.repository#_JgLzGDM6EeyaraHENifBmA"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Assembly_RabbitBroker.conversionRequestQueueMessages" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.repository#_xRtXeE7FEeypatfX75Y3Yg">
+    <assembly href="../rm.system#_0sIfEBYeEeyTBLpRqyumrw"/>
+    <passiveResource href="../rm.repository#_xRtXeE7FEeypatfX75Y3Yg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyPassiveResourceMeasuringPoint" stringRepresentation="Passive Resource: Assembly_RabbitBroker.conversionRequestReplyQueueMessages" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.repository#_TinfGE7KEey8KvpF93Vc9Q">
+    <assembly href="../rm.system#_0sIfEBYeEeyTBLpRqyumrw"/>
+    <passiveResource href="../rm.repository#_TinfGE7KEey8KvpF93Vc9Q"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ResourceContainer1" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.resourceenvironment#_L0DTwBLPEeu8HvFyDMmd-w">
+    <activeResource href="../rm.resourceenvironment#_L0DTwBLPEeu8HvFyDMmd-w"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ResourceContainer2" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.resourceenvironment#_JCqKMBLPEeu8HvFyDMmd-w">
+    <activeResource href="../rm.resourceenvironment#_JCqKMBLPEeu8HvFyDMmd-w"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Broker Node" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.resourceenvironment#_vmWqwBLVEeu8HvFyDMmd-w">
+    <activeResource href="../rm.resourceenvironment#_vmWqwBLVEeu8HvFyDMmd-w"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in ResourceContainerLoadBalancer" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.resourceenvironment#_rzroYBZnEe6jPe1PCVUBhg">
+    <activeResource href="../rm.resourceenvironment#_rzroYBZnEe6jPe1PCVUBhg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: VesselUsageScenario" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.usagemodel#_KX07cBLREeu8HvFyDMmd-w">
+    <usageScenario href="../rm.usagemodel#_KX07cBLREeu8HvFyDMmd-w"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: dataProviderGetTelemetryData" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.usagemodel#_Y1tP0Pr6Ee2HGboV_yvcZw">
+    <usageScenario href="../rm.usagemodel#_Y1tP0Pr6Ee2HGboV_yvcZw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: dataProcessingDataAvailableQueueConsuming" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.usagemodel#_Hs1AUBe1Eeybf7rGWS87vg">
+    <usageScenario href="../rm.usagemodel#_Hs1AUBe1Eeybf7rGWS87vg"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: dataProcessingOnConversionRequestQueueConsuming" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.usagemodel#_B17vwCXqEeyoRe0c4nmT0g">
+    <usageScenario href="../rm.usagemodel#_B17vwCXqEeyoRe0c4nmT0g"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyOperationMeasuringPoint" stringRepresentation="Operation: Assembly_DataProvider.DataProviderInterface.getTelemetryData" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.repository#_JxTd4BViEeybTaJk9S9mJw">
+    <role xsi:type="repository:OperationProvidedRole" href="../rm.repository#_MHJsMRVoEeybTaJk9S9mJw"/>
+    <operationSignature href="../rm.repository#_JxTd4BViEeybTaJk9S9mJw"/>
+    <assembly href="../rm.system#_ySz3QBYeEeyTBLpRqyumrw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:AssemblyOperationMeasuringPoint" stringRepresentation="Operation: Assembly_DeviceCommunication.DeviceCommunicationInterface.sendTelemetryData" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.repository#_sL4fYPaDEeqHU66RnBytqw">
+    <role xsi:type="repository:OperationProvidedRole" href="../rm.repository#_B25Z0RVnEeybTaJk9S9mJw"/>
+    <operationSignature href="../rm.repository#_sL4fYPaDEeqHU66RnBytqw"/>
+    <assembly href="../rm.system#_zEvqgBYeEeyTBLpRqyumrw"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="pcmmeasuringpoint:ResourceEnvironmentMeasuringPoint" stringRepresentation="Resource Environment: New ResourceEnvironment" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/rm.resourceenvironment#/">
+    <resourceEnvironment href="../rm.resourceenvironment#/"/>
+  </measuringPoints>
+  <measuringPoints xsi:type="spdmeasuringpoint:ElasticInfrastructureMeasuringPoint" stringRepresentation="Elastic Infrastructure myinfra [_qLTxAYICEe6xSLC-LdkjPQ]" resourceURIRepresentation="platform:/resource/RemoteMeasuringMosaic/scalingPolicies/ThesisExp.spd#_qLTxAYICEe6xSLC-LdkjPQ">
+    <elasticInfrastructure href="../scalingPolicies/ThesisExp.spd#_qLTxAYICEe6xSLC-LdkjPQ"/>
+  </measuringPoints>
+</org.palladiosimulator.edp2.models:MeasuringPointRepository>

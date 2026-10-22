@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="ASCII"?>
+<system:System xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:composition="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2" xmlns:repository="http://palladiosimulator.org/PalladioComponentModel/Repository/5.2" xmlns:system="http://palladiosimulator.org/PalladioComponentModel/System/5.2" xsi:schemaLocation="http://palladiosimulator.org/PalladioComponentModel/Core/Composition/5.2 http://palladiosimulator.org/PalladioComponentModel/5.2#//core/composition http://palladiosimulator.org/PalladioComponentModel/Repository/5.2 http://palladiosimulator.org/PalladioComponentModel/5.2#//repository http://palladiosimulator.org/PalladioComponentModel/System/5.2 http://palladiosimulator.org/PalladioComponentModel/5.2#//system" id="_ccfrQBYeEeyTBLpRqyumrw" entityName="RemoteMeasuringDemonstrator">
+  <assemblyContexts__ComposedStructure id="_vmn90BYeEeyTBLpRqyumrw" entityName="Assembly_DataProcessing">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="rm.repository#__FjeIBVnEeybTaJk9S9mJw"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_ySz3QBYeEeyTBLpRqyumrw" entityName="Assembly_DataProvider">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="rm.repository#_KveuoBVoEeybTaJk9S9mJw"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_zEvqgBYeEeyTBLpRqyumrw" entityName="Assembly_DeviceCommunication">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="rm.repository#_4nUE0BVmEeybTaJk9S9mJw"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_z2110BYeEeyTBLpRqyumrw" entityName="Assembly_MongoDB">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="rm.repository#_ik4dgBVoEeybTaJk9S9mJw"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_0sIfEBYeEeyTBLpRqyumrw" entityName="Assembly_RabbitBroker">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="rm.repository#_qJvWEBVoEeybTaJk9S9mJw"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_rIFVABr5Ee6kYtTTkxxYZQ" entityName="Assembly_LoadBalancer_DataProvider">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="rm.repository#_VGUgwOtTEe2s_tRc70XeNg"/>
+  </assemblyContexts__ComposedStructure>
+  <assemblyContexts__ComposedStructure id="_swrqgBr5Ee6kYtTTkxxYZQ" entityName="Assembly_LoadBalancer_DeviceCommunication">
+    <encapsulatedComponent__AssemblyContext xsi:type="repository:BasicComponent" href="rm.repository#_-R9a0Br3Ee6kYtTTkxxYZQ"/>
+  </assemblyContexts__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_I2YK0BYfEeyTBLpRqyumrw" entityName="AssemblyConnector_DataProcessing-MongoDB" requiringAssemblyContext_AssemblyConnector="_vmn90BYeEeyTBLpRqyumrw" providingAssemblyContext_AssemblyConnector="_z2110BYeEeyTBLpRqyumrw">
+    <providedRole_AssemblyConnector href="rm.repository#_kVLWcRVoEeybTaJk9S9mJw"/>
+    <requiredRole_AssemblyConnector href="rm.repository#_DjdM1RVoEeybTaJk9S9mJw"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_KnBCABYfEeyTBLpRqyumrw" entityName="AssemblyConnector_DataProvider-MongoDB" requiringAssemblyContext_AssemblyConnector="_ySz3QBYeEeyTBLpRqyumrw" providingAssemblyContext_AssemblyConnector="_z2110BYeEeyTBLpRqyumrw">
+    <providedRole_AssemblyConnector href="rm.repository#_kVLWcRVoEeybTaJk9S9mJw"/>
+    <requiredRole_AssemblyConnector href="rm.repository#_UM9VtRVoEeybTaJk9S9mJw"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_MV4-oBYfEeyTBLpRqyumrw" entityName="AssemblyConnector_DeviceCommunication-MongoDB" requiringAssemblyContext_AssemblyConnector="_zEvqgBYeEeyTBLpRqyumrw" providingAssemblyContext_AssemblyConnector="_z2110BYeEeyTBLpRqyumrw">
+    <providedRole_AssemblyConnector href="rm.repository#_kVLWcRVoEeybTaJk9S9mJw"/>
+    <requiredRole_AssemblyConnector href="rm.repository#_LHy9dRVnEeybTaJk9S9mJw"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_QqZgwBYfEeyTBLpRqyumrw" entityName="AssemblyInfrastructureConnector_DeviceCommunication_RabbitBroker_DataAvailableQueue" providingAssemblyContext__AssemblyInfrastructureConnector="_0sIfEBYeEeyTBLpRqyumrw" requiringAssemblyContext__AssemblyInfrastructureConnector="_zEvqgBYeEeyTBLpRqyumrw">
+    <providedRole__AssemblyInfrastructureConnector href="rm.repository#_5A-3IhVoEeybTaJk9S9mJw"/>
+    <requiredRole__AssemblyInfrastructureConnector href="rm.repository#_rNJwVBVnEeybTaJk9S9mJw"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_T7BkABYfEeyTBLpRqyumrw" entityName="AssemblyInfrastructureConnector_DataProvider-RabbitBroker_ConversionRequestQueue" providingAssemblyContext__AssemblyInfrastructureConnector="_0sIfEBYeEeyTBLpRqyumrw" requiringAssemblyContext__AssemblyInfrastructureConnector="_ySz3QBYeEeyTBLpRqyumrw">
+    <providedRole__AssemblyInfrastructureConnector href="rm.repository#_u2QvkhVoEeybTaJk9S9mJw"/>
+    <requiredRole__AssemblyInfrastructureConnector href="rm.repository#_XLp7dBVoEeybTaJk9S9mJw"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_UmhYEBYfEeyTBLpRqyumrw" entityName="AssemblyInfrastructureConnector_DataProvider-RabbitBroker_ConversionReplyQueue" providingAssemblyContext__AssemblyInfrastructureConnector="_0sIfEBYeEeyTBLpRqyumrw" requiringAssemblyContext__AssemblyInfrastructureConnector="_ySz3QBYeEeyTBLpRqyumrw">
+    <providedRole__AssemblyInfrastructureConnector href="rm.repository#_0ScrchVoEeybTaJk9S9mJw"/>
+    <requiredRole__AssemblyInfrastructureConnector href="rm.repository#_cszP1BVoEeybTaJk9S9mJw"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_40Ki8Be0Eeybf7rGWS87vg" entityName="AssemblyInfrastructureConnector_DataProcessing-RabbitBroker_DataAvailableQueue" providingAssemblyContext__AssemblyInfrastructureConnector="_0sIfEBYeEeyTBLpRqyumrw" requiringAssemblyContext__AssemblyInfrastructureConnector="_vmn90BYeEeyTBLpRqyumrw">
+    <providedRole__AssemblyInfrastructureConnector href="rm.repository#_5A-3IhVoEeybTaJk9S9mJw"/>
+    <requiredRole__AssemblyInfrastructureConnector href="rm.repository#_Kcm1xBe0Eeybf7rGWS87vg"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_zMwC8Be-Eeybf7rGWS87vg" entityName="AssemblyInfrastructureConnector_DataProcessing-RabbitBroker_ConversionReplyQueue" providingAssemblyContext__AssemblyInfrastructureConnector="_0sIfEBYeEeyTBLpRqyumrw" requiringAssemblyContext__AssemblyInfrastructureConnector="_vmn90BYeEeyTBLpRqyumrw">
+    <providedRole__AssemblyInfrastructureConnector href="rm.repository#_0ScrchVoEeybTaJk9S9mJw"/>
+    <requiredRole__AssemblyInfrastructureConnector href="rm.repository#_UIT6hBe-Eeybf7rGWS87vg"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyInfrastructureConnector" id="_SzzJMC24EeyjP44s5BVooA" entityName="AssemblyInfrastructureConnector_DataProcessing-RabbitBroker_ConversionRequestQueue" providingAssemblyContext__AssemblyInfrastructureConnector="_0sIfEBYeEeyTBLpRqyumrw" requiringAssemblyContext__AssemblyInfrastructureConnector="_vmn90BYeEeyTBLpRqyumrw">
+    <providedRole__AssemblyInfrastructureConnector href="rm.repository#_u2QvkhVoEeybTaJk9S9mJw"/>
+    <requiredRole__AssemblyInfrastructureConnector href="rm.repository#_CAQ1tCUUEeyBxdqLFnzF4w"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_huiLsBr5Ee6kYtTTkxxYZQ" entityName="ProvidedDelegationConnector_DataProcessing_conversionRequestQueueConsumer" outerProvidedRole_ProvidedDelegationConnector="_djTrMCXpEeyoRe0c4nmT0g" assemblyContext_ProvidedDelegationConnector="_vmn90BYeEeyTBLpRqyumrw">
+    <innerProvidedRole_ProvidedDelegationConnector href="rm.repository#_BCjWURVoEeybTaJk9S9mJw"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_0gnKoBr5Ee6kYtTTkxxYZQ" entityName="ProvidedDelegationConnector_DataProvider" outerProvidedRole_ProvidedDelegationConnector="_kWHdcBYfEeyTBLpRqyumrw" assemblyContext_ProvidedDelegationConnector="_rIFVABr5Ee6kYtTTkxxYZQ">
+    <innerProvidedRole_ProvidedDelegationConnector href="rm.repository#_F2JacBr3Ee6kYtTTkxxYZQ"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:ProvidedDelegationConnector" id="_1H3X4Br5Ee6kYtTTkxxYZQ" entityName="ProvidedDelegationConnector_DeviceCommunication" outerProvidedRole_ProvidedDelegationConnector="_gokNoBYfEeyTBLpRqyumrw" assemblyContext_ProvidedDelegationConnector="_swrqgBr5Ee6kYtTTkxxYZQ">
+    <innerProvidedRole_ProvidedDelegationConnector href="rm.repository#_CASGsBr4Ee6kYtTTkxxYZQ"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_19vP8Br5Ee6kYtTTkxxYZQ" entityName="AssemblyConnector_LoadBalancer-DeviceCommunication" requiringAssemblyContext_AssemblyConnector="_swrqgBr5Ee6kYtTTkxxYZQ" providingAssemblyContext_AssemblyConnector="_zEvqgBYeEeyTBLpRqyumrw">
+    <providedRole_AssemblyConnector href="rm.repository#_B25Z0RVnEeybTaJk9S9mJw"/>
+    <requiredRole_AssemblyConnector href="rm.repository#_Cic_oBr4Ee6kYtTTkxxYZQ"/>
+  </connectors__ComposedStructure>
+  <connectors__ComposedStructure xsi:type="composition:AssemblyConnector" id="_3dw4QBr5Ee6kYtTTkxxYZQ" entityName="AssemblyConnector_LoadBalancer-DataProvider" requiringAssemblyContext_AssemblyConnector="_rIFVABr5Ee6kYtTTkxxYZQ" providingAssemblyContext_AssemblyConnector="_ySz3QBYeEeyTBLpRqyumrw">
+    <providedRole_AssemblyConnector href="rm.repository#_MHJsMRVoEeybTaJk9S9mJw"/>
+    <requiredRole_AssemblyConnector href="rm.repository#_4Kg7cBr3Ee6kYtTTkxxYZQ"/>
+  </connectors__ComposedStructure>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_gokNoBYfEeyTBLpRqyumrw" entityName="DeviceCommunicationProvidedRole">
+    <providedInterface__OperationProvidedRole href="rm.repository#_r6KSsPaCEeqHU66RnBytqw"/>
+  </providedRoles_InterfaceProvidingEntity>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_kWHdcBYfEeyTBLpRqyumrw" entityName="DataProviderProvidedRole">
+    <providedInterface__OperationProvidedRole href="rm.repository#_lV1qEPaCEeqHU66RnBytqw"/>
+  </providedRoles_InterfaceProvidingEntity>
+  <providedRoles_InterfaceProvidingEntity xsi:type="repository:OperationProvidedRole" id="_djTrMCXpEeyoRe0c4nmT0g" entityName="DataProcessingProvidedRole_allQueues">
+    <providedInterface__OperationProvidedRole href="rm.repository#_AhLhYPaAEeqHU66RnBytqw"/>
+  </providedRoles_InterfaceProvidingEntity>
+</system:System>
