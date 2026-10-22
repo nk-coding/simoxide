@@ -84,7 +84,7 @@ impl<C: Compat, F: Flavour> Simulation<'_, C, F> {
             }
             PKind::Forked { sync, parent } => {
                 if sync && self.alive(parent) && !self.fork_done_of(parent) && self.st.running {
-                    self.activate(parent)?;
+                    self.resume_parent(parent)?;
                 }
             }
             PKind::OpenUser | PKind::OpenGen => {}

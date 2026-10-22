@@ -157,7 +157,10 @@ state machine plus an explicit continuation stack.
   suspension point it is currently in. If two `Resume(p)` notes are pending, the second one wakes `p` from its
   *next* wait prematurely (e.g. in the middle of a hold or a resource demand); the woken code simply continues
   after its `passivate()`. The known trigger is two synchronous fork children finishing before the parent's
-  first `Resume` is processed (ACT-9.5; `corpus/h26_fork_double_resume`). SimOxide reproduces this: every
+  first `Resume` is processed (ACT-9.5; `corpus/h26_fork_double_resume`): children that do not wait, or
+  whose last waits end in the same nanosecond (a resource schedules its next completion before it
+  resumes the finished job, so at time t the order is `finish(A)`, `finish(B)`, `resume(A)`,
+  `resume(B)`). SimOxide reproduces this: every
   `Resume` continues the process from its current wait point, and resumes are neither deduplicated nor
   validated. The consequences of a premature wake-up are reproduced too:
   - the resource the process was waiting at still holds its job. When a PS resource receives a second demand
@@ -169,6 +172,10 @@ state machine plus an explicit continuation stack.
   - when the resource later activates the process while it is running a later wait, the reference aborts with
     `IllegalStateException: Tried to schedule thread which was not suspended`; SimOxide reports
     `IllegalStateException: activate() of a running process` (REF-2).
+
+  `SimConfig::fix_double_resume` (opt-in, not the reference) drops the late resume: a finishing
+  synchronous child's note resumes the parent only while it still waits at its join
+  ([Deviations](../correctness/deviations.md#fixed-double-resume)).
 - **SIM-4.5 Termination.** After `lifeCycle()` returns: listeners notified, state `TERMINATED`, control returns
   to the resumer (`SimulatedProcess.java:66-71`). `SimuComSimProcess.lifeCycle` (`:185-215`) wraps
   `internalLifeCycle()`; any `Exception` → model status `ERROR` + `simulationControl.stop()` (SIM-6.6); then

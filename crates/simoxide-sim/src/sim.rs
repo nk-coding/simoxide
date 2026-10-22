@@ -102,6 +102,15 @@ pub struct SimConfig {
     /// work of its requests, seeded from `seed`, the scenario's id and the user's number.
     /// `false` (default): one stream per run.
     pub usage_streams: bool,
+    /// Fixes the reference's double resume (REF-2 in `docs/correctness/reference-bugs.md`,
+    /// SIM-4.4a; opt-in, any mode, `docs/correctness/deviations.md`): a finishing synchronous
+    /// fork child resumes its parent only while the parent still waits at the fork's join. A
+    /// resume note of a child that is due after the parent has left the join is dropped, so the
+    /// parent is not woken early from its next wait (a delay, a think time, a resource demand),
+    /// which in the reference aborts the run or cuts the wait short. Runs without such a late
+    /// note are unchanged, byte for byte (the same events, in the same order). `false`
+    /// (default): the reference's behaviour.
+    pub fix_double_resume: bool,
 }
 
 /// Resource limits of one run. A run that exceeds one stops with a [`SimError`] of kind
@@ -186,6 +195,7 @@ impl Default for SimConfig {
             mode: Mode::default(),
             load_profile: None,
             usage_streams: false,
+            fix_double_resume: false,
         }
     }
 }
@@ -1525,6 +1535,16 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     self.run_process(s)?;
                 }
             }
+            Ev::JoinResume(k) => {
+                let (s, g) = unkey(k);
+                let p = &self.st.procs[s as usize];
+                if p.generation == g
+                    && p.state == PState::Suspended
+                    && matches!(p.data.conts.last(), Some(Cont::ForkJoin { .. }))
+                {
+                    self.run_process(s)?;
+                }
+            }
             Ev::Think(k) => {
                 let (s, g) = unkey(k);
                 let p = &mut self.st.procs[s as usize];
@@ -2757,7 +2777,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         && !self.fork_done_of(parent)
                         && self.st.running
                     {
-                        self.activate(parent)?;
+                        self.resume_parent(parent)?;
                     }
                 }
             }
@@ -3149,6 +3169,30 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             self.st.pool.recycle(d.frames.pop());
         }
         Ok(Flow::Continue)
+    }
+
+    /// `parent.scheduleAt(0)` of a finishing synchronous fork child (ACT-9.4, E16). With
+    /// [`SimConfig::fix_double_resume`] the note is a [`Ev::JoinResume`], which resumes the
+    /// parent only if it still waits at its join when the note is due (REF-2 fixed).
+    fn resume_parent(&mut self, parent: u64) -> R<()> {
+        if !self.st.cfg.fix_double_resume || !self.st.running {
+            return self.activate(parent);
+        }
+        let (s, g) = unkey(parent);
+        let Some(p) = self.st.procs.get(s as usize) else {
+            return Ok(());
+        };
+        if p.generation != g || p.state == PState::Terminated {
+            return Ok(());
+        }
+        if p.state == PState::Running {
+            return self.err("IllegalStateException: activate() of a running process");
+        }
+        self.st
+            .meas
+            .events
+            .insert(self.st.now, Ev::JoinResume(parent));
+        Ok(())
     }
 
     #[inline]

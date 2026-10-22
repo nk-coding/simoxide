@@ -344,6 +344,11 @@ a difference.
 | `bug2_fcfs_double_queue_aborts` | a process queued twice at an FCFS resource aborts like the reference, after the same trace ([REF-2](./reference-bugs.md#ref-2-double-resumes-abort)) |
 | `reference_aborts_are_reproduced` | the saved reference aborts of `corpus-fuzz/l_ref_*`: same error, same trace prefix |
 
+`tests/double_resume.rs` checks the opt-in fix of REF-2 (`SimConfig::fix_double_resume`): by default
+the double resume of corpus model h26 and of a variant that aborts are kept; with the fix both run like
+their one-child variants, in both modes, also paused, forked and snapshotted; fork models without a
+late resume run byte for byte as without it.
+
 `tests/robustness.rs` covers pathological inputs: 600 mutated corpus models, 20 000 random StoEx
 strings, deep StoEx on a 1 MiB stack, self-containing composites, zero-time recursion, a
 2·10^9-iteration loop, zero inter-arrival time and cancellation. Each ends in an error of the

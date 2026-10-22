@@ -32,6 +32,11 @@ response time within 0.3 %). Only replica 0 records state.
 
 A synchronous fork whose children finish without waiting resumes its parent twice
 ([SIM-4.4a](../spec/simulation.md)). The second resume wakes the parent early from its next wait.
+Children whose last waits end in the same nanosecond do the same: a resource schedules its next
+completion before it resumes the finished job, so both children finish before the parent's first
+resume. In larger models with forks this happens by chance: on a MiSArch architecture design
+(open workloads, synchronous forks, one hour of simulated time, about 45 million events) 6 of 220
+exact-mode seeds abort, at 716 s to 3 187 s.
 
 - If the parent then waits at a resource or delay, the run aborts with
   `IllegalStateException: Tried to schedule thread which was not suspended [ClosedUser_n]` (from
@@ -44,7 +49,9 @@ A synchronous fork whose children finish without waiting resumes its parent twic
   resources, which are FCFS too. SimOxide reports `NullPointerException: FCFS process queued
   twice` at the same event, after the same trace.
 
-The model generator's `double_resume` feature provokes these on purpose.
+The model generator's `double_resume` feature provokes these on purpose. The opt-in
+`SimConfig::fix_double_resume` (CLI `--fix-double-resume`) fixes the bug
+([Deviations](./deviations.md#fixed-double-resume)).
 
 ## REF-3 `UniDouble(a, a)` aborts
 

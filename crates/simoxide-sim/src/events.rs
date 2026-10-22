@@ -34,6 +34,9 @@ pub(crate) enum Ev {
     External(u32),
     /// A step of the load profile (`crate::load`): applies the points due now.
     Load,
+    /// `Resume(p)` of a finishing synchronous fork child under `SimConfig::fix_double_resume`:
+    /// continues `p` only if it still waits at its fork's join (REF-2 fixed).
+    JoinResume(u64),
 }
 
 #[derive(Clone, Copy)]

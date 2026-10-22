@@ -267,7 +267,10 @@ Empty branch → exception. The **first** transition's type decides the mode:
   If two sync children finish before the parent's first `Resume` is processed (e.g. children without waits),
   the parent has two pending resumes: the first ends the join, the second wakes the parent from its next wait
   prematurely. SimOxide reproduces this (`corpus/h26_fork_double_resume`), including the aborts it can cause
-  (SIM-4.4a; REF-2 in [reference bugs](../correctness/reference-bugs.md)).
+  (SIM-4.4a; REF-2 in [reference bugs](../correctness/reference-bugs.md)). Children whose last waits end
+  in the same nanosecond trigger it too. The opt-in `SimConfig::fix_double_resume` (CLI
+  `--fix-double-resume`) resumes the parent only while it waits at the join
+  ([Deviations](../correctness/deviations.md#fixed-double-resume)).
 - **ACT-9.6** SynchronisationPoint output parameter usages / fork result variables are **not** processed by
   SimuLizar 5.2.2 (nothing reads them).
 

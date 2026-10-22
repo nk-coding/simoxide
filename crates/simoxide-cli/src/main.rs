@@ -42,6 +42,9 @@ const USAGE: &str = "usage:
              [--usage-streams]   (fast mode: the usage model draws from streams of its own, per
              scenario and per user, so models with the same usage model and seed see the same
              users: common random numbers; docs/spec/random.md RND-11)
+             [--fix-double-resume]   (a synchronous fork resumes its parent only while it waits
+             at the join: fixes SimuLizar's double resume, REF-2, which wakes the parent early
+             from its next wait or aborts the run; docs/correctness/deviations.md)
              [--rules DIR] [--rules-log rules.jsonl] [--qvto-mode auto|ordered|fast|compat]
              (SimuLizar's reconfiguration rules: the .qvto files of DIR in file-name order, or
              run.json's reconfiguration_rules; `reconfiguration` feature; QVTo's compat mode
@@ -115,6 +118,7 @@ struct Args {
     load_profile: Option<PathBuf>,
     no_load_profile: bool,
     usage_streams: bool,
+    fix_double_resume: bool,
     rules: Option<PathBuf>,
     rules_log: Option<PathBuf>,
     qvto_mode: Option<String>,
@@ -181,6 +185,7 @@ fn parse_args() -> Result<Args, String> {
         load_profile: None,
         no_load_profile: false,
         usage_streams: false,
+        fix_double_resume: false,
         rules: None,
         rules_log: None,
         qvto_mode: None,
@@ -310,6 +315,7 @@ fn parse_args() -> Result<Args, String> {
             "--load-profile" => a.load_profile = Some(val()?.into()),
             "--no-load-profile" => a.no_load_profile = true,
             "--usage-streams" => a.usage_streams = true,
+            "--fix-double-resume" => a.fix_double_resume = true,
             "--rules" => a.rules = Some(val()?.into()),
             "--rules-log" => a.rules_log = Some(val()?.into()),
             "--qvto-mode" => a.qvto_mode = Some(val()?),
@@ -460,6 +466,7 @@ fn setup_with_rules(a: &Args) -> Result<(CompiledModel, SimConfig, Option<PathBu
         cfg.load_profile = p.map(Arc::new);
     }
     cfg.usage_streams = a.usage_streams;
+    cfg.fix_double_resume = a.fix_double_resume;
     Ok((cm, cfg, rules))
 }
 

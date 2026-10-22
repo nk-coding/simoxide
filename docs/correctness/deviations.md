@@ -145,6 +145,23 @@ branches, loops, think times) and one for the system work of its requests, so th
 the same usage model and seed see the same users (common random numbers across designs). The reference has one stream per run. Rules:
 [RND-11](../spec/random.md#rnd-11-usage-streams-opt-in-fast-mode-not-the-reference).
 
+### Fixed double resume
+
+`SimConfig::fix_double_resume` (CLI `--fix-double-resume`, any mode and flavour, default off)
+fixes the reference's double resume ([REF-2](./reference-bugs.md#ref-2-double-resumes-abort),
+[SIM-4.4a](../spec/simulation.md)). A finishing synchronous fork child still schedules a resume
+of its parent at the same instant (ACT-9.4), as its own note (`JoinResume`). That note resumes
+the parent only if the parent still waits at the fork's join when the note is due. A note that is
+due after an earlier one has already let the parent through the join does nothing, so the parent
+is not woken early from its next wait (a delay, a think time, a resource demand). In the reference
+such a wake-up aborts the run (`Tried to schedule thread which was not suspended`, an FCFS
+`NullPointerException`) or cuts a delay or demand short.
+
+The parent continues once, when all synchronous children have finished, as in Slingshot
+(SS-ACT-10.3). Runs in which no child resumes a parent that has left its join are unchanged, byte
+for byte: the same events in the same order, the same trace, draws and measurements. In the other
+runs the dropped note still counts as an event. Tests: `crates/simoxide-sim/tests/double_resume.rs`.
+
 ### Slingshot flavour
 
 `--flavour slingshot` ([Slingshot flavour](../guide/slingshot.md)) follows Slingshot's semantics in

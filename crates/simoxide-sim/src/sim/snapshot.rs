@@ -289,6 +289,7 @@ pub(crate) struct ConfigImage {
     mode: Mode,
     load_profile: Option<crate::load::LoadProfile>,
     usage_streams: bool,
+    fix_double_resume: bool,
 }
 
 impl From<&SimConfig> for ConfigImage {
@@ -329,6 +330,7 @@ impl From<&SimConfig> for ConfigImage {
             mode: c.mode,
             load_profile: c.load_profile.as_deref().cloned(),
             usage_streams: c.usage_streams,
+            fix_double_resume: c.fix_double_resume,
         }
     }
 }
@@ -371,6 +373,7 @@ impl From<ConfigImage> for SimConfig {
             mode: c.mode,
             load_profile: c.load_profile.map(Arc::new),
             usage_streams: c.usage_streams,
+            fix_double_resume: c.fix_double_resume,
         }
     }
 }
