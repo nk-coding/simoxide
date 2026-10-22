@@ -171,6 +171,13 @@ impl<'m> SsxRun<'m> {
                 kind: SimErrorKind::Model,
             });
         }
+        if cfg.sync_paths || cfg.call_counts {
+            return Err(SimError {
+                message: "the Slingshot-exact engine has no path monitoring (MEAS-13): run the slingshot or simulizar flavour".into(),
+                at_ns: 0,
+                kind: SimErrorKind::Model,
+            });
+        }
         if cfg.max_sim_time <= 0 {
             return Err(SimError {
                 message: "the Slingshot-exact mode needs a simulation time (Slingshot's simTime is its only stop condition, SS-RUN-5)".into(),

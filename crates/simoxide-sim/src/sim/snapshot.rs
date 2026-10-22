@@ -290,6 +290,10 @@ pub(crate) struct ConfigImage {
     load_profile: Option<crate::load::LoadProfile>,
     usage_streams: bool,
     fix_double_resume: bool,
+    #[serde(default)]
+    sync_paths: bool,
+    #[serde(default)]
+    call_counts: bool,
 }
 
 impl From<&SimConfig> for ConfigImage {
@@ -331,6 +335,8 @@ impl From<&SimConfig> for ConfigImage {
             load_profile: c.load_profile.as_deref().cloned(),
             usage_streams: c.usage_streams,
             fix_double_resume: c.fix_double_resume,
+            sync_paths: c.sync_paths,
+            call_counts: c.call_counts,
         }
     }
 }
@@ -374,6 +380,8 @@ impl From<ConfigImage> for SimConfig {
             load_profile: c.load_profile.map(Arc::new),
             usage_streams: c.usage_streams,
             fix_double_resume: c.fix_double_resume,
+            sync_paths: c.sync_paths,
+            call_counts: c.call_counts,
         }
     }
 }
@@ -426,6 +434,9 @@ struct EngineImage<K: Clock> {
     lp: Option<crate::load::LoadRun>,
     /// The usage streams (`super::streams`).
     us: Option<UsageStreamsImage>,
+    /// Path monitoring (`super::paths`).
+    #[serde(default)]
+    paths: Option<super::paths::PathRec>,
 }
 
 /// The usage streams of a run (`super::streams::UsageStreams`).
@@ -644,6 +655,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
                     })
                     .collect(),
             }),
+            paths: self.paths.as_deref().cloned(),
         })
     }
 
@@ -871,6 +883,10 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             next_event_check: img.next_event_check,
             lp: img.lp.map(Box::new),
             us,
+            paths: img.paths.map(|mut p| {
+                p.reindex();
+                Box::new(p)
+            }),
             max_depth,
             nesting: 0,
             direct: 0,

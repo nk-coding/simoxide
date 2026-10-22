@@ -185,6 +185,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         d.frames.push(fc);
                         d.frames.push(fa);
                         self.component_instance(d)?;
+                        if self.st.paths.is_some() {
+                            self.paths_seff(s, cur_path(d));
+                        }
                         // the SEFF for the signature (matched by signature id)
                         let Some(beh) = seff else {
                             if self.quirk(crate::flavour::Quirk::Q35)

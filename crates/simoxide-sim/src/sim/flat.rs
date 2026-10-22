@@ -177,6 +177,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     let Some(sig) = *signature else {
                         return self.err("external call without signature");
                     };
+                    if self.st.paths.is_some() {
+                        self.paths_call(a);
+                    }
                     let aid = &cm.action_ids[a.index()];
                     let fin = self.with_stream(Who::User(s), |x| {
                         x.input_frame(inputs, d.frames.last(), Origin::Elem("param", aid))

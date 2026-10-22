@@ -64,7 +64,7 @@ pub use rng::{RngMode, Tape};
 pub use sim::watch::{Condition, Watch};
 pub use sim::{
     DEFAULT_MAX_EVENTS_PER_INSTANT, Detached, Limits, Outputs, Pause, Phase, RunResult, RunState,
-    SimConfig, SimError, SimErrorKind, Simulation, Status,
+    SessionPaths, SimConfig, SimError, SimErrorKind, Simulation, Status,
 };
 pub use simoxide_sched::PsAlgorithm;
 

@@ -44,6 +44,7 @@ mod calls;
 mod flat;
 mod hooks;
 mod loadstep;
+mod paths;
 mod reconf;
 mod removal;
 mod runmodel;
@@ -55,6 +56,7 @@ mod streams;
 pub mod watch;
 
 pub use hooks::ObservedTuple;
+pub use paths::SessionPaths;
 use reconf::{FinStep, Prm, Reconf, prm_tuple, prm_write, reconf_resume};
 pub use reconf::{PrmMeasurement, ReconfDue};
 pub use runmodel::RunModel;
@@ -111,6 +113,14 @@ pub struct SimConfig {
     /// note are unchanged, byte for byte (the same events, in the same order). `false`
     /// (default): the reference's behaviour.
     pub fix_double_resume: bool,
+    /// Record each session's synchronous path: per usage-scenario run, the resource containers
+    /// whose assembly contexts executed SEFFs for it outside asynchronous forks
+    /// (`docs/spec/measurements.md` MEAS-13, [`RunState::sync_paths`]). Not SimuLizar; changes
+    /// nothing else in the run. `false` (default): not recorded.
+    pub sync_paths: bool,
+    /// Count the executions of every external call action (MEAS-13.3,
+    /// [`RunState::call_counts`]). Not SimuLizar; changes nothing else. `false` (default).
+    pub call_counts: bool,
 }
 
 /// Resource limits of one run. A run that exceeds one stops with a [`SimError`] of kind
@@ -196,6 +206,8 @@ impl Default for SimConfig {
             load_profile: None,
             usage_streams: false,
             fix_double_resume: false,
+            sync_paths: false,
+            call_counts: false,
         }
     }
 }
@@ -806,9 +818,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             None => None,
         };
         let us = cfg.usage_streams.then(Box::default);
+        let paths = paths::PathRec::new(cfg.sync_paths, cfg.call_counts);
         let mut st = RunState::new(cm, cfg, traced, rng);
         st.lp = lp;
         st.us = us;
+        st.paths = paths;
         Ok(Simulation {
             base: cm,
             cm,
@@ -1444,6 +1458,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 _ => None,
             };
             self.us_spawned(slot, kind, scen);
+        }
+        if self.st.paths.is_some() {
+            self.paths_spawned(slot, kind);
         }
         if let Some(t) = self.trace.as_mut() {
             let (k, n) = match kind {
@@ -2863,6 +2880,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         if *st == 0 {
             *st = 1;
             self.st.procs[s as usize].epoch = self.st.model.generation();
+            if self.st.paths.is_some() {
+                self.paths_session_start(s);
+            }
             let pid = self.pid(s);
             if let Some(t) = self.trace.as_mut() {
                 t.element(self.st.now, true, pid, "UsageScenario", sid, None);
@@ -2903,6 +2923,10 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 );
             }
             self.st.procs[s as usize].epoch = NO_REQUEST;
+            if self.st.paths.is_some() {
+                let scen = *scen;
+                self.paths_session_end(s, scen);
+            }
             d.conts.pop();
         }
         Ok(Flow::Continue)

@@ -178,6 +178,8 @@ pub struct RunState<C: Compat = crate::compat::DefaultCompat, F: Flavour = SimuL
     pub(super) lp: Option<Box<crate::load::LoadRun>>,
     /// The usage streams (`SimConfig::usage_streams`; `None`: one stream per run).
     pub(super) us: Option<Box<super::streams::UsageStreams<C::Rng>>>,
+    /// Path monitoring (`SimConfig::sync_paths`, `SimConfig::call_counts`; `None`: off).
+    pub(super) paths: Option<Box<super::paths::PathRec>>,
     /// `Limits::max_stack_depth` (`usize::MAX` if unlimited).
     pub(super) max_depth: usize,
     // ------------------------------------------------------------------ within an event
@@ -241,6 +243,7 @@ impl<C: Compat, F: Flavour> Clone for RunState<C, F> {
             next_event_check: self.next_event_check,
             lp: self.lp.clone(),
             us: self.us.clone(),
+            paths: self.paths.clone(),
             max_depth: self.max_depth,
             nesting: self.nesting,
             direct: self.direct,
@@ -324,6 +327,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             next_event_check: 0,
             lp: None,
             us: None,
+            paths: None,
             max_depth,
             nesting: 0,
             direct: 0,

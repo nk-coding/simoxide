@@ -434,3 +434,46 @@ and activated (SIM-7 step 4). Uses the first MonitorRepository; specs of **activ
 
 See SIM-6.4: only scenario runs of workload users count, independent of monitors; closed users count after the
 think time.
+
+## MEAS-13 Path monitoring (opt-in; not SimuLizar)
+
+Two measurements SimuLizar does not have, for design-space exploration (failure exposure and
+call rates measured in the simulation instead of computed beside it;
+`crates/simoxide-sim/src/sim/paths.rs`, tests `crates/simoxide-sim/tests/sync_paths.rs`).
+Both are off by default, run in the process engine (SimuLizar and Slingshot flavours, exact and
+fast mode; the Slingshot-exact engine refuses them), draw no random numbers, schedule no events
+and emit no tuples: a run with them is the run without them, trace and measurements byte for
+byte. Off, they cost one predictable branch per SEFF entry, external call, process creation
+and usage-scenario run.
+
+- **MEAS-13.1 Synchronous paths** (`SimConfig::sync_paths`, read with
+  `RunState::sync_paths(&CompiledModel)`). A **session** is one usage-scenario run of one user
+  process: one open-workload user, one iteration of a closed-workload user (WL-4.1, from BEGIN to
+  END). Its **synchronous path** is the work done for it while the user waits: the user's own
+  process and, recursively, the processes of the **synchronous** forked behaviours of a
+  `ForkAction` (those of its `SynchronisationPoint`, ACT-9) started on the path. An
+  **asynchronous** forked behaviour, and everything its process starts (also its own synchronous
+  forks), is not on the path. Each time a process on a session's path enters the SEFF of a basic
+  component (ACT-2.3, also behind provided delegations and through infrastructure calls), the
+  container the assembly-context path is allocated to at that moment joins the session's set
+  (each container once; an unallocated context adds nothing). This is the set of containers whose
+  failure the session cannot survive: their components executed for it, and the user waited for
+  them. Linking resources are not containers. Passive resources and resource calls belong to the
+  container of the SEFF that uses them.
+- **MEAS-13.2 What is kept.** When a session ends while the experiment runs (`isRunning`, as
+  MEAS-3), its set is counted: the run keeps, per usage scenario, the number of sessions per
+  distinct container set (`SessionPaths`: scenario, containers sorted by id, sessions). Sessions
+  in progress at the stop are not counted (MEAS-10.2). Counts over a window are differences of
+  two readings (pause the run at the window's start with `Simulation::run_until`). Containers are
+  typed ids of the run's model; containers created by model changes (scale-outs) have ids of
+  their own: `simoxide-spd`'s `SpdRun::container_units` maps every container that was an element
+  of an elastic infrastructure to the infrastructure's unit, also after the container was removed.
+- **MEAS-13.3 Call counts** (`SimConfig::call_counts`, read with `RunState::call_counts`): the
+  number of executions of every `ExternalCallAction`, by action (one counter per action for all
+  assembly contexts of its component), counted when the call starts (ACT-4, before its input
+  parameters are evaluated), on any process, also in asynchronous forks and after the stop
+  (during the drain). Rates are differences of two readings over the time between them.
+- **MEAS-13.4** Forks, pauses and snapshots carry both (the snapshot's `engine` section, field
+  `paths`; snapshots written before carry none). For utilisation per time bin without monitors,
+  the busy-time hook (`Simulation::track_busy`) can be read at a fixed instant without an event
+  there (`Simulation::busy_integral_at`, after `run_until(Pause::Before(t))`).
