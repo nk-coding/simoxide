@@ -1,0 +1,45 @@
+# Runs the guardrail tests (docs/development/contributing.md, "Guardrails") on pushes to main and on
+# pull requests. The third-party submodules are checked out and required, so a missing model fails
+# instead of skipping.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  SIMOXIDE_REQUIRE_THIRD_PARTY: "1"
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all --check
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: SimOxide crates (cargo test-sim)
+        run: cargo test-sim --no-fail-fast
+      - name: Foundation crates (cargo test-fdn)
+        run: cargo test-fdn --no-fail-fast
