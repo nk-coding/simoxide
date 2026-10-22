@@ -78,6 +78,7 @@ impl PathRec {
     }
 
     /// Rebuilds the index of `sessions` (after a snapshot was read).
+    #[cfg_attr(not(feature = "snapshot"), allow(dead_code))]
     pub(crate) fn reindex(&mut self) {
         self.index = self
             .sessions
