@@ -167,6 +167,23 @@ pub fn point_of_key(m: &Model, key: &str) -> PointRef {
             kind: PointKind::Environment,
             class: "ResourceEnvironmentMeasuringPoint",
         },
+        "AssemblyPassiveResourceMeasuringPoint" => {
+            let assembly = parts
+                .first()
+                .and_then(|id| m.assembly_contexts.iter().find(|a| &*a.id == *id))
+                .map(|a| a.obj);
+            let passive = parts
+                .get(1)
+                .and_then(|id| m.passive_resources.iter().find(|p| &*p.id == *id))
+                .map(|p| p.obj);
+            match (assembly, passive) {
+                (Some(assembly), Some(passive)) => PointRef {
+                    kind: PointKind::AssemblyPassiveResource { assembly, passive },
+                    class: "AssemblyPassiveResourceMeasuringPoint",
+                },
+                _ => other("AssemblyPassiveResourceMeasuringPoint"),
+            }
+        }
         "UsageScenarioMeasuringPoint" => other("UsageScenarioMeasuringPoint"),
         "EntryLevelSystemCallMeasuringPoint" => other("EntryLevelSystemCallMeasuringPoint"),
         "ExternalCallActionMeasuringPoint" => other("ExternalCallActionMeasuringPoint"),
@@ -483,6 +500,44 @@ pub fn setup_error(e: SpdError) -> SimError {
         message: e.to_string(),
         at_ns: 0,
         kind: SimErrorKind::Model,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::{Membership, PointKind, SpdModel, point_in_group};
+    use simoxide_sim::RunSpec;
+    use std::path::PathBuf;
+
+    fn rmuc_app_metrics() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../corpus-spd/rmuc_app_metrics")
+    }
+
+    /// `docs/guide/formats.md` §4: `AssemblyPassiveResourceMeasuringPoint[assembly|passive]`.
+    /// Without this arm the key was `PointKind::Other` and QueueLength policies never passed
+    /// `TargetGroupChecker`.
+    #[test]
+    fn assembly_passive_resource_key_is_inside_its_competing_consumers_group() {
+        let dir = rmuc_app_metrics();
+        let spec = RunSpec::load(&dir.join("run.json")).unwrap();
+        let m = spec.load_model(&dir).unwrap();
+        let key = "AssemblyPassiveResourceMeasuringPoint[_0sIfEBYeEeyTBLpRqyumrw|_JgLzGDM6EeyaraHENifBmA]";
+        let point = point_of_key(&m, key);
+        assert!(
+            matches!(point.kind, PointKind::AssemblyPassiveResource { .. }),
+            "{:?}",
+            point.kind
+        );
+        assert_eq!(point.class, "AssemblyPassiveResourceMeasuringPoint");
+        let spd = SpdModel::from_graph(&m.graph).expect("spd");
+        let membership = Membership::from_graph(&m.graph, &spd);
+        let group = spd
+            .groups
+            .iter()
+            .find(|g| g.name.as_ref() == "DataProcessing")
+            .expect("DataProcessing");
+        assert_eq!(point_in_group(&membership, group, &point).unwrap(), true);
     }
 }
 

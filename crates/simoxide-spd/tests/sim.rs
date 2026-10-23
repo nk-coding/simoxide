@@ -428,3 +428,63 @@ fn enforcing_policies_queues_requests() {
     assert_eq!(summary.pending, wsummary.pending);
     assert_eq!(res.measurements.to_csv(), wres.measurements.to_csv());
 }
+
+/// Min-size scale-in under Slingshot quirks commits cooldown (Q2) without a size check (Q9),
+/// so the DataProcessing scale-out on the same spike never requests. Fixed quirks drop that
+/// no-op in `GroupSize` and both groups request a scale-out.
+#[test]
+fn rmuc_fixed_quirks_request_both_scale_outs() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../corpus-spd/rmuc_app_metrics");
+    let spec = RunSpec::load(&dir.join("run.json")).unwrap();
+    let mut c = spec.sim_config("spd");
+    c.seed = 1;
+    c.max_sim_time = 30;
+    for (q, data_processing_scales_out) in [(Quirks::fixed(), true), (Quirks::slingshot(), false)] {
+        let model = spec.load_model(&dir).unwrap();
+        let spd_model = SpdModel::from_graph(&model.graph).expect("spd");
+        let cm = CompiledModel::compile_flavour(
+            model,
+            simoxide_sim::FlavourConfig::slingshot(simoxide_sim::flavour::Quirks::NONE),
+        )
+        .unwrap();
+        let spd = Spd::new(spd_model, q).unwrap();
+        c.mode = simoxide_sim::Mode::Fast;
+        let sim = Simulation::<simoxide_sim::Fast, simoxide_sim::Slingshot>::create(
+            &cm,
+            c.clone(),
+            Outputs::default(),
+        )
+        .unwrap();
+        let mut r = SpdRun::new(sim, &spd).unwrap();
+        let mut log = VecLog::default();
+        r.run(&mut NoAdjustment, &mut log).unwrap();
+        let mut names = std::collections::HashMap::<String, String>::new();
+        for rec in &log.records {
+            if let Record::Policy { id, name, .. } = rec {
+                names.insert(id.to_string(), name.to_string());
+            }
+        }
+        let requested: Vec<String> = log
+            .records
+            .iter()
+            .filter_map(|rec| match rec {
+                Record::Eval {
+                    policy,
+                    request: true,
+                    ..
+                } => names.get(policy.as_ref()).cloned(),
+                _ => None,
+            })
+            .collect();
+        let has = |n: &str| requested.iter().any(|p| p == n);
+        let mut unique: Vec<&str> = requested.iter().map(String::as_str).collect();
+        unique.sort_unstable();
+        unique.dedup();
+        assert!(has("scaleOutDeviceCommunication"), "{q:?} {unique:?}");
+        assert_eq!(
+            has("scaleOutDataProcessing"),
+            data_processing_scales_out,
+            "{q:?} {unique:?}"
+        );
+    }
+}
