@@ -428,3 +428,44 @@ generated models ([testing](../correctness/testing.md)). Rules that the corpus e
 | ACT-11.3 network flags (recorded in `run.json`, [formats](../guide/formats.md) §5) | `corpus/h19_linking_resource`, `corpus/h19b_linking_no_throughput`, `corpus/h30_middleware_stream` |
 | MEAS-7.2 reconfiguration process (`triggersSelfAdaptations`) | `corpus/h28_triggers_default`, `corpus/h29_triggers_late` |
 | ND-2 PS tie order | `corpus/h02_ps_ties` |
+
+## SIM-14 Interpreter listeners (not part of the reference's outputs)
+
+The counterpart of SimuLizar's `IInterpreterListener`
+(`org.palladiosimulator.simulizar.interpreter.listener`, 5.2.2: begin/end of usage scenarios,
+entry-level system calls, system operations, assembly-provided operations and external calls; the
+events carry the simulated thread, whose probe-framework `RequestContext` links to the forking
+thread's, `SimuComSimProcess` and `ForkedBehaviourProcess`). A host registers a
+`listener::Listener` with `Simulation::set_listener` or `SsxRun::set_listener` (also `with_listener`,
+`take_listener`; `simoxide_sim::run_with_listener` runs any engine) before the run starts
+(`crates/simoxide-sim/src/listener.rs`, tests
+`crates/simoxide-sim/tests/listener.rs`).
+
+- **SIM-14.1 Callbacks.** `process_created(t, p, parent, kind)` (kind: open-workload generator,
+  open or closed user with its scenario, forked behaviour with its `ForkAction`, behaviour and
+  synchronous/asynchronous), `process_ended(t, p)` (also aborted processes),
+  `usage_scenario(t, begin, p, scenario)`, `entry_call(t, begin, p, call)`,
+  `system_operation(t, begin, p, role, signature)`, `assembly_operation(t, begin, p, op)` (assembly
+  context, provided role, signature, the container the context is allocated to at the begin),
+  `external_call(t, begin, p, action)`. Typed ids of the run's model, `t` in model time units;
+  begin/end of assembly operations and external calls nest per process.
+- **SIM-14.2 Observation only.** A listener cannot change the run: a run with one has the same
+  events, draws, measurements, trace and tape as without (tested in every engine). It is not
+  carried by forks, snapshots and resumed runs (a listener set on them sees what happens from then
+  on).
+- **SIM-14.3 Cost.** Without a listener, one predictable branch per call site (process creation
+  and end, usage-scenario begin and end, entry-level call, external call, provided-role call; in
+  the Slingshot-exact engine one per dispatched event); the work is in cold helpers.
+- **SIM-14.4 Per engine.** Process engine, SimuLizar flavour (exact and fast mode): every callback;
+  processes are the engine's processes. Slingshot flavour: the same; with quirk Q23 (SS-ACT-10) a
+  fork runs no asynchronous behaviour and its synchronous behaviour in the forking process, so it
+  creates no process. Slingshot-exact engine: Slingshot has no processes; a process is a `User`
+  (created at its first `UserStarted`, ended at `UserFinished` of an open-workload user or at
+  `UserAborted`; no generator process) or the synchronous forked behaviours of one fork (Q23;
+  ended when the fork's behaviours are done). Asynchronous forked behaviours are not interpreted
+  (Q23). Callbacks follow the bus events before their handlers run: `UserStarted`/`UserFinished`
+  (usage scenario), `UserEntryRequested`/`UserRequestFinished` (entry-level call and system
+  operation), `SEFFExternalActionCalled` and the reply's `CallOverWireSucceeded` (external call),
+  the first `SEFFInterpretationProgressed` and the `SEFFInterpretationFinished` of the provider's
+  root context (assembly operation; the role is the provided role of the assembly connector, for
+  an entry-level call the system delegation's inner role).

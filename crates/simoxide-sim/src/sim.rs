@@ -719,6 +719,8 @@ pub struct Simulation<'m, C: Compat = DefaultCompat, F: Flavour = SimuLizar> {
     /// `RunState::traced`), of `cm`.
     code: &'m crate::code::Flat,
     trace: Option<TraceOut>,
+    /// The interpreter listener (SIM-14).
+    listener: Option<Box<dyn crate::listener::Listener>>,
     /// Where the buffered tape records go (`SimRng::tape_buf`).
     tape: Option<Box<dyn Write>>,
     /// Everything the run changes.
@@ -828,6 +830,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             cm,
             code: cm.code.get(traced),
             trace: out.trace.map(|w| TraceOut::new(w, F::Clock::secs)),
+            listener: None,
             tape: out.tape,
             st,
         })
@@ -1462,6 +1465,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         if self.st.paths.is_some() {
             self.paths_spawned(slot, kind);
         }
+        if self.listener.is_some() {
+            self.listen_spawned(slot, kind);
+        }
         if let Some(t) = self.trace.as_mut() {
             let (k, n) = match kind {
                 PKind::OpenGen => ("OpenWorkload", "OpenWorkloadUserMaturationChamber"),
@@ -1763,6 +1769,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         self.st.spare_data.push(spare);
         self.st.free.push(s);
         self.us_end(s);
+        if let Some(l) = self.listener.as_deref_mut() {
+            l.process_ended(F::Clock::secs(self.st.now), pid);
+        }
         if let Some(t) = self.trace.as_mut() {
             t.pend(self.st.now, pid);
         }
@@ -2559,6 +2568,72 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         self.st.procs[s as usize].pid
     }
 
+    /// [`crate::listener::Listener::process_created`] of the process in `slot`.
+    #[cold]
+    #[inline(never)]
+    fn listen_spawned(&mut self, slot: u32, kind: PKind) {
+        use crate::listener::ProcessKind as K;
+        let cm = self.cm;
+        let p = &self.st.procs[slot as usize];
+        let pid = p.pid;
+        let scen = |c: Option<&Cont>| match c {
+            Some(
+                &Cont::OpenUser { scen, .. }
+                | &Cont::ClosedUser { scen, .. }
+                | &Cont::OpenGen { scen, .. },
+            ) => scen,
+            _ => u32::MAX,
+        };
+        let first = p.data.conts.first();
+        let (k, parent) = match kind {
+            PKind::OpenGen => (
+                K::OpenWorkload {
+                    scenario: scen(first),
+                },
+                None,
+            ),
+            PKind::OpenUser => (
+                K::OpenUser {
+                    scenario: scen(first),
+                },
+                None,
+            ),
+            PKind::ClosedUser => (
+                K::ClosedUser {
+                    scenario: scen(first),
+                },
+                None,
+            ),
+            PKind::Forked { sync, parent } => {
+                let Some(&Cont::Forked { beh, .. }) = first else {
+                    return;
+                };
+                let fork = match cm.model.behaviours[beh].owner {
+                    BehaviourOwner::ForkedAsync(a) | BehaviourOwner::ForkedSync(a) => a,
+                    _ => return,
+                };
+                let parent = self.st.procs.get(unkey(parent).0 as usize).map(|x| x.pid);
+                (
+                    K::Forked {
+                        fork,
+                        behaviour: beh,
+                        synchronous: sync,
+                    },
+                    parent,
+                )
+            }
+        };
+        // users are started by their generator (open) or the run (closed)
+        let parent = match kind {
+            PKind::OpenUser => Some(self.st.meas.cur_pid).filter(|&x| x != 0),
+            _ => parent,
+        };
+        let now = F::Clock::secs(self.st.now);
+        if let Some(l) = self.listener.as_deref_mut() {
+            l.process_created(now, pid, parent, k);
+        }
+    }
+
     /// Resolves a required role from assembly context `ac` (ACT-2.4..2.7) by pushing the
     /// continuations that perform the call.
     fn call_required(
@@ -2884,6 +2959,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                 self.paths_session_start(s);
             }
             let pid = self.pid(s);
+            if let Some(l) = self.listener.as_deref_mut() {
+                l.usage_scenario(F::Clock::secs(self.st.now), true, pid, *scen);
+            }
             if let Some(t) = self.trace.as_mut() {
                 t.element(self.st.now, true, pid, "UsageScenario", sid, None);
             }
@@ -2904,6 +2982,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         } else {
             let t0 = *t0;
             let pid = self.pid(s);
+            if let Some(l) = self.listener.as_deref_mut() {
+                l.usage_scenario(F::Clock::secs(self.st.now), false, pid, *scen);
+            }
             if let Some(t) = self.trace.as_mut() {
                 t.element(self.st.now, false, pid, "UsageScenario", sid, None);
             }

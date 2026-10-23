@@ -34,6 +34,7 @@
 //! The handler exceptions are in [`RunResult::warnings`].
 
 mod frame;
+mod listen;
 mod monitor;
 mod pdist;
 mod resource;
@@ -595,6 +596,8 @@ pub(crate) struct Engine<'m> {
     same_instant: u64,
     last_t: f64,
     max_per_instant: u64,
+    /// The interpreter listener (SIM-14).
+    pub(crate) lis: listen::Listening,
 }
 
 impl<'m> Engine<'m> {
@@ -660,6 +663,7 @@ impl<'m> Engine<'m> {
             same_instant: 0,
             last_t: 0.0,
             max_per_instant: cfg.max_events_per_instant,
+            lis: listen::Listening::default(),
         })
     }
 
@@ -822,6 +826,9 @@ impl<'m> Engine<'m> {
     fn dispatch(&mut self, ev: Ev, hooks: &mut Option<&mut dyn SpdHooks>) {
         self.project(&ev);
         self.rng.pos = self.lines - 1;
+        if self.lis.l.is_some() {
+            self.listen(&ev);
+        }
         match ev {
             Ev::PreSim => {
                 // SpdBehavior is subscribed before the monitor interpreter (SS-SPD-1.2)

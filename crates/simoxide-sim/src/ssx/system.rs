@@ -37,7 +37,10 @@ impl Engine<'_> {
     /// `SystemModelRepositoryImpl.findAssemblyContextFromRequiredRole` and
     /// `findProvidedRoleFromRequiredRole`: the first assembly connector of the system with that
     /// required role id (SS-ACT-2.2, Q20).
-    fn assembly_connector(&self, role: Option<RoleId>) -> Result<Option<ConnEnds>, Throw> {
+    pub(super) fn assembly_connector(
+        &self,
+        role: Option<RoleId>,
+    ) -> Result<Option<ConnEnds>, Throw> {
         let m = self.m;
         let Some(rid) = self.role_id(role) else {
             return throw("NullPointerException", "required role is null");
@@ -112,7 +115,7 @@ impl Engine<'_> {
         })))
     }
 
-    fn has_finished(h: &Holder) -> bool {
+    pub(super) fn has_finished(h: &Holder) -> bool {
         match &h.kind {
             HKind::Infra { calls, pos } => *pos >= calls.len(),
             HKind::Loop { max, progression } => {

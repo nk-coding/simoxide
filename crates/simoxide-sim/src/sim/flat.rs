@@ -180,6 +180,10 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     if self.st.paths.is_some() {
                         self.paths_call(a);
                     }
+                    if let Some(l) = self.listener.as_deref_mut() {
+                        let pid = self.st.procs[s as usize].pid;
+                        l.external_call(F::Clock::secs(self.st.now), true, pid, a);
+                    }
                     let aid = &cm.action_ids[a.index()];
                     let fin = self.with_stream(Who::User(s), |x| {
                         x.input_frame(inputs, d.frames.last(), Origin::Elem("param", aid))
@@ -241,6 +245,10 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         r?;
                     }
                     self.st.pool.recycle(res);
+                    if let Some(l) = self.listener.as_deref_mut() {
+                        let pid = self.st.procs[s as usize].pid;
+                        l.external_call(F::Clock::secs(self.st.now), false, pid, a);
+                    }
                 }
                 SOp::Exec(a) => {
                     let depth = d.conts.len();
@@ -633,6 +641,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                         return self.err("entry level system call without role or signature");
                     };
                     let pid = self.pid(s);
+                    if let Some(l) = self.listener.as_deref_mut() {
+                        let now = F::Clock::secs(self.st.now);
+                        l.entry_call(now, true, pid, a);
+                        l.system_operation(now, true, pid, role, sig);
+                    }
                     if let Some(t) = self.trace.as_mut() {
                         t.system_op(
                             self.st.now,
@@ -711,6 +724,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     }
                     self.st.pool.recycle(res);
                     let pid = self.pid(s);
+                    if let Some(l) = self.listener.as_deref_mut() {
+                        let now = F::Clock::secs(self.st.now);
+                        l.system_operation(now, false, pid, role, sig);
+                        l.entry_call(now, false, pid, a);
+                    }
                     if let Some(t) = self.trace.as_mut() {
                         t.system_op(
                             self.st.now,

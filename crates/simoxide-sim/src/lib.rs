@@ -35,6 +35,7 @@ pub mod javafmt;
 #[cfg(feature = "exact")]
 pub mod javahash;
 mod javarand;
+pub mod listener;
 pub mod load;
 pub mod meas;
 pub mod rng;
@@ -88,6 +89,44 @@ pub fn run(cm: &CompiledModel, cfg: SimConfig, out: Outputs) -> Result<RunResult
         }
         (Mode::Fast, FlavourKind::Slingshot) => {
             Simulation::<compat::Fast, Slingshot>::create(cm, cfg, out)?.run()
+        }
+        #[cfg(not(feature = "exact"))]
+        (m, _) => Err(SimError {
+            message: m.unavailable_reason().unwrap_or_default(),
+            at_ns: 0,
+            kind: SimErrorKind::ModeUnavailable,
+        }),
+    }
+}
+
+/// [`run`] with interpreter listener `l` (SIM-14): every engine, mode and flavour.
+pub fn run_with_listener(
+    cm: &CompiledModel,
+    cfg: SimConfig,
+    out: Outputs,
+    l: Box<dyn listener::Listener>,
+) -> Result<RunResult, SimError> {
+    match (cfg.mode, cm.flavour.kind) {
+        (_, FlavourKind::SlingshotExact) => ssx::SsxRun::new(cm, cfg, out)?
+            .with_listener(l)
+            .finish(None),
+        #[cfg(feature = "exact")]
+        (Mode::Exact, FlavourKind::SimuLizar) => Simulation::<Exact>::create(cm, cfg, out)?
+            .with_listener(l)
+            .run(),
+        #[cfg(feature = "exact")]
+        (Mode::Exact, FlavourKind::Slingshot) => {
+            Simulation::<Exact, Slingshot>::create(cm, cfg, out)?
+                .with_listener(l)
+                .run()
+        }
+        (Mode::Fast, FlavourKind::SimuLizar) => Simulation::<compat::Fast>::create(cm, cfg, out)?
+            .with_listener(l)
+            .run(),
+        (Mode::Fast, FlavourKind::Slingshot) => {
+            Simulation::<compat::Fast, Slingshot>::create(cm, cfg, out)?
+                .with_listener(l)
+                .run()
         }
         #[cfg(not(feature = "exact"))]
         (m, _) => Err(SimError {

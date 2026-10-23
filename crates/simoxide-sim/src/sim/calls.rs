@@ -83,6 +83,16 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             if *st == 0 {
                 *st = 1;
                 self.ac_push(&mut d.acs, ac);
+                if self.listener.is_some() && ac != SYSTEM_AC {
+                    self.listen_asm_op(
+                        s,
+                        d.acs.last().map_or(ROOT_PATH, |e| e.1),
+                        ac,
+                        role,
+                        sig,
+                        true,
+                    );
+                }
                 if let Some(t) = self.trace.as_mut() {
                     t.assembly_op(
                         self.st.now,
@@ -214,6 +224,16 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     self.st.pool.recycle(d.frames.pop());
                     self.st.pool.recycle(d.frames.pop());
                 }
+                if self.listener.is_some() && ac != SYSTEM_AC {
+                    self.listen_asm_op(
+                        s,
+                        d.acs.last().map_or(ROOT_PATH, |e| e.1),
+                        ac,
+                        role,
+                        sig,
+                        false,
+                    );
+                }
                 d.conts.pop();
                 d.acs.pop();
                 if t0 >= 0 {
@@ -299,6 +319,33 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     return self.resume_caller(d);
                 }
             }
+        }
+    }
+}
+
+impl<C: Compat, F: Flavour> Simulation<'_, C, F> {
+    /// [`crate::listener::Listener::assembly_operation`] (`path`: the assembly context's path).
+    #[cold]
+    #[inline(never)]
+    fn listen_asm_op(
+        &mut self,
+        s: u32,
+        path: u32,
+        ac: AcRef,
+        role: RoleId,
+        sig: SignatureId,
+        begin: bool,
+    ) {
+        let op = crate::listener::AssemblyOp {
+            assembly: AssemblyContextId(ac),
+            role,
+            signature: sig,
+            container: self.path_node(path).container,
+        };
+        let pid = self.st.procs[s as usize].pid;
+        let now = F::Clock::secs(self.st.now);
+        if let Some(l) = self.listener.as_deref_mut() {
+            l.assembly_operation(now, begin, pid, &op);
         }
     }
 }

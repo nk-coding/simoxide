@@ -271,6 +271,26 @@ impl<'m> SsxRun<'m> {
     }
 
     /// Runs to the end and returns the result (the outputs get the rest).
+    /// Registers interpreter listener `l` (SIM-14; `None`: none): before the first event to see
+    /// every callback; forks and restored runs have none until one is set.
+    pub fn set_listener(&mut self, l: Option<Box<dyn crate::listener::Listener>>) {
+        self.e.lis = Default::default();
+        self.e.lis.l = l;
+    }
+
+    /// [`SsxRun::set_listener`] as a builder.
+    pub fn with_listener(mut self, l: Box<dyn crate::listener::Listener>) -> Self {
+        self.set_listener(Some(l));
+        self
+    }
+
+    /// Takes the listener back.
+    pub fn take_listener(&mut self) -> Option<Box<dyn crate::listener::Listener>> {
+        let l = self.e.lis.l.take();
+        self.e.lis = Default::default();
+        l
+    }
+
     pub fn finish(mut self, hooks: Option<&mut dyn SpdHooks>) -> Result<RunResult, SimError> {
         self.go(hooks, &mut NoPause)?;
         Ok(self.result())

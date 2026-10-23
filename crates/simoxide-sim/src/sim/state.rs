@@ -557,6 +557,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             cm,
             code: cm.code.get(state.traced),
             trace: trace.map(|w| TraceOut::new(w, F::Clock::secs)),
+            listener: None,
             tape: out.tape,
             st: state,
         })
@@ -565,6 +566,24 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     /// The state (read only).
     pub fn state(&self) -> &RunState<C, F> {
         &self.st
+    }
+
+    /// Registers interpreter listener `l` (SIM-14; `None`: none). Register it before the run
+    /// starts to see every callback (a listener set later sees what happens from then on);
+    /// forks, snapshots and resumed runs have none until one is set.
+    pub fn set_listener(&mut self, l: Option<Box<dyn crate::listener::Listener>>) {
+        self.listener = l;
+    }
+
+    /// [`Simulation::set_listener`] as a builder.
+    pub fn with_listener(mut self, l: Box<dyn crate::listener::Listener>) -> Self {
+        self.listener = Some(l);
+        self
+    }
+
+    /// Takes the listener back (e.g. to read what it recorded).
+    pub fn take_listener(&mut self) -> Option<Box<dyn crate::listener::Listener>> {
+        self.listener.take()
     }
 
     /// A copy of the current state (a fork), to continue with [`Simulation::resume`]. Flushes
