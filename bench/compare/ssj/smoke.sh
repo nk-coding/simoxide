@@ -7,7 +7,7 @@
 # Env: SMOKE_MODEL (x_espresso), SMOKE_RUNS (10), SMOKE_OSGI (1; 0 = without the OSGi cold runs), SMOKE_CPU (last core), FORCE=1 (skip the quiet-machine check)
 set -u
 source "$(cd "$(dirname "$0")" && pwd)/common.sh"
-LOCK=${SSJ_LOCK-/home/devbox/workspace/misarch-optimization/MEASURING.lock}
+LOCK=${SSJ_LOCK-/home/devbox/workspace/architecture-optimization/MEASURING.lock}
 if [ -z "${FORCE:-}" ]; then
   [ -n "$LOCK" ] && [ -e "$LOCK" ] && { echo "$LOCK exists: another measurement is running, not now" >&2; exit 3; }
   awk '{exit !($1 < 3)}' /proc/loadavg || { echo "1-min load $(cut -d' ' -f1 /proc/loadavg) >= 3: not now" >&2; exit 3; }

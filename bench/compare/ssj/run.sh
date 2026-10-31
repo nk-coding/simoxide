@@ -17,7 +17,7 @@ export PAR_WORKERS=${PAR_WORKERS:-$(nproc)}
 export SUSN_CONFIGS=${SUSN_CONFIGS:-"simoxide-threads:60 simoxide-batch:60 simulizar-threads:300 simulizar-procs:300 simulizar-ssj-threads:300 simulizar-ssj-procs:300"}
 export CMP_COLUMNS=present   # tables: only the simulators of this session
 EXTRA_MODELS=${EXTRA_MODELS-x_misarch}
-LOCK=${SSJ_LOCK-/home/devbox/workspace/misarch-optimization/MEASURING.lock}
+LOCK=${SSJ_LOCK-/home/devbox/workspace/architecture-optimization/MEASURING.lock}
 PHASES=${*:-build cold warm sus1 susN longrun par extra summary}
 mkdir -p "$OUT"
 
