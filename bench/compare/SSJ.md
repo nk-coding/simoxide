@@ -23,7 +23,7 @@ at the extension point `de.uka.ipd.sdq.simulation.abstractsimengine.engine`:
 The engine is chosen by the Eclipse preference **`de.uka.ipd.sdq.simulation/simulationEngineField`**
 (preference page "Palladio Simulation"), not by a launch-configuration attribute. If it is unset, the
 default is the first registered engine (`SimulationPreferenceInitialiser`), so with both bundles installed
-the choice must be explicit. Sources (Palladio 5.2.2, `old/palladio-research/src-5.2.2`):
+the choice must be explicit. Sources (Palladio 5.2.2, `$PALLADIO_RESEARCH/src-5.2.2`):
 
 - `de.uka.ipd.sdq.simulation/.../preferences/SimulationPreferencesHelper.getPreferredSimulationEngine()`
   reads the preference and creates the factory through `AbstractSimEngineExtensionHelper.getEngineFactory(id)`
@@ -77,9 +77,10 @@ install): downloads and verifies the two jars; builds an **overlay install** `wo
 `work/simucom-{desmoj,ssj}` (with `simucom/build.sh`), SimuLizar's OSGi configurations
 `work/simulizar-osgi-{desmoj,ssj}` (as `work-simucom/make-headless-config.sh`, with the prebuilt
 `headless.bench` jar) and the SimuLizar driver `work/build/simulizar`; and the SimuCom copy of the MiSArch
-model. The existing configurations (`simucom/work/config`, `work-simucom/headless-config`) still point to
-`/home/devbox/workspace/palladio-research`, which has moved to `old/`; the SSJ scripts find the install
-themselves (`ssj/common.sh`, `PALLADIO_RESEARCH` overrides) and leave those files alone.
+model. Existing configurations (`simucom/work/config`, `work-simucom/headless-config`) may record the absolute
+location of the install they were made from; the SSJ scripts find the install themselves (`ssj/common.sh`: the
+palladio-research work directory of `reference/tools/palladio-research.sh`, `$PALLADIO_RESEARCH` else
+`reference/.work/palladio-research`) and leave those files alone.
 
 Simulators of the SSJ session (`ssj/ext.sh`, hooked into `lib.sh` by `CMP_EXT`):
 
@@ -124,7 +125,8 @@ bench/compare/ssj/run.sh            # build cold warm sus1 susN longrun par extr
 - Output: `bench/compare/ssj/results/` (`summary.csv`, `tables.md`, `tables_sustained.md`, ..., raw logs in
   `raw/`, git-ignored), then `docs-numbers.md` and `docs-ssj.patch` (below). Every phase resumes like
   `run-all.sh`; single phases: `bench/compare/ssj/run.sh cold warm summary`.
-- The run waits for `SSJ_LOCK` (default: the MiSArch `MEASURING.lock`) to disappear before each phase,
+- If `SIMOXIDE_MEASURING_LOCK` names a file (a lock file other measurement tooling on the machine may use;
+  unset = no check), the run waits for it to disappear before each phase,
   and `run-all.sh` waits for a quiet machine (≤ 2 runnable tasks) before each benchmark process.
 - **Duration**: about 3 hours (estimated from the DESMO-J logs, SSJ assumed similar): cold ≈ 30 min,
   warm ≈ 40 min, sustained one core ≈ 35 min, all cores ≈ 25 min, long run ≈ 15 min, parallel ≈ 15 min,

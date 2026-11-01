@@ -318,15 +318,26 @@ fn snapshot(args: &[String]) {
     std::fs::create_dir_all(&out).unwrap();
     let mut dirs = model_dirs(&args[1..]);
     if args.len() == 1 {
-        // plus every directory of the EMF oracle's model list
-        let list = root().join("reference/oracles/pcm-model/models.txt");
-        if let Ok(t) = std::fs::read_to_string(list) {
+        // plus every directory of the EMF oracle's model list (directories relative to the list,
+        // or below $PALLADIO_RESEARCH: else reference/.work/palladio-research)
+        let oracle = root().join("reference/oracles/pcm-model");
+        let pr = std::env::var("PALLADIO_RESEARCH")
+            .ok()
+            .filter(|d| !d.is_empty())
+            .map(PathBuf::from)
+            .unwrap_or_else(|| root().join("reference/.work/palladio-research"));
+        if let Ok(t) = std::fs::read_to_string(oracle.join("models.txt")) {
             for l in t.lines().filter(|l| !l.starts_with('#')) {
                 if let Some((_, d)) = l.split_once('\t')
                     && d != "-"
-                    && Path::new(d).is_dir()
                 {
-                    dirs.push(PathBuf::from(d));
+                    let d = match d.strip_prefix("$PALLADIO_RESEARCH/") {
+                        Some(rest) => pr.join(rest),
+                        None => oracle.join(d),
+                    };
+                    if d.is_dir() {
+                        dirs.push(d);
+                    }
                 }
             }
         }

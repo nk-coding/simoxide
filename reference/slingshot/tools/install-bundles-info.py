@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Generate the Equinox configuration (config.ini + simpleconfigurator bundles.info) of a fresh p2 install
-(install.sh step 4; from old/palladio-research/work-slingshot/make-config.py). Writes into INSTALL/configuration."""
+(install.sh step 4; from make-config.py of the palladio-research work directory, work-slingshot/). Writes into INSTALL/configuration."""
 import os, re, sys, zipfile, glob
 root = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else 'sl-install')
 start = {'org.eclipse.equinox.common': 2, 'org.apache.felix.scr': 2, 'org.eclipse.equinox.event': 2,

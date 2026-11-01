@@ -1,5 +1,5 @@
 # Paths and command lines shared by the bench/compare scripts (sourced).
-PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research work directory
 C="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 R="$(cd "$C/../.." && pwd)"
 PR=$PRDIR

@@ -20,7 +20,12 @@ import re
 import sys
 from collections import defaultdict
 
-DEFAULT = "/home/devbox/workspace/old/palladio-research/repos/Palladio-Analyzer-Slingshot/bundles"
+# default: the Slingshot sources in the palladio-research work directory (reference/tools/palladio-research.sh:
+# $PALLADIO_RESEARCH, else reference/.work/palladio-research of this repository)
+DEFAULT = os.path.join(
+    os.environ.get("PALLADIO_RESEARCH")
+    or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".work", "palladio-research"),
+    "repos", "Palladio-Analyzer-Slingshot", "bundles")
 
 DECL = re.compile(r"\b(class|interface|enum|record)\s+(\w+)(\s*<[^{]*?>)?\s*([^{;]*)\{", re.S)
 SUB = re.compile(

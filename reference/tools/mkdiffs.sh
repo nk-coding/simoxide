@@ -1,7 +1,7 @@
 #!/bin/bash
 # Writes reference/patches/diffs/<Class>.diff: unified diff of every shadowed class against its
 # releases/5.2.2 source (palladio-research/src-5.2.2, shallow clones of the release tags).
-PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research work directory
 cd "$(dirname "$0")/.."
 SRC522=${SRC522:-$PRDIR/src-5.2.2}
 rm -rf patches/diffs; mkdir -p patches/diffs

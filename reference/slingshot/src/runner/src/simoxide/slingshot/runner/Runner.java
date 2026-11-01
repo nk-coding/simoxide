@@ -61,7 +61,7 @@ import simoxide.slingshot.instrument.Keys;
 
 /**
  * Headless Slingshot run(s) of one model directory. Derived from the bench runner in
- * old/palladio-research/work-slingshot/headless-app (itself after SlingshotTestRun of
+ * work-slingshot/headless-app of the palladio-research work directory (itself after SlingshotTestRun of
  * Palladio-Analyzer-Slingshot-E2E-Tests). See docs/reference-simulator/slingshot.md.
  *
  * <pre>

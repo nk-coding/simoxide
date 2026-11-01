@@ -1,6 +1,6 @@
 #!/bin/bash
 # Builds the headless.simucom OSGi bundle against the Palladio 5.2.2 product and creates its OSGi configuration area.
-PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research work directory
 set -e
 H="$(cd "$(dirname "$0")" && pwd)"
 P=${PALLADIO:-$PRDIR/work-simucom/palladio-5.2.2}

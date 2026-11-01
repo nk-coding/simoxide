@@ -11,14 +11,16 @@ Every agent working here reads this file first. It then appends a short section 
 
 ## Reference
 
+(`$PALLADIO_RESEARCH`: the palladio-research work directory, `reference/tools/palladio-research.sh`.)
+
 - **Semantic reference:** SimuLizar **5.2.2** from the prebuilt product at
-  `/home/devbox/workspace/palladio-research/work-simucom/palladio-5.2.2/plugins`.
+  `$PALLADIO_RESEARCH/work-simucom/palladio-5.2.2/plugins`.
   - It already runs headless without OSGi via
-    `/home/devbox/workspace/palladio-research/work-simucom/standalone` (a flat classpath and a
+    `$PALLADIO_RESEARCH/work-simucom/standalone` (a flat classpath and a
     hand-built Dagger component).
-  - Background: `/home/devbox/workspace/palladio-research/notes/02-*.md` and `04-*.md`.
+  - Background: `$PALLADIO_RESEARCH/notes/02-*.md` and `04-*.md`.
 - **Source code:** shallow clones of the Palladio repos (master, 6.0-SNAPSHOT) are in
-  `/home/devbox/workspace/palladio-research/repos/`.
+  `$PALLADIO_RESEARCH/repos/`.
   - Where semantics matter, check against the **5.2.2 sources**: fetch the matching tag, or
     decompile the product jars.
   - When master differs from 5.2.2, record it.
@@ -132,12 +134,12 @@ output (a simple measurement sink replaces it), UI.
   - `cargo fmt`, and `cargo clippy --all-targets -- -D warnings` must pass.
   - No `unsafe` without a comment explaining why and a test.
 - Java: `/usr/bin/java` (21), with Temurin 17 at
-  `/home/devbox/workspace/palladio-research/work-simucom/jre17` if needed.
+  `$PALLADIO_RESEARCH/work-simucom/jre17` if needed.
   - Reference jars are referenced in place, never copied.
 - **Disk is tight (about 6 GB free):**
   - one shared cargo target dir (default `simoxide/target`);
   - delete large temporary outputs;
-  - check `df -h /home/devbox` before anything big.
+  - check `df -h` before anything big.
 - **No git commits.** The coordinator handles version control.
   - Don't edit files owned by another running agent, except to append to `docs/STATUS.md`.
 - Tests must be quick by default. Anything long goes behind `--ignored` or a feature flag.

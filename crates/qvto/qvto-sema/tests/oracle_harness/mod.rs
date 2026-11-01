@@ -810,13 +810,32 @@ thread_local! {
     static LAST_PANIC: RefCell<Option<String>> = const { RefCell::new(None) };
 }
 
+/// The palladio-research work directory, as `reference/tools/palladio-research.sh` resolves it:
+/// `$PALLADIO_RESEARCH`, else `reference/.work/palladio-research` of the repository.
+fn palladio_research(base: &Path) -> PathBuf {
+    std::env::var("PALLADIO_RESEARCH")
+        .ok()
+        .filter(|d| !d.is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            qvto_paths::workspace_root(base).join("reference/.work/palladio-research")
+        })
+}
+
+/// Reads `compile.cases`, whose SimuLizar/SPD paths start with `$PALLADIO_RESEARCH`.
+fn read_compile_cases(base: &Path, path: &Path) -> Result<Vec<Case>, String> {
+    let text = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let pr = palladio_research(base);
+    let text = text.replace("$PALLADIO_RESEARCH", &pr.to_string_lossy());
+    qvto_testkit::case::parse_cases(&text).map_err(|e| format!("{}: {e}", path.display()))
+}
+
 impl Harness {
     pub fn new() -> Result<Harness, String> {
         let t0 = Instant::now();
         let base = repo_root();
         let sema = base.join("qvto-sema");
-        let cases = qvto_testkit::case::read_cases(&sema.join("tests/data/compile.cases"))
-            .map_err(|e| e.to_string())?;
+        let cases = read_compile_cases(&base, &sema.join("tests/data/compile.cases"))?;
         let oracle = read_oracle(&sema.join("tests/fixtures/eclipse-compile-oracle.tsv"))?;
         let mut notes = Vec::new();
 

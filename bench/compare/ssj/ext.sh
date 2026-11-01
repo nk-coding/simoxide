@@ -21,7 +21,7 @@ SSJ_ENGINE_ID_desmoj=de.uka.ipd.sdq.simucomframework.desmoj.engine1
 SSJ_ENGINE_ID_ssj=org.palladiosimulator.simulation.abstractsimengine.ssj
 
 # reference/build/classpath.txt keeps the absolute paths of the install it was generated from; if that install has
-# moved (palladio-research -> old/palladio-research), map its prefix to $PR.
+# moved, map its prefix to $PR.
 _ssj_first=${SL_CP%%:*}
 if [ -n "$_ssj_first" ] && [ ! -e "$_ssj_first" ] && [[ $_ssj_first == */work-simucom/* ]]; then
   SL_CP=${SL_CP//${_ssj_first%%/work-simucom/*}\/work-simucom\//$PR/work-simucom/}

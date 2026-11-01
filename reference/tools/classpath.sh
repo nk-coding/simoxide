@@ -4,7 +4,7 @@
 #   tools/classpath.py gen   : one jar per bundle + nested Bundle-ClassPath jars (build/lib/<bsn>/)
 #   tools/classpath.py check : duplicate classes across jars must resolve like OSGi (docs/reference-simulator/patches.md "Classpath")
 # Env: PALLADIO_PLUGINS
-PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research work directory
 set -e
 R=$(cd "$(dirname "$0")/.." && pwd)
 P=${PALLADIO_PLUGINS:-$PRDIR/work-simucom/palladio-5.2.2/plugins}

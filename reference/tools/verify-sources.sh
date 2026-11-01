@@ -4,7 +4,7 @@
 # the product class with CFR, and diffs the normalised output (whitespace, String.valueOf/(String) casts
 # from javac-vs-ECJ string concatenation removed). Prints "<#differing lines> <class>".
 # Env: SRC522 (default palladio-research/src-5.2.2), CFR jar, WORK dir.
-PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research work directory
 set -e
 R="$(cd "$(dirname "$0")/.." && pwd)"
 SRC522=${SRC522:-$PRDIR/src-5.2.2}

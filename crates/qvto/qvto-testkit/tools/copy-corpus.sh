@@ -12,7 +12,7 @@
 # Slingshot's minimal example comes from the submodule third_party/slingshot-docs and is not kept as
 # a copy: its files (header, enacted policy) are recorded as derived files (third_party/README.md).
 set -e
-R=${1:-/home/devbox/workspace/old/palladio-research/repos}
+R=${1:-$("$(cd "$(dirname "$0")/../../../.." && pwd)/reference/tools/palladio-research.sh")/repos}
 S=$R/Palladio-Analyzer-SimuLizar
 T=$S/tests/org.palladiosimulator.simulizar.tests/testmodels
 L=$S/bundles/ExampleModels/org.palladiosimulator.simulizar.examples.loadbalancer

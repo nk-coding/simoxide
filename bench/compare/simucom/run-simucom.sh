@@ -3,7 +3,7 @@
 # Usage: run-simucom.sh <model-dir> <simTime> <runs> <seed> [extra key=value args, e.g. dump=true keep=true]
 # Prints per run: PHASES ... and RESULT sim=simucom model=... run=i wall_ms=... sim_ms=... requests=... mean_rt=... sim_end=...
 # Requires ./build.sh to have been run once (creates work/headless.simucom_1.0.0.jar + work/config).
-PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research work directory
 set -e
 H="$(cd "$(dirname "$0")" && pwd)"
 [ $# -ge 4 ] || { echo "usage: $0 <model-dir> <simTime> <runs> <seed> [key=value...]" >&2; exit 2; }

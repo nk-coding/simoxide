@@ -85,7 +85,7 @@ syncers                         <-------  Journal (per rule run)
   `qvto-emf`, `qvto-model`) behind a cargo feature (`reconfiguration`), by path or git; all
   EPL-2.0. The adapter stays in qvto-rs because its tests use qvto-rs's corpus and testkit.
   When the branch `qvto-adapter` is merged, its `Cargo.toml` path changes from
-  `../../../simoxide-qvto/...` to SimOxide's main checkout.
+  a separate SimOxide worktree to SimOxide's main checkout.
 
 ## 3. What SimOxide needs (option D)
 

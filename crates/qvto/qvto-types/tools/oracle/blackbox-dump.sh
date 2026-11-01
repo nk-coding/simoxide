@@ -20,10 +20,13 @@ fi
 OUT=${CARGO_TARGET_DIR:-$ROOT/../../target}/types-oracle-bbox
 mkdir -p "$OUT"
 nice -n 19 javac -nowarn -encoding UTF-8 -proc:none -d "$OUT" -cp "$RUNNER/build/classes:$CP" "$HERE/BlackboxDump.java"
+# compile.cases with $PALLADIO_RESEARCH replaced by the palladio-research work directory
+PR=$("$ROOT/../../reference/tools/palladio-research.sh")
+sed "s|\$PALLADIO_RESEARCH|$PR|g" "$ROOT/qvto-sema/tests/data/compile.cases" > "$OUT/compile.cases"
 Q=$ROOT/reference/eclipse-qvto
 T=$Q/tests/org.eclipse.m2m.tests.qvt.oml
 nice -n 19 java -Xmx2g -Dqvtorun.testbundle="$T" -Dqvtorun.oclplugin="$Q/plugins/org.eclipse.m2m.qvt.oml.ocl" \
 	-cp "$OUT:$RUNNER/build/classes:$CP:$T:$Q/plugins/org.eclipse.m2m.qvt.oml.samples:$STUBS" qvtorun.BlackboxDump "$ROOT" \
 	"$ROOT/qvto-testkit/cases/eclipse.cases" "$ROOT/qvto-testkit/cases/corpus.cases" \
-	"$ROOT/qvto-sema/tests/data/compile.cases" > "$HERE/../../data/blackboxes.tsv"
+	"$OUT/compile.cases" > "$HERE/../../data/blackboxes.tsv"
 wc -l "$HERE/../../data/blackboxes.tsv"

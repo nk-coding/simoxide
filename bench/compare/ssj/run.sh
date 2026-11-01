@@ -7,7 +7,8 @@
 #                                     (default: all, in this order; every phase resumes, like run-all.sh)
 # Env (besides run-all.sh's): OUT (ssj/results), SIMS ("simoxide simulizar simulizar-ssj simucom simucom-ssj"),
 #   EXTRA_MODELS ("x_misarch"; phase extra = cold + warm of these), PAR_WORKERS (number of cores),
-#   SSJ_LOCK (file that must not exist, default the MiSArch measurement lock; empty = no check)
+#   SIMOXIDE_MEASURING_LOCK (a lock file other measurement tooling on the machine may use: wait while it exists;
+#   unset or empty = no check)
 set -u
 source "$(cd "$(dirname "$0")" && pwd)/common.sh"
 export OUT=${OUT:-$SSJ_HOME/results}
@@ -17,7 +18,7 @@ export PAR_WORKERS=${PAR_WORKERS:-$(nproc)}
 export SUSN_CONFIGS=${SUSN_CONFIGS:-"simoxide-threads:60 simoxide-batch:60 simulizar-threads:300 simulizar-procs:300 simulizar-ssj-threads:300 simulizar-ssj-procs:300"}
 export CMP_COLUMNS=present   # tables: only the simulators of this session
 EXTRA_MODELS=${EXTRA_MODELS-x_misarch}
-LOCK=${SSJ_LOCK-/home/devbox/workspace/architecture-optimization/MEASURING.lock}
+LOCK=${SIMOXIDE_MEASURING_LOCK-}   # a lock file other measurement tooling on the machine may use; unset = no check
 PHASES=${*:-build cold warm sus1 susN longrun par extra summary}
 mkdir -p "$OUT"
 

@@ -31,7 +31,8 @@ demonstrate it.
 
 The specified version is the Slingshot nightly `1.0.0.202609010045`, pinned by
 `reference/slingshot/install.lock`, built from Slingshot commit `8bf9adc` (2026-08-21). All
-sources are read-only under `/home/devbox/workspace/old/palladio-research/repos/`. Line numbers
+sources are read-only under `$PALLADIO_RESEARCH/repos/` (the palladio-research work directory,
+[refsim](../../reference-simulator/refsim.md#requirements)). Line numbers
 refer to these commits.
 
 | Tag | Path prefix (under `Palladio-Analyzer-Slingshot/bundles/org.palladiosimulator.analyzer.slingshot.`, except `[TR]`, `[SSJ]`, `[RUN]`) |

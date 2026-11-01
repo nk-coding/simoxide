@@ -22,7 +22,14 @@ lockfile() {
      | sort | xargs sha256sum)
 }
 if [ "${1:-}" = --lock ]; then
-  { echo "# sha256 of the pinned jars of $I (setup.sh --lock, $(date -I))"; lockfile; } > "$H/install.lock"
+  # the install's location without machine-specific prefixes
+  PR=$("$H/../tools/palladio-research.sh" 2>/dev/null)
+  case $I in
+    "$H"/*) loc=reference/slingshot/${I#"$H"/} ;;
+    "$PR"/*) loc='$PALLADIO_RESEARCH'/${I#"$PR"/} ;;
+    *) loc="\$SLINGSHOT_INSTALL ($(basename "$I"))" ;;
+  esac
+  { echo "# sha256 of the pinned jars of $loc (setup.sh --lock, $(date -I))"; lockfile; } > "$H/install.lock"
   echo "wrote install.lock"; exit 0
 fi
 mkdir -p "$B"

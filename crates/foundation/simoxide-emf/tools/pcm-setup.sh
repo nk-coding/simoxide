@@ -7,9 +7,10 @@
 # Usage: tools/pcm-setup.sh <out> [plugins-dir] [corpus-dir] [repos-dir]   (from the QVTo root, crates/qvto)
 set -e
 OUT=$(mkdir -p "$1" && cd "$1" && pwd -P)
-P=${2:-/home/devbox/workspace/old/palladio-research/work-simucom/palladio-5.2.2/plugins}
+PR=$("$(cd "$(dirname "$0")/../../../.." && pwd)/reference/tools/palladio-research.sh")   # palladio-research work directory
+P=${2:-$PR/work-simucom/palladio-5.2.2/plugins}
 CORPUS=${3:-$(cd "$(dirname "$0")/../../../.." && pwd)/corpus}   # SimOxide's corpus
-REPOS=${4:-/home/devbox/workspace/old/palladio-research/repos}
+REPOS=${4:-$PR/repos}
 BUNDLES="de.uka.ipd.sdq.identifier de.uka.ipd.sdq.units de.uka.ipd.sdq.probfunction de.uka.ipd.sdq.stoex
 org.palladiosimulator.pcm org.palladiosimulator.metricspec org.palladiosimulator.edp2
 org.palladiosimulator.monitorrepository org.palladiosimulator.monitorrepository.map

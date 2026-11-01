@@ -21,20 +21,29 @@ fn dir_from_env(var: &str, default: PathBuf) -> Option<PathBuf> {
 /// Corpus roots by fixture prefix (`eclipse`, `simulizar`, `spd`); missing ones are absent.
 pub fn roots() -> BTreeMap<&'static str, PathBuf> {
     let repo = qvto_paths::root();
-    let old = qvto_paths::workspace_root(&repo).join("../old/palladio-research/repos");
+    // the palladio-research work directory, as reference/tools/palladio-research.sh resolves it:
+    // $PALLADIO_RESEARCH, else reference/.work/palladio-research of the repository
+    let pr = std::env::var("PALLADIO_RESEARCH")
+        .ok()
+        .filter(|d| !d.is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            qvto_paths::workspace_root(&repo).join("reference/.work/palladio-research")
+        });
+    let repos = pr.join("repos");
     let mut m = BTreeMap::new();
     if let Some(p) = dir_from_env("QVTO_ECLIPSE_DIR", repo.join("reference/eclipse-qvto")) {
         m.insert("eclipse", p);
     }
     if let Some(p) = dir_from_env(
         "QVTO_SIMULIZAR_DIR",
-        old.join("Palladio-Analyzer-SimuLizar"),
+        repos.join("Palladio-Analyzer-SimuLizar"),
     ) {
         m.insert("simulizar", p);
     }
     if let Some(p) = dir_from_env(
         "QVTO_SPD_DIR",
-        old.join("Palladio-Addons-SPD-Metamodel/bundles/org.palladiosimulator.spd.semantic.transformations"),
+        repos.join("Palladio-Addons-SPD-Metamodel/bundles/org.palladiosimulator.spd.semantic.transformations"),
     ) {
         m.insert("spd", p);
     }

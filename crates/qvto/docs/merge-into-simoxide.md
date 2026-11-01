@@ -109,7 +109,7 @@ Hard constraints:
 
 ## 1. Duplication inventory
 
-"S" = SimOxide (`/home/devbox/workspace/simoxide`), "Q" = qvto-rs. Paths are relative to each
+"S" = SimOxide, "Q" = qvto-rs. Paths are relative to each
 repository.
 
 ### 1.1 EMF layer
@@ -546,7 +546,7 @@ panic = "unwind"
 `target/qvto-testkit/java`, `target/qvto-bench`). After the move they need a QVTo root
 (`crates/qvto`, one level up from a crate) and the workspace target directory (honour
 `CARGO_TARGET_DIR`). One helper in `qvto-testkit` (`paths::qvto_root()`, `paths::target_dir()`)
-plus the scripts. `qvto-simoxide`'s path dependency `../../../simoxide-qvto/...` becomes
+plus the scripts. `qvto-simoxide`'s path dependency on a separate SimOxide worktree becomes
 `simoxide-model.workspace = true`.
 
 **Test commands** (`.cargo/config.toml` aliases). The exactness gates need the opt-in
@@ -674,13 +674,14 @@ has the new paths. `git log`, `git blame` and `git log --follow` then work on
 `git filter-repo` is not installed here; it is a single Python script.
 
 ```sh
-WORK=/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/<session>/scratchpad/qvto-import
+# QVTO_RS: the qvto-rs checkout; MERGE: the SimOxide worktree of branch qvto-merge; WORK: a scratch directory
+WORK=$SCRATCH/qvto-import
 mkdir -p "$WORK"
 python3 -m venv "$WORK/venv" && "$WORK/venv/bin/pip" install git-filter-repo==2.47.0
 FR="$WORK/venv/bin/git-filter-repo"
 
 # 1. fresh clone of main only (filter-repo refuses to rewrite a non-fresh clone)
-git clone --no-local --single-branch --branch main /home/devbox/workspace/qvto-rs "$WORK/qvto"
+git clone --no-local --single-branch --branch main "$QVTO_RS" "$WORK/qvto"
 cd "$WORK/qvto"
 
 # 2. rewrite paths in every commit (renames apply in order; prefixes match at the path start)
@@ -700,7 +701,7 @@ cd "$WORK/qvto"
 git ls-files | grep -v '^crates/qvto/' && echo "unexpected paths"    # must print nothing
 
 # 3. merge into SimOxide on the merge branch (M0 already narrowed the workspace members)
-cd /home/devbox/workspace/simoxide-merge          # worktree of branch qvto-merge
+cd "$MERGE"          # worktree of branch qvto-merge
 git remote add qvto-import "$WORK/qvto"
 git fetch qvto-import main
 git merge --allow-unrelated-histories --no-ff qvto-import/main -m "Import qvto-rs with its history under crates/qvto/"
@@ -709,7 +710,7 @@ git remote remove qvto-import
 # 4. the ignored bulk (not in git): move it, or fetch it again per crates/qvto/reference/README.md
 for d in specs eclipse-qvto eclipse-ocl runner/lib runner/build; do
   mkdir -p "crates/qvto/reference/$(dirname $d)"
-  cp -a "/home/devbox/workspace/qvto-rs/reference/$d" "crates/qvto/reference/$d"
+  cp -a "$QVTO_RS/reference/$d" "crates/qvto/reference/$d"
 done
 ```
 

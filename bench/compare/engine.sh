@@ -45,9 +45,7 @@ for p in $PHASES; do
     hpa) for r in 1 2 3; do
            ( cd "$R/crates/simoxide-reconf" && taskset -c "$CORE" "$(newest hpa)" cost_per_scaling_step --exact --ignored --nocapture ) \
              > "$OUT/raw/hpa-cost-$r.txt" 2>&1; done ;;
-    qvto) # the Eclipse QVTo jars of the Java runner (crates/qvto/reference/runner/build.sh) moved with qvto-rs to old/
-          q=/home/devbox/workspace/old/qvto-rs/reference/runner/lib/qvto-3.11.0
-          [ -d "$R/crates/qvto/reference/runner/lib/qvto-3.11.0" ] || { [ -d "$q" ] && export LIB=${LIB:-$q}; }
+    qvto) # the Eclipse QVTo jars of the Java runner: crates/qvto/reference/runner/lib/qvto-3.11.0, or $LIB
           ( cd "$R" && QVTO_NICE=0 taskset -c 2,3 target/release-unwind/qvto bench --java --java-cold ) > "$OUT/raw/qvto-bench.txt" 2>&1
           rm -rf "$OUT/raw/qvto-bench"; cp -r "$R/crates/qvto/target/qvto-bench" "$OUT/raw/qvto-bench"
           cp "$OUT/raw/qvto-bench/last.md" "$OUT/qvto-bench.md" ;;

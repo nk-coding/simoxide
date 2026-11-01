@@ -4,10 +4,11 @@
 # compares the usage-scenario mean response time of SSJ and DESMO-J.
 #   smoke.sh            SimOxide, SimuLizar (flat classpath and OSGi) and SimuCom on DESMO-J and SSJ
 #   smoke.sh misarch    can SimuLizar and SimuCom run the generated MiSArch model? (one short run each)
-# Env: SMOKE_MODEL (x_espresso), SMOKE_RUNS (10), SMOKE_OSGI (1; 0 = without the OSGi cold runs), SMOKE_CPU (last core), FORCE=1 (skip the quiet-machine check)
+# Env: SMOKE_MODEL (x_espresso), SMOKE_RUNS (10), SMOKE_OSGI (1; 0 = without the OSGi cold runs), SMOKE_CPU (last core), FORCE=1 (skip the quiet-machine check),
+#   SIMOXIDE_MEASURING_LOCK (a lock file other measurement tooling on the machine may use: not while it exists; unset = no check)
 set -u
 source "$(cd "$(dirname "$0")" && pwd)/common.sh"
-LOCK=${SSJ_LOCK-/home/devbox/workspace/architecture-optimization/MEASURING.lock}
+LOCK=${SIMOXIDE_MEASURING_LOCK-}   # a lock file other measurement tooling on the machine may use; unset = no check
 if [ -z "${FORCE:-}" ]; then
   [ -n "$LOCK" ] && [ -e "$LOCK" ] && { echo "$LOCK exists: another measurement is running, not now" >&2; exit 3; }
   awk '{exit !($1 < 3)}' /proc/loadavg || { echo "1-min load $(cut -d' ' -f1 /proc/loadavg) >= 3: not now" >&2; exit 3; }

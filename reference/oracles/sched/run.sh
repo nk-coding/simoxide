@@ -4,7 +4,8 @@
 # unpatched = product jars only (PS ties follow identity-hash order: nondeterministic)
 set -e
 D=$(cd "$(dirname "$0")" && pwd)
+PRDIR="$("$D/../../tools/palladio-research.sh")"   # palladio-research work directory
 PRE=""
 [ "$1" = patched ] && PRE="$D/build/patched:"
-exec ${JAVA:-java} -Xmx256m -Dlog4j.configuration=file:/home/devbox/workspace/palladio-research/work-simucom/log4j-quiet.properties \
+exec ${JAVA:-java} -Xmx256m -Dlog4j.configuration="file:$PRDIR/work-simucom/log4j-quiet.properties" \
   -cp "${PRE}$D/build/classes:$(cat "$D/build/classpath.txt")" schedoracle.Main "$2"

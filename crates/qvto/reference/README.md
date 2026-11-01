@@ -106,7 +106,7 @@ reference checkout, the test bundle's generated packages and Java blackboxes, th
 plugin's generated packages, the suite's comparer and qvto-emf's `CanonDump`.
 
 - Jars (`runner/lib/qvto-3.11.0/`, 25 jars, 9.7 MB, not committed): copied from the local
-  Slingshot install `old/palladio-research/work-slingshot/sl-install/plugins` (Eclipse 2025-12
+  Slingshot install `$PALLADIO_RESEARCH/work-slingshot/sl-install/plugins` (Eclipse 2025-12
   train): QVTo 3.11.0.v20251124-1059, classic OCL 3.22.0.v20240902-1518, EMF Ecore 2.41.0,
   EMF Common 2.44.0, XMI 2.39.0, LPG runtime 2.0.17, Equinox common/registry/preferences,
   core.runtime/jobs/contenttype/resources, OSGi 3.24, `org.osgi.service.prefs`.
@@ -114,7 +114,8 @@ plugin's generated packages, the suite's comparer and qvto-emf's `CanonDump`.
   repositories at `https://download.eclipse.org/mmt/qvto/updates/releases/<version>/`; 3.11.x
   ships with the Eclipse simultaneous release (`https://download.eclipse.org/releases/2025-12/`).
   Palladio 5.2.2 (SimuLizar's product) bundles QVTo 3.10.7
-  (`old/palladio-research/work-simucom/palladio-5.2.2/plugins`); copy those jars into
+  (`$PALLADIO_RESEARCH/work-simucom/palladio-5.2.2/plugins`; `$PALLADIO_RESEARCH` is the
+  palladio-research work directory of `reference/tools/palladio-research.sh` at the repository root); copy those jars into
   `lib/qvto-3.10.7` and build with `LIB=lib/qvto-3.10.7` to get SimuLizar's exact version.
 
 ```sh

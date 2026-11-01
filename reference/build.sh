@@ -6,7 +6,7 @@
 #  - build/classes-base  : refsim; build/classes-patches: the patched (shadowing) classes, FIRST on the classpath
 #  - build/seed-agent.jar: the shared seed agent (oraclekit/seed-agent.sh) with the product's ASM
 # Env: PALLADIO_PLUGINS (default: palladio-research/work-simucom/palladio-5.2.2/plugins), JAVAC
-PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research work directory
 set -e
 cd "$(dirname "$0")"
 P=${PALLADIO_PLUGINS:-$PRDIR/work-simucom/palladio-5.2.2/plugins}

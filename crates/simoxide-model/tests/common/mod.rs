@@ -73,9 +73,21 @@ impl Entry {
     }
 }
 
-/// Where an entry's directory is in this checkout: `models.txt` records absolute paths of the
-/// checkout that generated it, so the in-tree directories (`corpus_*`, `case_*`) are taken from
-/// this checkout (a worktree tests its own files).
+/// The palladio-research work directory, as `reference/tools/palladio-research.sh` resolves it:
+/// `$PALLADIO_RESEARCH`, else `reference/.work/palladio-research` of the repository.
+pub fn palladio_research() -> PathBuf {
+    std::env::var("PALLADIO_RESEARCH")
+        .ok()
+        .filter(|d| !d.is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| {
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../reference/.work/palladio-research")
+        })
+}
+
+/// Where an entry's directory is in this checkout: `models.txt` records directories relative to
+/// the oracle directory (`corpus_*`, `case_*`) or below `$PALLADIO_RESEARCH` (the Palladio
+/// repositories); the repositories that are submodules here are taken from the submodules.
 pub fn local_dir(name: &str, dir: &str) -> String {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     for (prefix, marker, base) in [
@@ -104,7 +116,13 @@ pub fn local_dir(name: &str, dir: &str) -> String {
             return base.join(rest).to_string_lossy().into_owned();
         }
     }
-    dir.to_string()
+    if let Some(rest) = dir.strip_prefix("$PALLADIO_RESEARCH/") {
+        return palladio_research()
+            .join(rest)
+            .to_string_lossy()
+            .into_owned();
+    }
+    oracle_dir().join(dir).to_string_lossy().into_owned()
 }
 
 /// Entries of `models.txt` whose directory exists (the Palladio repos may be absent) and whose

@@ -1,4 +1,4 @@
-# sha256 of the pinned jars of /home/devbox/workspace/old/palladio-research/work-slingshot/sl-install (setup.sh --lock, 2026-10-17)
+# sha256 of the pinned jars of $PALLADIO_RESEARCH/work-slingshot/sl-install (setup.sh --lock, 2026-10-17)
 ba0c5fdeef5fc4afd903bfb8f24ec50b9352dc23267fcb8b7455489f40d1aee3  ca.umontreal.iro.simul.ssj_3.3.1.jar
 017c71e7a253a065f22c4ca54bc00848c34a673dfdddbf24010282832745128c  de.uka.ipd.sdq.probfunction_6.0.0.202609010005.jar
 258e51548281c01ac863b31aac1ba9dec44889028bf5a55d08c6f2f923fc6b48  de.uka.ipd.sdq.probfunction.math_6.0.0.202609010005.jar

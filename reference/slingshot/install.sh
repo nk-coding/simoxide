@@ -1,14 +1,14 @@
 #!/bin/bash
 # Creates a headless Slingshot install (nightly) from the p2 update sites: the "fetch" step of the
 # reference runner. Not needed when an install already exists (env.sh finds the one of 2026-09-29 in
-# old/palladio-research/work-slingshot/sl-install, made by the same procedure).
+# $PALLADIO_RESEARCH/work-slingshot/sl-install, made by the same procedure).
 #
 #   ./install.sh            -> install/sl-install (~130 MB, gitignored), then ./setup.sh --lock to pin it
 #
 # Needs network, Java 21, and an Eclipse install with the p2 director and publisher bundles ($P, default:
 # the Palladio 5.2.2 product in palladio-research/work-simucom). Slingshot has no releases: the update
 # sites serve the current nightly, so a new install is generally NOT the pinned one (install.lock).
-# Ported from old/palladio-research/work-slingshot/setup-slingshot.sh + install-slingshot.sh (2026-09).
+# Ported from $PALLADIO_RESEARCH/work-slingshot/setup-slingshot.sh + install-slingshot.sh (2026-09).
 # Not re-run in S0 (2026-10-17).
 set -euo pipefail
 H="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

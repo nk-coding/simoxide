@@ -10,7 +10,7 @@
 # from tests/data/compile.cases (tools/oracle/gen_compile_cases.py). Needs the runner
 # (reference/runner/build.sh, built here if missing), the PCM metamodels at target/pcm
 # (../foundation/simoxide-emf/tools/pcm-setup.sh target/pcm, or a symlink to an existing one) and the
-# SimuLizar/SPD repositories under ../old/palladio-research/repos.
+# SimuLizar/SPD repositories under <palladio-research>/repos (reference/tools/palladio-research.sh).
 #   KEEP=dir   keep the runner's result directories there (default: a temporary directory)
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -36,8 +36,10 @@ OUT=${KEEP:-$(mktemp -d)}
 mkdir -p "$OUT"
 # Every case twice in one JVM: a warm-up pass (ids warm__*, ignored) and the recorded pass, so the
 # compile times are those of a warm JVM.
-sed 's/^case /case warm__/' "$CASES" > "$OUT/batch.cases"
-cat "$CASES" >> "$OUT/batch.cases"
+# ($PALLADIO_RESEARCH in the case file: the palladio-research work directory)
+PR=$("$ROOT/../../reference/tools/palladio-research.sh")
+sed -e 's/^case /case warm__/' -e "s|\$PALLADIO_RESEARCH|$PR|g" "$CASES" > "$OUT/batch.cases"
+sed -e "s|\$PALLADIO_RESEARCH|$PR|g" "$CASES" >> "$OUT/batch.cases"
 EXTRA_CP=$STUBS XMX=-Xmx2g "$RUNNER/qvto-run" --batch "$OUT/batch.cases" --out "$OUT" --base "$ROOT" --no-tape --timeout 300 > "$OUT/batch.log"
 tail -1 "$OUT/batch.log"
 

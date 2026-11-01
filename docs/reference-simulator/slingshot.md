@@ -20,7 +20,8 @@ Both use the same install, the same stub bundle and the same instrumentation.
 - Java 21.
 - A headless Slingshot install (p2, about 130 MB). `env.sh` takes `SLINGSHOT_INSTALL`, else
   `reference/slingshot/install/sl-install`, else the install of 2026-09-29 in
-  `old/palladio-research/work-slingshot/sl-install`. The install is only read.
+  `$PALLADIO_RESEARCH/work-slingshot/sl-install` (the palladio-research work directory, see
+  [refsim](refsim.md#requirements)). The install is only read.
 - `install.lock` pins the install: SHA-256 of the 47 Slingshot, SPD, QVTo, SimuCom-framework,
   probfunction and SSJ jars (nightly `1.0.0.202609010045`, SPD `1.0.0.202609010039`, QVTo 3.11.0).
   `setup.sh` warns when the install differs. Slingshot has no releases; a fresh install from the

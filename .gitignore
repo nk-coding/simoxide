@@ -47,6 +47,10 @@ __pycache__/
 /docs/.vitepress/cache/
 /docs/.vitepress/dist/
 
+# Default location of the external palladio-research work directory (reference/tools/palladio-research.sh;
+# $PALLADIO_RESEARCH overrides)
+/reference/.work/
+
 # The harnesses' shared seed agent (reference/oraclekit/seed-agent.sh)
 /reference/oraclekit/build/
 

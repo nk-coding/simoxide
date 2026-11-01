@@ -2,7 +2,7 @@
 # Builds the simoxide-model oracle: standalone EMF (no OSGi) with the generated PCM, monitor repository and
 # measuring point packages of the Palladio 5.2.2 product (jars referenced in place; the shared flat
 # classpath reference/build/classpath.txt, OSGi-ordered: tools/classpath.sh, docs/reference-simulator/patches.md "Classpath").
-PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
+PRDIR="$("$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/reference/tools/palladio-research.sh")"  # palladio-research work directory
 set -e
 cd "$(dirname "$0")"
 P=${PALLADIO_PLUGINS:-$PRDIR/work-simucom/palladio-5.2.2/plugins}

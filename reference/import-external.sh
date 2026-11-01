@@ -7,7 +7,7 @@
 # kept as copies; after the import each one is replaced by a relative link to the upstream file of
 # the same name (the import's EMF re-save loads into the same model, see third_party/README.md).
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PRDIR="$("$ROOT/reference/tools/palladio-research.sh")"  # palladio-research (moved to old/)
+PRDIR="$("$ROOT/reference/tools/palladio-research.sh")"  # palladio-research work directory
 cd "$(dirname "$0")"
 OUT=${1:-../corpus}; RE=${2:-.}
 BASE=$PRDIR
