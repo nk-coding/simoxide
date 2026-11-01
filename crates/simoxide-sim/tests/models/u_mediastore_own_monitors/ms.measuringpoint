@@ -3,29 +3,29 @@
     xmlns:org.palladiosimulator.edp2.models="http://palladiosimulator.org/EDP2/MeasuringPoint/1.0" xmlns:pcmmeasuringpoint="http://palladiosimulator.org/PCM/MeasuringPoint/1.0"
     xmlns:simulizarmeasuringpoint="http://palladiosimulator.org/simulizar/measuringpoint" id="_yisyIKGxEeWc24RAWmuF8Q">
   <measuringPoints xsi:type="pcmmeasuringpoint:UsageScenarioMeasuringPoint" stringRepresentation="Usage Scenario: RealisticUsageScenario"
-      resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_mediastore/ms_base_usage_realistic.usagemodel#__hpRMHD6EeSA4fySuX9I2Q">
+      resourceURIRepresentation="ms_base_usage_realistic.usagemodel#__hpRMHD6EeSA4fySuX9I2Q">
     <usageScenario href="ms_base_usage_realistic.usagemodel#__hpRMHD6EeSA4fySuX9I2Q"/>
   </measuringPoints>
   <measuringPoints xsi:type="pcmmeasuringpoint:ExternalCallActionMeasuringPoint" stringRepresentation="ExternalCall aName from TagWatermarking to Required_IDownload_TagWatermarking->download [_BVVtgLzYEeSAHuL4ItXOLQ]"
-      resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_mediastore/ms.repository#_BVVtgLzYEeSAHuL4ItXOLQ">
+      resourceURIRepresentation="ms.repository#_BVVtgLzYEeSAHuL4ItXOLQ">
     <externalCall href="ms.repository#_BVVtgLzYEeSAHuL4ItXOLQ"/>
   </measuringPoints>
-  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server2" resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_mediastore/ms.resourceenvironment#_kkiVoLg3EeSNPorBlo7x9g">
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server2" resourceURIRepresentation="ms.resourceenvironment#_kkiVoLg3EeSNPorBlo7x9g">
     <activeResource href="ms.resourceenvironment#_kkiVoLg3EeSNPorBlo7x9g"/>
   </measuringPoints>
-  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server3" resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_mediastore/ms.resourceenvironment#_J5xVgOXREeSa__lJ2-JCxw">
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server3" resourceURIRepresentation="ms.resourceenvironment#_J5xVgOXREeSa__lJ2-JCxw">
     <activeResource href="ms.resourceenvironment#_J5xVgOXREeSa__lJ2-JCxw"/>
   </measuringPoints>
-  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server4" resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_mediastore/ms.resourceenvironment#_wZVsQKNOEeW-HtW2mCFHaw">
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server4" resourceURIRepresentation="ms.resourceenvironment#_wZVsQKNOEeW-HtW2mCFHaw">
     <activeResource href="ms.resourceenvironment#_wZVsQKNOEeW-HtW2mCFHaw"/>
   </measuringPoints>
   <measuringPoints xsi:type="simulizarmeasuringpoint:ReconfigurationMeasuringPoint" stringRepresentation="Reconfigurations"
       resourceURIRepresentation="platform:/resource/MediaStore Model v3/reconfigurations/horizontalscaling.qvto" measuringPoint="Reconfigurations"
       resourceURI="platform:/resource/MediaStore Model v3/reconfigurations/horizontalscaling.qvto"/>
-  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server5" resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_mediastore/ms.resourceenvironment#_pvHaQKPuEeWsYYUki_pfEw">
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server5" resourceURIRepresentation="ms.resourceenvironment#_pvHaQKPuEeWsYYUki_pfEw">
     <activeResource href="ms.resourceenvironment#_pvHaQKPuEeWsYYUki_pfEw"/>
   </measuringPoints>
-  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server6" resourceURIRepresentation="file:/home/devbox/.vmdev/tmp/claude-1000/-home-devbox-workspace/b346a0e9-d247-4066-9c01-b186f4f55e7b/scratchpad/km/km_mediastore/ms.resourceenvironment#_y5cb0KPuEeWsYYUki_pfEw">
+  <measuringPoints xsi:type="pcmmeasuringpoint:ActiveResourceMeasuringPoint" stringRepresentation="CPU [0] in Server6" resourceURIRepresentation="ms.resourceenvironment#_y5cb0KPuEeWsYYUki_pfEw">
     <activeResource href="ms.resourceenvironment#_y5cb0KPuEeWsYYUki_pfEw"/>
   </measuringPoints>
 </org.palladiosimulator.edp2.models:MeasuringPointRepository>
