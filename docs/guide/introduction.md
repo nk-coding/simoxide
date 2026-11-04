@@ -3,8 +3,9 @@
 SimOxide is a performance simulator for **Palladio Component Models** (PCM), written in Rust. It
 reads the same model files as Palladio's Java simulators (repository, system, resource
 environment, allocation, usage model, monitor repository) and simulates them the way
-**SimuLizar 5.2.2** or **Slingshot** does. It runs as a command line tool (`simoxide`) or as a
-library inside another program.
+**SimuLizar 5.2.2** or **Slingshot** does. It runs as a command line tool (`simoxide`), as a
+library inside another program, or as a server that other programs and AI agents call over
+HTTP or MCP (`simoxide-server`).
 
 The name: an oxidised (that is, Rust) Palladio simulator, in the naming tradition of SimuCom,
 SimuLizar and EventSim.
@@ -66,6 +67,7 @@ output. See [Supported models](./scope.md).
 | runtime model changes, the QVTo host | `crates/simoxide-reconf` |
 | the QVTo engine (also usable on its own, with the `qvto` tool) | `crates/qvto` ([QVTo engine](../qvto/)) |
 | command line tools `simoxide`, `simoxide-bench` | `crates/simoxide-cli` |
+| HTTP and MCP server `simoxide-server` | `crates/simoxide-server` ([Server](./server.md)) |
 | the Java reference simulators and oracles | `reference/` |
 
 ## Licence
@@ -78,4 +80,4 @@ are git submodules. See [Licensing](./licensing.md).
 
 - [Getting started](./getting-started.md): build, run a model in each mode.
 - [Modes and features](./modes.md): the feature matrix.
-- [Command line](./cli.md) and [Library API](./library.md).
+- [Command line](./cli.md), [Library API](./library.md) and [Server: HTTP and MCP](./server.md).

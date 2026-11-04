@@ -377,6 +377,12 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
         &self.meas.m
     }
 
+    /// Ends the state and returns the measurements recorded so far (without copying them),
+    /// e.g. of a run paused for good ([`Simulation::into_state`]).
+    pub fn into_measurements(self) -> Measurements {
+        self.meas.m
+    }
+
     /// Live processes (users, workload drivers, forked behaviours).
     pub fn live_processes(&self) -> usize {
         self.procs.len() - self.free.len()

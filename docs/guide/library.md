@@ -260,6 +260,8 @@ collected in `RunResult::measurements`:
   readable file. For untrusted input use the memory API, which never reads the file system.
 - **Process isolation.** The simplest isolation for a service is to run `simoxide run` as a
   subprocess or container, with `--timeout` and a memory cgroup.
+- **A ready service.** `simoxide-server` ([Server](./server.md)) is such a service: jobs on
+  threads of their own, live progress, termination conditions, HTTP and MCP.
 
 ## Crates
 
@@ -274,6 +276,7 @@ collected in `RunResult::measurements`:
 | `simoxide-spd` | scaling policy definitions: Slingshot's filter-chain interpreter and its driver |
 | `simoxide-reconf` | runtime model changes: direct edits, the QVTo host (transformations, SimuLizar rule sets, SPD adjustments); QVTo directly on the model graph |
 | `simoxide-cli` | the `simoxide` and `simoxide-bench` binaries |
+| `simoxide-server` | the `simoxide-server` binary and library: jobs with live progress and termination conditions, HTTP (REST, SSE) and MCP ([Server](./server.md)) |
 | `simoxide-testkit` | differential testing: formats, diff, reference driver, model generator, `simoxide-fuzz`, exact-vs-fast statistics |
 | `simoxide-oraclekit` | the reference harnesses' shared driver: warm-JVM batch processes, the seed agent, scratch and result directories, comparisons (test infrastructure, not published) |
 | `simoxide-jcompat`, `simoxide-jcompat-exact` | Java behaviour (hash codes, `Double.toString`, parsing, insertion order); `-exact` (opt-in, no licence granted): `HashMap` order and HotSpot's identity hashes ([Foundation crates](../development/foundation.md)) |
