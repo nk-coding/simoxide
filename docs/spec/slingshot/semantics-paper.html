@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>A stated semantics for Slingshot’s scaling policies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,680&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --ink:#14212b; --muted:#5c6b76; --line:#d5dee4; --paper:#f4f7f5; --panel:#fff;
+  --teal:#0f766e; --teal-s:#e7f4f2; --rust:#c45c26; --rust-s:#fdf1ea;
+  --violet:#6d28d9; --violet-s:#f3eefe; --amber:#a16207; --amber-s:#fbf6ea; --gray:#8b99a3;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 "IBM Plex Sans",sans-serif}
+article{width:min(920px,calc(100% - 40px));margin:0 auto;padding:42px 0 80px}
+header.mast{margin-bottom:28px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:0 0 8px}
+h1{font-family:Fraunces,serif;font-weight:680;font-size:44px;line-height:1.05;letter-spacing:-.03em;margin:0 0 12px}
+.deck{font-size:19px;color:#314049;margin:0 0 14px;max-width:68ch}
+.meta{color:var(--muted);font-size:14px}
+h2{font-family:Fraunces,serif;font-weight:560;font-size:30px;letter-spacing:-.02em;margin:42px 0 10px}
+h3{font-family:Fraunces,serif;font-weight:560;font-size:22px;margin:28px 0 8px}
+p{margin:0 0 12px}
+figure{margin:18px 0 22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 14px 10px;box-shadow:0 10px 30px rgba(20,33,43,.04)}
+figcaption{color:var(--muted);font-size:13.5px;margin-top:8px}
+svg{width:100%;height:auto;display:block}
+.note{border-left:3px solid var(--violet);background:var(--violet-s);padding:10px 12px;border-radius:0 12px 12px 0;font-size:15.5px;margin:12px 0}
+.note b{font-weight:600}
+blockquote{margin:8px 0 12px;padding:8px 12px;background:#f7f4ee;border-radius:10px;font-style:italic;color:#3a3228}
+table{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--panel);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pill{display:inline-block;border-radius:99px;padding:1px 8px;font-size:12px;font-weight:600}
+.p-fixed{background:var(--teal-s);color:var(--teal)}
+.p-sling{background:var(--rust-s);color:var(--rust)}
+.p-other{background:var(--violet-s);color:var(--violet)}
+.p-open{background:var(--amber-s);color:var(--amber)}
+.p-none{background:#eef2f4;color:#60707a}
+code{font-family:"IBM Plex Mono",monospace;font-size:.86em}
+ul{margin:6px 0 12px;padding-left:1.2em}
+li{margin:4px 0}
+@media print{
+  body{background:#fff}
+  article{width:100%;padding:0}
+  figure{break-inside:avoid;box-shadow:none}
+  h2{break-after:avoid}
+}
+</style>
+</head>
+<body>
+<article>
+<header class="mast">
+  <p class="kicker">Semantics decisions · 4 November 2026</p>
+  <h1>What Slingshot did, and what a scaling policy should mean</h1>
+  <p class="deck">Slingshot evaluates a scaling policy with a handful of behaviors that a reader of the model does not see. The decisions below keep two of those behaviors, replace the rest with the behavior the model states, and replace the group-size rule with a third one: an out-of-range step is clamped to the bound, not discarded.</p>
+  <p class="meta">Compiled from <code>semantics-decisions.json</code>, saved 4 November 2026. Figures that cite a run use seed 1 and <code>--flavour slingshot</code> on the five <code>corpus-spd</code> examples. Where a decision is not what <code>--spd-quirks fixed</code> does today, the figure says so.</p>
+</header>
+
+<h2>1. How to read a decision</h2>
+<p>Each quirk is a place where the running interpreter and the text of the model can disagree. Three answers were available, and the notes use all three.</p>
+<ul>
+  <li><span class="pill p-sling">Slingshot</span> The interpreter’s behavior is the right semantics. Reproducing it is not a compatibility mode. It is what the mechanism means.</li>
+  <li><span class="pill p-fixed">Fixed</span> The model’s stated behavior is the right semantics. The interpreter was doing something else, and that something else should stop.</li>
+  <li><span class="pill p-other">Other</span> Neither reading. The note states the rule.</li>
+</ul>
+<p>One decision is still empty (Q1). Two are marked not sure (Q12, Q26). Q16 is marked fixed, with a reservation in the note. The map is the whole set.</p>
+
+<figure>
+  <svg viewBox="0 0 880 300" role="img" aria-label="Decision for each quirk">
+    <text x="0" y="18" font-size="13" fill="#5c6b76" font-family="IBM Plex Sans, sans-serif">SPD interpreter</text>
+    <text x="0" y="118" font-size="13" fill="#5c6b76" font-family="IBM Plex Sans, sans-serif">Engine</text>
+    <g id="spd"></g>
+  </svg>
+  <figcaption>Figure 1. All 37 decisions. Teal: fixed reading, or Q3 kept as designed. Rust: Slingshot’s behavior is the semantics (Q2, Q24). Violet: a different rule (Q9). Amber: not sure (Q12, Q26). Grey: unanswered (Q1).</figcaption>
+</figure>
+
+<h2>2. The system the figures use</h2>
+<p>Five of the examples are the same small system, with a different policy file. An open workload calls <code>chargeForEspresso</code> every 3 seconds. A load balancer forwards the call to EspressoAccounting, deployed on AppServer. The elastic infrastructure’s unit is that container: a scale-out copies it. A service-group policy, where there is one, scales the accounting assembly, and each new replica is placed on its own container.</p>
+
+<figure>
+  <svg viewBox="0 0 880 210" role="img" aria-label="Architecture of the running example">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 1.2 L 10 5 L 0 8.8 z" fill="#0f766e"/>
+      </marker>
+    </defs>
+    <rect x="16" y="48" width="150" height="92" rx="14" fill="#f7faf8" stroke="#d5dee4"/>
+    <text x="91" y="82" text-anchor="middle" font-family="Fraunces, serif" font-size="16" fill="#14212b">Users</text>
+    <text x="91" y="104" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5c6b76">open workload</text>
+    <text x="91" y="120" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5c6b76">every 3 s</text>
+    <line x1="166" y1="94" x2="214" y2="94" stroke="#0f766e" stroke-width="1.6" marker-end="url(#arr)"/>
+    <rect x="220" y="36" width="180" height="116" rx="14" fill="#f7faf8" stroke="#d5dee4"/>
+    <text x="310" y="70" text-anchor="middle" font-family="Fraunces, serif" font-size="16" fill="#14212b">Load balancer</text>
+    <text x="310" y="92" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5c6b76">Loadbalancer_RC</text>
+    <text x="310" y="110" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5c6b76">CPU rate 100000</text>
+    <text x="310" y="128" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5c6b76">forwards every call</text>
+    <line x1="400" y1="94" x2="468" y2="94" stroke="#0f766e" stroke-width="1.6" marker-end="url(#arr)"/>
+    <rect x="474" y="22" width="386" height="156" rx="16" fill="#e7f4f2" stroke="#0f766e" stroke-dasharray="5 4"/>
+    <text x="492" y="44" font-family="IBM Plex Sans, sans-serif" font-size="11" font-weight="600" fill="#0f766e" letter-spacing="0.6">ELASTIC INFRASTRUCTURE · UNIT APPSERVER</text>
+    <rect x="496" y="58" width="168" height="100" rx="12" fill="#fff" stroke="#d5dee4"/>
+    <text x="580" y="84" text-anchor="middle" font-family="Fraunces, serif" font-size="15" fill="#14212b">AppServer</text>
+    <text x="580" y="104" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5c6b76">CPU rate 1</text>
+    <text x="580" y="122" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5c6b76">demand 2, or 9</text>
+    <text x="580" y="140" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#14212b">EspressoAccounting</text>
+    <rect x="678" y="58" width="160" height="100" rx="12" fill="#fff" stroke="#d5dee4" stroke-dasharray="4 3"/>
+    <text x="758" y="96" text-anchor="middle" font-family="Fraunces, serif" font-size="14" fill="#8b99a3">AppServer_1</text>
+    <text x="758" y="116" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#8b99a3">created by a</text>
+    <text x="758" y="132" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#8b99a3">scale-out</text>
+  </svg>
+  <figcaption>Figure 2. The running example. Demand is 2 in four of the models, so one server keeps up with a call every 3 seconds and response time stays at 2 s. In <em>Scale in</em> the demand is 9, so the queue grows until a second server exists.</figcaption>
+</figure>
+
+<h2>3. A time policy hears only its own clock</h2>
+<p>Slingshot posts <code>SimulationTimeReached</code> to every policy of the target group (Q15). A policy written to fire at its own instant also fires at every other policy’s instant. In <em>Same instant</em> two policies share t = 50 s: step +2, and step −1. Each reacts to the other’s event, so the pair runs twice.</p>
+<p>The adopted semantics gives a policy only the event of its own trigger. The pair runs once. The group ends at 2 servers, which is what “+2 and −1 at the same instant” reads as, starting from 1. Ending at 3 is an extra, invisible firing.</p>
+
+<figure>
+  <svg viewBox="0 0 880 250" role="img" aria-label="Same instant under both rules">
+    <text x="20" y="22" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="#c45c26">Slingshot · ends at 3</text>
+    <text x="460" y="22" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="#0f766e">Adopted · ends at 2</text>
+    <!-- left timeline -->
+    <line x1="40" y1="58" x2="400" y2="58" stroke="#d5dee4"/>
+    <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#14212b">
+      <circle cx="70" cy="58" r="6" fill="#0f766e"/>
+      <text x="70" y="84" text-anchor="middle">+2</text>
+      <text x="70" y="100" text-anchor="middle" fill="#5c6b76">1→3</text>
+      <circle cx="150" cy="58" r="6" fill="#c45c26"/>
+      <text x="150" y="84" text-anchor="middle">−1</text>
+      <text x="150" y="100" text-anchor="middle" fill="#5c6b76">3→2</text>
+      <circle cx="230" cy="58" r="6" fill="#0f766e"/>
+      <text x="230" y="84" text-anchor="middle">+2</text>
+      <text x="230" y="100" text-anchor="middle" fill="#5c6b76">2→4</text>
+      <circle cx="310" cy="58" r="6" fill="#c45c26"/>
+      <text x="310" y="84" text-anchor="middle">−1</text>
+      <text x="310" y="100" text-anchor="middle" fill="#5c6b76">4→3</text>
+    </g>
+    <text x="70" y="128" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#8b99a3">all four at t = 50 s</text>
+    <!-- servers left -->
+    <g font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#14212b">
+      <rect x="40" y="156" width="36" height="28" rx="6" fill="#e7f4f2" stroke="#0f766e"/>
+      <rect x="80" y="156" width="36" height="28" rx="6" fill="#e7f4f2" stroke="#0f766e"/>
+      <rect x="120" y="156" width="36" height="28" rx="6" fill="#e7f4f2" stroke="#0f766e"/>
+      <text x="200" y="175">3 servers</text>
+    </g>
+    <!-- right -->
+    <line x1="480" y1="58" x2="840" y2="58" stroke="#d5dee4"/>
+    <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#14212b">
+      <circle cx="560" cy="58" r="6" fill="#0f766e"/>
+      <text x="560" y="84" text-anchor="middle">+2</text>
+      <text x="560" y="100" text-anchor="middle" fill="#5c6b76">1→3</text>
+      <circle cx="680" cy="58" r="6" fill="#c45c26"/>
+      <text x="680" y="84" text-anchor="middle">−1</text>
+      <text x="680" y="100" text-anchor="middle" fill="#5c6b76">3→2</text>
+    </g>
+    <text x="620" y="128" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#8b99a3">each policy, its own event, once</text>
+    <g font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#14212b">
+      <rect x="500" y="156" width="36" height="28" rx="6" fill="#e7f4f2" stroke="#0f766e"/>
+      <rect x="540" y="156" width="36" height="28" rx="6" fill="#e7f4f2" stroke="#0f766e"/>
+      <text x="600" y="175">2 servers</text>
+    </g>
+  </svg>
+  <figcaption>Figure 3. <em>Same instant</em>, seed 1. Left: Q15 on, four adjustments at one timestamp. Right: the adopted rule. The same sharing is why <em>Time policies</em> under Slingshot quirks logs eight adjustments and sits at the maximum of 3, while the adopted time rule logs the four steps 1→2, 2→1, 1→3, 3→2.</figcaption>
+</figure>
+<p>What it meant: a model with several time policies on one group does not have the schedule it writes down. Adding a scale-in “at 80” also wakes the scale-out “at 50”, and the other way around. What the change does: the schedule on the page is the schedule that runs. Policies still share a group, a cooldown, and a size bound. They do not share a clock.</p>
+
+<h2>4. Group size clamps the step. It does not drop the decision.</h2>
+<p>Slingshot’s filter chain holds the thrashing constraint and not the group-size constraint (Q9). <code>minSize</code> and <code>maxSize</code> are applied later, inside the QVTo transformation, by rewriting the number of containers. SimOxide’s fixed flag does something stronger than that: if the step would be clamped to zero, the filter disregards the policy before the adjustment, and no cooldown is started.</p>
+<p>The decision rejects both. The note says the out-of-range decision must be modified to the bound, not ignored, and that this modification belongs to the transformation, where Slingshot already put it.</p>
+<blockquote>it has to make sure if the change is lt or gt, then the decision is not simply ignored while it lays out of the bounds, but the decision has to be modified to max and min. This was part of the qvto transformation and not in the filter chain in Slingshot.</blockquote>
+
+<figure>
+  <svg viewBox="0 0 880 280" role="img" aria-label="Three size rules at the maximum">
+    <text x="20" y="24" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#5c6b76">Size is already 3. The bound is 1–3. A policy requests step +1.</text>
+    <g font-family="IBM Plex Sans, sans-serif">
+      <rect x="16" y="44" width="270" height="210" rx="14" fill="#fdf1ea" stroke="#f0c7b4"/>
+      <text x="32" y="70" font-size="13" font-weight="600" fill="#c45c26">Slingshot</text>
+      <text x="32" y="96" font-size="13" fill="#14212b">Chain does not look at size.</text>
+      <text x="32" y="116" font-size="13" fill="#14212b">Request is made.</text>
+      <text x="32" y="136" font-size="13" fill="#14212b">Transformation clamps to 3.</text>
+      <text x="32" y="168" font-size="13" fill="#5c6b76">Capacity stays 3.</text>
+      <text x="32" y="188" font-size="13" fill="#5c6b76">The attempt still happened.</text>
+      <rect x="302" y="44" width="270" height="210" rx="14" fill="#f4f7f6" stroke="#d5dee4"/>
+      <text x="318" y="70" font-size="13" font-weight="600" fill="#5c6b76">Fixed flag today</text>
+      <text x="318" y="96" font-size="13" fill="#14212b">Chain sees a zero step.</text>
+      <text x="318" y="116" font-size="13" fill="#14212b">Policy is disregarded.</text>
+      <text x="318" y="136" font-size="13" fill="#14212b">No adjustment is requested.</text>
+      <text x="318" y="168" font-size="13" fill="#5c6b76">Capacity stays 3.</text>
+      <text x="318" y="188" font-size="13" fill="#5c6b76">The attempt is erased.</text>
+      <rect x="588" y="44" width="276" height="210" rx="14" fill="#f3eefe" stroke="#ddd0f7"/>
+      <text x="604" y="70" font-size="13" font-weight="600" fill="#6d28d9">Adopted rule</text>
+      <text x="604" y="96" font-size="13" fill="#14212b">Request stands.</text>
+      <text x="604" y="116" font-size="13" fill="#14212b">Transformation rewrites</text>
+      <text x="604" y="136" font-size="13" fill="#14212b">+1 into “stay at 3”.</text>
+      <text x="604" y="168" font-size="13" fill="#5c6b76">Capacity stays 3.</text>
+      <text x="604" y="188" font-size="13" fill="#5c6b76">The decision was modified,</text>
+      <text x="604" y="206" font-size="13" fill="#5c6b76">not dropped.</text>
+    </g>
+  </svg>
+  <figcaption>Figure 4. Three readings of one out-of-range step. The middle column is what <code>--spd-quirks fixed</code> does. The right column is the recorded decision. A step that can be partly applied is rewritten onto the bound: from size 2 with maximum 3, step +2 becomes +1 and the group ends at 3.</figcaption>
+</figure>
+<p>What it meant under Slingshot: the numbers <code>minSize</code> and <code>maxSize</code> on the group are real, but only as a rewrite of the adjustment, after the policy has already been accepted. What the fixed flag meant: those numbers can veto the policy. What the adopted rule means: the bound is a rewrite of the decision. A scale-out above the maximum still scales, up to the maximum. A scale-in below the minimum still scales, down to the minimum. A decision that lands exactly on the bound is a modified decision of size zero. It is not a disregard.</p>
+
+<h2>5. Cooldown counts the attempt, including an attempt that does not change capacity</h2>
+<p>This is the decision that keeps Slingshot. The adjustor records the time, the cooldown, and the group’s last policy when the request is made (Q2), including when the following transformation leaves the number of containers unchanged. The note states why that is the semantics rather than a bug.</p>
+<blockquote>a cooldown is a constraint on an adjustment made to the target, even though that adjustment may not effectively change the capacity of the target group</blockquote>
+<p>Read next to the size rule, the two decisions are one mechanism. The policy fires. The transformation clamps the step onto <code>[minSize, maxSize]</code>. The cooldown starts because an adjustment was made to the target, whether or not the clamp left the capacity where it was. The fixed flag breaks that pair: it drops the zero step first, so the cooldown never starts, and a second policy at the same instant is free to scale the other way.</p>
+
+<figure>
+  <svg viewBox="0 0 880 230" role="img" aria-label="Cooldown starts on the attempt">
+    <text x="16" y="22" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#5c6b76">Size 1, minimum 1, cooldown 180 s. A scale-in is requested, then a scale-out at the same time.</text>
+    <line x1="40" y1="78" x2="820" y2="78" stroke="#d5dee4"/>
+    <circle cx="160" cy="78" r="7" fill="#c45c26"/>
+    <circle cx="420" cy="78" r="7" fill="#0f766e"/>
+    <text x="160" y="108" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#14212b">scale-in requested</text>
+    <text x="160" y="126" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5c6b76">clamped to size 1</text>
+    <text x="420" y="108" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#14212b">scale-out</text>
+    <text x="420" y="126" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#5c6b76">blocked for 180 s</text>
+    <rect x="160" y="148" width="260" height="14" rx="7" fill="#f0c7b4"/>
+    <text x="430" y="159" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#c45c26">cooldown, started by the clamped attempt</text>
+    <text x="16" y="198" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#14212b">Under the fixed flag the scale-in is disregarded, the cooldown does not start, and the scale-out proceeds.</text>
+    <text x="16" y="218" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#14212b">That is the App-Metrics queue trace. The adopted pair of rules restores the block.</text>
+  </svg>
+  <figcaption>Figure 5. Adopted Q2 together with adopted Q9. The attempt counts. This is why a min-size scale-in in the RMUC App-Metrics policies can hold off the scale-out for a cooldown even though the group never leaves one replica. The fixed flag was written to remove that hold. The decision puts it back, and says the hold is what a cooldown is.</figcaption>
+</figure>
+<p>What it meant: cooldown in Slingshot is not “time since the capacity last changed”. It is “time since an adjustment was last offered to this target”. A policy author who sets 180 seconds is limiting how often the group may be the subject of a decision. What the change relative to the fixed flag does: it stops treating a clamped no-op as if the policy had not run. What the change relative to a careless reading of Slingshot does: the clamp is explicit. The group does not grow past its maximum, and the attempt is still on the record.</p>
+
+<h2>6. A removed container finishes the work it already has</h2>
+<p>The specification of Q5 says Slingshot aborts one job on the removed container and loses the others. The decision chooses drain: work already there finishes, new requests go elsewhere. The note adds a reading of what Palladio is actually doing.</p>
+<blockquote>I think also in Palladio/Slingshot the container drains, the resource container is deleted but the queue in the underlying data structure is cleaned up only after</blockquote>
+<p>So the adopted semantics is drain, and the recorded suspicion is that the apparent loss is the order of cleanup — the container object goes first, the queue behind it is emptied later — rather than a rule that jobs should vanish. The paper does not treat that suspicion as a new measurement. It records it next to the decision.</p>
+
+<figure>
+  <svg viewBox="0 0 880 200" role="img" aria-label="Drain versus drop on scale-in">
+    <text x="20" y="24" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="#c45c26">Specified Slingshot reading</text>
+    <text x="460" y="24" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="#0f766e">Adopted · drain</text>
+    <g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#14212b">
+      <rect x="20" y="44" width="70" height="44" rx="8" fill="#e7f4f2" stroke="#0f766e"/>
+      <text x="55" y="70" text-anchor="middle">kept</text>
+      <rect x="100" y="44" width="90" height="44" rx="8" fill="#fde8e8" stroke="#c45c26"/>
+      <text x="145" y="64" text-anchor="middle">removed</text>
+      <text x="145" y="80" text-anchor="middle" fill="#c45c26">jobs gone</text>
+      <text x="210" y="70">one aborted, the rest vanish</text>
+      <rect x="460" y="44" width="70" height="44" rx="8" fill="#e7f4f2" stroke="#0f766e"/>
+      <text x="495" y="70" text-anchor="middle">kept</text>
+      <rect x="540" y="44" width="110" height="44" rx="8" fill="#fff6f1" stroke="#c45c26" stroke-dasharray="4 3"/>
+      <text x="595" y="64" text-anchor="middle">draining</text>
+      <text x="595" y="80" text-anchor="middle" fill="#5c6b76">jobs finish</text>
+      <text x="664" y="70">then the container goes</text>
+    </g>
+    <text x="20" y="130" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#5c6b76">Scale in, seed 1, demand 9: response time climbs 9, 15, 21, … while one server holds the queue.</text>
+    <text x="20" y="150" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#5c6b76">At 50 s a second server appears and short completions (9 s, 15 s) show up beside the backlog.</text>
+    <text x="20" y="170" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#5c6b76">At 80 s the group returns to one server. Drain decides whether the backlog on the removed server is allowed to complete.</text>
+  </svg>
+  <figcaption>Figure 6. Scale-in at 80 s in the demand-9 model. The size trace is 1→2→1 under both SPD quirk sets, because the step is a real change. Q5 is about the jobs, not the count. The adopted rule lets them finish.</figcaption>
+</figure>
+
+<h2>7. A new container joins the links of its unit</h2>
+<p>After an adjustment, Slingshot reconnects every linking resource to every container (Q6). The adopted rule is local: a new container is appended to the links its unit is already on; other links stay; a removed container leaves every link. In the running example there is only one link, so both rules draw the same picture. The difference is the second link the example does not have.</p>
+
+<figure>
+  <svg viewBox="0 0 880 200" role="img" aria-label="Which links a new container joins">
+    <g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#14212b">
+      <text x="20" y="22" font-weight="600" fill="#c45c26">Slingshot · every link, every container</text>
+      <rect x="30" y="50" width="78" height="36" rx="8" fill="#fff" stroke="#d5dee4"/><text x="69" y="72" text-anchor="middle">App</text>
+      <rect x="150" y="50" width="78" height="36" rx="8" fill="#fff" stroke="#d5dee4"/><text x="189" y="72" text-anchor="middle">new</text>
+      <rect x="270" y="50" width="78" height="36" rx="8" fill="#fff" stroke="#d5dee4"/><text x="309" y="72" text-anchor="middle">LB</text>
+      <rect x="30" y="120" width="78" height="36" rx="8" fill="#fff" stroke="#d5dee4"/><text x="69" y="142" text-anchor="middle">DB</text>
+      <path d="M69 86 L189 86 L309 86" fill="none" stroke="#c45c26" stroke-width="1.6"/>
+      <path d="M69 120 L69 104 L309 104 L309 86" fill="none" stroke="#c45c26" stroke-width="1.4"/>
+      <path d="M189 86 L189 138 L108 138" fill="none" stroke="#c45c26" stroke-width="1.4"/>
+      <text x="460" y="22" font-weight="600" fill="#0f766e">Adopted · links of the unit only</text>
+      <rect x="470" y="50" width="78" height="36" rx="8" fill="#fff" stroke="#d5dee4"/><text x="509" y="72" text-anchor="middle">App</text>
+      <rect x="590" y="50" width="78" height="36" rx="8" fill="#e7f4f2" stroke="#0f766e"/><text x="629" y="72" text-anchor="middle">new</text>
+      <rect x="710" y="50" width="78" height="36" rx="8" fill="#fff" stroke="#d5dee4"/><text x="749" y="72" text-anchor="middle">LB</text>
+      <rect x="470" y="120" width="78" height="36" rx="8" fill="#fff" stroke="#d5dee4"/><text x="509" y="142" text-anchor="middle">DB</text>
+      <path d="M509 86 L629 86 L749 86" fill="none" stroke="#0f766e" stroke-width="1.8"/>
+      <path d="M509 120 L509 104 L749 104" fill="none" stroke="#8b99a3" stroke-width="1.3" stroke-dasharray="4 3"/>
+    </g>
+  </svg>
+  <figcaption>Figure 7. A second link, from the load balancer to a database container, is drawn dashed because the unit AppServer is not on it. Slingshot would tie the new application server into that link as well. The adopted rule does not. The five examples cannot show this; they have a single link.</figcaption>
+</figure>
+<p>What it meant: a scale-out rewrote the network, not only the copied server. Latency and routing after an adaptation depended on links the policy never named. What the change does: the network of the unit is the network of the replica. Anything else stays the model’s.</p>
+
+<h2>8. Top-down scale-in removes the emptied container in the same enactment</h2>
+<p>Slingshot’s top-down transformation deletes a container that the scale-in has emptied only at the next enactment (Q7). The decision takes the same-enactment removal, which is the transformation’s own TODO, and then separates two ideas the late deletion had been carrying.</p>
+<blockquote>The fix is the right top-down transformation semantic. It was not deleted to account for requests in transit. A top-down scale-in assumes that the effect of scaling in components automatically translates to the scaling in of hosts. That does not need to be the case. In practice, these two can be controlled independently.</blockquote>
+
+<figure>
+  <svg viewBox="0 0 880 230" role="img" aria-label="Components and containers are separate controls">
+    <g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#14212b">
+      <text x="20" y="22" font-weight="600" fill="#6d28d9">Service group · assemblies</text>
+      <text x="470" y="22" font-weight="600" fill="#0f766e">Elastic infrastructure · containers</text>
+      <rect x="20" y="44" width="120" height="48" rx="10" fill="#f3eefe" stroke="#6d28d9"/>
+      <text x="80" y="72" text-anchor="middle">accounting</text>
+      <rect x="156" y="44" width="120" height="48" rx="10" fill="#f3eefe" stroke="#6d28d9"/>
+      <text x="216" y="72" text-anchor="middle">accounting′</text>
+      <rect x="292" y="44" width="120" height="48" rx="10" fill="#f8f6fb" stroke="#c4b5e0" stroke-dasharray="4 3"/>
+      <text x="352" y="66" text-anchor="middle" fill="#6d28d9">scaled in</text>
+      <text x="352" y="82" text-anchor="middle" fill="#6d28d9">this enactment</text>
+      <rect x="470" y="44" width="110" height="48" rx="10" fill="#e7f4f2" stroke="#0f766e"/>
+      <text x="525" y="72" text-anchor="middle">AppServer</text>
+      <rect x="596" y="44" width="110" height="48" rx="10" fill="#e7f4f2" stroke="#0f766e"/>
+      <text x="651" y="72" text-anchor="middle">AppServer_2</text>
+      <rect x="722" y="44" width="130" height="48" rx="10" fill="#f7faf8" stroke="#0f766e" stroke-dasharray="4 3"/>
+      <text x="787" y="66" text-anchor="middle">emptied host</text>
+      <text x="787" y="82" text-anchor="middle">same enactment</text>
+      <text x="20" y="130">If the policy is top-down, emptying the assembly removes the host now,</text>
+      <text x="20" y="150">not one enactment later. Requests already in transit are not a reason to keep the host.</text>
+      <text x="20" y="178">If hosts and assemblies are meant to scale apart, that is a second policy on the</text>
+      <text x="20" y="198">elastic infrastructure, not a delayed delete inside the service-group transformation.</text>
+    </g>
+  </svg>
+  <figcaption>Figure 8. The adopted split. Same-enactment removal is the meaning of a top-down scale-in. Independence of component cardinality and host cardinality is expressed by having both target groups, as <em>Service group</em> already does: the service group adds replicas at 20 s and 40 s, and the infrastructure adds one more container at 60 s, on its own trigger.</figcaption>
+</figure>
+<p>What the late delete meant: the transformation was remembering work in flight by leaving a dead container in the model for one more decision. What the change does: in-flight work is the drain rule (section 6), and the structure of the model updates when the decision does. A designer who wants the host to stay says so with an infrastructure policy, not by relying on a one-step lag.</p>
+
+<h2>9. Windows, order, and the things that must be determined by the model</h2>
+<h3>One window per element</h3>
+<p>Slingshot pours every element of the group into a single aggregation window, reads it on measurements that are not the stimulus, and consumes the EMA’s emit slot even when a later filter disregards the policy (Q13). The adopted rule is one window per measuring point, aggregated across elements only for the stimulus’s metric, and consumed only when the policy fires. The five time-triggered examples never open a window. The rule matters as soon as a group has two replicas and a CPU or response-time trigger, which is the RMUC HPA case after the first scale-out: a merged window lets an idle new replica dilute the busy original, or the other way around, inside one average.</p>
+
+<figure>
+  <svg viewBox="0 0 880 150" role="img" aria-label="Merged window versus a window per replica">
+    <g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#14212b">
+      <text x="20" y="22" font-weight="600" fill="#c45c26">Slingshot · one window</text>
+      <rect x="20" y="40" width="360" height="56" rx="10" fill="#fdf1ea" stroke="#f0c7b4"/>
+      <text x="40" y="64">CPU 0.9</text>
+      <text x="140" y="64">CPU 0.1</text>
+      <text x="240" y="64">other metrics too</text>
+      <text x="40" y="84" fill="#5c6b76">one EMA, read and consumed on every event</text>
+      <text x="460" y="22" font-weight="600" fill="#0f766e">Adopted · per element</text>
+      <rect x="460" y="40" width="150" height="56" rx="10" fill="#e7f4f2" stroke="#0f766e"/>
+      <text x="478" y="64">replica A · 0.9</text>
+      <text x="478" y="82" fill="#5c6b76">own window</text>
+      <rect x="626" y="40" width="150" height="56" rx="10" fill="#e7f4f2" stroke="#0f766e"/>
+      <text x="644" y="64">replica B · 0.1</text>
+      <text x="644" y="82" fill="#5c6b76">own window</text>
+    </g>
+  </svg>
+  <figcaption>Figure 9. Q13. AVERAGE stays the exponential moving average kept later in this section. What changes is whose samples enter which window, and when the window is allowed to move.</figcaption>
+</figure>
+
+<h3>Relative step of zero</h3>
+<p>If a relative percentage comes out as no container, Slingshot discards <code>minAdjustmentValue</code>. The adopted rule (Q4) leaves a true zero as zero, and applies the minimum only when the percentage does call for a change, in that direction. A 0 % policy does not secretly move by its minimum. A small non-zero percentage is not rounded away.</p>
+
+<h3>Placement and container order</h3>
+<p>Slingshot picks a container for a new assembly with <code>any(true)</code>, so the choice follows Java identity-hash order and can differ between JVMs (Q8). After the adjustment, the list of containers is in that same hash order (Q16). Both decisions take insertion order, which is what the deterministic runner already uses. The note on Q8 asks what the harm is. The note on Q16 says the choice is not settled.</p>
+<p>The harm is the next decision, not the hash itself. Scale-in removes the newest element. If two machines disagree on which container was created last, they remove different servers, and the response-time series diverge with no change in the model. Insertion order makes “newest” a property of the run, not of the JVM. Q16 stays on the open list because the note does.</p>
+
+<h3>The model after a removal, and a run that cannot share a JVM</h3>
+<p>Slingshot leaves removed assemblies, monitors, and passive resources in the running model, and a population change does not take effect (Q14). The adopted rule reports the deletions and drops those monitors. Static fields in <code>TargetGroupUtils</code> (Q10) are not reproduced: two runs in one process must not see each other’s group size.</p>
+
+<h3>An unsupported trigger is an error, not a silent empty SPD</h3>
+<p>Slingshot throws during set-up and then drops the whole policy definition, so the run continues with no scaling at all (Q11). The adopted rule fails the configuration and names the stimulus. A model that asks for a metric the interpreter does not have should not look like a model that chose not to scale.</p>
+
+<h3>The aggregator stays</h3>
+<p>AVERAGE is the exponential moving average (60 s, emit every 10 s, α = 0.2). MAX, MIN, MEDIAN, and SUM keep the last ten values (Q3). This one is kept. The decay is the correction for samples that exist only when a job arrives or leaves. It is the design of the trigger, not an accident next to it.</p>
+
+<h2>10. Composed triggers are not decided</h2>
+<p>Slingshot’s AND continues after a child has failed, OR does not evaluate its children, and XOR inverts after the first child (Q12). The fixed proposal evaluates every child on every event and combines them as AND, OR, or exactly-one. The decision is not sure, and the note asks the question the proposal skips.</p>
+<blockquote>on every event or on relevant events?</blockquote>
+<p>That question is still the semantics. “Every event” means a time event of one child re-evaluates the other children, which is a cousin of Q15. “Relevant events” means each child is evaluated on the measurements or the instant that belong to it, and the combination is of those results. The five examples have no composed trigger, so they do not answer it. Until that choice is made, Q12 has no adopted rule.</p>
+
+<h2>11. The engine</h2>
+<p>Q17 to Q37 are not scaling policies. They are places where a request, a resource, or a monitor does something other than the Palladio action it is written as. Thirty of them take the fixed reading: demands of one internal action run in order; a loop of count 0 does not enter; roles resolve along the connector that names them; forks get their own cursors; delay resources wait; response-time monitors record; composites are entered; a call with nowhere to go stops the run instead of disposing the link handler for every later transfer. The full list is the table at the end.</p>
+<p>Two engine decisions are not in that majority.</p>
+<p><span class="pill p-sling">Q24</span> Acquire and Release keep Slingshot’s requirement of a <code>ParametricResourceDemand</code>. The fixed reading, which acquires one unit when the demand is missing, is rejected. An acquire with no amount is a broken action, not an implicit acquire of one. The model has to say how much.</p>
+<p><span class="pill p-open">Q26</span> A superseded processor-sharing completion that still samples state and utilisation is not decided. The fixed reading would record nothing. The Slingshot reading records an extra sample. No note chooses between a measurement that includes stale events and one that does not.</p>
+<p>Q1, whether a disregard restores adjustor state, was left unanswered. No example in this set separates the two, and no effect on results is known. It stays out of the adopted semantics until there is a case that can show it.</p>
+
+<h2>12. What is better, in one picture</h2>
+<p>Better here means: a result can be read off the policy file without knowing which events are shared, which constraints are enforced only later, and which containers an adjustment will wire together. The adopted semantics is that reading, with two deliberate exceptions and one rewrite.</p>
+<ul>
+  <li>The schedule, the links, the windows, the order, and the contents of the model after a removal are what the file says.</li>
+  <li>A size bound rewrites the step onto the bound. It does not veto the policy.</li>
+  <li>A cooldown starts when the adjustment is made to the target, including when the rewritten step leaves the capacity unchanged.</li>
+  <li>A removed container finishes work it has already accepted. In-flight work is not a reason to keep the container in the structure for another enactment.</li>
+  <li>Component cardinality and host cardinality are separate policies. Top-down removal is same-enactment only when the policy really is top-down.</li>
+  <li>An acquire names its demand. An unsupported trigger is an error.</li>
+</ul>
+<p>The current <code>--spd-quirks fixed</code> flag is not this semantics. It matches the adopted rule on Q4, Q6, Q7, Q8, Q13, Q14, Q15, and Q16, and it disagrees on the two decisions that change the RMUC traces: it disregards a zero step (against Q9) and it withholds cooldown until the capacity changes (against Q2). A run that claims to follow this paper has to clamp in the transformation and commit the cooldown on the request. The engine flag for Q24 has to stay on the Slingshot side as well: a missing demand is an error.</p>
+
+<h2>13. The decisions</h2>
+<table>
+  <thead><tr><th>Id</th><th>Subject</th><th>Decision</th><th>Note</th></tr></thead>
+  <tbody id="rows"></tbody>
+</table>
+<p class="meta" style="margin-top:14px">Source file <code>docs/spec/slingshot/semantics-decisions.json</code>, saved 2026-11-04T09:04:47Z. Q3 is “keep”, which is the Slingshot aggregator, so it is marked with the fixed colour in Figure 1 only because nothing is being changed.</p>
+</article>
+<script>
+const CELLS = [
+  ["Q1","none"],["Q2","sling"],["Q3","fixed"],["Q4","fixed"],["Q5","fixed"],["Q6","fixed"],["Q7","fixed"],["Q8","fixed"],
+  ["Q9","other"],["Q10","fixed"],["Q11","fixed"],["Q12","open"],["Q13","fixed"],["Q14","fixed"],["Q15","fixed"],["Q16","fixed"],
+  ["Q17","fixed"],["Q18","fixed"],["Q19","fixed"],["Q20","fixed"],["Q21","fixed"],["Q22","fixed"],["Q23","fixed"],["Q24","sling"],
+  ["Q25","fixed"],["Q26","open"],["Q27","fixed"],["Q28","fixed"],["Q29","fixed"],["Q30","fixed"],["Q31","fixed"],["Q32","fixed"],
+  ["Q33","fixed"],["Q34","fixed"],["Q35","fixed"],["Q36","fixed"],["Q37","fixed"]
+];
+const fill = {fixed:"#e7f4f2", sling:"#fdf1ea", other:"#f3eefe", open:"#fbf6ea", none:"#eef2f4"};
+const stroke = {fixed:"#0f766e", sling:"#c45c26", other:"#6d28d9", open:"#a16207", none:"#8b99a3"};
+const svg = document.querySelector("figure svg");
+const g = document.getElementById("spd");
+CELLS.forEach((c,i) => {
+  let x, y;
+  if (i < 16) { x = 8 + i * 54; y = 32; }
+  else if (i < 27) { x = 8 + (i - 16) * 78; y = 132; }
+  else { x = 8 + (i - 27) * 78; y = 178; }
+  const r = document.createElementNS("http://www.w3.org/2000/svg","rect");
+  r.setAttribute("x", x); r.setAttribute("y", y); r.setAttribute("width", 48); r.setAttribute("height", 36); r.setAttribute("rx", 8);
+  r.setAttribute("fill", fill[c[1]]); r.setAttribute("stroke", stroke[c[1]]);
+  const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+  t.setAttribute("x", x+24); t.setAttribute("y", y+23); t.setAttribute("text-anchor","middle");
+  t.setAttribute("font-family","IBM Plex Sans, sans-serif"); t.setAttribute("font-size","12"); t.setAttribute("fill","#14212b");
+  t.textContent = c[0];
+  g.appendChild(r); g.appendChild(t);
+});
+const ROWS = [
+["Q1","Disregard restores adjustor state","unanswered",""],
+["Q2","Cooldown starts when the adjustment is requested","Slingshot","Counts even if capacity does not change"],
+["Q3","AVERAGE is an EMA","keep","Design, not a bug"],
+["Q4","Relative zero and the minimum step","fixed","Zero stays zero; a real step respects the minimum"],
+["Q5","Jobs on a removed container","fixed","Drain. Note: the queue may be cleaned up only afterwards"],
+["Q6","Which links a new container joins","fixed","Links of the unit only"],
+["Q7","When an emptied container disappears","fixed","Same enactment. Hosts and assemblies can still be separate policies"],
+["Q8","Which container receives a replica","fixed","Insertion order. Note asks why JVM differences matter"],
+["Q9","Out-of-range step","other","Clamp to min or max in the transformation. Do not disregard"],
+["Q10","Static group state across runs","fixed","Not shared"],
+["Q11","Unsupported trigger","fixed","Configuration error, named"],
+["Q12","AND / OR / XOR","not sure","On every event, or only on relevant events?"],
+["Q13","Aggregation windows","fixed","One window per element, consumed when the policy fires"],
+["Q14","Removed elements left in the model","fixed","Deletions reported and dropped"],
+["Q15","Whose time event a policy sees","fixed","Its own"],
+["Q16","Container list order","fixed","Insertion order. Note: not sure yet"],
+["Q17","Several demands of one action","fixed","In order"],
+["Q18","Handler thrown away, run continues","fixed","The run stops at the error"],
+["Q19","Loop count 0","fixed","Body skipped"],
+["Q20","Role lookup by id alone","fixed","The connector that names the assembly"],
+["Q21","Branch with no true guard","fixed","Run error"],
+["Q22","Collection iterator","fixed","Frame and draw per iteration"],
+["Q23","Fork","fixed","Own cursor per child; asynchronous children run"],
+["Q24","Acquire without a demand","Slingshot","A missing amount is an error, not one unit"],
+["Q25","Delay resource","fixed","The demand waits"],
+["Q26","Stale PS completion samples state","not sure",""],
+["Q27","Passive capacity and parameters","fixed","Evaluated in the component frame"],
+["Q28","Link failure draw at probability 0","fixed","Draw only if the probability is positive"],
+["Q29","Response-time monitors","fixed","They record"],
+["Q30","Entering a composite","fixed","Entered, inner assemblies allocated"],
+["Q31","Infrastructure call and the monitor","fixed","Infrastructure SEFFs are not measured; the monitor stays"],
+["Q32","Only simulated time stops the run","fixed","The measurement limit counts"],
+["Q33","Entry-call measuring-point key","fixed","The component role"],
+["Q34","Replica monitors","fixed","Per replica, per assembly"],
+["Q35","Unsupported action","fixed","An error, not a silent stall"],
+["Q36","Infrastructure-call inputs","fixed","The callee receives the frame"],
+["Q37","Call between unconnected containers","fixed","The run stops. A draining container may still use a remaining link"]
+];
+const pill = {Slingshot:"p-sling", fixed:"p-fixed", other:"p-other", "not sure":"p-open", unanswered:"p-none", keep:"p-fixed"};
+document.getElementById("rows").innerHTML = ROWS.map(r =>
+  `<tr><td><code>${r[0]}</code></td><td>${r[1]}</td><td><span class="pill ${pill[r[2]]}">${r[2]}</span></td><td>${r[3]}</td></tr>`
+).join("");
+</script>
+</body>
+</html>
