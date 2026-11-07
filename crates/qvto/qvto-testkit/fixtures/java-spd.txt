@@ -7345,7 +7345,7 @@ problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemb
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_step_0
-@file result.txt 260
+@file result.txt 274
 id	spd_min_step_0
 load	OK
 params	inout:pcmAllocation,inout:pcmSystem,inout:pcmResourceEnvironment,inout:repository,in:spd,inout:spdSemantic,inout:usageModel
@@ -7355,6 +7355,7 @@ message	Transformation execution completed
 exception	-
 trace-records	8
 verdict	pass
+unstable	dump
 
 @file out.jsonl.digest 728
 sha256	20ae1125a2db19bff08bfe0b3800aceb3075946c2977aa4bd8d63663f8217fa4
