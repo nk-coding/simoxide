@@ -457,6 +457,106 @@ fn pathological_models_stop_with_errors() {
     }
 }
 
+/// Runs `files` in the Slingshot-exact engine for at most `max_sim_time` simulated seconds.
+fn run_slingshot_exact(
+    files: &[(String, String)],
+    spec: &RunSpec,
+    max_sim_time: i64,
+    limits: Limits,
+) -> Result<simoxide_sim::RunResult, simoxide_sim::SimError> {
+    let model = spec.load_model_memory(files).unwrap();
+    let cm = CompiledModel::compile_flavour(model, simoxide_sim::FlavourConfig::slingshot_exact())
+        .unwrap();
+    let mut cfg = spec.sim_config("");
+    cfg.max_sim_time = max_sim_time;
+    cfg.limits = limits;
+    simoxide_sim::run(&cm, cfg, Outputs::default())
+}
+
+/// The Slingshot-exact engine enforces every limit of [`Limits`] as well (it has no processes
+/// or continuation stacks: it counts live users, nested calls and handler events instead).
+#[test]
+fn slingshot_exact_enforces_the_limits() {
+    let expect = |r: Result<simoxide_sim::RunResult, simoxide_sim::SimError>,
+                  kind: SimErrorKind,
+                  what: &str| match r {
+        Err(e) => {
+            assert_eq!(e.kind, kind, "{e}");
+            assert!(e.message.contains(what), "{e}");
+        }
+        Ok(_) => panic!("expected an error ({what})"),
+    };
+    // unbounded zero-time recursion: the nested calls (was: unbounded memory)
+    let (mut fs, spec) = files("h32_recursion");
+    for (from, to) in [
+        (r#"specification="Exp(20.0)""#, r#"specification="0""#),
+        (r#"branchProbability="0.4""#, r#"branchProbability="1.0""#),
+        (r#"branchProbability="0.6""#, r#"branchProbability="0.0""#),
+    ] {
+        replace(&mut fs, ".repository", from, to);
+    }
+    let r = small_stack(move || run_slingshot_exact(&fs, &spec, 100, Limits::default()));
+    expect(r, SimErrorKind::Limit, "Limits::max_stack_depth");
+
+    // an open workload with inter-arrival time 0: the live users
+    let (mut fs, spec) = files("h05_open_workload");
+    replace(
+        &mut fs,
+        ".usagemodel",
+        r#"interArrivalTime_OpenWorkload specification="Exp(4.0)""#,
+        r#"interArrivalTime_OpenWorkload specification="0""#,
+    );
+    let limits = Limits {
+        max_processes: 10_000,
+        ..Limits::default()
+    };
+    expect(
+        run_slingshot_exact(&fs, &spec, 100, limits),
+        SimErrorKind::Limit,
+        "Limits::max_processes",
+    );
+
+    // the step budget (handler events), the deadline and the cancellation flag
+    let (fs, spec) = files("h01_ps_single");
+    let limits = Limits {
+        max_steps: 1000,
+        ..Limits::default()
+    };
+    expect(
+        run_slingshot_exact(&fs, &spec, 1_000_000, limits),
+        SimErrorKind::Limit,
+        "Limits::max_steps",
+    );
+    let limits = Limits {
+        deadline: Some(Instant::now()),
+        ..Limits::default()
+    };
+    expect(
+        run_slingshot_exact(&fs, &spec, 1_000_000, limits),
+        SimErrorKind::Cancelled,
+        "deadline",
+    );
+    let limits = Limits {
+        cancel: Some(std::sync::Arc::new(std::sync::atomic::AtomicBool::new(
+            true,
+        ))),
+        ..Limits::default()
+    };
+    expect(
+        run_slingshot_exact(&fs, &spec, 1_000_000, limits),
+        SimErrorKind::Cancelled,
+        "cancelled",
+    );
+    // and none of them changes a run that stays within them
+    let unlimited = run_slingshot_exact(&fs, &spec, 2000, Limits::unlimited()).unwrap();
+    let limited = run_slingshot_exact(&fs, &spec, 2000, Limits::default()).unwrap();
+    assert_eq!(
+        unlimited.measurements.to_csv(),
+        limited.measurements.to_csv()
+    );
+    assert_eq!(unlimited.events, limited.events);
+}
+
 #[test]
 fn limits_do_not_change_results_and_memory_equals_directory() {
     for name in [

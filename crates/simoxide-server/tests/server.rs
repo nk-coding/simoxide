@@ -17,17 +17,37 @@ fn repo() -> PathBuf {
 }
 
 fn app_with(cfg: HttpConfig) -> Router {
-    let server = ServerConfig {
-        allow_dirs: vec![repo().join("corpus"), repo().join("corpus-spd")],
-        max_concurrent: 4,
-        ..ServerConfig::default()
-    };
+    app_of(
+        ServerConfig {
+            allow_dirs: vec![repo().join("corpus"), repo().join("corpus-spd")],
+            max_concurrent: 4,
+            ..ServerConfig::default()
+        },
+        cfg,
+    )
+}
+
+fn app_of(server: ServerConfig, cfg: HttpConfig) -> Router {
     router(
         Arc::new(Service {
             jobs: JobManager::new(server),
         }),
         cfg,
     )
+}
+
+/// The status and body of a request built by the caller (for custom headers).
+async fn send(app: &Router, req: Request<Body>) -> (StatusCode, String) {
+    let r = app.clone().oneshot(req).await.unwrap();
+    let s = r.status();
+    let bytes = r.into_body().collect().await.unwrap().to_bytes();
+    (s, String::from_utf8_lossy(&bytes).into_owned())
+}
+
+/// A JSON-RPC `tools/call` request.
+fn tool_call(id: u64, name: &str, args: Value) -> Value {
+    json!({"jsonrpc": "2.0", "id": id, "method": "tools/call",
+           "params": {"name": name, "arguments": args}})
 }
 
 fn app() -> Router {
@@ -328,6 +348,52 @@ async fn bad_requests_are_rejected() {
             json!({"model_dir": "x_sl_mediastore", "termination": {"confidence": {"level": 2}}}),
             "bad level",
         ),
+        // entry files outside the model directory
+        (
+            json!({"model_dir": "x_sl_mediastore", "config": {"usagemodel": "/etc/passwd"}}),
+            "absolute usagemodel",
+        ),
+        (
+            json!({"model_dir": "x_sl_mediastore", "config": {"allocation": ["../x_sl_loadbalancer/a.allocation"]}}),
+            "allocation with ..",
+        ),
+        (
+            json!({"model_dir": "x_sl_mediastore", "config": {"monitorrepository": "/tmp/m.monitorrepository"}}),
+            "absolute monitorrepository",
+        ),
+        // checks that need no model, made before the job exists
+        (
+            json!({"model_dir": "x_sl_mediastore", "config": {"quirks": "all"}}),
+            "quirks without slingshot",
+        ),
+        (
+            json!({"model_dir": "x_sl_mediastore", "config": {"spd_quirks": "bogus"}}),
+            "bad spd_quirks",
+        ),
+        (
+            json!({"model_dir": "x_sl_loadbalancer", "config": {"flavour": "slingshot-exact", "max_sim_time": 10, "usage_streams": true}}),
+            "usage streams in slingshot-exact",
+        ),
+        (
+            json!({"files": [{"name": "a.usagemodel", "content_base64": "not base64!"}]}),
+            "bad base64",
+        ),
+        (
+            json!({"model_dir": "x_sl_mediastore", "termination": {"max_measurements": -1}}),
+            "negative count",
+        ),
+        (
+            json!({"model_dir": "x_sl_mediastore", "termination": {"combine": "all", "max_events": 1000, "all": []}}),
+            "empty all",
+        ),
+        (
+            json!({"model_dir": "x_sl_mediastore", "progress": {"interval_ms": u64::MAX}}),
+            "interval beyond the clock",
+        ),
+        (
+            json!({"files": [{"name": "a.usagemodel", "content": ""}], "root": "corpus"}),
+            "root without model_dir",
+        ),
     ] {
         let (s, v) = call(&app, "POST", "/v1/simulations", Some(req)).await;
         assert_eq!(s, StatusCode::BAD_REQUEST, "{what}: {v}");
@@ -585,4 +651,295 @@ async fn token_and_origin_guard() {
         app.clone().oneshot(req).await.unwrap().status(),
         StatusCode::FORBIDDEN
     );
+}
+
+/// A wait longer than `Duration` can hold is capped, not a panic (which aborts a release build).
+#[tokio::test(flavor = "multi_thread")]
+async fn oversized_waits_are_capped() {
+    let app = app();
+    let v = run(
+        &app,
+        json!({"model_dir": "x_sl_mediastore", "config": {"max_measurements": 20}}),
+    )
+    .await;
+    let id = v["id"].as_str().unwrap();
+    for wait in ["1e20", "1e300", "inf", "NaN", "-5"] {
+        let (s, v) = call(
+            &app,
+            "GET",
+            &format!("/v1/simulations/{id}?wait={wait}&until=done"),
+            None,
+        )
+        .await;
+        assert_eq!(s, StatusCode::OK, "wait={wait}: {v}");
+        assert_eq!(v["status"], "completed");
+    }
+}
+
+/// The guard against browsers and DNS rebinding: `Origin: null`, a foreign `Host` and `/mcp`
+/// bodies that are not JSON are refused; `--allow-host` names more hosts.
+#[tokio::test(flavor = "multi_thread")]
+async fn host_origin_and_content_type_guard() {
+    let app = app_with(HttpConfig {
+        allowed_hosts: vec!["sim.lab".into()],
+        ..HttpConfig::default()
+    });
+    let get = |host: &str, origin: Option<&str>| {
+        let mut b = Request::builder()
+            .uri("/v1/models")
+            .header(header::HOST, host);
+        if let Some(o) = origin {
+            b = b.header(header::ORIGIN, o);
+        }
+        b.body(Body::empty()).unwrap()
+    };
+    for (host, origin, want) in [
+        ("127.0.0.1:8080", None, StatusCode::OK),
+        (
+            "localhost:8080",
+            Some("http://localhost:8080"),
+            StatusCode::OK,
+        ),
+        ("sim.lab:8080", Some("http://sim.lab:8080"), StatusCode::OK),
+        ("127.0.0.1:8080", Some("null"), StatusCode::FORBIDDEN),
+        ("evil.example:8080", None, StatusCode::FORBIDDEN),
+        (
+            "127.0.0.1:8080",
+            Some("https://evil.example"),
+            StatusCode::FORBIDDEN,
+        ),
+    ] {
+        let (s, body) = send(&app, get(host, origin)).await;
+        assert_eq!(s, want, "Host {host}, Origin {origin:?}: {body}");
+    }
+    // a page's text/plain POST needs no preflight: /mcp takes JSON only
+    let ping = json!({"jsonrpc": "2.0", "id": 1, "method": "ping"}).to_string();
+    for (content_type, want) in [
+        ("text/plain", StatusCode::UNSUPPORTED_MEDIA_TYPE),
+        ("application/json; charset=utf-8", StatusCode::OK),
+    ] {
+        let req = Request::builder()
+            .method("POST")
+            .uri("/mcp")
+            .header(header::CONTENT_TYPE, content_type)
+            .body(Body::from(ping.clone()))
+            .unwrap();
+        assert_eq!(send(&app, req).await.0, want, "{content_type}");
+    }
+    // the health check stays open, and --allow-any-origin turns the guard off
+    let req = Request::builder()
+        .uri("/health")
+        .header(header::HOST, "evil.example")
+        .body(Body::empty())
+        .unwrap();
+    assert_eq!(send(&app, req).await.0, StatusCode::OK);
+    let open = app_with(HttpConfig {
+        allow_any_origin: true,
+        ..HttpConfig::default()
+    });
+    assert_eq!(
+        send(&open, get("evil.example", Some("null"))).await.0,
+        StatusCode::OK
+    );
+}
+
+/// Beyond the running and the queued simulations a submit is refused (HTTP 429, an MCP tool
+/// error); a cancelled queued simulation leaves the queue at once and frees its place.
+#[tokio::test(flavor = "multi_thread")]
+async fn the_queue_is_bounded() {
+    let app = app_of(
+        ServerConfig {
+            allow_dirs: vec![repo().join("corpus")],
+            max_concurrent: 1,
+            max_queued: 1,
+            ..ServerConfig::default()
+        },
+        HttpConfig::default(),
+    );
+    let long = json!({"model_dir": "x_sl_mediastore", "config": {"max_measurements": -1},
+                      "termination": {"timeout_secs": 60}});
+    let (s, running) = call(&app, "POST", "/v1/simulations", Some(long.clone())).await;
+    assert_eq!(s, StatusCode::CREATED, "{running}");
+    let (s, queued) = call(&app, "POST", "/v1/simulations", Some(long.clone())).await;
+    assert_eq!(s, StatusCode::CREATED, "{queued}");
+    assert_eq!(queued["status"], "queued");
+    let (s, v) = call(&app, "POST", "/v1/simulations", Some(long.clone())).await;
+    assert_eq!(s, StatusCode::TOO_MANY_REQUESTS, "{v}");
+    let (_, v) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(1, "start_simulation", long.clone())),
+    )
+    .await;
+    assert_eq!(v["result"]["isError"], true, "{v}");
+    assert!(
+        v["result"]["content"][0]["text"]
+            .as_str()
+            .unwrap()
+            .contains("try again")
+    );
+
+    let queued_id = queued["id"].as_str().unwrap();
+    let (s, v) = call(
+        &app,
+        "POST",
+        &format!("/v1/simulations/{queued_id}/cancel"),
+        None,
+    )
+    .await;
+    assert_eq!(s, StatusCode::OK);
+    assert_eq!(v["status"], "cancelled", "{v}");
+    let (s, v) = call(&app, "POST", "/v1/simulations", Some(long)).await;
+    assert_eq!(s, StatusCode::CREATED, "{v}");
+
+    // cancelling the running one starts the next
+    let running_id = running["id"].as_str().unwrap();
+    call(
+        &app,
+        "POST",
+        &format!("/v1/simulations/{running_id}/cancel"),
+        None,
+    )
+    .await;
+    let next = v["id"].as_str().unwrap();
+    let (_, v) = call(
+        &app,
+        "GET",
+        &format!("/v1/simulations/{next}?wait=30&after_version=3"),
+        None,
+    )
+    .await;
+    assert_ne!(v["status"], "queued", "{v}");
+    call(
+        &app,
+        "POST",
+        &format!("/v1/simulations/{next}/cancel"),
+        None,
+    )
+    .await;
+    let (_, v) = call(
+        &app,
+        "GET",
+        &format!("/v1/simulations/{running_id}?wait=30&until=done"),
+        None,
+    )
+    .await;
+    assert_eq!(v["status"], "cancelled", "{v}");
+    assert_eq!(v["stop_reason"]["detail"], "cancelled by a client", "{v}");
+}
+
+/// A model name below several allowed directories needs `root`; with it, the model of that
+/// directory runs (HTTP and MCP).
+#[tokio::test(flavor = "multi_thread")]
+async fn root_selects_among_models_of_the_same_name() {
+    let base = std::env::temp_dir().join(format!("simoxide-server-roots-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&base);
+    let model = repo().join("corpus/x_sl_mediastore");
+    for (root, seed) in [("a", 11), ("b", 22)] {
+        let dir = base.join(root).join("m");
+        std::fs::create_dir_all(&dir).unwrap();
+        for e in std::fs::read_dir(&model).unwrap() {
+            let p = e.unwrap().path();
+            if p.is_file() && p.file_name().unwrap() != "run.json" {
+                std::fs::copy(&p, dir.join(p.file_name().unwrap())).unwrap();
+            }
+        }
+        std::fs::write(
+            dir.join("run.json"),
+            format!(r#"{{"seed": {seed}, "max_measurements": 5}}"#),
+        )
+        .unwrap();
+    }
+    let app = app_of(
+        ServerConfig {
+            allow_dirs: vec![base.join("a"), base.join("b")],
+            ..ServerConfig::default()
+        },
+        HttpConfig::default(),
+    );
+    let (_, v) = call(&app, "GET", "/v1/models", None).await;
+    let roots: Vec<&str> = v["models"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|m| m["model_dir"] == "m")
+        .map(|m| m["root"].as_str().unwrap())
+        .collect();
+    assert_eq!(roots.len(), 2, "{v}");
+    let (s, v) = call(
+        &app,
+        "POST",
+        "/v1/simulations",
+        Some(json!({"model_dir": "m"})),
+    )
+    .await;
+    assert_eq!(s, StatusCode::BAD_REQUEST, "{v}");
+    assert!(v["error"].as_str().unwrap().contains("root"), "{v}");
+    let v = run(&app, json!({"model_dir": "m", "root": roots[1]})).await;
+    assert_eq!(v["status"], "completed", "{v}");
+    assert_eq!(v["model"]["seed"], 22, "{v}");
+    let (_, v) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(
+            1,
+            "start_simulation",
+            json!({"model_dir": "m", "root": roots[0]}),
+        )),
+    )
+    .await;
+    assert_eq!(v["result"]["isError"], false, "{v}");
+    let id = v["result"]["structuredContent"]["id"].as_str().unwrap();
+    let (_, v) = call(
+        &app,
+        "GET",
+        &format!("/v1/simulations/{id}?wait=60&until=done"),
+        None,
+    )
+    .await;
+    assert_eq!(v["model"]["seed"], 11, "{v}");
+    let _ = std::fs::remove_dir_all(&base);
+}
+
+/// A passed `max_sim_time` still counts inside `all` (it used to read false again once the
+/// engine stopped reporting the next event's time, so the run went on).
+#[tokio::test(flavor = "multi_thread")]
+async fn sim_time_inside_all_ends_the_run() {
+    let app = app();
+    for flavour in ["slingshot-exact", "simulizar"] {
+        let v = run(
+            &app,
+            json!({"model_dir": "x_sl_loadbalancer",
+                   "config": {"flavour": flavour, "max_sim_time": 100_000_000, "max_measurements": -1},
+                   "termination": {"combine": "all", "max_sim_time": 5, "timeout_secs": 0.2},
+                   "progress": {"interval_ms": 50}}),
+        )
+        .await;
+        assert_eq!(v["stop_reason"]["kind"], "termination", "{flavour}: {v}");
+        let d = v["stop_reason"]["detail"].as_str().unwrap();
+        assert!(
+            d.contains("max_sim_time") && d.contains("timeout_secs"),
+            "{flavour}: {d}"
+        );
+    }
+}
+
+/// The server's resource limits reach the slingshot-exact engine.
+#[tokio::test(flavor = "multi_thread")]
+async fn slingshot_exact_enforces_resource_limits() {
+    let app = app();
+    let v = run(
+        &app,
+        json!({"model_dir": "x_sl_loadbalancer",
+               "config": {"flavour": "slingshot-exact", "max_sim_time": 100_000, "max_steps": 1000}}),
+    )
+    .await;
+    assert_eq!(v["status"], "failed", "{v}");
+    assert!(
+        v["error"].as_str().unwrap().contains("Limits::max_steps"),
+        "{v}"
+    );
+    assert_eq!(v["results_available"], true, "{v}");
 }

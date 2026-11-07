@@ -40,9 +40,11 @@ const LENTZ_TINY: f64 = 1e-300;
 const LENTZ_TOLERANCE: f64 = 1e-15;
 /// ... or after this many terms.
 const LENTZ_MAX_TERMS: u32 = 1000;
-/// [`t_quantile`] searches in `[-T_SEARCH_BOUND, T_SEARCH_BOUND]`.
-const T_SEARCH_BOUND: f64 = 1e4;
-/// Bisection steps of [`t_quantile`] (the interval shrinks to far below `f64` resolution).
+/// [`t_quantile`] first brackets the quantile in `[0, T_INITIAL_UPPER_BOUND]` and doubles the
+/// upper bound until the bracket contains it (a level close to 1 with few degrees of freedom
+/// needs a large quantile: 63 662 at 99.999 % and one degree of freedom).
+const T_INITIAL_UPPER_BOUND: f64 = 16.0;
+/// Bisection steps of [`t_quantile`] (the bracket shrinks to far below `f64` resolution).
 const T_BISECTION_STEPS: u32 = 200;
 /// [`t_quantile_cached`] starts over beyond this many entries.
 const T_CACHE_CAPACITY: usize = 4096;
@@ -116,9 +118,24 @@ pub fn t_cdf(t: f64, df: f64) -> f64 {
     if t >= 0.0 { 1.0 - tail } else { tail }
 }
 
-/// Student t quantile: `t` with `t_cdf(t, df) = p` (bisection).
+/// Student t quantile: `t` with `t_cdf(t, df) = p` (bisection); infinite for `p >= 1` and for
+/// quantiles beyond what `f64` resolves.
 pub fn t_quantile(p: f64, df: f64) -> f64 {
-    let (mut lo, mut hi) = (-T_SEARCH_BOUND, T_SEARCH_BOUND);
+    if p < 0.5 {
+        // the distribution is symmetric
+        return -t_quantile(1.0 - p, df);
+    }
+    if p >= 1.0 {
+        return f64::INFINITY;
+    }
+    let (mut lo, mut hi) = (0.0, T_INITIAL_UPPER_BOUND);
+    while t_cdf(hi, df) < p {
+        lo = hi;
+        hi *= 2.0;
+        if !hi.is_finite() {
+            return f64::INFINITY;
+        }
+    }
     for _ in 0..T_BISECTION_STEPS {
         let mid = 0.5 * (lo + hi);
         if t_cdf(mid, df) < p {
@@ -212,7 +229,7 @@ impl BatchMeans {
         self.cur_n = 0;
         if let Batching::Doubling { min } = self.batching {
             let min = min.max(MIN_BATCHES_FOR_INTERVAL);
-            if self.means.len() >= 2 * min {
+            if self.means.len() >= min.saturating_mul(2) {
                 // merge neighbours: half as many batches of twice the size
                 let merged: Vec<f64> = self
                     .means
@@ -432,6 +449,28 @@ mod tests {
         assert!((t_quantile(0.975, 10.0) - 2.228_138_851_986).abs() < 1e-6);
         assert!((t_quantile(0.975, 1.0) - 12.706_204_736_174_7).abs() < 1e-5);
         assert!((t_quantile(0.995, 30.0) - 2.749_995_653_567).abs() < 1e-6);
+        assert!((t_quantile(0.025, 10.0) + 2.228_138_851_986).abs() < 1e-6);
+        assert_eq!(t_quantile(1.0, 3.0), f64::INFINITY);
+    }
+
+    /// Far tails with few degrees of freedom, against the closed forms for one and two degrees
+    /// of freedom (the bracket used to end at 10 000).
+    #[test]
+    fn t_quantiles_in_the_far_tail() {
+        use std::f64::consts::PI;
+        for p in [0.999_995, 0.999_999_5, 0.999_999_999] {
+            let cauchy = (PI * (p - 0.5)).tan();
+            let rel = (t_quantile(p, 1.0) - cauchy).abs() / cauchy;
+            assert!(
+                rel < 1e-6,
+                "df 1, p {p}: {} vs {cauchy}",
+                t_quantile(p, 1.0)
+            );
+            let a = 4.0 * p * (1.0 - p);
+            let two = (2.0 * p - 1.0) * (2.0 / a).sqrt();
+            let rel = (t_quantile(p, 2.0) - two).abs() / two;
+            assert!(rel < 1e-6, "df 2, p {p}: {} vs {two}", t_quantile(p, 2.0));
+        }
     }
 
     #[test]

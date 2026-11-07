@@ -2,8 +2,9 @@
 //! ([`crate::mcp`]): start, list, inspect, wait for, cancel and delete simulations, read their
 //! logs and results.
 //!
-//! Everything here is synchronous; [`Service::wait`] blocks (the HTTP layer calls it on a
-//! blocking thread).
+//! Everything here is synchronous except [`Service::wait`], which waits asynchronously (on a
+//! tokio runtime) so that a waiting client holds no thread. The HTTP layer runs the slower
+//! synchronous operations (submitting, `measurements.csv`) on blocking threads.
 
 use crate::job::{ApiError, JobManager, JobView, LogPage};
 use crate::report::{JobStatus, Level, LogSource};
@@ -122,6 +123,7 @@ impl Service {
             "limits": {
                 "max_concurrent": c.max_concurrent,
                 "max_jobs": c.max_jobs,
+                "max_queued": c.max_queued,
                 "max_run_secs": c.max_run_secs,
                 "max_tuples": c.max_tuples,
                 "log_capacity": c.log_capacity,
@@ -199,9 +201,9 @@ impl Service {
             .logs(since, limit.clamp(1, MAX_LOG_PAGE), min_level))
     }
 
-    /// Blocks until the simulation changed after `after_version` (default: its version now) or
+    /// Waits until the simulation changed after `after_version` (default: its version now) or
     /// ended (`until: done`), at most `timeout` (capped at [`MAX_WAIT`]); returns its state.
-    pub fn wait(
+    pub async fn wait(
         &self,
         id: &str,
         after_version: Option<u64>,
@@ -211,14 +213,15 @@ impl Service {
     ) -> Result<JobView, ApiError> {
         let job = self.jobs.get(id)?;
         let after = after_version.unwrap_or_else(|| job.version());
-        job.wait(after, until == Until::Done, timeout.min(MAX_WAIT));
+        job.wait(after, until == Until::Done, timeout.min(MAX_WAIT))
+            .await;
         Ok(job.view(recent_logs, true))
     }
 
     /// Asks a simulation to stop; it ends as `cancelled` with the results so far.
     pub fn cancel(&self, id: &str) -> Result<JobView, ApiError> {
         let job = self.jobs.get(id)?;
-        if job.request_cancel() {
+        if self.jobs.cancel(&job) {
             job.log(
                 Level::Info,
                 LogSource::Server,

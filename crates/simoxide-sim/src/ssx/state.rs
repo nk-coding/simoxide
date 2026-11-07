@@ -475,6 +475,8 @@ impl Writer {
 /// The objects of an arena, rebuilt in node order.
 struct Rebuilt {
     objs: Vec<Obj>,
+    /// The engine's live-user count, shared by every rebuilt user ([`User::live`]).
+    live_users: Rc<()>,
 }
 
 const BAD: &str = "damaged object arena";
@@ -529,9 +531,10 @@ impl Rebuilt {
             .collect()
     }
 
-    fn new(nodes: Vec<NodeImg>) -> Result<Rebuilt, String> {
+    fn new(nodes: Vec<NodeImg>, live_users: Rc<()>) -> Result<Rebuilt, String> {
         let mut r = Rebuilt {
             objs: Vec::with_capacity(nodes.len()),
+            live_users,
         };
         for n in nodes {
             // every reference is to an earlier node (checked by the getters' bounds)
@@ -558,6 +561,7 @@ impl Rebuilt {
                             .map(|i| r.sframe(i))
                             .collect::<Result<_, _>>()?,
                     ),
+                    live: r.live_users.clone(),
                 })),
                 NodeImg::UBeh {
                     kind,
@@ -1098,7 +1102,7 @@ impl SsxState {
         {
             return Err(fail("the run state does not fit the model's tables".into()));
         }
-        let b = Rebuilt::new(img.nodes).map_err(fail)?;
+        let b = Rebuilt::new(img.nodes, e.live_users.clone()).map_err(fail)?;
         e.now = img.now;
         e.seq = img.seq;
         e.heap = img

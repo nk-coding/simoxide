@@ -38,13 +38,15 @@ serves both.
 | `--mcp-stdio` | off | serve MCP on stdin and stdout; the server ends when stdin closes |
 | `--allow-dir DIR` | none | requests may name model directories below `DIR` (`model_dir`); repeatable |
 | `--max-concurrent N` | CPUs | simulations that run at once; the others wait as `queued` |
+| `--max-queued N` | 64 | simulations that wait for a free slot; beyond it a new one is refused (`429`) |
 | `--max-jobs N` | 100 | simulations kept in memory; the oldest finished ones are dropped |
 | `--max-run-secs S` | 3600 | wall-clock cap of one run (`0` = none) |
 | `--max-tuples N` | 20 000 000 | cap of recorded tuples per run, 16 bytes each (`0` = none) |
 | `--log-capacity N` | 5000 | log entries kept per simulation (ring buffer) |
 | `--token TOKEN` | none | HTTP needs `Authorization: Bearer TOKEN` (also `SIMOXIDE_SERVER_TOKEN`) |
 | `--max-body-mb N` | 64 | largest HTTP request body |
-| `--allow-any-origin` | off | accept browser requests from any `Origin` |
+| `--allow-host NAME` | none | accept `Host` and `Origin` headers naming `NAME` besides `localhost`, `127.0.0.1` and `[::1]` (the server's name on a network); repeatable |
+| `--allow-any-origin` | off | accept any `Host` and `Origin` header (turns the DNS-rebinding guard off) |
 
 Cargo features of `simoxide-server`:
 
@@ -99,7 +101,9 @@ The server's `initialize` answer carries instructions for the agent (the workflo
    subscribe to the event stream (`GET /v1/simulations/{id}/events`). The log (`/logs`, tool
    `get_logs`) has model warnings, scaling-policy decisions and the end.
 3. **Stop** it early if the numbers already answer the question (`POST .../cancel`, tool
-   `cancel_simulation`); its results so far stay readable.
+   `cancel_simulation`); its results so far stay readable. A queued simulation ends at once; a
+   running one stops at its next pause between two events, and only if it has not stopped
+   10 s later is it aborted in the middle of an event.
 4. **Read** the results once it has ended (`GET .../results`, `.../measurements.csv`, tool
    `get_results`).
 
@@ -107,7 +111,7 @@ A simulation's `status` is one of:
 
 | Status | Meaning |
 |---|---|
-| `queued` | waiting for a free slot (`--max-concurrent`) |
+| `queued` | waiting for a free slot (`--max-concurrent`); at most `--max-queued` wait, and a submit beyond them is refused with `429` (try again once a simulation has ended) |
 | `loading` | loading and compiling the model |
 | `running` | simulating; progress is published |
 | `completed` | a termination condition, the simulator's own stop condition, the end of the events, or a server cap ended it; results available |
@@ -171,8 +175,11 @@ may include:
 
 `model_dir` names a model directory on the server instead, relative to one of the
 `--allow-dir` directories (or absolute inside one). `GET /v1/models` (tool `list_models`)
-lists the directories with a `.usagemodel` below them. Without `--allow-dir`, `model_dir` is
-refused.
+lists the directories with a `.usagemodel` below them, each with its `root` (the allowed
+directory it is below). When several allowed directories have a model of the same name, the
+request must say which with `"root"` (as the listing reports it); otherwise it is refused, so
+that a request never runs another model than the one listed. Without `--allow-dir`,
+`model_dir` is refused.
 
 ### `config`
 
@@ -184,14 +191,14 @@ refused.
 | `quirks` | `none` | Slingshot compat flags (`all`, `Q1,Q5,...`), as `--quirks` |
 | `max_sim_time` | run.json's | the simulator's own stop: simulated seconds (`-1` = off); required by `slingshot-exact` |
 | `max_measurements` | run.json's | the simulator's own stop: finished usage-scenario runs (`-1` = off) |
-| `usagemodel`, `allocation`, `monitorrepository` | found by extension | entry files |
+| `usagemodel`, `allocation`, `monitorrepository` | found by extension | entry files: names of model files, relative, without `..` |
 | `simulate_linking_resources`, `simulate_throughput_of_linking_resources` | run.json's | as in `run.json` |
 | `ps_algorithm` | `exact` | `exact` or `virtual-time` processor sharing |
 | `usage_streams`, `fix_double_resume` | `false` | as `--usage-streams`, `--fix-double-resume` ([Command line](./cli.md)) |
 | `spd`, `hpa`, `load_profile` | `true` | use the model's scaling policies, autoscalers, load profiles |
 | `spd_quirks` | `fixed` (`slingshot` for `slingshot-exact`) | as `--spd-quirks` |
 | `spd_log_all` | `false` | also log the SPD evaluations that requested nothing (one per watched measurement) |
-| `max_events_per_instant`, `max_stack_depth`, `max_processes`, `max_steps` | as `simoxide run` | resource limits ([Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)) |
+| `max_events_per_instant`, `max_stack_depth`, `max_processes`, `max_steps` | as `simoxide run` | resource limits ([Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)); `slingshot-exact`, which has no processes, bounds the frames of a user's stack, the live users and the handler events instead |
 
 `config.max_sim_time` and `config.max_measurements` are the simulator's own stop conditions,
 with SimuLizar's (or Slingshot's) semantics, including what happens at the stop. The
@@ -205,7 +212,7 @@ A termination condition is a JSON object whose fields are criteria:
 | Criterion | Holds when |
 |---|---|
 | `timeout_secs` | this many wall-clock seconds passed since the run started (after loading) |
-| `max_measurements` | this many usage-scenario runs finished (SimuLizar's measurement count) |
+| `max_measurements` | this many usage-scenario runs finished (SimuLizar's measurement count); not negative: unlike `config.max_measurements`, `-1` does not mean off here |
 | `max_tuples` | this many measurement tuples were recorded, all series together |
 | `max_events` | this many events were processed |
 | `max_sim_time` | the next event is later than this simulated time (s): every event up to it has run |
@@ -214,8 +221,9 @@ A termination condition is a JSON object whose fields are criteria:
 | `any` | any condition of the list holds |
 
 The criteria of one object combine as its `combine` field says: `any` (the default) or
-`all`. `all` and `any` nest conditions, each counting as one criterion of its object. An empty
-object never holds.
+`all`. `all` and `any` nest conditions, each counting as one criterion of its object; their
+lists must not be empty. An empty object never holds. A `max_sim_time` that has been reached
+stays reached, also inside `all` while the other criteria catch up.
 
 ```json
 {"timeout_secs": 60, "max_measurements": 10000}
@@ -277,7 +285,7 @@ report the time-weighted mean, but an interval of the plain mean of their tuples
 
 | Field | Default | Meaning |
 |---|---|---|
-| `interval_ms` | 500 | wall-clock interval of progress updates (at least 20) |
+| `interval_ms` | 500 | wall-clock interval of progress updates (at least 20, at most 86 400 000: one day) |
 | `warmup_time` | 0 | rows before this simulated time (s) count neither in the statistics nor in the confidence intervals |
 | `warmup_samples` | 0 | nor the first rows of each series |
 
@@ -434,8 +442,10 @@ Query parameters (tool arguments in parentheses):
 | `DELETE /v1/simulations/{id}` | cancel and forget; `204` |
 | `POST /mcp` | MCP over streamable HTTP |
 
-Errors are `{"error": "..."}` with `400` (bad request), `401` (token), `403` (origin), `404`
-(no such simulation or route) or `409` (results not available yet).
+Errors are `{"error": "..."}` with `400` (bad request), `401` (token), `403` (host or origin),
+`404` (no such simulation or route), `409` (results not available yet), `415` (`POST /mcp`
+without `Content-Type: application/json`) or `429` (as many simulations run and wait as the
+server allows).
 
 ```sh
 # a request with the files of a model directory
@@ -481,11 +491,15 @@ notifications); the server sends no server-initiated messages and keeps no sessi
 
 ## Limits and security
 
-- **Binding.** The default address is `127.0.0.1`. To serve a network, bind to another address
-  and set `--token` (constant-time comparison); put TLS in front with a reverse proxy.
-- **Origins.** Requests with an `Origin` header from another host than `localhost`,
-  `127.0.0.1` or `[::1]` are refused (`403`) unless `--allow-any-origin`: a web page the user
-  visits cannot drive a local server (DNS rebinding).
+- **Binding.** The default address is `127.0.0.1`. To serve a network, bind to another address,
+  set `--token` (constant-time comparison) and name the host clients use with `--allow-host`;
+  put TLS in front with a reverse proxy.
+- **Hosts and origins.** Every route but `/health` refuses (`403`) requests whose `Host` or
+  `Origin` header names another host than `localhost`, `127.0.0.1`, `[::1]` or an
+  `--allow-host` name, and the opaque origin `null` of sandboxed frames and `file:` pages,
+  unless `--allow-any-origin`. `POST /mcp` takes only `application/json` bodies, which a page
+  cannot send without a CORS preflight. So a web page the user visits cannot drive or read a
+  local server, also not through DNS rebinding.
 - **Files.** Models sent with the request are loaded from memory and never touch the file
   system. `model_dir` resolves (symbolic links included) inside the `--allow-dir` directories
   only.
@@ -493,8 +507,9 @@ notifications); the server sends no server-initiated messages and keeps no sessi
   check, and hard 10 s later through the simulator's deadline) and the `--max-tuples` cap on
   stored tuples (16 bytes each); both end the run as `completed` with `stop_reason.kind:
   server_limit` and its results. The results of finished simulations stay in memory until
-  `--max-jobs` pushes them out or a client deletes them. Loading and compiling a model have no
-  deadline; cap the request size with `--max-body-mb`.
+  `--max-jobs` pushes them out or a client deletes them. A queued simulation is not a thread,
+  but it holds its request: at most `--max-queued` × `--max-body-mb` of waiting models. Loading
+  and compiling a model have no deadline; cap the request size with `--max-body-mb`.
 - **Untrusted models.** The simulator's resource limits apply (`config.max_stack_depth`,
   `max_processes`, the livelock guard; [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)).
   For hard isolation run the server in a container with a memory limit.
@@ -502,7 +517,8 @@ notifications); the server sends no server-initiated messages and keeps no sessi
 ## Embedding
 
 The crate is a library as well; [`Service`](https://github.com/nk-coding/simoxide/blob/main/crates/simoxide-server/src/api.rs)
-has every operation without HTTP:
+has every operation without HTTP. Its operations are synchronous, except `wait`, which is
+async and needs a tokio runtime:
 
 ```rust
 use simoxide_server::{JobManager, ServerConfig, Service, SimulationRequest};
@@ -520,7 +536,7 @@ let req: SimulationRequest = serde_json::from_str(r#"{
     "termination": {"timeout_secs": 10, "confidence": {"relative_half_width": 0.02}}
 }"#)?;
 let id = svc.start(req)?.id;
-let done = svc.wait(&id, None, Until::Done, Duration::from_secs(60), 0)?;
+let done = svc.wait(&id, None, Until::Done, Duration::from_secs(60), 0).await?;
 println!("{:?}", done.stop_reason);
 let results = svc.results(&id, &Default::default())?;   // serde_json::Value
 ```

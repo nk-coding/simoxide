@@ -13,12 +13,15 @@
 //! This is the setup of `simoxide run` (crates/simoxide-cli) for the subset a service needs:
 //! no trace, tape, snapshots or SimuLizar reconfiguration rules.
 
-use crate::job::{Job, ModelInfo, Outcome, SeriesName, ServerConfig};
+use crate::job::{HARD_STOP_GRACE, Job, ModelInfo, Outcome, SeriesName, ServerConfig};
 use crate::monitor::{
     Monitor, NANOS_PER_SEC, PauseWhy, Probe, capped_duration, ns_to_secs, secs_to_ns,
 };
 use crate::report::{JobStatus, Level, LogSource, ResultSummary, StopKind, StopReason};
-use crate::request::{MIN_PROGRESS_INTERVAL_MS, RUN_JSON, RunOptions, SimulationRequest};
+use crate::request::{
+    MAX_PROGRESS_INTERVAL_MS, MIN_PROGRESS_INTERVAL_MS, RUN_JSON, RunOptions, SimulationRequest,
+    check_name,
+};
 use crate::stats::Warmup;
 use simoxide_sim::compat::Compat;
 use simoxide_sim::ssx::{SpdHooks, SsxRun};
@@ -33,9 +36,6 @@ use std::time::{Duration, Instant};
 
 /// The simulator's stop conditions have this value when they are off.
 const SIM_STOP_OFF: i64 = -1;
-/// The simulator's hard deadline is this much later than the server's cap (s), which gives the
-/// monitor's soft stop, which keeps the results so far, time to act first.
-const HARD_DEADLINE_GRACE_SECS: f64 = 10.0;
 /// Name of the exact processor-sharing algorithm in `config.ps_algorithm`.
 const PS_EXACT: &str = "exact";
 /// Name of the virtual-time processor-sharing algorithm in `config.ps_algorithm`.
@@ -104,34 +104,62 @@ impl Source {
     }
 }
 
-/// Resolves `model_dir` inside one of the allowed directories.
-pub fn resolve_dir(dir: &str, allow: &[PathBuf]) -> Result<PathBuf, String> {
+/// Resolves `model_dir` inside one of the allowed directories: inside `root` if given (an
+/// allowed directory, as the model listing reports it), else inside the one allowed directory
+/// that has it. A name that several allowed directories have needs `root`, so that a request
+/// never runs another model than the listing showed.
+pub fn resolve_dir(dir: &str, root: Option<&str>, allow: &[PathBuf]) -> Result<PathBuf, String> {
     if allow.is_empty() {
         return Err(
             "model_dir is disabled on this server (start it with --allow-dir DIR), send the files instead"
                 .into(),
         );
     }
+    let roots: Vec<PathBuf> = allow.iter().filter_map(|r| r.canonicalize().ok()).collect();
+    let roots = match root {
+        None => roots,
+        Some(r) => {
+            let wanted = Path::new(r).canonicalize().ok();
+            let chosen: Vec<PathBuf> = roots
+                .into_iter()
+                .filter(|a| Some(a) == wanted.as_ref())
+                .collect();
+            if chosen.is_empty() {
+                return Err(format!("root {r:?}: not one of the allowed directories"));
+            }
+            chosen
+        }
+    };
     let rel = Path::new(dir);
-    for root in allow {
-        let Ok(root) = root.canonicalize() else {
-            continue;
-        };
+    let mut found: Vec<PathBuf> = Vec::new();
+    for root in &roots {
         let cand = if rel.is_absolute() {
             rel.to_path_buf()
         } else {
             root.join(rel)
         };
         if let Ok(c) = cand.canonicalize()
-            && c.starts_with(&root)
+            && c.starts_with(root)
             && c.is_dir()
+            && !found.contains(&c)
         {
-            return Ok(c);
+            found.push(c);
         }
     }
-    Err(format!(
-        "model_dir {dir:?}: not a directory inside the allowed directories"
-    ))
+    match found.len() {
+        0 => Err(format!(
+            "model_dir {dir:?}: not a directory inside the allowed directories"
+        )),
+        1 => Ok(found.remove(0)),
+        _ => Err(format!(
+            "model_dir {dir:?} is a directory below several allowed directories: give root (see the model listing)"
+        )),
+    }
+}
+
+/// The request's `model_dir`, resolved (see [`resolve_dir`]).
+fn request_dir(req: &SimulationRequest, dir: &str, cfg: &ServerConfig) -> Result<PathBuf, String> {
+    resolve_dir(dir, req.root.as_deref(), &cfg.allow_dirs)
 }
 
 /// `config.flavour`, by default SimuLizar.
@@ -174,27 +202,34 @@ pub fn precheck(req: &SimulationRequest, cfg: &ServerConfig) -> Result<(), Strin
             return Err("no model: give files (the model's XMI files) or model_dir".into());
         }
         (Some(d), true) => {
-            resolve_dir(d, &cfg.allow_dirs)?;
+            request_dir(req, d, cfg)?;
         }
         (None, false) => {
+            if req.root.is_some() {
+                return Err(
+                    "root selects the directory of a model_dir: give it only with model_dir".into(),
+                );
+            }
             let mut names = std::collections::HashSet::new();
             for f in &req.files {
-                crate::request::check_name(&f.name)?;
                 if !names.insert(&f.name) {
                     return Err(format!("file {} is given twice", f.name));
                 }
-                if f.content.is_none() == f.content_base64.is_none() {
-                    return Err(format!(
-                        "file {}: give exactly one of content and content_base64",
-                        f.name
-                    ));
-                }
+                // the name, exactly one content, valid base64
+                f.bytes()?;
             }
         }
     }
-    let flavour = parse_flavour(&req.config)?;
+    check_entry_names(&req.config)?;
+    let (flavour, _) = flavour_config(&req.config)?;
     parse_mode(&req.config)?;
-    parse_quirks(&req.config)?;
+    #[cfg(feature = "spd")]
+    if req.config.spd != Some(false) {
+        spd::quirks_of(&req.config, flavour)?;
+    }
+    if flavour == FlavourKind::SlingshotExact && req.config.usage_streams {
+        return Err("config.usage_streams: the slingshot-exact flavour has no usage streams (RND-11): run simulizar or slingshot in fast mode".into());
+    }
     if flavour == FlavourKind::SlingshotExact && simulator_sim_time(req, cfg) <= 0 {
         return Err("slingshot-exact needs config.max_sim_time (or run.json's max_sim_time): Slingshot's simulation time is its only stop condition".into());
     }
@@ -211,7 +246,35 @@ pub fn precheck(req: &SimulationRequest, cfg: &ServerConfig) -> Result<(), Strin
     if !(w.warmup_time.is_finite() && w.warmup_time >= 0.0) {
         return Err("progress.warmup_time: expected a non-negative number".into());
     }
+    if w.interval_ms > MAX_PROGRESS_INTERVAL_MS {
+        return Err(format!(
+            "progress.interval_ms: at most {MAX_PROGRESS_INTERVAL_MS} (one day)"
+        ));
+    }
     Ok(())
+}
+
+/// The entry files of `config` name files of the model: relative, without `..`, so that they
+/// stay inside the model directory (`usagemodel: "/etc/passwd"` would read any file).
+fn check_entry_names(o: &RunOptions) -> Result<(), String> {
+    let names = o
+        .usagemodel
+        .iter()
+        .chain(o.allocation.iter().flatten())
+        .chain(o.monitorrepository.iter());
+    for name in names {
+        check_name(name).map_err(|e| format!("config: entry {e}"))?;
+    }
+    Ok(())
+}
+
+/// The progress interval of a request, within the bounds the server honours.
+fn progress_interval(req: &SimulationRequest) -> Duration {
+    Duration::from_millis(
+        req.progress
+            .interval_ms
+            .clamp(MIN_PROGRESS_INTERVAL_MS, MAX_PROGRESS_INTERVAL_MS),
+    )
 }
 
 /// The simulator's `max_sim_time` of a request: `config.max_sim_time`, else its run.json's.
@@ -220,7 +283,7 @@ fn simulator_sim_time(req: &SimulationRequest, cfg: &ServerConfig) -> i64 {
         return t;
     }
     let spec = match &req.model_dir {
-        Some(d) => resolve_dir(d, &cfg.allow_dirs)
+        Some(d) => request_dir(req, d, cfg)
             .ok()
             .map(|d| d.join(RUN_JSON))
             .filter(|p| p.exists())
@@ -333,7 +396,7 @@ fn prepare(job: &Job, req: &SimulationRequest, scfg: &ServerConfig) -> Result<Pr
 /// Where the request's model is: its files, or the directory it names.
 fn model_source(req: &SimulationRequest, scfg: &ServerConfig) -> Result<Source, String> {
     Ok(match &req.model_dir {
-        Some(d) => Source::Dir(resolve_dir(d, &scfg.allow_dirs)?),
+        Some(d) => Source::Dir(request_dir(req, d, scfg)?),
         None => Source::Files(
             req.files
                 .iter()
@@ -487,9 +550,8 @@ fn sim_config(
     }
     cfg.limits.cancel = Some(job.hard_cancel.clone());
     if let Some(s) = scfg.max_run_secs {
-        cfg.limits.deadline = Some(
-            Instant::now() + capped_duration(s) + Duration::from_secs_f64(HARD_DEADLINE_GRACE_SECS),
-        );
+        // the soft stop at the cap keeps the results so far: it gets time to act first
+        cfg.limits.deadline = Some(Instant::now() + capped_duration(s) + HARD_STOP_GRACE);
     }
     cfg.usage_streams = o.usage_streams;
     cfg.fix_double_resume = o.fix_double_resume;
@@ -582,6 +644,9 @@ trait Drive {
     fn spd_counters(&self) -> Option<serde_json::Value> {
         None
     }
+    /// The run's warnings so far (handler exceptions, random-number problems), for runs that
+    /// end before the simulator finishes them.
+    fn warnings(&self) -> Vec<String>;
 }
 
 /// The counters of a process-engine run; `next`: with the time of the next event.
@@ -618,6 +683,9 @@ impl<C: Compat, F: Flavour> Drive for Plain<'_, C, F> {
     }
     fn finish(self) -> (Result<RunResult, SimError>, Option<serde_json::Value>) {
         (self.0.finish(), None)
+    }
+    fn warnings(&self) -> Vec<String> {
+        self.0.state().warnings().to_vec()
     }
 }
 
@@ -664,6 +732,9 @@ impl Drive for Ssx<'_, '_> {
     fn finish(mut self) -> (Result<RunResult, SimError>, Option<serde_json::Value>) {
         let hooks = self.hooks.take();
         (self.run.finish(hooks), None)
+    }
+    fn warnings(&self) -> Vec<String> {
+        self.run.warnings().to_vec()
     }
 }
 
@@ -748,6 +819,8 @@ struct RunEnd {
 /// Turns the end of the driver loop into the job's final state.
 fn conclude<D: Drive>(job: &Job, d: D, end: End, cfg: &SimConfig) -> RunEnd {
     let probe = d.probe();
+    // the warnings so far, for the ends without a result of the simulator
+    let warnings = d.warnings();
     match end {
         End::Finished => {
             let (r, spd) = d.finish();
@@ -774,7 +847,7 @@ fn conclude<D: Drive>(job: &Job, d: D, end: End, cfg: &SimConfig) -> RunEnd {
                         spd,
                     }
                 }
-                Err(e) => failed(job, e, None, probe, spd),
+                Err(e) => failed(job, e, None, probe, spd, warnings),
             }
         }
         End::Stopped(status, stop) => {
@@ -786,13 +859,13 @@ fn conclude<D: Drive>(job: &Job, d: D, end: End, cfg: &SimConfig) -> RunEnd {
                 measurements: Some(d.into_measurements()),
                 probe,
                 uniforms: None,
-                warnings: Vec::new(),
+                warnings,
                 spd,
             }
         }
         End::Failed(e) => {
             let spd = d.spd_counters();
-            failed(job, e, Some(d.into_measurements()), probe, spd)
+            failed(job, e, Some(d.into_measurements()), probe, spd, warnings)
         }
     }
 }
@@ -818,9 +891,12 @@ fn failed(
     m: Option<Measurements>,
     probe: Probe,
     spd: Option<serde_json::Value>,
+    warnings: Vec<String>,
 ) -> RunEnd {
     let (status, stop, error) = match e.kind {
-        SimErrorKind::Cancelled if job.cancel.load(std::sync::atomic::Ordering::Relaxed) => (
+        // the simulator saw a cancellation flag or the deadline: a client's cancellation sets
+        // the soft flag before the hard one
+        SimErrorKind::Cancelled if job.cancel_requested() => (
             JobStatus::Cancelled,
             StopReason {
                 kind: StopKind::Cancelled,
@@ -852,14 +928,14 @@ fn failed(
         measurements: m,
         probe,
         uniforms: None,
-        warnings: Vec::new(),
+        warnings,
         spd,
     }
 }
 
-/// Runs a job to its end (called on the job's thread, holding a simulation slot).
+/// Runs a job to its end (called on the job's thread, holding a simulation slot, with the job
+/// in status `loading`).
 pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
-    job.set_status(JobStatus::Loading);
     let t0 = Instant::now();
     let p = match prepare(job, &req, scfg) {
         Ok(p) => p,
@@ -879,7 +955,7 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
         ),
         None,
     );
-    let interval = Duration::from_millis(req.progress.interval_ms.max(MIN_PROGRESS_INTERVAL_MS));
+    let interval = progress_interval(&req);
     let mut mon = Monitor::new(
         req.termination.clone(),
         Warmup {
@@ -1050,20 +1126,7 @@ mod spd {
         if o.spd == Some(false) {
             return Ok(None);
         }
-        let exact = p.flavour == FlavourKind::SlingshotExact;
-        let q = match &o.spd_quirks {
-            Some(s) => {
-                simoxide_spd::Quirks::parse(s).map_err(|e| format!("config.spd_quirks: {e}"))?
-            }
-            None if exact => simoxide_spd::Quirks::slingshot(),
-            None => simoxide_spd::Quirks::fixed(),
-        };
-        if exact && q != simoxide_spd::Quirks::slingshot() {
-            return Err(
-                "slingshot-exact runs the SPD with all quirks (config.spd_quirks: slingshot)"
-                    .into(),
-            );
-        }
+        let q = quirks_of(o, p.flavour)?;
         let s = spd_of(&p.cm.model, q).map_err(|e| e.to_string())?;
         if let Some(s) = &s {
             if let Some(d) = s.dropped() {
@@ -1092,6 +1155,26 @@ mod spd {
             );
         }
         Ok(s)
+    }
+
+    /// `config.spd_quirks` for `flavour`: by default `fixed`, and `slingshot` (the only one it
+    /// allows) for slingshot-exact.
+    pub fn quirks_of(o: &RunOptions, flavour: FlavourKind) -> Result<simoxide_spd::Quirks, String> {
+        let exact = flavour == FlavourKind::SlingshotExact;
+        let q = match &o.spd_quirks {
+            Some(s) => {
+                simoxide_spd::Quirks::parse(s).map_err(|e| format!("config.spd_quirks: {e}"))?
+            }
+            None if exact => simoxide_spd::Quirks::slingshot(),
+            None => simoxide_spd::Quirks::fixed(),
+        };
+        if exact && q != simoxide_spd::Quirks::slingshot() {
+            return Err(
+                "slingshot-exact runs the SPD with all quirks (config.spd_quirks: slingshot)"
+                    .into(),
+            );
+        }
+        Ok(q)
     }
 
     /// Forwards the SPD decision log into the job's log.
@@ -1237,6 +1320,9 @@ mod spd {
                 "requests": self.run.state.requests,
             }))
         }
+        fn warnings(&self) -> Vec<String> {
+            self.run.sim.state().warnings().to_vec()
+        }
     }
 
     /// Runs the model with its scaling policies, on the engine of its flavour and mode.
@@ -1363,5 +1449,61 @@ mod spd {
         let mut d = WithSpd { run, adj, log };
         let end = drive(job, &mut d, mon, interval);
         Ok(conclude(job, d, end, &cfg))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// An engine that is paused for good, with warnings and a recorded series.
+    struct Paused {
+        warnings: Vec<String>,
+    }
+
+    impl Drive for Paused {
+        fn step(
+            &mut self,
+            _next: bool,
+            _keep: &mut dyn FnMut(&Probe) -> bool,
+        ) -> Result<Status, SimError> {
+            Ok(Status::Paused)
+        }
+        fn probe(&self) -> Probe {
+            Probe::default()
+        }
+        fn measurements(&self) -> &Measurements {
+            unreachable!("conclude reads the probe and the warnings only")
+        }
+        fn into_measurements(self) -> Measurements {
+            Measurements::default()
+        }
+        fn finish(self) -> (Result<RunResult, SimError>, Option<serde_json::Value>) {
+            unreachable!("a stopped or failed run is not finished")
+        }
+        fn warnings(&self) -> Vec<String> {
+            self.warnings.clone()
+        }
+    }
+
+    /// Runs that the monitor stops and runs that fail keep the simulator's warnings.
+    #[test]
+    fn stopped_and_failed_runs_keep_the_warnings() {
+        let job = Job::new("sim-1".into(), "test".into(), 100);
+        let warning = "t=1.0: NullPointerException in SeffProgressed: ...".to_string();
+        let engine = || Paused {
+            warnings: vec![warning.clone()],
+        };
+        let stopped = conclude(&job, engine(), cancelled(), &SimConfig::default());
+        assert_eq!(stopped.status, JobStatus::Cancelled);
+        assert_eq!(stopped.warnings, std::slice::from_ref(&warning));
+        let error = SimError {
+            message: "limit exceeded".into(),
+            at_ns: 0,
+            kind: SimErrorKind::Limit,
+        };
+        let failed = conclude(&job, engine(), End::Failed(error), &SimConfig::default());
+        assert_eq!(failed.status, JobStatus::Failed);
+        assert_eq!(failed.warnings, [warning]);
     }
 }

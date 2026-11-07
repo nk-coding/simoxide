@@ -50,7 +50,7 @@ use crate::frames::Binding;
 use crate::ir::*;
 use crate::javafmt::{push_json_double, push_json_str};
 use crate::meas::Measurements;
-use crate::sim::{Outputs, RunResult, SimConfig, SimError, SimErrorKind};
+use crate::sim::{CHECK_INTERVAL, Limits, Outputs, RunResult, SimConfig, SimError, SimErrorKind};
 use frame::{SEnv, SFrame};
 use simoxide_model::*;
 use simoxide_sched::Wakeup;
@@ -76,6 +76,10 @@ pub use state::SsxState;
 pub(crate) struct User {
     pub id: u64,
     pub stack: RefCell<Vec<SFrame>>,
+    /// A share of [`Engine::live_users`]: the engine counts its live users by these shares
+    /// (`Limits::max_processes`). Not part of Slingshot's `User`; held, never read.
+    #[allow(dead_code)]
+    pub live: Rc<()>,
 }
 pub(crate) type URef = Rc<User>;
 
@@ -299,6 +303,19 @@ pub(crate) enum Ev {
 
 /// A handler's result: events with their delays, in insertion order.
 pub(crate) type Out = Vec<(Ev, f64)>;
+
+/// The class of the [`Throw`] that unwinds a handler when a resource limit of [`Limits`] ends
+/// the run ([`Engine::run_limit`]). It is not a Java exception: it disposes no handler and is
+/// not a warning of the run.
+const RUN_LIMIT_CLASS: &str = "simoxide.RunLimitExceeded";
+
+/// A count limit of [`Limits`] as a bound (`0`: unlimited, `usize::MAX`).
+fn unlimited_if_zero(limit: u32) -> usize {
+    match limit {
+        0 => usize::MAX,
+        n => n as usize,
+    }
+}
 
 /// An exception thrown by a handler (SS-BUS-7).
 #[derive(Debug, Clone)]
@@ -596,6 +613,14 @@ pub(crate) struct Engine<'m> {
     same_instant: u64,
     last_t: f64,
     max_per_instant: u64,
+    /// Every live [`User`] holds a clone ([`User::live`]): the strong count minus this one is
+    /// the number of live users.
+    live_users: Rc<()>,
+    /// `Limits::max_processes` as a bound on the live users (`usize::MAX`: unlimited).
+    max_live_users: usize,
+    /// `Limits::max_stack_depth` as a bound on the frames of a user's SimuCom stack
+    /// (`usize::MAX`: unlimited).
+    max_stack_frames: usize,
     /// The interpreter listener (SIM-14).
     pub(crate) lis: listen::Listening,
 }
@@ -663,16 +688,95 @@ impl<'m> Engine<'m> {
             same_instant: 0,
             last_t: 0.0,
             max_per_instant: cfg.max_events_per_instant,
+            live_users: Rc::new(()),
+            max_live_users: unlimited_if_zero(cfg.limits.max_processes),
+            max_stack_frames: unlimited_if_zero(cfg.limits.max_stack_depth),
             lis: listen::Listening::default(),
         })
     }
 
-    pub fn new_user(&mut self) -> URef {
+    /// A new user; ends the run when it would exceed `Limits::max_processes` live users.
+    pub fn new_user(&mut self) -> Result<URef, Throw> {
+        if self.live_user_count() >= self.max_live_users {
+            return Err(self.run_limit(format!(
+                "limit exceeded: more than {} live users (Limits::max_processes)",
+                self.max_live_users
+            )));
+        }
         self.next_user += 1;
-        Rc::new(User {
+        Ok(Rc::new(User {
             id: self.next_user,
             stack: RefCell::new(Vec::new()),
-        })
+            live: self.live_users.clone(),
+        }))
+    }
+
+    /// Users that are still referenced: waiting, queued, thinking or running a request.
+    fn live_user_count(&self) -> usize {
+        Rc::strong_count(&self.live_users) - 1
+    }
+
+    /// `Limits::max_stack_depth` when a component's SEFF is entered: ends the run when `user`'s
+    /// SimuCom stack has grown to that many frames. Slingshot has no continuation stack; the
+    /// frames of the user's stack are what a recursion piles up (a few per call, and calls do
+    /// not lengthen the caller chain), so they stand in for its depth.
+    pub(crate) fn check_stack_depth(&mut self, user: &URef) -> Result<(), Throw> {
+        if user.stack.borrow().len() < self.max_stack_frames {
+            return Ok(());
+        }
+        Err(self.run_limit(format!(
+            "limit exceeded: a user's stack has {} frames (Limits::max_stack_depth; unbounded recursion?)",
+            self.max_stack_frames
+        )))
+    }
+
+    /// Ends the run with a resource-limit error: the run stops after the current event
+    /// ([`Engine::advance`]); the returned [`Throw`] unwinds the handler without disposing it.
+    fn run_limit(&mut self, message: String) -> Throw {
+        let at_ns = simoxide_sched::time::span(self.now);
+        self.failure.get_or_insert(SimError {
+            message: message.clone(),
+            at_ns,
+            kind: SimErrorKind::Limit,
+        });
+        self.stopped = true;
+        Throw {
+            class: RUN_LIMIT_CLASS,
+            message,
+        }
+    }
+
+    /// `Limits::max_steps` (a step of this engine is a dispatched event), and every
+    /// [`CHECK_INTERVAL`] events the deadline and the cancellation flag.
+    fn check_limits(&self, limits: &Limits) -> Result<(), SimError> {
+        let fail = |kind, message: String| SimError {
+            message,
+            at_ns: simoxide_sched::time::span(self.now),
+            kind,
+        };
+        if limits.max_steps > 0 && self.events > limits.max_steps {
+            return Err(fail(
+                SimErrorKind::Limit,
+                format!(
+                    "limit exceeded: more than {} handler events (Limits::max_steps)",
+                    limits.max_steps
+                ),
+            ));
+        }
+        if !self.events.is_multiple_of(CHECK_INTERVAL) {
+            return Ok(());
+        }
+        if let Some(c) = &limits.cancel
+            && c.load(std::sync::atomic::Ordering::Acquire)
+        {
+            return Err(fail(SimErrorKind::Cancelled, "cancelled".into()));
+        }
+        if let Some(d) = limits.deadline
+            && std::time::Instant::now() >= d
+        {
+            return Err(fail(SimErrorKind::Cancelled, "deadline passed".into()));
+        }
+        Ok(())
     }
 
     pub fn ctx_id(&mut self) -> u64 {
@@ -721,6 +825,8 @@ impl<'m> Engine<'m> {
                     }
                 }
             }
+            // a resource limit ended the run (`Engine::failure`): no Java exception
+            Err(t) if t.class == RUN_LIMIT_CLASS => {}
             Err(t) => {
                 self.disposed[h as usize] = true;
                 self.errors.push(format!(
@@ -800,6 +906,10 @@ impl<'m> Engine<'m> {
                     return Err(f);
                 }
                 break;
+            }
+            if let Err(e) = self.check_limits(&cfg.limits) {
+                self.done = true;
+                return Err(e);
             }
             if cfg.limits.max_events > 0 && self.events >= cfg.limits.max_events {
                 self.done = true;

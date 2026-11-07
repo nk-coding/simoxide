@@ -4,15 +4,17 @@
 //! `tools/call`; notifications get no answer). Two transports use it:
 //!
 //! * **stdio** ([`serve_stdio`]): newline-delimited JSON-RPC on stdin and stdout, as MCP
-//!   clients launch local servers (`simoxide-server --mcp-stdio`). Requests are handled on
-//!   threads of their own, so a client can call `get_status` while a `wait_for_simulation`
-//!   blocks.
+//!   clients launch local servers (`simoxide-server --mcp-stdio`). Requests are handled
+//!   concurrently, so a client can call `get_status` while a `wait_for_simulation` waits.
 //! * **streamable HTTP** (`POST /mcp` of [`crate::http`]): one JSON-RPC message or batch per
 //!   request, answered with `application/json`. The server sends no server-initiated messages,
 //!   so `GET /mcp` (the optional SSE stream) is not offered.
 //!
 //! Tool results carry the JSON both as text content and as `structuredContent`; failures are
 //! tool results with `isError: true` (protocol errors only for malformed requests).
+//!
+//! Handling is asynchronous (tokio): `wait_for_simulation` waits without holding a thread, and
+//! the other tools run on tokio's blocking threads.
 
 use crate::api::{
     DEFAULT_MAX_ROWS_PER_SERIES, DEFAULT_RECENT_LOGS, MAX_LOG_PAGE, MAX_WAIT, ResultsQuery,
@@ -22,7 +24,8 @@ use crate::job::{ApiError, MIB, lock_ignoring_poison};
 use crate::report::Level;
 use crate::request::{
     DEFAULT_CONFIDENCE_LEVEL, DEFAULT_MIN_BATCHES, DEFAULT_MIN_SAMPLES,
-    DEFAULT_PROGRESS_INTERVAL_MS, MIN_PROGRESS_INTERVAL_MS, SeriesSelector, SimulationRequest,
+    DEFAULT_PROGRESS_INTERVAL_MS, MAX_PROGRESS_INTERVAL_MS, MIN_PROGRESS_INTERVAL_MS,
+    SeriesSelector, SimulationRequest,
 };
 use crate::stats::MIN_BATCHES_FOR_INTERVAL;
 use serde_json::{Value, json};
@@ -80,20 +83,24 @@ fn rpc_result(id: Value, result: Value) -> Value {
 }
 
 impl Mcp {
-    /// Answers a JSON-RPC message or batch; `None` if nothing in it needs an answer.
-    pub fn handle_message(&self, message: &Value) -> Option<Value> {
+    /// Answers a JSON-RPC message or batch (the messages of a batch one after the other);
+    /// `None` if nothing in it needs an answer.
+    pub async fn handle_message(&self, message: Value) -> Option<Value> {
         match message {
             Value::Array(batch) => {
-                let replies: Vec<Value> = batch.iter().filter_map(|m| self.handle(m)).collect();
+                let mut replies = Vec::new();
+                for m in batch {
+                    replies.extend(self.handle(m).await);
+                }
                 (!replies.is_empty()).then_some(Value::Array(replies))
             }
-            one => self.handle(one),
+            one => self.handle(one).await,
         }
     }
 
     /// Answers one JSON-RPC message; `None` for notifications and responses.
-    pub fn handle(&self, msg: &Value) -> Option<Value> {
-        let Some(obj) = msg.as_object() else {
+    pub async fn handle(&self, msg: Value) -> Option<Value> {
+        let Value::Object(mut obj) = msg else {
             return Some(rpc_error(
                 Value::Null,
                 RPC_INVALID_REQUEST,
@@ -101,13 +108,13 @@ impl Mcp {
             ));
         };
         let id = obj.get("id").cloned();
-        let Some(method) = obj.get("method").and_then(Value::as_str) else {
+        let Some(method) = obj.get("method").and_then(Value::as_str).map(String::from) else {
             // a response from the client (we never send requests): ignore
             return id.map(|id| rpc_error(id, RPC_INVALID_REQUEST, "invalid request: no method"));
         };
         let id = id?; // notifications (`notifications/initialized`, `.../cancelled`) need no answer
-        let params = obj.get("params").cloned().unwrap_or(Value::Null);
-        Some(match method {
+        let mut params = obj.remove("params").unwrap_or(Value::Null);
+        Some(match method.as_str() {
             "initialize" => {
                 let asked = params
                     .get("protocolVersion")
@@ -135,16 +142,23 @@ impl Mcp {
             "ping" => rpc_result(id, json!({})),
             "tools/list" => rpc_result(id, json!({ "tools": tools() })),
             "tools/call" => {
-                let name = params.get("name").and_then(Value::as_str).unwrap_or("");
-                let args = params.get("arguments").cloned().unwrap_or(json!({}));
-                if !tools().iter().any(|t| t["name"] == name) {
+                let name = params
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .unwrap_or("")
+                    .to_string();
+                // taken, not copied: the arguments of start_simulation carry the model
+                let args = params
+                    .get_mut("arguments")
+                    .map_or_else(|| json!({}), Value::take);
+                if !tools().iter().any(|t| t["name"] == name.as_str()) {
                     return Some(rpc_error(
                         id,
                         RPC_INVALID_PARAMS,
                         format!("unknown tool {name:?}"),
                     ));
                 }
-                rpc_result(id, self.call(name, &args))
+                rpc_result(id, self.call(&name, args).await)
             }
             "resources/list" => rpc_result(id, json!({"resources": []})),
             "resources/templates/list" => rpc_result(id, json!({"resourceTemplates": []})),
@@ -154,8 +168,8 @@ impl Mcp {
     }
 
     /// Runs a tool: the result as MCP `CallToolResult`.
-    pub fn call(&self, name: &str, args: &Value) -> Value {
-        match self.dispatch(name, args) {
+    pub async fn call(&self, name: &str, args: Value) -> Value {
+        match self.dispatch(name, args).await {
             Ok(v) => {
                 let text = serde_json::to_string_pretty(&v).unwrap_or_default();
                 // structuredContent must be an object
@@ -177,118 +191,128 @@ impl Mcp {
         }
     }
 
-    /// Runs the tool `name` with the arguments `a`.
-    fn dispatch(&self, name: &str, a: &Value) -> Result<Value, ApiError> {
-        let svc = &self.svc;
-        match name {
-            "server_info" => Ok(svc.info()),
-            "list_models" => Ok(json!({ "models": svc.models()? })),
-            "start_simulation" => self.start_simulation(a),
-            "list_simulations" => Ok(json!({ "simulations": to_json(&svc.list()) })),
-            "get_status" => {
-                let view = svc.status(&id_argument(a)?, recent_logs_argument(a))?;
-                Ok(apply_include_series(to_json(&view), a))
-            }
-            "wait_for_simulation" => self.wait_for_simulation(a),
-            "get_logs" => self.get_logs(a),
-            "get_results" => self.get_results(a),
-            "cancel_simulation" => Ok(to_json(&svc.cancel(&id_argument(a)?)?)),
-            "delete_simulation" => {
-                let id = id_argument(a)?;
-                svc.jobs.delete(&id)?;
-                Ok(json!({"deleted": id}))
-            }
-            _ => Err(ApiError::bad_request(format!("unknown tool {name:?}"))),
+    /// Runs the tool `name` with the arguments `a`: `wait_for_simulation` waits here, every
+    /// other tool runs on a blocking thread.
+    async fn dispatch(&self, name: &str, a: Value) -> Result<Value, ApiError> {
+        if name == "wait_for_simulation" {
+            return wait_for_simulation(&self.svc, &a).await;
         }
+        let (svc, name) = (self.svc.clone(), name.to_string());
+        tokio::task::spawn_blocking(move || run_tool(&svc, &name, a))
+            .await
+            .map_err(|e| ApiError {
+                status: axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                message: format!("internal error: {e}"),
+            })?
     }
+}
 
-    /// `start_simulation`: the arguments are a [`SimulationRequest`].
-    fn start_simulation(&self, a: &Value) -> Result<Value, ApiError> {
-        let req: SimulationRequest = serde_json::from_value(a.clone())
-            .map_err(|e| ApiError::bad_request(format!("invalid arguments: {e}")))?;
-        let view = self.svc.start(req)?;
-        let mut out = to_json(&view);
-        out["next"] = json!(format!(
-            "Follow it with wait_for_simulation {{\"id\": \"{}\"}} or get_status; read the results with get_results once status is completed.",
-            view.id
-        ));
-        Ok(out)
+/// Runs a tool that does not wait.
+fn run_tool(svc: &Service, name: &str, a: Value) -> Result<Value, ApiError> {
+    match name {
+        "server_info" => Ok(svc.info()),
+        "list_models" => Ok(json!({ "models": svc.models()? })),
+        "start_simulation" => start_simulation(svc, a),
+        "list_simulations" => Ok(json!({ "simulations": to_json(&svc.list()) })),
+        "get_status" => {
+            let view = svc.status(&id_argument(&a)?, recent_logs_argument(&a))?;
+            Ok(apply_include_series(to_json(&view), &a))
+        }
+        "get_logs" => get_logs(svc, &a),
+        "get_results" => get_results(svc, &a),
+        "cancel_simulation" => Ok(to_json(&svc.cancel(&id_argument(&a)?)?)),
+        "delete_simulation" => {
+            let id = id_argument(&a)?;
+            svc.jobs.delete(&id)?;
+            Ok(json!({"deleted": id}))
+        }
+        _ => Err(ApiError::bad_request(format!("unknown tool {name:?}"))),
     }
+}
 
-    /// `wait_for_simulation`.
-    fn wait_for_simulation(&self, a: &Value) -> Result<Value, ApiError> {
-        let until = match a.get("until").and_then(Value::as_str) {
-            None | Some("change") => Until::Change,
-            Some("done") => Until::Done,
-            Some(u) => {
-                return Err(ApiError::bad_request(format!(
-                    "until: expected change or done, got {u:?}"
-                )));
-            }
-        };
-        let secs = a
-            .get("timeout_secs")
-            .and_then(Value::as_f64)
-            .filter(|s| s.is_finite())
-            .unwrap_or(DEFAULT_WAIT_SECS)
-            .clamp(0.0, MAX_WAIT.as_secs_f64());
-        let after = a.get("after_version").and_then(Value::as_u64);
-        let view = self.svc.wait(
+/// `start_simulation`: the arguments are a [`SimulationRequest`].
+fn start_simulation(svc: &Service, a: Value) -> Result<Value, ApiError> {
+    let req: SimulationRequest = serde_json::from_value(a)
+        .map_err(|e| ApiError::bad_request(format!("invalid arguments: {e}")))?;
+    let view = svc.start(req)?;
+    let mut out = to_json(&view);
+    out["next"] = json!(format!(
+        "Follow it with wait_for_simulation {{\"id\": \"{}\"}} or get_status; read the results with get_results once status is completed.",
+        view.id
+    ));
+    Ok(out)
+}
+
+/// `wait_for_simulation`.
+async fn wait_for_simulation(svc: &Service, a: &Value) -> Result<Value, ApiError> {
+    let until = match a.get("until").and_then(Value::as_str) {
+        None | Some("change") => Until::Change,
+        Some("done") => Until::Done,
+        Some(u) => {
+            return Err(ApiError::bad_request(format!(
+                "until: expected change or done, got {u:?}"
+            )));
+        }
+    };
+    let secs = a
+        .get("timeout_secs")
+        .and_then(Value::as_f64)
+        .filter(|s| s.is_finite())
+        .unwrap_or(DEFAULT_WAIT_SECS)
+        .clamp(0.0, MAX_WAIT.as_secs_f64());
+    let after = a.get("after_version").and_then(Value::as_u64);
+    let view = svc
+        .wait(
             &id_argument(a)?,
             after,
             until,
             Duration::from_secs_f64(secs),
             recent_logs_argument(a),
-        )?;
-        Ok(apply_include_series(to_json(&view), a))
-    }
+        )
+        .await?;
+    Ok(apply_include_series(to_json(&view), a))
+}
 
-    /// `get_logs`.
-    fn get_logs(&self, a: &Value) -> Result<Value, ApiError> {
-        let since = a.get("since").and_then(Value::as_u64).unwrap_or(0);
-        let limit = a
-            .get("limit")
+/// `get_logs`.
+fn get_logs(svc: &Service, a: &Value) -> Result<Value, ApiError> {
+    let since = a.get("since").and_then(Value::as_u64).unwrap_or(0);
+    let limit = a
+        .get("limit")
+        .and_then(Value::as_u64)
+        .unwrap_or(DEFAULT_LOG_LIMIT) as usize;
+    let level = Level::from_query(a.get("min_level").and_then(Value::as_str))
+        .map_err(|e| ApiError::bad_request(format!("min_level: {e}")))?;
+    Ok(to_json(&svc.logs(&id_argument(a)?, since, limit, level)?))
+}
+
+/// `get_results`: the summary and rows as JSON, or `measurements.csv` (`format: csv`).
+fn get_results(svc: &Service, a: &Value) -> Result<Value, ApiError> {
+    let series: Vec<SeriesSelector> = match a.get("series") {
+        Some(s) => serde_json::from_value(s.clone())
+            .map_err(|e| ApiError::bad_request(format!("series: {e}")))?,
+        None => Vec::new(),
+    };
+    if a.get("format").and_then(Value::as_str) == Some("csv") {
+        let mut csv = svc.csv(&id_argument(a)?, &series)?;
+        let max_bytes = a
+            .get("max_csv_bytes")
             .and_then(Value::as_u64)
-            .unwrap_or(DEFAULT_LOG_LIMIT) as usize;
-        let level = Level::from_query(a.get("min_level").and_then(Value::as_str))
-            .map_err(|e| ApiError::bad_request(format!("min_level: {e}")))?;
-        Ok(to_json(&self.svc.logs(
-            &id_argument(a)?,
-            since,
-            limit,
-            level,
-        )?))
+            .map_or(DEFAULT_MAX_CSV_BYTES, |n| n as usize);
+        let truncated = truncate_to_whole_lines(&mut csv, max_bytes);
+        return Ok(json!({"format": "csv", "truncated": truncated, "csv": csv}));
     }
-
-    /// `get_results`: the summary and rows as JSON, or `measurements.csv` (`format: csv`).
-    fn get_results(&self, a: &Value) -> Result<Value, ApiError> {
-        let series: Vec<SeriesSelector> = match a.get("series") {
-            Some(s) => serde_json::from_value(s.clone())
-                .map_err(|e| ApiError::bad_request(format!("series: {e}")))?,
-            None => Vec::new(),
-        };
-        if a.get("format").and_then(Value::as_str) == Some("csv") {
-            let mut csv = self.svc.csv(&id_argument(a)?, &series)?;
-            let max_bytes = a
-                .get("max_csv_bytes")
-                .and_then(Value::as_u64)
-                .map_or(DEFAULT_MAX_CSV_BYTES, |n| n as usize);
-            let truncated = truncate_to_whole_lines(&mut csv, max_bytes);
-            return Ok(json!({"format": "csv", "truncated": truncated, "csv": csv}));
-        }
-        let query = ResultsQuery {
-            include_rows: a
-                .get("include_rows")
-                .and_then(Value::as_bool)
-                .unwrap_or(false),
-            series,
-            max_rows_per_series: a
-                .get("max_rows_per_series")
-                .and_then(Value::as_u64)
-                .map(|n| n as usize),
-        };
-        self.svc.results(&id_argument(a)?, &query)
-    }
+    let query = ResultsQuery {
+        include_rows: a
+            .get("include_rows")
+            .and_then(Value::as_bool)
+            .unwrap_or(false),
+        series,
+        max_rows_per_series: a
+            .get("max_rows_per_series")
+            .and_then(Value::as_u64)
+            .map(|n| n as usize),
+    };
+    svc.results(&id_argument(a)?, &query)
 }
 
 /// The required argument `id`, the simulation id.
@@ -350,7 +374,7 @@ fn selector_schema() -> Value {
 fn condition_schema(depth: u32) -> Value {
     let mut props = json!({
         "timeout_secs": {"type": "number", "exclusiveMinimum": 0, "description": "Wall-clock seconds since the run started."},
-        "max_measurements": {"type": "integer", "description": "Finished usage-scenario runs (SimuLizar's measurement count)."},
+        "max_measurements": {"type": "integer", "minimum": 0, "description": "Finished usage-scenario runs (SimuLizar's measurement count). Unlike config.max_measurements, -1 is not off: leave the criterion out."},
         "max_tuples": {"type": "integer", "minimum": 0, "description": "Recorded measurement tuples, all series together."},
         "max_events": {"type": "integer", "minimum": 0, "description": "Processed simulation events."},
         "max_sim_time": {"type": "number", "minimum": 0, "description": "Simulated seconds."},
@@ -371,10 +395,8 @@ fn condition_schema(depth: u32) -> Value {
         "combine": {"type": "string", "enum": ["any", "all"], "default": "any", "description": "Whether any or all criteria of this object must hold."}
     });
     if depth > 0 {
-        let sub = json!({"type": "array", "items": condition_schema(depth - 1)});
-        props["all"] = json!({"type": "array", "items": condition_schema(depth - 1), "description": "Holds when every listed condition holds."});
-        props["any"] = sub;
-        props["any"]["description"] = json!("Holds when any listed condition holds.");
+        props["all"] = json!({"type": "array", "minItems": 1, "items": condition_schema(depth - 1), "description": "Holds when every listed condition holds."});
+        props["any"] = json!({"type": "array", "minItems": 1, "items": condition_schema(depth - 1), "description": "Holds when any listed condition holds."});
     }
     json!({"type": "object", "properties": props, "additionalProperties": false})
 }
@@ -393,14 +415,14 @@ pub fn tools() -> Vec<Value> {
         json!({
             "name": "list_models",
             "title": "List server-side models",
-            "description": "Model directories on the server (below its --allow-dir directories) that start_simulation accepts as model_dir, with their files.",
+            "description": "Model directories on the server (below its --allow-dir directories) that start_simulation accepts as model_dir, with their root and files.",
             "inputSchema": {"type": "object", "properties": {}, "additionalProperties": false},
             "annotations": ro,
         }),
         json!({
             "name": "start_simulation",
             "title": "Start a simulation",
-            "description": "Submits a Palladio model (repository, system, resource environment, allocation, usage model, measuring points and monitor repository, optionally run.json, scaling policies .spd, HPA autoscalers .hpa.json, load profiles .loadprofile.json) and starts simulating it. Returns the simulation id at once; the run goes on in the background. Give either files or model_dir. The run needs a bounding stop: config.max_sim_time / config.max_measurements (the simulator's own stop conditions, as run.json) or a termination criterion such as timeout_secs or max_measurements; a confidence criterion alone ends at the server's run-time cap at the latest.",
+            "description": "Submits a Palladio model (repository, system, resource environment, allocation, usage model, measuring points and monitor repository, optionally run.json, scaling policies .spd, HPA autoscalers .hpa.json, load profiles .loadprofile.json) and starts simulating it. Returns the simulation id at once; the run goes on in the background. Give either files or model_dir. The run needs a bounding stop: config.max_sim_time / config.max_measurements (the simulator's own stop conditions, as run.json) or a termination criterion such as timeout_secs or max_measurements; a confidence criterion alone ends at the server's run-time cap at the latest. When the server already runs and queues as many simulations as it may, the call fails: try again once one has ended.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
@@ -420,6 +442,7 @@ pub fn tools() -> Vec<Value> {
                         }
                     },
                     "model_dir": {"type": "string", "description": "A model directory on the server instead of files (see list_models)."},
+                    "root": {"type": "string", "description": "The allowed directory model_dir is below, as list_models reports it (its root). Needed when several have a model of that name."},
                     "config": {
                         "type": "object",
                         "description": "Run configuration; overrides a run.json among the files.",
@@ -457,7 +480,7 @@ pub fn tools() -> Vec<Value> {
                     "progress": {
                         "type": "object",
                         "properties": {
-                            "interval_ms": {"type": "integer", "minimum": MIN_PROGRESS_INTERVAL_MS, "default": DEFAULT_PROGRESS_INTERVAL_MS, "description": "Wall-clock interval of progress updates."},
+                            "interval_ms": {"type": "integer", "minimum": MIN_PROGRESS_INTERVAL_MS, "maximum": MAX_PROGRESS_INTERVAL_MS, "default": DEFAULT_PROGRESS_INTERVAL_MS, "description": "Wall-clock interval of progress updates."},
                             "warmup_time": {"type": "number", "minimum": 0, "description": "Ignore rows before this simulated time in statistics and confidence intervals."},
                             "warmup_samples": {"type": "integer", "minimum": 0, "description": "Ignore the first rows of every series."}
                         },
@@ -566,8 +589,12 @@ pub fn tools() -> Vec<Value> {
     ]
 }
 
-/// Serves MCP over stdin and stdout until stdin closes. Diagnostics go to stderr.
+/// Serves MCP over stdin and stdout until stdin closes, then answers the requests still in
+/// progress. Diagnostics go to stderr.
 pub fn serve_stdio(mcp: Arc<Mcp>) -> std::io::Result<()> {
+    let runtime = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()?;
     let out = Arc::new(Mutex::new(std::io::stdout()));
     let send = |out: &Mutex<std::io::Stdout>, v: &Value| {
         let mut o = lock_ignoring_poison(out);
@@ -575,7 +602,7 @@ pub fn serve_stdio(mcp: Arc<Mcp>) -> std::io::Result<()> {
         let _ = o.flush();
     };
     let stdin = std::io::stdin();
-    let mut workers = Vec::new();
+    let mut in_progress = Vec::new();
     for line in stdin.lock().lines() {
         let line = line?;
         if line.trim().is_empty() {
@@ -592,17 +619,20 @@ pub fn serve_stdio(mcp: Arc<Mcp>) -> std::io::Result<()> {
             }
         };
         let (m, o) = (mcp.clone(), out.clone());
-        // every message on a thread of its own: a blocking wait must not hold up the others
-        workers.push(std::thread::spawn(move || {
-            if let Some(reply) = m.handle_message(&msg) {
-                send(&o, &reply);
+        // concurrently: a waiting request must not hold up the others
+        in_progress.push(runtime.spawn(async move {
+            if let Some(reply) = m.handle_message(msg).await {
+                // writing to stdout can block on a slow client: off the async workers
+                let _ = tokio::task::spawn_blocking(move || send(&o, &reply)).await;
             }
         }));
-        workers.retain(|w| !w.is_finished());
+        in_progress.retain(|h| !h.is_finished());
     }
-    for w in workers {
-        let _ = w.join();
-    }
+    runtime.block_on(async {
+        for h in in_progress {
+            let _ = h.await;
+        }
+    });
     Ok(())
 }
 
@@ -617,20 +647,23 @@ mod tests {
         }
     }
 
-    #[test]
-    fn initialize_and_list() {
+    #[tokio::test]
+    async fn initialize_and_list() {
         let m = mcp();
         let r = m
-            .handle(&json!({"jsonrpc": "2.0", "id": 1, "method": "initialize",
+            .handle(json!({"jsonrpc": "2.0", "id": 1, "method": "initialize",
                 "params": {"protocolVersion": "2025-03-26", "capabilities": {}, "clientInfo": {"name": "t", "version": "0"}}}))
+            .await
             .unwrap();
         assert_eq!(r["result"]["protocolVersion"], "2025-03-26");
         assert!(
-            m.handle(&json!({"jsonrpc": "2.0", "method": "notifications/initialized"}))
+            m.handle(json!({"jsonrpc": "2.0", "method": "notifications/initialized"}))
+                .await
                 .is_none()
         );
         let r = m
-            .handle(&json!({"jsonrpc": "2.0", "id": 2, "method": "tools/list"}))
+            .handle(json!({"jsonrpc": "2.0", "id": 2, "method": "tools/list"}))
+            .await
             .unwrap();
         let names: Vec<&str> = r["result"]["tools"]
             .as_array()
@@ -642,21 +675,24 @@ mod tests {
         assert!(names.contains(&"get_results"));
     }
 
-    #[test]
-    fn errors_are_tool_results() {
+    #[tokio::test]
+    async fn errors_are_tool_results() {
         let m = mcp();
         let r = m
-            .handle(&json!({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+            .handle(json!({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
                 "params": {"name": "get_status", "arguments": {"id": "nope"}}}))
+            .await
             .unwrap();
         assert_eq!(r["result"]["isError"], true);
         let r = m
-            .handle(&json!({"jsonrpc": "2.0", "id": 4, "method": "tools/call",
+            .handle(json!({"jsonrpc": "2.0", "id": 4, "method": "tools/call",
                 "params": {"name": "start_simulation", "arguments": {"files": []}}}))
+            .await
             .unwrap();
         assert_eq!(r["result"]["isError"], true);
         let r = m
-            .handle(&json!({"jsonrpc": "2.0", "id": 5, "method": "nope"}))
+            .handle(json!({"jsonrpc": "2.0", "id": 5, "method": "nope"}))
+            .await
             .unwrap();
         assert_eq!(r["error"]["code"], RPC_METHOD_NOT_FOUND);
     }

@@ -19,12 +19,15 @@
 //!
 //! Errors are JSON objects `{"error": "..."}` with a 4xx status. With a token
 //! (`--token`/`SIMOXIDE_SERVER_TOKEN`) every route but `/health` needs
-//! `Authorization: Bearer <token>`. Requests with an `Origin` header from another host than
-//! `localhost`/`127.0.0.1`/`[::1]` are refused unless the server allows any origin (MCP's guard
-//! against DNS rebinding).
+//! `Authorization: Bearer <token>`. Unless the server allows any origin, every route but
+//! `/health` refuses requests whose `Host` header or `Origin` header names another host than
+//! `localhost`, `127.0.0.1`, `[::1]` or one of the configured host names (MCP's guard against
+//! DNS rebinding; the opaque origin `null` of sandboxed pages is refused too), and `/mcp` takes
+//! only `application/json` bodies (a page cannot send those without a preflight).
 
 use crate::api::{
-    DEFAULT_RECENT_LOGS, MAX_LOG_PAGE, ResultsQuery, Service, Until, to_json, without_series,
+    DEFAULT_RECENT_LOGS, MAX_LOG_PAGE, MAX_WAIT, ResultsQuery, Service, Until, to_json,
+    without_series,
 };
 use crate::job::{ApiError, JobView, MIB};
 use crate::mcp::{Mcp, RPC_PARSE_ERROR, rpc_error};
@@ -50,6 +53,10 @@ pub const DEFAULT_MAX_BODY_BYTES: usize = 64 * MIB;
 const DEFAULT_LOG_PAGE: usize = 1000;
 /// An event stream looks for a change at least this often, and is kept alive this often.
 const EVENT_STREAM_PERIOD: Duration = Duration::from_secs(15);
+/// Host names a local server answers to, besides [`HttpConfig::allowed_hosts`].
+const LOCAL_HOSTS: [&str; 3] = ["localhost", "127.0.0.1", "::1"];
+/// The media type `/mcp` requires.
+const JSON_MEDIA_TYPE: &str = "application/json";
 
 /// Settings of the HTTP layer.
 #[derive(Clone, Debug)]
@@ -58,8 +65,12 @@ pub struct HttpConfig {
     pub token: Option<String>,
     /// Largest request body in bytes.
     pub max_body_bytes: usize,
-    /// Accept requests with any `Origin` header (default: only local origins).
+    /// Accept requests with any `Host` and `Origin` header (default: only local hosts and
+    /// [`HttpConfig::allowed_hosts`]).
     pub allow_any_origin: bool,
+    /// Host names besides the local ones that `Host` and `Origin` headers may name (e.g. the
+    /// server's name on a network), without a port.
+    pub allowed_hosts: Vec<String>,
 }
 
 impl Default for HttpConfig {
@@ -68,6 +79,7 @@ impl Default for HttpConfig {
             token: None,
             max_body_bytes: DEFAULT_MAX_BODY_BYTES,
             allow_any_origin: false,
+            allowed_hosts: Vec::new(),
         }
     }
 }
@@ -120,17 +132,31 @@ pub fn router(svc: Arc<Service>, cfg: HttpConfig) -> Router {
         .with_state(state)
 }
 
-/// Authentication and the origin check.
+/// Authentication and the host and origin checks.
 async fn guard(State(st): State<AppState>, req: Request, next: Next) -> Response {
-    if !st.cfg.allow_any_origin
-        && let Some(o) = req.headers().get(header::ORIGIN)
-        && !local_origin(o)
-    {
-        return ApiError {
-            status: StatusCode::FORBIDDEN,
-            message: "origin not allowed (start the server with --allow-any-origin)".into(),
+    if !st.cfg.allow_any_origin {
+        let forbidden = |message: &str| {
+            ApiError {
+                status: StatusCode::FORBIDDEN,
+                message: message.into(),
+            }
+            .into_response()
+        };
+        // a missing `Host` is no browser's request (browsers always send it)
+        if let Some(h) = req.headers().get(header::HOST)
+            && !allowed_host(h, &st.cfg.allowed_hosts)
+        {
+            return forbidden(
+                "host not allowed (start the server with --allow-host NAME or --allow-any-origin)",
+            );
         }
-        .into_response();
+        if let Some(o) = req.headers().get(header::ORIGIN)
+            && !allowed_origin(o, &st.cfg.allowed_hosts)
+        {
+            return forbidden(
+                "origin not allowed (start the server with --allow-host NAME or --allow-any-origin)",
+            );
+        }
     }
     if let Some(t) = &st.cfg.token {
         let ok = req
@@ -153,23 +179,46 @@ async fn guard(State(st): State<AppState>, req: Request, next: Next) -> Response
     next.run(req).await
 }
 
-/// Whether an `Origin` header names this machine (or is the opaque origin `null`).
-fn local_origin(o: &HeaderValue) -> bool {
+/// The host of an authority (`host`, `host:port`, `[v6]:port`), without the port.
+fn host_of_authority(authority: &str) -> &str {
+    match authority.strip_prefix('[') {
+        Some(v6) => v6.split(']').next().unwrap_or(v6),
+        None => authority.split(':').next().unwrap_or(authority),
+    }
+}
+
+/// Whether `host` is a local host name or one of `allowed`.
+fn is_allowed_host(host: &str, allowed: &[String]) -> bool {
+    LOCAL_HOSTS.iter().any(|h| host.eq_ignore_ascii_case(h))
+        || allowed.iter().any(|h| host.eq_ignore_ascii_case(h))
+}
+
+/// Whether a `Host` header names this machine or an allowed host.
+fn allowed_host(h: &HeaderValue, allowed: &[String]) -> bool {
+    h.to_str()
+        .is_ok_and(|s| is_allowed_host(host_of_authority(s), allowed))
+}
+
+/// Whether an `Origin` header (`scheme://host[:port]`) names this machine or an allowed host.
+/// The opaque origin `null` (sandboxed frames, `file:` pages) is not allowed.
+fn allowed_origin(o: &HeaderValue, allowed: &[String]) -> bool {
     let Ok(s) = o.to_str() else {
         return false;
     };
-    let host = s
-        .split_once("://")
-        .map_or(s, |(_, rest)| rest)
-        .split('/')
-        .next()
-        .unwrap_or("");
-    let host = if host.starts_with('[') {
-        host.split(']').next().map_or(host, |h| &h[1..])
-    } else {
-        host.split(':').next().unwrap_or(host)
+    let Some((_, rest)) = s.split_once("://") else {
+        return false;
     };
-    matches!(host, "localhost" | "127.0.0.1" | "::1") || s == "null"
+    let authority = rest.split('/').next().unwrap_or("");
+    is_allowed_host(host_of_authority(authority), allowed)
+}
+
+/// Whether a request's `Content-Type` is JSON (`application/json`, parameters allowed).
+fn is_json(headers: &HeaderMap) -> bool {
+    headers
+        .get(header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.split(';').next())
+        .is_some_and(|t| t.trim().eq_ignore_ascii_case(JSON_MEDIA_TYPE))
 }
 
 /// Compares without an early exit, so that the time does not tell how much of a token is right.
@@ -243,10 +292,11 @@ async fn status(
     let recent_logs = q.logs.unwrap_or(DEFAULT_RECENT_LOGS);
     let v = match q.wait {
         Some(w) if w > 0.0 && w.is_finite() => {
-            let svc = st.svc.clone();
+            // capped before the conversion: `Duration::from_secs_f64` panics beyond 2^64 s
+            let timeout = Duration::from_secs_f64(w.min(MAX_WAIT.as_secs_f64()));
             let until = q.until.unwrap_or_default();
-            let after = q.after_version;
-            blocking(move || svc.wait(&id, after, until, Duration::from_secs_f64(w), recent_logs))
+            st.svc
+                .wait(&id, q.after_version, until, timeout, recent_logs)
                 .await?
         }
         _ => st.svc.status(&id, recent_logs)?,
@@ -337,26 +387,19 @@ impl Feed {
         if self.done {
             return None;
         }
-        let (svc, id, after) = (self.svc.clone(), self.id.clone(), self.version);
-        let first = self.status.is_none();
-        let r = tokio::task::spawn_blocking(move || -> ApiResult<JobView> {
-            let job = svc.jobs.get(&id)?;
-            if !first {
-                job.wait(after, false, EVENT_STREAM_PERIOD);
-            }
-            Ok(job.view(0, true))
-        })
-        .await;
         let mut out = Vec::new();
-        let v = match r {
-            Ok(Ok(v)) => v,
-            Ok(Err(e)) => {
+        let job = match self.svc.jobs.get(&self.id) {
+            Ok(job) => job,
+            Err(e) => {
                 self.done = true;
                 out.push(Ok(event("error", &json!({"error": e.message}))));
                 return Some((out, self));
             }
-            Err(_) => return None,
         };
+        if self.status.is_some() {
+            job.wait(self.version, false, EVENT_STREAM_PERIOD).await;
+        }
+        let v = job.view(0, true);
         self.version = v.version;
         if self.logs {
             if let Ok(page) = self
@@ -496,8 +539,19 @@ async fn delete(State(st): State<AppState>, Path(id): Path<String>) -> ApiResult
 }
 
 /// MCP streamable HTTP: one JSON-RPC message or a batch; notifications and responses are
-/// accepted with `202`.
-async fn mcp_post(State(st): State<AppState>, body: axum::body::Bytes) -> Response {
+/// accepted with `202`. The body must be `application/json` (`415` otherwise).
+async fn mcp_post(
+    State(st): State<AppState>,
+    headers: HeaderMap,
+    body: axum::body::Bytes,
+) -> Response {
+    if !is_json(&headers) {
+        return ApiError {
+            status: StatusCode::UNSUPPORTED_MEDIA_TYPE,
+            message: format!("POST /mcp needs Content-Type: {JSON_MEDIA_TYPE}"),
+        }
+        .into_response();
+    }
     let msg: Value = match serde_json::from_slice(&body) {
         Ok(v) => v,
         Err(e) => {
@@ -505,11 +559,7 @@ async fn mcp_post(State(st): State<AppState>, body: axum::body::Bytes) -> Respon
             return (StatusCode::BAD_REQUEST, Json(error)).into_response();
         }
     };
-    let mcp = st.mcp.clone();
-    let reply = tokio::task::spawn_blocking(move || mcp.handle_message(&msg))
-        .await
-        .unwrap_or(None);
-    match reply {
+    match st.mcp.handle_message(msg).await {
         Some(r) => Json(r).into_response(),
         None => StatusCode::ACCEPTED.into_response(),
     }
@@ -550,16 +600,55 @@ mod tests {
 
     #[test]
     fn origins() {
+        let allowed = vec!["sim.lab".to_string()];
         for ok in [
             "http://localhost:3000",
             "http://127.0.0.1",
             "https://[::1]:8080",
-            "null",
+            "http://LOCALHOST",
+            "https://sim.lab:8443",
         ] {
-            assert!(local_origin(&HeaderValue::from_static(ok)), "{ok}");
+            assert!(
+                allowed_origin(&HeaderValue::from_static(ok), &allowed),
+                "{ok}"
+            );
         }
-        for bad in ["https://evil.example", "http://localhost.evil.example"] {
-            assert!(!local_origin(&HeaderValue::from_static(bad)), "{bad}");
+        for bad in [
+            "https://evil.example",
+            "http://localhost.evil.example",
+            "null",
+            "localhost",
+        ] {
+            assert!(
+                !allowed_origin(&HeaderValue::from_static(bad), &allowed),
+                "{bad}"
+            );
         }
+    }
+
+    #[test]
+    fn hosts() {
+        for ok in ["localhost:8080", "127.0.0.1", "[::1]:8080", "sim.lab:80"] {
+            assert!(
+                allowed_host(&HeaderValue::from_static(ok), &["sim.lab".into()]),
+                "{ok}"
+            );
+        }
+        for bad in ["evil.example:8080", "127.0.0.1.evil.example", "sim.lab"] {
+            assert!(!allowed_host(&HeaderValue::from_static(bad), &[]), "{bad}");
+        }
+    }
+
+    #[test]
+    fn json_content_type() {
+        let mut h = HeaderMap::new();
+        assert!(!is_json(&h));
+        h.insert(header::CONTENT_TYPE, HeaderValue::from_static("text/plain"));
+        assert!(!is_json(&h));
+        h.insert(
+            header::CONTENT_TYPE,
+            HeaderValue::from_static("Application/JSON; charset=utf-8"),
+        );
+        assert!(is_json(&h));
     }
 }

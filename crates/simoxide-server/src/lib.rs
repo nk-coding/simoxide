@@ -16,8 +16,8 @@
 //!
 //! * [`request`]: what a client sends ([`SimulationRequest`], the termination tree
 //!   [`request::Condition`]);
-//! * [`job`]: jobs, their shared state and log, the [`JobManager`] (concurrency, retention,
-//!   caps);
+//! * [`job`]: jobs, their shared state and log, the [`JobManager`] (concurrency, the queue,
+//!   retention, caps);
 //! * [`runner`]: model loading, engine choice and the driver loop; [`monitor`]: the per-event
 //!   pause decision, incremental statistics and termination; [`stats`]: Student t, batch means;
 //! * [`api`]: the operations ([`Service`]) shared by
@@ -27,12 +27,13 @@
 //! The binary `simoxide-server` serves HTTP (`--http ADDR`), MCP over stdio (`--mcp-stdio`), or
 //! both. User documentation: `docs/guide/server.md`.
 //!
-//! Embedding without HTTP:
+//! Embedding without HTTP (waiting needs a tokio runtime):
 //!
 //! ```no_run
 //! use simoxide_server::{JobManager, ServerConfig, Service, SimulationRequest};
 //! use std::time::Duration;
 //!
+//! # #[tokio::main] async fn main() {
 //! let svc = Service {
 //!     jobs: JobManager::new(ServerConfig {
 //!         allow_dirs: vec!["corpus".into()],
@@ -46,8 +47,10 @@
 //! let v = svc.start(req).unwrap();
 //! let done = svc
 //!     .wait(&v.id, None, simoxide_server::api::Until::Done, Duration::from_secs(60), 0)
+//!     .await
 //!     .unwrap();
 //! println!("{:?}", done.stop_reason);
+//! # }
 //! ```
 
 pub mod api;

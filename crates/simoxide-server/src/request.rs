@@ -17,6 +17,9 @@ pub const USAGE_MODEL_SUFFIX: &str = ".usagemodel";
 pub const DEFAULT_PROGRESS_INTERVAL_MS: u64 = 500;
 /// The shortest [`ProgressOptions::interval_ms`] that is honoured.
 pub const MIN_PROGRESS_INTERVAL_MS: u64 = 20;
+/// The longest [`ProgressOptions::interval_ms`] a request may give (one day); longer intervals
+/// would overflow the clock arithmetic.
+pub const MAX_PROGRESS_INTERVAL_MS: u64 = 86_400_000;
 /// Default of [`Confidence::level`].
 pub const DEFAULT_CONFIDENCE_LEVEL: f64 = 0.95;
 /// The target of [`Confidence::relative_target`] when a criterion gives no target.
@@ -43,6 +46,10 @@ pub struct SimulationRequest {
     /// started with (`--allow-dir`). Not available without them.
     #[serde(default)]
     pub model_dir: Option<String>,
+    /// The allowed directory `model_dir` is below, as the model listing reports it (its
+    /// `root`). Needed when several allowed directories have a model of that name.
+    #[serde(default)]
+    pub root: Option<String>,
     /// Run configuration (seed, flavour, mode, the simulator's own stop conditions, ...).
     #[serde(default)]
     pub config: RunOptions,
@@ -321,20 +328,26 @@ impl Condition {
             Combine::All => {
                 !self.is_empty()
                     && self.confidence.is_none()
-                    && self
-                        .all
-                        .as_ref()
-                        .is_none_or(|l| l.iter().all(Condition::bounds_the_run))
-                    && self
-                        .any
-                        .as_ref()
-                        .is_none_or(|l| l.iter().any(Condition::bounds_the_run))
+                    && (self.all.is_none() || all_bounded(&self.all))
+                    && (self.any.is_none() || any_bounded(&self.any))
             }
         }
     }
 
-    /// Checks the values (non-negative, levels in (0, 1), ...).
+    /// Checks the values (non-negative, levels in (0, 1), non-empty lists, ...).
     pub fn validate(&self) -> Result<(), String> {
+        if let Some(m) = self.max_measurements
+            && m < 0
+        {
+            return Err("termination.max_measurements: expected a non-negative count (unlike config.max_measurements and run.json, -1 does not mean off here: leave the criterion out)".into());
+        }
+        for (name, list) in [("all", &self.all), ("any", &self.any)] {
+            if list.as_ref().is_some_and(Vec::is_empty) {
+                return Err(format!(
+                    "termination.{name}: expected at least one condition (an empty list never holds)"
+                ));
+            }
+        }
         if let Some(t) = self.timeout_secs
             && !(t.is_finite() && t > 0.0)
         {
@@ -521,5 +534,23 @@ mod tests {
         let c: Condition =
             serde_json::from_str(r#"{"all": [{"max_tuples": 4}, {"max_events": 9}]}"#).unwrap();
         assert!(c.bounds_the_run());
+        // an empty list never holds, so it does not bound the run either
+        let c: Condition =
+            serde_json::from_str(r#"{"combine": "all", "max_events": 9, "all": []}"#).unwrap();
+        assert!(!c.bounds_the_run());
+    }
+
+    #[test]
+    fn validation() {
+        for (bad, why) in [
+            (r#"{"all": []}"#, "empty all"),
+            (r#"{"any": [{"any": []}]}"#, "nested empty any"),
+            (r#"{"max_measurements": -1}"#, "negative count"),
+        ] {
+            let c: Condition = serde_json::from_str(bad).unwrap();
+            assert!(c.validate().is_err(), "{why}");
+        }
+        let c: Condition = serde_json::from_str(r#"{"max_measurements": 0}"#).unwrap();
+        assert!(c.validate().is_ok());
     }
 }

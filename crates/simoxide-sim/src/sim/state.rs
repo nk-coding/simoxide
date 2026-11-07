@@ -383,6 +383,12 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
         self.meas.m
     }
 
+    /// The warnings of the run so far ([`crate::RunResult::warnings`] once it has finished), e.g. of a
+    /// run that is ended early.
+    pub fn warnings(&self) -> &[String] {
+        &self.warnings
+    }
+
     /// Live processes (users, workload drivers, forked behaviours).
     pub fn live_processes(&self) -> usize {
         self.procs.len() - self.free.len()

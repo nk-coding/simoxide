@@ -2,7 +2,8 @@
 
 use simoxide_server::http::{DEFAULT_MAX_BODY_BYTES, HttpConfig};
 use simoxide_server::job::{
-    DEFAULT_LOG_CAPACITY, DEFAULT_MAX_JOBS, DEFAULT_MAX_RUN_SECS, DEFAULT_MAX_TUPLES, MIB,
+    DEFAULT_LOG_CAPACITY, DEFAULT_MAX_JOBS, DEFAULT_MAX_QUEUED, DEFAULT_MAX_RUN_SECS,
+    DEFAULT_MAX_TUPLES, MIB,
 };
 use simoxide_server::mcp::Mcp;
 use simoxide_server::{JobManager, ServerConfig, Service};
@@ -31,6 +32,8 @@ Serves SimOxide's Palladio simulator to other programs (HTTP: REST, server-sent 
   --allow-dir DIR        let requests name model directories below DIR (`model_dir`);
                          repeatable; default: none, models come with the request
   --max-concurrent N     simulations that run at once (default: the number of CPUs)
+  --max-queued N         simulations that wait for a free slot (default {DEFAULT_MAX_QUEUED});
+                         beyond it a new one is refused (HTTP 429)
   --max-jobs N           simulations kept in memory (default {DEFAULT_MAX_JOBS}; oldest finished dropped)
   --max-run-secs S       wall-clock cap of one run (default {DEFAULT_MAX_RUN_SECS}, 0 = none)
   --max-tuples N         cap of recorded tuples per run, 16 bytes each (default
@@ -39,7 +42,9 @@ Serves SimOxide's Palladio simulator to other programs (HTTP: REST, server-sent 
   --token TOKEN          require `Authorization: Bearer TOKEN` on HTTP (also the
                          environment variable {TOKEN_ENV})
   --max-body-mb N        largest HTTP request body (default {})
-  --allow-any-origin     accept browser requests from any Origin (default: local only)
+  --allow-host NAME      accept the Host and Origin NAME besides localhost, 127.0.0.1, [::1]
+                         (the server's name on a network); repeatable
+  --allow-any-origin     accept any Host and Origin (no DNS-rebinding guard)
   -h, --help             this text",
         DEFAULT_MAX_BODY_BYTES / MIB
     )
@@ -88,6 +93,7 @@ fn parse() -> Result<Args, String> {
             }
             "--max-concurrent" => a.server.max_concurrent = num(val()?, &f)?.max(1) as usize,
             "--max-jobs" => a.server.max_jobs = num(val()?, &f)?.max(1) as usize,
+            "--max-queued" => a.server.max_queued = num(val()?, &f)? as usize,
             "--max-run-secs" => {
                 let s: f64 = val()?
                     .parse()
@@ -101,6 +107,7 @@ fn parse() -> Result<Args, String> {
             "--log-capacity" => a.server.log_capacity = num(val()?, &f)? as usize,
             "--token" => a.http_cfg.token = Some(val()?),
             "--max-body-mb" => a.http_cfg.max_body_bytes = num(val()?, &f)? as usize * MIB,
+            "--allow-host" => a.http_cfg.allowed_hosts.push(val()?),
             "--allow-any-origin" => a.http_cfg.allow_any_origin = true,
             "-h" | "--help" => return Err(usage()),
             o => return Err(format!("unknown flag {o}\n{}", usage())),

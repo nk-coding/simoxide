@@ -103,6 +103,12 @@ impl<T: Copy + PartialOrd> Thresholds<T> {
     fn passed(&self, v: T) -> bool {
         self.next < self.values.len() && v > self.values[self.next]
     }
+    /// Whether the threshold `v` (one of the values) has been crossed: the crossed thresholds
+    /// stay crossed, as the counters they watch only grow.
+    #[inline]
+    fn crossed(&self, v: T) -> bool {
+        self.next > 0 && v <= self.values[self.next - 1]
+    }
     fn skip_reached(&mut self, v: T) {
         while self.reached(v) {
             self.next += 1;
@@ -321,7 +327,7 @@ impl Monitor {
 
     /// Whether a client cancelled the run.
     pub fn cancelled(&self) -> bool {
-        self.cancel.load(Ordering::Relaxed)
+        self.cancel.load(Ordering::Acquire)
     }
 
     /// Folds the rows recorded since the last checkpoint into the statistics and re-checks the
@@ -409,12 +415,11 @@ impl Monitor {
             held.push((p.events >= n).then(|| format!("max_events: {} events", p.events)));
         }
         if let Some(t) = c.max_sim_time {
+            // sticky: once crossed, the probes no longer carry the next event's time
+            // (`wants_next_time`), and the criterion must still hold inside `all`
             let lim = secs_to_ns(t);
-            held.push(
-                p.next_ns
-                    .is_some_and(|n| n > lim)
-                    .then(|| format!("max_sim_time: {t} s simulated")),
-            );
+            let crossed = self.th_time.crossed(lim) || p.next_ns.is_some_and(|n| n > lim);
+            held.push(crossed.then(|| format!("max_sim_time: {t} s simulated")));
         }
         if c.confidence.is_some() {
             let s = &self.confs[*next_confidence];
@@ -703,6 +708,28 @@ mod tests {
         assert!(m.keep_going(&p));
         p.next_ns = Some(2_000_000_001);
         assert!(!m.keep_going(&p));
+    }
+
+    /// Inside `all`, a passed `max_sim_time` still holds when later probes carry no next-event
+    /// time (they stop carrying it once every time threshold has passed).
+    #[test]
+    fn sim_time_stays_reached_inside_all() {
+        let mut m = monitor(r#"{"all": [{"max_sim_time": 2.0}, {"max_events": 100}]}"#);
+        let mut p = Probe {
+            next_ns: Some(3_000_000_000),
+            events: 10,
+            ..Probe::default()
+        };
+        assert!(m.keep_going(&p));
+        assert!(!m.wants_next_time());
+        p.next_ns = None;
+        p.events = 100;
+        assert!(!m.keep_going(&p));
+        assert!(
+            matches!(m.why, Some(PauseWhy::Terminate(ref s)) if s.contains("max_sim_time")),
+            "{:?}",
+            m.why
+        );
     }
 
     #[test]

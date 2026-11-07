@@ -175,8 +175,9 @@ impl Limits {
     }
 }
 
-/// How often (in steps and in events) the deadline and the cancellation flag are checked.
-const CHECK_INTERVAL: u64 = 4096;
+/// How often (in steps and in events) the deadline and the cancellation flag are checked (also
+/// by the Slingshot-exact engine, [`crate::ssx`]).
+pub(crate) const CHECK_INTERVAL: u64 = 4096;
 
 /// Maximum nesting of processes that run synchronously inside each other (after the stop, a
 /// fork runs its children synchronously): bounds the native stack.
@@ -861,8 +862,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     #[inline(never)]
     fn check_cancel(&self) -> R<()> {
         let l = &self.st.cfg.limits;
+        // `Acquire`: a caller that sets other flags before this one sees them set as well
         if let Some(c) = &l.cancel
-            && c.load(std::sync::atomic::Ordering::Relaxed)
+            && c.load(std::sync::atomic::Ordering::Acquire)
         {
             return self.limit_err(SimErrorKind::Cancelled, "cancelled".into());
         }
