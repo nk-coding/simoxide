@@ -469,9 +469,10 @@ fn thrashing_constraint() {
     );
 }
 
-/// Q2: fixed, the constraint state is committed only by a successful adjustment.
+/// Q2 (kept, decision of 2026-11-04): the constraint state is committed when the request is
+/// made, in Slingshot and in the fixed behaviour; the adjustment's outcome changes nothing.
 #[test]
-fn q2_commit_on_success() {
+fn q2_commit_on_request() {
     let mk = || {
         let mut p = policy(
             "p",
@@ -485,103 +486,84 @@ fn q2_commit_on_success() {
         });
         with_helpers(p, &[5.0, 6.0, 7.0], vec![ei_group("g", vec![])])
     };
-    // Slingshot: the request at 1 starts the cooldown at once: 5, 6, 7 are disregarded
-    let mut r = Run::new(mk(), Quirks::slingshot());
-    r.run_timers();
-    assert_eq!(r.fired(0), vec![1.0]);
-    // fixed: nothing committed until the adjustment succeeds
-    let mut r = Run::new(mk(), Quirks::fixed());
-    let q = Quirks {
+    // the helpers' events reach p only with Q15, so both runs share time events
+    let shared = Quirks {
         q15_shared_time_events: true,
         ..Quirks::fixed()
     };
-    let mut r2 = Run::new(mk(), q);
-    r.run_timers();
-    assert_eq!(
-        r.fired(0),
-        vec![1.0],
-        "fixed Q15: the helpers' events do not reach p"
-    );
-    r2.timer(0);
-    r2.timer(1); // 5: still no committed state: fires again
-    assert_eq!(r2.fired(0), vec![1.0, 5.0]);
-    let req = r2.host.requests[0].clone();
-    r2.spd
-        .adjusted(&mut r2.st, &req, true, 5.0, (None, None), &mut r2.log);
-    assert_eq!(r2.st.policies[0].adjustor.cooldown_end, 11.0);
-    r2.timer(2); // 6: in the cooldown now
-    assert_eq!(r2.fired(0), vec![1.0, 5.0]);
-    // a failed adjustment commits nothing
-    let req = r2.host.requests[1].clone();
-    r2.spd
-        .adjusted(&mut r2.st, &req, false, 6.0, (None, None), &mut r2.log);
-    assert_eq!(r2.st.policies[0].adjustor.scales, 1);
+    for q in [Quirks::slingshot(), shared] {
+        // the request at 1 starts the cooldown at once: 5, 6, 7 are disregarded
+        let mut r = Run::new(mk(), q);
+        r.run_timers();
+        assert_eq!(r.fired(0), vec![1.0], "{q:?}");
+        assert_eq!(r.st.policies[0].adjustor.cooldown_end, 11.0);
+        assert_eq!(r.st.policies[0].adjustor.scales, 1);
+    }
+    // the outcome commits nothing more and undoes nothing, failed or not
+    let mut r = Run::new(mk(), shared);
+    r.timer(0);
+    let req = r.host.requests[0].clone();
+    r.spd
+        .adjusted(&mut r.st, &req, false, 1.0, (None, None), &mut r.log);
+    assert_eq!(r.st.policies[0].adjustor.scales, 1);
+    assert_eq!(r.st.policies[0].adjustor.cooldown_end, 11.0);
+    r.spd
+        .adjusted(&mut r.st, &req, true, 1.0, (None, None), &mut r.log);
+    assert_eq!(r.st.policies[0].adjustor.scales, 1);
     assert!(matches!(
-        r2.log.records.last(),
-        Some(Record::Adjust { ok: false, .. })
+        r.log.records.last(),
+        Some(Record::Adjust { ok: true, .. })
     ));
+    r.timer(1); // 5: in the cooldown
+    assert_eq!(r.fired(0), vec![1.0]);
 }
 
-/// Q9: fixed (provisional), group-size constraints are checked in the chain.
+/// Q9 (kept, decision of 2026-11-04): a group-size constraint is no filter of the chain; the
+/// adjustment clamps the change, so a policy whose change is clamped to zero still fires and
+/// starts its cooldown (Q2).
 #[test]
-fn q9_group_size_in_chain() {
+fn q9_group_size_clamped_by_the_adjustment() {
     let g = || {
         vec![ei_group(
             "g",
             vec![TargetConstraint::Size { min: 1, max: 2 }],
         )]
     };
-    let m = || {
-        model(
-            vec![policy(
-                "p",
-                0,
-                step(1),
-                time_trigger("t", RelOp::EqualTo, 5.0),
-            )],
-            g(),
-        )
-    };
-    // two elements, max 2: +1 is clamped to 0
-    let mut r = Run::new(m(), Quirks::slingshot());
-    assert_eq!(
-        r.spd.contexts()[0].names,
-        ["TargetGroupChecker", "SimulationTimeChecker", "Adjustor"]
-    );
-    r.run_timers();
-    assert_eq!(r.fired(0), vec![5.0]);
-    let mut r = Run::new(m(), Quirks::fixed());
-    assert_eq!(
-        r.spd.contexts()[0].names,
-        [
-            "TargetGroupChecker",
-            "SimulationTimeChecker",
-            "TargetGroupSizeConstraintFilter",
-            "Adjustor"
-        ]
-    );
-    r.run_timers();
-    assert!(r.fired(0).is_empty());
-    assert_eq!(r.st.policies[0].adjustor.scales, 0);
-    // one element: passes
-    let mut r = Run::new(m(), Quirks::fixed());
-    r.st.membership = membership(vec![UNIT]);
-    r.run_timers();
-    assert_eq!(r.fired(0), vec![5.0]);
-    // scale-in of a single element is clamped to 0 by min 1
-    let m = model(
-        vec![policy(
+    let m = |step_value| {
+        let mut p = policy(
             "p",
             0,
-            step(-1),
+            step(step_value),
             time_trigger("t", RelOp::EqualTo, 5.0),
-        )],
-        g(),
-    );
-    let mut r = Run::new(m, Quirks::fixed());
-    r.st.membership = membership(vec![UNIT]);
-    r.run_timers();
-    assert!(r.fired(0).is_empty());
+        );
+        p.constraints.push(PolicyConstraint::Cooldown {
+            time: 10.0,
+            max_operations: 0,
+        });
+        model(vec![p], g())
+    };
+    for q in [Quirks::slingshot(), Quirks::fixed()] {
+        // two elements, max 2: +1 is clamped to 0 by the adjustment, the request stands
+        let mut r = Run::new(m(1), q);
+        assert_eq!(
+            r.spd.contexts()[0].names,
+            [
+                "TargetGroupChecker",
+                "SimulationTimeChecker",
+                "CooldownConstraintFilter",
+                "Adjustor"
+            ]
+        );
+        r.run_timers();
+        assert_eq!(r.fired(0), vec![5.0], "{q:?}");
+        assert_eq!(r.st.policies[0].adjustor.cooldown_end, 15.0);
+        // a scale-in of a single element (min 1) is requested too
+        let mut r = Run::new(m(-1), q);
+        r.st.membership = membership(vec![UNIT]);
+        r.run_timers();
+        assert_eq!(r.fired(0), vec![5.0], "{q:?}");
+        assert_eq!(r.st.policies[0].adjustor.scales, 1);
+    }
 }
 
 /// Q11: unsupported stimuli and triggers, wrong expectation types.

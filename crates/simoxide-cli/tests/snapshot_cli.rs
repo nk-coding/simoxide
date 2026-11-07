@@ -144,7 +144,7 @@ fn a_resumed_process_continues_the_run() {
 fn the_slingshot_flavour_resumes_too() {
     check(
         "slingshot",
-        &root().join("corpus/h13_passive_contention"),
+        &root().join("corpus/h20_ps_multicore"),
         &["--flavour", "slingshot", "--quirks", "Q26,Q29"],
         &["2", "9.25"],
         &[],

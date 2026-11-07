@@ -1602,6 +1602,11 @@ MC-8, MC-9; guides `library.md`, `reconfiguration.md`, `snapshots.md` "Change fi
   `TargetGroupSizeConstraintFilter` sits with the thrashing filters in target-constraint
   order), Q13 (one window per measuring point, the method over the ready windows, the EMA
   emit slot of the trigger consumed only when the policy fires). Fixed XOR = exactly one child.
+  *Changed 2026-11-07* by the semantics decisions of 2026-11-04
+  (`docs/spec/slingshot/semantics-decisions.md`): Q2 and Q9 are kept (the adjustor commits at
+  the request; no `TargetGroupSizeConstraintFilter`, the transformation clamps the change), so
+  both flags change nothing and `adjust.rs` is gone; Q3, Q4 and Q13 are confirmed; Q24 (engine)
+  is kept as a run error.
 - **Decision log** (`docs/guide/spd.md`): the reference runner's `spd.jsonl` records `policy`,
   `eval`, `adjust`, without the event index `e`, the `log` lines and the `adjust` model summaries;
   `log::project` reduces both logs to what they share (`adjust`: time, policy, name, `ok`).

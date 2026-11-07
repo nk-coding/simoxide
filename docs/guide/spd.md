@@ -34,7 +34,7 @@ byte.
 | Expectations | `ExpectedTime`, `ExpectedPercentage` (compared as `value / 100`), `ExpectedCount`, `NoExpectation` |
 | Aggregation | `AVERAGE`: exponential moving average (60 s, emit every 10 s, α = 0.2, decayed over the time between samples that no sample covers); `MAX`, `MIN`, `MEDIAN`, `SUM`: the last 10 values |
 | Policy constraints | `CooldownConstraint`, `IntervalConstraint` |
-| Target constraints | `ThrashingConstraint`; `TargetGroupSizeConstraint` (checked in the chain by default, see Q9) |
+| Target constraints | `ThrashingConstraint`; `TargetGroupSizeConstraint` (the adjustment clamps the change onto `[minSize, maxSize]`, see Q9) |
 | Target groups | `ElasticInfrastructure`, `ServiceGroup`, `CompetingConsumersGroup` |
 | Not supported | `SimpleFireOnTrend`, `NumberOfElements`, memory, HDD and network stimuli (Slingshot has no checker for them either): a configuration error |
 
@@ -129,21 +129,22 @@ newest elements (drained, above).
 ## Fixed behaviour and compat flags
 
 Where Slingshot's SPD interpreter is buggy, SimOxide fixes it by default; a flag per quirk
-reproduces Slingshot (`slingshot` turns all of them on). Rows marked *provisional* implement a
-proposal that is not confirmed yet.
+reproduces Slingshot (`slingshot` turns all of them on). Which behaviour is the semantics was
+decided on 4 November 2026 ([Semantics decisions](../spec/slingshot/semantics-decisions.md)): rows
+marked *kept* are Slingshot's behaviour, and their flag changes nothing.
 
 | Quirk | Slingshot | Fixed (default) |
 |---|---|---|
-| Q1 | a disregard does not restore the adjustor state | restored; no filter before the adjustor changes the state, so both behave the same |
-| Q2 | constraint state (cooldown, last enactment) changes when the request is made | changes only when the adjustment succeeds |
-| Q3 | AVERAGE is an EMA, the others use the last 10 values | kept (*provisional*); sliding-window samples (SimuLizar flavour) decay only over uncovered time |
-| Q4 | a relative change below the minimum ignores `minAdjustmentValue` when it is not positive | 0 stays 0, otherwise at least `minAdjustmentValue` in the direction of the percentage (*provisional*; the Q9 check and a patched `AdjustmentCalculator.qvto`) |
-| Q6 | after an adjustment every linking resource connects every container | a new container joins the links its unit is connected to, appended; other links keep their containers (*provisional*; patched `ResourceEnvironmentTransformation.qvto`) |
-| Q7 | a top-down scale-in removes the containers it empties one enactment late | removed in the same enactment (*provisional*; patched `TopDownTransformationInfrastructure.qvto`) |
-| Q9 | only thrashing constraints are in the chain | group-size constraints too: a policy whose change would be clamped to zero is disregarded (*provisional*) |
+| Q1 | a disregard does not restore the adjustor state | not decided; no filter before the adjustor changes the state, so both behave the same |
+| Q2 | constraint state (cooldown, last enactment) changes when the request is made | kept: a cooldown counts every adjustment made to the target, also one the size bound turns into no change, or one that fails |
+| Q3 | AVERAGE is an EMA, the others use the last 10 values | kept; sliding-window samples (SimuLizar flavour) decay only over uncovered time |
+| Q4 | a relative change below the minimum ignores `minAdjustmentValue` when it is not positive | 0 stays 0, otherwise at least `minAdjustmentValue` in the direction of the percentage (patched `AdjustmentCalculator.qvto`) |
+| Q6 | after an adjustment every linking resource connects every container | a new container joins the links its unit is connected to, appended; other links keep their containers (patched `ResourceEnvironmentTransformation.qvto`) |
+| Q7 | a top-down scale-in removes the containers it empties one enactment late | removed in the same enactment (patched `TopDownTransformationInfrastructure.qvto`) |
+| Q9 | only thrashing constraints are in the chain; the adjustment clamps the change to the group size | kept: an out-of-range step is modified to the bound, not disregarded (size 2, maximum 3: step +2 becomes +1; at size 3 it becomes 0, an adjustment that still starts the cooldown, Q2) |
 | Q11 | an unsupported stimulus or trigger throws at set-up: the whole SPD is dropped | a configuration error naming it |
-| Q12 | composed triggers: AND resumes after a failed child, OR never evaluates its children and parks the chain, XOR inverts after the first child; two measurement stimulus kinds run the chain twice | AND / OR / XOR (exactly one) of the children's results, every child evaluated, one evaluation per event |
-| Q13 | all elements of the group feed one window; any measurement reaching the checker reads it; reading consumes the EMA's emit slot | one window per measuring point, the aggregation over their values; a window starts with its element's first sample (an EMA is ready 60 s later) and is dropped when its container leaves the group; only the stimulus' metric is evaluated; the slot is consumed when the policy fires (*provisional*) |
+| Q12 | composed triggers: AND resumes after a failed child, OR never evaluates its children and parks the chain, XOR inverts after the first child; two measurement stimulus kinds run the chain twice | AND / OR / XOR (exactly one) of the children's results, every child evaluated, one evaluation per event (not decided yet: every event or only the child's own) |
+| Q13 | all elements of the group feed one window; any measurement reaching the checker reads it; reading consumes the EMA's emit slot | one window per measuring point, the aggregation over their values; a window starts with its element's first sample (an EMA is ready 60 s later) and is dropped when its container leaves the group; only the stimulus' metric is evaluated; the slot is consumed when the policy fires |
 | Q15 | every policy of a target group receives every time event of the group | only its own |
 
 The patched transformations are marked "PATCHED by SimOxide"; with the flag on, Slingshot's

@@ -2,7 +2,7 @@
 
 Saved: 2026-11-04T09:04:47.356Z
 
-The same choices, with figures and the reading of each note, are in [semantics-paper.html](./semantics-paper.html){target="_self"}. The machine-readable copy is [semantics-decisions.json](./semantics-decisions.json){target="_self"}. These decisions are not yet what `--spd-quirks fixed` implements: Q2 keeps cooldown on the request, and Q9 clamps an out-of-range step to the bound instead of disregarding it.
+The same choices, with figures and the reading of each note, are in [semantics-paper.html](./semantics-paper.html){target="_self"}. The machine-readable copy is [semantics-decisions.json](./semantics-decisions.json){target="_self"}. Since 7 November 2026 SimOxide's fixed behaviour (`--spd-quirks fixed`, `--quirks` without Q24) implements these decisions: the cooldown is committed at the request (Q2), an out-of-range step is clamped to the bound by the adjustment instead of being disregarded (Q9), and an Acquire or Release without a demand is a run error (Q24). The paper describes the state before that change. Q1, Q12 and Q26 are open; their fixed behaviour is unchanged ([Quirks](./quirks.md)).
 
 ## SPD interpreter
 
