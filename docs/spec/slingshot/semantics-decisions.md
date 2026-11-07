@@ -2,7 +2,7 @@
 
 Saved: 2026-11-04T09:04:47.356Z
 
-The same choices, with figures and the reading of each note, are in [semantics-paper.html](./semantics-paper.html). The machine-readable copy is [semantics-decisions.json](./semantics-decisions.json). These decisions are not yet what `--spd-quirks fixed` implements: Q2 keeps cooldown on the request, and Q9 clamps an out-of-range step to the bound instead of disregarding it.
+The same choices, with figures and the reading of each note, are in [semantics-paper.html](./semantics-paper.html){target="_self"}. The machine-readable copy is [semantics-decisions.json](./semantics-decisions.json){target="_self"}. These decisions are not yet what `--spd-quirks fixed` implements: Q2 keeps cooldown on the request, and Q9 clamps an out-of-range step to the bound instead of disregarding it.
 
 ## SPD interpreter
 

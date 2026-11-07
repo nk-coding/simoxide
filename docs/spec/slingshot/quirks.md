@@ -5,7 +5,7 @@ the Slingshot flavour **fixes** each one by default; a compat flag per quirk rep
 Slingshot-exact mode turns all flags on, because its oracle (the `det` runner) is Slingshot with all
 of them.
 
-Recorded choices for which behaviour should be the semantics, including where they differ from the fixed column on this page, are in [Semantics decisions](./semantics-paper.html) ([answers](./semantics-decisions.md)).
+Recorded choices for which behaviour should be the semantics, including where they differ from the fixed column on this page, are in [Semantics decisions](./semantics-paper.html){target="_self"} ([answers](./semantics-decisions.md)).
 
 "Fixed behaviour" says what the flavour does without the flag. It follows decision U13: where
 Slingshot's behaviour is a bug, the fixed behaviour is **SimuLizar's (SimOxide's) semantics**
