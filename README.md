@@ -24,6 +24,9 @@ autoscaling, on its own QVTo engine.
   another process: the continuation equals the uninterrupted run byte for byte.
 - **Embeddable.** A library with no global state that loads models from memory, runs batches in
   parallel and bounds untrusted models with limits.
+- **A service.** `simoxide-server` takes models over HTTP (REST, server-sent events) and MCP
+  (for AI agents), streams live progress and logs, stops a run by a confidence interval, a
+  timeout or a count, and returns the measurements.
 
 ## Quick start
 
@@ -39,6 +42,11 @@ cargo build --release                                       # EPL build, fast mo
 # with the QVTo engine: reconfiguration rules, SPD/HPA adjustments, resume with changes
 cargo build --release -p simoxide-cli --features reconfiguration
 ./target/release/simoxide run --model corpus-rules/lb_outsource --rules-log rules.jsonl
+
+# the HTTP and MCP server (docs/guide/server.md)
+cargo build --release -p simoxide-server
+./target/release/simoxide-server --http 127.0.0.1:8080 --allow-dir corpus   # REST, SSE, MCP at /mcp
+./target/release/simoxide-server --mcp-stdio --allow-dir corpus             # MCP for agents
 
 # the exact build (local use only, see Licence): --mode exact
 cargo build --release -p simoxide-cli --features exact,hotspot-math   # or: cargo build-exact
@@ -75,7 +83,7 @@ cd docs && npm install && npm run dev
 
 | Section | Contents |
 |---|---|
-| [Guide](docs/guide/introduction.md) | getting started, [modes and features](docs/guide/modes.md), Slingshot-compatible mode, fast mode, reconfiguration rules, SPD, HPA, load profiles, snapshots, command line, library API, formats, [licensing](docs/guide/licensing.md) |
+| [Guide](docs/guide/introduction.md) | getting started, [modes and features](docs/guide/modes.md), Slingshot-compatible mode, fast mode, reconfiguration rules, SPD, HPA, load profiles, snapshots, command line, library API, [HTTP and MCP server](docs/guide/server.md), formats, [licensing](docs/guide/licensing.md) |
 | [Performance](docs/performance/index.md) | comparison with SimuLizar, Slingshot, SimuCom and EventSim; engine benchmarks |
 | [Correctness](docs/correctness/index.md) | the exactness claim and its evidence, testing, deviations, reference bugs |
 | [Semantics](docs/spec/index.md) | SimuLizar 5.2.2's and [Slingshot's](docs/spec/slingshot/index.md) semantics as numbered rules with source references |
@@ -98,6 +106,7 @@ cd docs && npm install && npm run dev
 | `crates/simoxide-spd` | scaling policies (Slingshot's SPD interpreter) and HPA autoscalers |
 | `crates/simoxide-reconf` | runtime model changes: direct edits, change files, the QVTo host (SimuLizar's rules, SPD adjustments), exploration |
 | `crates/simoxide-cli` | `simoxide` and `simoxide-bench` |
+| `crates/simoxide-server` | `simoxide-server`: HTTP (REST, server-sent events) and MCP server with live progress and termination conditions |
 | `crates/simoxide-testkit` | differential testing, model generator, `simoxide-fuzz` |
 | `crates/simoxide-thirdparty` | the third-party test models behind git submodules: checks, derived files, digests |
 | `crates/simoxide-oraclekit` | what the Java reference harnesses share: warm-JVM batch driver, seed agent, result directories, comparisons (`reference/oraclekit/` on the Java side) |

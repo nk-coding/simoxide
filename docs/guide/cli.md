@@ -6,6 +6,7 @@ The workspace builds these binaries:
 |---|---|---|
 | `simoxide` | `simoxide-cli` | run a model, pause and resume it, explore variants, benchmark it |
 | `simoxide-bench` | `simoxide-cli` | the benchmark suite |
+| `simoxide-server` | `simoxide-server` | HTTP and MCP server: submit models, follow runs live, stop them by confidence, time or count ([Server](./server.md)) |
 | `simoxide-fuzz` | `simoxide-testkit` | differential testing against the reference |
 | `qvto` | `qvto-cli` | the QVTo engine on its own ([QVTo usage](../qvto/usage.md)) |
 | `simoxide-thirdparty` | `simoxide-thirdparty` | set up and check the third-party test models ([Licensing](./licensing.md#simoxide-thirdparty)) |

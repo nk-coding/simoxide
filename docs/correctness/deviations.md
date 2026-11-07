@@ -26,6 +26,13 @@ or never finishes. They never change the result of a run that stays within them.
 | `Limits::max_events`, `max_steps`, `deadline`, `cancel` | `SimError` kind `Limit` / `Cancelled` | off | – |
 
 CLI: `--max-steps`, `--max-events`, `--timeout SECONDS`, `--max-stack-depth`, `--max-processes`.
+
+The Slingshot-exact engine (`--flavour slingshot-exact`) has neither processes nor
+continuation stacks: a recursion there does not nest calls but piles frames onto the user's
+SimuCom stack. It applies the same limits to its own counterparts: `max_stack_depth` bounds the
+frames of a user's stack (checked at each SEFF entry), `max_processes` the live users,
+`max_steps` the dispatched handler events; `deadline` and `cancel` are checked every 4 096
+events. The run then ends with the same error kinds.
 `Limits::unlimited()` switches off the two defaults of `Limits`.
 
 `Limits::max_stack_depth` counts the reference interpreter's levels, so the limit fires at the

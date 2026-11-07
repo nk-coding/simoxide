@@ -389,6 +389,7 @@ impl Engine<'_> {
         };
         match &m.components[comp].kind {
             ComponentKind::Basic { seffs, .. } => {
+                self.check_stack_depth(&ri.user)?;
                 // caseBasicComponent: component parameter frame and assembly frame (SS-ACT-1.3)
                 let parent = self.top(&ri.user)?;
                 let cf = self.push_new_frame(
