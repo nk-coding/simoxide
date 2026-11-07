@@ -375,11 +375,10 @@ fn scoreboard(o: &Opts, root: &Path, suites: &[(String, PathBuf, PathBuf)]) {
                 if name == "fuzz" {
                     q.constant_identity = Some(1);
                 }
-                if o.det {
-                    // the det runs' identity-hash tapes (`Class@hash` texts)
-                    q.tape_dirs
-                        .push(root.join(paths::JAVA_DET_CACHE).join(name));
-                }
+                // the identity-hash tapes of the suite's recording (`record` writes the cache):
+                // with --det the det runs' (`Class@hash` texts); also of a `--cases` file, whose
+                // cache (`custom`) the engine's own lookup of the named suites does not cover
+                q.tape_dirs.push(root.join(o.java_cache()).join(name));
                 Box::new(q)
             }
             e if e.starts_with("replay:") => {
