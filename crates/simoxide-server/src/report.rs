@@ -60,6 +60,8 @@ pub enum StopKind {
     Cancelled,
     /// The model did not load or compile, or the run aborted.
     Error,
+    /// A scaling decision is pending and `config.spd_decisions` has no action list left for it.
+    Decision,
 }
 
 impl StopKind {
@@ -71,6 +73,7 @@ impl StopKind {
             StopKind::ServerLimit => "server_limit",
             StopKind::Cancelled => "cancelled",
             StopKind::Error => "error",
+            StopKind::Decision => "decision",
         }
     }
 }
@@ -298,6 +301,7 @@ mod tests {
             StopKind::ServerLimit,
             StopKind::Cancelled,
             StopKind::Error,
+            StopKind::Decision,
         ] {
             assert_eq!(serde_json::json!(kind), kind.as_str());
         }

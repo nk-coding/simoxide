@@ -53,6 +53,9 @@
 //! # }
 //! ```
 
+// the tool list of `mcp::tools` is one `json!` literal each, the largest beyond the default limit
+#![recursion_limit = "256"]
+
 pub mod api;
 pub mod http;
 pub mod job;

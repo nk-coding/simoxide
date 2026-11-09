@@ -615,6 +615,136 @@ async fn scaling_policies_log_their_decisions() {
     assert!(res["summary"]["spd"]["requests"].as_u64().unwrap() > 0);
 }
 
+/// `config.spd_decisions` (issue #6, `simoxide run --pause-on-decision` / `resume --decide` in
+/// one job): no list stops at the first recommendation, un-applied; a list resolves it (the
+/// recommendation, declined) and the run goes on to the next decision; through HTTP and MCP.
+#[tokio::test(flavor = "multi_thread")]
+async fn scaling_decisions_from_the_request() {
+    let app = app();
+    let files = files_of(&repo().join("corpus-spd/rmuc_app_metrics"));
+    let req = |plan: Value| json!({"files": files, "config": {"flavour": "slingshot", "max_sim_time": 300, "spd_decisions": plan}});
+    // no list: the first recommendation is pending, nothing adjusted
+    let v = run(&app, req(json!([]))).await;
+    assert_eq!(v["status"], "completed", "{v}");
+    assert_eq!(v["stop_reason"]["kind"], "decision", "{v}");
+    let spd = results(&app, v["id"].as_str().unwrap(), "").await["summary"]["spd"].clone();
+    assert_eq!(spd["decisions"], json!([]));
+    let first = spd["pending_decision"].clone();
+    assert_eq!(first["decision"], 1, "{spd}");
+    let t1 = first["time_ns"].as_i64().unwrap();
+    assert!(t1 > 0 && t1 <= 300_000_000_000, "{first}");
+    let recommended: Vec<Value> = first["recommended"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r["policy"].clone())
+        .collect();
+    assert!(!recommended.is_empty());
+    assert_eq!(v["progress"]["sim_time"].as_f64().unwrap(), t1 as f64 / 1e9);
+
+    // the recommendation, then declined: resolved in order, each with its outcomes
+    let v = run(&app, req(json!([recommended, []]))).await;
+    assert_eq!(v["status"], "completed", "{v}");
+    let spd = results(&app, v["id"].as_str().unwrap(), "").await["summary"]["spd"].clone();
+    let d = spd["decisions"].as_array().unwrap();
+    assert_eq!(d.len(), 2, "{spd}");
+    assert_eq!(d[0]["decision"], 1);
+    assert_eq!(d[0]["time_ns"], t1);
+    assert_eq!(d[0]["recommended"], first["recommended"]);
+    assert_eq!(d[0]["selected"], json!(recommended));
+    assert_eq!(
+        d[0]["outcomes"].as_array().unwrap().len(),
+        recommended.len()
+    );
+    assert_eq!(d[1]["decision"], 2);
+    assert_eq!(d[1]["selected"], json!([]));
+    assert_eq!(d[1]["outcomes"], json!([]));
+    assert!(d[1]["time_ns"].as_i64().unwrap() >= t1);
+    match spd["pending_decision"]["decision"].as_u64() {
+        Some(n) => assert_eq!(
+            (n, v["stop_reason"]["kind"].as_str()),
+            (3, Some("decision"))
+        ),
+        None => assert_eq!(v["stop_reason"]["kind"], "simulator", "{v}"),
+    }
+    let id = v["id"].as_str().unwrap();
+    let (_, logs) = call(
+        &app,
+        "GET",
+        &format!("/v1/simulations/{id}/logs?limit=10000"),
+        None,
+    )
+    .await;
+    let kinds: Vec<&str> = logs["entries"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|e| e["source"] == "spd")
+        .filter_map(|e| e["data"]["k"].as_str())
+        .filter(|k| ["decision", "select"].contains(k))
+        .collect();
+    assert_eq!(&kinds[..4], ["decision", "select", "decision", "select"]);
+
+    // MCP: the same option of start_simulation
+    let (_, v) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(1, "start_simulation", req(json!([])))),
+    )
+    .await;
+    assert_eq!(v["result"]["isError"], false, "{v}");
+    let id = v["result"]["structuredContent"]["id"]
+        .as_str()
+        .unwrap()
+        .to_string();
+    let (_, v) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(
+            2,
+            "wait_for_simulation",
+            json!({"id": id, "until": "done", "timeout_secs": 60}),
+        )),
+    )
+    .await;
+    assert_eq!(
+        v["result"]["structuredContent"]["stop_reason"]["kind"], "decision",
+        "{v}"
+    );
+    let (_, v) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(3, "get_results", json!({"id": id}))),
+    )
+    .await;
+    assert_eq!(
+        v["result"]["structuredContent"]["summary"]["spd"]["pending_decision"],
+        first
+    );
+
+    // refused: slingshot-exact (before the job), an unknown policy (the job fails)
+    let (s, _) = call(
+        &app,
+        "POST",
+        "/v1/simulations",
+        Some(json!({"files": files, "config": {"flavour": "slingshot-exact", "max_sim_time": 10, "spd_decisions": []}})),
+    )
+    .await;
+    assert_eq!(s, StatusCode::BAD_REQUEST);
+    let v = run(&app, req(json!([["no such policy"]]))).await;
+    assert_eq!(v["status"], "failed", "{v}");
+    assert!(
+        v["error"]
+            .as_str()
+            .unwrap()
+            .contains("no scaling policy named no such policy"),
+        "{v}"
+    );
+}
+
 #[tokio::test(flavor = "multi_thread")]
 async fn slingshot_exact_runs() {
     let app = app();
