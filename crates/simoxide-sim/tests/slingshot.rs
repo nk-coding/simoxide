@@ -194,6 +194,13 @@ fn fixed_behaviour_differs_where_documented() {
     // Q19: a loop count of 0 skips the body instead of throwing
     assert!(run_csv(&probe("ss_loop_zero"), Quirks::NONE, 1, 8).is_ok());
     assert!(run_csv(&probe("ss_loop_zero"), Quirks::NONE.with(Quirk::Q19), 1, 8).is_err());
+    // Q24 (kept, decision of 2026-11-04): an Acquire without a ParametricResourceDemand is a
+    // run error with or without the flag, not an acquire of one unit
+    let h13 = root().join("corpus/h13_passive_contention");
+    for q in [Quirks::NONE, Quirks::NONE.with(Quirk::Q24)] {
+        let e = run_csv(&h13, q, 1, 10).unwrap_err();
+        assert!(e.contains("has no ParametricResourceDemand"), "{q:?}: {e}");
+    }
     // Q32: the maximum measurement count stops the run (fixed), or is ignored
     let dir = root().join("corpus/x_ss_minimal");
     let cm = compile(&dir, Quirks::NONE);

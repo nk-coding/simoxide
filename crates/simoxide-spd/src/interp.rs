@@ -3,8 +3,12 @@
 //! spd.md`, SS-SPD-1 to SS-SPD-3).
 //!
 //! The chain, in Slingshot's order (`SPDAdjustorContext.java:80-94`):
-//! target-group check, trigger, the group's thrashing constraints (fixed Q9: and its size
-//! constraints, in model order), the policy constraints in model order, the adjustor.
+//! target-group check, trigger, the group's thrashing constraints, the policy constraints in
+//! model order, the adjustor. A `TargetGroupSizeConstraint` is no filter: the adjustment clamps
+//! the change onto `[minSize, maxSize]` (Q9, semantics decision of 2026-11-04). The adjustor
+//! commits its state (cooldown, latest adjustment, the group's last policy) when the request is
+//! made, also if the clamped change leaves the group's size unchanged or the adjustment fails
+//! (Q2, same decisions).
 //!
 //! The chain runs like Slingshot's `FilterChain`: from the start, unless a filter returned no
 //! result (`null`, only Slingshot's broken compound filters do, Q12), which parks the chain
@@ -13,7 +17,6 @@
 //! `LogicalXORCompoundFilter` including their iterator state; without it they are plain
 //! AND / OR / XOR of the children's results.
 
-use crate::adjust;
 use crate::aggregate::{PerElement, Window};
 use crate::jfmt::f6;
 use crate::log::{FilterRecord, Log, Record};
@@ -221,11 +224,6 @@ pub enum Filter {
     Thrashing {
         minimum_time: f64,
     },
-    /// Fixed Q9 only.
-    GroupSize {
-        min: i64,
-        max: i64,
-    },
     Cooldown {
         time: f64,
         max_operations: i64,
@@ -385,10 +383,6 @@ pub enum Reason {
         delta: f64,
     },
     Thrashing,
-    GroupSizeZero {
-        size: usize,
-    },
-    GroupSizeInvalid(String),
     XorMore,
     XorNone(Box<Reason>),
     OrNone(Box<Reason>),
@@ -458,10 +452,6 @@ impl Reason {
                 }
             }
             Reason::Thrashing => "Thrashing Constraint prevents this scaling Operation.".into(),
-            Reason::GroupSizeZero { size } => format!(
-                "Target group size constraint: the change of a group of {size} elements is clamped to 0."
-            ),
-            Reason::GroupSizeInvalid(m) => m.clone(),
             Reason::XorMore => "More than one filter through XOR".into(),
             Reason::XorNone(m) => format!("No filter went through. Last message: {}", m.message()),
             Reason::OrNone(m) => format!("No filter went through. Last message: {}", m.message()),
@@ -662,9 +652,7 @@ impl Spd {
                     TargetConstraint::Thrashing { minimum_time } => {
                         chain.push(Filter::Thrashing { minimum_time })
                     }
-                    TargetConstraint::Size { min, max } if !q.q9_no_size_check => {
-                        chain.push(Filter::GroupSize { min, max })
-                    }
+                    // Q9: enforced by the adjustment, which clamps the change
                     TargetConstraint::Size { .. } => {}
                 }
             }
@@ -711,7 +699,6 @@ impl Spd {
                     Filter::TargetGroup => "TargetGroupChecker",
                     Filter::Trigger => nodes[root].class_name(),
                     Filter::Thrashing { .. } => "ThrashingConstraintFilter",
-                    Filter::GroupSize { .. } => "TargetGroupSizeConstraintFilter",
                     Filter::Cooldown { .. } => "CooldownConstraintFilter",
                     Filter::Interval { .. } => "IntervalConstraintFilter",
                     Filter::Adjustor => "Adjustor",
@@ -836,9 +823,10 @@ impl Spd {
         }
     }
 
-    /// The executor of `req` reports its outcome (`ModelAdjusted`): with the fixed Q2 a
-    /// successful adjustment commits the adjustor's state change; `size_before`/`size_after`
-    /// (the target group's element counts, if known) go into the log. The host updates
+    /// The executor of `req` reports its outcome (`ModelAdjusted`): `size_before`/`size_after`
+    /// (the target group's element counts, if known) go into the log. The outcome changes no
+    /// adjustor state: the adjustor committed it when the request was made (Q2), whether the
+    /// adjustment changed the group's size or not, and whether it succeeded. The host updates
     /// [`SpdState::membership`] itself.
     pub fn adjusted(
         &self,
@@ -859,19 +847,15 @@ impl Spd {
     }
 
     /// [`Spd::adjusted`] with the executor's whole outcome: Slingshot's change count and the
-    /// model summaries go into the log too. An enforced request ([`Spd::enforce`]) commits no
-    /// state.
+    /// model summaries go into the log too.
     pub fn adjusted_with(
         &self,
-        st: &mut SpdState,
+        _st: &mut SpdState,
         req: &AdjustmentRequest,
         out: &AdjustOutcome,
         now: f64,
         log: &mut dyn Log,
     ) {
-        if out.ok && !self.quirks.q2_commit_on_request && !req.enforced && req.hpa.is_none() {
-            self.commit(st, req.ctx, req.time);
-        }
         if log.enabled() {
             let p = &self.model.policies[req.policy];
             log.record(Record::Adjust {
@@ -1144,22 +1128,6 @@ impl Spd {
                     FRes::Ok
                 }
             }
-            Filter::GroupSize { min, max } => {
-                let g = &self.model.groups[ctx.group];
-                let Some(size) = st.membership.group_size(g) else {
-                    return FRes::Ok;
-                };
-                let adj = &self.model.policies[ctx.policy].adjustment;
-                let r = adjust::desired_change(adj, size as i64, self.quirks.q4_relative_zero)
-                    .and_then(|ch| adjust::clamp(ch, size as i64, min, max));
-                match r {
-                    Err(m) => FRes::Disregard(Reason::GroupSizeInvalid(m)),
-                    Ok(ch) if adjust::effective_change(ch, size as i64) == 0 => {
-                        FRes::Disregard(Reason::GroupSizeZero { size })
-                    }
-                    Ok(_) => FRes::Ok,
-                }
-            }
             Filter::Cooldown { max_operations, .. } => {
                 let a = &st.policies[c].adjustor;
                 if t >= a.cooldown_end || a.scales_in_cooldown < max_operations {
@@ -1191,9 +1159,8 @@ impl Spd {
                 }
             }
             Filter::Adjustor => {
-                if self.quirks.q2_commit_on_request {
-                    self.commit(st, c, t);
-                }
+                // Q2: committed at the request
+                self.commit(st, c, t);
                 FRes::Ok
             }
         }

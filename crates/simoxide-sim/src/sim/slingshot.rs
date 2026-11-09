@@ -549,8 +549,9 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
     }
 
     /// The amount of an acquire or release (SS-ACT-8.1, SS-RES-4.2/4.3): the action's first
-    /// `ParametricResourceDemand`, evaluated as `Long` in the user's top frame; one unit without
-    /// one (fixed Q24).
+    /// `ParametricResourceDemand`, evaluated as `Long` in the user's top frame. Without one it is
+    /// a run error with or without the flag (Q24 kept, decision of 2026-11-04: an acquire names
+    /// its amount; Slingshot throws `NoSuchElementException` there).
     fn ss_passive_amount(&mut self, d: &ProcData, a: ActionId) -> R<u64> {
         let cm = self.cm;
         match cm.ss.passive_amount.get(a.index()).copied().flatten() {
@@ -561,12 +562,11 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
                     _ => self.err(format!("passive resource amount {v:?} is no Long")),
                 }
             }
-            None if self.quirk(Quirk::Q24) => self.err(format!(
+            None => self.err(format!(
                 "NoSuchElementException: {} {} has no ParametricResourceDemand (Slingshot Q24)",
                 cm.action_type[a.index()],
                 cm.action_ids[a.index()]
             )),
-            None => Ok(1),
         }
     }
 

@@ -412,8 +412,8 @@ fn fixed_behaviour_composed_triggers() {
 }
 
 /// The fixed behaviour on `spd_time_policies`: each policy sees only its own time event (Q15),
-/// the group-size constraint is checked in the chain (Q9) and the constraint state changes at
-/// the (successful) adjustment (Q2). Hand-derived: Out20 fires at 20 (group of 1, cooldown
+/// the group-size constraint is enforced by the adjustment, not the chain (Q9, kept) and the
+/// constraint state changes at the request (Q2, kept). Hand-derived: Out20 fires at 20 (group of 1, cooldown
 /// from 20 to 45); In30 is stopped by thrashing (20 + 15 >= 30); In40 by its interval
 /// (35-45); InLe50 fires at 50 (no reference adjustment there: the double reports success);
 /// Abs60 fires (absolute passes thrashing; 3 - 2 = +1 within 1-3); In77 fires (the last
@@ -456,7 +456,6 @@ fn fixed_behaviour_time_policies() {
             "TargetGroupChecker",
             "SimulationTimeChecker",
             "ThrashingConstraintFilter",
-            "TargetGroupSizeConstraintFilter",
             "IntervalConstraintFilter",
             "Adjustor"
         ])
