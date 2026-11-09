@@ -91,7 +91,7 @@ impl Engine<'_> {
             match sc.workload {
                 CWorkload::Closed { population, .. } => {
                     for _ in 0..population.max(0) {
-                        let user = self.new_user();
+                        let user = self.new_user()?;
                         let c = Rc::new(UCtx {
                             scenario: i,
                             action: Some(first),
@@ -104,7 +104,7 @@ impl Engine<'_> {
                     }
                 }
                 CWorkload::Open { .. } => {
-                    let user = self.new_user();
+                    let user = self.new_user()?;
                     let c = Rc::new(UCtx {
                         scenario: i,
                         action: Some(first),
@@ -164,7 +164,7 @@ impl Engine<'_> {
     pub(super) fn on_user_aborted(&mut self, c: &Rc<UCtx>) -> HR {
         let mut out = Out::new();
         if c.closed {
-            let user = self.new_user();
+            let user = self.new_user()?;
             let n = self.uctx(c, c.action, c.beh.clone(), None, Some(user));
             let think = self.think_time(&n)?;
             out.push((Ev::ClosedInit(n), delay(think)?));
@@ -228,7 +228,7 @@ impl Engine<'_> {
                         "There must be a Start user action within the usage scenario.",
                     );
                 };
-                let user = self.new_user();
+                let user = self.new_user()?;
                 let next = Rc::new(UCtx {
                     scenario: c.scenario,
                     action: Some(first),

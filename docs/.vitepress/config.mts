@@ -85,6 +85,7 @@ export default defineConfig({
           items: [
             { text: 'Command line', link: '/guide/cli' },
             { text: 'Library API', link: '/guide/library' },
+            { text: 'Server: HTTP and MCP', link: '/guide/server' },
             { text: 'Output formats', link: '/guide/formats' },
             { text: 'Snapshot format', link: '/formats/snapshot' },
             { text: 'QVTo engine', link: '/qvto/' },

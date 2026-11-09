@@ -15,6 +15,7 @@ members = [
     "crates/simoxide-random",
     "crates/simoxide-reconf",
     "crates/simoxide-sched",
+    "crates/simoxide-server",
     "crates/simoxide-sim",
     "crates/simoxide-spd",
     "crates/simoxide-stoex",

@@ -1,0 +1,47 @@
+[package]
+name = "simoxide-server"
+description = "HTTP (REST + server-sent events) and MCP server for SimOxide: submit Palladio models, follow simulations live, stop them by confidence interval, timeout or count, read the results"
+edition.workspace = true
+version.workspace = true
+repository.workspace = true
+license.workspace = true
+# depends on simoxide-reconf (publish = false) with the feature `reconfiguration`
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "simoxide-server"
+path = "src/main.rs"
+
+[dependencies]
+simoxide-sim = { workspace = true }
+simoxide-spd = { workspace = true, optional = true, features = ["sim"] }
+simoxide-reconf = { workspace = true, optional = true, features = ["spd"] }
+serde = { version = "1", features = ["derive", "rc"] }
+serde_json = "1"
+base64 = "0.22"
+# the HTTP layer (MIT): REST, server-sent events, MCP's streamable HTTP transport
+axum = { version = "0.8", default-features = false, features = ["http1", "json", "query", "tokio"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "signal", "time", "sync"] }
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
+
+[features]
+# The default build is the distributable EPL build: fast mode, the Slingshot flavours, SPD/HPA
+# decisions (as `simoxide-cli`'s default build).
+default = ["spd"]
+# Scaling policies (`.spd`) and HPA autoscalers (`*.hpa.json`) of a submitted model run with the
+# simulation. Without `reconfiguration` their decisions are logged but not executed.
+spd = ["dep:simoxide-spd"]
+# Executes SPD and HPA adjustments with Slingshot's QVTo transformation (simoxide-reconf, EPL).
+reconfiguration = ["spd", "dep:simoxide-reconf"]
+# SimuLizar-exact mode (`"mode": "exact"`). Links `simoxide-jcompat-exact`, for which no licence
+# is granted: binaries built with it must not be distributed (LICENSES, sections 4 and 7).
+exact = ["simoxide-sim/exact", "simoxide-spd?/exact", "simoxide-reconf?/exact"]
+# Bit-exact HotSpot Math.log/exp (GPL-2.0-only; not distributable).
+hotspot-math = ["simoxide-sim/hotspot-math"]
+
+[dev-dependencies]
+tower = { version = "0.5", default-features = false, features = ["util"] }
+http-body-util = "0.1"

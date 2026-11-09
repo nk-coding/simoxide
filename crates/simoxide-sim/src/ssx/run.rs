@@ -115,6 +115,10 @@ impl SsxView<'_> {
     pub fn measurements(&self) -> &crate::Measurements {
         &self.e.meas
     }
+    /// Finished usage-scenario runs so far ([`SsxRun::main_count`]).
+    pub fn main_count(&self) -> i64 {
+        self.e.finished
+    }
 }
 
 /// A Slingshot-exact run that can pause between two events, fork, detach and continue
@@ -336,6 +340,13 @@ impl<'m> SsxRun<'m> {
     /// Finished usage-scenario runs so far.
     pub fn main_count(&self) -> i64 {
         self.e.finished
+    }
+
+    /// Ends the run where it is and returns the measurements recorded so far (without copying
+    /// them; the outputs get what is pending).
+    pub fn into_measurements(mut self) -> crate::Measurements {
+        self.flush();
+        std::mem::take(&mut self.e.meas)
     }
 
     /// The handler exceptions so far ([`RunResult::warnings`]).
