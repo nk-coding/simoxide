@@ -52,6 +52,8 @@ simoxide run --model <dir> [flags]
 | `--pause-when COND` | pause when a condition holds (repeatable): `time T`, `before T`, `events N`, `elapsed T`, `elapsed-events N`, `METRIC[POINT] [mean W] OP V [for W]`, `slo METRIC[POINT] upper U [lower L] [sensitivity S] [delay D]` ([Pause conditions](./snapshots.md#pause-conditions)) |
 | `--snapshot FILE`, `--snapshot-format postcard\|json` | write the paused run to `FILE` ([Snapshot format](../formats/snapshot.md)) |
 | `--measurements-scope cumulative\|interval` | `cumulative` (default): the snapshot keeps the measurement rows; `interval`: `--measurements` gets the tuples this invocation recorded, the snapshot keeps none ([Measurement intervals](./snapshots.md#measurement-intervals)) |
+| `--pause-on-decision` | pause before a scaling policy's adjustment runs, the recommendation pending (resume it with `--decide`); also of `resume` ([Decisions](./spd.md#decisions)) |
+| `--decision-file FILE` | write the decision the run paused at and, at a resume, the one `--decide` resolved, as JSON ([Decision file](./spd.md#decision-file)); also of `resume` |
 
 Limits (see [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)):
 
@@ -77,6 +79,7 @@ simoxide resume FILE --model DIR [--run-json F] [--trace F] [--tape F] [--measur
                 [--timeout S] [--change FILE.changes]... [--transform X.qvto]...
                 [--enforce POLICY,...] [--hpa-set NAME.PARAMETER=VALUE]...
                 [--measurements-scope cumulative|interval]
+                [--decide ACTIONS] [--pause-on-decision] [--decision-file F]
 simoxide snapshot-info FILE
 ```
 
@@ -85,8 +88,8 @@ compat flags come from the snapshot. The trace, the tape and the logs receive th
 only; `--measurements` receives the run's rows from time 0 (`--measurements-scope cumulative`)
 or the continuation's (`interval`), by default as the snapshot was written
 ([Measurement intervals](./snapshots.md#measurement-intervals)). `--until T` is
-`--pause-at T`. `snapshot-info` prints the snapshot's header as JSON. See
-[Snapshots](./snapshots.md).
+`--pause-at T`. `snapshot-info` prints the snapshot's header as JSON (with `spd_decision`, the
+run's scaling decisions, once it made one). See [Snapshots](./snapshots.md).
 
 | Flag | Meaning |
 |---|---|
@@ -95,6 +98,7 @@ or the continuation's (`interval`), by default as the snapshot was written
 | `--rules DIR` | other rules than the snapshot's replace them; on a snapshot without rules, they are added |
 | `--enforce POLICY,...` | adjust by these scaling policies at the resume, past their triggers and constraints ([Scaling policies](./spd.md#command-line)); not with `slingshot-exact` |
 | `--hpa-set NAME.PARAMETER=VALUE` | change an HPA autoscaler's parameter ([Autoscaling (HPA)](./hpa.md#command-line)) |
+| `--decide ACTIONS` | resolve the snapshot's pending scaling decision: the policies (ids or names) whose adjustments run in its place, in order, as a JSON array (`'["_a","_a"]'`) or a comma list (`_a,_b`); `'[]'` declines; required to resume a pending decision ([Decisions](./spd.md#decisions)) |
 
 The change steps run in the order given.
 

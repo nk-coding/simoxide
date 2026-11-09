@@ -97,6 +97,116 @@ run after the events already queued for that time and appear in the decision log
 `--transform` steps at the resume of an SPD run use the adjustments' QVTo state (one per run,
 the snapshot's section `qvto`).
 
+## Decisions
+
+A run can stop before a policy's adjustment runs, so that the caller chooses what happens
+instead: apply the recommendation, decline it, or run other actions. The snapshot holds the
+recommendation un-applied; the next invocation resolves it with an explicit, ordered action list.
+
+```sh
+# pause at the first recommendation (here: a scale-out at t = 2 s)
+simoxide run --model M --flavour slingshot --max-sim-time 600 \
+    --pause-on-decision --snapshot d.snap --decision-file d.json
+# pause condition: scaling decision 1 pending at t=2: recommended [_out2]
+
+simoxide resume d.snap --model M --decide _out2          # apply it (= the run without decisions)
+simoxide resume d.snap --model M --decide '[]'           # decline it
+simoxide resume d.snap --model M --decide _scaleIn       # another action instead
+simoxide resume d.snap --model M --decide '["_out2","_out2"]' --pause-on-decision \
+    --snapshot d2.snap --decision-file d2.json           # twice, then pause at the next decision
+```
+
+| Flag | Meaning |
+|---|---|
+| `--pause-on-decision` | `run`, `resume`: pause when a policy's adjustment is about to run |
+| `--decide ACTIONS` | `resume`: resolve the snapshot's pending decision with `ACTIONS` |
+| `--decision-file FILE` | `run`, `resume`: write the decision the invocation resolved and the one it paused at ([below](#decision-file)) |
+
+**When it pauses.** A request of a policy's chain (trigger, constraints and adjustor passed) is
+queued for the current instant behind the events already queued for it, as Slingshot's
+`ModelAdjustmentRequested`. With `--pause-on-decision` the run takes the request when it is
+dispatched, before the adjustment runs (where Slingshot's MENTOR extension,
+`SnapshotTriggeringBehavior`, intercepts `ModelAdjustmentRequested`), and pauses there. Every
+other request queued at that moment (all of the same instant, e.g. other policies whose time
+events or measurements came at the same time) joins it: one decision, its recommendations in
+request order. Decisions are numbered from 1 per run (across resumes). The pause is a pause
+between two events like `--pause-at` and works with them and with `--pause-when`; the flag holds
+for one invocation (a resume pauses at the next decision only with the flag again). Requests of
+`--enforce`, the HPA's rescales and the actions of `--decide` are not intercepted. A run that
+ends at the instant of the request (its stop condition) executes it as without the flag.
+
+**Resolving.** `--decide ACTIONS` names policies by id (the `.spd` id; or by name) as a JSON
+array or a comma list; an action is the policy's adjustment of its target group. The list
+replaces the recommendations: `[]` runs nothing, `[A]` runs A once, `[A, A]` twice, `[A, B]` A
+then B. The actions run at the resume, at the decision's time, in place of the
+recommendations, before anything else happens: after `--change` and `--transform`, before the
+requests of `--enforce`. Each runs like an enforced policy, past its trigger and constraints
+(inactive policies can be actions), with the size bound applied (Q9: a step beyond
+`maxSize` becomes the bound, at the bound no change). The recommendations never run: a decision
+is resolved once, and a snapshot taken later holds none of it. Policies can recommend again
+later (a new decision). A snapshot with a pending decision does not resume without `--decide`
+(an error naming the recommendation); `--decide` on a snapshot without one is an error, as is an
+unknown policy (nothing runs then). The Slingshot-exact engine does not support decisions.
+
+**Policy state.** The chain changes the policies' state when the request is made, as in every
+run (Q2, decided on 4 November 2026): when the run pauses, the adjustor state (cooldown end,
+scales in the cooldown, latest adjustment, scale count), the target group's last enactment (the
+thrashing constraint's) and the triggers' aggregation slots (fixed Q13: consumed when the policy
+fires) are already updated, whatever is decided. Neither the selection nor the application of
+an action changes policy state: like Slingshot's incoming policies (`--enforce`) they bypass the
+chain and only change the model, and with it the target groups' membership and size that later
+evaluations see. A declined scale-out therefore still counts for its policy's cooldown, and an
+alternative scale-in does not count for the thrashing constraint. With exactly the recommended
+policies, in order, the continuation is the run without `--pause-on-decision`: the same
+adjustments, measurements and decision log, except for the `decision` and `select` records and
+the `decision` field.
+
+**Measurements.** A decision's snapshot is an ordinary pause: its header has the measurement
+cursor and the state id, and with `--measurements-scope interval` each `--decide` child of it
+exports only its own tuples, from the parent's cursor, naming the parent's state
+([Measurement intervals](./snapshots.md#measurement-intervals)). Tuples the actions record at
+the resume are the child's. The parent's export followed by that of the child that decided the
+recommendation is the uninterrupted run's `measurements.csv`.
+
+**HPA.** The first version covers SPD policies only: the HPA controller's rescales
+([Autoscaling (HPA)](./hpa.md)) run without pausing.
+
+### Decision file
+
+`--decision-file FILE` writes one JSON object per invocation, after the snapshot:
+
+```json
+{
+  "format": "simoxide-spd-decisions",
+  "version": 1,
+  "resolved": {
+    "decision": 1, "time": 2.0, "time_ns": 2000000000,
+    "recommended": [{"policy": "_out2", "policy_name": "Scale out at 2", "target_group": "_DC8f...",
+                     "group_size": 1, "adjustment": {"type": "StepAdjustment", "stepValue": 1}}],
+    "selected": ["_out2", "_out2", "_out2"],
+    "outcomes": [{"policy": "_out2", "policy_name": "Scale out at 2", "target_group": "_DC8f...",
+                  "ok": true, "size_before": 1, "size_after": 2, "changes": 4},
+                 {"policy": "_out2", ..., "size_before": 2, "size_after": 3, "changes": 4},
+                 {"policy": "_out2", ..., "size_before": 3, "size_after": 3, "changes": 2}]
+  },
+  "pending": null
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `format`, `version` | `simoxide-spd-decisions`, `1` (a new version for incompatible changes; new fields may be added) |
+| `resolved` | the decision `--decide` resolved in this invocation, else `null` |
+| `pending` | the decision the invocation paused at (in its snapshot), else `null` |
+| `decision` | the decision's number in the run (1, 2, ...) |
+| `time`, `time_ns` | the simulation time of the decision, the requests' time: seconds (double) and nanoseconds (integer); the actions run at this time too |
+| `recommended` | the recommendations in request order: `policy` (the `.spd` id), `policy_name`, `target_group` (id), `group_size` (the group's element count at the decision, `null` if unknown), `adjustment` (metamodel class as `type` and its attributes: `stepValue`, `percentageGrowthValue` and `minAdjustmentValue`, `goalValue`) |
+| `selected` | the actions, policy ids in order (`[]`: declined) |
+| `outcomes` | per action, in order: `policy`, `policy_name`, `target_group`, `ok` (the adjustment succeeded; `false` without the `reconfiguration` feature), `size_before`, `size_after` (the group's element count; equal when the size bound left nothing to do), `changes` (Slingshot's change count) |
+
+The decision log (`--spd-log`) has the same in its `decision` and `select` records and the
+`decision` field of the actions' `adjust` records ([Decision log](#decision-log)).
+
 ## Adjustments
 
 Each executed request runs `MainTransformation.qvto` as Slingshot's
@@ -169,7 +279,9 @@ One JSON object per line, in the format of the Slingshot reference runner's `spd
 |---|---|---|
 | `policy` | when the policy's handler runs the first time | id, name, target group, adjustment and trigger class, the chain's filter classes |
 | `eval` | per evaluation (not those the target-group check rejects, unless `--spd-log-all`) | time, event (`SimulationTimeReached`, `MeasurementMade`), the filters that ran with `ok`, `disregard` and Slingshot's reason, `null` or `exception`, and whether a request came out |
-| `adjust` | when a request is executed | time, policy, success; Slingshot's change count (`changes`: the environment and allocation changes and one per cloned monitor) and the model summaries `before` and `after` (the containers with their ids, `~Class:name` for created ones; the links with their containers; the allocation contexts; the target-group configurations' elements; each in model order, as the reference runner's); the target group's size before and after; `enforced` for an enforced policy. Without the `reconfiguration` feature nothing is executed: `ok` is `false` |
+| `adjust` | when a request is executed | time, policy, success; Slingshot's change count (`changes`: the environment and allocation changes and one per cloned monitor) and the model summaries `before` and `after` (the containers with their ids, `~Class:name` for created ones; the links with their containers; the allocation contexts; the target-group configurations' elements; each in model order, as the reference runner's); the target group's size before and after; `enforced` for an enforced policy; `decision` (its number) for an action of `--decide`. Without the `reconfiguration` feature nothing is executed: `ok` is `false` |
+| `decision` | when `--pause-on-decision` pauses ([Decisions](#decisions)) | time `t`, `decision` (its number), `recommended`: the policy ids in request order; they are not executed |
+| `select` | when `--decide` resolves the decision | time `t`, `decision`, `selected`: the policy ids of the actions in order; their `adjust` records follow |
 
 On the time-triggered models of the Slingshot reference runner (`corpus-spd/`), the decision
 log with `--spd-quirks slingshot` equals the runner's `spd.jsonl`, the adjustments' change
@@ -191,6 +303,9 @@ counts and model summaries included, see [Testing](../correctness/testing.md).
   and `fork` pause and fork the run with its SPD state; `enforce_policies` queues enforced
   requests; `snapshot_value` and `restore_snapshot` write and read it (with the adjuster's
   QVTo state: `QvtoRun::snapshot_section`, `restore_section`). It runs both flavours.
+- `simoxide_spd::decision`: `SpdRun::set_pause_on_decision`, `pending_decision`
+  (`PendingDecision` with its `Recommendation`s) and `decide` (a `Resolution` with the
+  `ActionOutcome`s); `report` is the decision file, `parse_actions` reads `--decide`'s list.
 - `simoxide_spd::adjusted`: Slingshot's `ModelAdjusted` and the model summary, for other hosts.
 
 ```rust

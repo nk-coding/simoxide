@@ -106,6 +106,9 @@ gets the section `hpa`, and the resume needs the same configuration. A time-vary
 library): the load steps run inside the simulation. Pauses with change files (`arrival-rate
 WORKLOAD RATE`), or the library's `run_until` plus `ChangeFile::apply`, work too.
 
+Scaling decisions (`--pause-on-decision`, `--decide`, [Decisions](./spd.md#decisions)) cover
+SPD policies only: the controller's rescales are not intercepted.
+
 ## Decision log
 
 `hpa` records, one per sync:

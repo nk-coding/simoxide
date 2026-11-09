@@ -46,10 +46,13 @@ simoxide snapshot-info ms-300.snap   # the header (JSON)
   snapshot keeps the rows, and the resumed run's `--measurements` file is the uninterrupted
   run's. With `--measurements-scope interval` they concatenate like the trace (next section).
 - Scaling policies: a run with a `.spd` resumes with its interpreter state; the compat flags of
-  `--spd-quirks` are kept in the snapshot and used again. HPA autoscalers (section `hpa`) need
-  the same configuration at the resume and can be changed with `--hpa-set`
-  ([Autoscaling (HPA)](./hpa.md#command-line)); a load profile and its position are part of the
-  run state ([Load profiles](./load-profile.md)).
+  `--spd-quirks` are kept in the snapshot and used again. With `--pause-on-decision` a run pauses
+  before a policy's adjustment runs; the snapshot holds the recommendation un-applied (section
+  `spd-decision`, shown by `snapshot-info` as `spd_decision`) and resumes only with `--decide
+  ACTIONS`, the actions that run in its place ([Decisions](./spd.md#decisions)). HPA
+  autoscalers (section `hpa`) need the same configuration at the resume and can be changed with
+  `--hpa-set` ([Autoscaling (HPA)](./hpa.md#command-line)); a load profile and its position are
+  part of the run state ([Load profiles](./load-profile.md)).
 - Reconfiguration rules (`reconfiguration` feature): resume with the same rules (`--rules DIR` or
   the model's `run.json`); the rules' names are checked.
 - The Slingshot-exact engine (`--flavour slingshot-exact`) pauses, snapshots and resumes the
@@ -110,7 +113,9 @@ let rules_run = RulesRun::<Exact>::restore_from(f, &cm, host, Outputs::default()
 
 - `SpdRun` (feature `snapshot` of `simoxide-spd`) keeps the policies' adjustor, trigger and
   aggregation states, the target groups, the membership, the queued adjustment requests and the
-  counters. Restoring checks that the interpreter has the same policies and compat flags
+  counters; once the run made a scaling decision, also the decisions (section `spd-decision`:
+  their count, the pending one; `simoxide_spd::snapshot::pending_decision_of` reads it).
+  Restoring checks that the interpreter has the same policies and compat flags
   (`simoxide_spd::snapshot::quirks_of` reads the flags from a snapshot).
 - `RulesRun` (feature `snapshot` of `simoxide-reconf`) keeps the host's QVTo state, the PRM mirror
   (rebuilt with the same objects), the statistics and kept records. The QVTo state of other hosts
@@ -186,7 +191,8 @@ the restored snapshot's cursor (0 for `run`), `to` the cursor at the pause or th
   observation is complete. A response time is recorded when its request ends: a request that
   started before the snapshot and ends after the resume is the continuation's tuple (its
   `time` is the end; `time - value` is the start, before `from`'s time). Tuples recorded at the
-  resume itself (by `--change`, `--transform`, `--enforce`, `--hpa-set`) are the continuation's.
+  resume itself (by `--change`, `--transform`, `--enforce`, `--decide`, `--hpa-set`) are the
+  continuation's.
 - A pause falls between two events. With `--pause-at T` every event at or before `T` has run,
   so tuples with `time = T` belong to the interval before the pause; with `--pause-events N`
   or a pause condition, both intervals can have tuples at the same time. Their numbers tell
@@ -398,7 +404,8 @@ if let Some(f) = watch.fired() {
   snapshot's), `RulesRun::new(restored_sim, host)` (rules added).
 - SPD: `SpdRun::model_changed` (the target groups' membership after a change),
   `SpdRun::enforce_policies` (queues enforced requests; `EnforceError` for an unknown policy or
-  one without a target group).
+  one without a target group), `SpdRun::decide` (resolves a pending decision,
+  `simoxide_spd::decision`).
 - `simoxide_reconf::explore` (restores in parallel threads, `Variant`, `VariantResult`) and
   `compare` (the table).
 
