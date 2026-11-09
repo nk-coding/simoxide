@@ -568,6 +568,70 @@ fn snapshot_bytes_are_deterministic() {
     }
 }
 
+/// Interval scope (`Simulation::take_measurement_rows`, `docs/guide/snapshots.md`,
+/// "Measurement intervals"): a snapshot written after the take holds no rows and is smaller by
+/// exactly their bytes (16 a row, and per series the varint of its row count instead of the one
+/// byte of an empty list); its header carries the cursor; the restored run records the tuples
+/// after the cursor, and the rows taken plus the continuation's are the uninterrupted run's.
+#[test]
+fn taken_rows_leave_the_snapshot() {
+    let ms = models();
+    let (_, cm, base) = ms.iter().find(|m| m.0 == "x_sl_mediastore").unwrap();
+    let want = simoxide_sim::run(cm, base.clone(), Outputs::default())
+        .unwrap()
+        .measurements;
+    let mut sim = Simulation::<Exact>::create(cm, base.clone(), Outputs::default()).unwrap();
+    sim.run_until(Pause::Events(5000)).unwrap();
+    let mut full = Vec::new();
+    let fi = sim.snapshot_to(&mut full).unwrap();
+    let taken = sim.take_measurement_rows();
+    assert!(taken.count > 0 && taken.rows_held() == taken.count);
+    let mut none = Vec::new();
+    let ni = sim.snapshot_to(&mut none).unwrap();
+    let cursor = |h: &simoxide_sim::snapshot::Header| {
+        let m = h.measurements.unwrap();
+        (m.tuples, m.rows_from)
+    };
+    assert_eq!(cursor(&fi.header), (taken.count, 0));
+    assert_eq!(cursor(&ni.header), (taken.count, taken.count));
+    assert_ne!(fi.header.state, ni.header.state);
+    assert_eq!(ni.header.parent, None);
+    let engine = |h: &simoxide_sim::snapshot::Header| {
+        h.sections
+            .iter()
+            .find(|s| s.name == "engine")
+            .unwrap()
+            .bytes
+    };
+    let varint = |n: usize| (1..).find(|k| n < 1 << (7 * k)).unwrap() as u64;
+    let rows: u64 = taken
+        .rows
+        .iter()
+        .map(|r| 16 * r.len() as u64 + varint(r.len()) - 1)
+        .sum();
+    assert_eq!(engine(&fi.header) - engine(&ni.header), rows);
+    // restored: the state id of the bytes read; the continuation's rows follow the taken ones
+    let s = Snapshot::read(&none[..]).unwrap();
+    assert_eq!(Some(s.header.state_id()), ni.header.state);
+    let rest = Simulation::<Exact>::restore_from(&none[..], cm, Outputs::default())
+        .unwrap()
+        .finish()
+        .unwrap()
+        .measurements;
+    assert_eq!(rest.count, want.count);
+    assert_eq!(rest.rows_held(), want.count - taken.count);
+    let mut joined = rest.clone();
+    for (i, r) in joined.rows.iter_mut().enumerate() {
+        let mut v = taken.rows.get(i).cloned().unwrap_or_default();
+        v.append(r);
+        *r = v;
+    }
+    assert!(
+        joined.to_csv() == want.to_csv(),
+        "taken + continued = uninterrupted"
+    );
+}
+
 #[test]
 fn restoring_checks_model_mode_flavour_and_version() {
     let ms = models();

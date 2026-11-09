@@ -29,6 +29,23 @@ impl Measurements {
         idx
     }
 
+    /// The number of stored rows, all series together.
+    pub fn rows_held(&self) -> u64 {
+        self.rows.iter().map(|r| r.len() as u64).sum()
+    }
+
+    /// Takes the stored rows out (the series stay, each with no rows; `count` is unchanged) and
+    /// returns them with the series and `count`. The rows recorded from then on are the tuples
+    /// after `count` (`docs/guide/snapshots.md`, "Measurement intervals").
+    pub fn take_rows(&mut self) -> Measurements {
+        let rows = self.rows.iter_mut().map(std::mem::take).collect();
+        Measurements {
+            series: self.series.clone(),
+            rows,
+            count: self.count,
+        }
+    }
+
     /// Writes `measurements.csv`.
     pub fn write_csv(&self, out: &mut dyn Write) -> std::io::Result<()> {
         let mut s = String::from("measuring_point,metric,time,value\n");

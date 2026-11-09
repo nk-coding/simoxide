@@ -342,6 +342,11 @@ impl<'m> SsxRun<'m> {
         self.e.finished
     }
 
+    /// Takes the stored measurement rows out of the run, as [`crate::Simulation::take_measurement_rows`].
+    pub fn take_measurement_rows(&mut self) -> crate::Measurements {
+        self.e.meas.take_rows()
+    }
+
     /// Ends the run where it is and returns the measurements recorded so far (without copying
     /// them; the outputs get what is pending).
     pub fn into_measurements(mut self) -> crate::Measurements {

@@ -580,6 +580,15 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         &self.st
     }
 
+    /// Takes the stored measurement rows out of the run ([`Measurements::take_rows`]): the run
+    /// goes on recording into empty rows, and a snapshot written afterwards holds only the rows
+    /// recorded after the take. Nothing else changes (counts, windows, the simulation), so the
+    /// run continues as without the take. Between events, e.g. at a pause or right after a
+    /// restore; a [`Watch`] reads rows by position, so arm it (again) after the take.
+    pub fn take_measurement_rows(&mut self) -> Measurements {
+        self.st.meas.m.take_rows()
+    }
+
     /// Registers interpreter listener `l` (SIM-14; `None`: none). Register it before the run
     /// starts to see every callback (a listener set later sees what happens from then on);
     /// forks, snapshots and resumed runs have none until one is set.
