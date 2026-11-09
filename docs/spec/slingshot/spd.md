@@ -22,7 +22,8 @@ Models: `reference/slingshot/models/spd_minimal`, `spd_scale_in`.
   is named "something", `StimuliInterpreter.java:40-50`). Policies register in model order.
 - **SS-SPD-1.4 The filter chain** of a policy (`entities/SPDAdjustorContext.java:80-94`), run from the start
   for each event (`entities/FilterChain.java:100-123`): target-group check; trigger checker; the
-  target group's `ThrashingConstraint`s (only these; Q9); the policy constraints in model order
+  target group's `ThrashingConstraint`s (only these: the group size is clamped by the adjustment,
+  SS-SPD-4.2; Q9, kept); the policy constraints in model order
   (cooldown, interval; others throw); the `Adjustor`. A filter returns success or disregard; an
   exception counts as disregard. On success the handler returns `ModelAdjustmentRequested(policy)`
   (delay 0). The runner logs every evaluation in `spd.jsonl`.
@@ -65,7 +66,8 @@ Models: `reference/slingshot/models/spd_minimal`, `spd_scale_in`.
   last enacted policy and time, updates the cooldown (only if `cooldownTime != 0`: `t > end` resets
   the count and moves the end, `t == end` only moves it, otherwise the count increments), and returns
   `ModelAdjustmentRequested`. The state changes when the request is made, even if the adjustment
-  fails (Q2). `doOnDisregard` does not restore state (Q1).
+  fails or its clamped change leaves the group's size unchanged (Q2, kept: the cooldown counts the
+  adjustments made to the target). `doOnDisregard` does not restore state (Q1).
 
 ## SS-SPD-4 The adjustment
 
@@ -76,8 +78,9 @@ Models: `reference/slingshot/models/spd_minimal`, `spd_scale_in`.
   `ModelAdjusted(true, changes)` with a resource-environment change (new and deleted containers), an
   allocation change (new allocation contexts) and one monitor change per monitor cloned from the unit
   container's monitors; on failure `ModelAdjusted(false, [])`.
-- **SS-SPD-4.2** What the transformation does (step, relative, absolute size change; clamped by
-  `TargetGroupSizeConstraint`; scale-out copies the unit container, connects every link to all
+- **SS-SPD-4.2** What the transformation does (step, relative, absolute size change; clamped onto
+  `[minSize, maxSize]` by a `TargetGroupSizeConstraint`, so an out-of-range step is modified to the
+  bound, not dropped; scale-out copies the unit container, connects every link to all
   containers, adds assemblies and load-balancer branches with probabilities `1/n`; scale-in removes the
   newest elements, keeps at least one): `DESIGN-SPD.md` §1.3, quirks Q4, Q6, Q7, Q8, Q16.
 

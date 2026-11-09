@@ -275,7 +275,7 @@ pub fn apply(f: Aggregation, values: impl Iterator<Item = f64> + Clone) -> f64 {
     }
 }
 
-/// Fixed Q13 (provisional): one window per element (measuring point) of the group.
+/// Fixed Q13: one window per element (measuring point) of the group.
 ///
 /// * A sample updates its element's window only. An element's window starts with its first
 ///   sample ([`Window::for_element`]).

@@ -25,6 +25,7 @@ demonstrate it.
 | [Random numbers](./random.md) | `SS-RNG-*` | the two random streams, draw sites and draw order |
 | [Scaling policies (SPD)](./spd.md) | `SS-SPD-*` | the SPD interpreter, triggers, constraints, the QVTo adjustment and how the simulation applies it |
 | [Quirks](./quirks.md) | `SS-Qn` | every known Slingshot bug or oddity: observable effect, compat flag, fixed behaviour |
+| [Semantics decisions](./semantics-paper.html){target="_self"} | — | recorded choices (4 Nov 2026) for which behaviour is the semantics, with the notes; [answers](./semantics-decisions.md) |
 | [Exact comparison](./exact.md) | `SS-X-*` | event projection, tape mapping, the `det` oracle and its verification, the probe set |
 
 ## Version and sources

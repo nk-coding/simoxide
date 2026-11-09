@@ -279,7 +279,7 @@ running (`reconfiguration` feature):
   Slingshot's instantaneous samples) and the run follows SimuLizar's semantics; there is no
   reference for this combination. The adjustment itself is Slingshot's transformation, so the
   model after each adjustment equals Slingshot's (with the compat flags on).
-- **Fixed behaviour** (the default, *provisional*): patched copies of three transformation files
+- **Fixed behaviour** (the default, decided on 2026-11-04): patched copies of three transformation files
   fix Q4, Q6 and Q7 (the [quirk table](../guide/spd.md#fixed-behaviour-and-compat-flags)); with
   Q6 fixed the links differ from Slingshot's after a scale-out (the new container is appended to
   its unit's links only).

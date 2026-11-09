@@ -65,7 +65,8 @@ pub trait Adjuster<C: Compat, F: Flavour = SimuLizar> {
 }
 
 /// No adjustment is executed (the decisions only); every request is reported as failed
-/// (`ok: false`), so the fixed Q2 commits no constraint state.
+/// (`ok: false`). The constraint state was committed at the request (Q2), so cooldowns and
+/// thrashing constraints still apply.
 pub struct NoAdjustment;
 
 impl<C: Compat, F: Flavour> Adjuster<C, F> for NoAdjustment {

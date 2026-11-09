@@ -5,6 +5,8 @@ the Slingshot flavour **fixes** each one by default; a compat flag per quirk rep
 Slingshot-exact mode turns all flags on, because its oracle (the `det` runner) is Slingshot with all
 of them.
 
+Which behaviour is the semantics was decided on 4 November 2026 ([Semantics decisions](./semantics-paper.html){target="_self"}, [answers](./semantics-decisions.md)). The fixed column on this page follows those decisions: three of them keep Slingshot's behaviour (Q2, Q9, Q24, marked *kept*); Q1, Q12 and Q26 are open, and their fixed behaviour stays as defined here until they are decided.
+
 "Fixed behaviour" says what the flavour does without the flag. It follows decision U13: where
 Slingshot's behaviour is a bug, the fixed behaviour is **SimuLizar's (SimOxide's) semantics**
 (asynchronous forks run, delay resources work, no handler is disposed, demands are served one after
@@ -31,7 +33,7 @@ always simulated (SS-ACT-7.2), the release that does not wait (SS-ACT-8.3).
 | Q21 | guarded branch without a true guard | exception, disposed handler | defined: run error (as SimuLizar ACT-6.2) | `ss_guard_none` |
 | Q22 | CollectionIteratorAction | INNER drawn once; frame never popped; `UserRequestFinished` precondition fails | defined: ACT-7.2/7.3 (frame per iteration, INNER per iteration, popped) | corpus `h10`, `h27` |
 | Q23 | ForkAction | async ignored; sync children share a rotating cursor and throw; no synchronisation point throws | defined: as SimuLizar: asynchronous behaviours run detached (ACT-9); one cursor (and frame chain) per synchronous child, join | `ss_async_fork`; corpus `h11`, `h12`, `h26`, `x_pem_fork` |
-| Q24 | Acquire/Release need a ParametricResourceDemand | exception, disposed handler | defined: one unit when there is none (ACT-8.2); with a demand, its amount (Slingshot design) | corpus `h13`, `h28` |
+| Q24 | Acquire/Release need a ParametricResourceDemand | exception, disposed handler | kept (decision of 2026-11-04): an Acquire or Release without a demand is a run error (Slingshot's exception, with Q18 fixed); with a demand, its amount | corpus `h13`, `h28` |
 | Q25 | no delay resources | every demand on a Delay resource aborts the user | defined: SimuLizar's delay scheduler | `ss_delay_resource`; corpus `h04`, `h25`, `x_pem_fork` |
 | Q26 | stale PS completions sample the state | extra state and utilisation tuples | defined: stale events record nothing (as SimuLizar, which cancels them) | `ss_fifo_ties`, `ss_ps_multicore` |
 | Q27 | passive capacity without a frame | a capacity that uses a component parameter aborts the run before t = 0 | defined: evaluated in the component instance's frame (ACT-8.1) | corpus `x_pem_acquire` |
@@ -74,7 +76,7 @@ has one flag per quirk: `--quirks Q26,Q29`, `--quirks fast` (every flag the fast
 | Q21 | up to the throw | the same run error as the fixed behaviour |
 | Q22 | up to the throw | INNER drawn once, the frame left on the stack (with Slingshot's frame misalignment), run error at the end of the entry-level call |
 | Q23 | up to the throw | asynchronous behaviours ignored; no synchronisation point: run error; one synchronous behaviour runs on the user's stack; two or more: run error at the fork |
-| Q24 | up to the throw | run error at an Acquire/Release without demand |
+| Q24 | up to the throw | run error at an Acquire/Release without demand (the fixed behaviour too) |
 | Q25 | full | Delay resources (and any other non-FCFS/PS policy) have no resource: the user is aborted |
 | Q26 | full | the superseded completion stays in the event list at its old position and samples state and utilisation |
 | Q27 | full | capacities evaluated without a frame (an unknown variable is a run error before t = 0) |
@@ -90,9 +92,8 @@ has one flag per quirk: `--quirks Q26,Q29`, `--quirks fast` (every flag the fast
 | Q37 | up to the throw | a link touching either container is used; none: run error |
 
 "Up to the throw" means: Slingshot throws in a handler at that point, disposes the handler and runs
-on (Q18); the fast mode stops there with a run error. *Provisional:* the fixed behaviours marked
-*proposed* (Q4, Q6, Q7, Q9, Q13, Q14) and *kept* (Q3) above are not confirmed by the user; the SPD
-phases implement them as proposed. The fixed behaviour of Q34 for active resources is defined by
+on (Q18); the fast mode stops there with a run error. The fixed behaviours of the SPD quirks were
+confirmed by the decisions of 2026-11-04, Q2 and Q9 as *kept* (below). The fixed behaviour of Q34 for active resources is defined by
 S2: a measuring point with replica *k* of a processor-sharing resource with several cores records
 core *k* (the jobs `reportCoreUsage` attributes to it, utilisation 1 or 0), FCFS and delay
 resources and single-core resources the resource itself; a replica outside the resource records
@@ -152,7 +153,11 @@ only. Under the flag: asynchronous behaviours ignored, one rotating cursor, the 
 ### SS-Q24 Acquire/Release without ParametricResourceDemand {#ss-q24}
 
 [SS-ACT-8.1](./seff.md#ss-act-8-acquire-and-release). Most Palladio example models (refsim's corpus
-included) have no demand on their acquire actions.
+included) have no demand on their acquire actions. Kept by the decision of 2026-11-04: an acquire
+with no amount is a broken action, not an implicit acquire of one unit, so the Slingshot flavour
+stops with a run error there with or without the flag (the SimuLizar flavour keeps SimuLizar's one
+unit, ACT-8.2). Under the flag the fast mode's error is the same; the exact mode throws in the
+handler and disposes it (Q18).
 
 ### SS-Q25 No delay resources {#ss-q25}
 
@@ -221,25 +226,26 @@ exact comparison of such a model is impossible anyway (the oracle never ends).
 ## SPD quirks Q1–Q16 {#spd-quirks-q1-q16}
 
 Defined in `DESIGN-SPD.md` §1.5, rules on [SPD](./spd.md). The fixed behaviour is the evident intent
-of the code (U13); *proposed* rows are confirmed in phases P1/P2 (interpreter, adjustment). Fixes
-inside the QVTo transformations (Q4, Q6, Q7) need a patched copy of the transformations, selected
-when the flag is off; the unchanged transformations run under the flag.
+of the code (U13), confirmed or replaced by the [decisions of 2026-11-04](./semantics-decisions.md):
+*kept* rows (Q2, Q3, Q9) are Slingshot's behaviour, and their flags change nothing; Q1 and Q12 are
+not decided yet. Fixes inside the QVTo transformations (Q4, Q6, Q7) need a patched copy of the
+transformations, selected when the flag is off; the unchanged transformations run under the flag.
 
 | # | Quirk | Rule | Fixed behaviour |
 |---|---|---|---|
-| Q1 | `doOnDisregard` does not restore the state | SS-SPD-3.2 | defined: a disregard restores the state as `doOnDisregard` intends (no effect on results known). P1: `Quirks::q1_disregard_keeps_state`. |
-| Q2 | constraint state changes when the request is made, even if QVTo fails | SS-SPD-3.2 | defined: the adjustor's state change is committed only by a successful `ModelAdjusted`. P1: `Quirks::q2_commit_on_request`. |
-| Q3 | AVERAGE is an EMA (60 s, 10 s, 0.2); the others use the last 10 values | SS-SPD-2.4 | kept: Slingshot's aggregator design (no SimuLizar counterpart, no other intent in the code); P1 may revisit. P1: kept, no flag (*provisional*). The EMA's decay `exp(-Δt/60)` per sample is, by its Javadoc, a correction for Slingshot's utilisation samples (taken only at job arrivals and departures, so the time without samples counts as idle); a sample that covers a span (a sliding window's utilisation in the SimuLizar flavour, `Measurement::covers`) decays only over the time no sample covers. Instantaneous samples decay as in Slingshot. |
-| Q4 | relative 0 % ignores `minAdjustmentValue` | SS-SPD-4.2 | proposed (P2): a zero change stays zero; otherwise the magnitude is at least `minAdjustmentValue`, in the direction of the percentage. P1: the arithmetic and `Quirks::q4_relative_zero` (used by the Q9 check); P2: the patched `AdjustmentCalculator.qvto` (`crates/simoxide-reconf/transformations/spd-fixed`), *provisional*. |
-| Q5 | scale-in aborts one job, loses the others | SS-SPD-5.4 | defined in the design (§5.3): drain |
-| Q6 | every link connects every container after an adjustment | SS-SPD-4.2 | proposed (P2): a new container joins the links of the unit container (appended); other links unchanged; removed containers leave every link. P2: `Quirks::q6_all_links`, the patched `ResourceEnvironmentTransformation.qvto`, *provisional* |
-| Q7 | top-down scale-in removes emptied containers one enactment late | SS-SPD-4.2 | proposed (P2): removed in the same enactment (the transformation's own TODO). P2: `Quirks::q7_late_removal`, the patched `TopDownTransformationInfrastructure.qvto`, *provisional* |
-| Q8 | top-down placement `->any(true)`: Java-hash order | SS-SPD-4.2 | the QVTo engine's deterministic insertion order (documented deviation, `DESIGN-SPD.md` §5.5); the Slingshot-exact mode uses QVTo's ordered mode, which equals the `det` runner's insertion order |
-| Q9 | only thrashing constraints in the chain | SS-SPD-1.4 | proposed (P1): the `TargetGroupSizeConstraint` is also checked in the chain, so a policy whose change would be clamped to zero is disregarded (and changes no constraint state). P1: `Quirks::q9_no_size_check`, *provisional*. |
+| Q1 | `doOnDisregard` does not restore the state | SS-SPD-3.2 | not decided. No filter after the adjustor can disregard, so nothing is ever restored (no effect on results known). P1: `Quirks::q1_disregard_keeps_state`. |
+| Q2 | constraint state changes when the request is made, even if QVTo fails | SS-SPD-3.2 | kept (decision of 2026-11-04): a cooldown constrains the adjustments made to the target, also those that leave its capacity unchanged, so the adjustor commits its state (latest adjustment, cooldown, the group's last policy) when the request is made. `Quirks::q2_commit_on_request` changes nothing. |
+| Q3 | AVERAGE is an EMA (60 s, 10 s, 0.2); the others use the last 10 values | SS-SPD-2.4 | kept (decision of 2026-11-04): Slingshot's aggregator design (no SimuLizar counterpart, no other intent in the code). No flag. The EMA's decay `exp(-Δt/60)` per sample is, by its Javadoc, a correction for Slingshot's utilisation samples (taken only at job arrivals and departures, so the time without samples counts as idle); a sample that covers a span (a sliding window's utilisation in the SimuLizar flavour, `Measurement::covers`) decays only over the time no sample covers. Instantaneous samples decay as in Slingshot. |
+| Q4 | relative 0 % ignores `minAdjustmentValue` | SS-SPD-4.2 | defined (decision of 2026-11-04): a zero change stays zero; otherwise the magnitude is at least `minAdjustmentValue`, in the direction of the percentage. `Quirks::q4_relative_zero`, the patched `AdjustmentCalculator.qvto` (`crates/simoxide-reconf/transformations/spd-fixed`). |
+| Q5 | scale-in aborts one job, loses the others | SS-SPD-5.4 | defined in the design (§5.3), confirmed 2026-11-04: drain |
+| Q6 | every link connects every container after an adjustment | SS-SPD-4.2 | defined (decision of 2026-11-04): a new container joins the links of the unit container (appended); other links unchanged; removed containers leave every link. `Quirks::q6_all_links`, the patched `ResourceEnvironmentTransformation.qvto` |
+| Q7 | top-down scale-in removes emptied containers one enactment late | SS-SPD-4.2 | defined (decision of 2026-11-04): removed in the same enactment (the transformation's own TODO); hosts that should outlive their assemblies need a policy of their own on the elastic infrastructure. `Quirks::q7_late_removal`, the patched `TopDownTransformationInfrastructure.qvto` |
+| Q8 | top-down placement `->any(true)`: Java-hash order | SS-SPD-4.2 | decided 2026-11-04: the QVTo engine's deterministic insertion order (documented deviation, `DESIGN-SPD.md` §5.5); the Slingshot-exact mode uses QVTo's ordered mode, which equals the `det` runner's insertion order |
+| Q9 | only thrashing constraints in the chain | SS-SPD-1.4 | kept (decision of 2026-11-04): the `TargetGroupSizeConstraint` is no filter; the adjustment clamps the change onto `[minSize, maxSize]` (`Interprete_GroupSizeConstraints`), so an out-of-range decision is modified to the bound, not disregarded. From size 2 with maximum 3, step +2 becomes +1; at size 3 it becomes 0, which is still an adjustment and starts the cooldown (Q2). `Quirks::q9_no_size_check` changes nothing. |
 | Q10 | static fields in `TargetGroupUtils` | – | not reproduced (no shared JVM state in SimOxide) |
 | Q11 | unsupported stimuli: NPE at set-up | SS-SPD-2.2 | defined: a configuration error naming the stimulus. P1: `Quirks::q11_setup_error_drops_spd` (also wrong expectation types, CPU percentages outside 0-100, `QueueLength` outside competing-consumer groups). |
-| Q12 | composed triggers broken | SS-SPD-2.6 | defined: AND/OR/XOR of the children's results. P1: `Quirks::q12_broken_composed` (also the double evaluation with two measurement stimulus kinds); fixed XOR = exactly one child. |
-| Q13 | instantaneous samples merged over containers; aggregation on every event | SS-SPD-2.3/2.4 | proposed (P1): `aggregationOverElements` aggregates the latest value of each element of the group; `getResult` only for events that were aggregated; samples are consumed only when the chain gets that far. P1: `Quirks::q13_merged_samples`; fixed: one window per measuring point, the method over the ready windows, *provisional*. A window starts with its element's first sample (an EMA is ready a window length, 60 s, later; it was decayed over the time before the element existed and ready at once); a window whose container left the group is dropped (its last value stayed in the aggregation before). |
-| Q14 | deleted elements not reported; population changes ineffective | SS-SPD-5.2 | proposed (F4/P2): deletions are reported, monitors and passive resources of removed elements are dropped, a population change takes effect |
+| Q12 | composed triggers broken | SS-SPD-2.6 | not decided (open: is a child evaluated on every event or only on its own?). As implemented: AND/OR/XOR of the children's results. P1: `Quirks::q12_broken_composed` (also the double evaluation with two measurement stimulus kinds); fixed XOR = exactly one child. |
+| Q13 | instantaneous samples merged over containers; aggregation on every event | SS-SPD-2.3/2.4 | defined (decision of 2026-11-04): `aggregationOverElements` aggregates the latest value of each element of the group; `getResult` only for events that were aggregated; samples are consumed only when the chain gets that far. P1: `Quirks::q13_merged_samples`; fixed: one window per measuring point, the method over the ready windows. A window starts with its element's first sample (an EMA is ready a window length, 60 s, later; it was decayed over the time before the element existed and ready at once); a window whose container left the group is dropped (its last value stayed in the aggregation before). |
+| Q14 | deleted elements not reported; population changes ineffective | SS-SPD-5.2 | defined (decision of 2026-11-04): deletions are reported, monitors and passive resources of removed elements are dropped, a population change takes effect |
 | Q15 | policies react to each other's `SimulationTimeReached` | SS-SPD-2.1 | defined: only the policy's own event. P1: `Quirks::q15_shared_time_events`. |
-| Q16 | container order after an adjustment follows Java identity hashes | SS-SPD-4.2 | insertion order (the `det` rule, phase Q2) |
+| Q16 | container order after an adjustment follows Java identity hashes | SS-SPD-4.2 | insertion order (the `det` rule, phase Q2); chosen 2026-11-04 with a reservation |

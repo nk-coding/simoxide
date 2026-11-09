@@ -1,0 +1,339 @@
+{
+  "saved_at": "2026-11-04T09:04:47.356Z",
+  "about": "Decisions for SimOxide's semantics when not reproducing Slingshot. choice is slingshot, fixed, other, unsure, or keep.",
+  "answers": [
+    {
+      "id": "Q1",
+      "group": "SPD interpreter",
+      "title": "Disregard does not restore adjustor state",
+      "status": "defined",
+      "choice": "",
+      "choice_label": "",
+      "note": ""
+    },
+    {
+      "id": "Q2",
+      "group": "SPD interpreter",
+      "title": "Cooldown is committed when the request is made",
+      "status": "defined",
+      "choice": "slingshot",
+      "choice_label": "Slingshot\u2019s behavior is the right semantics",
+      "note": "a cooldown is a constraint on an adjustment made to the target, even though that adjustment may not effectiively change the capacity of the target group"
+    },
+    {
+      "id": "Q3",
+      "group": "SPD interpreter",
+      "title": "AVERAGE is an exponential moving average",
+      "status": "kept",
+      "choice": "keep",
+      "choice_label": "Keep this behavior",
+      "note": ""
+    },
+    {
+      "id": "Q4",
+      "group": "SPD interpreter",
+      "title": "A relative change of 0 ignores the minimum step",
+      "status": "proposed",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q5",
+      "group": "SPD interpreter",
+      "title": "Scale-in drops jobs on the removed container",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": "I think also in palladio/slingshot the container drains, the resource container is deleted but the queue in the underlying data structure is cleaned up only after "
+    },
+    {
+      "id": "Q6",
+      "group": "SPD interpreter",
+      "title": "Every link is connected to every container",
+      "status": "proposed",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q7",
+      "group": "SPD interpreter",
+      "title": "Top-down scale-in removes empty containers one enactment late",
+      "status": "proposed",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": "The fix is the right top-down transformation semantic. It was not deleted to account for requests in transit.\nA top-down scale-in assumes, that the effect of scaling in components automatically translates to the scaling in of hosts/containers/vms; however, that does not need to be the case. In practice, these two can be controlled independently."
+    },
+    {
+      "id": "Q8",
+      "group": "SPD interpreter",
+      "title": "Top-down placement follows Java hash order",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": "So what is the issue if it changes between JVMs ? "
+    },
+    {
+      "id": "Q9",
+      "group": "SPD interpreter",
+      "title": "Group size is not checked before the request",
+      "status": "proposed",
+      "choice": "other",
+      "choice_label": "Neither \u2014 the rule should be something else",
+      "note": "it has to make sure if the change is lt or gt, then the decision is not simply ignored while it lays out of the bounds, but the decision has to be modified to max and min. This was part of the qvto transformation and not in the filter chain in Slingshot.  "
+    },
+    {
+      "id": "Q10",
+      "group": "SPD interpreter",
+      "title": "Static fields in TargetGroupUtils",
+      "status": "unreproduced",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q11",
+      "group": "SPD interpreter",
+      "title": "An unsupported trigger drops the whole SPD",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q12",
+      "group": "SPD interpreter",
+      "title": "AND / OR / XOR triggers do not combine the children",
+      "status": "defined",
+      "choice": "unsure",
+      "choice_label": "Not sure yet",
+      "note": "on every event or on relevant events?"
+    },
+    {
+      "id": "Q13",
+      "group": "SPD interpreter",
+      "title": "One window for every element, consumed on every event",
+      "status": "proposed",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q14",
+      "group": "SPD interpreter",
+      "title": "Removed elements stay in the running model",
+      "status": "proposed",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q15",
+      "group": "SPD interpreter",
+      "title": "Time policies hear each other\u2019s events",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q16",
+      "group": "SPD interpreter",
+      "title": "Container order follows Java identity hashes",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": "not sure yet, "
+    },
+    {
+      "id": "Q17",
+      "group": "Engine",
+      "title": "Several demands of one internal action run together",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q18",
+      "group": "Engine",
+      "title": "A throwing handler is disposed and the run continues",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q19",
+      "group": "Engine",
+      "title": "A loop count of 0 still enters the body",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q20",
+      "group": "Engine",
+      "title": "Roles are resolved by role id alone",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q21",
+      "group": "Engine",
+      "title": "A guarded branch with no true guard throws",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q22",
+      "group": "Engine",
+      "title": "A collection iterator draws once and never pops the frame",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q23",
+      "group": "Engine",
+      "title": "Forks share a cursor and ignore asynchronous children",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q24",
+      "group": "Engine",
+      "title": "Acquire and Release require a resource demand",
+      "status": "defined",
+      "choice": "slingshot",
+      "choice_label": "Slingshot\u2019s behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q25",
+      "group": "Engine",
+      "title": "Delay resources abort the user",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q26",
+      "group": "Engine",
+      "title": "A stale processor-sharing completion still samples state",
+      "status": "defined",
+      "choice": "unsure",
+      "choice_label": "Not sure yet",
+      "note": ""
+    },
+    {
+      "id": "Q27",
+      "group": "Engine",
+      "title": "Passive capacity is evaluated with no frame",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q28",
+      "group": "Engine",
+      "title": "Every link transfer draws a failure, even at probability 0",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q29",
+      "group": "Engine",
+      "title": "Some response-time monitors record nothing",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q30",
+      "group": "Engine",
+      "title": "Entering a composite stops the user",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q31",
+      "group": "Engine",
+      "title": "An infrastructure call breaks the assembly-operation monitor",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q32",
+      "group": "Engine",
+      "title": "Only simTime stops the run",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q33",
+      "group": "Engine",
+      "title": "The entry-call measuring point uses the system role",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q34",
+      "group": "Engine",
+      "title": "Replica monitors share one series",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q35",
+      "group": "Engine",
+      "title": "Unsupported actions stall with no error",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q36",
+      "group": "Engine",
+      "title": "Infrastructure-call inputs are dropped",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    },
+    {
+      "id": "Q37",
+      "group": "Engine",
+      "title": "A call between unconnected containers disposes the link handler",
+      "status": "defined",
+      "choice": "fixed",
+      "choice_label": "The fixed behavior is the right semantics",
+      "note": ""
+    }
+  ]
+}
