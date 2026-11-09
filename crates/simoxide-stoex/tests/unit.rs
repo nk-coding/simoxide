@@ -196,3 +196,16 @@ fn folding() {
         EvalErrorKind::Arithmetic
     );
 }
+
+/// Value equality is Java `equals` (`doubleToLongBits`): `0.0 != -0.0`, and a NaN equals every
+/// other NaN whatever its bits. x86-64 and ARM64 give `0.0 / 0.0` different NaN bits.
+#[test]
+fn double_equality_is_java_equals() {
+    let x86_nan = f64::from_bits(0xfff8_0000_0000_0000);
+    let arm_nan = f64::from_bits(0x7ff8_0000_0000_0000);
+    assert_eq!(Value::Double(x86_nan), Value::Double(arm_nan));
+    assert_eq!(eval("0.0/0").unwrap(), Value::Double(x86_nan));
+    assert_eq!(eval("0.0/0").unwrap(), Value::Double(arm_nan));
+    assert_ne!(Value::Double(0.0), Value::Double(-0.0));
+    assert_ne!(Value::Double(f64::NAN), Value::Double(f64::INFINITY));
+}

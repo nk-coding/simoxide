@@ -16,11 +16,15 @@ pub enum Value {
 }
 
 impl PartialEq for Value {
-    /// Java `equals`: doubles compare by bits (so NaN equals NaN, `0.0 != -0.0`).
+    /// Java `equals`: doubles compare by `doubleToLongBits`, so `0.0 != -0.0` and every NaN equals
+    /// every other NaN. The bits of a NaN depend on the CPU (x86-64 sets the sign bit of the NaN of
+    /// `0.0 / 0.0`, ARM64 does not), so comparing raw bits would make results differ by platform.
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Value::Int(a), Value::Int(b)) => a == b,
-            (Value::Double(a), Value::Double(b)) => a.to_bits() == b.to_bits(),
+            (Value::Double(a), Value::Double(b)) => {
+                a.to_bits() == b.to_bits() || (a.is_nan() && b.is_nan())
+            }
             (Value::Bool(a), Value::Bool(b)) => a == b,
             (Value::Str(a), Value::Str(b)) => a == b,
             (Value::Null, Value::Null) => true,
@@ -94,7 +98,7 @@ impl Value {
         }
     }
 
-    /// Bitwise identity (same as `==`).
+    /// Java `equals` (same as `==`).
     pub fn same(&self, other: &Value) -> bool {
         self == other
     }
