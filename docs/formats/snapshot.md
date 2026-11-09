@@ -192,7 +192,9 @@ mirror (rebuilt on restore with the same objects); the host's statistics and kep
 ### `qvto`
 
 A run's QVTo state: whether it exists, the number of transformation runs, and the state of its id
-generator (the seeded UUID generator of `IdPolicy::Uuid`). The run's model graph is the engine's
+generator (the seeded UUID generator of `IdPolicy::Uuid`), as the next transformation would
+continue it: from the run's current model graph when edits after the last transformation drew ids
+from it (e.g. the monitors an SPD adjustment clones). The run's model graph is the engine's
 (`model`), the journal is empty between events, and models of other metamodels are rebuilt by
 their owners. When QVTo runs on the shared EMF graph (merge step M6), the graph's own
 serialisation replaces this.

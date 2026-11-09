@@ -468,7 +468,7 @@ fn transformations_at_resume_equal_the_run_in_process() {
                 assert!(steps[1].log.contains("added2"), "{}", steps[1].log);
                 sim.run_until(Pause::After(150 * S)).unwrap();
                 let qsec = q
-                    .snapshot_section(simoxide_sim::snapshot::Encoding::Postcard)
+                    .snapshot_section(&sim, simoxide_sim::snapshot::Encoding::Postcard)
                     .unwrap();
                 let s = sim
                     .snapshot_value(simoxide_sim::snapshot::Encoding::Postcard, vec![qsec])

@@ -261,7 +261,7 @@ fn the_qvto_state_continues_its_id_sequence() {
         let mut q = qrun();
         q.invoke(&mut sim, &rate, &inv).unwrap();
         q.invoke(&mut sim, &add, &inv).unwrap();
-        let qsec = q.snapshot_section(enc).unwrap();
+        let qsec = q.snapshot_section(&sim, enc).unwrap();
         let s = sim.snapshot_value(enc, vec![qsec]).unwrap();
         let mut bytes = Vec::new();
         s.write(&mut bytes).unwrap();

@@ -3,7 +3,8 @@
 //! in new processes: the SPD minimal example in the SimuLizar flavour scales out at 50 s, the
 //! decision log records the adjustment with Slingshot's model summaries; a run paused after the
 //! adjustment and resumed from its snapshot gives the uninterrupted run's log and measurements;
-//! `--enforce` adjusts at the resume.
+//! `--enforce` adjusts at the resume. In the Slingshot flavours, runs paused at any time, also
+//! several times, give objects created after a resume the uninterrupted run's ids.
 
 #![cfg(all(feature = "spd", feature = "reconfiguration"))]
 
@@ -169,4 +170,147 @@ fn adjustments_run_and_resume() {
             .len(),
         3
     );
+}
+
+/// Runs `model` with `flags` uninterrupted, and paused at the times `chain` (one process per
+/// hop, each resumed from the previous hop's snapshot). The hops' decision logs and traces joined
+/// and the last hop's measurements (cumulative) are the uninterrupted run's bytes, and every
+/// hop's snapshot is the bytes of the uninterrupted run paused at the same time (the run's model
+/// with every id, the QVTo state with its id generator).
+fn resumed_equals_whole(name: &str, model: &str, flags: &[&str], chain: &[&str]) {
+    let d = tmp(&format!("{name}-{}", chain.join("-")));
+    let p = |f: &str| d.join(f).to_string_lossy().into_owned();
+    let outputs = |tag: &str| {
+        vec![
+            "--spd-log".to_string(),
+            p(&format!("log-{tag}")),
+            "--trace".into(),
+            p(&format!("trace-{tag}")),
+            "--measurements".into(),
+            p(&format!("m-{tag}.csv")),
+        ]
+    };
+    let run: Vec<&str> = [&["run", "--model", model], flags].concat();
+    let w = outputs("whole");
+    ok(&[&run[..], &w.iter().map(String::as_str).collect::<Vec<_>>()].concat());
+    let mut prev: Option<String> = None;
+    for i in 0..=chain.len() {
+        let mut args: Vec<&str> = match &prev {
+            None => run.clone(),
+            Some(s) => vec!["resume", s, "--model", model],
+        };
+        let o = outputs(&i.to_string());
+        args.extend(o.iter().map(String::as_str));
+        let snap = p(&format!("snap-{i}"));
+        if let Some(t) = chain.get(i) {
+            args.extend(["--pause-at", t, "--snapshot", &snap]);
+        }
+        ok(&args);
+        prev = Some(snap);
+    }
+    let at = format!("{name} paused at {chain:?}");
+    for (i, t) in chain.iter().enumerate() {
+        let (u, ut) = (p(&format!("u-{i}")), p("u-trace"));
+        let mut args = run.clone();
+        args.extend(["--trace", &ut, "--pause-at", t, "--snapshot", &u]);
+        ok(&args);
+        assert!(
+            read_bytes(&d.join(format!("snap-{i}"))) == read_bytes(Path::new(&u)),
+            "{at}: snapshot at {t}"
+        );
+    }
+    let joined = |kind: &str| -> String {
+        (0..=chain.len())
+            .map(|i| read(&d.join(format!("{kind}-{i}"))))
+            .collect()
+    };
+    assert!(joined("log") == read(&d.join("log-whole")), "{at}: SPD log");
+    assert!(
+        joined("trace") == read(&d.join("trace-whole")),
+        "{at}: trace"
+    );
+    let (m, whole) = (
+        read(&d.join(format!("m-{}.csv", chain.len()))),
+        read(&d.join("m-whole.csv")),
+    );
+    if m != whole {
+        let line = m.lines().zip(whole.lines()).position(|(a, b)| a != b);
+        panic!("{at}: measurements differ, first at line {line:?}");
+    }
+    std::fs::remove_dir_all(&d).unwrap();
+}
+
+fn read_bytes(p: &Path) -> Vec<u8> {
+    std::fs::read(p).unwrap()
+}
+
+/// Objects created after a resume get the uninterrupted run's ids, for every pause point: each
+/// adjustment's monitor clones (Slingshot's `ResourceContainerMonitorCloner`) are created on the
+/// run's model after the transformation and draw from its UUID generator, so the snapshot keeps
+/// the generator of the run's model, not that of the transformation's last working graph.
+/// Otherwise the containers and processing resources of later adjustments get other ids, their
+/// measurements other measuring-point keys (the Slingshot flavour), the trace other ids.
+/// `spd_v4_cpu` adjusts at 60.1, 90.6, 120.7, 154.8 s, ...; `spd_service_group` at 20, 40 and
+/// 60 s; `spd_time_policies` from 20 s on.
+#[test]
+fn objects_created_after_a_resume_get_the_uninterrupted_runs_ids() {
+    if !simoxide_thirdparty::skip_unless_all_available() {
+        return;
+    }
+    let m = |n: &str| {
+        root()
+            .join("reference/slingshot/models")
+            .join(n)
+            .to_string_lossy()
+            .into_owned()
+    };
+    let fixed = [
+        "--flavour",
+        "slingshot",
+        "--spd-quirks",
+        "fixed",
+        "--seed",
+        "7",
+    ];
+    let exact = [
+        "--flavour",
+        "slingshot-exact",
+        "--spd-quirks",
+        "slingshot",
+        "--seed",
+        "7",
+    ];
+    let chains: [(&str, &[&str], &str, &[&[&str]]); 4] = [
+        (
+            "spd_v4_cpu",
+            &fixed,
+            "600",
+            &[
+                &["30"],
+                &["61"],
+                &["90"],
+                &["150"],
+                &["30", "61", "121", "300", "450"],
+            ],
+        ),
+        (
+            "spd_service_group",
+            &fixed,
+            "100",
+            &[&["30"], &["50"], &["10", "30", "50", "70"]],
+        ),
+        (
+            "spd_time_policies",
+            &fixed,
+            "100",
+            &[&["30"], &["10", "30", "50", "70"]],
+        ),
+        ("spd_service_group", &exact, "100", &[&["30", "50"]]),
+    ];
+    for (model, flags, until, chains) in chains {
+        let f = [flags, &["--max-sim-time", until]].concat();
+        for chain in chains {
+            resumed_equals_whole(model, &m(model), &f, chain);
+        }
+    }
 }

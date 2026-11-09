@@ -244,7 +244,7 @@ fn hop(
             if let Some(a) = &adj
                 && a.run.is_started()
             {
-                extra.push(a.run.snapshot_section(enc).unwrap());
+                extra.push(a.run.snapshot_section(&run, enc).unwrap());
             }
             let s = run.snapshot_value(enc, extra).unwrap();
             let mut b = Vec::new();
@@ -437,7 +437,7 @@ fn forks_and_detached_runs_continue_like_the_uninterrupted_run() {
                 && a.run.is_started()
             {
                 s.sections
-                    .push(a.run.snapshot_section(Encoding::Postcard).unwrap());
+                    .push(a.run.snapshot_section(&run, Encoding::Postcard).unwrap());
             }
             s
         });

@@ -253,7 +253,10 @@ fn fixed_behaviour_runs_the_patched_transformations() {
 /// An SPD run with adjustments, written to snapshots (sections `engine`, `model`/`graph`,
 /// `spd`, `qvto`) at several times and restored into a fresh run with a fresh adjuster each
 /// time, continues like the uninterrupted run: decision log (model summaries included) and
-/// measurements equal; a restored run writes the bytes it was read from.
+/// measurements equal; a restored run writes the bytes it was read from, and each snapshot is the
+/// bytes of the never restored run's at the same time (objects created after a restore, e.g. by
+/// a later adjustment, get the same ids: the id generator continues from the run's model, which
+/// the monitor clones after an adjustment drew from).
 #[test]
 fn snapshots_with_adjustments_continue_identically() {
     if !simoxide_thirdparty::skip_unless_all_available() {
@@ -273,6 +276,23 @@ fn snapshots_with_adjustments_continue_identically() {
         whole.run(&mut adjuster(q), &mut wlog).unwrap();
         let (wres, wst, _) = whole.finish().unwrap();
 
+        let snap = |r: &mut SpdRun<'_, '_, Exact>, adj: &QvtoAdjuster| {
+            let mut snap = r.snapshot_value(Encoding::Postcard).unwrap();
+            snap.sections.push(
+                adj.run
+                    .snapshot_section(&r.sim, Encoding::Postcard)
+                    .unwrap(),
+            );
+            let mut bytes = Vec::new();
+            snap.write(&mut bytes).unwrap();
+            bytes
+        };
+        // never restored
+        let sim = Simulation::<Exact>::new(&s.cm, s.cfg.clone(), Outputs::default()).unwrap();
+        let mut u = SpdRun::new(sim, &s.spd).unwrap();
+        let mut uadj = adjuster(q);
+        let mut ulog = VecLog::default();
+
         let sim = Simulation::<Exact>::new(&s.cm, s.cfg.clone(), Outputs::default()).unwrap();
         let mut r = SpdRun::new(sim, &s.spd).unwrap();
         let mut adj = adjuster(q);
@@ -281,15 +301,22 @@ fn snapshots_with_adjustments_continue_identically() {
         for t in [5, 20, 33, 50, 51, 60, 77, 90] {
             r.run_until(&mut adj, &mut log, Some(t * 1_000_000_000))
                 .unwrap();
-            let snap = |r: &mut SpdRun<'_, '_, Exact>, adj: &QvtoAdjuster| {
-                let mut snap = r.snapshot_value(Encoding::Postcard).unwrap();
-                snap.sections
-                    .push(adj.run.snapshot_section(Encoding::Postcard).unwrap());
-                let mut bytes = Vec::new();
-                snap.write(&mut bytes).unwrap();
-                bytes
-            };
             let bytes = snap(&mut r, &adj);
+            u.run_until(&mut uadj, &mut ulog, Some(t * 1_000_000_000))
+                .unwrap();
+            let ubytes = snap(&mut u, &uadj);
+            if bytes != ubytes {
+                let a = Snapshot::read(&bytes[..]).unwrap();
+                let b = Snapshot::read(&ubytes[..]).unwrap();
+                for (x, y) in a.sections.iter().zip(&b.sections) {
+                    assert!(
+                        x == y,
+                        "{q:?} t={t}: section {} not the uninterrupted run's",
+                        x.name
+                    );
+                }
+                panic!("{q:?} t={t}: header not the uninterrupted run's");
+            }
             generations.push(r.sim.state().model().generation());
             drop(r);
             let read = Snapshot::read(&bytes[..]).unwrap();
