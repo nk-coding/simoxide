@@ -18,6 +18,8 @@ simoxide-emf = { workspace = true }
 simoxide-reconf = { workspace = true, optional = true }
 simoxide-spd = { workspace = true, optional = true, features = ["sim"] }
 mimalloc = { version = "0.1", optional = true, default-features = false }
+# the decision file and `snapshot-info`'s decision (`spd` feature)
+serde_json = "1"
 pprof = { version = "0.15", optional = true, default-features = false, features = ["flamegraph"] }
 
 [features]
