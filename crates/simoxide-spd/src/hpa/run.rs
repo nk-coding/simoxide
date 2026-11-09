@@ -552,6 +552,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             time: now as f64 / 1e9,
             enforced: false,
             hpa: Some(i as u32),
+            decision: None,
         };
         self.state.next_request += 1;
         let s = &mut self.hpa_state.autoscalers[i];

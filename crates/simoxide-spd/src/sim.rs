@@ -221,6 +221,11 @@ pub struct SpdRun<'m, 's, C: Compat, F: Flavour = SimuLizar> {
     /// Every container that was an element of an elastic infrastructure while this run
     /// observed it, with the infrastructure's unit ([`SpdRun::container_units`]).
     pub(crate) units: Vec<(ContainerId, ContainerId)>,
+    /// Pause when a policy's request is about to be executed (`crate::decision`); not part
+    /// of the run state.
+    pub(crate) pause_on_decision: bool,
+    /// The run's decisions (`crate::decision`).
+    pub(crate) decisions: crate::decision::Decisions,
 }
 
 struct Host<'a, 'm, C: Compat, F: Flavour> {
@@ -277,6 +282,8 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             hpa: None,
             hpa_state: Default::default(),
             units: Vec::new(),
+            pause_on_decision: false,
+            decisions: Default::default(),
         };
         run.note_units();
         let mut host = Host {
@@ -318,23 +325,29 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
 
     /// Runs like [`SpdRun::run`] while `keep_going` holds, asked between events (as
     /// [`Simulation::run_while`] asks it) after the SPD work of the last event: e.g. a pause
-    /// condition (`simoxide_sim::Watch::keep_going`).
+    /// condition (`simoxide_sim::Watch::keep_going`). With
+    /// [`SpdRun::set_pause_on_decision`] it also returns `Paused` at a decision
+    /// ([`SpdRun::pending_decision`]); a run with a pending decision does not continue (an
+    /// error) before [`SpdRun::decide`] resolved it.
     pub fn run_while(
         &mut self,
         adjuster: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
         mut keep_going: impl FnMut(&RunState<C, F>) -> bool,
     ) -> Result<Status, SimError> {
+        if self.decisions.pending.is_some() {
+            return Err(self.pending_error());
+        }
         loop {
             let status = self
                 .sim
                 .run_while(|s| !s.hooks_pending() && keep_going(s))?;
             let pending = self.sim.state().hooks_pending();
-            self.handle(adjuster, log)?;
+            self.handle(adjuster, log, status == Status::Finished)?;
             if status == Status::Finished {
                 return Ok(Status::Finished);
             }
-            if !pending {
+            if !pending || self.decisions.pending.is_some() {
                 return Ok(Status::Paused);
             }
         }
@@ -353,6 +366,8 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             hpa: self.hpa,
             hpa_state: self.hpa_state.clone(),
             units: self.units.clone(),
+            pause_on_decision: self.pause_on_decision,
+            decisions: self.decisions.clone(),
         })
     }
 
@@ -362,7 +377,12 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             evaluations: self.state.evaluations,
             requests: self.state.requests,
             adjustments_ok: self.adjusted_ok,
-            pending: self.requests.iter().filter(|r| r.is_some()).count() as u64,
+            pending: self.requests.iter().filter(|r| r.is_some()).count() as u64
+                + self
+                    .decisions
+                    .pending
+                    .as_ref()
+                    .map_or(0, |d| d.recommended.len() as u64),
         };
         let r = self.sim.finish()?;
         Ok((r, self.state, summary))
@@ -429,44 +449,12 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
         &mut self,
         adjuster: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
+        finished: bool,
     ) -> Result<(), SimError> {
-        for tag in self.sim.take_external() {
-            if tag & REQUEST != 0 {
-                let Some(req) = self.requests[(tag & !REQUEST) as usize].take() else {
-                    continue;
-                };
-                let out = adjuster.adjust(&mut self.sim, self.spd, &mut self.state, &req)?;
-                if out.ok {
-                    self.adjusted_ok += 1;
-                }
-                self.note_units();
-                self.observe_new_series();
-                let now = self.sim.state().now_ns() as f64 / 1e9;
-                self.spd
-                    .adjusted_with(&mut self.state, &req, &out, now, log);
-                if let Some(i) = req.hpa {
-                    self.hpa_adjusted(i as usize, &out)?;
-                } else if !self.hpa_state.autoscalers.is_empty() {
-                    // an SPD policy may have changed an autoscaler's group
-                    self.hpa_model_changed();
-                }
-                // every request taken: the table starts again (it never grows with the run)
-                if self.requests.iter().all(Option::is_none) {
-                    self.requests.clear();
-                }
-            } else if tag & crate::hpa::run::HPA != 0 {
-                self.hpa_note(tag, log)?;
-            } else {
-                let mut host = Host {
-                    sim: &mut self.sim,
-                    requests: &mut self.requests,
-                    error: None,
-                };
-                self.spd.on_timer(&mut self.state, &mut host, tag, log);
-                if let Some(e) = host.error {
-                    return Err(e);
-                }
-            }
+        let tags = self.sim.take_external();
+        if !self.handle_tags(tags, adjuster, log, finished)? {
+            // paused at a decision: the observed tuples stay buffered for the continuation
+            return Ok(());
         }
         let tuples = self.sim.take_observed();
         for o in tuples {
@@ -492,6 +480,79 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             }
         }
         Ok(())
+    }
+
+    /// Handles the dispatched external notes `tags`, in order. `false`: a request was
+    /// intercepted as a decision (`crate::decision`); the rest waits in the decision.
+    pub(crate) fn handle_tags(
+        &mut self,
+        tags: Vec<u32>,
+        adjuster: &mut dyn Adjuster<C, F>,
+        log: &mut dyn Log,
+        finished: bool,
+    ) -> Result<bool, SimError> {
+        let mut tags = tags.into_iter();
+        while let Some(tag) = tags.next() {
+            if tag & REQUEST != 0 {
+                let Some(req) = self.requests[(tag & !REQUEST) as usize].take() else {
+                    // a request a decision took: its note is a no-op
+                    self.decisions.cancelled = self.decisions.cancelled.saturating_sub(1);
+                    self.compact_requests();
+                    continue;
+                };
+                if self.pause_on_decision && !finished && req.is_recommendation() {
+                    self.intercept(req, tags.collect(), log);
+                    return Ok(false);
+                }
+                self.execute(adjuster, log, &req)?;
+            } else if tag & crate::hpa::run::HPA != 0 {
+                self.hpa_note(tag, log)?;
+            } else {
+                let mut host = Host {
+                    sim: &mut self.sim,
+                    requests: &mut self.requests,
+                    error: None,
+                };
+                self.spd.on_timer(&mut self.state, &mut host, tag, log);
+                if let Some(e) = host.error {
+                    return Err(e);
+                }
+            }
+        }
+        Ok(true)
+    }
+
+    /// Executes `req` by `adjuster` now and takes its outcome back.
+    pub(crate) fn execute(
+        &mut self,
+        adjuster: &mut dyn Adjuster<C, F>,
+        log: &mut dyn Log,
+        req: &AdjustmentRequest,
+    ) -> Result<AdjustOutcome, SimError> {
+        let out = adjuster.adjust(&mut self.sim, self.spd, &mut self.state, req)?;
+        if out.ok {
+            self.adjusted_ok += 1;
+        }
+        self.note_units();
+        self.observe_new_series();
+        let now = self.sim.state().now_ns() as f64 / 1e9;
+        self.spd.adjusted_with(&mut self.state, req, &out, now, log);
+        if let Some(i) = req.hpa {
+            self.hpa_adjusted(i as usize, &out)?;
+        } else if !self.hpa_state.autoscalers.is_empty() {
+            // an SPD policy may have changed an autoscaler's group
+            self.hpa_model_changed();
+        }
+        self.compact_requests();
+        Ok(out)
+    }
+
+    /// Every request taken and no note of one still queued: the table starts again (it never
+    /// grows with the run).
+    pub(crate) fn compact_requests(&mut self) {
+        if self.decisions.cancelled == 0 && self.requests.iter().all(Option::is_none) {
+            self.requests.clear();
+        }
     }
 }
 

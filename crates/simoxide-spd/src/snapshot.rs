@@ -20,6 +20,42 @@ pub const SPD: &str = "spd";
 /// Name of the HPA section (the autoscalers' run state, `crate::hpa`).
 pub const HPA: &str = "hpa";
 
+/// Name of the decision section (`crate::decision`): written once the run made a decision.
+pub const DECISION: &str = "spd-decision";
+
+/// The section `spd-decision`: the decisions made so far, the request notes they cancelled
+/// that are still queued, the pending decision.
+#[derive(Serialize, Deserialize)]
+struct DecisionImage {
+    made: u64,
+    cancelled: u32,
+    pending: Option<crate::decision::PendingDecision>,
+}
+
+fn read_decision(s: &Snapshot) -> Result<Option<DecisionImage>, SnapshotError> {
+    s.section(DECISION)
+        .map(|sec| sec.decode::<DecisionImage>(s.header.encoding))
+        .transpose()
+}
+
+/// The decision state of snapshot `s` as JSON (`simoxide snapshot-info`): `{"decisions": n,
+/// "pending": decision or null}`; `None` if the run made no decision.
+pub fn decision_info(s: &Snapshot) -> Result<Option<serde_json::Value>, SnapshotError> {
+    Ok(read_decision(s)?.map(|d| {
+        serde_json::json!({
+            "decisions": d.made,
+            "pending": d.pending.as_ref().map(crate::decision::PendingDecision::to_json),
+        })
+    }))
+}
+
+/// The pending decision of snapshot `s`, if any.
+pub fn pending_decision_of(
+    s: &Snapshot,
+) -> Result<Option<crate::decision::PendingDecision>, SnapshotError> {
+    Ok(read_decision(s)?.and_then(|d| d.pending))
+}
+
 /// The section `hpa`: the autoscalers' names (checked on restore) and state.
 #[derive(Serialize, Deserialize)]
 struct HpaImage {
@@ -248,6 +284,15 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             };
             secs.push(Section::encode(HPA, &img, enc)?);
         }
+        let d = &self.decisions;
+        if d.made > 0 || d.cancelled > 0 {
+            let img = DecisionImage {
+                made: d.made,
+                cancelled: d.cancelled,
+                pending: d.pending.clone(),
+            };
+            secs.push(Section::encode(DECISION, &img, enc)?);
+        }
         self.sim.snapshot_value(enc, secs)
     }
 
@@ -334,6 +379,14 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
                 img.state
             }
         };
+        let decisions = match read_decision(s)? {
+            Some(d) => crate::decision::Decisions {
+                made: d.made,
+                pending: d.pending,
+                cancelled: d.cancelled,
+            },
+            None => Default::default(),
+        };
         let sim = Simulation::<C, F>::restore_snapshot(s, base, out)?;
         let mut run = SpdRun {
             series: series_points(sim.compiled(), &sim.state().measurements().series),
@@ -345,6 +398,8 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
             hpa,
             hpa_state,
             units: Vec::new(),
+            pause_on_decision: false,
+            decisions,
         };
         run.note_units();
         Ok(run)
