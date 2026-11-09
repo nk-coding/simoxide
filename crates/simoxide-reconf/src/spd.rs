@@ -5,7 +5,7 @@
 //!   at a pinned commit, EPL-2.0) is embedded in the binary: the origin-headed copies of
 //!   `crates/qvto/qvto-testkit/corpus/spd/transformations` (source, commit, licence;
 //!   `LICENSES` section 6). Three units have patched copies
-//!   for the provisional fixed behaviours of the quirks Q4, Q6 and Q7
+//!   for the fixed behaviours of the quirks Q4, Q6 and Q7
 //!   (`transformations/spd-fixed`); [`SpdVariant`] picks the unchanged unit when the quirk's
 //!   compat flag is on, so [`simoxide_spd::Quirks::slingshot`] runs Slingshot's bundle as it is.
 //!   [`main_transformation`] compiles a variant once per core ([`QvtoCore::compiled`]).
@@ -139,7 +139,7 @@ pub const TRANSFORMATIONS: [(&str, &str, &str); 17] = [
     ),
 ];
 
-/// The patched units of the provisional fixed behaviours (`transformations/spd-fixed`, marked
+/// The patched units of the fixed behaviours (`transformations/spd-fixed`, marked
 /// "PATCHED by SimOxide"): (quirk, qualified name, text).
 pub const FIXED: [(&str, &str, &str); 3] = [
     (

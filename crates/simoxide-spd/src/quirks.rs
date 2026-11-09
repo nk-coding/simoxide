@@ -1,8 +1,10 @@
 //! Compat flags of the SPD quirks Q1-Q16 (`DESIGN-SPD.md` §1.5, `docs/spec/slingshot/quirks.md`).
 //!
 //! Slingshot's bugs are fixed by default (U5, U13); each flag reproduces one quirk. The
-//! Slingshot-exact mode turns all of them on ([`Quirks::slingshot`]). Fixed behaviours marked
-//! *provisional* follow a proposal of the quirks page that the user has not confirmed yet.
+//! Slingshot-exact mode turns all of them on ([`Quirks::slingshot`]). Which behaviour is the
+//! semantics was decided on 2026-11-04 (`docs/spec/slingshot/semantics-decisions.md`): Q2 and Q9
+//! are *kept* there (the fixed behaviour equals Slingshot's, as for Q3 and Q1), so their flags
+//! change nothing; they stay for the snapshot layout and for `--spd-quirks Q2,Q9`.
 //!
 //! Of the quirks that live in the adjustment, Q4, Q6 and Q7 are flags here: their fixed
 //! behaviours are patched copies of Slingshot's transformations, which the adjuster
@@ -18,27 +20,30 @@ pub struct Quirks {
     /// changes that state, so both settings behave the same (kept for completeness).
     pub q1_disregard_keeps_state: bool,
     /// Q2: the adjustor's state change (latest adjustment, cooldown, the group's enacted
-    /// policies) happens when the request is made. Fixed: it is committed only by a successful
-    /// adjustment ([`crate::Spd::adjusted`]).
+    /// policies) happens when the request is made, also when the adjustment leaves the group's
+    /// size unchanged or fails. Kept (decision of 2026-11-04: a cooldown constrains the
+    /// adjustments made to the target, whether or not they change its capacity): the flag
+    /// changes nothing.
     pub q2_commit_on_request: bool,
     /// Q4: a relative adjustment whose percentage gives 0 ignores `minAdjustmentValue`
-    /// (`min(0, min)`). Fixed (provisional): a zero change stays zero, otherwise its magnitude
-    /// is at least `minAdjustmentValue` in the direction of the percentage. Used by the
-    /// group-size check of the fixed Q9 and by the adjustment (the patched
+    /// (`min(0, min)`). Fixed: a zero change stays zero, otherwise its magnitude
+    /// is at least `minAdjustmentValue` in the direction of the percentage (the patched
     /// `AdjustmentCalculator.qvto`).
     pub q4_relative_zero: bool,
     /// Q6: after an adjustment every linking resource of the environment connects every
-    /// container (`ResourceEnvironmentTransformation.qvto`). Fixed (provisional): a new
+    /// container (`ResourceEnvironmentTransformation.qvto`). Fixed: a new
     /// container joins the links its unit is connected to; the other links keep their
     /// containers; removed containers leave every link (patched transformation).
     pub q6_all_links: bool,
     /// Q7: a top-down scale-in removes the containers it empties only at the next enactment
-    /// (`TopDownTransformationInfrastructure.qvto`). Fixed (provisional): they are removed in
+    /// (`TopDownTransformationInfrastructure.qvto`). Fixed: they are removed in
     /// the same enactment, the transformation's own TODO (patched transformation).
     pub q7_late_removal: bool,
-    /// Q9: only thrashing constraints are target constraints of the chain. Fixed
-    /// (provisional): `TargetGroupSizeConstraint`s are checked in the chain too, so a policy
-    /// whose change would be clamped to zero is disregarded.
+    /// Q9: only thrashing constraints are target constraints of the chain; the adjustment
+    /// clamps the change onto `[minSize, maxSize]` (`AdjustmentCalculator.qvto`,
+    /// `Interprete_GroupSizeConstraints`). Kept (decision of 2026-11-04: an out-of-range
+    /// decision is modified to the bound, not disregarded; a change clamped to zero is still an
+    /// adjustment and starts the cooldown, Q2): the flag changes nothing.
     pub q9_no_size_check: bool,
     /// Q11: an unsupported stimulus or trigger (and any other set-up error: wrong expectation
     /// type, unsupported constraint) throws in Slingshot's set-up handler, which drops the
@@ -52,7 +57,7 @@ pub struct Quirks {
     pub q12_broken_composed: bool,
     /// Q13: samples of all elements of the group feed one window; `getResult` runs for every
     /// measurement that reaches the checker, also of other metrics; reading the value consumes
-    /// the EMA's emit slot even if a later filter disregards. Fixed (provisional): one window
+    /// the EMA's emit slot even if a later filter disregards. Fixed: one window
     /// per element (measuring point), the value is the aggregation method over the elements'
     /// window values; only measurements of the stimulus' metric are evaluated; the emit slot is
     /// consumed only when the policy fires.

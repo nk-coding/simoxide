@@ -106,7 +106,7 @@ The genuine design differences of Slingshot, always on in the flavour:
 | resources | SimuLizar's schedulers; nested containers not simulated | PS as SimuCom's with zero demands as 1e-9 s jobs, FCFS serving each job for its demand from the head (SS-RES-2/3); every allocated container, nested or not; HDD rates ignored |
 | demands | skipped when 0, measured otherwise | measured also when 0; a demand without allocation or resource aborts the user (closed: restarts after a think time, open: dropped, SS-WL-5) |
 | links | depending on the linking-resource options | always simulated, BYTESIZE payloads both ways (SS-ACT-7) |
-| passive resources | one unit, created at first use | the action's amount, the release re-evaluated (SS-RES-4); instances created before the start |
+| passive resources | one unit, created at first use | the action's amount, the release re-evaluated (SS-RES-4); an Acquire or Release without a demand is a run error (Q24, kept); instances created before the start |
 | branches | the run's random stream | Slingshot's `Math.random()` stream (SS-RNG-1.2) |
 | monitoring | probe framework, sliding windows, PRM, initial and final tuples | instantaneous state and utilisation samples at every resource event, the resource demand at every job start, Slingshot's passive-resource points; no windows, no processing types, no initial or final tuples (SS-MEAS) |
 

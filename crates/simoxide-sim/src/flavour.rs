@@ -190,14 +190,14 @@ macro_rules! quirks {
 
 quirks! {
     Q1 = 1, Spd, "doOnDisregard does not restore the adjustor state";
-    Q2 = 2, Spd, "the constraint state changes when the request is made, even if QVTo fails";
+    Q2 = 2, Spd, "the constraint state changes when the request is made, even if QVTo fails (kept: the fixed behaviour equals it)";
     Q3 = 3, Spd, "AVERAGE is an EMA (60 s, 10 s, 0.2), the other aggregations use the last 10 values (kept: the fixed behaviour equals it)";
     Q4 = 4, Spd, "a relative adjustment of 0 % ignores minAdjustmentValue";
     Q5 = 5, Spd, "a scale-in aborts the one job with a pending event on a removed container and loses the others";
     Q6 = 6, Spd, "after an adjustment every linking resource connects every container";
     Q7 = 7, Spd, "top-down scale-in removes emptied containers one enactment late";
     Q8 = 8, Spd, "top-down placement uses ->any(true) on a set (Java-hash order)";
-    Q9 = 9, Spd, "only thrashing constraints are checked in the chain";
+    Q9 = 9, Spd, "only thrashing constraints are checked in the chain; the adjustment clamps the change to the group size (kept: the fixed behaviour equals it)";
     Q10 = 10, Spd, "TargetGroupUtils keeps state in static fields (not reproduced: no shared JVM state)";
     Q11 = 11, Spd, "unsupported stimuli and SimpleFireOnTrend: NullPointerException at set-up";
     Q12 = 12, Spd, "composed triggers AND/OR/XOR misbehave";
@@ -212,7 +212,7 @@ quirks! {
     Q21 = 21, UpToThrow, "a guarded branch without a true guard throws";
     Q22 = 22, UpToThrow, "CollectionIteratorAction: INNER drawn once, the frame is never popped, the end of the request throws";
     Q23 = 23, UpToThrow, "ForkAction: asynchronous behaviours ignored, synchronous ones share the user's stack and cursor (more than one throws)";
-    Q24 = 24, UpToThrow, "Acquire/Release without a ParametricResourceDemand throw";
+    Q24 = 24, UpToThrow, "Acquire/Release without a ParametricResourceDemand throw (kept: the fixed behaviour is the same run error)";
     Q25 = 25, Full, "no delay resources: a demand on a Delay (or missing) resource aborts the user";
     Q26 = 26, Full, "stale processor-sharing completions record state and utilisation samples";
     Q27 = 27, Full, "passive capacities are evaluated without a frame";

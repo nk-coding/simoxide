@@ -193,11 +193,18 @@ fn observers_deliver_measurements_and_outputs_are_unchanged() {
             .filter(|r| matches!(r, Record::Adjust { ok: false, .. }))
             .count() as u64;
         assert_eq!(adj, summary.requests - summary.pending);
-        if q == Quirks::fixed() {
-            // fixed Q2: nothing is committed by a failed adjustment, so the cooldown never
-            // starts and the policies fire on many tuples
-            assert!(fired.iter().filter(|(p, _)| p == "tasks").count() > 5);
-        }
+        // Q2 (kept): the cooldown is committed at the request, so it holds although no
+        // adjustment is executed: the requests of a policy are at least 5 s apart
+        let tasks: Vec<f64> = fired
+            .iter()
+            .filter(|(p, _)| p == "tasks")
+            .map(|(_, t)| *t)
+            .collect();
+        assert!(tasks.len() > 1, "{q:?} {tasks:?}");
+        assert!(
+            tasks.windows(2).all(|w| w[1] - w[0] >= 5.0),
+            "{q:?} {tasks:?}"
+        );
     }
 }
 
@@ -429,17 +436,18 @@ fn enforcing_policies_queues_requests() {
     assert_eq!(res.measurements.to_csv(), wres.measurements.to_csv());
 }
 
-/// Min-size scale-in under Slingshot quirks commits cooldown (Q2) without a size check (Q9),
-/// so the DataProcessing scale-out on the same spike never requests. Fixed quirks drop that
-/// no-op in `GroupSize` and both groups request a scale-out.
+/// A min-size scale-in commits the cooldown (Q2) although the adjustment clamps it to no change
+/// (Q9), so the DataProcessing scale-out on the same spike never requests. Both are kept by the
+/// decisions of 2026-11-04 (`docs/spec/slingshot/semantics-paper.html`, figure 5: the hold is
+/// what a cooldown is), so the fixed behaviour and Slingshot's agree.
 #[test]
-fn rmuc_fixed_quirks_request_both_scale_outs() {
+fn rmuc_min_size_scale_in_holds_off_the_scale_out() {
     let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../corpus-spd/rmuc_app_metrics");
     let spec = RunSpec::load(&dir.join("run.json")).unwrap();
     let mut c = spec.sim_config("spd");
     c.seed = 1;
     c.max_sim_time = 30;
-    for (q, data_processing_scales_out) in [(Quirks::fixed(), true), (Quirks::slingshot(), false)] {
+    for q in [Quirks::fixed(), Quirks::slingshot()] {
         let model = spec.load_model(&dir).unwrap();
         let spd_model = SpdModel::from_graph(&model.graph).expect("spd");
         let cm = CompiledModel::compile_flavour(
@@ -481,10 +489,6 @@ fn rmuc_fixed_quirks_request_both_scale_outs() {
         unique.sort_unstable();
         unique.dedup();
         assert!(has("scaleOutDeviceCommunication"), "{q:?} {unique:?}");
-        assert_eq!(
-            has("scaleOutDataProcessing"),
-            data_processing_scales_out,
-            "{q:?} {unique:?}"
-        );
+        assert!(!has("scaleOutDataProcessing"), "{q:?} {unique:?}");
     }
 }

@@ -29,7 +29,6 @@
 //! The interpreter is flavour neutral: it sees time events and measurement tuples, whatever
 //! engine produces them.
 
-pub mod adjust;
 pub mod adjusted;
 pub mod aggregate;
 pub mod hpa;
