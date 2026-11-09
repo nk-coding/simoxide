@@ -24,8 +24,14 @@ SIMOXIDE-SNAPSHOT 1\n                       magic line: the format version
 | `traced` | the run writes a trace (a resumed run must keep one or discard its lines) |
 | `encoding` | `postcard` or `json`: the encoding of every section |
 | `sections` | `[{"name", "bytes", "checksum"}]`: the sections in file order, their length and FNV-1a-64 checksum (16 hex digits) |
+| `measurements` | `{"tuples": n, "rows_from": k}`: the measurement cursor, `n` tuples recorded from time 0 (the number of the next tuple), and the rows the `engine` or `ssx` section holds, those of tuples `k..n`: `0` in cumulative scope, `n` (none) in interval scope ([Measurement intervals](../guide/snapshots.md#measurement-intervals)) |
+| `state` | the state id: FNV-1a 64 (16 hex digits) over the lines `name:bytes:checksum\n` of `sections`, in order; equal for equal sections, whatever path led to them |
+| `parent` | the `state` of the snapshot the run was resumed from (`simoxide resume`); absent for a run from time 0 and in snapshots written through the library without one |
 
-The header has no timestamps: the same state gives the same file.
+The header has no timestamps: the same state gives the same file (`parent` names the path:
+the same state reached on another path differs in it). `measurements`, `state` and `parent`
+are optional: a reader takes a header without them (an older build's) as cumulative, with no
+known cursor; older readers ignore them.
 
 **Model fingerprint.** Two FNV-1a-64 hashes (32 hex digits) over the model graph: per resource
 its name and roots, per object its class, home resource, container, `xmi:id`, proxy (file name and
@@ -84,8 +90,8 @@ Everything a run changes, as of a point between two events:
 - random numbers: MT19937 words and position (exact), the replayed tape's position, or the
   xoshiro256++ state (fast), with the counters and tape bookkeeping; Slingshot's
   `java.util.Random` branch stream;
-- measurements: series definitions, stored rows (or counts), sliding windows, PRM recorders and
-  values, the reconfiguration process, the event list (the heap of notes and the resource timer
+- measurements: series definitions, stored rows (none in interval scope), the tuple count,
+  sliding windows, PRM recorders and values, the reconfiguration process, the event list (the heap of notes and the resource timer
   slots, with the FIFO sequence counter), host hooks (external notes, observed tuples);
 - resolution caches (provided-role calls, call sites, entry-level calls), warnings, the run
   model's generation;
@@ -115,7 +121,7 @@ Slingshot's bus, and its configuration (as in `engine`):
 - random numbers: the MT19937 words and position, the StoEx draws so far, `Math.random()`'s
   `java.util.Random`, the position of the last projection line (the tape's `p`);
 - the disposed bits of the subscribers (Q18), the handler exceptions so far;
-- measurements (series and rows) and the monitors' calculators: per scenario and resource the
+- measurements (series, rows: none in interval scope, the tuple count) and the monitors' calculators: per scenario and resource the
   series, the assembly-operation and passive-resource probes by key, the open start-stop
   calculators with their request contexts, the series by (measuring-point key, metric);
 - the projection's state: written or not (`traced`), its line count, users and jobs numbered by

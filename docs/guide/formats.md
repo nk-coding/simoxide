@@ -148,6 +148,10 @@ UsageScenarioMeasuringPoint[_LPnI8CHdEd6lJo4DCALHMw],Response Time Tuple,3.0,3.0
     `Resource Demand Tuple`, are reordered.
   - Units are the metric default units: seconds for times and demands, and dimensionless counts for
     states.
+- **Scope.** A run's file has every tuple it recorded. A resumed run's (`simoxide resume`) has
+  the rows from time 0 by default, or with `--measurements-scope interval` only the tuples it
+  recorded itself ([Measurement intervals](./snapshots.md#measurement-intervals)); the header
+  and the columns are the same.
 - **Row order.**
   - Series are sorted by `(measuring_point, metric)` in Java `String.compareTo` order (UTF-16 code units,
     which equals byte order for ASCII).

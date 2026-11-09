@@ -424,6 +424,11 @@ Query parameters (tool arguments in parentheses):
 ([Formats](./formats.md)), optionally only the selected series. Before the end, results are
 `409`; read the live progress instead, or cancel the run to get the results so far.
 
+A simulation on the server is one run from time 0, without snapshots: its measurements are
+a single interval in the sense of [Measurement intervals](./snapshots.md#measurement-intervals),
+tuples `0..tuples` (`summary.tuples`, the number of rows of `measurements.csv` without a series
+selection), so the cumulative and the interval scope coincide and there is nothing to choose.
+
 ## HTTP API
 
 | Method and path | Purpose |

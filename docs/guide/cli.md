@@ -51,6 +51,7 @@ simoxide run --model <dir> [flags]
 | `--pause-at T`, `--pause-before T`, `--pause-events N` | stop between two events: after every event at or before `T` s, before the first event at or after `T` s, or after `N` events; prints `paused t=...` and writes the measurements so far ([Snapshots](./snapshots.md)) |
 | `--pause-when COND` | pause when a condition holds (repeatable): `time T`, `before T`, `events N`, `elapsed T`, `elapsed-events N`, `METRIC[POINT] [mean W] OP V [for W]`, `slo METRIC[POINT] upper U [lower L] [sensitivity S] [delay D]` ([Pause conditions](./snapshots.md#pause-conditions)) |
 | `--snapshot FILE`, `--snapshot-format postcard\|json` | write the paused run to `FILE` ([Snapshot format](../formats/snapshot.md)) |
+| `--measurements-scope cumulative\|interval` | `cumulative` (default): the snapshot keeps the measurement rows; `interval`: `--measurements` gets the tuples this invocation recorded, the snapshot keeps none ([Measurement intervals](./snapshots.md#measurement-intervals)) |
 
 Limits (see [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)):
 
@@ -75,11 +76,15 @@ simoxide resume FILE --model DIR [--run-json F] [--trace F] [--tape F] [--measur
                 [--spd-log F] [--spd-quirks ...] [--rules DIR] [--rules-log F] [--qvto-mode M]
                 [--timeout S] [--change FILE.changes]... [--transform X.qvto]...
                 [--enforce POLICY,...] [--hpa-set NAME.PARAMETER=VALUE]...
+                [--measurements-scope cumulative|interval]
 simoxide snapshot-info FILE
 ```
 
 Continues a snapshot on the model it was taken of (checked by fingerprint); mode, flavour and
-compat flags come from the snapshot. The outputs receive the continuation only. `--until T` is
+compat flags come from the snapshot. The trace, the tape and the logs receive the continuation
+only; `--measurements` receives the run's rows from time 0 (`--measurements-scope cumulative`)
+or the continuation's (`interval`), by default as the snapshot was written
+([Measurement intervals](./snapshots.md#measurement-intervals)). `--until T` is
 `--pause-at T`. `snapshot-info` prints the snapshot's header as JSON. See
 [Snapshots](./snapshots.md).
 
