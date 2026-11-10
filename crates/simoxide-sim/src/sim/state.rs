@@ -268,6 +268,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
                 series: cm.series.clone(),
                 rows: vec![Vec::new(); cm.series.len()],
                 count: 0,
+                ..Measurements::default()
             },
             windows: Vec::new(),
             series_windows: Vec::new(),
@@ -350,6 +351,12 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
     /// Current simulation time (ns).
     pub fn now_ns(&self) -> i64 {
         F::Clock::to_ns(self.now)
+    }
+
+    /// Current simulation time (s, the flavour's clock as a double; [`RunState::now_ns`] is it
+    /// in whole nanoseconds).
+    pub fn now_secs(&self) -> f64 {
+        F::Clock::secs(self.now)
     }
 
     /// Time of the next pending event (ns), if any.

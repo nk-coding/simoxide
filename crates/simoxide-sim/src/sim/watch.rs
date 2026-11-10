@@ -269,15 +269,7 @@ impl Watch {
             }
             let _ = metric_matcher(&sel.metric)?;
             // element names: the element's id and those of its direct children
-            for o in 0..g.object_count() as u32 {
-                let o = simoxide_model::raw::ObjId(o);
-                if g.str_attr(o, mf::NamedElement_entityName).as_deref() == Some(&*sel.point) {
-                    t.ids.extend(g.id(o).map(str::to_string));
-                    for (_, ch) in g.children(o) {
-                        t.ids.extend(g.id(ch).map(str::to_string));
-                    }
-                }
-            }
+            t.ids.extend(ids_named(g, &sel.point));
         }
         self.count = st.measurements().count;
         // series conditions start after the rows present now
@@ -502,17 +494,9 @@ fn resolve(c: &Condition, t: &mut Track, m: &Measurements) {
 /// The series a condition currently selects (`measurements.csv` keys and metrics), e.g. to warn
 /// about a condition that selects none.
 pub fn selected_series(sel: &SeriesSel, ids: &[String], m: &Measurements) -> Vec<String> {
-    let Ok(metric) = metric_matcher(&sel.metric) else {
-        return Vec::new();
-    };
     m.series
         .iter()
-        .filter(|d| {
-            (sel.point == "*"
-                || d.mp.contains(&*sel.point)
-                || ids.iter().any(|id| d.mp.contains(id.as_str())))
-                && metric(d.metric)
-        })
+        .filter(|d| selects(sel, ids, d))
         .map(|d| format!("{} {}", d.mp, d.metric))
         .collect()
 }
@@ -632,35 +616,8 @@ pub fn parse_condition(s: &str) -> Result<Condition, String> {
         "slo" => (true, rest.trim()),
         _ => (false, s),
     };
-    // METRIC[POINT]: the point may contain brackets (a full key)
-    let open = body
-        .find('[')
-        .ok_or_else(|| err("expected METRIC[POINT] (e.g. rt[_id])"))?;
-    let mut depth = 0;
-    let mut close = None;
-    for (i, ch) in body.char_indices().skip(open) {
-        match ch {
-            '[' => depth += 1,
-            ']' => {
-                depth -= 1;
-                if depth == 0 {
-                    close = Some(i);
-                    break;
-                }
-            }
-            _ => {}
-        }
-    }
-    let close = close.ok_or_else(|| err("unbalanced brackets"))?;
-    let series = SeriesSel {
-        metric: body[..open].trim().to_string(),
-        point: body[open + 1..close].trim().to_string(),
-    };
-    if series.point.is_empty() {
-        return Err(err("empty measuring point"));
-    }
-    let _ = metric_matcher(&series.metric).map_err(|e| err(&e))?;
-    let mut words = body[close + 1..].split_whitespace().peekable();
+    let (series, rest) = series_prefix(body).map_err(|e| err(&e))?;
+    let mut words = rest.split_whitespace().peekable();
     if slo {
         let (mut upper, mut lower, mut sensitivity, mut delay_s) = (None, None, 0.0, 0.0);
         while let Some(w) = words.next() {
@@ -721,6 +678,85 @@ pub fn parse_condition(s: &str) -> Result<Condition, String> {
         value,
         sustain_s,
     })
+}
+
+/// `METRIC[POINT]` at the start of `body` and the text after it. The point may contain brackets
+/// (a full key).
+fn series_prefix(body: &str) -> Result<(SeriesSel, &str), String> {
+    let open = body
+        .find('[')
+        .ok_or("expected METRIC[POINT] (e.g. rt[_id])")?;
+    let mut depth = 0;
+    let mut close = None;
+    for (i, ch) in body.char_indices().skip(open) {
+        match ch {
+            '[' => depth += 1,
+            ']' => {
+                depth -= 1;
+                if depth == 0 {
+                    close = Some(i);
+                    break;
+                }
+            }
+            _ => {}
+        }
+    }
+    let close = close.ok_or("unbalanced brackets")?;
+    let series = SeriesSel {
+        metric: body[..open].trim().to_string(),
+        point: body[open + 1..close].trim().to_string(),
+    };
+    if series.point.is_empty() {
+        return Err("empty measuring point".into());
+    }
+    let _ = metric_matcher(&series.metric)?;
+    Ok((series, &body[close + 1..]))
+}
+
+/// Parses a series selection `METRIC[POINT]` as in a pause condition (e.g. `rt[*]`,
+/// `util[Server]`, `*[_id]`); a metric alone (`rt`, `*`) selects it at every measuring point.
+pub fn parse_series_sel(s: &str) -> Result<SeriesSel, String> {
+    let s = s.trim();
+    let err = |m: &str| format!("series `{s}`: {m}");
+    if !s.contains('[') {
+        let _ = metric_matcher(s).map_err(|e| err(&e))?;
+        return Ok(SeriesSel {
+            metric: s.to_string(),
+            point: "*".into(),
+        });
+    }
+    let (sel, rest) = series_prefix(s).map_err(|e| err(&e))?;
+    if !rest.trim().is_empty() {
+        return Err(err("unexpected words at the end"));
+    }
+    Ok(sel)
+}
+
+/// The ids a measuring point's element name stands for in `g`: those of the elements named so
+/// and of their direct children (a container's processing resources).
+pub fn ids_named(g: &simoxide_model::raw::Graph, name: &str) -> Vec<String> {
+    let mut ids = Vec::new();
+    for o in 0..g.object_count() as u32 {
+        let o = simoxide_model::raw::ObjId(o);
+        if g.str_attr(o, mf::NamedElement_entityName).as_deref() == Some(name) {
+            ids.extend(g.id(o).map(str::to_string));
+            for (_, ch) in g.children(o) {
+                ids.extend(g.id(ch).map(str::to_string));
+            }
+        }
+    }
+    ids
+}
+
+/// Whether `sel` selects the series `def`; `ids`: [`ids_named`] of its point.
+pub fn selects(sel: &SeriesSel, ids: &[String], def: &crate::ir::SeriesDef) -> bool {
+    let Ok(metric) = metric_matcher(&sel.metric) else {
+        return false;
+    };
+    (sel.point == "*"
+        || def.mp.contains(&*sel.point)
+        || ids.iter().any(|id| def.mp.contains(id.as_str())))
+        && metric(def.metric)
 }
 
 impl std::str::FromStr for Condition {

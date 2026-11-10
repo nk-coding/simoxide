@@ -199,6 +199,7 @@ that a request never runs another model than the one listed. Without `--allow-di
 | `spd_quirks` | `fixed` (`slingshot` for `slingshot-exact`) | as `--spd-quirks` |
 | `spd_log_all` | `false` | also log the SPD evaluations that requested nothing (one per watched measurement) |
 | `spd_decisions` | absent (off) | scaling decisions ([below](#scaling-decisions)): a list of action lists, e.g. `[["_out"], []]` |
+| `interval_summary` | absent (off) | `{"series": [{measuring_point, metric}], "stats": [...]}`: an interval summary in the results ([below](#interval-summaries)) |
 | `max_events_per_instant`, `max_stack_depth`, `max_processes`, `max_steps` | as `simoxide run` | resource limits ([Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)); `slingshot-exact`, which has no processes, bounds the frames of a user's stack, the live users and the handler events instead |
 
 `config.max_sim_time` and `config.max_measurements` are the simulator's own stop conditions,
@@ -456,6 +457,23 @@ A simulation on the server is one run from time 0, without snapshots: its measur
 a single interval in the sense of [Measurement intervals](./snapshots.md#measurement-intervals),
 tuples `0..tuples` (`summary.tuples`, the number of rows of `measurements.csv` without a series
 selection), so the cumulative and the interval scope coincide and there is nothing to choose.
+
+### Interval summaries
+
+With `config.interval_summary` the results' `summary.interval_summary` is the document
+`simoxide run --summary` writes ([Interval summaries](./snapshots.md#interval-summaries)) for
+the run's single interval: tuples `0..tuples`, time 0 to `sim_time`, every tuple from time 0
+(no warm-up), without `parent` and `state`. `series` selects series as everywhere in the server
+(substrings of the measuring point and the metric; any selector matches; empty or absent: every
+series), `stats` names the statistics (`count`, `sum`, `mean`, `min`, `max`, `first`, `last`,
+`initial`, `time_weighted`, `all`; default all; `count` is always written). An unknown statistic
+is refused (`400`). `initial` is `none` for every series (a run from time 0). The tool
+`start_simulation` takes the same option; the raw rows stay available as above.
+
+```json
+{"model_dir": "rmuc_app_metrics",
+ "config": {"interval_summary": {"series": [{"metric": "Response Time"}], "stats": ["mean", "max"]}}}
+```
 
 ## HTTP API
 

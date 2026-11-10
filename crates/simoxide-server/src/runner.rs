@@ -251,6 +251,9 @@ pub fn precheck(req: &SimulationRequest, cfg: &ServerConfig) -> Result<(), Strin
             "config.ps_algorithm: expected {PS_EXACT} or {PS_VIRTUAL_TIME}, got {p:?}"
         ));
     }
+    if let Some(o) = &req.config.interval_summary {
+        o.stats()?;
+    }
     req.termination.validate()?;
     let w = &req.progress;
     if !(w.warmup_time.is_finite() && w.warmup_time >= 0.0) {
@@ -1036,11 +1039,37 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
                 warnings,
                 series: mon.series_stats(&m, true),
                 spd,
+                interval_summary: interval_summary(&req, &m, probe.now_ns),
             },
             measurements: m,
         }
     });
     job.end(status, Some(stop), error, outcome);
+}
+
+/// `config.interval_summary`: the summary of the run, one interval from time 0 to its end
+/// (`now_ns`).
+fn interval_summary(
+    req: &SimulationRequest,
+    m: &simoxide_sim::Measurements,
+    now_ns: i64,
+) -> Option<serde_json::Value> {
+    use simoxide_sim::summary::{Interval, document};
+    let o = req.config.interval_summary.as_ref()?;
+    // validated with the request
+    let stats = o.stats().unwrap_or_default();
+    let iv = Interval {
+        tuples_from: Some(0),
+        tuples_to: m.count,
+        from: 0.0,
+        to: ns_to_secs(now_ns),
+        from_ns: 0,
+        to_ns: now_ns,
+    };
+    let select = |d: &simoxide_sim::ir::SeriesDef| {
+        o.series.is_empty() || o.series.iter().any(|s| s.matches(&d.mp, d.metric))
+    };
+    Some(document(m, &iv, &select, &stats))
 }
 
 /// Ends a job that failed before it recorded anything.

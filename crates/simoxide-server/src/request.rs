@@ -182,6 +182,10 @@ pub struct RunOptions {
     /// `decision` and the decision pending. Off (absent) by default.
     #[serde(default)]
     pub spd_decisions: Option<Vec<Vec<String>>>,
+    /// An interval summary in the results (`simoxide run --summary`): per selected series,
+    /// statistics of its tuples (the run is one interval from time 0). Off (absent) by default.
+    #[serde(default)]
+    pub interval_summary: Option<IntervalSummaryOptions>,
     /// Run the HPA autoscalers of `*.hpa` / `*.hpa.json` files (default true).
     #[serde(default)]
     pub hpa: Option<bool>,
@@ -200,6 +204,30 @@ pub struct RunOptions {
     /// Resource limit on the interpreter's steps (see `simoxide_sim::Limits`; 0 = off).
     #[serde(default)]
     pub max_steps: Option<u64>,
+}
+
+/// `config.interval_summary`: which series and statistics.
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct IntervalSummaryOptions {
+    /// The series (any selector matches; empty: every series).
+    #[serde(default)]
+    pub series: Vec<SeriesSelector>,
+    /// The statistics: `count`, `sum`, `mean`, `min`, `max`, `first`, `last`, `initial`,
+    /// `time_weighted`, `all` (default: all; `count` is always written).
+    #[serde(default)]
+    pub stats: Option<Vec<String>>,
+}
+
+impl IntervalSummaryOptions {
+    /// The statistics ([`simoxide_sim::summary::Stat::parse_list`]).
+    pub fn stats(&self) -> Result<Vec<simoxide_sim::summary::Stat>, String> {
+        match &self.stats {
+            None => Ok(simoxide_sim::summary::Stat::ALL.to_vec()),
+            Some(v) => simoxide_sim::summary::Stat::parse_list(&v.join(","))
+                .map_err(|e| format!("config.interval_summary.stats: {e}")),
+        }
+    }
 }
 
 /// Live progress options.

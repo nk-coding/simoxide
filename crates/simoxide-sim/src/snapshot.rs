@@ -110,6 +110,49 @@ impl MeasurementsInfo {
     }
 }
 
+/// Name of the section with the last tuple of each series before the rows a snapshot holds
+/// ([`crate::Measurements::before`]).
+pub const MEAS_BEFORE: &str = "meas-before";
+
+/// The section [`MEAS_BEFORE`] of `m`: per series (in series order) its last tuple before the
+/// rows held, [`crate::meas::Before`]. Written only when rows were taken out of the run
+/// (`rows_from > 0`, interval scope); with every row from time 0 the rows tell it.
+pub(crate) fn meas_before_section(
+    m: &crate::Measurements,
+    enc: Encoding,
+) -> Result<Option<Section>, SnapshotError> {
+    if MeasurementsInfo::of(m).rows_from == 0 {
+        return Ok(None);
+    }
+    let v: Vec<crate::meas::Before> = (0..m.series.len()).map(|i| m.before_of(i)).collect();
+    Section::encode(MEAS_BEFORE, &v, enc).map(Some)
+}
+
+/// Sets [`crate::Measurements::before`] of measurements restored from `s` (from the section
+/// [`MEAS_BEFORE`]; without it and without the rows from time 0: unknown) and starts their
+/// interval at the run's time `now` (s; [`crate::Measurements::start_interval`]).
+pub(crate) fn restore_meas_before(
+    m: &mut crate::Measurements,
+    s: &Snapshot,
+    now: f64,
+) -> Result<(), SnapshotError> {
+    use crate::meas::Before;
+    m.before = match s.section(MEAS_BEFORE) {
+        Some(sec) => sec.decode(s.header.encoding)?,
+        None if MeasurementsInfo::of(m).rows_from > 0 => vec![Before::Unknown; m.series.len()],
+        None => Vec::new(),
+    };
+    if m.before.len() > m.series.len() {
+        return Err(SnapshotError::Corrupt(format!(
+            "section {MEAS_BEFORE}: {} series, the run has {}",
+            m.before.len(),
+            m.series.len()
+        )));
+    }
+    m.start_interval(now);
+    Ok(())
+}
+
 impl Header {
     /// The state id: FNV-1a 64 (16 hex digits) over the sections' names, lengths and checksums.
     /// It is a function of the sections alone (not of the header's other fields, `parent`

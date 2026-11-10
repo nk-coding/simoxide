@@ -60,6 +60,7 @@ and the `serde` derives on the engine's types); it is versioned with SimOxide, n
 | `engine` | `simoxide-sim` | the run state ([`RunState`](../guide/library.md#pause-fork-and-resume)) |
 | `ssx` | `simoxide-sim` (`SsxRun`), instead of `engine` | the Slingshot-exact engine's run state |
 | `model` | `simoxide-sim`, after model changes | the run's own model |
+| `meas-before` | `simoxide-sim`, when the `engine` or `ssx` section holds no rows from time 0 (`rows_from > 0`, interval scope) | per series, in series order, the last tuple before the rows held: `None`, `Tuple(time, value)` or `Unknown`; for the interval summaries of later intervals ([Interval summaries](../guide/snapshots.md#interval-summaries)) |
 | `spd` | `simoxide-spd` (`SpdRun`, `SsxSpd`) | the SPD interpreter's state |
 | `spd-ssx` | `simoxide-spd` (`SsxSpd`) | the Slingshot-exact SPD layer's own state |
 | `hpa` | `simoxide-spd` (`SpdRun` with autoscalers) | the HPA controller's state |

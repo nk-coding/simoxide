@@ -307,6 +307,7 @@ impl<'m> SsxRun<'m> {
             uniforms: self.e.rng.stoex,
             events: self.e.events,
             end_ns: simoxide_sched::time::span(self.cfg.max_sim_time as f64),
+            end_secs: self.cfg.max_sim_time as f64,
             main_count: self.e.finished,
             warnings: std::mem::take(&mut self.e.errors),
         }

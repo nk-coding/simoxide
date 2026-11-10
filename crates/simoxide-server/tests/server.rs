@@ -1075,3 +1075,153 @@ async fn slingshot_exact_enforces_resource_limits() {
     );
     assert_eq!(v["results_available"], true, "{v}");
 }
+
+/// `config.interval_summary` (`docs/guide/server.md`, "Interval summaries"): the run's single
+/// interval `0..tuples`; per selected series the statistics of its rows in
+/// `measurements.csv`, through HTTP and MCP; an unknown statistic is refused.
+#[tokio::test(flavor = "multi_thread")]
+async fn interval_summary_of_the_run() {
+    let app = app();
+    let files = files_of(&repo().join("corpus/x_sl_mediastore"));
+    let req = json!({"files": files, "config": {"seed": 3, "max_measurements": 200,
+        "interval_summary": {"series": [{"metric": "Response Time"}, {"metric": "State of Active"}],
+                             "stats": ["mean", "max", "last", "initial", "time_weighted"]}}});
+    let v = run(&app, req.clone()).await;
+    assert_eq!(v["status"], "completed", "{v}");
+    let id = v["id"].as_str().unwrap();
+    let res = results(&app, id, "").await;
+    let sum = &res["summary"];
+    let doc = &sum["interval_summary"];
+    assert_eq!(doc["format"], "simoxide-interval-summary");
+    assert_eq!(doc["version"], 1);
+    assert_eq!(
+        doc["interval"]["tuples"],
+        json!({"from": 0, "to": sum["tuples"]})
+    );
+    assert_eq!(doc["interval"]["time"]["from"], 0.0);
+    assert_eq!(doc["interval"]["time"]["to"], sum["sim_time"]);
+    assert_eq!(
+        doc["stats"],
+        json!(["count", "mean", "max", "last", "initial", "time_weighted"])
+    );
+    let (_, csv) = call_text(
+        &app,
+        "GET",
+        &format!("/v1/simulations/{id}/measurements.csv"),
+        None,
+        None,
+    )
+    .await;
+    // the rows of each series, in file order
+    let mut rows: std::collections::BTreeMap<(String, String), Vec<(f64, f64)>> =
+        Default::default();
+    for l in csv.lines().skip(1) {
+        let f: Vec<&str> = l.rsplitn(4, ',').collect();
+        rows.entry((f[3].to_string(), f[2].to_string()))
+            .or_default()
+            .push((f[1].parse().unwrap(), f[0].parse().unwrap()));
+    }
+    let series = doc["series"].as_array().unwrap();
+    let keys: Vec<(String, String)> = series
+        .iter()
+        .map(|s| {
+            (
+                s["measuring_point"].as_str().unwrap().to_string(),
+                s["metric"].as_str().unwrap().to_string(),
+            )
+        })
+        .collect();
+    // every selected series with rows, and only selected ones (also those without rows)
+    for k in rows.keys() {
+        let selected = k.1.contains("Response Time") || k.1.contains("State of Active");
+        assert_eq!(keys.contains(k), selected, "{k:?}");
+    }
+    assert!(
+        keys.iter()
+            .all(|k| k.1.contains("Response Time") || k.1.contains("State of Active"))
+    );
+    assert!(series.iter().any(|s| s["unit"] == "s"));
+    assert!(series.iter().any(|s| s["unit"] == "1"));
+    for (s, key) in series.iter().zip(&keys) {
+        let Some(r) = rows.get(key) else {
+            // a series without tuples: explicit nulls
+            assert_eq!(s["count"], 0, "{s}");
+            assert_eq!(
+                (&s["mean"], &s["max"], &s["last"]),
+                (&json!(null), &json!(null), &json!(null))
+            );
+            assert_eq!(s["time_weighted"], json!(null), "{s}");
+            continue;
+        };
+        assert_eq!(s["count"], r.len(), "{s}");
+        let total: f64 = r.iter().map(|x| x.1).sum();
+        assert_eq!(s["mean"].as_f64().unwrap(), total / r.len() as f64, "{s}");
+        let max = r.iter().map(|x| x.1).fold(f64::NEG_INFINITY, f64::max);
+        assert_eq!(s["max"].as_f64().unwrap(), max);
+        let last = r.last().unwrap();
+        assert_eq!(s["last"], json!({"time": last.0, "value": last.1}));
+        assert_eq!(s["initial"], json!({"status": "none"}));
+        assert!(s.get("sum").is_none() && s.get("min").is_none());
+        // the step function from the first row to the end of the run
+        let tw = &s["time_weighted"];
+        assert_eq!(tw["from"].as_f64().unwrap(), r[0].0);
+        let end = sum["sim_time"].as_f64().unwrap();
+        let mut integral = 0.0;
+        for (i, &(t, v)) in r.iter().enumerate() {
+            let next = r.get(i + 1).map_or(end, |x| x.0);
+            integral += v * (next - t);
+        }
+        let got = tw["integral"].as_f64().unwrap();
+        assert!(
+            (got - integral).abs() <= 1e-9 * integral.abs().max(1.0),
+            "{tw} vs {integral}"
+        );
+    }
+
+    // MCP: the same option of start_simulation, the same document
+    let (_, v) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(1, "start_simulation", req.clone())),
+    )
+    .await;
+    assert_eq!(v["result"]["isError"], false, "{v}");
+    let mid = v["result"]["structuredContent"]["id"]
+        .as_str()
+        .unwrap()
+        .to_string();
+    let (_, v) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(
+            2,
+            "wait_for_simulation",
+            json!({"id": mid, "until": "done", "timeout_secs": 60}),
+        )),
+    )
+    .await;
+    assert_eq!(
+        v["result"]["structuredContent"]["status"], "completed",
+        "{v}"
+    );
+    let (_, v) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(3, "get_results", json!({"id": mid}))),
+    )
+    .await;
+    assert_eq!(
+        v["result"]["structuredContent"]["summary"]["interval_summary"],
+        *doc
+    );
+
+    // refused: an unknown statistic
+    let mut bad = req;
+    bad["config"]["interval_summary"]["stats"] = json!(["median"]);
+    let (s, v) = call(&app, "POST", "/v1/simulations", Some(bad)).await;
+    assert_eq!(s, StatusCode::BAD_REQUEST, "{v}");
+    assert!(v["error"].as_str().unwrap().contains("median"), "{v}");
+}

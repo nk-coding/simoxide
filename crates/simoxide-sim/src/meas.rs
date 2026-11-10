@@ -15,6 +15,33 @@ pub struct Measurements {
     pub rows: Vec<Vec<(f64, f64)>>,
     /// Total number of recorded tuples.
     pub count: u64,
+    /// Per series, the last tuple before the rows held (`rows[i]`); series without an entry had
+    /// none. Not part of the engine state: snapshots whose rows were taken carry it in a section
+    /// of its own (`meas-before`), for the summaries of later intervals.
+    #[cfg_attr(feature = "snapshot", serde(skip))]
+    pub before: Vec<Before>,
+    /// Per series, the number of rows held when the current interval started (a restore; series
+    /// without an entry: 0). The rows `start[i]..` of series `i` are the interval's tuples
+    /// (`docs/guide/snapshots.md`, "Interval summaries").
+    #[cfg_attr(feature = "snapshot", serde(skip))]
+    pub start: Vec<usize>,
+    /// Simulation time (s, the engine's clock) at which the current interval started: the
+    /// restore, 0 for a run from time 0.
+    #[cfg_attr(feature = "snapshot", serde(skip))]
+    pub start_time: f64,
+}
+
+/// The last tuple of a series before some point of a run ([`Measurements::before`]).
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+#[cfg_attr(feature = "snapshot", derive(serde::Serialize, serde::Deserialize))]
+pub enum Before {
+    /// The series had no tuple before.
+    #[default]
+    None,
+    /// Its last tuple: `(point in time, value)`.
+    Tuple(f64, f64),
+    /// Not known: the rows were taken out of a run whose snapshot did not record it.
+    Unknown,
 }
 
 impl Measurements {
@@ -37,13 +64,50 @@ impl Measurements {
     /// Takes the stored rows out (the series stay, each with no rows; `count` is unchanged) and
     /// returns them with the series and `count`. The rows recorded from then on are the tuples
     /// after `count` (`docs/guide/snapshots.md`, "Measurement intervals").
+    ///
+    /// The value returned keeps [`Measurements::before`] and [`Measurements::start`] as they
+    /// were (its rows are the interval's from `start` on); here `before` becomes the last tuple
+    /// of each series and `start` 0 (the rows recorded from now on are all the interval's).
     pub fn take_rows(&mut self) -> Measurements {
+        let before = (0..self.series.len())
+            .map(|i| match self.rows.get(i).and_then(|r| r.last()) {
+                Some(&(t, v)) => Before::Tuple(t, v),
+                None => self.before_of(i),
+            })
+            .collect();
         let rows = self.rows.iter_mut().map(std::mem::take).collect();
         Measurements {
             series: self.series.clone(),
             rows,
             count: self.count,
+            before: std::mem::replace(&mut self.before, before),
+            start: std::mem::take(&mut self.start),
+            start_time: self.start_time,
         }
+    }
+
+    /// The last tuple of series `i` before its rows held ([`Measurements::before`]).
+    pub fn before_of(&self, i: usize) -> Before {
+        self.before.get(i).copied().unwrap_or_default()
+    }
+
+    /// Marks the start of an interval at simulation time `time` (s): the rows held now are
+    /// before it ([`Measurements::start`]). Restoring a snapshot does this.
+    pub fn start_interval(&mut self, time: f64) {
+        self.start = self.rows.iter().map(Vec::len).collect();
+        self.start_time = time;
+    }
+
+    /// The tuples of series `i` in the current interval (its rows from [`Measurements::start`]
+    /// on) and the last tuple before them.
+    pub fn interval_rows(&self, i: usize) -> (Before, &[(f64, f64)]) {
+        let rows = self.rows.get(i).map_or(&[][..], Vec::as_slice);
+        let k = self.start.get(i).copied().unwrap_or(0).min(rows.len());
+        let before = match k {
+            0 => self.before_of(i),
+            _ => Before::Tuple(rows[k - 1].0, rows[k - 1].1),
+        };
+        (before, &rows[k..])
     }
 
     /// Writes `measurements.csv`.

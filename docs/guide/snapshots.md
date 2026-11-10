@@ -97,6 +97,11 @@ let result = sim.finish()?;
   between events; a snapshot written after it holds only the rows recorded since (interval
   scope, [Measurement intervals](#measurement-intervals)). It changes nothing else in the run.
   `Snapshot::write` fills in the header's `state`; `Header::parent` is the caller's to set.
+- `Measurements::interval_rows(i)` gives series `i`'s tuples of the current interval (from a
+  restore, or time 0) and its last tuple before them (`meas::Before`; the section `meas-before`
+  carries it across snapshots whose rows were taken); `simoxide_sim::summary::document` builds
+  the [interval summary](#interval-summaries) from them, `summary::SeriesAcc` accumulates one
+  series tuple by tuple.
 
 ### Scaling policies and reconfiguration rules
 
@@ -253,9 +258,147 @@ which is part of every snapshot in both scopes:
   invocation (their windows start empty there), so they never need earlier rows.
 
 So dropping the rows changes nothing in the run: an interval-scope path gives the uninterrupted
-run's tuples, events and decisions. The snapshot of an interval-scope run is smaller than the
-cumulative one by exactly the rows: in `postcard`, 16 bytes per row, plus per series the bytes
-of its row count beyond the one byte of an empty list.
+run's tuples, events and decisions. The run state (section `engine` or `ssx`) of an
+interval-scope snapshot is smaller than the cumulative one by exactly the rows: in `postcard`,
+16 bytes per row, plus per series the bytes of its row count beyond the one byte of an empty
+list. In their place the snapshot has the section `meas-before`: per series its last tuple (at
+most 17 bytes per series in `postcard`), which is not run state either: it is what the
+[interval summaries](#interval-summaries) of later intervals hold at their start.
+
+## Interval summaries
+
+A search that evaluates many short intervals need not read the raw tuples back to compute the
+same statistics each time. `--summary FILE` (on `run` and `resume`) writes, per series,
+statistics of the tuples of the invocation's interval as JSON, at the pause or the end:
+
+```sh
+simoxide resume s1.snap --model M --pause-at 200 --snapshot s2.snap --summary s2.json \
+    --summary-series 'rt[*]' --summary-series 'containers[*]' --summary-stats mean,max,time_weighted
+```
+
+- `--summary-series METRIC[POINT]` (repeatable; default every series) selects series as in
+  [pause conditions](#pause-conditions): aliases (`rt`, `util`, `state`, `containers`, ...) or
+  a metric name (prefix), a measuring-point key, a part of it or an element name (looked up in
+  the model of `--model`), `*`. A metric alone (`rt`) is `rt[*]`.
+- `--summary-stats LIST` (comma list; default `all`) chooses statistics; `count` is always
+  written.
+- It needs no `--measurements`, works in both scopes and changes nothing in the run.
+
+```json
+{
+  "format": "simoxide-interval-summary",
+  "interval": {
+    "time": {"from": 2.0, "to": 6.0},
+    "time_ns": {"from": 2000000000, "to": 6000000000},
+    "tuples": {"from": 4, "to": 12}
+  },
+  "parent": "7b1509dec8e81d77",
+  "series": [
+    {
+      "count": 2, "sum": 1.0, "mean": 0.5, "min": 0.0, "max": 1.0,
+      "first": {"time": 3.0, "value": 1.0}, "last": {"time": 5.0, "value": 0.0},
+      "initial": {"status": "tuple", "time": 2.0, "value": 0.0},
+      "measuring_point": "ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]",
+      "metric": "State of Active Resource Tuple",
+      "time_weighted": {"from": 2.0, "integral": 2.0, "mean": 0.5, "to": 6.0},
+      "unit": "1"
+    },
+    {
+      "count": 0, "sum": 0.0, "mean": null, "min": null, "max": null,
+      "first": null, "last": null,
+      "initial": {"status": "none"},
+      "measuring_point": "ActiveResourceMeasuringPoint[_rSc8tILWZUP8i0M73aQGtQ|replicaID=0]",
+      "metric": "State of Active Resource Tuple",
+      "time_weighted": null,
+      "unit": "1"
+    }
+  ],
+  "state": "94beea1cd4b29cf0",
+  "stats": ["count", "sum", "mean", "min", "max", "first", "last", "initial", "time_weighted"],
+  "version": 1
+}
+```
+
+(Slingshot's minimal example after a scale-out at 2 s, from 2 s to 6 s: the server's state, 0
+from 2 to 3 s, 1 from 3 to 5 s, 0 from 5 to 6 s; and a resource of the container the
+scale-out added, which got no job. Objects are written with their keys in alphabetical order.)
+
+**Membership.** A summary covers exactly the interval's tuples, numbers `from..to`: the rows
+the interval export writes (`--measurements-scope interval`), in both scopes. Tuples recorded at
+the resume (change steps, `--enforce`, `--decide`, `--hpa-set`) belong to it; adjacent intervals
+that share a time (`--pause-events`, pause conditions) are told apart by number, not time. So
+the `count`s of a series over the intervals of a path add up to its rows in the uninterrupted
+run, and `first` and `last` are the first and last row of the series in the interval's export.
+
+**The interval.** `tuples`: the cursor, as on the interval line (`from` is `null` if the
+snapshot resumed has no cursor). `time.from` is the simulation time of the snapshot resumed
+(its header's `time_ns`; 0 for `run`), `time.to` the time at the pause or the end: the time of
+the last event processed, which is the next interval's `time.from`, not the requested pause
+time (`--pause-at 200` with the last event at 199.75 s ends the interval at 199.75 s, and the
+next one starts there). `time` is the engine's clock in seconds, the time the tuples' `time`
+is measured in (a double in the Slingshot flavours, whole nanoseconds in SimuLizar); `time_ns`
+is the same in whole nanoseconds, truncated, as in snapshot headers. `parent` and `state` are
+those of the interval line (`state` only with `--snapshot`).
+
+**Series.** One entry per selected series that the run has at the end of the interval, in
+`measurements.csv` order, identified as there by `(measuring_point, metric)`. A series without
+tuples in the interval is there with `count` 0. `unit` is the unit of the values:
+
+| Metric | Value | `unit` |
+|---|---|---|
+| `Response Time Tuple` | the duration of a call (its `time` is the end) | `s` |
+| `Resource Demand Tuple`, `Waiting Time Tuple`, `Holding Time Tuple`, `Reconfiguration Time Tuple` | a duration | `s` |
+| `State of Active Resource Tuple` | jobs at the resource | `1` |
+| `State of Passive Resource Tuple` | available units | `1` |
+| `Utilization of Active Resource Tuple` | busy fraction, 0 to 1 | `1` |
+| `Number of Resource Containers over Time` | containers | `1` |
+
+(`null` for a metric this build does not know.) Times are simulation seconds.
+
+**Statistics.**
+
+| Name | Value |
+|---|---|
+| `count` | tuples of the series in the interval |
+| `sum` | the sum of their values, in recording order; `0` for none |
+| `mean` | `sum / count`: the sample mean, every tuple weighs the same; `null` for none |
+| `min`, `max` | `null` for none |
+| `first`, `last` | `{"time", "value"}` of the first and the last tuple in recording order; `null` for none |
+| `initial` | the series' last tuple before the interval: `{"status": "tuple", "time", "value"}`; `{"status": "none"}`: the series had none on this path (a run from time 0, a series created later); `{"status": "unavailable"}`: not known (a snapshot without `meas-before`, written by an older build) |
+| `time_weighted` | `{"from", "to", "integral", "mean"}`, the value as a step function of time (below); `null` if the series holds no value in the interval |
+
+Empty series are explicit: `count` 0, `sum` 0, `mean`, `min`, `max`, `first`, `last` `null`
+(never 0 or NaN). Numbers are JSON numbers in shortest round-trip form; a non-finite value
+would be `null`.
+
+**Sample and time weighting.** `mean` weighs every tuple the same: right for per-request series
+(response, waiting, holding times). State-like series (the state of a resource, utilisation,
+the number of containers) are recorded when the state changes, so their sample mean weighs a
+busy stretch with many changes more than a long quiet one. `time_weighted` treats the value as
+held from its tuple's `time` until the next tuple of the series, the last one until the end of
+the interval: `integral` is the sum of value times holding time (e.g. container-seconds),
+`mean = integral / (to - from)` (`null` for `to = from`). At the start of the interval the value
+held is `initial`'s, carried across the snapshot (from the rows in cumulative scope, from the
+section `meas-before` in interval scope), so a series without tuples in the interval still
+holds its value (the number of containers between two scalings). Without an initial tuple
+(`none`, `unavailable`) the step function starts at the first tuple of the interval: `from` is
+its time. A tuple whose time lies before the previous tuple's (or before the interval) holds
+from that later time. There is no aggregation over fixed windows: the only window is the
+interval, with the boundaries above.
+
+**Summaries do not replace the raw observations.** They are computed from the same tuples as
+the interval export and agree with it (`count`, `sum`, `min`, `max`, `first`, `last` exactly;
+`mean = sum / count`). But a statistic of the tuples cannot be graded like the tuples: the
+share of response times above a threshold, a percentile or a fuzzy utility of each tuple is not
+a function of the mean, and grading the mean is not the mean of the grades. Export the tuples
+(`--measurements`) for whatever needs them; the summary saves reading them for the statistics
+above.
+
+**Cost.** One pass over the interval's own tuples at the end of the invocation (they are in
+memory until then, in both scopes): no rows of earlier intervals are read, in cumulative scope
+the series' rows start at their length at the restore. The format is `format`
+`simoxide-interval-summary`, `version` 1: fields may be added in version 1; a changed meaning
+gets a new version.
 
 ## Resume with changes
 
