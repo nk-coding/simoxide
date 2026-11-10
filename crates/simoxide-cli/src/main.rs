@@ -55,12 +55,19 @@ const USAGE: &str = "usage:
              [--pause-when COND]...   (pause when a condition holds, any of several: time T,
              before T, events N, elapsed T, elapsed-events N, METRIC[POINT] [mean W] OP V
              [for W], slo METRIC[POINT] upper U [lower L] [sensitivity S] [delay D])
+             [--measurements-scope cumulative|interval]   (cumulative, the default: the
+             snapshot keeps the measurement rows and --measurements of a resume repeats them;
+             interval: --measurements gets the tuples recorded by this invocation only, the
+             snapshot keeps no rows; docs/guide/snapshots.md#measurement-intervals)
   simoxide resume FILE --model <dir> [--run-json run.json] [--trace out.jsonl] [--tape out.jsonl]
              [--measurements out.csv] [--pause-at T ... --snapshot FILE2] [--until T]
              [--pause-when COND]... [--spd-log ...] [--spd-quirks ...] [--rules DIR]
              [--rules-log ...] [--qvto-mode ...] [--timeout SECONDS]   (continue a snapshot on
-             the model it was taken of: mode, flavour and quirks come from the snapshot; outputs
-             get the continuation only; --until T = --pause-at T)
+             the model it was taken of: mode, flavour and quirks come from the snapshot; the
+             trace, tape and logs get the continuation only, --measurements as the
+             measurement scope says; --until T = --pause-at T)
+             [--measurements-scope cumulative|interval]   (default: the snapshot's; cumulative:
+             the rows of the run from time 0, interval: the tuples recorded since the restore)
              [--change FILE.changes]... [--transform X.qvto]...   (change the model before it
              continues, in the given order: a change file, a QVTo transformation run once;
              `reconfiguration` feature; --rules DIR with other rules than the snapshot's replaces
@@ -137,6 +144,13 @@ struct Args {
     /// `explore`: `--variant NAME=FILE`, `--metrics`.
     variants: Vec<(String, Option<PathBuf>)>,
     metrics: Vec<String>,
+    /// `--measurements-scope`: `Some(true)` interval, `Some(false)` cumulative.
+    measurements_scope: Option<bool>,
+    /// Resolved: this invocation's measurements are of its interval (docs/guide/snapshots.md,
+    /// "Measurement intervals"): the restored rows are dropped, the snapshot holds none.
+    interval: bool,
+    /// `resume`: the state id and the measurement cursor of the snapshot resumed.
+    parent: Option<(String, Option<u64>)>,
 }
 
 /// A change step of `resume` (`--change`, `--transform`).
@@ -198,6 +212,9 @@ fn parse_args() -> Result<Args, String> {
         enforce: Vec::new(),
         variants: Vec::new(),
         metrics: Vec::new(),
+        measurements_scope: None,
+        interval: false,
+        parent: None,
     };
     let secs = |f: &str, v: String| -> Result<i64, String> {
         let t: f64 = v.parse().map_err(|e| format!("{f}: {e}"))?;
@@ -351,6 +368,13 @@ fn parse_args() -> Result<Args, String> {
             "--metrics" => a
                 .metrics
                 .extend(val()?.split(',').map(|m| m.trim().to_string())),
+            "--measurements-scope" => {
+                a.measurements_scope = match val()?.as_str() {
+                    "cumulative" => Some(false),
+                    "interval" => Some(true),
+                    v => return Err(format!("{f}: expected cumulative or interval, got {v}")),
+                }
+            }
             "--snapshot-format" => {
                 a.snapshot_json = match val()?.as_str() {
                     "postcard" => false,
@@ -487,6 +511,9 @@ fn run(a: &Args) -> Result<(), String> {
             "--change, --transform, --enforce and --hpa-set are options of `resume`".into(),
         );
     }
+    let mut a2 = a.clone();
+    a2.interval = a.measurements_scope == Some(true);
+    let a = &a2;
     let (cm, cfg, rules_dir) = setup_with_rules(a)?;
     for w in &cm.warnings {
         eprintln!("warning: {w}");
@@ -533,7 +560,8 @@ enum End {
         now_ns: i64,
         events: u64,
         measurements: simoxide_sim::Measurements,
-        snapshot: Option<(PathBuf, u64)>,
+        /// The snapshot written: path, bytes, state id.
+        snapshot: Option<(PathBuf, u64, String)>,
         /// The pause condition that held (`--pause-when`).
         reason: Option<String>,
     },
@@ -541,8 +569,36 @@ enum End {
 
 /// Reports a run that ended or paused.
 fn report_end(a: &Args, r: End, t0: Instant) -> Result<(), String> {
+    // the measurement interval of a pause, a resume or a run with --measurements-scope
+    let interval = |m: &simoxide_sim::Measurements, paused: bool, state: Option<&str>| {
+        if a.cmd != "resume" && a.measurements_scope.is_none() && !paused {
+            return;
+        }
+        let held = m.rows_held();
+        let from = match &a.parent {
+            Some((_, Some(n))) => Some(*n),
+            Some((_, None)) => a.interval.then(|| m.count - held),
+            None => Some(0),
+        };
+        let mut line = format!(
+            "measurements: scope={} tuples={}..{} rows={held}",
+            if a.interval { "interval" } else { "cumulative" },
+            from.map_or("?".to_string(), |n| n.to_string()),
+            m.count
+        );
+        if let Some((p, _)) = &a.parent {
+            line.push_str(&format!(" parent={p}"));
+        }
+        if let Some(s) = state {
+            line.push_str(&format!(" state={s}"));
+        }
+        eprintln!("{line}");
+    };
     match r {
-        End::Finished(r) => report(a, r, t0),
+        End::Finished(r) => {
+            interval(&r.measurements, false, None);
+            report(a, r, t0)
+        }
         End::Paused {
             now_ns,
             events,
@@ -559,8 +615,9 @@ fn report_end(a: &Args, r: End, t0: Instant) -> Result<(), String> {
                     .write_csv(&mut f)
                     .map_err(|e| format!("{}: {e}", p.display()))?;
             }
+            interval(&measurements, true, snapshot.as_ref().map(|s| s.2.as_str()));
             let snap = match snapshot {
-                Some((p, n)) => format!(" snapshot={} ({n} bytes)", p.display()),
+                Some((p, n, _)) => format!(" snapshot={} ({n} bytes)", p.display()),
                 None => String::new(),
             };
             eprintln!(
@@ -723,6 +780,9 @@ mod spd {
             Some(snap) => {
                 let mut r = SpdRun::<C, F>::restore_snapshot_hpa(snap, cm, spd, hpa.as_ref(), out)
                     .map_err(|e| e.to_string())?;
+                if a.interval {
+                    r.sim.take_measurement_rows();
+                }
                 #[cfg(feature = "reconfiguration")]
                 sets.extend(super::changes::hpa_settings(a)?);
                 sets.extend(hpa_sets(a)?);
@@ -791,6 +851,10 @@ mod spd {
         }
         hpa_report(&r);
         if status == Status::Paused && (before.is_some() || watch.is_some()) {
+            let measurements = match a.interval {
+                true => r.sim.take_measurement_rows(),
+                false => r.sim.state().measurements().clone(),
+            };
             let snapshot = match &a.snapshot {
                 Some(p) => {
                     let opts = super::snap::options(a);
@@ -805,7 +869,7 @@ mod spd {
                                 .map_err(|e| e.to_string())?,
                         );
                     }
-                    Some(super::snap::write(p, &s)?)
+                    Some(super::snap::write(a, p, s)?)
                 }
                 None => None,
             };
@@ -813,7 +877,7 @@ mod spd {
             return Ok(End::Paused {
                 now_ns: st.now_ns(),
                 events: st.events(),
-                measurements: st.measurements().clone(),
+                measurements,
                 snapshot,
                 reason: watch.and_then(|w| w.fired().map(|f| f.reason.clone())),
             });
@@ -869,6 +933,9 @@ mod spd {
                 Some(s),
             ),
         };
+        if a.interval && snap.is_some() {
+            run.take_measurement_rows();
+        }
         #[cfg(feature = "reconfiguration")]
         let changed = {
             if let Some(s) = snap {
@@ -908,17 +975,21 @@ mod spd {
             }
             #[cfg(not(feature = "reconfiguration"))]
             extra.extend(carry.sections(enc)?);
+            let measurements = match a.interval {
+                true => run.take_measurement_rows(),
+                false => run.measurements().clone(),
+            };
             let snapshot = match &a.snapshot {
                 Some(p) => {
                     let s = run.snapshot_value(enc, extra).map_err(|e| e.to_string())?;
-                    Some(super::snap::write(p, &s)?)
+                    Some(super::snap::write(a, p, s)?)
                 }
                 None => None,
             };
             let end = Ok(End::Paused {
                 now_ns: run.now_ns(),
                 events: run.events(),
-                measurements: run.measurements().clone(),
+                measurements,
                 snapshot,
                 reason,
             });
@@ -1064,18 +1135,25 @@ mod rules {
                     .iter()
                     .map(|r| r.name().to_string())
                     .collect();
-                if old == new {
+                let mut run = if old == new {
                     RulesRun::<C>::restore_snapshot(snap, cm, host, out)
                 } else {
                     eprintln!("rules replaced: {old:?} -> {new:?}");
                     RulesRun::<C>::restore_snapshot_replacing(snap, cm, host, out)
                 }
-                .map_err(|e| e.to_string())?
+                .map_err(|e| e.to_string())?;
+                if a.interval {
+                    run.sim_mut().take_measurement_rows();
+                }
+                run
             }
             Some(snap) => {
                 // a snapshot without rules: they are added at the resume
-                let sim =
+                let mut sim =
                     Simulation::<C>::restore_snapshot(snap, cm, out).map_err(|e| e.to_string())?;
+                if a.interval {
+                    sim.take_measurement_rows();
+                }
                 eprintln!(
                     "rules added: {:?}",
                     host.rules()
@@ -1107,14 +1185,16 @@ mod rules {
         let (end, mut host) = if paused {
             // the records so far go to this run's log; the snapshot holds none
             let records = run.host_mut().take_records();
+            let measurements = match a.interval {
+                true => run.sim_mut().take_measurement_rows(),
+                false => run.sim().state().measurements().clone(),
+            };
             let snapshot = match &a.snapshot {
                 Some(p) => {
-                    let f =
-                        std::fs::File::create(p).map_err(|e| format!("{}: {e}", p.display()))?;
-                    let info = run
-                        .snapshot_with(std::io::BufWriter::new(f), &super::snap::options(a))
+                    let s = run
+                        .snapshot_value(super::snap::options(a).encoding)
                         .map_err(|e| e.to_string())?;
-                    Some((p.clone(), info.bytes))
+                    Some(super::snap::write(a, p, s)?)
                 }
                 None => None,
             };
@@ -1122,7 +1202,7 @@ mod rules {
             let end = End::Paused {
                 now_ns: st.now_ns(),
                 events: st.events(),
-                measurements: st.measurements().clone(),
+                measurements,
                 snapshot,
                 reason: watch
                     .as_ref()
@@ -1707,6 +1787,9 @@ mod ssxrun {
                 Some(s),
             ),
         };
+        if a.interval && snap.is_some() {
+            run.take_measurement_rows();
+        }
         let carry = super::changes::ssx_plain_changes(a, &mut run, snap)?;
         let (status, reason) = drive(a, &mut run, None)?;
         if status == Status::Finished {
@@ -1715,20 +1798,24 @@ mod ssxrun {
                 .map(End::Finished)
                 .map_err(|e| e.to_string());
         }
+        let measurements = match a.interval {
+            true => run.take_measurement_rows(),
+            false => run.measurements().clone(),
+        };
         let snapshot = match &a.snapshot {
             Some(p) => {
                 let enc = super::snap::options(a).encoding;
                 let s = run
                     .snapshot_value(enc, carry.sections(enc)?)
                     .map_err(|e| e.to_string())?;
-                Some(super::snap::write(p, &s)?)
+                Some(super::snap::write(a, p, s)?)
             }
             None => None,
         };
         Ok(End::Paused {
             now_ns: run.now_ns(),
             events: run.events(),
-            measurements: run.measurements().clone(),
+            measurements,
             snapshot,
             reason,
         })
@@ -1786,12 +1873,18 @@ mod snap {
         Some(Watch::new(c))
     }
 
-    /// Writes `s` to `p`; the path and the number of bytes.
-    pub fn write(p: &Path, s: &Snapshot) -> Result<(PathBuf, u64), String> {
+    /// Writes `s` to `p`, with the state id of the snapshot resumed as its `parent`; the path,
+    /// the number of bytes and the state id.
+    pub fn write(a: &Args, p: &Path, mut s: Snapshot) -> Result<(PathBuf, u64, String), String> {
+        s.header.parent = a.parent.as_ref().map(|(id, _)| id.clone());
         let mut bytes = Vec::new();
-        s.write(&mut bytes).map_err(|e| e.to_string())?;
+        let h = s.write(&mut bytes).map_err(|e| e.to_string())?;
         std::fs::write(p, &bytes).map_err(|e| format!("{}: {e}", p.display()))?;
-        Ok((p.to_path_buf(), bytes.len() as u64))
+        Ok((
+            p.to_path_buf(),
+            bytes.len() as u64,
+            h.state.unwrap_or_default(),
+        ))
     }
 
     fn go<C: Compat, F: Flavour>(
@@ -1809,6 +1902,9 @@ mod snap {
                 }
                 let mut sim =
                     Simulation::<C, F>::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?;
+                if a.interval {
+                    sim.take_measurement_rows();
+                }
                 carry = super::changes::plain(a, &mut sim, Some(s))?;
                 sim
             }
@@ -1822,13 +1918,17 @@ mod snap {
         if status == Status::Finished {
             return sim.finish().map(End::Finished).map_err(|e| e.to_string());
         }
+        let measurements = match a.interval {
+            true => sim.take_measurement_rows(),
+            false => sim.state().measurements().clone(),
+        };
         let snapshot = match &a.snapshot {
             Some(p) => {
                 let enc = options(a).encoding;
                 let s = sim
                     .snapshot_value(enc, carry.sections(enc)?)
                     .map_err(|e| e.to_string())?;
-                Some(write(p, &s)?)
+                Some(write(a, p, s)?)
             }
             None => None,
         };
@@ -1836,7 +1936,7 @@ mod snap {
         Ok(End::Paused {
             now_ns: st.now_ns(),
             events: st.events(),
-            measurements: st.measurements().clone(),
+            measurements,
             snapshot,
             reason: watch.and_then(|w| w.fired().map(|f| f.reason.clone())),
         })
@@ -1898,6 +1998,21 @@ mod snap {
         if let Some(why) = a2.mode.unavailable_reason() {
             return Err(why);
         }
+        // the measurement scope: the snapshot's unless given; a snapshot without the rows of
+        // earlier intervals cannot continue cumulatively
+        let m = s.header.measurements;
+        let history = m.is_none_or(|m| m.rows_from == 0);
+        a2.interval = match a.measurements_scope {
+            Some(i) => i,
+            None => !history,
+        };
+        if !a2.interval && !history {
+            return Err(format!(
+                "--measurements-scope cumulative: the snapshot holds no measurement rows before tuple {} (earlier intervals exported them); resume with --measurements-scope interval",
+                m.map_or(0, |m| m.rows_from)
+            ));
+        }
+        a2.parent = Some((s.header.state_id(), m.map(|m| m.tuples)));
         Ok(a2)
     }
 

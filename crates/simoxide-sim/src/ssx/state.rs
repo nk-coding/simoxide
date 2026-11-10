@@ -1211,8 +1211,8 @@ mod disk {
         ConfigImage, graph_section, model_section, read_graph_section, read_model_section,
     };
     use crate::snapshot::{
-        Encoding, FORMAT, Header, Section, Snapshot, SnapshotError, SnapshotInfo, SnapshotOptions,
-        model_fingerprint,
+        Encoding, FORMAT, Header, MeasurementsInfo, Section, Snapshot, SnapshotError, SnapshotInfo,
+        SnapshotOptions, model_fingerprint,
     };
 
     /// The section `ssx` as written.
@@ -1280,6 +1280,9 @@ mod disk {
                 traced: img.traced,
                 encoding: enc,
                 sections: Vec::new(),
+                measurements: Some(MeasurementsInfo::of(&img.meas)),
+                state: None,
+                parent: None,
             };
             Ok(Snapshot { header, sections })
         }

@@ -191,6 +191,8 @@ async fn uploaded_model_gives_the_library_result() {
     let res = results(&app, id, "").await;
     assert_eq!(res["summary"]["measurements"], 300);
     assert_eq!(res["summary"]["events"], r.events);
+    // one interval from time 0: the cursor at its end is the number of rows
+    assert_eq!(res["summary"]["tuples"], csv.lines().count() as u64 - 1);
     let series = res["summary"]["series"].as_array().unwrap();
     assert!(!series.is_empty());
     assert!(series.iter().all(|s| s["percentiles"]["p50"].is_number()));

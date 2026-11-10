@@ -17,7 +17,7 @@ a copy in memory, a snapshot is the same state as bytes.
 simoxide run --model corpus/x_sl_mediastore --trace a.jsonl \
     --pause-at 120 --snapshot ms-120.snap
 
-# continue it to the end (outputs get the continuation only)
+# continue it to the end (the trace gets the continuation only, m.csv the whole run's rows)
 simoxide resume ms-120.snap --model corpus/x_sl_mediastore \
     --trace b.jsonl --measurements m.csv
 
@@ -31,7 +31,9 @@ simoxide snapshot-info ms-300.snap   # the header (JSON)
 - Pauses: `--pause-at T` (every event at or before `T` seconds has run), `--pause-before T`
   (every event before `T`), `--pause-events N` (at least `N` events). `simoxide resume` also
   takes `--until T`, the same as `--pause-at T`. A paused run reports `paused t=... events=...`
-  and writes the measurements recorded so far to `--measurements`.
+  and writes its measurements to `--measurements`: the rows the run holds, from time 0 by
+  default, or with `--measurements-scope interval` the tuples of this invocation only
+  ([Measurement intervals](#measurement-intervals)).
 - `--snapshot-format json` writes the sections as JSON (for reading; see the format page).
 - `resume` needs the model the run was created on (`--model`, `--run-json`): the snapshot names
   it by a fingerprint of its content and refuses another model. The mode (`exact`, `fast`), the
@@ -40,7 +42,9 @@ simoxide snapshot-info ms-300.snap   # the header (JSON)
 - Outputs: the trace, tape, decision log (`--spd-log`) and rules log (`--rules-log`) of the paused
   run and those of the resumed run concatenate to the outputs of the uninterrupted run. A run
   started with `--trace` must be resumed with one (or its lines are discarded); a tape can be
-  added or dropped at any pause (exact mode).
+  added or dropped at any pause (exact mode). Measurements are cumulative by default: the
+  snapshot keeps the rows, and the resumed run's `--measurements` file is the uninterrupted
+  run's. With `--measurements-scope interval` they concatenate like the trace (next section).
 - Scaling policies: a run with a `.spd` resumes with its interpreter state; the compat flags of
   `--spd-quirks` are kept in the snapshot and used again. HPA autoscalers (section `hpa`) need
   the same configuration at the resume and can be changed with `--hpa-set`
@@ -86,6 +90,10 @@ let result = sim.finish()?;
   the bytes it was read from.
 - Not part of a snapshot: the output writers, the wall-clock deadline and the cancellation flag
   of `Limits` (set them again with `Simulation::set_limits`).
+- `Simulation::take_measurement_rows()` (and `SsxRun`'s) moves the stored rows out of a run
+  between events; a snapshot written after it holds only the rows recorded since (interval
+  scope, [Measurement intervals](#measurement-intervals)). It changes nothing else in the run.
+  `Snapshot::write` fills in the header's `state`; `Header::parent` is the caller's to set.
 
 ### Scaling policies and reconfiguration rules
 
@@ -145,6 +153,103 @@ simoxide resume hot.snap --model corpus/x_pem_screencast_ms --pause-when 'elapse
 Series conditions read the stored measurement rows (`store_measurements`, on by default). A
 condition changes nothing in the run: a run paused by a condition is the run paused by
 `--pause-events` at the same event count, and its snapshot has the same bytes.
+
+## Measurement intervals
+
+A search that continues snapshots many times saves each continuation's new measurements once.
+`--measurements-scope interval` (on `run` and `resume`) does that: `--measurements` gets only
+the tuples recorded by this invocation, and the snapshot it writes holds no measurement rows,
+so neither the export nor the snapshot grows with the observations of earlier intervals.
+
+```sh
+simoxide run --model M --flavour slingshot --pause-at 100 --snapshot s1.snap \
+    --measurements m0.csv --measurements-scope interval          # tuples 0..n1
+simoxide resume s1.snap --model M --pause-at 200 --snapshot s2a.snap \
+    --measurements m1a.csv                                       # n1..n2a (the scope is s1's)
+simoxide resume s1.snap --model M --change faster.changes --pause-at 200 \
+    --snapshot s2b.snap --measurements m1b.csv                   # n1..n2b, another branch
+```
+
+**Tuple numbers (the cursor).** Every measurement tuple (a row of `measurements.csv`) is
+numbered in recording order from 0 at time 0 of the run. The numbering is part of the run state
+and continues across snapshots, so the `n`-th tuple of a paused and resumed run is the `n`-th
+tuple of the uninterrupted run with the same seed. A snapshot's header carries the cursor,
+`measurements.tuples`: the number of tuples recorded before the snapshot, which is the number
+of the next one ([Snapshot format](../formats/snapshot.md#header)).
+
+**Intervals.** One invocation simulates one interval: `run` from time 0, `resume` from the
+snapshot it restores, to the pause (with or without a snapshot) or the end of the run. Its
+tuples are those recorded during the invocation, numbers `from..to` (`to` excluded): `from` is
+the restored snapshot's cursor (0 for `run`), `to` the cursor at the pause or the end. So:
+
+- A tuple belongs to the interval in which it is recorded, and a tuple is recorded when its
+  observation is complete. A response time is recorded when its request ends: a request that
+  started before the snapshot and ends after the resume is the continuation's tuple (its
+  `time` is the end; `time - value` is the start, before `from`'s time). Tuples recorded at the
+  resume itself (by `--change`, `--transform`, `--enforce`, `--hpa-set`) are the continuation's.
+- A pause falls between two events. With `--pause-at T` every event at or before `T` has run,
+  so tuples with `time = T` belong to the interval before the pause; with `--pause-events N`
+  or a pause condition, both intervals can have tuples at the same time. Their numbers tell
+  them apart: membership is decided by the number, never by the time.
+- The intervals of a path are adjacent and disjoint: the next interval's `from` is the previous
+  one's `to`. Concatenating the interval exports of a path, per series in path order, gives
+  the uninterrupted run's rows of that series, and the row counts add up to `to` of the last
+  interval.
+
+Within one export the rows are ordered as in every `measurements.csv` (by series, each in
+recording order, [Formats](./formats.md#_4-measurements-csv)), so a row's tuple number is not
+in the file: a row is identified by its interval and its series and position, and in a path's
+history by its series and its position among that series' rows of the path.
+
+**Branches.** `resume` never changes the snapshot it reads, so any number of continuations can
+start from one snapshot. Each numbers its tuples from the snapshot's cursor on: the numbers of
+two siblings overlap, and a tuple number names a tuple only together with its branch, the path
+of snapshots from the root run. The headers link that path: `state` is a snapshot's state id (a
+hash of its sections, the same for the same run state), `parent` the state id of the snapshot
+the run was resumed from (absent for a run from time 0). The CLI prints the interval of every
+`resume` and pause:
+
+```text
+measurements: scope=interval tuples=1000..1053 rows=53 parent=3f0c9a1d5e7b2468 state=9b1e04c27f3a8d55
+```
+
+`rows` is the number of rows written to `--measurements` (in interval scope `to - from`);
+`state` is that of the snapshot written (absent without one).
+
+**Scopes.**
+
+| Scope | `--measurements` of a resume | the snapshot written |
+|---|---|---|
+| `cumulative` (default of `run`) | every row the run holds: the parent's and the new ones, the uninterrupted run's file | keeps every row (`rows_from` 0) |
+| `interval` | the tuples `from..to` of this invocation | keeps no row (`rows_from` = `tuples`) |
+
+`resume` takes the scope of the snapshot unless `--measurements-scope` is given: a snapshot
+written in interval scope continues in interval scope, any other cumulatively. `interval` on
+a cumulative snapshot drops the restored rows at the restore (the continuation and its
+snapshots are in interval scope from there on); `cumulative` on an interval snapshot is
+refused, since the rows of the earlier intervals are not in it. In interval scope an
+invocation without `--measurements` writes its tuples nowhere. `simoxide explore` summarises
+each variant's tuples from the fork on, the same interval membership.
+
+**What a continuation needs instead of the rows.** Nothing in a run reads past measurement
+rows: they are output only. What does depend on past tuples is kept in its own bounded state,
+which is part of every snapshot in both scopes:
+
+- the sliding windows of SimuLizar's calculators and runtime measurements (PRM), cut to their
+  window length;
+- the SPD triggers' aggregation: per trigger an exponential moving average (a sufficient
+  statistic) or the last values of a fixed-size window, per element with the fixed `Q13`;
+- the HPA controller's busy-time readings, recommendations and scale events of the
+  stabilisation windows; the engine's busy-time integrals;
+- the Slingshot-exact engine's open calculators (requests in progress), the count of finished
+  usage-scenario runs (`--max-measurements`) and the tuple count itself;
+- pause conditions (`--pause-when`) read only tuples recorded after the start of the
+  invocation (their windows start empty there), so they never need earlier rows.
+
+So dropping the rows changes nothing in the run: an interval-scope path gives the uninterrupted
+run's tuples, events and decisions. The snapshot of an interval-scope run is smaller than the
+cumulative one by exactly the rows: in `postcard`, 16 bytes per row, plus per series the bytes
+of its row count beyond the one byte of an empty list.
 
 ## Resume with changes
 

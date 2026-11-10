@@ -75,6 +75,52 @@ pub struct Header {
     pub traced: bool,
     pub encoding: Encoding,
     pub sections: Vec<SectionInfo>,
+    /// The measurement cursor and the rows the snapshot holds ([`MeasurementsInfo`]; absent in
+    /// snapshots of builds before it).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub measurements: Option<MeasurementsInfo>,
+    /// The snapshot's state id ([`Header::state_id`]), filled in by [`Snapshot::write`].
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub state: Option<String>,
+    /// The state id of the snapshot the run was resumed from (`simoxide resume` sets it; absent:
+    /// a run from time 0, or a snapshot written through the library without one).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent: Option<String>,
+}
+
+/// The measurements of a run in a [`Header`] (`docs/guide/snapshots.md`, "Measurement
+/// intervals"). Tuples are numbered in recording order from 0 (time 0 of the run), along the
+/// branch the snapshot is on.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MeasurementsInfo {
+    /// The cursor: tuples recorded from time 0 up to the snapshot (the number of the next one).
+    pub tuples: u64,
+    /// The snapshot holds the rows of tuples `rows_from..tuples`; `rows_from == tuples`: none
+    /// (interval scope: earlier intervals exported them), `0`: all (cumulative scope).
+    pub rows_from: u64,
+}
+
+impl MeasurementsInfo {
+    /// The cursor and the rows held of `m`.
+    pub fn of(m: &crate::Measurements) -> MeasurementsInfo {
+        MeasurementsInfo {
+            tuples: m.count,
+            rows_from: m.count.saturating_sub(m.rows_held()),
+        }
+    }
+}
+
+impl Header {
+    /// The state id: FNV-1a 64 (16 hex digits) over the sections' names, lengths and checksums.
+    /// It is a function of the sections alone (not of the header's other fields, `parent`
+    /// included): the same run state gives the same id, whichever path led to it.
+    pub fn state_id(&self) -> String {
+        let mut b = Vec::new();
+        for s in &self.sections {
+            b.extend_from_slice(format!("{}:{}:{}\n", s.name, s.bytes, s.checksum).as_bytes());
+        }
+        format!("{:016x}", fnv64(&b))
+    }
 }
 
 /// The run's own model in a [`Header`].
@@ -161,6 +207,7 @@ impl Snapshot {
                 checksum: format!("{:016x}", fnv64(&s.data)),
             })
             .collect();
+        h.state = Some(h.state_id());
         let line = serde_json::to_string(&h).map_err(|e| SnapshotError::Encode(e.to_string()))?;
         w.write_all(format!("{MAGIC} {FORMAT}\n{line}\n").as_bytes())?;
         for s in &self.sections {

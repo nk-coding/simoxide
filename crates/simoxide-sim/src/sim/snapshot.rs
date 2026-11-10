@@ -20,8 +20,8 @@ use super::state::{Shape, max_depth};
 use super::*;
 use crate::rng::Tape;
 use crate::snapshot::{
-    Encoding, FORMAT, Header, RngImage, RunModelInfo, Section, Snapshot, SnapshotError,
-    SnapshotInfo, SnapshotOptions, model_fingerprint,
+    Encoding, FORMAT, Header, MeasurementsInfo, RngImage, RunModelInfo, Section, Snapshot,
+    SnapshotError, SnapshotInfo, SnapshotOptions, model_fingerprint,
 };
 use serde::{Deserialize, Serialize};
 use simoxide_model::persist::GraphXmi;
@@ -698,6 +698,9 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             traced: self.traced,
             encoding: enc,
             sections: Vec::new(),
+            measurements: Some(MeasurementsInfo::of(&self.meas.m)),
+            state: None,
+            parent: None,
         };
         Ok(Snapshot { header, sections })
     }
