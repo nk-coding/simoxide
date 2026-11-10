@@ -54,6 +54,7 @@ simoxide run --model <dir> [flags]
 | `--measurements-scope cumulative\|interval` | `cumulative` (default): the snapshot keeps the measurement rows; `interval`: `--measurements` gets the tuples this invocation recorded, the snapshot keeps none ([Measurement intervals](./snapshots.md#measurement-intervals)) |
 | `--pause-on-decision` | pause before a scaling policy's adjustment runs, the recommendation pending (resume it with `--decide`); also of `resume` ([Decisions](./spd.md#decisions)) |
 | `--decision-file FILE` | write the decision the run paused at and, at a resume, the one `--decide` resolved, as JSON ([Decision file](./spd.md#decision-file)); also of `resume` |
+| `--summary FILE`, `--summary-series METRIC[POINT]`, `--summary-stats LIST` | write statistics per series of the tuples this invocation recorded (count, sum, mean, min, max, first, last, initial, time_weighted; default all) as JSON; series as in `--pause-when`, repeatable, default all; also of `resume` ([Interval summaries](./snapshots.md#interval-summaries)) |
 
 Limits (see [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)):
 
@@ -80,6 +81,7 @@ simoxide resume FILE --model DIR [--run-json F] [--trace F] [--tape F] [--measur
                 [--enforce POLICY,...] [--hpa-set NAME.PARAMETER=VALUE]...
                 [--measurements-scope cumulative|interval]
                 [--decide ACTIONS] [--pause-on-decision] [--decision-file F]
+                [--summary F] [--summary-series METRIC[POINT]]... [--summary-stats LIST]
 simoxide snapshot-info FILE
 ```
 
