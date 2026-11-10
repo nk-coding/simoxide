@@ -34,6 +34,8 @@ pub mod aggregate;
 #[cfg(feature = "sim")]
 pub mod decision;
 pub mod hpa;
+#[cfg(feature = "sim")]
+pub mod inspect;
 mod interp;
 pub mod jfmt;
 pub mod log;

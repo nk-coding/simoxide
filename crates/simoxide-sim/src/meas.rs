@@ -222,7 +222,7 @@ impl Measurements {
 }
 
 /// `String.compareTo`: UTF-16 code unit order.
-fn java_cmp(a: &str, b: &str) -> std::cmp::Ordering {
+pub(crate) fn java_cmp(a: &str, b: &str) -> std::cmp::Ordering {
     a.encode_utf16().cmp(b.encode_utf16())
 }
 

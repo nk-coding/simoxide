@@ -825,7 +825,7 @@ fn metric_continuous(m: &Model, spec: &MeasurementSpecification) -> bool {
 }
 
 /// The tuple metric of the calculator that measures a base metric (by metric id).
-fn tuple_metric_name(id: &str) -> Option<&'static str> {
+pub(crate) fn tuple_metric_name(id: &str) -> Option<&'static str> {
     Some(match id {
         metric_ids::RESPONSE_TIME => metric_names::RESPONSE_TIME,
         metric_ids::RESOURCE_DEMAND => metric_names::RESOURCE_DEMAND,
