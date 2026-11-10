@@ -689,11 +689,26 @@ pub(crate) struct PerRun {
 }
 
 impl QvtoRun {
-    /// The state a snapshot keeps of the run's QVTo state in its working graph.
+    /// The state a snapshot of the run `sim` keeps of the run's QVTo state: that of the graph
+    /// the next transformation starts from ([`QvtoRun::prepare`]). That is the working graph
+    /// while it is `sim`'s model. After edits of the model outside a transformation (the
+    /// monitors an SPD adjustment clones, change files), which draw ids from the model's
+    /// generator, it is `sim`'s model, unless that has no QVTo state (a restored run's model
+    /// changed before its first transformation): then the working graph's state carries over.
     #[cfg(feature = "snapshot")]
-    pub(crate) fn session_state(&self) -> Option<crate::qvt::SessionState> {
+    pub(crate) fn session_state<H: ChangeHost + ?Sized>(
+        &self,
+        sim: &H,
+    ) -> Option<crate::qvt::SessionState> {
         let st = self.state.as_ref()?;
-        let g = st.work.as_ref().map(|(g, _)| &**g)?;
+        let current = sim.model_graph();
+        let attached = |g: &Graph| !g.links().package_obj.is_empty();
+        let g = match &st.work {
+            Some((g, fp)) if *fp == fingerprint(sim) => &**g,
+            Some((g, _)) if !attached(current) && attached(g) => &**g,
+            _ if attached(current) => current,
+            _ => return None,
+        };
         Some(self.core.0.template.save_state(g))
     }
 

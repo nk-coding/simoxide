@@ -125,8 +125,11 @@ let rules_run = RulesRun::<Exact>::restore_from(f, &cm, host, Outputs::default()
 - `RulesRun` (feature `snapshot` of `simoxide-reconf`) keeps the host's QVTo state, the PRM mirror
   (rebuilt with the same objects), the statistics and kept records. The QVTo state of other hosts
   (e.g. an SPD run's `QvtoAdjuster.run`) goes into a snapshot with
-  `QvtoRun::snapshot_section(enc)` and comes back with `QvtoRun::restore_section(&sim, &s)`: the
-  id generator continues, so objects created after the restore get the ids they would have got.
+  `QvtoRun::snapshot_section(&sim, enc)` and comes back with
+  `QvtoRun::restore_section(&sim, &s)`: the id generator continues, so objects created after the
+  restore get the ids they would have got. `sim` is the run the transformations change: its model
+  may have changed since the last transformation (the monitors an SPD adjustment clones, a change
+  file), and the generator continues from it then.
 
 ## Pause conditions
 
@@ -578,7 +581,7 @@ let mut run = SsxRun::new(&cm, cfg, Outputs::default())?;    // cm compiled for 
 run.run_until(Pause::After(120_000_000_000), Some(&mut hooks))?;   // hooks: SsxSpd, or None
 let mut extra = hooks.snapshot_sections(Encoding::Postcard)?;      // SPD: `spd`, `spd-ssx`
 drop(hooks);
-extra.push(adjuster.run.snapshot_section(Encoding::Postcard)?);    // if adjuster.run.is_started()
+extra.push(adjuster.run.snapshot_section(&run, Encoding::Postcard)?); // if adjuster.run.is_started()
 run.snapshot_with(&mut file, &SnapshotOptions::default(), extra)?;
 
 // later: the run, the adjuster's QVTo state, the SPD layer

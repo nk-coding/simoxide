@@ -1038,12 +1038,12 @@ mod spd {
                     let opts = super::snap::options(a);
                     let mut s = r.snapshot_value(opts.encoding).map_err(|e| e.to_string())?;
                     #[cfg(not(feature = "reconfiguration"))]
-                    s.sections.extend(carry.sections(opts.encoding)?);
+                    s.sections.extend(carry.sections(&r.sim, opts.encoding)?);
                     #[cfg(feature = "reconfiguration")]
                     if adj.run.is_started() {
                         s.sections.push(
                             adj.run
-                                .snapshot_section(opts.encoding)
+                                .snapshot_section(&r.sim, opts.encoding)
                                 .map_err(|e| e.to_string())?,
                         );
                     }
@@ -1192,10 +1192,14 @@ mod spd {
             drop(hooks);
             #[cfg(feature = "reconfiguration")]
             if a.snapshot.is_some() && adj.run.is_started() {
-                extra.push(adj.run.snapshot_section(enc).map_err(|e| e.to_string())?);
+                extra.push(
+                    adj.run
+                        .snapshot_section(&run, enc)
+                        .map_err(|e| e.to_string())?,
+                );
             }
             #[cfg(not(feature = "reconfiguration"))]
-            extra.extend(carry.sections(enc)?);
+            extra.extend(carry.sections(&run, enc)?);
             let measurements = match a.interval {
                 true => run.take_measurement_rows(),
                 false => run.measurements().clone(),
@@ -1564,11 +1568,17 @@ mod changes {
             Carry { qvto: None }
         }
 
-        pub fn sections(&self, enc: Encoding) -> Result<Vec<Section>, String> {
+        /// The sections of the run `sim` (whose model may have changed since the last
+        /// transformation).
+        pub fn sections<H: simoxide_sim::ChangeHost + ?Sized>(
+            &self,
+            sim: &H,
+            enc: Encoding,
+        ) -> Result<Vec<Section>, String> {
             match &self.qvto {
-                Some(q) if q.is_started() => {
-                    Ok(vec![q.snapshot_section(enc).map_err(|e| e.to_string())?])
-                }
+                Some(q) if q.is_started() => Ok(vec![
+                    q.snapshot_section(sim, enc).map_err(|e| e.to_string())?,
+                ]),
                 _ => Ok(Vec::new()),
             }
         }
@@ -1800,7 +1810,7 @@ mod changes {
             }
         }
 
-        pub fn sections(&self, enc: Encoding) -> Result<Vec<Section>, String> {
+        pub fn sections<H: ?Sized>(&self, _sim: &H, enc: Encoding) -> Result<Vec<Section>, String> {
             match &self.raw {
                 None => Ok(Vec::new()),
                 Some((s, e)) if *e == enc => Ok(vec![s.clone()]),
@@ -2028,8 +2038,9 @@ mod ssxrun {
         let snapshot = match &a.snapshot {
             Some(p) => {
                 let enc = super::snap::options(a).encoding;
+                let sections = carry.sections(&run, enc)?;
                 let s = run
-                    .snapshot_value(enc, carry.sections(enc)?)
+                    .snapshot_value(enc, sections)
                     .map_err(|e| e.to_string())?;
                 Some(super::snap::write(a, p, s)?)
             }
@@ -2149,8 +2160,9 @@ mod snap {
         let snapshot = match &a.snapshot {
             Some(p) => {
                 let enc = options(a).encoding;
+                let sections = carry.sections(&sim, enc)?;
                 let s = sim
-                    .snapshot_value(enc, carry.sections(enc)?)
+                    .snapshot_value(enc, sections)
                     .map_err(|e| e.to_string())?;
                 Some(write(a, p, s)?)
             }

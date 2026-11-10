@@ -35,8 +35,10 @@ pub struct QvtoState {
 }
 
 impl QvtoRun {
-    /// The run's QVTo state for a snapshot (see the module documentation).
-    pub fn save_state(&self) -> QvtoState {
+    /// The QVTo state of the run `sim` for a snapshot (see the module documentation). `sim` is
+    /// the simulation (or Slingshot-exact engine) the transformations run on: its model may have
+    /// changed since the last transformation, and the id generator continues from it then.
+    pub fn save_state<H: simoxide_sim::ChangeHost + ?Sized>(&self, sim: &H) -> QvtoState {
         match &self.state {
             None => QvtoState {
                 started: false,
@@ -46,7 +48,7 @@ impl QvtoRun {
             Some(st) => QvtoState {
                 started: true,
                 invocations: st.invocations,
-                session: self.session_state(),
+                session: self.session_state(sim),
             },
         }
     }
@@ -67,8 +69,12 @@ impl QvtoRun {
     }
 
     /// [`QvtoRun::save_state`] as the section `qvto`.
-    pub fn snapshot_section(&self, enc: Encoding) -> Result<Section, SnapshotError> {
-        Section::encode(QVTO, &self.save_state(), enc)
+    pub fn snapshot_section<H: simoxide_sim::ChangeHost + ?Sized>(
+        &self,
+        sim: &H,
+        enc: Encoding,
+    ) -> Result<Section, SnapshotError> {
+        Section::encode(QVTO, &self.save_state(sim), enc)
     }
 
     /// [`QvtoRun::restore_state`] from the section `qvto` of `s` (nothing if it has none).
@@ -110,7 +116,7 @@ impl<'m, C: Compat, F: Flavour> RulesRun<'m, C, F> {
                 .iter()
                 .map(|r| r.name().to_string())
                 .collect(),
-            qvto: host.run.save_state(),
+            qvto: host.run.save_state(&*sim),
             prm: host.prm.model.as_ref().map(|(m, root)| {
                 let r = match m {
                     crate::host::ModelRef::Loaded(r) | crate::host::ModelRef::Graph(r) => r.0,
