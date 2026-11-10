@@ -74,7 +74,9 @@ pub fn begin<H: ChangeHost + ?Sized>(
     ))
 }
 
-/// Records a change step of the resume (`--change`, `--transform`) applied to `h`.
+/// Records a change step of the resume (`--change`, `--transform`) or a reconfiguration of the
+/// rules applied to `h` (both need the `reconfiguration` feature).
+#[cfg_attr(not(feature = "reconfiguration"), allow(dead_code))]
 pub fn record_step<H: ChangeHost + ?Sized>(
     rec: Option<&mut Recorder>,
     h: &H,
