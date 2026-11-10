@@ -365,6 +365,12 @@ impl<'m> SsxRun<'m> {
         &self.cfg
     }
 
+    /// Sets the wall-clock deadline ([`crate::Limits::deadline`]): it is not part of the run
+    /// state, so a restored run has none. Checked from the next event on.
+    pub fn set_deadline(&mut self, deadline: Option<std::time::Instant>) {
+        self.cfg.limits.deadline = deadline;
+    }
+
     /// The compiled model the run was created on.
     pub fn base(&self) -> &'m CompiledModel {
         self.e.base

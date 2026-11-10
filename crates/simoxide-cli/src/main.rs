@@ -551,10 +551,7 @@ fn setup_with_rules(a: &Args) -> Result<(CompiledModel, SimConfig, Option<PathBu
     if a.ps_virtual_time {
         cfg.ps_algorithm = simoxide_sim::PsAlgorithm::VirtualTime;
     }
-    if let Some(s) = a.timeout {
-        let d = std::time::Duration::try_from_secs_f64(s).map_err(|e| format!("--timeout: {e}"))?;
-        cfg.limits.deadline = Some(Instant::now() + d);
-    }
+    cfg.limits.deadline = deadline(a)?;
     if let Some(r) = &a.replay {
         let text = std::fs::read_to_string(r).map_err(|e| format!("{}: {e}", r.display()))?;
         cfg.rng = RngMode::Replay(Arc::new(Tape::parse(&text)?));
@@ -571,6 +568,31 @@ fn setup_with_rules(a: &Args) -> Result<(CompiledModel, SimConfig, Option<PathBu
     cfg.usage_streams = a.usage_streams;
     cfg.fix_double_resume = a.fix_double_resume;
     Ok((cm, cfg, rules))
+}
+
+/// The deadline of `--timeout`, from now.
+fn deadline(a: &Args) -> Result<Option<Instant>, String> {
+    a.timeout
+        .map(|s| {
+            std::time::Duration::try_from_secs_f64(s)
+                .map(|d| Instant::now() + d)
+                .map_err(|e| format!("--timeout: {e}"))
+        })
+        .transpose()
+}
+
+/// `--timeout` for a restored run: a deadline is not part of the run state, the restored run
+/// has the snapshot's limits without one.
+fn timeout<C: simoxide_sim::Compat, F: simoxide_sim::Flavour>(
+    a: &Args,
+    sim: &mut simoxide_sim::Simulation<'_, C, F>,
+) -> Result<(), String> {
+    if let Some(d) = deadline(a)? {
+        let mut l = sim.state().config().limits.clone();
+        l.deadline = Some(d);
+        sim.set_limits(l);
+    }
+    Ok(())
 }
 
 fn create(p: &Path) -> Result<Box<dyn std::io::Write>, String> {
@@ -980,6 +1002,7 @@ mod spd {
             Some(snap) => {
                 let mut r = SpdRun::<C, F>::restore_snapshot_hpa(snap, cm, spd, hpa.as_ref(), out)
                     .map_err(|e| e.to_string())?;
+                super::timeout(a, &mut r.sim)?;
                 if a.interval {
                     r.sim.take_measurement_rows();
                 }
@@ -1272,10 +1295,11 @@ mod spd {
         let mut adj = NoAdjustment;
         let (mut run, snap) = match start {
             Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(|e| e.to_string())?, None),
-            Err(s) => (
-                SsxRun::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?,
-                Some(s),
-            ),
+            Err(s) => {
+                let mut run = SsxRun::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?;
+                run.set_deadline(super::deadline(a)?);
+                (run, Some(s))
+            }
         };
         if a.interval && snap.is_some() {
             run.take_measurement_rows();
@@ -1524,6 +1548,7 @@ mod rules {
         };
         let mut rec = super::meta::begin(a, run.sim(), None, || serde_json::Value::Null);
         if let Some(snap) = restore {
+            super::timeout(a, run.sim_mut())?;
             run = super::changes::with_rules(a, run, snap, rec.as_mut())?;
         }
         let mut watch = super::snap::watch(a);
@@ -2270,10 +2295,11 @@ mod ssxrun {
         super::no_runtime_metadata(a)?;
         let (mut run, snap) = match start {
             Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(|e| e.to_string())?, None),
-            Err(s) => (
-                SsxRun::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?,
-                Some(s),
-            ),
+            Err(s) => {
+                let mut run = SsxRun::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?;
+                run.set_deadline(super::deadline(a)?);
+                (run, Some(s))
+            }
         };
         if a.interval && snap.is_some() {
             run.take_measurement_rows();
@@ -2397,6 +2423,7 @@ mod snap {
                 }
                 let mut sim =
                     Simulation::<C, F>::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?;
+                super::timeout(a, &mut sim)?;
                 if a.interval {
                     sim.take_measurement_rows();
                 }
