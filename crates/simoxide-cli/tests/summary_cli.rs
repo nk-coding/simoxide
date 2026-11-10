@@ -393,7 +393,8 @@ fn equal_times_are_split_by_tuple_number() {
 /// Scaling decisions and empty intervals, hand-calculated: the minimal example pauses at the
 /// scale-out recommended at t = 2 s, is resumed with it (`--decide`) to t = 6 s, then for an
 /// interval without events (`--pause-at 7.9`: the next event is at 8 s, so the run pauses at
-/// once, at 6 s), then to the end at 10 s.
+/// once, at 6 s), then to the end at 10 s. The adjustments run with `reconfiguration`.
+#[cfg(feature = "reconfiguration")]
 #[test]
 fn decisions_and_empty_intervals() {
     if !simoxide_thirdparty::skip_unless_all_available() {
