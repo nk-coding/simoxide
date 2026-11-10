@@ -702,6 +702,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
             measurements: Some(MeasurementsInfo::of(&self.meas.m)),
             state: None,
             parent: None,
+            interval_end: None,
         };
         Ok(Snapshot { header, sections })
     }

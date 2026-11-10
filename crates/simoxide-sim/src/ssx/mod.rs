@@ -775,7 +775,7 @@ impl<'m> Engine<'m> {
         if let Some(d) = limits.deadline
             && std::time::Instant::now() >= d
         {
-            return Err(fail(SimErrorKind::Cancelled, "deadline passed".into()));
+            return Err(fail(SimErrorKind::Cancelled, crate::stop::DEADLINE.into()));
         }
         Ok(())
     }

@@ -1284,6 +1284,7 @@ mod disk {
                 measurements: Some(MeasurementsInfo::of(&img.meas)),
                 state: None,
                 parent: None,
+                interval_end: None,
             };
             Ok(Snapshot { header, sections })
         }

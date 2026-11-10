@@ -90,6 +90,31 @@ impl Quirks {
         }
     }
 
+    /// The flags as [`Quirks::parse`] reads them: `fixed`, `slingshot`, or the list of the
+    /// quirks that are on (`Q2,Q12`).
+    pub fn name(&self) -> String {
+        if *self == Quirks::fixed() {
+            return "fixed".into();
+        }
+        if *self == Quirks::slingshot() {
+            return "slingshot".into();
+        }
+        let on = [
+            ("Q1", self.q1_disregard_keeps_state),
+            ("Q2", self.q2_commit_on_request),
+            ("Q4", self.q4_relative_zero),
+            ("Q6", self.q6_all_links),
+            ("Q7", self.q7_late_removal),
+            ("Q9", self.q9_no_size_check),
+            ("Q11", self.q11_setup_error_drops_spd),
+            ("Q12", self.q12_broken_composed),
+            ("Q13", self.q13_merged_samples),
+            ("Q15", self.q15_shared_time_events),
+        ];
+        let v: Vec<&str> = on.iter().filter(|x| x.1).map(|x| x.0).collect();
+        v.join(",")
+    }
+
     /// Parses `fixed`, `slingshot`, or a comma-separated list of quirks to turn on (`Q2,Q12`,
     /// case-insensitive; `Q3` is accepted and changes nothing: kept behaviour).
     pub fn parse(s: &str) -> Result<Quirks, String> {
@@ -121,5 +146,20 @@ impl Quirks {
             }
         }
         Ok(q)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Quirks;
+
+    /// `name` is read back by `parse`.
+    #[test]
+    fn names_parse_back() {
+        for s in ["fixed", "slingshot", "Q2", "Q2,Q12", "Q1,Q4,Q15"] {
+            let q = Quirks::parse(s).unwrap();
+            assert_eq!(q.name(), s);
+            assert_eq!(Quirks::parse(&q.name()).unwrap(), q);
+        }
     }
 }
