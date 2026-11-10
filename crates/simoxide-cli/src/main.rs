@@ -10,6 +10,8 @@ use std::process::ExitCode;
 use std::sync::Arc;
 use std::time::Instant;
 
+mod meta;
+
 const USAGE: &str = "usage:
   simoxide run --model <dir> [--run-json run.json] [--seed N] [--max-sim-time T]
              [--max-measurements M] [--no-link-throughput] [--trace out.jsonl] [--tape out.jsonl]
@@ -66,6 +68,10 @@ const USAGE: &str = "usage:
              (statistics per series of the tuples this invocation recorded, its interval:
              count, sum, mean, min, max, first, last, initial, time_weighted (default all);
              series as in --pause-when, default all; docs/guide/snapshots.md#interval-summaries)
+             [--model-metadata FILE.json] [--runtime-metadata FILE.json]   (the model's
+             definitions with a content hash; the run's deployment at the start, its changes
+             with their causes, policy state, retired elements and the metadata of every
+             measurement series; docs/guide/runtime-metadata.md)
   simoxide resume FILE --model <dir> [--run-json run.json] [--trace out.jsonl] [--tape out.jsonl]
              [--measurements out.csv] [--pause-at T ... --snapshot FILE2] [--until T]
              [--pause-when COND]... [--spd-log ...] [--spd-quirks ...] [--rules DIR]
@@ -89,6 +95,8 @@ const USAGE: &str = "usage:
              resume: minReplicas, maxReplicas, averageUtilization, tolerance, startupDelay,
              scaleUpStabilization, scaleDownStabilization, downscaleStabilization; also `hpa
              NAME PARAMETER VALUE` lines of change files)
+             [--model-metadata FILE.json] [--runtime-metadata FILE.json]   (as for run: the
+             deployment at the restore, the changes of this invocation from --change on)
   simoxide explore FILE --model <dir> --variant NAME=FILE.changes|NAME=X.qvto|NAME ...
              [--until T] [--threads N] [--metrics rt,util,...]   (fork the snapshot into one
              run per variant, each with its changes, to the end or T; compare their measurements;
@@ -172,6 +180,11 @@ struct Args {
     summary: Option<PathBuf>,
     summary_series: Vec<simoxide_sim::sim::watch::SeriesSel>,
     summary_stats: Option<Vec<simoxide_sim::summary::Stat>>,
+    /// `--model-metadata FILE`, `--runtime-metadata FILE` (docs/guide/runtime-metadata.md).
+    model_metadata: Option<PathBuf>,
+    runtime_metadata: Option<PathBuf>,
+    /// Resolved: the hash of the model file, for the runtime file.
+    model_hash: Option<String>,
 }
 
 /// A change step of `resume` (`--change`, `--transform`).
@@ -243,6 +256,9 @@ fn parse_args() -> Result<Args, String> {
         summary: None,
         summary_series: Vec::new(),
         summary_stats: None,
+        model_metadata: None,
+        runtime_metadata: None,
+        model_hash: None,
     };
     let secs = |f: &str, v: String| -> Result<i64, String> {
         let t: f64 = v.parse().map_err(|e| format!("{f}: {e}"))?;
@@ -389,6 +405,8 @@ fn parse_args() -> Result<Args, String> {
             "--pause-on-decision" => a.pause_on_decision = true,
             "--decide" => a.decide = Some(decide_actions(&val()?)?),
             "--decision-file" => a.decision_file = Some(val()?.into()),
+            "--model-metadata" => a.model_metadata = Some(val()?.into()),
+            "--runtime-metadata" => a.runtime_metadata = Some(val()?.into()),
             "--variant" => {
                 let v = val()?;
                 a.variants.push(match v.split_once('=') {
@@ -577,17 +595,18 @@ fn run(a: &Args) -> Result<(), String> {
     }
     let mut a2 = a.clone();
     a2.interval = a.measurements_scope == Some(true);
-    let a = &a2;
-    let (cm, cfg, rules_dir) = setup_with_rules(a)?;
+    let (cm, cfg, rules_dir) = setup_with_rules(&a2)?;
     for w in &cm.warnings {
         eprintln!("warning: {w}");
     }
     let out = Outputs {
-        trace: a.trace.as_deref().map(create).transpose()?,
-        tape: a.tape.as_deref().map(create).transpose()?,
+        trace: a2.trace.as_deref().map(create).transpose()?,
+        tape: a2.tape.as_deref().map(create).transpose()?,
     };
     let t0 = Instant::now();
-    let spd = spd::of(a, &cm)?;
+    let spd = spd::of(&a2, &cm)?;
+    a2.model_hash = model_metadata(&a2, &cm, spd.as_ref())?;
+    let a = &a2;
     if decision_options(a) && spd.is_none() {
         return Err(
             "--pause-on-decision and --decision-file need a model with scaling policies (.spd)"
@@ -615,12 +634,54 @@ fn run(a: &Args) -> Result<(), String> {
         {
             ssxrun::plain(a, &cm, Ok(cfg), out)?
         }
-        None if a.pause.is_some() || a.snapshot.is_some() || !a.pause_when.is_empty() => {
+        None if a.pause.is_some()
+            || a.snapshot.is_some()
+            || !a.pause_when.is_empty()
+            || a.runtime_metadata.is_some() =>
+        {
             snap::plain(a, &cm, Ok(cfg), out)?
         }
         None => End::Finished(simoxide_sim::run(&cm, cfg, out).map_err(|e| e.to_string())?),
     };
     report_end(a, &cm, r, t0)
+}
+
+/// Writes `--model-metadata` and returns the model file's hash for `--runtime-metadata` (with
+/// the scaling definitions of `s` and its HPA autoscalers).
+#[cfg(feature = "spd")]
+fn model_metadata(
+    a: &Args,
+    cm: &CompiledModel,
+    s: Option<&simoxide_spd::Spd>,
+) -> Result<Option<String>, String> {
+    if a.model_metadata.is_none() && a.runtime_metadata.is_none() {
+        return Ok(None);
+    }
+    let hpa = match s {
+        Some(s) => spd::hpa_of(a, s)?,
+        None => None,
+    };
+    meta::write_model(a, || meta::model_file(cm, s, hpa.as_ref()))
+}
+
+#[cfg(not(feature = "spd"))]
+fn model_metadata<T>(
+    a: &Args,
+    cm: &CompiledModel,
+    _: Option<&T>,
+) -> Result<Option<String>, String> {
+    meta::write_model(a, || meta::model_file(cm))
+}
+
+/// `--runtime-metadata` is not supported by the Slingshot-exact engine.
+fn no_runtime_metadata(a: &Args) -> Result<(), String> {
+    match a.runtime_metadata {
+        Some(_) => Err(
+            "--runtime-metadata is not supported by the Slingshot-exact engine (use --flavour slingshot)"
+                .into(),
+        ),
+        None => Ok(()),
+    }
 }
 
 /// How a run (or a resumed one) ended: at its end, or paused with a snapshot written.
@@ -837,7 +898,7 @@ mod spd {
     }
 
     /// The run's autoscalers, resolved against its SPD interpreter.
-    fn hpa_of(a: &Args, spd: &Spd) -> Result<Option<Hpa>, String> {
+    pub fn hpa_of(a: &Args, spd: &Spd) -> Result<Option<Hpa>, String> {
         let dir = super::model_dir(a)?;
         hpa_config(a, &dir)?.map(|c| Hpa::new(&c, spd)).transpose()
     }
@@ -913,6 +974,8 @@ mod spd {
         let mut adj = NoAdjustment;
         let hpa = hpa_of(a, spd)?;
         let mut sets = Vec::new();
+        let groups = Some(spd.model());
+        let mut rec;
         let mut r = match restore {
             Some(snap) => {
                 let mut r = SpdRun::<C, F>::restore_snapshot_hpa(snap, cm, spd, hpa.as_ref(), out)
@@ -920,6 +983,7 @@ mod spd {
                 if a.interval {
                     r.sim.take_measurement_rows();
                 }
+                rec = super::meta::begin(a, &r.sim, groups, || policy_state(&r));
                 match (r.pending_decision(), &a.decide) {
                     (Some(d), None) => {
                         let p = d.policies();
@@ -944,13 +1008,14 @@ mod spd {
                     adj.run
                         .restore_section(&r.sim, snap)
                         .map_err(|e| e.to_string())?;
-                    if super::changes::with_qvto(a, &mut r.sim, &mut adj.run)? {
+                    if super::changes::with_qvto(a, &mut r.sim, &mut adj.run, rec.as_mut(), groups)?
+                    {
                         r.model_changed();
                     }
                 }
                 #[cfg(not(feature = "reconfiguration"))]
                 {
-                    carry = super::changes::plain(a, &mut r.sim, Some(snap))?;
+                    carry = super::changes::plain(a, &mut r.sim, Some(snap), rec.as_mut())?;
                     if carry.changed {
                         r.model_changed();
                     }
@@ -972,11 +1037,25 @@ mod spd {
             None => {
                 let sim = Simulation::<C, F>::create(cm, cfg, out).map_err(|e| e.to_string())?;
                 let r = SpdRun::new(sim, spd).map_err(|e| e.to_string())?;
-                match &hpa {
+                let r = match &hpa {
                     Some(h) => r.with_hpa(h).map_err(|e| e.to_string())?,
                     None => r,
-                }
+                };
+                rec = super::meta::begin(a, &r.sim, groups, || policy_state(&r));
+                r
             }
+        };
+        // with --runtime-metadata every adjustment is recorded
+        let mut recording;
+        let adjuster: &mut dyn simoxide_spd::sim::Adjuster<C, F> = match rec.as_mut() {
+            Some(rec) => {
+                recording = simoxide_spd::inspect::Recording {
+                    inner: &mut adj,
+                    rec,
+                };
+                &mut recording
+            }
+            None => &mut adj,
         };
         let file = a.spd_log.as_deref().map(create).transpose()?;
         let sink: Box<dyn std::io::Write> = file.unwrap_or_else(|| Box::new(std::io::sink()));
@@ -986,7 +1065,7 @@ mod spd {
             Some(actions) => {
                 let names: Vec<&str> = actions.iter().map(String::as_str).collect();
                 let res = r
-                    .decide(&mut adj, &mut log, &names)
+                    .decide(adjuster, &mut log, &names)
                     .map_err(|e| format!("--decide: {e}"))?;
                 report_resolution(&res);
                 Some(res)
@@ -999,14 +1078,14 @@ mod spd {
             Some(w) => {
                 w.arm(&r.sim)?;
                 let st = r
-                    .run_while(&mut adj, &mut log, |s| w.keep_going(s))
+                    .run_while(adjuster, &mut log, |s| w.keep_going(s))
                     .map_err(|e| e.to_string())?;
                 (st, None)
             }
             None => {
                 let before = super::snap::before_ns(a)?;
                 let st = r
-                    .run_until(&mut adj, &mut log, before)
+                    .run_until(adjuster, &mut log, before)
                     .map_err(|e| e.to_string())?;
                 (st, before)
             }
@@ -1054,6 +1133,20 @@ mod spd {
             if let Some((p, v)) = &decisions {
                 write_json(p, v)?;
             }
+            super::meta::finish(
+                a,
+                rec,
+                super::meta::End {
+                    cm: r.sim.compiled(),
+                    base: cm,
+                    series: &measurements.series,
+                    time_ns: r.sim.state().now_ns(),
+                    generation: r.sim.state().model().generation(),
+                    policies: policy_state(&r),
+                    state: snapshot.as_ref().map(|s| s.2.as_str()),
+                    paused: true,
+                },
+            )?;
             let st = r.sim.state();
             return Ok(End::Paused {
                 now_ns: st.now_ns(),
@@ -1065,9 +1158,33 @@ mod spd {
                     .or_else(|| watch.and_then(|w| w.fired().map(|f| f.reason.clone()))),
             });
         }
+        let end_meta = rec.is_some().then(|| {
+            let st = r.sim.state();
+            (
+                st.model().compiled().cloned(),
+                st.model().generation(),
+                policy_state(&r),
+            )
+        });
         let (res, _, s) = r.finish().map_err(|e| e.to_string())?;
         if let Some((p, v)) = &decisions {
             write_json(p, v)?;
+        }
+        if let Some((own, generation, policies)) = end_meta {
+            super::meta::finish(
+                a,
+                rec,
+                super::meta::End {
+                    cm: own.as_deref().unwrap_or(cm),
+                    base: cm,
+                    series: &res.measurements.series,
+                    time_ns: res.end_ns,
+                    generation,
+                    policies,
+                    state: None,
+                    paused: false,
+                },
+            )?;
         }
         let executed = if cfg!(feature = "reconfiguration") {
             format!("adjusted={}", s.adjustments_ok)
@@ -1081,6 +1198,11 @@ mod spd {
             s.requests
         );
         Ok(End::Finished(res))
+    }
+
+    /// The policy state of `--runtime-metadata`.
+    fn policy_state<C: Compat, F: Flavour>(r: &SpdRun<'_, '_, C, F>) -> serde_json::Value {
+        simoxide_spd::inspect::policy_state(r)
     }
 
     /// Prints what `--decide` did.
@@ -1143,6 +1265,7 @@ mod spd {
                     .into(),
             );
         }
+        super::no_runtime_metadata(a)?;
         #[cfg(feature = "reconfiguration")]
         let mut adj = super::changes::spd_adjuster(a, &spd.quirks())?;
         #[cfg(not(feature = "reconfiguration"))]
@@ -1328,8 +1451,12 @@ mod rules {
     use super::{Args, End, create};
     use simoxide_reconf::{QvtoCore, RuleSet, RulesHost, RulesRun, RunConfig};
     use simoxide_sim::compat::Compat;
+    use simoxide_sim::inspect::Recorder;
     use simoxide_sim::snapshot::Snapshot;
-    use simoxide_sim::{CompiledModel, Mode, Outputs, Pause, SimConfig, Simulation, Status};
+    use simoxide_sim::{
+        CompiledModel, Mode, Outputs, Pause, RunState, SimConfig, SimError, SimuLizar, Simulation,
+        Status,
+    };
     use std::io::Write;
     use std::path::Path;
 
@@ -1395,19 +1522,38 @@ mod rules {
                 RulesRun::new(sim, host)
             }
         };
+        let mut rec = super::meta::begin(a, run.sim(), None, || serde_json::Value::Null);
         if let Some(snap) = restore {
-            run = super::changes::with_rules(a, run, snap)?;
+            run = super::changes::with_rules(a, run, snap, rec.as_mut())?;
         }
         let mut watch = super::snap::watch(a);
-        let status = match &mut watch {
-            Some(w) => {
-                w.arm(run.sim())?;
-                run.run_while(|s| w.keep_going(s))
+        if let Some(w) = &mut watch {
+            w.arm(run.sim())?;
+        }
+        let pause = a.pause.unwrap_or(Pause::Never);
+        let mut keep = |s: &RunState<C, SimuLizar>| match &mut watch {
+            Some(w) => w.keep_going(s),
+            None => !reached(pause, s),
+        };
+        let status = match rec.as_mut() {
+            None => run.run_while(&mut keep),
+            Some(rec) => {
+                let (r, st) = run_recorded(run, rec, &mut keep);
+                run = r;
+                st
             }
-            None => run.run_until(a.pause.unwrap_or(Pause::Never)),
         }
         .map_err(|e| e.to_string())?;
         let paused = status == Status::Paused && (a.pause.is_some() || watch.is_some());
+        // (time, generation, the run's own model) at the end, for --runtime-metadata
+        let end_meta = {
+            let st = run.sim().state();
+            (
+                st.now_ns(),
+                st.model().generation(),
+                st.model().compiled().cloned(),
+            )
+        };
         let (end, mut host) = if paused {
             // the records so far go to this run's log; the snapshot holds none
             let records = run.host_mut().take_records();
@@ -1424,6 +1570,20 @@ mod rules {
                 }
                 None => None,
             };
+            super::meta::finish(
+                a,
+                rec,
+                super::meta::End {
+                    cm: run.sim().compiled(),
+                    base: cm,
+                    series: &measurements.series,
+                    time_ns: end_meta.0,
+                    generation: end_meta.1,
+                    policies: serde_json::Value::Null,
+                    state: snapshot.as_ref().map(|s| s.2.as_str()),
+                    paused: true,
+                },
+            )?;
             let st = run.sim().state();
             let end = End::Paused {
                 now_ns: st.now_ns(),
@@ -1442,6 +1602,20 @@ mod rules {
             (end, host)
         } else {
             let (res, host) = run.finish().map_err(|e| e.to_string())?;
+            super::meta::finish(
+                a,
+                rec,
+                super::meta::End {
+                    cm: end_meta.2.as_deref().unwrap_or(cm),
+                    base: cm,
+                    series: &res.measurements.series,
+                    time_ns: res.end_ns,
+                    generation: end_meta.1,
+                    policies: serde_json::Value::Null,
+                    state: None,
+                    paused: false,
+                },
+            )?;
             (End::Finished(res), host)
         };
         if let Some(p) = &a.rules_log {
@@ -1482,6 +1656,48 @@ mod rules {
             s.prm_micros as f64 / 1e3
         );
         Ok(end)
+    }
+
+    /// `RulesRun::run_while`, recording every reconfiguration that changed the model in `rec`
+    /// (cause `rules`).
+    fn run_recorded<'m, C: Compat>(
+        run: RulesRun<'m, C>,
+        rec: &mut Recorder,
+        keep: &mut dyn FnMut(&RunState<C, SimuLizar>) -> bool,
+    ) -> (RulesRun<'m, C>, Result<Status, SimError>) {
+        let (mut sim, mut host) = run.into_parts();
+        let st = loop {
+            let st = match sim.run_while(|s| !s.reconf_pending() && keep(s)) {
+                Ok(st) => st,
+                Err(e) => break Err(e),
+            };
+            let generation = sim.state().model().generation();
+            match host.handle(&mut sim) {
+                Ok(true) => {
+                    if sim.state().model().generation() != generation {
+                        super::meta::record_step(
+                            Some(&mut *rec),
+                            &sim,
+                            None,
+                            serde_json::json!({"type": "rules"}),
+                        );
+                    }
+                }
+                Ok(false) => break Ok(st),
+                Err(e) => break Err(e),
+            }
+        };
+        (RulesRun::from_parts(sim, host), st)
+    }
+
+    /// `RulesRun::run_until`'s pause test.
+    fn reached<C: Compat>(p: Pause, s: &RunState<C, SimuLizar>) -> bool {
+        match p {
+            Pause::Never => false,
+            Pause::After(t) => s.next_event_ns().is_some_and(|n| n > t),
+            Pause::Before(t) => s.next_event_ns().is_some_and(|n| n >= t),
+            Pause::Events(n) => s.events() >= n,
+        }
     }
 
     /// Keeps the records taken before a snapshot for this run's log.
@@ -1549,11 +1765,13 @@ mod rules {
 /// DESIGN-SPD.md N2).
 #[cfg(feature = "reconfiguration")]
 mod changes {
+    use super::meta::Groups;
     use super::{Args, ChangeArg};
     use simoxide_reconf::{
         ChangeFile, FailedRunChanges, Imports, QvtMode, QvtoCore, QvtoRun, RULES, ResumeChanges,
         RulesRun, RunConfig, StepReport,
     };
+    use simoxide_sim::inspect::Recorder;
     use simoxide_sim::snapshot::{Encoding, Section, Snapshot};
     use simoxide_sim::{Compat, Flavour, Simulation};
 
@@ -1610,21 +1828,57 @@ mod changes {
     pub fn build(a: &Args, core: &QvtoCore) -> Result<ResumeChanges, String> {
         let mut c = ResumeChanges::new();
         for ch in &a.changes {
-            c = match ch {
-                ChangeArg::File(p) => c.file(ChangeFile::load(p).map_err(|e| match e {
-                    simoxide_reconf::ChangeFileError::Line(..) => {
-                        format!("{}: {e}", p.display())
-                    }
-                    e => e.to_string(),
-                })?),
-                ChangeArg::Transform(p) => c.transform(
-                    core.compile_file(p, &Imports::Folder)
-                        .map_err(|e| format!("{}: {e}", p.display()))?,
-                    simoxide_reconf::Invocation::simulizar(),
-                ),
-            };
+            c = add_step(c, ch, core)?;
         }
         Ok(c)
+    }
+
+    /// `c` with the change step `ch`.
+    fn add_step(
+        c: ResumeChanges,
+        ch: &ChangeArg,
+        core: &QvtoCore,
+    ) -> Result<ResumeChanges, String> {
+        Ok(match ch {
+            ChangeArg::File(p) => c.file(ChangeFile::load(p).map_err(|e| match e {
+                simoxide_reconf::ChangeFileError::Line(..) => {
+                    format!("{}: {e}", p.display())
+                }
+                e => e.to_string(),
+            })?),
+            ChangeArg::Transform(p) => c.transform(
+                core.compile_file(p, &Imports::Folder)
+                    .map_err(|e| format!("{}: {e}", p.display()))?,
+                simoxide_reconf::Invocation::simulizar(),
+            ),
+        })
+    }
+
+    /// Applies the change steps of `a` to `sim` in `q`, one after the other, each recorded in
+    /// `rec` (`--runtime-metadata`) with its file as the cause.
+    fn apply_steps<C: Compat, F: Flavour>(
+        a: &Args,
+        sim: &mut Simulation<'_, C, F>,
+        q: &mut QvtoRun,
+        mut rec: Option<&mut Recorder>,
+        groups: Groups,
+    ) -> Result<Vec<StepReport>, String> {
+        let mut out = Vec::new();
+        for ch in &a.changes {
+            let c = add_step(ResumeChanges::new(), ch, q.core())?;
+            let steps = c.apply(sim, q).map_err(|e| e.to_string())?;
+            if steps.is_empty() {
+                // a change file with HPA parameters only
+                continue;
+            }
+            out.extend(steps);
+            let cause = match ch {
+                ChangeArg::File(p) => serde_json::json!({"type": "change", "file": p}),
+                ChangeArg::Transform(p) => serde_json::json!({"type": "transform", "file": p}),
+            };
+            super::meta::record_step(rec.as_deref_mut(), &*sim, groups, cause);
+        }
+        Ok(out)
     }
 
     fn report(steps: &[StepReport]) {
@@ -1658,6 +1912,7 @@ mod changes {
         a: &Args,
         sim: &mut Simulation<'_, C, F>,
         snap: Option<&Snapshot>,
+        rec: Option<&mut Recorder>,
     ) -> Result<Carry, String> {
         let has_qvto = snap.is_some_and(|s| s.section(simoxide_reconf::QVTO).is_some());
         if a.changes.is_empty() && !has_qvto {
@@ -1668,9 +1923,7 @@ mod changes {
         if let Some(s) = snap {
             q.restore_section(sim, s).map_err(|e| e.to_string())?;
         }
-        let steps = build(a, &core)?
-            .apply(sim, &mut q)
-            .map_err(|e| e.to_string())?;
+        let steps = apply_steps(a, sim, &mut q, rec, None)?;
         report(&steps);
         Ok(Carry { qvto: Some(q) })
     }
@@ -1754,13 +2007,13 @@ mod changes {
         a: &Args,
         sim: &mut Simulation<'_, C, F>,
         q: &mut QvtoRun,
+        rec: Option<&mut Recorder>,
+        groups: Groups,
     ) -> Result<bool, String> {
         if a.changes.is_empty() {
             return Ok(false);
         }
-        let steps = build(a, q.core())?
-            .apply(sim, q)
-            .map_err(|e| e.to_string())?;
+        let steps = apply_steps(a, sim, q, rec, groups)?;
         report(&steps);
         Ok(!steps.is_empty())
     }
@@ -1770,6 +2023,7 @@ mod changes {
         a: &Args,
         run: RulesRun<'m, C, F>,
         snap: &Snapshot,
+        rec: Option<&mut Recorder>,
     ) -> Result<RulesRun<'m, C, F>, String> {
         let (mut sim, mut host) = run.into_parts();
         if snap.section(RULES).is_none() {
@@ -1779,8 +2033,7 @@ mod changes {
                 .map_err(|e| e.to_string())?;
         }
         if !a.changes.is_empty() {
-            let c = build(a, host.qvto().core())?;
-            let steps = c.apply(&mut sim, host.qvto()).map_err(|e| e.to_string())?;
+            let steps = apply_steps(a, &mut sim, host.qvto(), rec, None)?;
             report(&steps);
         }
         Ok(RulesRun::from_parts(sim, host))
@@ -1844,6 +2097,7 @@ mod changes {
         a: &Args,
         _: &mut Simulation<'_, C, F>,
         snap: Option<&Snapshot>,
+        _: Option<&mut simoxide_sim::inspect::Recorder>,
     ) -> Result<Carry, String> {
         if !a.changes.is_empty() {
             return Err(
@@ -2013,6 +2267,7 @@ mod ssxrun {
         if !a.enforce.is_empty() {
             return Err("--enforce: the snapshot has no scaling policies".into());
         }
+        super::no_runtime_metadata(a)?;
         let (mut run, snap) = match start {
             Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(|e| e.to_string())?, None),
             Err(s) => (
@@ -2129,8 +2384,13 @@ mod snap {
         out: Outputs,
     ) -> Result<End, String> {
         let mut carry = super::changes::Carry::none();
+        let mut rec;
         let mut sim = match start {
-            Ok(cfg) => Simulation::<C, F>::create(cm, cfg, out).map_err(|e| e.to_string())?,
+            Ok(cfg) => {
+                let sim = Simulation::<C, F>::create(cm, cfg, out).map_err(|e| e.to_string())?;
+                rec = super::meta::begin(a, &sim, None, || serde_json::Value::Null);
+                sim
+            }
             Err(s) => {
                 if !a.enforce.is_empty() {
                     return Err("--enforce: the snapshot has no scaling policies".into());
@@ -2140,7 +2400,8 @@ mod snap {
                 if a.interval {
                     sim.take_measurement_rows();
                 }
-                carry = super::changes::plain(a, &mut sim, Some(s))?;
+                rec = super::meta::begin(a, &sim, None, || serde_json::Value::Null);
+                carry = super::changes::plain(a, &mut sim, Some(s), rec.as_mut())?;
                 sim
             }
         };
@@ -2151,7 +2412,24 @@ mod snap {
             (None, None) => Status::Finished,
         };
         if status == Status::Finished {
-            return sim.finish().map(End::Finished).map_err(|e| e.to_string());
+            let own = sim.state().model().compiled().cloned();
+            let generation = sim.state().model().generation();
+            let r = sim.finish().map_err(|e| e.to_string())?;
+            super::meta::finish(
+                a,
+                rec,
+                super::meta::End {
+                    cm: own.as_deref().unwrap_or(cm),
+                    base: cm,
+                    series: &r.measurements.series,
+                    time_ns: r.end_ns,
+                    generation,
+                    policies: serde_json::Value::Null,
+                    state: None,
+                    paused: false,
+                },
+            )?;
+            return Ok(End::Finished(r));
         }
         let measurements = match a.interval {
             true => sim.take_measurement_rows(),
@@ -2168,6 +2446,20 @@ mod snap {
             }
             None => None,
         };
+        super::meta::finish(
+            a,
+            rec,
+            super::meta::End {
+                cm: sim.compiled(),
+                base: cm,
+                series: &measurements.series,
+                time_ns: sim.state().now_ns(),
+                generation: sim.state().model().generation(),
+                policies: serde_json::Value::Null,
+                state: snapshot.as_ref().map(|s| s.2.as_str()),
+                paused: true,
+            },
+        )?;
         let st = sim.state();
         Ok(End::Paused {
             now_ns: st.now_ns(),
@@ -2283,9 +2575,19 @@ mod snap {
             return Err("--snapshot needs a pause (--pause-at, --until, --pause-when, ...)".into());
         }
         let s = read(a)?;
-        let a2 = resume_args(a, &s)?;
+        let mut a2 = resume_args(a, &s)?;
+        let (cm, _, rules_dir) = setup_with_rules(&a2)?;
+        let has_rules = s.section("rules").is_some();
+        let has_spd = s.section("spd").is_some();
+        let spd = match has_spd && a2.rules.is_none() {
+            true => Some(
+                super::spd::of_snapshot(&a2, &cm, &s)?
+                    .ok_or("the snapshot is of a run with scaling policies, the model has none")?,
+            ),
+            false => None,
+        };
+        a2.model_hash = super::model_metadata(&a2, &cm, spd.as_ref())?;
         let a = &a2;
-        let (cm, _, rules_dir) = setup_with_rules(a)?;
         let out = Outputs {
             trace: a.trace.as_deref().map(create).transpose()?,
             tape: a.tape.as_deref().map(create).transpose()?,
@@ -2297,8 +2599,6 @@ mod snap {
         };
         // the change set (--change, --transform, --rules, --enforce) is applied by the runs
         // below, between the restore and the continuation (DESIGN-SPD.md N2)
-        let has_rules = s.section("rules").is_some();
-        let has_spd = s.section("spd").is_some();
         #[cfg(feature = "reconfiguration")]
         let hpa_lines = !super::changes::hpa_settings(a)?.is_empty();
         #[cfg(not(feature = "reconfiguration"))]
@@ -2322,8 +2622,7 @@ mod snap {
                         .into(),
                 );
             }
-            let spd = super::spd::of_snapshot(a, &cm, &s)?
-                .ok_or("the snapshot is of a run with scaling policies, the model has none")?;
+            let spd = spd.expect("the snapshot's scaling policies");
             if a.flavour == FlavourKind::SlingshotExact {
                 super::spd::run_exact(a, &cm, Err(&s), out, &spd)?
             } else {
