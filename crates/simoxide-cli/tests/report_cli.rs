@@ -530,10 +530,12 @@ fn stop_reasons() {
     assert_eq!(r["interval"]["start"], t(10.0));
 }
 
+#[cfg(feature = "reconfiguration")]
 const GROUP: &str = "_DC8fM8pgEe6u3p81um7oyQ";
 
 /// The minimal example with `policies` (ids, step, time; all active) on its elastic
 /// infrastructure (1 to 3 servers).
+#[cfg(feature = "reconfiguration")]
 fn model(d: &Path, policies: &[(&str, i32, f64)]) -> String {
     let src = root().join("reference/slingshot/models/spd_minimal");
     let out = d.join("model");
