@@ -78,6 +78,7 @@ export default defineConfig({
             { text: 'Scaling policies (SPD)', link: '/guide/spd' },
             { text: 'Autoscaling (HPA)', link: '/guide/hpa' },
             { text: 'Snapshots, forks, changes', link: '/guide/snapshots' },
+            { text: 'Runtime metadata', link: '/guide/runtime-metadata' },
           ],
         },
         {

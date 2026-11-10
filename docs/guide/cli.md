@@ -55,6 +55,7 @@ simoxide run --model <dir> [flags]
 | `--pause-on-decision` | pause before a scaling policy's adjustment runs, the recommendation pending (resume it with `--decide`); also of `resume` ([Decisions](./spd.md#decisions)) |
 | `--decision-file FILE` | write the decision the run paused at and, at a resume, the one `--decide` resolved, as JSON ([Decision file](./spd.md#decision-file)); also of `resume` |
 | `--summary FILE`, `--summary-series METRIC[POINT]`, `--summary-stats LIST` | write statistics per series of the tuples this invocation recorded (count, sum, mean, min, max, first, last, initial, time_weighted; default all) as JSON; series as in `--pause-when`, repeatable, default all; also of `resume` ([Interval summaries](./snapshots.md#interval-summaries)) |
+| `--model-metadata FILE`, `--runtime-metadata FILE` | write the model file (definitions, deployment, content hash) and the runtime file (the deployment at the start, every change with its time and cause, policy state, retired elements, what each measurement series refers to); also of `resume`; not with `slingshot-exact` (runtime file) ([Runtime metadata](./runtime-metadata.md)) |
 
 Limits (see [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)):
 
@@ -82,6 +83,7 @@ simoxide resume FILE --model DIR [--run-json F] [--trace F] [--tape F] [--measur
                 [--measurements-scope cumulative|interval]
                 [--decide ACTIONS] [--pause-on-decision] [--decision-file F]
                 [--summary F] [--summary-series METRIC[POINT]]... [--summary-stats LIST]
+                [--model-metadata F] [--runtime-metadata F]
 simoxide snapshot-info FILE
 ```
 
@@ -102,7 +104,9 @@ run's scaling decisions, once it made one). See [Snapshots](./snapshots.md).
 | `--hpa-set NAME.PARAMETER=VALUE` | change an HPA autoscaler's parameter ([Autoscaling (HPA)](./hpa.md#command-line)) |
 | `--decide ACTIONS` | resolve the snapshot's pending scaling decision: the policies (ids or names) whose adjustments run in its place, in order, as a JSON array (`'["_a","_a"]'`) or a comma list (`_a,_b`); `'[]'` declines; required to resume a pending decision ([Decisions](./spd.md#decisions)) |
 
-The change steps run in the order given.
+The change steps run in the order given. With `--runtime-metadata` the runtime file starts at
+the restore, and each step, each `--decide` action and each enforced adjustment is a change of
+it ([Runtime metadata](./runtime-metadata.md#changes)).
 
 ## `simoxide explore`
 
