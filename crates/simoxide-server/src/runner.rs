@@ -14,10 +14,11 @@
 //! no trace, tape, snapshots or SimuLizar reconfiguration rules.
 
 use crate::job::{HARD_STOP_GRACE, Job, ModelInfo, Outcome, SeriesName, ServerConfig};
-use crate::monitor::{
-    Monitor, NANOS_PER_SEC, PauseWhy, Probe, capped_duration, ns_to_secs, secs_to_ns,
+use crate::monitor::{Monitor, PauseWhy, Probe, capped_duration, ns_to_secs, secs_to_ns};
+use crate::report::{
+    JobStatus, Level, LogSource, ResultSummary, RunInterval, StopKind, StopReason, TimePoint,
+    TupleRange,
 };
-use crate::report::{JobStatus, Level, LogSource, ResultSummary, StopKind, StopReason};
 use crate::request::{
     MAX_PROGRESS_INTERVAL_MS, MIN_PROGRESS_INTERVAL_MS, RUN_JSON, RunOptions, SimulationRequest,
     check_name,
@@ -878,7 +879,15 @@ fn drive<D: Drive>(job: &Job, d: &mut D, mon: &mut Monitor, interval: Duration) 
 
 /// The monitor stopped the run regularly.
 fn completed(kind: StopKind, detail: String) -> End {
-    End::Stopped(JobStatus::Completed, StopReason { kind, detail })
+    let cause = (kind == StopKind::Decision).then_some("decision");
+    End::Stopped(
+        JobStatus::Completed,
+        StopReason {
+            kind,
+            detail,
+            cause,
+        },
+    )
 }
 
 /// A client stopped the run.
@@ -888,6 +897,7 @@ fn cancelled() -> End {
         StopReason {
             kind: StopKind::Cancelled,
             detail: CANCELLED_BY_CLIENT.into(),
+            cause: None,
         },
     )
 }
@@ -929,12 +939,13 @@ fn conclude<D: Drive>(
                 Ok(r) => {
                     let runtime_metadata =
                         runtime(parts, &r.measurements.series, r.end_ns, "finished");
-                    let detail = simulator_stop_detail(&r, cfg);
+                    let (cause, detail) = simulator_stop_detail(&r, cfg);
                     RunEnd {
                         status: JobStatus::Completed,
                         stop: StopReason {
                             kind: StopKind::Simulator,
                             detail,
+                            cause: Some(cause),
                         },
                         error: None,
                         probe: Probe {
@@ -981,18 +992,19 @@ fn conclude<D: Drive>(
     }
 }
 
-/// Which of the simulator's own stops ended a run that it finished itself.
-fn simulator_stop_detail(r: &RunResult, cfg: &SimConfig) -> String {
-    if cfg.max_measurements > 0 && r.main_count >= cfg.max_measurements {
-        format!(
+/// Which of the simulator's own stops ended a run that it finished itself: the cause
+/// (`simoxide_sim::stop::completion`) and in words.
+fn simulator_stop_detail(r: &RunResult, cfg: &SimConfig) -> (&'static str, String) {
+    let cause = simoxide_sim::stop::completion(r.end_ns, r.main_count, cfg).cause;
+    let detail = match cause {
+        "max_measurements" => format!(
             "config.max_measurements: {} usage-scenario runs",
             r.main_count
-        )
-    } else if cfg.max_sim_time > 0 && r.end_ns >= cfg.max_sim_time.saturating_mul(NANOS_PER_SEC) {
-        format!("config.max_sim_time: {} s simulated", cfg.max_sim_time)
-    } else {
-        "no event left".into()
-    }
+        ),
+        "max_sim_time" => format!("config.max_sim_time: {} s simulated", cfg.max_sim_time),
+        _ => "no event left".into(),
+    };
+    (cause, detail)
 }
 
 /// An aborted run: a cancellation, the server's deadline or an error.
@@ -1012,6 +1024,7 @@ fn failed(
             StopReason {
                 kind: StopKind::Cancelled,
                 detail: CANCELLED_BY_CLIENT.into(),
+                cause: None,
             },
             None,
         ),
@@ -1020,6 +1033,7 @@ fn failed(
             StopReason {
                 kind: StopKind::ServerLimit,
                 detail: format!("the server's run-time cap: {}", e.message),
+                cause: None,
             },
             None,
         ),
@@ -1028,6 +1042,7 @@ fn failed(
             StopReason {
                 kind: StopKind::Error,
                 detail: e.to_string(),
+                cause: Some(simoxide_sim::stop::error(&e).cause),
             },
             Some(e.to_string()),
         ),
@@ -1116,6 +1131,11 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
         ),
         None,
     );
+    // the logical end: a `max_sim_time` criterion's time if it ended the run
+    let end_ns = match stop.kind {
+        StopKind::Termination => mon.time_boundary(probe.now_ns).unwrap_or(probe.now_ns),
+        _ => probe.now_ns,
+    };
     let outcome = measurements.map(|m| {
         mon.checkpoint(&m, &probe);
         // the last progress, so that live views end with the final numbers
@@ -1124,6 +1144,15 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
             summary: ResultSummary {
                 stop_reason: stop.clone(),
                 sim_time: ns_to_secs(probe.now_ns),
+                interval: RunInterval {
+                    start: TimePoint::of_ns(0),
+                    end: TimePoint::of_ns(end_ns),
+                    last_event: TimePoint::of_ns(probe.now_ns),
+                    tuples: TupleRange {
+                        from: 0,
+                        to: m.count,
+                    },
+                },
                 events: probe.events,
                 measurements: probe.main_count,
                 tuples: m.count,
@@ -1132,7 +1161,7 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
                 warnings,
                 series: mon.series_stats(&m, true),
                 spd,
-                interval_summary: interval_summary(&req, &m, probe.now_ns),
+                interval_summary: interval_summary(&req, &m, end_ns),
             },
             measurements: m,
             runtime_metadata,
@@ -1141,12 +1170,12 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
     job.end(status, Some(stop), error, outcome);
 }
 
-/// `config.interval_summary`: the summary of the run, one interval from time 0 to its end
-/// (`now_ns`).
+/// `config.interval_summary`: the summary of the run, one interval from time 0 to its logical
+/// end (`end_ns`, `summary.interval.end`).
 fn interval_summary(
     req: &SimulationRequest,
     m: &simoxide_sim::Measurements,
-    now_ns: i64,
+    end_ns: i64,
 ) -> Option<serde_json::Value> {
     use simoxide_sim::summary::{Interval, document};
     let o = req.config.interval_summary.as_ref()?;
@@ -1156,9 +1185,9 @@ fn interval_summary(
         tuples_from: Some(0),
         tuples_to: m.count,
         from: 0.0,
-        to: ns_to_secs(now_ns),
+        to: ns_to_secs(end_ns),
         from_ns: 0,
-        to_ns: now_ns,
+        to_ns: end_ns,
     };
     let select = |d: &simoxide_sim::ir::SeriesDef| {
         o.series.is_empty() || o.series.iter().any(|s| s.matches(&d.mp, d.metric))
@@ -1174,6 +1203,7 @@ fn fail_without_results(job: &Job, source: LogSource, error: String) {
         Some(StopReason {
             kind: StopKind::Error,
             detail: error.clone(),
+            cause: None,
         }),
         Some(error),
         None,
@@ -1220,7 +1250,13 @@ fn run_engine(
             let run = SsxRun::new(cm, cfg.clone(), Outputs::default()).map_err(err)?;
             let mut d = Ssx { run, hooks: None };
             let end = drive(job, &mut d, mon, interval);
-            conclude(job, d, end, &cfg, None)
+            conclude(
+                job,
+                d,
+                end,
+                &simoxide_sim::stop::effective_config(&cfg, &cm.flavour),
+                None,
+            )
         }
         #[cfg(feature = "exact")]
         (Mode::Exact, FlavourKind::SimuLizar) => run_plain::<simoxide_sim::Exact, SimuLizar>(
@@ -1289,7 +1325,13 @@ fn run_plain<C: Compat, F: Flavour>(
     });
     let mut d = Plain(sim, rec);
     let end = drive(job, &mut d, mon, interval);
-    Ok(conclude(job, d, end, &cfg, meta.as_ref()))
+    Ok(conclude(
+        job,
+        d,
+        end,
+        &simoxide_sim::stop::effective_config(&cfg, &cm.flavour),
+        meta.as_ref(),
+    ))
 }
 
 /// Scaling policies (`.spd`) and HPA autoscalers.
@@ -1649,7 +1691,13 @@ mod spd {
                 hooks: Some(&mut hooks),
             };
             let end = drive(job, &mut d, mon, interval);
-            let mut r = conclude(job, d, end, &cfg, None);
+            let mut r = conclude(
+                job,
+                d,
+                end,
+                &simoxide_sim::stop::effective_config(&cfg, &cm.flavour),
+                None,
+            );
             r.spd = Some(serde_json::json!({
                 "evaluations": hooks.state.evaluations,
                 "requests": hooks.state.requests,
@@ -1797,7 +1845,13 @@ mod spd {
             rec,
         };
         let end = drive(job, &mut d, mon, interval);
-        Ok(conclude(job, d, end, &cfg, meta))
+        Ok(conclude(
+            job,
+            d,
+            end,
+            &simoxide_sim::stop::effective_config(&cfg, &cm.flavour),
+            meta,
+        ))
     }
 }
 

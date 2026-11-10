@@ -27,11 +27,13 @@ SIMOXIDE-SNAPSHOT 1\n                       magic line: the format version
 | `measurements` | `{"tuples": n, "rows_from": k}`: the measurement cursor, `n` tuples recorded from time 0 (the number of the next tuple), and the rows the `engine` or `ssx` section holds, those of tuples `k..n`: `0` in cumulative scope, `n` (none) in interval scope ([Measurement intervals](../guide/snapshots.md#measurement-intervals)) |
 | `state` | the state id: FNV-1a 64 (16 hex digits) over the lines `name:bytes:checksum\n` of `sections`, in order; equal for equal sections, whatever path led to them |
 | `parent` | the `state` of the snapshot the run was resumed from (`simoxide resume`); absent for a run from time 0 and in snapshots written through the library without one |
+| `interval_end` | `{"time": s, "time_ns": n}`: the logical end of the interval that ends at the snapshot, when it is not the clock `time_ns`: the time of `--pause-at T` or `--pause-before T` (or `elapsed`) that the run reached after its last event. A continuation's interval starts there ([Interval boundaries](../guide/result-report.md#interval-boundaries)); without it, at `time_ns`. Set by `simoxide`; not part of `state` |
 
 The header has no timestamps: the same state gives the same file (`parent` names the path:
 the same state reached on another path differs in it). `measurements`, `state` and `parent`
 are optional: a reader takes a header without them (an older build's) as cumulative, with no
-known cursor; older readers ignore them.
+known cursor; older readers ignore them. `interval_end` is optional too: without it the next
+interval starts at the clock, as before it existed.
 
 **Model fingerprint.** Two FNV-1a-64 hashes (32 hex digits) over the model graph: per resource
 its name and roots, per object its class, home resource, container, `xmi:id`, proxy (file name and

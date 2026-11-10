@@ -261,6 +261,18 @@ impl Monitor {
         }
     }
 
+    /// The time (ns) a `max_sim_time` criterion asked the run to stop at, if the run stopped
+    /// there: the earliest crossed one at or after the last event (`now_ns`). The run paused
+    /// before the first event later than it, so its state holds up to that time; it is the
+    /// logical end of the run's interval (`docs/guide/result-report.md`, "Interval boundaries").
+    pub fn time_boundary(&self, now_ns: i64) -> Option<i64> {
+        self.th_time.values[..self.th_time.next]
+            .iter()
+            .copied()
+            .filter(|&t| t >= now_ns)
+            .min()
+    }
+
     /// Whether [`Monitor::keep_going`] needs [`Probe::next_ns`] (a `max_sim_time` criterion not
     /// yet passed); finding the next event costs a little on every event otherwise.
     pub fn wants_next_time(&self) -> bool {

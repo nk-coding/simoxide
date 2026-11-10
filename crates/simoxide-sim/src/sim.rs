@@ -873,7 +873,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         if let Some(d) = l.deadline
             && std::time::Instant::now() >= d
         {
-            return self.limit_err(SimErrorKind::Cancelled, "deadline passed".into());
+            return self.limit_err(SimErrorKind::Cancelled, crate::stop::DEADLINE.into());
         }
         Ok(())
     }

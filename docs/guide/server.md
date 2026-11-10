@@ -398,7 +398,12 @@ buffer had already evicted).
   "summary": {
     "stop_reason": {"kind": "termination",
                     "detail": "all(confidence: 2 series within ±5 % at 95 %; max_measurements: 1000 usage-scenario runs)"},
-    "sim_time": 9120.4, "events": 3901277, "measurements": 9310, "tuples": 341007,
+    "sim_time": 9120.4,
+    "interval": {"start": {"time": 0.0, "time_ns": 0},
+                 "end": {"time": 9120.4, "time_ns": 9120400000000},
+                 "last_event": {"time": 9120.4, "time_ns": 9120400000000},
+                 "tuples": {"from": 0, "to": 341007}},
+    "events": 3901277, "measurements": 9310, "tuples": 341007,
     "wall_secs": 0.41, "warnings": [],
     "series": [{"measuring_point": "...", "metric": "Response Time Tuple", "count": 9310,
                 "mean": 1.93, "std_dev": 0.72, "min": 0.4, "max": 9.1,
@@ -412,8 +417,20 @@ buffer had already evicted).
 `stop_reason.kind` is `termination` (a termination condition held; `detail` says which),
 `simulator` (`config.max_sim_time`, `config.max_measurements`, or no event left),
 `server_limit` (`--max-run-secs` or `--max-tuples`), `decision` (a scaling decision without an
-action list in `config.spd_decisions`), `cancelled` or `error`. `uniforms` (the
-random numbers drawn) is reported for runs the simulator finished itself.
+action list in `config.spd_decisions`), `cancelled` or `error`. `stop_reason.cause` names the
+cause in the words of the CLI's [result report](./result-report.md#stop-reasons): for
+`simulator` `max_sim_time`, `max_measurements` or `no_events`; for `error` the limit
+(`max_events`, `max_steps`, `max_processes`, `max_stack_depth`, `livelock`, `limit`) or
+`simulation`; `decision` for `decision`; absent for the other kinds. `uniforms` (the random
+numbers drawn) is reported for runs the simulator finished itself.
+
+`summary.interval` is the run's interval as in the result report
+([Interval boundaries](./result-report.md#interval-boundaries)): a job is one interval from
+time 0. `last_event` is the time of the last event processed (`sim_time`); `end` is the time a
+`termination.max_sim_time` criterion asked for when it ended the run (the run stops before the
+first event later than that time, so the last event can be earlier), else the last event's;
+`tuples` is `0..tuples`. The result report's mapping of stop reasons to the server's is on
+that page ([Server](./result-report.md#server)).
 
 ### Scaling decisions
 
@@ -463,7 +480,8 @@ selection), so the cumulative and the interval scope coincide and there is nothi
 
 With `config.interval_summary` the results' `summary.interval_summary` is the document
 `simoxide run --summary` writes ([Interval summaries](./snapshots.md#interval-summaries)) for
-the run's single interval: tuples `0..tuples`, time 0 to `sim_time`, every tuple from time 0
+the run's single interval: tuples `0..tuples`, time 0 to `summary.interval.end` (`sim_time` unless a
+`termination.max_sim_time` criterion ended the run after an earlier last event), every tuple from time 0
 (no warm-up), without `parent` and `state`. `series` selects series as everywhere in the server
 (substrings of the measuring point and the metric; any selector matches; empty or absent: every
 series), `stats` names the statistics (`count`, `sum`, `mean`, `min`, `max`, `first`, `last`,

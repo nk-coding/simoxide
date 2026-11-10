@@ -1356,3 +1356,104 @@ async fn interval_summary_of_the_run() {
     assert_eq!(s, StatusCode::BAD_REQUEST, "{v}");
     assert!(v["error"].as_str().unwrap().contains("median"), "{v}");
 }
+
+/// `summary.interval` and `stop_reason.cause` (`docs/guide/result-report.md`, "Server"),
+/// hand-calculated on Slingshot's minimal example (an arrival every 3 s, each served for 2 s:
+/// events at `3k` and `3k + 2` s): the `max_sim_time` termination criterion at 1000 s ends the
+/// interval there, after the last event at 999 s; the simulator's own stops name their cause
+/// (the 10th request ends at 29 s); a resource limit fails the job with the limit as its cause.
+/// MCP `get_results` gives the same summary.
+#[tokio::test(flavor = "multi_thread")]
+async fn interval_and_stop_cause_of_the_run() {
+    let app = app();
+    let dir = repo().join("reference/slingshot/models/spd_minimal");
+    if !dir.join("default.usagemodel").exists() {
+        return;
+    }
+    let base = json!({"files": files_of(&dir),
+        "config": {"flavour": "slingshot", "spd": false, "max_sim_time": 1200, "max_measurements": -1}});
+    let tp = |s: f64| json!({"time": s, "time_ns": (s * 1e9) as i64});
+
+    let mut req = base.clone();
+    req["termination"] = json!({"max_sim_time": 1000});
+    req["config"]["interval_summary"] = json!({"stats": ["count"]});
+    let v = run(&app, req.clone()).await;
+    assert_eq!(v["stop_reason"]["kind"], "termination", "{v}");
+    assert_eq!(v["stop_reason"].get("cause"), None, "{v}");
+    let sum = results(&app, v["id"].as_str().unwrap(), "").await["summary"].clone();
+    assert_eq!(
+        sum["interval"],
+        json!({"start": tp(0.0), "end": tp(1000.0), "last_event": tp(999.0),
+               "tuples": {"from": 0, "to": sum["tuples"]}})
+    );
+    assert_eq!(sum["sim_time"], 999.0);
+    assert_eq!(sum["stop_reason"], v["stop_reason"]);
+    // the interval summary spans the same interval
+    assert_eq!(
+        sum["interval_summary"]["interval"]["time"],
+        json!({"from": 0.0, "to": 1000.0})
+    );
+
+    // MCP: the same summary
+    let (_, m) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(1, "start_simulation", req)),
+    )
+    .await;
+    let mid = m["result"]["structuredContent"]["id"]
+        .as_str()
+        .unwrap()
+        .to_string();
+    let (_, m) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(
+            2,
+            "wait_for_simulation",
+            json!({"id": mid, "until": "done", "timeout_secs": 60}),
+        )),
+    )
+    .await;
+    assert_eq!(
+        m["result"]["structuredContent"]["status"], "completed",
+        "{m}"
+    );
+    let (_, m) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(3, "get_results", json!({"id": mid}))),
+    )
+    .await;
+    let ms = &m["result"]["structuredContent"]["summary"];
+    assert_eq!(ms["interval"], sum["interval"]);
+    assert_eq!(ms["stop_reason"], sum["stop_reason"]);
+
+    // the simulator's stops: the time (Slingshot ends at it), the finished usage-scenario runs
+    let mut req = base.clone();
+    req["config"]["max_sim_time"] = json!(1000);
+    let v = run(&app, req).await;
+    assert_eq!(v["stop_reason"]["kind"], "simulator", "{v}");
+    assert_eq!(v["stop_reason"]["cause"], "max_sim_time", "{v}");
+    let sum = results(&app, v["id"].as_str().unwrap(), "").await["summary"].clone();
+    assert_eq!(sum["interval"]["end"], tp(1000.0));
+    assert_eq!(sum["interval"]["last_event"], tp(1000.0));
+    let mut req = base.clone();
+    req["config"]["max_measurements"] = json!(10);
+    let v = run(&app, req).await;
+    assert_eq!(v["stop_reason"]["cause"], "max_measurements", "{v}");
+    let sum = results(&app, v["id"].as_str().unwrap(), "").await["summary"].clone();
+    assert_eq!(sum["interval"]["end"], tp(29.0));
+    assert_eq!(sum["measurements"], 10);
+
+    // a resource limit: the job fails, the cause names the limit
+    let mut req = base;
+    req["config"]["max_steps"] = json!(100);
+    let v = run(&app, req).await;
+    assert_eq!(v["status"], "failed", "{v}");
+    assert_eq!(v["stop_reason"]["kind"], "error", "{v}");
+    assert_eq!(v["stop_reason"]["cause"], "max_steps", "{v}");
+}

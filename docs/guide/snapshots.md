@@ -334,14 +334,16 @@ the `count`s of a series over the intervals of a path add up to its rows in the 
 run, and `first` and `last` are the first and last row of the series in the interval's export.
 
 **The interval.** `tuples`: the cursor, as on the interval line (`from` is `null` if the
-snapshot resumed has no cursor). `time.from` is the simulation time of the snapshot resumed
-(its header's `time_ns`; 0 for `run`), `time.to` the time at the pause or the end: the time of
-the last event processed, which is the next interval's `time.from`, not the requested pause
-time (`--pause-at 200` with the last event at 199.75 s ends the interval at 199.75 s, and the
-next one starts there). `time` is the engine's clock in seconds, the time the tuples' `time`
-is measured in (a double in the Slingshot flavours, whole nanoseconds in SimuLizar); `time_ns`
-is the same in whole nanoseconds, truncated, as in snapshot headers. `parent` and `state` are
-those of the interval line (`state` only with `--snapshot`).
+snapshot resumed has no cursor). `time` is the interval's logical start and end, those of the
+[result report](./result-report.md#interval-boundaries): `time.to` is the requested pause time
+when the run paused there (`--pause-at 200` with the last event at 199.75 s ends the interval
+at 200 s: the state of 199.75 s holds until then, the next event is later), else the time of
+the last event processed; `time.from` is the end of the interval resumed (0 for `run`), so
+each interval starts where the previous one ended. `time` is in seconds on the engine's clock,
+the time the tuples' `time` is measured in (a double in the Slingshot flavours, whole
+nanoseconds in SimuLizar); `time_ns` is the same in whole nanoseconds, truncated, as in
+snapshot headers. `parent` and `state` are those of the interval line (`state` only with
+`--snapshot`).
 
 **Series.** One entry per selected series that the run has at the end of the interval, in
 `measurements.csv` order, identified as there by `(measuring_point, metric)`. A series without

@@ -85,6 +85,51 @@ pub struct StopReason {
     pub kind: StopKind,
     /// Which criteria held, in words, e.g. `confidence: 2 series within ±5 % at 95 %`.
     pub detail: String,
+    /// The cause within the kind, in the words of `simoxide run --report` (`stop.cause`,
+    /// `docs/guide/result-report.md`): for `simulator` `max_sim_time`, `max_measurements` or
+    /// `no_events`; for `error` the limit (`max_events`, `max_steps`, `max_processes`,
+    /// `max_stack_depth`, `livelock`, `limit`) or `simulation`; `decision` for `decision`.
+    /// Absent for the other kinds (`detail` has the criteria).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cause: Option<&'static str>,
+}
+
+/// A point in simulation time: seconds and whole nanoseconds.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+pub struct TimePoint {
+    pub time: f64,
+    pub time_ns: i64,
+}
+
+impl TimePoint {
+    pub fn of_ns(ns: i64) -> TimePoint {
+        TimePoint {
+            time: ns as f64 / 1e9,
+            time_ns: ns,
+        }
+    }
+}
+
+/// Tuple numbers `from..to`.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+pub struct TupleRange {
+    pub from: u64,
+    pub to: u64,
+}
+
+/// The interval a run simulated, as the `interval` of `simoxide run --report`
+/// (`docs/guide/result-report.md`, "Interval boundaries"): a server run is one interval from time 0.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+pub struct RunInterval {
+    /// Time 0.
+    pub start: TimePoint,
+    /// The logical end: the `max_sim_time` termination criterion's time if the run stopped
+    /// there, else the last event's time.
+    pub end: TimePoint,
+    /// The time of the last event processed (`sim_time`).
+    pub last_event: TimePoint,
+    /// The tuples recorded: `0..tuples`.
+    pub tuples: TupleRange,
 }
 
 /// Statistics of one series (after the warm-up).
@@ -256,8 +301,10 @@ pub struct LogEntry {
 pub struct ResultSummary {
     /// Why the run ended.
     pub stop_reason: StopReason,
-    /// Simulation time at the end (s).
+    /// Simulation time at the end (s): the last event's time.
     pub sim_time: f64,
+    /// The interval simulated: its logical end and the last event's time.
+    pub interval: RunInterval,
     /// Events processed.
     pub events: u64,
     /// Finished usage-scenario runs.

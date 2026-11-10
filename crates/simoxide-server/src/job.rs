@@ -473,6 +473,7 @@ impl Job {
             let reason = StopReason {
                 kind: StopKind::Cancelled,
                 detail: "cancelled before it started".into(),
+                cause: None,
             };
             self.end_locked(&mut st, JobStatus::Cancelled, Some(reason), None, None);
             return true;
@@ -707,6 +708,7 @@ impl JobManager {
                 Some(StopReason {
                     kind: StopKind::Error,
                     detail: "internal error".into(),
+                    cause: None,
                 }),
                 Some(message),
                 None,

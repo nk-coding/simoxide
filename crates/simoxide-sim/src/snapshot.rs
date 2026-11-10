@@ -86,6 +86,21 @@ pub struct Header {
     /// a run from time 0, or a snapshot written through the library without one).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parent: Option<String>,
+    /// The logical end of the interval that ends at the snapshot, when it is not the clock
+    /// (`time_ns`): the requested time of `--pause-at` or `--pause-before`, which the run
+    /// reached after its last event (`docs/guide/result-report.md`, "Interval boundaries"). A
+    /// continuation's interval starts there. Absent: the interval ends at the clock. Set by
+    /// `simoxide`, not part of the state id.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interval_end: Option<SimTime>,
+}
+
+/// A point in simulation time: seconds (the engine's clock, a double in the Slingshot
+/// flavours) and the same in whole nanoseconds.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SimTime {
+    pub time: f64,
+    pub time_ns: i64,
 }
 
 /// The measurements of a run in a [`Header`] (`docs/guide/snapshots.md`, "Measurement

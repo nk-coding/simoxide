@@ -373,7 +373,14 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
 
     /// The run's result and the SPD counters.
     pub fn finish(self) -> Result<(RunResult, SpdState, SpdSummary), SimError> {
-        let summary = SpdSummary {
+        let summary = self.counters();
+        let r = self.sim.finish()?;
+        Ok((r, self.state, summary))
+    }
+
+    /// The SPD counters so far (from time 0 of the run: they are part of its snapshots).
+    pub fn counters(&self) -> SpdSummary {
+        SpdSummary {
             evaluations: self.state.evaluations,
             requests: self.state.requests,
             adjustments_ok: self.adjusted_ok,
@@ -383,9 +390,7 @@ impl<'m, 's, C: Compat, F: Flavour> SpdRun<'m, 's, C, F> {
                     .pending
                     .as_ref()
                     .map_or(0, |d| d.recommended.len() as u64),
-        };
-        let r = self.sim.finish()?;
-        Ok((r, self.state, summary))
+        }
     }
 
     /// The containers that were elements of an elastic infrastructure (a scaled-out copy of the

@@ -88,6 +88,7 @@ export default defineConfig({
             { text: 'Library API', link: '/guide/library' },
             { text: 'Server: HTTP and MCP', link: '/guide/server' },
             { text: 'Output formats', link: '/guide/formats' },
+            { text: 'Result report', link: '/guide/result-report' },
             { text: 'Snapshot format', link: '/formats/snapshot' },
             { text: 'QVTo engine', link: '/qvto/' },
           ],

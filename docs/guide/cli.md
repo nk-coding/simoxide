@@ -56,6 +56,7 @@ simoxide run --model <dir> [flags]
 | `--decision-file FILE` | write the decision the run paused at and, at a resume, the one `--decide` resolved, as JSON ([Decision file](./spd.md#decision-file)); also of `resume` |
 | `--summary FILE`, `--summary-series METRIC[POINT]`, `--summary-stats LIST` | write statistics per series of the tuples this invocation recorded (count, sum, mean, min, max, first, last, initial, time_weighted; default all) as JSON; series as in `--pause-when`, repeatable, default all; also of `resume` ([Interval summaries](./snapshots.md#interval-summaries)) |
 | `--model-metadata FILE`, `--runtime-metadata FILE` | write the model file (definitions, deployment, content hash) and the runtime file (the deployment at the start, every change with its time and cause, policy state, retired elements, what each measurement series refers to); also of `resume`; not with `slingshot-exact` (runtime file) ([Runtime metadata](./runtime-metadata.md)) |
+| `--report FILE` | write the result report as JSON, last, also when the run fails: the interval's start, logical end and last event, why the run stopped, the decisions, the files written, counters; also of `resume` ([Result report](./result-report.md)) |
 
 Limits (see [Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)):
 
@@ -84,6 +85,7 @@ simoxide resume FILE --model DIR [--run-json F] [--trace F] [--tape F] [--measur
                 [--decide ACTIONS] [--pause-on-decision] [--decision-file F]
                 [--summary F] [--summary-series METRIC[POINT]]... [--summary-stats LIST]
                 [--model-metadata F] [--runtime-metadata F]
+                [--report F]
 simoxide snapshot-info FILE
 ```
 
