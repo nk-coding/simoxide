@@ -1161,7 +1161,7 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
                 warnings,
                 series: mon.series_stats(&m, true),
                 spd,
-                interval_summary: interval_summary(&req, &m, probe.now_ns),
+                interval_summary: interval_summary(&req, &m, end_ns),
             },
             measurements: m,
             runtime_metadata,
@@ -1170,12 +1170,12 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
     job.end(status, Some(stop), error, outcome);
 }
 
-/// `config.interval_summary`: the summary of the run, one interval from time 0 to its end
-/// (`now_ns`).
+/// `config.interval_summary`: the summary of the run, one interval from time 0 to its logical
+/// end (`end_ns`, `summary.interval.end`).
 fn interval_summary(
     req: &SimulationRequest,
     m: &simoxide_sim::Measurements,
-    now_ns: i64,
+    end_ns: i64,
 ) -> Option<serde_json::Value> {
     use simoxide_sim::summary::{Interval, document};
     let o = req.config.interval_summary.as_ref()?;
@@ -1185,9 +1185,9 @@ fn interval_summary(
         tuples_from: Some(0),
         tuples_to: m.count,
         from: 0.0,
-        to: ns_to_secs(now_ns),
+        to: ns_to_secs(end_ns),
         from_ns: 0,
-        to_ns: now_ns,
+        to_ns: end_ns,
     };
     let select = |d: &simoxide_sim::ir::SeriesDef| {
         o.series.is_empty() || o.series.iter().any(|s| s.matches(&d.mp, d.metric))

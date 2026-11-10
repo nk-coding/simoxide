@@ -285,8 +285,14 @@ fn intervals_tile_and_reports_change_nothing() {
         assert_eq!(x["counters"]["cumulative"]["events"], events, "{k}");
         assert_eq!(x["status"], if k < 3 { "paused" } else { "finished" });
         assert_eq!(x["resumable"], k < 3);
+        // the interval summary has the report's interval
         let s = json_file(&d.join(format!("r{k}.summary")));
         assert_eq!(s["interval"]["tuples"], x["interval"]["tuples"], "{k}");
+        assert_eq!(
+            s["interval"]["time"],
+            json!({"from": times(x).0, "to": times(x).1}),
+            "{k}"
+        );
     }
     // 400 arrivals, each with its response time and the server's state twice
     assert_eq!(

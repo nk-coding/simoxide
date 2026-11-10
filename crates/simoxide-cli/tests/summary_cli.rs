@@ -393,7 +393,8 @@ fn equal_times_are_split_by_tuple_number() {
 /// Scaling decisions and empty intervals, hand-calculated: the minimal example pauses at the
 /// scale-out recommended at t = 2 s, is resumed with it (`--decide`) to t = 6 s, then for an
 /// interval without events (`--pause-at 7.9`: the next event is at 8 s, so the run pauses at
-/// once, at 6 s), then to the end at 10 s. The adjustments run with `reconfiguration`.
+/// once, its clock at 6 s, the interval ending at 7.9 s), then from 7.9 s to the end at 10 s.
+/// The adjustments run with `reconfiguration`.
 #[cfg(feature = "reconfiguration")]
 #[test]
 fn decisions_and_empty_intervals() {
@@ -512,14 +513,14 @@ fn decisions_and_empty_intervals() {
         iv(c),
         (
             json!({"from": 12, "to": 12}),
-            json!({"from": 6.0, "to": 6.0})
+            json!({"from": 6.0, "to": 7.9})
         )
     );
     assert_eq!(
         iv(e),
         (
             json!({"from": 12, "to": 17}),
-            json!({"from": 6.0, "to": 10.0})
+            json!({"from": 7.9, "to": 10.0})
         )
     );
     // the path: each parent is the previous state
@@ -575,20 +576,26 @@ fn decisions_and_empty_intervals() {
         at(c, &busy, STATE)["initial"],
         json!({"status": "tuple", "time": 6.0, "value": 1.0})
     );
-    // carried through the empty interval's snapshot: busy from 6 to 8, idle to 10
+    // the empty interval lasts to its logical end, 7.9 s: the added server is busy all along
+    let approx = |v: &Value, (from, to, integral, mean): (f64, f64, f64, f64)| {
+        assert_eq!(
+            (v["from"].as_f64(), v["to"].as_f64()),
+            (Some(from), Some(to)),
+            "{v}"
+        );
+        assert!(close(v["integral"].as_f64().unwrap(), integral), "{v}");
+        assert!(close(v["mean"].as_f64().unwrap(), mean), "{v}");
+    };
+    approx(&tw(c, &busy, STATE), (6.0, 7.9, 1.9, 1.0));
+    approx(&tw(c, SERVER, STATE), (6.0, 7.9, 0.0, 0.0));
+    // carried through the empty interval's snapshot: busy to 8, idle to 10
     assert_eq!(
         at(e, &busy, STATE)["initial"],
         json!({"status": "tuple", "time": 6.0, "value": 1.0})
     );
-    assert_eq!(
-        tw(e, &busy, STATE),
-        json!({"from": 6.0, "to": 10.0, "integral": 2.0, "mean": 0.5})
-    );
-    // the first server: 0 from 6 to 9, 1 from 9 to 10
-    assert_eq!(
-        tw(e, SERVER, STATE),
-        json!({"from": 6.0, "to": 10.0, "integral": 1.0, "mean": 0.25})
-    );
+    approx(&tw(e, &busy, STATE), (7.9, 10.0, 0.1, 0.1 / 2.1));
+    // the first server: 0 from 7.9 to 9, 1 from 9 to 10
+    approx(&tw(e, SERVER, STATE), (7.9, 10.0, 1.0, 1.0 / 2.1));
     // sample and time weighting differ: the whole run's server state, 3 of 5 tuples busy, but
     // busy 5 of 10 s
     let whole = json_file(&d.join("whole.json"));
@@ -607,7 +614,15 @@ fn decisions_and_empty_intervals() {
             x.1 += i;
         }
     }
-    assert_eq!(sum, totals(&whole));
+    let whole = totals(&whole);
+    assert_eq!(
+        sum.keys().collect::<Vec<_>>(),
+        whole.keys().collect::<Vec<_>>()
+    );
+    for (k, (n, i)) in &whole {
+        assert_eq!(sum[k].0, *n, "{k:?}");
+        assert!(close(sum[k].1, *i), "{k:?}: {} != {i}", sum[k].1);
+    }
 }
 
 /// The issue's setting: the V4 model in the Slingshot flavour (CPU-utilisation policies that

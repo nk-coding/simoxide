@@ -915,13 +915,14 @@ fn interval_from(a: &Args, m: &simoxide_sim::Measurements) -> Option<u64> {
 }
 
 /// Writes `--summary`: the interval summary of `m` (the run's measurements at the pause or the
-/// end, `to_ns`), with the state id of the snapshot written, if any
+/// end), from the interval's start to its logical `end` (docs/guide/result-report.md, "Interval
+/// boundaries"), with the state id of the snapshot written, if any
 /// (docs/guide/snapshots.md#interval-summaries).
 fn write_summary(
     a: &Args,
     cm: &CompiledModel,
     m: &simoxide_sim::Measurements,
-    (to, to_ns): (f64, i64),
+    end: SimTime,
     state: Option<&str>,
 ) -> Result<(), String> {
     use simoxide_sim::sim::watch::{ids_named, selects};
@@ -946,13 +947,14 @@ fn write_summary(
     let select = |d: &simoxide_sim::ir::SeriesDef| {
         sels.is_empty() || sels.iter().any(|(s, ids)| selects(s, ids, d))
     };
+    let start = interval_start(a, m);
     let iv = Interval {
         tuples_from: interval_from(a, m),
         tuples_to: m.count,
-        from: m.start_time,
-        to,
-        from_ns: a.start_ns,
-        to_ns,
+        from: start.time,
+        to: end.time,
+        from_ns: start.time_ns,
+        to_ns: end.time_ns,
     };
     let stats = a.summary_stats.as_deref().unwrap_or(&Stat::ALL);
     let mut doc = summary::document(m, &iv, &select, stats);
@@ -996,7 +998,12 @@ fn report_end(a: &Args, cm: &CompiledModel, r: End, t0: Instant) -> Result<(), S
     let ended = match &r {
         End::Finished(r, info) => {
             interval(&r.measurements, false, None);
-            write_summary(a, cm, &r.measurements, (r.end_secs, r.end_ns), None)?;
+            let last = SimTime {
+                time: r.end_secs,
+                time_ns: r.end_ns,
+            };
+            let end = interval_end(a, None, &r.measurements, last);
+            write_summary(a, cm, &r.measurements, end, None)?;
             report(a, r, t0)?;
             report::Ended {
                 why: None,
@@ -1028,7 +1035,12 @@ fn report_end(a: &Args, cm: &CompiledModel, r: End, t0: Instant) -> Result<(), S
             }
             let state = snapshot.as_ref().map(|s| s.2.as_str());
             interval(measurements, true, state);
-            write_summary(a, cm, measurements, (*now_s, *now_ns), state)?;
+            let last = SimTime {
+                time: *now_s,
+                time_ns: *now_ns,
+            };
+            let end = interval_end(a, Some(why), measurements, last);
+            write_summary(a, cm, measurements, end, state)?;
             let snap = match snapshot {
                 Some((p, n, _)) => format!(" snapshot={} ({n} bytes)", p.display()),
                 None => String::new(),

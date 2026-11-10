@@ -1376,6 +1376,7 @@ async fn interval_and_stop_cause_of_the_run() {
 
     let mut req = base.clone();
     req["termination"] = json!({"max_sim_time": 1000});
+    req["config"]["interval_summary"] = json!({"stats": ["count"]});
     let v = run(&app, req.clone()).await;
     assert_eq!(v["stop_reason"]["kind"], "termination", "{v}");
     assert_eq!(v["stop_reason"].get("cause"), None, "{v}");
@@ -1387,6 +1388,11 @@ async fn interval_and_stop_cause_of_the_run() {
     );
     assert_eq!(sum["sim_time"], 999.0);
     assert_eq!(sum["stop_reason"], v["stop_reason"]);
+    // the interval summary spans the same interval
+    assert_eq!(
+        sum["interval_summary"]["interval"]["time"],
+        json!({"from": 0.0, "to": 1000.0})
+    );
 
     // MCP: the same summary
     let (_, m) = call(
