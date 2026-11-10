@@ -261,9 +261,25 @@ fn outputs(
         ("spd_log", &a.spd_log, spd),
         ("decision_file", &a.decision_file, spd),
         ("rules_log", &a.rules_log, rules),
+        ("model_metadata", &a.model_metadata, true),
+        ("runtime_metadata", &a.runtime_metadata, true),
     ] {
         if let (Some(p), true) = (p, written) {
             o.insert(kind.into(), file(p));
+        }
+    }
+    // the model file's content hash (#9), which the runtime file names
+    let hash = |p: &Path| -> Option<Value> {
+        let v: Value = serde_json::from_str(&std::fs::read_to_string(p).ok()?).ok()?;
+        Some(v["hash"].clone())
+    };
+    for kind in ["model_metadata", "runtime_metadata"] {
+        let h = match kind {
+            "model_metadata" => a.model_metadata.as_deref().and_then(hash),
+            _ => a.model_hash.clone().map(Value::from),
+        };
+        if let (Some(f), Some(h)) = (o.get_mut(kind), h) {
+            f["model_hash"] = h;
         }
     }
     Value::Object(o)

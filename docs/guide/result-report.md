@@ -83,12 +83,19 @@ missing or partial. What is not known at the failure is `null` or absent.
 | `decisions` | for runs with scaling policies (not in `slingshot-exact`): the [decision file](./spd.md#decision-file)'s `resolved` (the decision `--decide` resolved: `recommended`, the `selected` actions in order, their `outcomes` in order) and `pending` (the decision the run paused at, with its `recommended` actions); each `null` when there is none |
 | `measurements` | `scope` (`cumulative`, `interval`) and `rows`: the rows `--measurements` gets |
 | `parent`, `state` | the state ids of the snapshot resumed and of the snapshot written ([Measurement intervals](./snapshots.md#measurement-intervals)) |
-| `outputs` | the files written, by kind: `snapshot` (with its `state`), `measurements` (with `rows`), `summary`, `trace`, `tape`, `spd_log`, `decision_file`, `rules_log`; each `{"path", "bytes"}`, the path as given. A file that was not asked for, or that this kind of run does not write (`spd_log` without scaling policies), is absent |
+| `outputs` | the files written, by kind: `snapshot` (with its `state`), `measurements` (with `rows`), `summary`, `trace`, `tape`, `spd_log`, `decision_file`, `rules_log`, `model_metadata` and `runtime_metadata` ([Runtime metadata](./runtime-metadata.md); both with `model_hash`, the model file's content `hash`); each `{"path", "bytes"}`, the path as given. A file that was not asked for, or that this kind of run does not write (`spd_log` without scaling policies), is absent |
 | `counters` | `invocation`: what this invocation did: `events`, `tuples` (`to - from`), `wall_secs`, and where they apply `adjustments` (executed SPD or HPA adjustments, `--decide` and `--enforce` actions included), `spd_evaluations`, `spd_requests`, `reconfigurations` and `reconfigurations_changed` (SimuLizar's rules), `change_steps`. `cumulative`: counted from time 0 along the run's path: `events`, `tuples`, `usage_scenario_runs` (finished usage-scenario runs, what `max_measurements` counts), and the SPD and rules counters |
 
 Times are simulation seconds (`time`, the engine's clock: a double in the Slingshot flavours)
 and the same in whole nanoseconds (`time_ns`, truncated, as in snapshot headers). Fields may be
 added within version 1; a changed meaning gets a new version.
+
+The report's `status` and the [runtime file](./runtime-metadata.md)'s `run.status` are one
+vocabulary: an invocation that writes both has the same `status` (`paused` or `finished`), and
+the runtime file's `run.parent` and `run.state` are the report's `parent` and `state`. A failed
+invocation writes no runtime file; its report has `status` `failed`. The runtime file's
+`start.time` and `end.time` are the clock (the snapshot's `time_ns` and `last_event`), not the
+logical interval boundaries.
 
 ## Interval boundaries
 

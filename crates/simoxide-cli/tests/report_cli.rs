@@ -118,6 +118,24 @@ fn check_outputs(report: &Path) {
             "summary" | "decision_file" => {
                 serde_json::from_str::<Value>(&text).unwrap();
             }
+            // #9's files: the model file's hash, the runtime file's run as the report's
+            "model_metadata" => {
+                let m: Value = serde_json::from_str(&text).unwrap();
+                assert_eq!(f["model_hash"], m["hash"]);
+            }
+            "runtime_metadata" => {
+                let m: Value = serde_json::from_str(&text).unwrap();
+                assert_eq!(f["model_hash"], m["model"]["hash"]);
+                assert_eq!(m["run"]["status"], r["status"]);
+                assert_eq!(
+                    m["run"]["parent"],
+                    r.get("parent").cloned().unwrap_or(Value::Null)
+                );
+                assert_eq!(
+                    m["run"]["state"],
+                    r.get("state").cloned().unwrap_or(Value::Null)
+                );
+            }
             "trace" | "spd_log" => {
                 assert!(text.ends_with('\n'), "{kind}");
                 for l in text.lines() {
@@ -197,6 +215,8 @@ fn intervals_tile_and_reports_change_nothing() {
                 ("--trace", "trace"),
                 ("--measurements", "csv"),
                 ("--summary", "summary"),
+                ("--model-metadata", "model"),
+                ("--runtime-metadata", "runtime"),
             ] {
                 a.extend([flag.into(), f(n)]);
             }
@@ -208,7 +228,7 @@ fn intervals_tile_and_reports_change_nothing() {
     }
     // the same bytes with and without --report
     for k in 0..4 {
-        for n in ["trace", "csv", "summary", "snap"] {
+        for n in ["trace", "csv", "summary", "snap", "model", "runtime"] {
             if n == "snap" && k == 3 {
                 continue;
             }
@@ -234,8 +254,18 @@ fn intervals_tile_and_reports_change_nothing() {
     let r: Vec<Value> = (0..4)
         .map(|k| json_file(&d.join(format!("r{k}.json"))))
         .collect();
-    for k in 0..4 {
+    for (k, x) in r.iter().enumerate() {
         check_outputs(&d.join(format!("r{k}.json")));
+        for kind in [
+            "trace",
+            "measurements",
+            "summary",
+            "model_metadata",
+            "runtime_metadata",
+        ] {
+            assert!(x["outputs"].get(kind).is_some(), "{k} {kind}: {x}");
+        }
+        assert_eq!(x["outputs"].get("snapshot").is_some(), k < 3);
     }
     // hand-calculated: (start, end, last event), the stop
     assert_eq!(times(&r[0]), (0.0, 1000.0, 999.0));
