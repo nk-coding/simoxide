@@ -465,6 +465,10 @@ pub fn tools() -> Vec<Value> {
                             "spd_quirks": {"type": "string"},
                             "spd_log_all": {"type": "boolean"},
                             "spd_decisions": {"type": "array", "items": {"type": "array", "items": {"type": "string"}}, "description": "Scaling decisions: lists of policy ids or names. The run stops before each scaling policy's adjustment and resolves decision i with the i-th list, whose adjustments run instead ([] declines); at a decision beyond the lists it ends with stop reason 'decision'. Results: spd.decisions, spd.pending_decision."},
+                            "interval_summary": {"type": "object", "description": "Per-series statistics of the run's tuples in the results (interval_summary; format simoxide-interval-summary, docs/guide/snapshots.md#interval-summaries): count, sum, mean, min, max, first, last, initial, time_weighted. Raw measurements stay available.", "properties": {
+                                "series": {"type": "array", "items": selector_schema(), "description": "Series to summarise (any selector matches); default every series."},
+                                "stats": {"type": "array", "items": {"type": "string", "enum": ["count", "sum", "mean", "min", "max", "first", "last", "initial", "time_weighted", "all"]}, "description": "Default all; count is always written."}
+                            }, "additionalProperties": false},
                             "hpa": {"type": "boolean", "description": "Run *.hpa.json autoscalers (default true)."},
                             "load_profile": {"type": "boolean", "description": "Apply *.loadprofile.json files (default true)."},
                             "max_events_per_instant": {"type": "integer", "minimum": 0},

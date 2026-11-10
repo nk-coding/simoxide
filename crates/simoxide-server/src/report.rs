@@ -276,6 +276,9 @@ pub struct ResultSummary {
     /// Scaling policies: counters of the SPD interpreter, if the model has policies.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub spd: Option<serde_json::Value>,
+    /// `config.interval_summary`: the summary document (format `simoxide-interval-summary`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub interval_summary: Option<serde_json::Value>,
 }
 
 #[cfg(test)]
