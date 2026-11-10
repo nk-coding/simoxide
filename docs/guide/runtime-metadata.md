@@ -193,7 +193,10 @@ removed element stays resolvable without the earlier files.
 ### Series
 
 One object per measurement series of the run, in the order of `measurements.csv`, whether or
-not the invocation recorded tuples for it:
+not the invocation recorded tuples for it. These are the series an interval summary
+(`--summary`, [Interval summaries](./snapshots.md#interval-summaries)) of the same invocation
+lists without `--summary-series`, identified the same way and with the same `unit`; the summary
+gives their statistics, the runtime file what they refer to:
 
 ```json
 {"measuring_point": "ActiveResourceMeasuringPoint[_KFRwgCpXEeKNWc2UWjbmuw|replicaID=0]",
@@ -208,7 +211,7 @@ not the invocation recorded tuples for it:
 | Field | Meaning |
 |---|---|
 | `measuring_point`, `metric` | the series' identity, as in `measurements.csv` |
-| `unit` | of the values: `s` for `Response Time Tuple`, `Resource Demand Tuple`, `Waiting Time Tuple`, `Holding Time Tuple`, `Reconfiguration Time Tuple`; `1` for `State of Active Resource Tuple` (jobs at the resource), `Utilization of Active Resource Tuple` (busy fraction), `State of Passive Resource Tuple` (tokens), `Number of Resource Containers over Time`. The `time` column is always simulation time in seconds |
+| `unit` | of the values: `s` for durations, `1` for counts and fractions, `null` for a metric this build does not know: the table of [Interval summaries](./snapshots.md#interval-summaries) (one table, `simoxide_sim::summary::metric_unit`, for both files). The `time` column is always simulation time in seconds |
 | `point` | the model elements the measuring point refers to, by id: `class` and, per class, `usage_scenario`; `entry_level_system_call` with its `usage_scenario`, `role`, `signature`; `role`, `signature`, `system` (system operation); `role`, `signature`, `assembly`, `component` (assembly operation); `subsystem`, `role`, `signature`; `external_call` with `role`, `signature`, `component`; `processing_resource`, `replica`, `container`, `resource_type` (active resource; `replica` = the core count `n` is SimuLizar's overall utilisation of `n` cores); `linking_resource`; `container`; `resource_environment`; `assembly`, `passive_resource`, `component` (passive resource); `resource_uri_fragment` and `text` (reconfiguration points) |
 | `monitors` | the monitors of the run's model whose measuring point has this key (with the monitors Slingshot clones for new containers): `id`, `name`, `activated`, `specification` (the id of its measurement specification whose metric is the series' metric, else `null`) |
 | `unavailable` | the associations neither the key nor the model gives: `monitor` (no monitor has the point: SimuLizar's passive-resource points, Slingshot's overall utilisation at `replicaID=n`), `assembly` (SimuLizar's passive-resource points name the assembly context by name only), and any derived association (`container`, `component`, ...) whose element the model does not hold |

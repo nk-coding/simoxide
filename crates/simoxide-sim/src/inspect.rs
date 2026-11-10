@@ -11,7 +11,7 @@
 //!
 //! JSON objects are written with sorted keys; arrays keep model order.
 
-use crate::ir::{CompiledModel, SeriesDef, metric_names, ss_mp_key, tuple_metric_name};
+use crate::ir::{CompiledModel, SeriesDef, ss_mp_key, tuple_metric_name};
 use serde_json::{Map, Value, json};
 use simoxide_model::*;
 use std::collections::{HashMap, HashSet};
@@ -729,23 +729,6 @@ pub fn seal(mut definitions: Map<String, Value>) -> Value {
 // ---------------------------------------------------------------------------------------------
 // measurement series
 
-/// The unit of a metric's values (`docs/guide/runtime-metadata.md`, "Series"): `s` for times,
-/// `1` for counts and fractions.
-pub fn metric_unit(metric: &str) -> Option<&'static str> {
-    Some(match metric {
-        metric_names::RESPONSE_TIME
-        | metric_names::RESOURCE_DEMAND
-        | metric_names::WAITING_TIME
-        | metric_names::HOLDING_TIME
-        | metric_names::RECONFIGURATION_TIME => "s",
-        metric_names::STATE_OF_ACTIVE_RESOURCE
-        | metric_names::UTILIZATION
-        | metric_names::STATE_OF_PASSIVE_RESOURCE
-        | metric_names::NUMBER_OF_RESOURCE_CONTAINERS => "1",
-        _ => return None,
-    })
-}
-
 /// Id lookups over every element of a model, tombstones included.
 struct Ids<'a> {
     m: &'a Model,
@@ -989,7 +972,8 @@ fn point_of(ids: &Ids, key: &str) -> (Value, Vec<&'static str>) {
 /// The metadata of measurement series `defs` (a run's `Measurements::series`) against the run's
 /// current model `cm` (which keeps the elements that left it): one object per series, in the
 /// order of `measurements.csv` (`Measurements::sorted_series`). Each has the series' identity
-/// (`measuring_point`, `metric`), the `unit` of its values, the model elements its point refers
+/// (`measuring_point`, `metric`), the `unit` of its values (`crate::summary::metric_unit`, as in
+/// interval summaries), the model elements its point refers
 /// to (`point`), the monitors of the model at that point (`monitors`, each with the
 /// specification that gives the series' metric, if any) and the associations that are not
 /// available (`unavailable`; `monitor` when no monitor of the model has the point).
@@ -1034,7 +1018,7 @@ pub fn series(cm: &CompiledModel, defs: &[SeriesDef]) -> Vec<Value> {
             json!({
                 "measuring_point": &*d.mp,
                 "metric": d.metric,
-                "unit": metric_unit(d.metric),
+                "unit": crate::summary::metric_unit(d.metric),
                 "point": point,
                 "monitors": monitors,
                 "unavailable": unavailable,

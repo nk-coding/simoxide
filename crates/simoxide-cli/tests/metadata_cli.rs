@@ -405,8 +405,9 @@ fn scaling_changes_and_series() {
 }
 
 /// Runs `m` with `flags` uninterrupted and as a chain of invocations paused at `pauses` (one
-/// process each, interval scope), each with its runtime file; checks that every interval's
-/// measurements are described in its own file, that the files chain (each start is the previous
+/// process each, interval scope), each with its runtime file and its interval summary; checks
+/// that every interval's measurements are described in its own file, that the summary lists the
+/// file's series (same identities and units, the same order), that the files chain (each start is the previous
 /// file's deployment replayed, its policy state, generation and time the previous end's, its
 /// `parent` the previous `state`), that their changes concatenate to the uninterrupted run's
 /// and that the last file's end, retired elements and series are the uninterrupted run's.
@@ -434,6 +435,8 @@ fn chain_equals_whole(d: &Path, m: &str, flags: &[&str], pauses: &[&str]) -> (Va
             p(&format!("r{i}.json")),
             "--measurements".into(),
             p(&format!("m{i}.csv")),
+            "--summary".into(),
+            p(&format!("sum{i}.json")),
         ]);
         if let Some(t) = pauses.get(i) {
             args.extend(["--pause-at".into(), t.to_string()]);
@@ -445,6 +448,32 @@ fn chain_equals_whole(d: &Path, m: &str, flags: &[&str], pauses: &[&str]) -> (Va
         for (mp, metric) in csv_series(&d.join(format!("m{i}.csv"))) {
             series_of(&r, &mp, &metric);
         }
+        // the interval summary (#10) lists the same series, with the same units
+        let summary = json_of(&d.join(format!("sum{i}.json")));
+        let key = |s: &Value| {
+            (
+                s["measuring_point"].clone(),
+                s["metric"].clone(),
+                s["unit"].clone(),
+            )
+        };
+        let listed: Vec<_> = summary["series"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(key)
+            .collect();
+        assert!(!listed.is_empty());
+        assert_eq!(
+            listed,
+            r["series"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(key)
+                .collect::<Vec<_>>(),
+            "interval {i}"
+        );
         files.push(r);
     }
     assert_eq!(files[0]["start"], whole["start"]);

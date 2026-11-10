@@ -356,7 +356,10 @@ tuples in the interval is there with `count` 0. `unit` is the unit of the values
 | `Utilization of Active Resource Tuple` | busy fraction, 0 to 1 | `1` |
 | `Number of Resource Containers over Time` | containers | `1` |
 
-(`null` for a metric this build does not know.) Times are simulation seconds.
+(`null` for a metric this build does not know.) Times are simulation seconds. What a series
+refers to (its model elements, monitors and specifications) is in the runtime file of
+`--runtime-metadata` ([Runtime metadata](./runtime-metadata.md#series)), which lists the same
+series, every series of the run at the end of the interval, with the same `unit`.
 
 **Statistics.**
 
