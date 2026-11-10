@@ -186,6 +186,11 @@ pub struct RunOptions {
     /// statistics of its tuples (the run is one interval from time 0). Off (absent) by default.
     #[serde(default)]
     pub interval_summary: Option<IntervalSummaryOptions>,
+    /// Runtime metadata (`simoxide run --model-metadata --runtime-metadata`): the model file and
+    /// the runtime file of the run, read with `GET .../runtime-metadata` (MCP
+    /// `get_runtime_metadata`). Off by default.
+    #[serde(default)]
+    pub runtime_metadata: bool,
     /// Run the HPA autoscalers of `*.hpa` / `*.hpa.json` files (default true).
     #[serde(default)]
     pub hpa: Option<bool>,

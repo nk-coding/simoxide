@@ -237,6 +237,9 @@ pub fn precheck(req: &SimulationRequest, cfg: &ServerConfig) -> Result<(), Strin
             );
         }
     }
+    if flavour == FlavourKind::SlingshotExact && req.config.runtime_metadata {
+        return Err("config.runtime_metadata: the slingshot-exact flavour does not record runtime metadata: run simulizar or slingshot".into());
+    }
     if flavour == FlavourKind::SlingshotExact && req.config.usage_streams {
         return Err("config.usage_streams: the slingshot-exact flavour has no usage streams (RND-11): run simulizar or slingshot in fast mode".into());
     }
@@ -664,6 +667,64 @@ trait Drive {
     fn pending_decision(&self) -> Option<String> {
         None
     }
+    /// What the runtime file needs from the run now (`config.runtime_metadata`), before it
+    /// ends.
+    fn metadata_parts(&self) -> Option<MetaParts> {
+        None
+    }
+}
+
+/// `config.runtime_metadata`: the model the run starts from and its model file.
+struct MetaCtx<'a> {
+    base: &'a CompiledModel,
+    model: serde_json::Value,
+}
+
+/// The deployment record of a run and what the runtime file needs from its state.
+struct MetaParts {
+    rec: simoxide_sim::inspect::Recorder,
+    /// The run's own model after model changes.
+    own: Option<Arc<CompiledModel>>,
+    generation: u32,
+    policies: serde_json::Value,
+}
+
+impl MetaParts {
+    fn of<C: Compat, F: Flavour>(
+        rec: &simoxide_sim::inspect::Recorder,
+        s: &RunState<C, F>,
+        policies: serde_json::Value,
+    ) -> MetaParts {
+        MetaParts {
+            rec: rec.clone(),
+            own: s.model().compiled().cloned(),
+            generation: s.model().generation(),
+            policies,
+        }
+    }
+
+    /// `{"model": ..., "runtime": ...}` of a run that ended at `end_ns` (`status`: `finished`,
+    /// `stopped` or `failed`) with the series `series`.
+    fn into_json(
+        self,
+        ctx: &MetaCtx,
+        series: &[simoxide_sim::ir::SeriesDef],
+        end_ns: i64,
+        status: &str,
+    ) -> serde_json::Value {
+        let run = serde_json::json!({"parent": null, "state": null, "status": status});
+        let runtime = self.rec.into_json(
+            ctx.model["hash"].as_str().unwrap_or_default(),
+            run,
+            self.own.as_deref().unwrap_or(ctx.base),
+            ctx.base,
+            series,
+            end_ns,
+            self.generation,
+            self.policies,
+        );
+        serde_json::json!({"model": ctx.model, "runtime": runtime})
+    }
 }
 
 /// The counters of a process-engine run; `next`: with the time of the next event.
@@ -678,8 +739,11 @@ fn probe_of<C: Compat, F: Flavour>(s: &RunState<C, F>, next: bool) -> Probe {
     }
 }
 
-/// A plain process-engine run.
-struct Plain<'m, C: Compat, F: Flavour>(Simulation<'m, C, F>);
+/// A plain process-engine run (with its deployment record for `config.runtime_metadata`).
+struct Plain<'m, C: Compat, F: Flavour>(
+    Simulation<'m, C, F>,
+    Option<simoxide_sim::inspect::Recorder>,
+);
 
 impl<C: Compat, F: Flavour> Drive for Plain<'_, C, F> {
     fn step(
@@ -703,6 +767,10 @@ impl<C: Compat, F: Flavour> Drive for Plain<'_, C, F> {
     }
     fn warnings(&self) -> Vec<String> {
         self.0.state().warnings().to_vec()
+    }
+    fn metadata_parts(&self) -> Option<MetaParts> {
+        let rec = self.1.as_ref()?;
+        Some(MetaParts::of(rec, self.0.state(), serde_json::Value::Null))
     }
 }
 
@@ -834,18 +902,33 @@ struct RunEnd {
     uniforms: Option<u64>,
     warnings: Vec<String>,
     spd: Option<serde_json::Value>,
+    /// `config.runtime_metadata`: the model file and the runtime file.
+    runtime_metadata: Option<serde_json::Value>,
 }
 
-/// Turns the end of the driver loop into the job's final state.
-fn conclude<D: Drive>(job: &Job, d: D, end: End, cfg: &SimConfig) -> RunEnd {
+/// Turns the end of the driver loop into the job's final state; `meta` with
+/// `config.runtime_metadata`.
+fn conclude<D: Drive>(
+    job: &Job,
+    d: D,
+    end: End,
+    cfg: &SimConfig,
+    meta: Option<&MetaCtx>,
+) -> RunEnd {
     let probe = d.probe();
     // the warnings so far, for the ends without a result of the simulator
     let warnings = d.warnings();
+    let parts = meta.and(d.metadata_parts());
+    let runtime = |parts: Option<MetaParts>, series: &[_], end_ns, status| {
+        Some(parts?.into_json(meta?, series, end_ns, status))
+    };
     match end {
         End::Finished => {
             let (r, spd) = d.finish();
             match r {
                 Ok(r) => {
+                    let runtime_metadata =
+                        runtime(parts, &r.measurements.series, r.end_ns, "finished");
                     let detail = simulator_stop_detail(&r, cfg);
                     RunEnd {
                         status: JobStatus::Completed,
@@ -865,6 +948,7 @@ fn conclude<D: Drive>(job: &Job, d: D, end: End, cfg: &SimConfig) -> RunEnd {
                         warnings: r.warnings,
                         measurements: Some(r.measurements),
                         spd,
+                        runtime_metadata,
                     }
                 }
                 Err(e) => failed(job, e, None, probe, spd, warnings),
@@ -872,6 +956,8 @@ fn conclude<D: Drive>(job: &Job, d: D, end: End, cfg: &SimConfig) -> RunEnd {
         }
         End::Stopped(status, stop) => {
             let spd = d.spd_counters();
+            let runtime_metadata = parts
+                .and_then(|p| runtime(Some(p), &d.measurements().series, probe.now_ns, "stopped"));
             RunEnd {
                 status,
                 stop,
@@ -881,11 +967,16 @@ fn conclude<D: Drive>(job: &Job, d: D, end: End, cfg: &SimConfig) -> RunEnd {
                 uniforms: None,
                 warnings,
                 spd,
+                runtime_metadata,
             }
         }
         End::Failed(e) => {
             let spd = d.spd_counters();
-            failed(job, e, Some(d.into_measurements()), probe, spd, warnings)
+            let runtime_metadata = parts
+                .and_then(|p| runtime(Some(p), &d.measurements().series, probe.now_ns, "failed"));
+            let mut r = failed(job, e, Some(d.into_measurements()), probe, spd, warnings);
+            r.runtime_metadata = runtime_metadata;
+            r
         }
     }
 }
@@ -950,6 +1041,7 @@ fn failed(
         uniforms: None,
         warnings,
         spd,
+        runtime_metadata: None,
     }
 }
 
@@ -1003,6 +1095,7 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
         uniforms,
         warnings,
         spd,
+        runtime_metadata,
     } = end;
     for w in &warnings {
         job.log(Level::Warn, LogSource::Simulator, None, w.clone(), None);
@@ -1042,6 +1135,7 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
                 interval_summary: interval_summary(&req, &m, probe.now_ns),
             },
             measurements: m,
+            runtime_metadata,
         }
     });
     job.end(status, Some(stop), error, outcome);
@@ -1126,22 +1220,42 @@ fn run_engine(
             let run = SsxRun::new(cm, cfg.clone(), Outputs::default()).map_err(err)?;
             let mut d = Ssx { run, hooks: None };
             let end = drive(job, &mut d, mon, interval);
-            conclude(job, d, end, &cfg)
+            conclude(job, d, end, &cfg, None)
         }
         #[cfg(feature = "exact")]
-        (Mode::Exact, FlavourKind::SimuLizar) => {
-            run_plain::<simoxide_sim::Exact, SimuLizar>(job, cm, cfg, mon, interval)?
-        }
+        (Mode::Exact, FlavourKind::SimuLizar) => run_plain::<simoxide_sim::Exact, SimuLizar>(
+            job,
+            cm,
+            cfg,
+            mon,
+            interval,
+            req.config.runtime_metadata,
+        )?,
         #[cfg(feature = "exact")]
-        (Mode::Exact, FlavourKind::Slingshot) => {
-            run_plain::<simoxide_sim::Exact, Slingshot>(job, cm, cfg, mon, interval)?
-        }
-        (Mode::Fast, FlavourKind::SimuLizar) => {
-            run_plain::<simoxide_sim::Fast, SimuLizar>(job, cm, cfg, mon, interval)?
-        }
-        (Mode::Fast, FlavourKind::Slingshot) => {
-            run_plain::<simoxide_sim::Fast, Slingshot>(job, cm, cfg, mon, interval)?
-        }
+        (Mode::Exact, FlavourKind::Slingshot) => run_plain::<simoxide_sim::Exact, Slingshot>(
+            job,
+            cm,
+            cfg,
+            mon,
+            interval,
+            req.config.runtime_metadata,
+        )?,
+        (Mode::Fast, FlavourKind::SimuLizar) => run_plain::<simoxide_sim::Fast, SimuLizar>(
+            job,
+            cm,
+            cfg,
+            mon,
+            interval,
+            req.config.runtime_metadata,
+        )?,
+        (Mode::Fast, FlavourKind::Slingshot) => run_plain::<simoxide_sim::Fast, Slingshot>(
+            job,
+            cm,
+            cfg,
+            mon,
+            interval,
+            req.config.runtime_metadata,
+        )?,
         #[cfg(not(feature = "exact"))]
         (m, _) => return Err(m.unavailable_reason().unwrap_or_default()),
     })
@@ -1154,12 +1268,28 @@ fn run_plain<C: Compat, F: Flavour>(
     cfg: SimConfig,
     mon: &mut Monitor,
     interval: Duration,
+    runtime_metadata: bool,
 ) -> Result<RunEnd, String> {
     let sim = Simulation::<C, F>::create(cm, cfg.clone(), Outputs::default())
         .map_err(|e| e.to_string())?;
-    let mut d = Plain(sim);
+    let meta = runtime_metadata.then(|| {
+        let d = simoxide_sim::inspect::deployment(cm, &cm.model);
+        MetaCtx {
+            base: cm,
+            model: simoxide_sim::inspect::model_file(cm, &d, serde_json::Value::Null),
+        }
+    });
+    let rec = runtime_metadata.then(|| {
+        simoxide_sim::inspect::Recorder::start(
+            simoxide_sim::inspect::deployment(cm, &cm.model),
+            0,
+            0,
+            serde_json::Value::Null,
+        )
+    });
+    let mut d = Plain(sim, rec);
     let end = drive(job, &mut d, mon, interval);
-    Ok(conclude(job, d, end, &cfg))
+    Ok(conclude(job, d, end, &cfg, meta.as_ref()))
 }
 
 /// Scaling policies (`.spd`) and HPA autoscalers.
@@ -1350,6 +1480,8 @@ mod spd {
         log: &'a mut dyn Log,
         /// `config.spd_decisions`: the action lists not used yet, the resolved decisions.
         decisions: Option<Decisions>,
+        /// `config.runtime_metadata`: the deployment record (every adjustment).
+        rec: Option<simoxide_sim::inspect::Recorder>,
     }
 
     /// The scaling decisions of a run with `config.spd_decisions`.
@@ -1378,10 +1510,21 @@ mod spd {
             next: bool,
             keep: &mut dyn FnMut(&Probe) -> bool,
         ) -> Result<Status, SimError> {
+            let mut recording;
+            let adj: &mut dyn Adjuster<C, F> = match self.rec.as_mut() {
+                Some(rec) => {
+                    recording = simoxide_spd::inspect::Recording {
+                        inner: &mut *self.adj,
+                        rec,
+                    };
+                    &mut recording
+                }
+                None => &mut *self.adj,
+            };
             loop {
                 let st = self
                     .run
-                    .run_while(&mut *self.adj, &mut *self.log, |s| keep(&probe_of(s, next)))?;
+                    .run_while(&mut *adj, &mut *self.log, |s| keep(&probe_of(s, next)))?;
                 let Some(d) = &mut self.decisions else {
                     return Ok(st);
                 };
@@ -1393,17 +1536,17 @@ mod spd {
                 };
                 let names: Vec<&str> = actions.iter().map(String::as_str).collect();
                 let n = d.resolved.len();
-                let r = self
-                    .run
-                    .decide(&mut *self.adj, &mut *self.log, &names)
-                    .map_err(|e| match e {
-                        DecisionError::Sim(e) => e,
-                        e => SimError {
-                            message: format!("config.spd_decisions[{n}]: {e}"),
-                            at_ns: self.run.sim.state().now_ns(),
-                            kind: SimErrorKind::Model,
-                        },
-                    })?;
+                let r =
+                    self.run
+                        .decide(&mut *adj, &mut *self.log, &names)
+                        .map_err(|e| match e {
+                            DecisionError::Sim(e) => e,
+                            e => SimError {
+                                message: format!("config.spd_decisions[{n}]: {e}"),
+                                at_ns: self.run.sim.state().now_ns(),
+                                kind: SimErrorKind::Model,
+                            },
+                        })?;
                 d.resolved.push(r.to_json());
             }
         }
@@ -1453,6 +1596,14 @@ mod spd {
         fn warnings(&self) -> Vec<String> {
             self.run.sim.state().warnings().to_vec()
         }
+        fn metadata_parts(&self) -> Option<MetaParts> {
+            let rec = self.rec.as_ref()?;
+            Some(MetaParts::of(
+                rec,
+                self.run.sim.state(),
+                simoxide_spd::inspect::policy_state(&self.run),
+            ))
+        }
     }
 
     /// Runs the model with its scaling policies, on the engine of its flavour and mode.
@@ -1498,7 +1649,7 @@ mod spd {
                 hooks: Some(&mut hooks),
             };
             let end = drive(job, &mut d, mon, interval);
-            let mut r = conclude(job, d, end, &cfg);
+            let mut r = conclude(job, d, end, &cfg, None);
             r.spd = Some(serde_json::json!({
                 "evaluations": hooks.state.evaluations,
                 "requests": hooks.state.requests,
@@ -1510,6 +1661,11 @@ mod spd {
             Some(c) => Some(simoxide_spd::hpa::Hpa::new(c, spd)?),
             None => None,
         };
+        let meta = req.config.runtime_metadata.then(|| MetaCtx {
+            base: cm,
+            model: simoxide_spd::inspect::model_file(cm, Some(spd), hpa.as_ref()),
+        });
+        let meta = meta.as_ref();
         match (cfg.mode, p.flavour) {
             #[cfg(feature = "exact")]
             (Mode::Exact, FlavourKind::SimuLizar) => {
@@ -1524,6 +1680,7 @@ mod spd {
                     decisions,
                     mon,
                     interval,
+                    meta,
                 )
             }
             #[cfg(feature = "exact")]
@@ -1539,6 +1696,7 @@ mod spd {
                     decisions,
                     mon,
                     interval,
+                    meta,
                 )
             }
             (Mode::Fast, FlavourKind::SimuLizar) => {
@@ -1553,6 +1711,7 @@ mod spd {
                     decisions,
                     mon,
                     interval,
+                    meta,
                 )
             }
             (Mode::Fast, FlavourKind::Slingshot) => {
@@ -1567,6 +1726,7 @@ mod spd {
                     decisions,
                     mon,
                     interval,
+                    meta,
                 )
             }
             #[cfg(not(feature = "exact"))]
@@ -1612,6 +1772,7 @@ mod spd {
         decisions: Option<Decisions>,
         mon: &mut Monitor,
         interval: Duration,
+        meta: Option<&MetaCtx>,
     ) -> Result<RunEnd, String> {
         let sim = Simulation::<C, F>::create(cm, cfg.clone(), Outputs::default())
             .map_err(|e| e.to_string())?;
@@ -1620,14 +1781,23 @@ mod spd {
             run = run.with_hpa(h).map_err(|e| e.to_string())?;
         }
         run.set_pause_on_decision(decisions.is_some());
+        let rec = meta.map(|_| {
+            simoxide_sim::inspect::Recorder::start(
+                simoxide_spd::inspect::deployment(&run.sim, Some(spd.model())),
+                0,
+                0,
+                simoxide_spd::inspect::policy_state(&run),
+            )
+        });
         let mut d = WithSpd {
             run,
             adj,
             log,
             decisions,
+            rec,
         };
         let end = drive(job, &mut d, mon, interval);
-        Ok(conclude(job, d, end, &cfg))
+        Ok(conclude(job, d, end, &cfg, meta))
     }
 }
 
@@ -1673,7 +1843,7 @@ mod tests {
         let engine = || Paused {
             warnings: vec![warning.clone()],
         };
-        let stopped = conclude(&job, engine(), cancelled(), &SimConfig::default());
+        let stopped = conclude(&job, engine(), cancelled(), &SimConfig::default(), None);
         assert_eq!(stopped.status, JobStatus::Cancelled);
         assert_eq!(stopped.warnings, std::slice::from_ref(&warning));
         let error = SimError {
@@ -1681,7 +1851,13 @@ mod tests {
             at_ns: 0,
             kind: SimErrorKind::Limit,
         };
-        let failed = conclude(&job, engine(), End::Failed(error), &SimConfig::default());
+        let failed = conclude(
+            &job,
+            engine(),
+            End::Failed(error),
+            &SimConfig::default(),
+            None,
+        );
         assert_eq!(failed.status, JobStatus::Failed);
         assert_eq!(failed.warnings, [warning]);
     }

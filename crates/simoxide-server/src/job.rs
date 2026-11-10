@@ -189,6 +189,9 @@ pub struct Outcome {
     pub summary: ResultSummary,
     /// The recorded rows.
     pub measurements: Measurements,
+    /// `config.runtime_metadata`: `{"model": <model file>, "runtime": <runtime file>}`
+    /// (`docs/guide/runtime-metadata.md`).
+    pub runtime_metadata: Option<serde_json::Value>,
 }
 
 /// The mutable part of a job.
