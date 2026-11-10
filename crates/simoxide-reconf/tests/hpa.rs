@@ -461,8 +461,11 @@ fn forks_and_snapshots_continue_identically() {
     let snap = |r: &mut SpdRun<'_, '_, Fast>, adj: &QvtoAdjuster| {
         let mut snap = r.snapshot_value(Encoding::Postcard).unwrap();
         if adj.run.is_started() {
-            snap.sections
-                .push(adj.run.snapshot_section(Encoding::Postcard).unwrap());
+            snap.sections.push(
+                adj.run
+                    .snapshot_section(&r.sim, Encoding::Postcard)
+                    .unwrap(),
+            );
         }
         let mut bytes = Vec::new();
         snap.write(&mut bytes).unwrap();

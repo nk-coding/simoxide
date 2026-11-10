@@ -13,6 +13,7 @@
 //! | `GET /v1/simulations/{id}/events` | server-sent events: `status`, `progress`, `log`, `done` |
 //! | `GET /v1/simulations/{id}/results` | final results `?rows=true&max_rows=N&measuring_point=..&metric=..` |
 //! | `GET /v1/simulations/{id}/measurements.csv` | `measurements.csv` `?measuring_point=..&metric=..` |
+//! | `GET /v1/simulations/{id}/runtime-metadata` | model file and runtime file (`config.runtime_metadata`) |
 //! | `POST /v1/simulations/{id}/cancel` | stop; results so far stay readable |
 //! | `DELETE /v1/simulations/{id}` | cancel and forget |
 //! | `POST /mcp` | MCP (JSON-RPC over streamable HTTP, JSON responses) |
@@ -116,6 +117,10 @@ pub fn router(svc: Arc<Service>, cfg: HttpConfig) -> Router {
         .route("/v1/simulations/{id}/events", get(events))
         .route("/v1/simulations/{id}/results", get(results))
         .route("/v1/simulations/{id}/measurements.csv", get(csv))
+        .route(
+            "/v1/simulations/{id}/runtime-metadata",
+            get(runtime_metadata),
+        )
         .route("/v1/simulations/{id}/cancel", post(cancel))
         .route("/mcp", post(mcp_post).get(mcp_get).delete(mcp_get))
         .layer(axum::middleware::from_fn_with_state(state.clone(), guard));
@@ -527,6 +532,14 @@ async fn csv(
         HeaderValue::from_static("text/csv; charset=utf-8"),
     );
     Ok((h, body).into_response())
+}
+
+async fn runtime_metadata(
+    State(st): State<AppState>,
+    Path(id): Path<String>,
+) -> ApiResult<Json<Value>> {
+    let svc = st.svc.clone();
+    Ok(Json(blocking(move || svc.runtime_metadata(&id)).await?))
 }
 
 async fn cancel(State(st): State<AppState>, Path(id): Path<String>) -> ApiResult<Json<JobView>> {

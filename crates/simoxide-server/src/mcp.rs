@@ -63,6 +63,7 @@ Workflow:
 2. Follow it: wait_for_simulation (blocks until something changes or it ends) or get_status return the live progress: simulation time, finished usage-scenario runs, per-series mean/std/min/max and confidence intervals, and how far each termination criterion is. get_logs returns the log (model warnings, scaling-policy decisions, termination).
 3. get_results once it has ended: per-series statistics with percentiles and confidence intervals, optionally the raw (time, value) rows (downsampled by default) or the measurements.csv.
 cancel_simulation stops a run early and keeps its results so far.
+get_runtime_metadata (with config.runtime_metadata) tells what the measurements refer to: containers, resources, assemblies, allocations, target groups, their changes over the run, and each series' model elements.
 
 Measurements: one series per (measuring point, metric) of the monitor repository, e.g. `Response Time Tuple` of a usage scenario or an operation, `Utilization of Active Resource Tuple` of a CPU. Times are in seconds of simulated time.";
 
@@ -220,6 +221,7 @@ fn run_tool(svc: &Service, name: &str, a: Value) -> Result<Value, ApiError> {
         }
         "get_logs" => get_logs(svc, &a),
         "get_results" => get_results(svc, &a),
+        "get_runtime_metadata" => svc.runtime_metadata(&id_argument(&a)?),
         "cancel_simulation" => Ok(to_json(&svc.cancel(&id_argument(&a)?)?)),
         "delete_simulation" => {
             let id = id_argument(&a)?;
@@ -469,6 +471,7 @@ pub fn tools() -> Vec<Value> {
                                 "series": {"type": "array", "items": selector_schema(), "description": "Series to summarise (any selector matches); default every series."},
                                 "stats": {"type": "array", "items": {"type": "string", "enum": ["count", "sum", "mean", "min", "max", "first", "last", "initial", "time_weighted", "all"]}, "description": "Default all; count is always written."}
                             }, "additionalProperties": false},
+                            "runtime_metadata": {"type": "boolean", "description": "Record the runtime metadata (default false): the model file (definitions, deployment, content hash) and the runtime file (deployment at the start, every architecture change with its time and cause, policy state, retired elements, what each measurement series refers to). Read it with get_runtime_metadata."},
                             "hpa": {"type": "boolean", "description": "Run *.hpa.json autoscalers (default true)."},
                             "load_profile": {"type": "boolean", "description": "Apply *.loadprofile.json files (default true)."},
                             "max_events_per_instant": {"type": "integer", "minimum": 0},
@@ -568,6 +571,13 @@ pub fn tools() -> Vec<Value> {
                 "required": ["id"],
                 "additionalProperties": false
             },
+            "annotations": ro,
+        }),
+        json!({
+            "name": "get_runtime_metadata",
+            "title": "Get runtime metadata",
+            "description": "The runtime metadata of an ended simulation started with config.runtime_metadata: {model, runtime}. model: the model file (format simoxide-model: components, interfaces, systems, usage scenarios, monitors, the deployment, scaling definitions, a content hash). runtime: the runtime file (format simoxide-runtime: the deployment at the start, every change of containers, resources, assemblies, allocations and target groups with time, cause and the added/removed/changed elements, the policy state at start and end, retired elements, and per measurement series (measuring_point, metric) its unit, model elements and monitors). docs/guide/runtime-metadata.md.",
+            "inputSchema": {"type": "object", "properties": {"id": id_schema()}, "required": ["id"], "additionalProperties": false},
             "annotations": ro,
         }),
         json!({

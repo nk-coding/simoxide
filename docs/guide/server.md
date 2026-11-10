@@ -200,6 +200,7 @@ that a request never runs another model than the one listed. Without `--allow-di
 | `spd_log_all` | `false` | also log the SPD evaluations that requested nothing (one per watched measurement) |
 | `spd_decisions` | absent (off) | scaling decisions ([below](#scaling-decisions)): a list of action lists, e.g. `[["_out"], []]` |
 | `interval_summary` | absent (off) | `{"series": [{measuring_point, metric}], "stats": [...]}`: an interval summary in the results ([below](#interval-summaries)) |
+| `runtime_metadata` | `false` | record the model file and the runtime file of the run ([below](#runtime-metadata)); not with `slingshot-exact` |
 | `max_events_per_instant`, `max_stack_depth`, `max_processes`, `max_steps` | as `simoxide run` | resource limits ([Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)); `slingshot-exact`, which has no processes, bounds the frames of a user's stack, the live users and the handler events instead |
 
 `config.max_sim_time` and `config.max_measurements` are the simulator's own stop conditions,
@@ -475,6 +476,19 @@ is refused (`400`). `initial` is `none` for every series (a run from time 0). Th
  "config": {"interval_summary": {"series": [{"metric": "Response Time"}], "stats": ["mean", "max"]}}}
 ```
 
+### Runtime metadata
+
+With `config.runtime_metadata: true`, `GET /v1/simulations/{id}/runtime-metadata` (tool
+`get_runtime_metadata`) returns, once the simulation has ended, `{"model": ..., "runtime":
+...}`: the model file and the runtime file of `simoxide run --model-metadata
+--runtime-metadata` ([Runtime metadata](./runtime-metadata.md)). The job is one interval from
+time 0: `runtime.start` is the model's deployment, `runtime.changes` every adjustment of the run
+(SPD policies, actions of `config.spd_decisions` with cause `decision`, HPA rescales), and
+`runtime.series` describes every series of `measurements.csv`. `runtime.run` has no `parent` or
+`state` (no snapshots); its `status` is `finished` when the simulator ended the run, `stopped`
+when a termination condition, a decision without action list or a cancellation did, and
+`failed`. Without the option the route answers `409`; `slingshot-exact` refuses it (`400`).
+
 ## HTTP API
 
 | Method and path | Purpose |
@@ -486,6 +500,7 @@ is refused (`400`). `initial` is `none` for every series (a run from time 0). Th
 | `GET /v1/simulations` | every simulation, oldest first |
 | `GET /v1/simulations/{id}` | state and progress; `wait`, `until`, `after_version`, `logs=N` (newest log entries, default 10), `series=false` (without per-series statistics) |
 | `GET /v1/simulations/{id}/logs` | log entries: `since`, `limit` (default 1000), `level` |
+| `GET /v1/simulations/{id}/runtime-metadata` | the model file and the runtime file (`config.runtime_metadata`, [above](#runtime-metadata)) |
 | `GET /v1/simulations/{id}/events` | server-sent events |
 | `GET /v1/simulations/{id}/results` | results: `rows`, `max_rows`, `measuring_point`, `metric` |
 | `GET /v1/simulations/{id}/measurements.csv` | `measurements.csv`: `measuring_point`, `metric` |
@@ -529,6 +544,7 @@ Tools (all results are JSON, as text and as `structuredContent`; a failure is a 
 | `wait_for_simulation` | `id`, `until` (`change`/`done`), `timeout_secs` (30, max 300), `after_version`, `recent_logs`, `include_series` | as `get_status`, after the change or the end |
 | `get_logs` | `id`, `since`, `limit` (200), `min_level` (`info`) | log entries, `last_seq`, `dropped` |
 | `get_results` | `id`, `series`, `include_rows`, `max_rows_per_series` (1000), `format` (`json`/`csv`), `max_csv_bytes` | results |
+| `get_runtime_metadata` | `id` | the model file and the runtime file (`config.runtime_metadata`) |
 | `cancel_simulation` | `id` | state |
 | `list_simulations` | | every simulation |
 | `delete_simulation` | `id` | `{"deleted": id}` |

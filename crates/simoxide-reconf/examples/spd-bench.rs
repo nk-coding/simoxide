@@ -111,7 +111,7 @@ fn one<C: Compat, F: Flavour>(c: &Ctx, phase: &str, i: usize) -> Result<(), Stri
         s.sections.push(
             adj.inner
                 .run
-                .snapshot_section(Encoding::Postcard)
+                .snapshot_section(&r.sim, Encoding::Postcard)
                 .map_err(|e| e.to_string())?,
         );
         let mut bytes = Vec::new();

@@ -147,7 +147,7 @@ fn secs(ns: i64) -> f64 {
 }
 
 /// An adjustment as JSON: its metamodel class and attributes.
-fn adjustment_json(a: &Adjustment) -> Value {
+pub(crate) fn adjustment_json(a: &Adjustment) -> Value {
     match *a {
         Adjustment::Step { step } => json!({"type": "StepAdjustment", "stepValue": step}),
         Adjustment::Relative { percentage, min } => json!({

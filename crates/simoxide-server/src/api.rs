@@ -313,6 +313,22 @@ impl Service {
     }
 }
 
+impl Service {
+    /// The runtime metadata of an ended simulation with `config.runtime_metadata`: `{"model":
+    /// <model file>, "runtime": <runtime file>}` (`docs/guide/runtime-metadata.md`).
+    pub fn runtime_metadata(&self, id: &str) -> Result<Value, ApiError> {
+        let job = self.jobs.get(id)?;
+        let Some(o) = job.outcome() else {
+            return Err(not_ready(&job.view(0, false)));
+        };
+        o.runtime_metadata.clone().ok_or_else(|| {
+            ApiError::conflict(format!(
+                "simulation {id} ran without config.runtime_metadata: start it with \"runtime_metadata\": true in its config"
+            ))
+        })
+    }
+}
+
 /// The error of asking for results a simulation does not have (yet).
 fn not_ready(v: &JobView) -> ApiError {
     if v.status.is_terminal() {

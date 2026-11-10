@@ -30,6 +30,7 @@ mod events;
 pub mod flavour;
 mod frames;
 pub mod fxhash;
+pub mod inspect;
 pub mod ir;
 pub mod javafmt;
 #[cfg(feature = "exact")]

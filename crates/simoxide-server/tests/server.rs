@@ -615,6 +615,137 @@ async fn scaling_policies_log_their_decisions() {
     assert!(res["summary"]["spd"]["requests"].as_u64().unwrap() > 0);
 }
 
+/// `config.runtime_metadata` (issue #9, `simoxide run --model-metadata --runtime-metadata`):
+/// the model file and the runtime file of the run through HTTP and MCP. The runtime file starts
+/// with the model file's deployment, has one change per executed adjustment (at the times of the
+/// decision log's `adjust` records), and describes every series of `measurements.csv`.
+#[tokio::test(flavor = "multi_thread")]
+async fn runtime_metadata_of_a_run() {
+    let app = app();
+    let files = files_of(&repo().join("corpus-spd/rmuc_app_metrics"));
+    let req = |cfg: Value| json!({"files": files, "config": cfg});
+    let v = run(
+        &app,
+        req(json!({"flavour": "slingshot", "max_sim_time": 300, "runtime_metadata": true})),
+    )
+    .await;
+    assert_eq!(v["status"], "completed", "{v}");
+    let id = v["id"].as_str().unwrap();
+    let (s, meta) = call(
+        &app,
+        "GET",
+        &format!("/v1/simulations/{id}/runtime-metadata"),
+        None,
+    )
+    .await;
+    assert_eq!(s, StatusCode::OK, "{meta}");
+    let (model, rt) = (&meta["model"], &meta["runtime"]);
+    assert_eq!(model["format"], "simoxide-model");
+    assert_eq!(rt["format"], "simoxide-runtime");
+    assert_eq!(rt["model"]["hash"], model["hash"]);
+    assert!(model["scaling"]["policies"].as_array().unwrap().len() > 0);
+    assert_eq!(rt["start"]["time_ns"], 0);
+    assert_eq!(rt["start"]["deployment"], model["deployment"]);
+    assert_eq!(rt["run"]["status"], "finished");
+    assert_eq!(rt["end"]["time_ns"], 300_000_000_000i64);
+    // one change per adjustment of the decision log, at its time, caused by its policy
+    let (_, logs) = call(
+        &app,
+        "GET",
+        &format!("/v1/simulations/{id}/logs?limit=100000"),
+        None,
+    )
+    .await;
+    let adjusts: Vec<&Value> = logs["entries"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|e| e["source"] == "spd" && e["data"]["k"] == "adjust")
+        .collect();
+    let changes = rt["changes"].as_array().unwrap();
+    assert!(!changes.is_empty());
+    assert_eq!(changes.len(), adjusts.len(), "{}", rt["changes"]);
+    for (c, a) in changes.iter().zip(&adjusts) {
+        assert_eq!(c["time"], a["sim_time"], "{c}");
+        assert_eq!(c["cause"]["type"], "policy");
+        assert_eq!(c["cause"]["policy"], a["data"]["policy"], "{c}");
+    }
+    // a build that executes adjustments changes the deployment (the service group's
+    // assemblies); one that does not reports every adjustment as failed, with no change
+    let executed = v["model"]["adjustments_executed"] == true;
+    assert_eq!(
+        changes
+            .iter()
+            .any(|c| c["added"] != json!({}) || c["removed"] != json!({})),
+        executed,
+        "{}",
+        rt["changes"]
+    );
+    if !executed {
+        assert!(changes.iter().all(|c| c["outcome"]["ok"] == false));
+    }
+    // every series of measurements.csv has its metadata
+    let (_, csv) = call_text(
+        &app,
+        "GET",
+        &format!("/v1/simulations/{id}/measurements.csv"),
+        None,
+        None,
+    )
+    .await;
+    for line in csv.lines().skip(1) {
+        let mut f = line.split(',');
+        let (mp, metric) = (f.next().unwrap(), f.next().unwrap());
+        assert!(
+            rt["series"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|s| s["measuring_point"] == mp
+                    && s["metric"] == metric
+                    && s["unit"].is_string()),
+            "no metadata for ({mp}, {metric})"
+        );
+    }
+    // MCP: the same
+    let (_, v) = call(
+        &app,
+        "POST",
+        "/mcp",
+        Some(tool_call(1, "get_runtime_metadata", json!({"id": id}))),
+    )
+    .await;
+    assert_eq!(v["result"]["isError"], false, "{v}");
+    assert_eq!(v["result"]["structuredContent"], meta);
+    // without the option: no metadata; slingshot-exact: refused
+    let v = run(
+        &app,
+        req(json!({"flavour": "slingshot", "max_sim_time": 10})),
+    )
+    .await;
+    let (s, _) = call(
+        &app,
+        "GET",
+        &format!(
+            "/v1/simulations/{}/runtime-metadata",
+            v["id"].as_str().unwrap()
+        ),
+        None,
+    )
+    .await;
+    assert_eq!(s, StatusCode::CONFLICT);
+    let (s, _) = call(
+        &app,
+        "POST",
+        "/v1/simulations",
+        Some(req(
+            json!({"flavour": "slingshot-exact", "max_sim_time": 10, "runtime_metadata": true}),
+        )),
+    )
+    .await;
+    assert_eq!(s, StatusCode::BAD_REQUEST);
+}
+
 /// `config.spd_decisions` (issue #6, `simoxide run --pause-on-decision` / `resume --decide` in
 /// one job): no list stops at the first recommendation, un-applied; a list resolves it (the
 /// recommendation, declined) and the run goes on to the next decision; through HTTP and MCP.

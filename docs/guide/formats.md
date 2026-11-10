@@ -23,6 +23,7 @@ Other files SimOxide reads or writes:
 | `--rules-log` | one JSON line per run of SimuLizar's reconfiguration process ([Reconfiguration rules](./reconfiguration.md#the-rules-log)) |
 | `--snapshot` | a paused run ([Snapshot format](../formats/snapshot.md)) |
 | `--summary` | statistics per series of an invocation's tuples, JSON ([Interval summaries](./snapshots.md#interval-summaries)) |
+| `--model-metadata`, `--runtime-metadata` | the model's definitions; an invocation's deployment, changes, policy state and series metadata, JSON ([Runtime metadata](./runtime-metadata.md)) |
 | `*.hpa.json` | HPA autoscalers ([Autoscaling (HPA)](./hpa.md#the-configuration-file)) |
 | `*.loadprofile.json` | load profiles ([Load profiles](./load-profile.md#the-file)) |
 | `*.changes` | change files for `resume --change` ([Change files](./snapshots.md#change-files)) |
