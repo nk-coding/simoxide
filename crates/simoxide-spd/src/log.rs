@@ -17,7 +17,12 @@
 //!   when the executor computes them, Slingshot's change count `changes` and the model
 //!   summaries `before` and `after` (`crate::adjusted::summary`, as the reference runner's);
 //!   the target-group size before and after when the host knows them; `enforced` for an
-//!   enforced policy.
+//!   enforced policy; `decision` for a selected action of that decision (`crate::decision`).
+//! * `decision`: a run that pauses on decisions intercepted the requests about to be
+//!   executed: `t`, `decision` (its number in the run, from 1) and `recommended`, the policies
+//!   (ids) of the requests, in request order. They are not executed.
+//! * `select`: the decision was resolved: `t`, `decision` and `selected`, the policies (ids)
+//!   of the actions the caller chose, in order (`[]`: declined); their `adjust` records follow.
 //! * `hpa`: one sync of an HPA autoscaler (`crate::hpa`, `docs/spec/hpa.md`): `t`, `hpa` (its
 //!   name), `metric` (`cpu`), `current` (replicas: `ready` plus `starting`), `unready` and
 //!   `missing` pods of the calculation, the ready pods' `utilization` (percent of their
@@ -80,6 +85,21 @@ pub enum Record {
         size_after: Option<usize>,
         /// An enforced policy's request ([`crate::Spd::enforce`]).
         enforced: bool,
+        /// A selected action of this decision ([`crate::Spd::selected`]).
+        decision: Option<u64>,
+    },
+    /// A run that pauses on decisions intercepted the recommendations of decision `decision`
+    /// (policy ids, in request order).
+    Decision {
+        t: f64,
+        decision: u64,
+        recommended: Vec<Box<str>>,
+    },
+    /// Decision `decision` was resolved with the actions `selected` (policy ids, in order).
+    Select {
+        t: f64,
+        decision: u64,
+        selected: Vec<Box<str>>,
     },
     /// One sync of an HPA autoscaler.
     Hpa(Box<HpaRecord>),
@@ -117,6 +137,11 @@ pub struct HpaRecord {
 
 fn q(s: &str) -> String {
     serde_json::to_string(s).expect("string")
+}
+
+/// Policy ids as the elements of a JSON array.
+fn ids(v: &[Box<str>]) -> String {
+    v.iter().map(|i| q(i)).collect::<Vec<_>>().join(",")
 }
 
 impl Record {
@@ -179,6 +204,7 @@ impl Record {
                 size_before,
                 size_after,
                 enforced,
+                decision,
             } => {
                 let mut s = format!(
                     "{{\"k\":\"adjust\",\"t\":{},\"policy\":{},\"policy_name\":{},\"ok\":{}",
@@ -201,6 +227,9 @@ impl Record {
                 if *enforced {
                     s.push_str(",\"enforced\":true");
                 }
+                if let Some(d) = decision {
+                    s.push_str(&format!(",\"decision\":{d}"));
+                }
                 if let Some(b) = size_before {
                     s.push_str(&format!(",\"size_before\":{b}"));
                 }
@@ -210,6 +239,24 @@ impl Record {
                 s.push('}');
                 s
             }
+            Record::Decision {
+                t,
+                decision,
+                recommended,
+            } => format!(
+                "{{\"k\":\"decision\",\"t\":{},\"decision\":{decision},\"recommended\":[{}]}}",
+                json_double(*t),
+                ids(recommended)
+            ),
+            Record::Select {
+                t,
+                decision,
+                selected,
+            } => format!(
+                "{{\"k\":\"select\",\"t\":{},\"decision\":{decision},\"selected\":[{}]}}",
+                json_double(*t),
+                ids(selected)
+            ),
             Record::Hpa(r) => {
                 let opt_i = |o: Option<i32>| o.map_or_else(|| "null".into(), |v| v.to_string());
                 let mut s = format!(

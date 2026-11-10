@@ -198,6 +198,7 @@ that a request never runs another model than the one listed. Without `--allow-di
 | `spd`, `hpa`, `load_profile` | `true` | use the model's scaling policies, autoscalers, load profiles |
 | `spd_quirks` | `fixed` (`slingshot` for `slingshot-exact`) | as `--spd-quirks` |
 | `spd_log_all` | `false` | also log the SPD evaluations that requested nothing (one per watched measurement) |
+| `spd_decisions` | absent (off) | scaling decisions ([below](#scaling-decisions)): a list of action lists, e.g. `[["_out"], []]` |
 | `max_events_per_instant`, `max_stack_depth`, `max_processes`, `max_steps` | as `simoxide run` | resource limits ([Deviations](../correctness/deviations.md#resource-limits-for-untrusted-models)); `slingshot-exact`, which has no processes, bounds the frames of a user's stack, the live users and the handler events instead |
 
 `config.max_sim_time` and `config.max_measurements` are the simulator's own stop conditions,
@@ -408,8 +409,35 @@ buffer had already evicted).
 
 `stop_reason.kind` is `termination` (a termination condition held; `detail` says which),
 `simulator` (`config.max_sim_time`, `config.max_measurements`, or no event left),
-`server_limit` (`--max-run-secs` or `--max-tuples`), `cancelled` or `error`. `uniforms` (the
+`server_limit` (`--max-run-secs` or `--max-tuples`), `decision` (a scaling decision without an
+action list in `config.spd_decisions`), `cancelled` or `error`. `uniforms` (the
 random numbers drawn) is reported for runs the simulator finished itself.
+
+### Scaling decisions
+
+The server has no snapshots, so it runs `simoxide run --pause-on-decision` / `resume --decide`
+([Decisions](./spd.md#decisions)) as one job with the actions given in advance:
+`config.spd_decisions` is a list of action lists. With it, the run pauses before each scaling
+policy's adjustment and resolves decision `i` (from 0) with the `i`-th list: the policies (ids or
+names) whose adjustments run in its place, in order (`[]` declines, `["A","A"]` runs A twice).
+The semantics are the command line's: the recommendations of one instant form one decision, the
+policies' state changes on the recommendation, not on the selection. At the first decision
+beyond the lists the job ends as `completed` with the stop reason `decision`, the decision
+pending; a client that wants to continue it starts the job again with one more list (runs are
+deterministic, so the same lists reach the same decision). `[]` (no lists) stops at the first
+recommendation. `slingshot-exact` and `"spd": false` are refused (`400`); an action naming no
+policy of the model, or a model without scaling policies, fails the job.
+
+The results' `summary.spd` then has `decisions`, the resolved decisions (each with `decision`,
+`time`, `time_ns`, `recommended`, `selected`, `outcomes`, as in the [decision
+file](./spd.md#decision-file)), and `pending_decision` (the decision the run stopped at, or
+`null`); the `spd` log has the `decision` and `select` records. The tool `start_simulation`
+takes the same `config.spd_decisions`.
+
+```json
+{"model_dir": "rmuc_app_metrics",
+ "config": {"flavour": "slingshot", "max_sim_time": 300, "spd_decisions": [[]]}}
+```
 
 Query parameters (tool arguments in parentheses):
 

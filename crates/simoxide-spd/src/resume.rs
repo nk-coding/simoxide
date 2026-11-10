@@ -42,6 +42,28 @@ impl fmt::Display for EnforceError {
 impl std::error::Error for EnforceError {}
 
 impl<C: Compat, F: Flavour> SpdRun<'_, '_, C, F> {
+    /// The policies `names` (name or id) as indices into the SPD's policies, each with a
+    /// target group.
+    pub(crate) fn policy_indices(&self, names: &[&str]) -> Result<Vec<usize>, EnforceError> {
+        let policies = &self.spd.model().policies;
+        let mut idx = Vec::with_capacity(names.len());
+        for n in names {
+            // the id first: a stable reference even if a name is shared
+            let Some(i) = policies
+                .iter()
+                .position(|p| &*p.id == *n)
+                .or_else(|| policies.iter().position(|p| &*p.name == *n))
+            else {
+                return Err(EnforceError::UnknownPolicy(n.to_string()));
+            };
+            if policies[i].group.is_none() {
+                return Err(EnforceError::NoTargetGroup(n.to_string()));
+            }
+            idx.push(i);
+        }
+        Ok(idx)
+    }
+
     /// Re-reads the target groups' membership from the run's (changed) model.
     pub fn model_changed(&mut self) {
         self.state.membership =
@@ -58,17 +80,7 @@ impl<C: Compat, F: Flavour> SpdRun<'_, '_, C, F> {
     /// adjuster of the run's next [`SpdRun::run_while`]; they appear in the decision log as
     /// `adjust` records with `"enforced":true`. On an error nothing is queued.
     pub fn enforce_policies(&mut self, names: &[&str]) -> Result<(), EnforceError> {
-        let policies = &self.spd.model().policies;
-        let mut idx = Vec::with_capacity(names.len());
-        for n in names {
-            let Some(i) = policies.iter().position(|p| &*p.name == *n || &*p.id == *n) else {
-                return Err(EnforceError::UnknownPolicy(n.to_string()));
-            };
-            if policies[i].group.is_none() {
-                return Err(EnforceError::NoTargetGroup(n.to_string()));
-            }
-            idx.push(i);
-        }
+        let idx = self.policy_indices(names)?;
         let now_ns = self.sim.state().now_ns();
         let now = now_ns as f64 / 1e9;
         for i in idx {

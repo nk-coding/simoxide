@@ -175,6 +175,13 @@ pub struct RunOptions {
     /// measurement: many), at level `debug`.
     #[serde(default)]
     pub spd_log_all: bool,
+    /// Scaling decisions (`simoxide run --pause-on-decision`, `resume --decide`): the run stops
+    /// before each scaling policy's adjustment, and decision `i` (from 0) is resolved with the
+    /// `i`-th action list, the policies (ids or names) whose adjustments run in its place (`[]`
+    /// declines). At the first decision beyond the lists the run ends with the stop reason
+    /// `decision` and the decision pending. Off (absent) by default.
+    #[serde(default)]
+    pub spd_decisions: Option<Vec<Vec<String>>>,
     /// Run the HPA autoscalers of `*.hpa` / `*.hpa.json` files (default true).
     #[serde(default)]
     pub hpa: Option<bool>,

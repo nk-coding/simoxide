@@ -59,6 +59,9 @@ const USAGE: &str = "usage:
              snapshot keeps the measurement rows and --measurements of a resume repeats them;
              interval: --measurements gets the tuples recorded by this invocation only, the
              snapshot keeps no rows; docs/guide/snapshots.md#measurement-intervals)
+             [--pause-on-decision] [--decision-file FILE.json]   (pause before a scaling
+             policy's adjustment runs, the recommendation pending in the snapshot; resume it
+             with --decide; the file reports the decision; docs/guide/spd.md#decisions)
   simoxide resume FILE --model <dir> [--run-json run.json] [--trace out.jsonl] [--tape out.jsonl]
              [--measurements out.csv] [--pause-at T ... --snapshot FILE2] [--until T]
              [--pause-when COND]... [--spd-log ...] [--spd-quirks ...] [--rules DIR]
@@ -74,6 +77,9 @@ const USAGE: &str = "usage:
              them, on a snapshot without rules adds them)
              [--enforce POLICY,...]   (adjust by these scaling policies at the resume, past
              their triggers and constraints: Slingshot's incoming policies)
+             [--decide ACTIONS]   (resolve the snapshot's pending scaling decision: the
+             policies, by id or name, whose adjustments run in its place, in order: a JSON
+             array or a comma list; '[]' declines; needed to resume a pending decision)
              [--hpa-set NAME.PARAMETER=VALUE]...   (change an HPA autoscaler's parameter at the
              resume: minReplicas, maxReplicas, averageUtilization, tolerance, startupDelay,
              scaleUpStabilization, scaleDownStabilization, downscaleStabilization; also `hpa
@@ -141,6 +147,10 @@ struct Args {
     changes: Vec<ChangeArg>,
     /// `--enforce` policies.
     enforce: Vec<String>,
+    /// `--pause-on-decision`, `--decide ACTIONS`, `--decision-file FILE`.
+    pause_on_decision: bool,
+    decide: Option<Vec<String>>,
+    decision_file: Option<PathBuf>,
     /// `explore`: `--variant NAME=FILE`, `--metrics`.
     variants: Vec<(String, Option<PathBuf>)>,
     metrics: Vec<String>,
@@ -210,6 +220,9 @@ fn parse_args() -> Result<Args, String> {
         pause_when: Vec::new(),
         changes: Vec::new(),
         enforce: Vec::new(),
+        pause_on_decision: false,
+        decide: None,
+        decision_file: None,
         variants: Vec::new(),
         metrics: Vec::new(),
         measurements_scope: None,
@@ -358,6 +371,9 @@ fn parse_args() -> Result<Args, String> {
                     .filter(|x| !x.is_empty())
                     .map(String::from),
             ),
+            "--pause-on-decision" => a.pause_on_decision = true,
+            "--decide" => a.decide = Some(decide_actions(&val()?)?),
+            "--decision-file" => a.decision_file = Some(val()?.into()),
             "--variant" => {
                 let v = val()?;
                 a.variants.push(match v.split_once('=') {
@@ -387,6 +403,23 @@ fn parse_args() -> Result<Args, String> {
         }
     }
     Ok(a)
+}
+
+/// The actions of `--decide`.
+#[cfg(feature = "spd")]
+fn decide_actions(v: &str) -> Result<Vec<String>, String> {
+    simoxide_spd::decision::parse_actions(v).map_err(|e| format!("--decide: {e}"))
+}
+
+#[cfg(not(feature = "spd"))]
+fn decide_actions(_: &str) -> Result<Vec<String>, String> {
+    Err("--decide needs the `spd` feature".into())
+}
+
+/// The options of scaling decisions (`--pause-on-decision`, `--decide`, `--decision-file`)
+/// that need a run with scaling policies.
+fn decision_options(a: &Args) -> bool {
+    a.pause_on_decision || a.decide.is_some() || a.decision_file.is_some()
 }
 
 fn setup(a: &Args) -> Result<(CompiledModel, SimConfig), String> {
@@ -500,15 +533,18 @@ fn create(p: &Path) -> Result<Box<dyn std::io::Write>, String> {
 }
 
 fn run(a: &Args) -> Result<(), String> {
-    if a.snapshot.is_some() && a.pause.is_none() && a.pause_when.is_empty() {
+    if a.snapshot.is_some() && a.pause.is_none() && a.pause_when.is_empty() && !a.pause_on_decision
+    {
         return Err(
-            "--snapshot needs a pause (--pause-at, --pause-before, --pause-events, --pause-when)"
+            "--snapshot needs a pause (--pause-at, --pause-before, --pause-events, --pause-when, --pause-on-decision)"
                 .into(),
         );
     }
-    if !a.changes.is_empty() || !a.enforce.is_empty() || !a.hpa_set.is_empty() {
+    if !a.changes.is_empty() || !a.enforce.is_empty() || !a.hpa_set.is_empty() || a.decide.is_some()
+    {
         return Err(
-            "--change, --transform, --enforce and --hpa-set are options of `resume`".into(),
+            "--change, --transform, --enforce, --decide and --hpa-set are options of `resume`"
+                .into(),
         );
     }
     let mut a2 = a.clone();
@@ -524,6 +560,12 @@ fn run(a: &Args) -> Result<(), String> {
     };
     let t0 = Instant::now();
     let spd = spd::of(a, &cm)?;
+    if decision_options(a) && spd.is_none() {
+        return Err(
+            "--pause-on-decision and --decision-file need a model with scaling policies (.spd)"
+                .into(),
+        );
+    }
     if let Some(dir) = rules_dir {
         if spd.is_some() {
             return Err("reconfiguration rules and scaling policies in one run are not supported (use --no-spd)".into());
@@ -664,6 +706,7 @@ mod spd {
     use simoxide_sim::compat::Compat;
     use simoxide_sim::snapshot::Snapshot;
     use simoxide_sim::{CompiledModel, Flavour, Mode, Outputs, SimConfig, Simulation, Status};
+    use simoxide_spd::decision;
     use simoxide_spd::hpa::{Hpa, HpaConfig};
     use simoxide_spd::log::JsonlLog;
     #[cfg(not(feature = "reconfiguration"))]
@@ -783,6 +826,22 @@ mod spd {
                 if a.interval {
                     r.sim.take_measurement_rows();
                 }
+                match (r.pending_decision(), &a.decide) {
+                    (Some(d), None) => {
+                        let p = d.policies();
+                        return Err(format!(
+                            "the snapshot has a pending scaling decision (decision {} at t={} s, recommended: [{}]): resume it with --decide ACTIONS (the recommendation: --decide {}; decline it: --decide '[]')",
+                            d.decision,
+                            d.time_ns as f64 / 1e9,
+                            p.join(", "),
+                            p.join(",")
+                        ));
+                    }
+                    (None, Some(_)) => {
+                        return Err("--decide: the snapshot has no pending scaling decision".into());
+                    }
+                    _ => {}
+                }
                 #[cfg(feature = "reconfiguration")]
                 sets.extend(super::changes::hpa_settings(a)?);
                 sets.extend(hpa_sets(a)?);
@@ -829,6 +888,18 @@ mod spd {
         let sink: Box<dyn std::io::Write> = file.unwrap_or_else(|| Box::new(std::io::sink()));
         let mut log = JsonlLog::new(sink);
         log.all = a.spd_log_all;
+        let resolved = match &a.decide {
+            Some(actions) => {
+                let names: Vec<&str> = actions.iter().map(String::as_str).collect();
+                let res = r
+                    .decide(&mut adj, &mut log, &names)
+                    .map_err(|e| format!("--decide: {e}"))?;
+                report_resolution(&res);
+                Some(res)
+            }
+            None => None,
+        };
+        r.set_pause_on_decision(a.pause_on_decision);
         let mut watch = super::snap::watch(a);
         let (status, before) = match &mut watch {
             Some(w) => {
@@ -850,7 +921,20 @@ mod spd {
             log.finish().map_err(|e| format!("--spd-log: {e}"))?;
         }
         hpa_report(&r);
-        if status == Status::Paused && (before.is_some() || watch.is_some()) {
+        // written after the snapshot, which it describes
+        let decisions = a
+            .decision_file
+            .as_ref()
+            .map(|p| (p, decision::report(resolved.as_ref(), r.pending_decision())));
+        let decision = r.pending_decision().map(|d| {
+            format!(
+                "scaling decision {} pending at t={}: recommended [{}]",
+                d.decision,
+                d.time_ns as f64 / 1e9,
+                d.policies().join(", ")
+            )
+        });
+        if status == Status::Paused && (before.is_some() || watch.is_some() || decision.is_some()) {
             let measurements = match a.interval {
                 true => r.sim.take_measurement_rows(),
                 false => r.sim.state().measurements().clone(),
@@ -873,16 +957,23 @@ mod spd {
                 }
                 None => None,
             };
+            if let Some((p, v)) = &decisions {
+                write_json(p, v)?;
+            }
             let st = r.sim.state();
             return Ok(End::Paused {
                 now_ns: st.now_ns(),
                 events: st.events(),
                 measurements,
                 snapshot,
-                reason: watch.and_then(|w| w.fired().map(|f| f.reason.clone())),
+                reason: decision
+                    .or_else(|| watch.and_then(|w| w.fired().map(|f| f.reason.clone()))),
             });
         }
         let (res, _, s) = r.finish().map_err(|e| e.to_string())?;
+        if let Some((p, v)) = &decisions {
+            write_json(p, v)?;
+        }
         let executed = if cfg!(feature = "reconfiguration") {
             format!("adjusted={}", s.adjustments_ok)
         } else {
@@ -895,6 +986,35 @@ mod spd {
             s.requests
         );
         Ok(End::Finished(res))
+    }
+
+    /// Prints what `--decide` did.
+    fn report_resolution(r: &decision::Resolution) {
+        eprintln!(
+            "decision {} (t={}): recommended [{}], selected [{}]",
+            r.decision.decision,
+            r.decision.time_ns as f64 / 1e9,
+            r.decision.policies().join(", "),
+            r.selected.join(", ")
+        );
+        let n = |v: Option<usize>| v.map_or_else(|| "?".to_string(), |v| v.to_string());
+        for o in &r.outcomes {
+            eprintln!(
+                "  {} ({}): ok={} size {} -> {}",
+                o.policy,
+                o.policy_name,
+                o.ok,
+                n(o.size_before),
+                n(o.size_after)
+            );
+        }
+    }
+
+    /// Writes `v` to `p` (pretty JSON, a final newline).
+    fn write_json(p: &std::path::Path, v: &serde_json::Value) -> Result<(), String> {
+        let mut text = serde_json::to_string_pretty(v).map_err(|e| e.to_string())?;
+        text.push('\n');
+        std::fs::write(p, text).map_err(|e| format!("{}: {e}", p.display()))
     }
 
     /// The Slingshot-exact engine with the SPD layer (`DESIGN-SPD.md` X2d): Slingshot's
@@ -919,6 +1039,12 @@ mod spd {
         if !a.enforce.is_empty() {
             return Err(
                 "--enforce is not supported by the Slingshot-exact engine (use --flavour slingshot)"
+                    .into(),
+            );
+        }
+        if super::decision_options(a) {
+            return Err(
+                "scaling decisions (--pause-on-decision, --decide, --decision-file) are not supported by the Slingshot-exact engine (use --flavour slingshot)"
                     .into(),
             );
         }
@@ -2019,14 +2145,29 @@ mod snap {
     /// `simoxide snapshot-info FILE`.
     pub fn info(a: &Args) -> Result<(), String> {
         let s = read(a)?;
-        print!("{}", simoxide_sim::snapshot::describe(&s));
+        #[allow(unused_mut)]
+        let mut out = simoxide_sim::snapshot::describe(&s);
+        #[cfg(feature = "spd")]
+        if let Some(d) = simoxide_spd::snapshot::decision_info(&s).map_err(|e| e.to_string())? {
+            // one more member of the header object: the run's scaling decisions
+            let body = serde_json::to_string_pretty(&d)
+                .map_err(|e| e.to_string())?
+                .replace('\n', "\n  ");
+            let head = out.trim_end().strip_suffix('}').unwrap_or(&out).trim_end();
+            out = format!("{head},\n  \"spd_decision\": {body}\n}}\n");
+        }
+        print!("{out}");
         Ok(())
     }
 
     /// `simoxide resume FILE --model DIR ...`: the model compiled as the snapshot says (flavour,
     /// quirks), the run restored and continued to the next pause or the end.
     pub fn resume(a: &Args) -> Result<(), String> {
-        if a.snapshot.is_some() && a.pause.is_none() && a.pause_when.is_empty() {
+        if a.snapshot.is_some()
+            && a.pause.is_none()
+            && a.pause_when.is_empty()
+            && !a.pause_on_decision
+        {
             return Err("--snapshot needs a pause (--pause-at, --until, --pause-when, ...)".into());
         }
         let s = read(a)?;
@@ -2050,6 +2191,9 @@ mod snap {
         let hpa_lines = !super::changes::hpa_settings(a)?.is_empty();
         #[cfg(not(feature = "reconfiguration"))]
         let hpa_lines = false;
+        if !has_spd && super::decision_options(a) {
+            return Err("scaling decisions (--pause-on-decision, --decide, --decision-file): the snapshot is of a run without scaling policies".into());
+        }
         if !has_spd && (hpa_lines || !a.hpa_set.is_empty()) {
             return Err("HPA parameters (--hpa-set, `hpa` change lines): the snapshot is of a run without HPA autoscalers".into());
         }

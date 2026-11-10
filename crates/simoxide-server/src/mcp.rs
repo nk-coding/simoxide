@@ -464,6 +464,7 @@ pub fn tools() -> Vec<Value> {
                             "spd": {"type": "boolean", "description": "Run the model's scaling policies (default true)."},
                             "spd_quirks": {"type": "string"},
                             "spd_log_all": {"type": "boolean"},
+                            "spd_decisions": {"type": "array", "items": {"type": "array", "items": {"type": "string"}}, "description": "Scaling decisions: lists of policy ids or names. The run stops before each scaling policy's adjustment and resolves decision i with the i-th list, whose adjustments run instead ([] declines); at a decision beyond the lists it ends with stop reason 'decision'. Results: spd.decisions, spd.pending_decision."},
                             "hpa": {"type": "boolean", "description": "Run *.hpa.json autoscalers (default true)."},
                             "load_profile": {"type": "boolean", "description": "Apply *.loadprofile.json files (default true)."},
                             "max_events_per_instant": {"type": "integer", "minimum": 0},

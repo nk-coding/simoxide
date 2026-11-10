@@ -63,6 +63,7 @@ and the `serde` derives on the engine's types); it is versioned with SimOxide, n
 | `spd` | `simoxide-spd` (`SpdRun`, `SsxSpd`) | the SPD interpreter's state |
 | `spd-ssx` | `simoxide-spd` (`SsxSpd`) | the Slingshot-exact SPD layer's own state |
 | `hpa` | `simoxide-spd` (`SpdRun` with autoscalers) | the HPA controller's state |
+| `spd-decision` | `simoxide-spd` (`SpdRun`), once the run made a scaling decision | the decisions made so far, the request notes they cancelled that are still queued, the pending decision (its number, time, recommendations with their requests) |
 | `rules` | `simoxide-reconf` (`RulesRun`) | the reconfiguration host's state |
 | `qvto` | `simoxide-reconf` (`QvtoRun::snapshot_section`), for hosts of their own | a run's QVTo state |
 
@@ -189,6 +190,15 @@ autoscalers' names (checked on restore) and per autoscaler its spec (changed par
 included), the controller's recommendations and scale events, the starting pods' ready times, the
 ready pods (element ids, start and ready times), the busy-time readings of the window start, the
 queued goal and the counters. The engine's busy-time integrals are part of `engine`.
+
+### `spd-decision`
+
+Next to `spd` once the run made a scaling decision ([Decisions](../guide/spd.md#decisions)):
+the number of decisions made, the number of request notes a decision took whose (no-op) dispatch
+is still queued, and the pending decision, if any: its number, time (ns), the deferred
+external-note tags, and per recommendation its adjustment request (as in `spd`'s queue), the
+policy's id and name, the target group's id and size. A run without decisions has no such
+section, so its snapshots are unchanged.
 
 ### `rules`
 

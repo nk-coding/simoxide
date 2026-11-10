@@ -98,6 +98,19 @@ pub struct AdjustmentRequest {
     /// changes no adjustor or group state.
     #[cfg_attr(feature = "snapshot", serde(default))]
     pub hpa: Option<u32>,
+    /// A selected action of the run's decision with this number (`crate::decision`), past the
+    /// policy's chain like an enforced request: its outcome changes no adjustor or group state.
+    /// Executed when it is made, never queued (so not part of a snapshot).
+    #[cfg_attr(feature = "snapshot", serde(skip))]
+    pub decision: Option<u64>,
+}
+
+impl AdjustmentRequest {
+    /// A request of a policy's chain (not enforced, not the HPA's, not a selected action): what
+    /// a run that pauses on decisions intercepts.
+    pub fn is_recommendation(&self) -> bool {
+        !self.enforced && self.hpa.is_none() && self.decision.is_none()
+    }
 }
 
 /// The outcome of an executed adjustment, reported with [`Spd::adjusted_with`].
@@ -869,6 +882,7 @@ impl Spd {
                 size_before: out.size_before,
                 size_after: out.size_after,
                 enforced: req.enforced,
+                decision: req.decision,
             });
         }
     }
@@ -892,10 +906,35 @@ impl Spd {
             time: now,
             enforced: true,
             hpa: None,
+            decision: None,
         };
         st.next_request += 1;
         st.requests += 1;
         req
+    }
+
+    /// The request of a selected action of decision `decision`: policy `policy`'s adjustment
+    /// at `now`, past its trigger and constraints like [`Spd::enforce`], but in place of the
+    /// decision's recommendations (`crate::decision`). It changes no state: neither the
+    /// request counters nor, by its outcome, any adjustor or group state. `id` is the id of
+    /// the decision's first recommendation.
+    pub fn selected(&self, policy: usize, now: f64, decision: u64, id: u64) -> AdjustmentRequest {
+        let p = &self.model.policies[policy];
+        AdjustmentRequest {
+            id,
+            policy,
+            ctx: self
+                .ctxs
+                .iter()
+                .position(|c| c.policy == policy)
+                .unwrap_or(usize::MAX),
+            group: p.group.unwrap_or(usize::MAX),
+            adjustment: p.adjustment,
+            time: now,
+            enforced: false,
+            hpa: None,
+            decision: Some(decision),
+        }
     }
 
     /// The policy subscribers Slingshot registers (`SpdBehavior`, SS-SPD-1.3), in registration
@@ -1051,6 +1090,7 @@ impl Spd {
                 time: ev.time(),
                 enforced: false,
                 hpa: None,
+                decision: None,
             };
             st.next_request += 1;
             host.request(req);

@@ -227,6 +227,16 @@ pub fn precheck(req: &SimulationRequest, cfg: &ServerConfig) -> Result<(), Strin
     if req.config.spd != Some(false) {
         spd::quirks_of(&req.config, flavour)?;
     }
+    if req.config.spd_decisions.is_some() {
+        if flavour == FlavourKind::SlingshotExact {
+            return Err("config.spd_decisions: scaling decisions run in the simulizar and slingshot flavours, not in slingshot-exact".into());
+        }
+        if req.config.spd == Some(false) || !cfg!(feature = "spd") {
+            return Err(
+                "config.spd_decisions: needs the model's scaling policies (config.spd)".into(),
+            );
+        }
+    }
     if flavour == FlavourKind::SlingshotExact && req.config.usage_streams {
         return Err("config.usage_streams: the slingshot-exact flavour has no usage streams (RND-11): run simulizar or slingshot in fast mode".into());
     }
@@ -647,6 +657,10 @@ trait Drive {
     /// The run's warnings so far (handler exceptions, random-number problems), for runs that
     /// end before the simulator finishes them.
     fn warnings(&self) -> Vec<String>;
+    /// A scaling decision the run paused at and cannot resolve (`config.spd_decisions`).
+    fn pending_decision(&self) -> Option<String> {
+        None
+    }
 }
 
 /// The counters of a process-engine run; `next`: with the time of the next event.
@@ -763,6 +777,9 @@ fn drive<D: Drive>(job: &Job, d: &mut D, mon: &mut Monitor, interval: Duration) 
             Err(e) => return End::Failed(e),
             Ok(Status::Finished) => return End::Finished,
             Ok(Status::Paused) => {}
+        }
+        if let Some(s) = d.pending_decision() {
+            return completed(StopKind::Decision, s);
         }
         match mon.why.take() {
             Some(PauseWhy::Terminate(s)) => return completed(StopKind::Termination, s),
@@ -1064,8 +1081,12 @@ fn run_engine(
     }
     #[cfg(not(feature = "spd"))]
     {
-        let _ = req;
         job.set_model(p.info.clone());
+    }
+    if req.config.spd_decisions.is_some() {
+        return Err(
+            "config.spd_decisions: the model has no scaling policies (.spd) to decide".into(),
+        );
     }
     job.set_status(JobStatus::Running);
     let cm = &p.cm;
@@ -1117,6 +1138,7 @@ fn run_plain<C: Compat, F: Flavour>(
 mod spd {
     use super::*;
     use simoxide_spd::Spd;
+    use simoxide_spd::decision::DecisionError;
     use simoxide_spd::log::{Log, Record};
     use simoxide_spd::sim::{Adjuster, SpdRun, spd_of};
     use simoxide_spd::ssx::SsxSpd;
@@ -1249,6 +1271,23 @@ mod spd {
                         s("size_after")
                     ),
                 ),
+                "decision" => (
+                    Level::Info,
+                    format!(
+                        "scaling decision {} at t={}: recommended {}",
+                        s("decision"),
+                        s("t"),
+                        s("recommended")
+                    ),
+                ),
+                "select" => (
+                    Level::Info,
+                    format!(
+                        "scaling decision {} resolved: selected {}",
+                        s("decision"),
+                        s("selected")
+                    ),
+                ),
                 k => (Level::Info, format!("{k} record")),
             };
             self.job.log(level, LogSource::Spd, t, msg, Some(v));
@@ -1280,6 +1319,28 @@ mod spd {
         run: SpdRun<'m, 's, C, F>,
         adj: &'a mut dyn Adjuster<C, F>,
         log: &'a mut dyn Log,
+        /// `config.spd_decisions`: the action lists not used yet, the resolved decisions.
+        decisions: Option<Decisions>,
+    }
+
+    /// The scaling decisions of a run with `config.spd_decisions`.
+    struct Decisions {
+        plan: std::collections::VecDeque<Vec<String>>,
+        resolved: Vec<serde_json::Value>,
+    }
+
+    impl<C: Compat, F: Flavour> WithSpd<'_, '_, '_, C, F> {
+        /// The SPD counters, with the decisions in a run with `config.spd_decisions`.
+        fn counters(&self, mut v: serde_json::Value) -> serde_json::Value {
+            if let Some(d) = &self.decisions {
+                v["decisions"] = serde_json::Value::Array(d.resolved.clone());
+                v["pending_decision"] = self
+                    .run
+                    .pending_decision()
+                    .map_or(serde_json::Value::Null, |p| p.to_json());
+            }
+            v
+        }
     }
 
     impl<C: Compat, F: Flavour> Drive for WithSpd<'_, '_, '_, C, F> {
@@ -1288,8 +1349,43 @@ mod spd {
             next: bool,
             keep: &mut dyn FnMut(&Probe) -> bool,
         ) -> Result<Status, SimError> {
-            self.run
-                .run_while(&mut *self.adj, &mut *self.log, |s| keep(&probe_of(s, next)))
+            loop {
+                let st = self
+                    .run
+                    .run_while(&mut *self.adj, &mut *self.log, |s| keep(&probe_of(s, next)))?;
+                let Some(d) = &mut self.decisions else {
+                    return Ok(st);
+                };
+                if st != Status::Paused || self.run.pending_decision().is_none() {
+                    return Ok(st);
+                }
+                let Some(actions) = d.plan.pop_front() else {
+                    return Ok(st);
+                };
+                let names: Vec<&str> = actions.iter().map(String::as_str).collect();
+                let n = d.resolved.len();
+                let r = self
+                    .run
+                    .decide(&mut *self.adj, &mut *self.log, &names)
+                    .map_err(|e| match e {
+                        DecisionError::Sim(e) => e,
+                        e => SimError {
+                            message: format!("config.spd_decisions[{n}]: {e}"),
+                            at_ns: self.run.sim.state().now_ns(),
+                            kind: SimErrorKind::Model,
+                        },
+                    })?;
+                d.resolved.push(r.to_json());
+            }
+        }
+        fn pending_decision(&self) -> Option<String> {
+            let d = self.run.pending_decision()?;
+            Some(format!(
+                "scaling decision {} pending at t={} s (recommended: {}): config.spd_decisions has no action list for it",
+                d.decision,
+                d.time_ns as f64 / 1e9,
+                d.policies().join(", ")
+            ))
         }
         fn probe(&self) -> Probe {
             probe_of(self.run.sim.state(), true)
@@ -1301,24 +1397,29 @@ mod spd {
             self.run.sim.into_state().into_measurements()
         }
         fn finish(self) -> (Result<RunResult, SimError>, Option<serde_json::Value>) {
+            let extra = self.counters(serde_json::json!({}));
             match self.run.finish() {
-                Ok((r, _, s)) => (
-                    Ok(r),
-                    Some(serde_json::json!({
+                Ok((r, _, s)) => {
+                    let mut v = serde_json::json!({
                         "evaluations": s.evaluations,
                         "requests": s.requests,
                         "adjustments_ok": s.adjustments_ok,
                         "pending": s.pending,
-                    })),
-                ),
+                    });
+                    if let (Some(v), serde_json::Value::Object(extra)) = (v.as_object_mut(), extra)
+                    {
+                        v.extend(extra);
+                    }
+                    (Ok(r), Some(v))
+                }
                 Err(e) => (Err(e), None),
             }
         }
         fn spd_counters(&self) -> Option<serde_json::Value> {
-            Some(serde_json::json!({
+            Some(self.counters(serde_json::json!({
                 "evaluations": self.run.state.evaluations,
                 "requests": self.run.state.requests,
-            }))
+            })))
         }
         fn warnings(&self) -> Vec<String> {
             self.run.sim.state().warnings().to_vec()
@@ -1341,6 +1442,21 @@ mod spd {
         let mut adj = adjuster(&spd.quirks())?;
         let cfg = p.cfg.clone();
         let cm = &p.cm;
+        let decisions = match &req.config.spd_decisions {
+            Some(plan) => {
+                if p.flavour == FlavourKind::SlingshotExact {
+                    return Err(
+                        "config.spd_decisions: scaling decisions run in the simulizar and slingshot flavours, not in slingshot-exact".into(),
+                    );
+                }
+                check_actions(spd, plan)?;
+                Some(Decisions {
+                    plan: plan.iter().cloned().collect(),
+                    resolved: Vec::new(),
+                })
+            }
+            None => None,
+        };
         if p.flavour == FlavourKind::SlingshotExact {
             if p.hpa.is_some() {
                 return Err("HPA autoscalers run in the simulizar and slingshot flavours, not in slingshot-exact".into());
@@ -1376,6 +1492,7 @@ mod spd {
                     hpa.as_ref(),
                     &mut adj,
                     &mut log,
+                    decisions,
                     mon,
                     interval,
                 )
@@ -1390,6 +1507,7 @@ mod spd {
                     hpa.as_ref(),
                     &mut adj,
                     &mut log,
+                    decisions,
                     mon,
                     interval,
                 )
@@ -1403,6 +1521,7 @@ mod spd {
                     hpa.as_ref(),
                     &mut adj,
                     &mut log,
+                    decisions,
                     mon,
                     interval,
                 )
@@ -1416,6 +1535,7 @@ mod spd {
                     hpa.as_ref(),
                     &mut adj,
                     &mut log,
+                    decisions,
                     mon,
                     interval,
                 )
@@ -1425,6 +1545,29 @@ mod spd {
             #[allow(unreachable_patterns)]
             _ => Err("unsupported flavour".into()),
         }
+    }
+
+    /// Every action of `config.spd_decisions` names a policy (id or name) with a target group.
+    fn check_actions(spd: &Spd, plan: &[Vec<String>]) -> Result<(), String> {
+        let policies = &spd.model().policies;
+        for (i, actions) in plan.iter().enumerate() {
+            for a in actions {
+                match policies.iter().find(|p| &*p.id == a || &*p.name == a) {
+                    None => {
+                        return Err(format!(
+                            "config.spd_decisions[{i}]: no scaling policy named {a}"
+                        ));
+                    }
+                    Some(p) if p.group.is_none() => {
+                        return Err(format!(
+                            "config.spd_decisions[{i}]: scaling policy {a} has no target group to adjust"
+                        ));
+                    }
+                    Some(_) => {}
+                }
+            }
+        }
+        Ok(())
     }
 
     /// Runs a process engine with an SPD interpreter and the optional HPA autoscalers.
@@ -1437,6 +1580,7 @@ mod spd {
         hpa: Option<&simoxide_spd::hpa::Hpa>,
         adj: &mut dyn Adjuster<C, F>,
         log: &mut dyn Log,
+        decisions: Option<Decisions>,
         mon: &mut Monitor,
         interval: Duration,
     ) -> Result<RunEnd, String> {
@@ -1446,7 +1590,13 @@ mod spd {
         if let Some(h) = hpa {
             run = run.with_hpa(h).map_err(|e| e.to_string())?;
         }
-        let mut d = WithSpd { run, adj, log };
+        run.set_pause_on_decision(decisions.is_some());
+        let mut d = WithSpd {
+            run,
+            adj,
+            log,
+            decisions,
+        };
         let end = drive(job, &mut d, mon, interval);
         Ok(conclude(job, d, end, &cfg))
     }
