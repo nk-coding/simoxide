@@ -679,6 +679,7 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
         if let Some(g) = self.model.graph_override() {
             sections.push(graph_section(g, enc)?);
         }
+        sections.extend(crate::snapshot::meas_before_section(&self.meas.m, enc)?);
         let header = Header {
             format: FORMAT,
             simoxide: env!("CARGO_PKG_VERSION").to_string(),
@@ -751,7 +752,8 @@ impl<C: Compat, F: Flavour> RunState<C, F> {
         let engine = s
             .section(ENGINE)
             .ok_or_else(|| SnapshotError::Corrupt("no section `engine`".into()))?;
-        let img: EngineImage<F::Clock> = engine.decode(enc)?;
+        let mut img: EngineImage<F::Clock> = engine.decode(enc)?;
+        crate::snapshot::restore_meas_before(&mut img.meas.m, s, F::Clock::secs(img.now))?;
         let restore = |m: String| SnapshotError::Restore(m);
         // the run's own model
         let model = if img.generation == 0 {

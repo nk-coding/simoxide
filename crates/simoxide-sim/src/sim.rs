@@ -263,6 +263,8 @@ pub struct RunResult {
     pub events: u64,
     /// Final simulation time (ns).
     pub end_ns: i64,
+    /// Final simulation time (s, the engine's clock: `end_ns` is it in whole nanoseconds).
+    pub end_secs: f64,
     /// `mainMeasurementsCount` (finished usage-scenario runs, SIM-6.4).
     pub main_count: i64,
     /// Non-fatal problems (e.g. tape origin mismatches).
@@ -935,6 +937,7 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
             uniforms: self.st.rng.count(),
             events: self.st.n_events,
             end_ns: F::Clock::to_ns(self.st.now),
+            end_secs: F::Clock::secs(self.st.now),
             main_count: self.st.main_count,
             warnings: std::mem::take(&mut self.st.warnings),
         })

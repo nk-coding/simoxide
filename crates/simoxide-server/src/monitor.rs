@@ -748,6 +748,7 @@ mod tests {
                     .collect(),
             ],
             count: 10_000,
+            ..Measurements::default()
         };
         let p = Probe {
             tuples: 10_000,

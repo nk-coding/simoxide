@@ -647,6 +647,7 @@ impl<'m> Engine<'m> {
             series: Vec::new(),
             rows: Vec::new(),
             count: 0,
+            ..Measurements::default()
         };
         let mon = monitor::build(cm, &mut meas);
         Ok(Engine {

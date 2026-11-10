@@ -44,6 +44,7 @@ pub mod sim;
 pub mod snapshot;
 pub mod ssx;
 pub mod stats;
+pub mod summary;
 mod trace;
 pub mod windows;
 

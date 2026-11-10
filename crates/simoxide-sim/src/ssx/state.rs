@@ -1255,6 +1255,7 @@ mod disk {
             if let Some(g) = &self.graph {
                 sections.push(graph_section(g, enc)?);
             }
+            sections.extend(crate::snapshot::meas_before_section(&img.meas, enc)?);
             let phase = match (&img.error, img.done, img.events) {
                 (Some(_), _, _) => "failed",
                 (None, true, _) => "finished",
@@ -1316,7 +1317,8 @@ mod disk {
             let sec = s
                 .section(SSX)
                 .ok_or_else(|| SnapshotError::Corrupt("no section `ssx`".into()))?;
-            let x: SsxIn = sec.decode(h.encoding)?;
+            let mut x: SsxIn = sec.decode(h.encoding)?;
+            crate::snapshot::restore_meas_before(&mut x.engine.meas, s, x.engine.now)?;
             let generation = x.engine.generation;
             let model = if generation == 0 {
                 None
