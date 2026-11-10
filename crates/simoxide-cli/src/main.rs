@@ -1,10 +1,13 @@
 //! `simoxide`: run a PCM model with simoxide-sim (flags mirror `reference/refsim run`), or benchmark it.
 
+use simoxide_sim::snapshot::SimTime;
 use simoxide_sim::{
     CompiledModel, FlavourConfig, FlavourKind, Mode, Outputs, Quirks, RngMode, RunResult, RunSpec,
     SimConfig, Tape,
 };
-use std::io::BufWriter;
+
+mod report;
+use std::io::{BufWriter, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::sync::Arc;
@@ -72,6 +75,9 @@ const USAGE: &str = "usage:
              definitions with a content hash; the run's deployment at the start, its changes
              with their causes, policy state, retired elements and the metadata of every
              measurement series; docs/guide/runtime-metadata.md)
+             [--report FILE.json]   (the result report: interval boundaries, why the run
+             stopped, decisions, the files written, counters; also when the run fails;
+             docs/guide/result-report.md)
   simoxide resume FILE --model <dir> [--run-json run.json] [--trace out.jsonl] [--tape out.jsonl]
              [--measurements out.csv] [--pause-at T ... --snapshot FILE2] [--until T]
              [--pause-when COND]... [--spd-log ...] [--spd-quirks ...] [--rules DIR]
@@ -82,6 +88,7 @@ const USAGE: &str = "usage:
              [--measurements-scope cumulative|interval]   (default: the snapshot's; cumulative:
              the rows of the run from time 0, interval: the tuples recorded since the restore)
              [--summary FILE.json ...]   (as for run: the tuples recorded since the restore)
+             [--report FILE.json]   (as for run; the interval starts at the snapshot's end)
              [--change FILE.changes]... [--transform X.qvto]...   (change the model before it
              continues, in the given order: a change file, a QVTo transformation run once;
              `reconfiguration` feature; --rules DIR with other rules than the snapshot's replaces
@@ -185,6 +192,17 @@ struct Args {
     runtime_metadata: Option<PathBuf>,
     /// Resolved: the hash of the model file, for the runtime file.
     model_hash: Option<String>,
+    /// `--report FILE`.
+    report: Option<PathBuf>,
+    /// The `--pause-when` conditions as given.
+    pause_when_text: Vec<String>,
+    /// `resume`: the logical end of the snapshot's interval (its header's `interval_end`), the
+    /// start of this one; `None`: the snapshot's clock.
+    start_end: Option<SimTime>,
+    /// `resume`: the events of the snapshot resumed (0 for `run`).
+    start_events: u64,
+    /// `resume`: the behaviour flags taken from the snapshot (report).
+    restored: Vec<&'static str>,
 }
 
 /// A change step of `resume` (`--change`, `--transform`).
@@ -259,6 +277,11 @@ fn parse_args() -> Result<Args, String> {
         model_metadata: None,
         runtime_metadata: None,
         model_hash: None,
+        report: None,
+        pause_when_text: Vec::new(),
+        start_end: None,
+        start_events: 0,
+        restored: Vec::new(),
     };
     let secs = |f: &str, v: String| -> Result<i64, String> {
         let t: f64 = v.parse().map_err(|e| format!("{f}: {e}"))?;
@@ -390,9 +413,12 @@ fn parse_args() -> Result<Args, String> {
                 ))
             }
             "--snapshot" => a.snapshot = Some(val()?.into()),
-            "--pause-when" => a
-                .pause_when
-                .push(simoxide_sim::sim::watch::parse_condition(&val()?)?),
+            "--pause-when" => {
+                let v = val()?;
+                a.pause_when
+                    .push(simoxide_sim::sim::watch::parse_condition(&v)?);
+                a.pause_when_text.push(v);
+            }
             "--change" => a.changes.push(ChangeArg::File(val()?.into())),
             "--transform" => a.changes.push(ChangeArg::Transform(val()?.into())),
             "--enforce" => a.enforce.extend(
@@ -425,6 +451,7 @@ fn parse_args() -> Result<Args, String> {
                 }
             }
             "--summary" => a.summary = Some(val()?.into()),
+            "--report" => a.report = Some(val()?.into()),
             "--summary-series" => a
                 .summary_series
                 .push(simoxide_sim::sim::watch::parse_series_sel(&val()?)?),
@@ -523,7 +550,7 @@ fn setup_with_rules(a: &Args) -> Result<(CompiledModel, SimConfig, Option<PathBu
         }
         FlavourKind::SlingshotExact => FlavourConfig::slingshot_exact(),
     };
-    let cm = CompiledModel::compile_flavour(model, flavour).map_err(|e| e.to_string())?;
+    let cm = CompiledModel::compile_flavour(model, flavour).map_err(crate::report::sim_err)?;
     let name = a.name.clone().unwrap_or_else(|| {
         std::fs::canonicalize(&dir)
             .ok()
@@ -617,7 +644,9 @@ fn run(a: &Args) -> Result<(), String> {
     }
     let mut a2 = a.clone();
     a2.interval = a.measurements_scope == Some(true);
+    report::invocation(&a2);
     let (cm, cfg, rules_dir) = setup_with_rules(&a2)?;
+    report::config(&cfg);
     for w in &cm.warnings {
         eprintln!("warning: {w}");
     }
@@ -663,7 +692,11 @@ fn run(a: &Args) -> Result<(), String> {
         {
             snap::plain(a, &cm, Ok(cfg), out)?
         }
-        None => End::Finished(simoxide_sim::run(&cm, cfg, out).map_err(|e| e.to_string())?),
+        None => {
+            let info = RunInfo::of(&cfg, 0);
+            let r = simoxide_sim::run(&cm, cfg, out).map_err(report::sim_err)?;
+            End::Finished(r, info)
+        }
     };
     report_end(a, &cm, r, t0)
 }
@@ -708,7 +741,7 @@ fn no_runtime_metadata(a: &Args) -> Result<(), String> {
 
 /// How a run (or a resumed one) ended: at its end, or paused with a snapshot written.
 enum End {
-    Finished(RunResult),
+    Finished(RunResult, RunInfo),
     Paused {
         now_ns: i64,
         /// The same in seconds (the engine's clock).
@@ -717,9 +750,159 @@ enum End {
         measurements: simoxide_sim::Measurements,
         /// The snapshot written: path, bytes, state id.
         snapshot: Option<(PathBuf, u64, String)>,
-        /// The pause condition that held (`--pause-when`).
-        reason: Option<String>,
+        /// Why it paused.
+        why: Why,
+        info: RunInfo,
     },
+}
+
+impl End {
+    #[cfg_attr(not(feature = "reconfiguration"), allow(dead_code))]
+    fn info_mut(&mut self) -> &mut RunInfo {
+        match self {
+            End::Finished(_, i) | End::Paused { info: i, .. } => i,
+        }
+    }
+}
+
+/// Why a run paused.
+#[derive(Clone, Debug)]
+enum Why {
+    /// The pause of `--pause-at`, `--pause-before`, `--pause-events` or `--until`.
+    Pause,
+    /// A condition of the watch: one of `--pause-when` or, after them, the pause.
+    Condition(simoxide_sim::sim::watch::Fired),
+    /// A scaling decision (`--pause-on-decision`): its number and what is pending.
+    Decision(u64, String),
+}
+
+impl Why {
+    /// What the CLI prints as the pause condition.
+    fn text(&self) -> Option<&str> {
+        match self {
+            Why::Pause => None,
+            Why::Condition(f) => Some(&f.reason),
+            Why::Decision(_, s) => Some(s),
+        }
+    }
+
+    /// The watch's condition that held: `Some(Ok(i))` the `i`-th `--pause-when`, `Some(Err(p))`
+    /// the pause `p`.
+    fn condition(&self, a: &Args) -> Option<Result<usize, simoxide_sim::Pause>> {
+        match self {
+            Why::Condition(f) if f.condition < a.pause_when.len() => Some(Ok(f.condition)),
+            Why::Condition(_) => a.pause.map(Err),
+            Why::Pause => a.pause.map(Err),
+            Why::Decision(..) => None,
+        }
+    }
+
+    /// The time (ns) the run was asked to pause at, if it paused at a time it was asked for:
+    /// `--pause-at T` or `--pause-before T` (also as `time T`, `before T`, `--until T`), or
+    /// `elapsed T` (from the clock at the start).
+    fn time_bound(&self, a: &Args) -> Option<i64> {
+        use simoxide_sim::{Condition, Pause};
+        let p = match self.condition(a)? {
+            Err(p) => p,
+            Ok(i) => match &a.pause_when[i] {
+                Condition::At(p) => *p,
+                Condition::Elapsed(d) => Pause::After(a.start_ns.saturating_add(*d)),
+                _ => return None,
+            },
+        };
+        match p {
+            Pause::After(t) | Pause::Before(t) => Some(t),
+            Pause::Events(_) | Pause::Never => None,
+        }
+    }
+}
+
+/// What the report needs of a run at its pause or end, besides its measurements.
+struct RunInfo {
+    /// The run's configuration (a resumed run's is the snapshot's).
+    cfg: SimConfig,
+    /// Finished usage-scenario runs, from time 0.
+    main_count: i64,
+    /// Scaling policies.
+    spd: Option<SpdInfo>,
+    /// Reconfiguration rules: the reconfigurations run and those that changed the model, from
+    /// time 0: at the start of the invocation and now.
+    rules: Option<([u64; 2], [u64; 2])>,
+}
+
+/// The scaling policies of a run in the report.
+#[cfg_attr(not(feature = "spd"), allow(dead_code))]
+struct SpdInfo {
+    /// The compat flags (`--spd-quirks`, or the snapshot's).
+    quirks: String,
+    /// Evaluations, requests and executed adjustments from time 0: at the start of the
+    /// invocation and now.
+    start: [u64; 3],
+    now: [u64; 3],
+    /// The decision file's document (`resolved`, `pending`), for runs that can decide.
+    decisions: Option<serde_json::Value>,
+}
+
+impl RunInfo {
+    fn of(cfg: &SimConfig, main_count: i64) -> RunInfo {
+        RunInfo {
+            cfg: cfg.clone(),
+            main_count,
+            spd: None,
+            rules: None,
+        }
+    }
+}
+
+/// The start of this invocation's interval: the logical end of the snapshot's interval
+/// (`interval_end`), else its clock; 0 for `run` (docs/guide/result-report.md).
+fn interval_start(a: &Args, m: &simoxide_sim::Measurements) -> SimTime {
+    a.start_end.unwrap_or(SimTime {
+        time: m.start_time,
+        time_ns: a.start_ns,
+    })
+}
+
+/// The later of two times (by nanoseconds, then seconds).
+fn later(x: SimTime, y: SimTime) -> SimTime {
+    if (y.time_ns, y.time) > (x.time_ns, x.time) {
+        y
+    } else {
+        x
+    }
+}
+
+/// The logical end of the interval of a run paused or ended at `last` (its clock, the time of
+/// its last event): the time it was asked to pause at, if that is why it paused, else `last`;
+/// never before the interval's start (docs/guide/result-report.md, "Interval boundaries").
+fn interval_end(
+    a: &Args,
+    why: Option<&Why>,
+    m: &simoxide_sim::Measurements,
+    last: SimTime,
+) -> SimTime {
+    let end = later(interval_start(a, m), last);
+    match why.and_then(|w| w.time_bound(a)) {
+        Some(t) => later(
+            end,
+            SimTime {
+                time: t as f64 / 1e9,
+                time_ns: t,
+            },
+        ),
+        None => end,
+    }
+}
+
+/// The `interval_end` of a snapshot's header: the interval's end if it is not the clock.
+fn header_end(
+    a: &Args,
+    why: &Why,
+    m: &simoxide_sim::Measurements,
+    last: SimTime,
+) -> Option<SimTime> {
+    let end = interval_end(a, Some(why), m, last);
+    (end != last).then_some(end)
 }
 
 /// The first tuple number of this invocation's interval (`None`: unknown).
@@ -781,7 +964,7 @@ fn write_summary(
             o.insert("state".into(), s.into());
         }
     }
-    let mut text = serde_json::to_string_pretty(&doc).map_err(|e| e.to_string())?;
+    let mut text = serde_json::to_string_pretty(&doc).map_err(crate::report::sim_err)?;
     text.push('\n');
     std::fs::write(p, text).map_err(|e| format!("{}: {e}", p.display()))
 }
@@ -809,11 +992,24 @@ fn report_end(a: &Args, cm: &CompiledModel, r: End, t0: Instant) -> Result<(), S
         }
         eprintln!("{line}");
     };
-    match r {
-        End::Finished(r) => {
+    // the report comes last, when every file it names is complete
+    let ended = match &r {
+        End::Finished(r, info) => {
             interval(&r.measurements, false, None);
             write_summary(a, cm, &r.measurements, (r.end_secs, r.end_ns), None)?;
-            report(a, r, t0)
+            report(a, r, t0)?;
+            report::Ended {
+                why: None,
+                measurements: &r.measurements,
+                last: SimTime {
+                    time: r.end_secs,
+                    time_ns: r.end_ns,
+                },
+                events: r.events,
+                main_count: r.main_count,
+                snapshot: None,
+                info,
+            }
         }
         End::Paused {
             now_ns,
@@ -821,47 +1017,65 @@ fn report_end(a: &Args, cm: &CompiledModel, r: End, t0: Instant) -> Result<(), S
             events,
             measurements,
             snapshot,
-            reason,
+            why,
+            info,
         } => {
-            if let Some(r) = reason {
+            if let Some(r) = why.text() {
                 eprintln!("pause condition: {r}");
             }
             if let Some(p) = &a.measurements {
-                let mut f = create(p)?;
-                measurements
-                    .write_csv(&mut f)
-                    .map_err(|e| format!("{}: {e}", p.display()))?;
+                write_csv(p, measurements)?;
             }
             let state = snapshot.as_ref().map(|s| s.2.as_str());
-            interval(&measurements, true, state);
-            write_summary(a, cm, &measurements, (now_s, now_ns), state)?;
+            interval(measurements, true, state);
+            write_summary(a, cm, measurements, (*now_s, *now_ns), state)?;
             let snap = match snapshot {
                 Some((p, n, _)) => format!(" snapshot={} ({n} bytes)", p.display()),
                 None => String::new(),
             };
             eprintln!(
                 "paused t={} events={} measurements={}{snap} wall={:.3}ms",
-                now_ns as f64 / 1e9,
+                *now_ns as f64 / 1e9,
                 events,
                 measurements.count,
                 t0.elapsed().as_secs_f64() * 1e3
             );
-            Ok(())
+            report::Ended {
+                why: Some(why),
+                measurements,
+                last: SimTime {
+                    time: *now_s,
+                    time_ns: *now_ns,
+                },
+                events: *events,
+                main_count: info.main_count,
+                snapshot: snapshot.as_ref(),
+                info,
+            }
         }
+    };
+    if let Some(p) = &a.report {
+        report::write(p, &report::ended(a, &ended, t0))?;
     }
+    Ok(())
+}
+
+/// Writes `m` to `p` (`measurements.csv`), flushed.
+fn write_csv(p: &Path, m: &simoxide_sim::Measurements) -> Result<(), String> {
+    let mut f = create(p)?;
+    m.write_csv(&mut f)
+        .and_then(|()| f.flush())
+        .map_err(|e| format!("{}: {e}", p.display()))
 }
 
 /// Writes the measurements and the summary line of a run.
-fn report(a: &Args, r: RunResult, t0: Instant) -> Result<(), String> {
+fn report(a: &Args, r: &RunResult, t0: Instant) -> Result<(), String> {
     let dt = t0.elapsed();
     for w in &r.warnings {
         eprintln!("warning: {w}");
     }
     if let Some(p) = &a.measurements {
-        let mut f = create(p)?;
-        r.measurements
-            .write_csv(&mut f)
-            .map_err(|e| format!("{}: {e}", p.display()))?;
+        write_csv(p, &r.measurements)?;
     }
     eprintln!(
         "t_end={} events={} uniforms={} measurements={} main_count={} wall={:.3}ms",
@@ -879,7 +1093,7 @@ fn report(a: &Args, r: RunResult, t0: Instant) -> Result<(), String> {
 /// directory has a `.spd` file.
 #[cfg(feature = "spd")]
 mod spd {
-    use super::{Args, End, create};
+    use super::{Args, End, RunInfo, SpdInfo, Why, create};
     use simoxide_sim::compat::Compat;
     use simoxide_sim::snapshot::Snapshot;
     use simoxide_sim::{CompiledModel, Flavour, Mode, Outputs, SimConfig, Simulation, Status};
@@ -949,7 +1163,7 @@ mod spd {
     /// The interpreter of a resumed run: built with the snapshot's compat flags (unless
     /// `--spd-quirks` says otherwise; restoring then checks they agree).
     pub fn of_snapshot(a: &Args, cm: &CompiledModel, s: &Snapshot) -> Result<Option<Spd>, String> {
-        let q = simoxide_spd::snapshot::quirks_of(s).map_err(|e| e.to_string())?;
+        let q = simoxide_spd::snapshot::quirks_of(s).map_err(crate::report::sim_err)?;
         of_with(a, cm, q)
     }
 
@@ -971,7 +1185,7 @@ mod spd {
                     .into(),
             );
         }
-        let s = spd_of(&cm.model, q).map_err(|e| e.to_string())?;
+        let s = spd_of(&cm.model, q).map_err(crate::report::sim_err)?;
         if let Some(s) = &s
             && let Some(d) = s.dropped()
         {
@@ -998,11 +1212,14 @@ mod spd {
         let mut sets = Vec::new();
         let groups = Some(spd.model());
         let mut rec;
+        let mut start = [0; 3];
         let mut r = match restore {
             Some(snap) => {
                 let mut r = SpdRun::<C, F>::restore_snapshot_hpa(snap, cm, spd, hpa.as_ref(), out)
-                    .map_err(|e| e.to_string())?;
+                    .map_err(crate::report::sim_err)?;
                 super::timeout(a, &mut r.sim)?;
+                crate::report::config(r.sim.state().config());
+                start = counts(&r.counters());
                 if a.interval {
                     r.sim.take_measurement_rows();
                 }
@@ -1030,7 +1247,7 @@ mod spd {
                 {
                     adj.run
                         .restore_section(&r.sim, snap)
-                        .map_err(|e| e.to_string())?;
+                        .map_err(crate::report::sim_err)?;
                     if super::changes::with_qvto(a, &mut r.sim, &mut adj.run, rec.as_mut(), groups)?
                     {
                         r.model_changed();
@@ -1045,7 +1262,7 @@ mod spd {
                 }
                 if !a.enforce.is_empty() {
                     let names: Vec<&str> = a.enforce.iter().map(String::as_str).collect();
-                    r.enforce_policies(&names).map_err(|e| e.to_string())?;
+                    r.enforce_policies(&names).map_err(crate::report::sim_err)?;
                 }
                 if !sets.is_empty() && hpa.is_none() {
                     return Err("HPA parameters (--hpa-set, `hpa` change lines): the run has no HPA autoscaler".into());
@@ -1058,10 +1275,10 @@ mod spd {
                 r
             }
             None => {
-                let sim = Simulation::<C, F>::create(cm, cfg, out).map_err(|e| e.to_string())?;
-                let r = SpdRun::new(sim, spd).map_err(|e| e.to_string())?;
+                let sim = Simulation::<C, F>::create(cm, cfg, out).map_err(crate::report::sim_err)?;
+                let r = SpdRun::new(sim, spd).map_err(crate::report::sim_err)?;
                 let r = match &hpa {
-                    Some(h) => r.with_hpa(h).map_err(|e| e.to_string())?,
+                    Some(h) => r.with_hpa(h).map_err(crate::report::sim_err)?,
                     None => r,
                 };
                 rec = super::meta::begin(a, &r.sim, groups, || policy_state(&r));
@@ -1102,14 +1319,14 @@ mod spd {
                 w.arm(&r.sim)?;
                 let st = r
                     .run_while(adjuster, &mut log, |s| w.keep_going(s))
-                    .map_err(|e| e.to_string())?;
+                    .map_err(crate::report::sim_err)?;
                 (st, None)
             }
             None => {
                 let before = super::snap::before_ns(a)?;
                 let st = r
                     .run_until(adjuster, &mut log, before)
-                    .map_err(|e| e.to_string())?;
+                    .map_err(crate::report::sim_err)?;
                 (st, before)
             }
         };
@@ -1118,27 +1335,49 @@ mod spd {
         }
         hpa_report(&r);
         // written after the snapshot, which it describes
-        let decisions = a
-            .decision_file
-            .as_ref()
-            .map(|p| (p, decision::report(resolved.as_ref(), r.pending_decision())));
+        let report = decision::report(resolved.as_ref(), r.pending_decision());
+        let decisions = a.decision_file.as_ref().map(|p| (p, &report));
         let decision = r.pending_decision().map(|d| {
-            format!(
-                "scaling decision {} pending at t={}: recommended [{}]",
+            Why::Decision(
                 d.decision,
-                d.time_ns as f64 / 1e9,
-                d.policies().join(", ")
+                format!(
+                    "scaling decision {} pending at t={}: recommended [{}]",
+                    d.decision,
+                    d.time_ns as f64 / 1e9,
+                    d.policies().join(", ")
+                ),
             )
         });
+        let info = |r: &SpdRun<'_, '_, C, F>| RunInfo {
+            spd: Some(SpdInfo {
+                quirks: spd.quirks().name(),
+                start,
+                now: counts(&r.counters()),
+                decisions: Some(report.clone()),
+            }),
+            ..RunInfo::of(r.sim.state().config(), r.sim.state().main_count())
+        };
         if status == Status::Paused && (before.is_some() || watch.is_some() || decision.is_some()) {
             let measurements = match a.interval {
                 true => r.sim.take_measurement_rows(),
                 false => r.sim.state().measurements().clone(),
             };
+            let why = decision
+                .or_else(|| {
+                    watch
+                        .as_ref()
+                        .and_then(|w| w.fired().cloned().map(Why::Condition))
+                })
+                .unwrap_or(Why::Pause);
+            let st = r.sim.state();
+            let last = super::SimTime {
+                time: st.now_secs(),
+                time_ns: st.now_ns(),
+            };
             let snapshot = match &a.snapshot {
                 Some(p) => {
                     let opts = super::snap::options(a);
-                    let mut s = r.snapshot_value(opts.encoding).map_err(|e| e.to_string())?;
+                    let mut s = r.snapshot_value(opts.encoding).map_err(crate::report::sim_err)?;
                     #[cfg(not(feature = "reconfiguration"))]
                     s.sections.extend(carry.sections(&r.sim, opts.encoding)?);
                     #[cfg(feature = "reconfiguration")]
@@ -1146,10 +1385,11 @@ mod spd {
                         s.sections.push(
                             adj.run
                                 .snapshot_section(&r.sim, opts.encoding)
-                                .map_err(|e| e.to_string())?,
+                                .map_err(crate::report::sim_err)?,
                         );
                     }
-                    Some(super::snap::write(a, p, s)?)
+                    let end = super::header_end(a, &why, &measurements, last);
+                    Some(super::snap::write(a, p, s, end)?)
                 }
                 None => None,
             };
@@ -1177,8 +1417,8 @@ mod spd {
                 events: st.events(),
                 measurements,
                 snapshot,
-                reason: decision
-                    .or_else(|| watch.and_then(|w| w.fired().map(|f| f.reason.clone()))),
+                why,
+                info: info(&r),
             });
         }
         let end_meta = rec.is_some().then(|| {
@@ -1189,7 +1429,9 @@ mod spd {
                 policy_state(&r),
             )
         });
-        let (res, _, s) = r.finish().map_err(|e| e.to_string())?;
+        let mut info = info(&r);
+        let (res, _, s) = r.finish().map_err(crate::report::sim_err)?;
+        info.main_count = res.main_count;
         if let Some((p, v)) = &decisions {
             write_json(p, v)?;
         }
@@ -1220,7 +1462,12 @@ mod spd {
             s.evaluations,
             s.requests
         );
-        Ok(End::Finished(res))
+        Ok(End::Finished(res, info))
+    }
+
+    /// Evaluations, requests and executed adjustments of SPD counters.
+    fn counts(s: &simoxide_spd::sim::SpdSummary) -> [u64; 3] {
+        [s.evaluations, s.requests, s.adjustments_ok]
     }
 
     /// The policy state of `--runtime-metadata`.
@@ -1252,7 +1499,7 @@ mod spd {
 
     /// Writes `v` to `p` (pretty JSON, a final newline).
     fn write_json(p: &std::path::Path, v: &serde_json::Value) -> Result<(), String> {
-        let mut text = serde_json::to_string_pretty(v).map_err(|e| e.to_string())?;
+        let mut text = serde_json::to_string_pretty(v).map_err(crate::report::sim_err)?;
         text.push('\n');
         std::fs::write(p, text).map_err(|e| format!("{}: {e}", p.display()))
     }
@@ -1294,13 +1541,14 @@ mod spd {
         #[cfg(not(feature = "reconfiguration"))]
         let mut adj = NoAdjustment;
         let (mut run, snap) = match start {
-            Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(|e| e.to_string())?, None),
+            Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(crate::report::sim_err)?, None),
             Err(s) => {
-                let mut run = SsxRun::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?;
+                let mut run = SsxRun::restore_snapshot(s, cm, out).map_err(crate::report::sim_err)?;
                 run.set_deadline(super::deadline(a)?);
                 (run, Some(s))
             }
         };
+        crate::report::config(run.config());
         if a.interval && snap.is_some() {
             run.take_measurement_rows();
         }
@@ -1309,7 +1557,7 @@ mod spd {
             if let Some(s) = snap {
                 adj.run
                     .restore_section(&run, s)
-                    .map_err(|e| e.to_string())?;
+                    .map_err(crate::report::sim_err)?;
             }
             super::changes::ssx_with_qvto(a, &mut run, &mut adj.run)?
         };
@@ -1320,29 +1568,48 @@ mod spd {
         let mut log = JsonlLog::new(sink);
         log.all = a.spd_log_all;
         let mut hooks = match snap {
-            Some(s) => SsxSpd::restore(spd, s, &mut adj, &mut log).map_err(|e| e.to_string())?,
+            Some(s) => SsxSpd::restore(spd, s, &mut adj, &mut log).map_err(crate::report::sim_err)?,
             None => SsxSpd::new(spd, &cm.model, &mut adj, &mut log),
         };
         #[cfg(feature = "reconfiguration")]
         if changed {
             hooks.model_changed(&run.compiled().model.graph);
         }
-        let (status, reason) =
+        let start = [
+            hooks.state.evaluations,
+            hooks.state.requests,
+            hooks.adjusted_ok,
+        ];
+        let (status, why) =
             super::ssxrun::drive(a, &mut run, Some(&mut hooks as &mut dyn SpdHooks))?;
+        let info = |run: &SsxRun<'_>, hooks: &SsxSpd<'_, '_>| RunInfo {
+            spd: Some(SpdInfo {
+                quirks: spd.quirks().name(),
+                start,
+                now: [
+                    hooks.state.evaluations,
+                    hooks.state.requests,
+                    hooks.adjusted_ok,
+                ],
+                decisions: None,
+            }),
+            ..RunInfo::of(run.config(), run.main_count())
+        };
         let (end, ok, st) = if status == simoxide_sim::Status::Paused {
             let enc = super::snap::options(a).encoding;
             let mut extra = match &a.snapshot {
-                Some(_) => hooks.snapshot_sections(enc).map_err(|e| e.to_string())?,
+                Some(_) => hooks.snapshot_sections(enc).map_err(crate::report::sim_err)?,
                 None => Vec::new(),
             };
             let (ok, st) = (hooks.adjusted_ok, hooks.state.clone());
+            let info = info(&run, &hooks);
             drop(hooks);
             #[cfg(feature = "reconfiguration")]
             if a.snapshot.is_some() && adj.run.is_started() {
                 extra.push(
                     adj.run
                         .snapshot_section(&run, enc)
-                        .map_err(|e| e.to_string())?,
+                        .map_err(crate::report::sim_err)?,
                 );
             }
             #[cfg(not(feature = "reconfiguration"))]
@@ -1351,10 +1618,17 @@ mod spd {
                 true => run.take_measurement_rows(),
                 false => run.measurements().clone(),
             };
+            let last = super::SimTime {
+                time: run.now(),
+                time_ns: run.now_ns(),
+            };
             let snapshot = match &a.snapshot {
                 Some(p) => {
-                    let s = run.snapshot_value(enc, extra).map_err(|e| e.to_string())?;
-                    Some(super::snap::write(a, p, s)?)
+                    let s = run
+                        .snapshot_value(enc, extra)
+                        .map_err(crate::report::sim_err)?;
+                    let end = super::header_end(a, &why, &measurements, last);
+                    Some(super::snap::write(a, p, s, end)?)
                 }
                 None => None,
             };
@@ -1364,14 +1638,31 @@ mod spd {
                 events: run.events(),
                 measurements,
                 snapshot,
-                reason,
+                why,
+                info,
             });
             (end, ok, st)
         } else {
+            let cfg = run.config().clone();
             let r = run.finish(Some(&mut hooks as &mut dyn SpdHooks));
             let (ok, st) = (hooks.adjusted_ok, hooks.state.clone());
+            let now = [st.evaluations, st.requests, ok];
             drop(hooks);
-            (r.map(End::Finished).map_err(|e| e.to_string()), ok, st)
+            let end = r
+                .map(|r| {
+                    let info = RunInfo {
+                        spd: Some(SpdInfo {
+                            quirks: spd.quirks().name(),
+                            start,
+                            now,
+                            decisions: None,
+                        }),
+                        ..RunInfo::of(&cfg, r.main_count)
+                    };
+                    End::Finished(r, info)
+                })
+                .map_err(crate::report::sim_err);
+            (end, ok, st)
         };
         if a.spd_log.is_some() {
             log.finish().map_err(|e| format!("--spd-log: {e}"))?;
@@ -1472,7 +1763,7 @@ mod spd {
 /// process runs the rules of the folder (DESIGN-SPD R1).
 #[cfg(feature = "reconfiguration")]
 mod rules {
-    use super::{Args, End, create};
+    use super::{Args, End, RunInfo, SimTime, Why, create};
     use simoxide_reconf::{QvtoCore, RuleSet, RulesHost, RulesRun, RunConfig};
     use simoxide_sim::compat::Compat;
     use simoxide_sim::inspect::Recorder;
@@ -1492,20 +1783,20 @@ mod rules {
         dir: &Path,
         restore: Option<&Snapshot>,
     ) -> Result<End, String> {
-        let core = QvtoCore::new().map_err(|e| e.to_string())?;
-        let rules = RuleSet::load_dir(&core, dir).map_err(|e| e.to_string())?;
+        let core = QvtoCore::new().map_err(crate::report::sim_err)?;
+        let rules = RuleSet::load_dir(&core, dir).map_err(crate::report::sim_err)?;
         let mode = super::changes::mode(a)?;
         let cfg_q = RunConfig {
             mode,
             ..RunConfig::default()
         };
-        let mut host = RulesHost::new(&core, rules, cfg_q).map_err(|e| e.to_string())?;
+        let mut host = RulesHost::new(&core, rules, cfg_q).map_err(crate::report::sim_err)?;
         if a.rules_log.is_some() {
             host = host.keep_records();
         }
         let mut run = match restore {
             Some(snap) if snap.section(simoxide_reconf::RULES).is_some() => {
-                let old = RulesRun::<C>::snapshot_rules(snap).map_err(|e| e.to_string())?;
+                let old = RulesRun::<C>::snapshot_rules(snap).map_err(crate::report::sim_err)?;
                 let new: Vec<String> = host
                     .rules()
                     .rules
@@ -1518,7 +1809,7 @@ mod rules {
                     eprintln!("rules replaced: {old:?} -> {new:?}");
                     RulesRun::<C>::restore_snapshot_replacing(snap, cm, host, out)
                 }
-                .map_err(|e| e.to_string())?;
+                .map_err(crate::report::sim_err)?;
                 if a.interval {
                     run.sim_mut().take_measurement_rows();
                 }
@@ -1527,7 +1818,7 @@ mod rules {
             Some(snap) => {
                 // a snapshot without rules: they are added at the resume
                 let mut sim =
-                    Simulation::<C>::restore_snapshot(snap, cm, out).map_err(|e| e.to_string())?;
+                    Simulation::<C>::restore_snapshot(snap, cm, out).map_err(crate::report::sim_err)?;
                 if a.interval {
                     sim.take_measurement_rows();
                 }
@@ -1542,13 +1833,19 @@ mod rules {
                 RulesRun::new(sim, host)
             }
             None => {
-                let sim = Simulation::<C>::create(cm, cfg, out).map_err(|e| e.to_string())?;
+                let sim = Simulation::<C>::create(cm, cfg, out).map_err(crate::report::sim_err)?;
                 RulesRun::new(sim, host)
             }
         };
+        let stats = |run: &mut RulesRun<'_, C>| {
+            let s = run.host_mut().stats();
+            [s.runs, s.changed]
+        };
+        let start = stats(&mut run);
         let mut rec = super::meta::begin(a, run.sim(), None, || serde_json::Value::Null);
         if let Some(snap) = restore {
             super::timeout(a, run.sim_mut())?;
+            crate::report::config(run.sim().state().config());
             run = super::changes::with_rules(a, run, snap, rec.as_mut())?;
         }
         let mut watch = super::snap::watch(a);
@@ -1568,7 +1865,7 @@ mod rules {
                 st
             }
         }
-        .map_err(|e| e.to_string())?;
+        .map_err(crate::report::sim_err)?;
         let paused = status == Status::Paused && (a.pause.is_some() || watch.is_some());
         // (time, generation, the run's own model) at the end, for --runtime-metadata
         let end_meta = {
@@ -1579,19 +1876,29 @@ mod rules {
                 st.model().compiled().cloned(),
             )
         };
-        let (end, mut host) = if paused {
+        let (mut end, mut host) = if paused {
             // the records so far go to this run's log; the snapshot holds none
             let records = run.host_mut().take_records();
             let measurements = match a.interval {
                 true => run.sim_mut().take_measurement_rows(),
                 false => run.sim().state().measurements().clone(),
             };
+            let why = watch
+                .as_ref()
+                .and_then(|w| w.fired().cloned())
+                .map_or(Why::Pause, Why::Condition);
+            let st = run.sim().state();
+            let last = SimTime {
+                time: st.now_secs(),
+                time_ns: st.now_ns(),
+            };
             let snapshot = match &a.snapshot {
                 Some(p) => {
                     let s = run
                         .snapshot_value(super::snap::options(a).encoding)
-                        .map_err(|e| e.to_string())?;
-                    Some(super::snap::write(a, p, s)?)
+                        .map_err(crate::report::sim_err)?;
+                    let end = super::header_end(a, &why, &measurements, last);
+                    Some(super::snap::write(a, p, s, end)?)
                 }
                 None => None,
             };
@@ -1616,9 +1923,8 @@ mod rules {
                 events: st.events(),
                 measurements,
                 snapshot,
-                reason: watch
-                    .as_ref()
-                    .and_then(|w| w.fired().map(|f| f.reason.clone())),
+                why,
+                info: RunInfo::of(st.config(), st.main_count()),
             };
             let (_, mut host) = run.into_parts();
             if let Some(r) = host_records(&mut host) {
@@ -1626,7 +1932,8 @@ mod rules {
             }
             (end, host)
         } else {
-            let (res, host) = run.finish().map_err(|e| e.to_string())?;
+            let cfg = run.sim().state().config().clone();
+            let (res, host) = run.finish().map_err(crate::report::sim_err)?;
             super::meta::finish(
                 a,
                 rec,
@@ -1641,7 +1948,8 @@ mod rules {
                     paused: false,
                 },
             )?;
-            (End::Finished(res), host)
+            let info = RunInfo::of(&cfg, res.main_count);
+            (End::Finished(res, info), host)
         };
         if let Some(p) = &a.rules_log {
             let mut f = create(p)?;
@@ -1671,6 +1979,7 @@ mod rules {
             }
         }
         let s = host.stats();
+        end.info_mut().rules = Some((start, [s.runs, s.changed]));
         eprintln!(
             "rules: {} rule(s), {} reconfiguration(s), {} succeeded, {} changed the model, {:.1} ms (PRM {:.1} ms)",
             host.rules().rules.len(),
@@ -1820,7 +2129,7 @@ mod changes {
         ) -> Result<Vec<Section>, String> {
             match &self.qvto {
                 Some(q) if q.is_started() => Ok(vec![
-                    q.snapshot_section(sim, enc).map_err(|e| e.to_string())?,
+                    q.snapshot_section(sim, enc).map_err(crate::report::sim_err)?,
                 ]),
                 _ => Ok(Vec::new()),
             }
@@ -1891,7 +2200,7 @@ mod changes {
         let mut out = Vec::new();
         for ch in &a.changes {
             let c = add_step(ResumeChanges::new(), ch, q.core())?;
-            let steps = c.apply(sim, q).map_err(|e| e.to_string())?;
+            let steps = c.apply(sim, q).map_err(crate::report::sim_err)?;
             if steps.is_empty() {
                 // a change file with HPA parameters only
                 continue;
@@ -1943,10 +2252,10 @@ mod changes {
         if a.changes.is_empty() && !has_qvto {
             return Ok(Carry::none());
         }
-        let core = QvtoCore::new().map_err(|e| e.to_string())?;
-        let mut q = QvtoRun::new(&core, config(a)?).map_err(|e| e.to_string())?;
+        let core = QvtoCore::new().map_err(crate::report::sim_err)?;
+        let mut q = QvtoRun::new(&core, config(a)?).map_err(crate::report::sim_err)?;
         if let Some(s) = snap {
-            q.restore_section(sim, s).map_err(|e| e.to_string())?;
+            q.restore_section(sim, s).map_err(crate::report::sim_err)?;
         }
         let steps = apply_steps(a, sim, &mut q, rec, None)?;
         report(&steps);
@@ -1964,14 +2273,14 @@ mod changes {
         if a.changes.is_empty() && !has_qvto {
             return Ok(Carry::none());
         }
-        let core = QvtoCore::new().map_err(|e| e.to_string())?;
-        let mut q = QvtoRun::new(&core, config(a)?).map_err(|e| e.to_string())?;
+        let core = QvtoCore::new().map_err(crate::report::sim_err)?;
+        let mut q = QvtoRun::new(&core, config(a)?).map_err(crate::report::sim_err)?;
         if let Some(s) = snap {
-            q.restore_section(&*run, s).map_err(|e| e.to_string())?;
+            q.restore_section(&*run, s).map_err(crate::report::sim_err)?;
         }
         let steps = build(a, &core)?
             .apply_to(run, &mut q)
-            .map_err(|e| e.to_string())?;
+            .map_err(crate::report::sim_err)?;
         report(&steps);
         Ok(Carry { qvto: Some(q) })
     }
@@ -1988,7 +2297,7 @@ mod changes {
         }
         let steps = build(a, q.core())?
             .apply_to(run, q)
-            .map_err(|e| e.to_string())?;
+            .map_err(crate::report::sim_err)?;
         report(&steps);
         Ok(!steps.is_empty())
     }
@@ -2016,13 +2325,13 @@ mod changes {
         a: &Args,
         quirks: &simoxide_spd::Quirks,
     ) -> Result<simoxide_reconf::QvtoAdjuster, String> {
-        let core = QvtoCore::new().map_err(|e| e.to_string())?;
+        let core = QvtoCore::new().map_err(crate::report::sim_err)?;
         let mut opts = simoxide_reconf::SpdAdjust::new(quirks);
         opts.mode = match mode(a)? {
             QvtMode::Auto => QvtMode::InsertionOrderSets,
             m => m,
         };
-        simoxide_reconf::QvtoAdjuster::spd(&core, &opts).map_err(|e| e.to_string())
+        simoxide_reconf::QvtoAdjuster::spd(&core, &opts).map_err(crate::report::sim_err)
     }
 
     /// Applies the change steps to a restored SPD run in its adjuster's QVTo state (one QVTo
@@ -2055,7 +2364,7 @@ mod changes {
             // rules added to a run whose QVTo state (if any) is the section `qvto`
             host.qvto()
                 .restore_section(&sim, snap)
-                .map_err(|e| e.to_string())?;
+                .map_err(crate::report::sim_err)?;
         }
         if !a.changes.is_empty() {
             let steps = apply_steps(a, &mut sim, host.qvto(), rec, None)?;
@@ -2160,7 +2469,7 @@ mod explore {
             );
         }
         let (cm, _, _) = setup_with_rules(a)?;
-        let core = QvtoCore::new().map_err(|e| e.to_string())?;
+        let core = QvtoCore::new().map_err(crate::report::sim_err)?;
         let mut variants = Vec::new();
         for (name, file) in &a.variants {
             let mut c = ResumeChanges::new();
@@ -2258,27 +2567,29 @@ mod explore {
 /// The Slingshot-exact engine with pauses and snapshots (`DESIGN-SPD.md` 5.7, "ssx snapshots
 /// as built"): runs without scaling policies (with them: `spd::run_exact`).
 mod ssxrun {
-    use super::{Args, End};
+    use super::{Args, End, RunInfo, Why};
     use simoxide_sim::snapshot::Snapshot;
     use simoxide_sim::ssx::{SpdHooks, SsxRun};
     use simoxide_sim::{CompiledModel, Outputs, SimConfig, Status};
 
     /// Runs `run` to the pause of `a` (`--pause-at` and the like, `--pause-when`) or the end;
-    /// the status and the pause condition that held.
+    /// the status and why it paused.
     pub fn drive(
         a: &Args,
         run: &mut SsxRun<'_>,
         hooks: Option<&mut dyn SpdHooks>,
-    ) -> Result<(Status, Option<String>), String> {
+    ) -> Result<(Status, Why), String> {
         let mut watch = super::snap::watch(a);
         let status = match (&mut watch, a.pause) {
             (Some(w), _) => run.run_watch(w, hooks),
             (None, Some(p)) => run.run_until(p, hooks),
             (None, None) => run.run_until(simoxide_sim::Pause::Never, hooks),
         }
-        .map_err(|e| e.to_string())?;
-        let reason = watch.and_then(|w| w.fired().map(|f| f.reason.clone()));
-        Ok((status, reason))
+        .map_err(crate::report::sim_err)?;
+        let why = watch
+            .and_then(|w| w.fired().cloned())
+            .map_or(Why::Pause, Why::Condition);
+        Ok((status, why))
     }
 
     /// A run without scaling policies: started (`Ok(cfg)`) or restored (with `--change` and
@@ -2294,27 +2605,36 @@ mod ssxrun {
         }
         super::no_runtime_metadata(a)?;
         let (mut run, snap) = match start {
-            Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(|e| e.to_string())?, None),
+            Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(crate::report::sim_err)?, None),
             Err(s) => {
-                let mut run = SsxRun::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?;
+                let mut run = SsxRun::restore_snapshot(s, cm, out).map_err(crate::report::sim_err)?;
                 run.set_deadline(super::deadline(a)?);
                 (run, Some(s))
             }
         };
+        crate::report::config(run.config());
         if a.interval && snap.is_some() {
             run.take_measurement_rows();
         }
         let carry = super::changes::ssx_plain_changes(a, &mut run, snap)?;
-        let (status, reason) = drive(a, &mut run, None)?;
+        let (status, why) = drive(a, &mut run, None)?;
         if status == Status::Finished {
+            let cfg = run.config().clone();
             return run
                 .finish(None)
-                .map(End::Finished)
-                .map_err(|e| e.to_string());
+                .map(|r| {
+                    let info = RunInfo::of(&cfg, r.main_count);
+                    End::Finished(r, info)
+                })
+                .map_err(crate::report::sim_err);
         }
         let measurements = match a.interval {
             true => run.take_measurement_rows(),
             false => run.measurements().clone(),
+        };
+        let last = super::SimTime {
+            time: run.now(),
+            time_ns: run.now_ns(),
         };
         let snapshot = match &a.snapshot {
             Some(p) => {
@@ -2322,8 +2642,9 @@ mod ssxrun {
                 let sections = carry.sections(&run, enc)?;
                 let s = run
                     .snapshot_value(enc, sections)
-                    .map_err(|e| e.to_string())?;
-                Some(super::snap::write(a, p, s)?)
+                    .map_err(crate::report::sim_err)?;
+                let end = super::header_end(a, &why, &measurements, last);
+                Some(super::snap::write(a, p, s, end)?)
             }
             None => None,
         };
@@ -2333,14 +2654,15 @@ mod ssxrun {
             events: run.events(),
             measurements,
             snapshot,
-            reason,
+            why,
+            info: RunInfo::of(run.config(), run.main_count()),
         })
     }
 }
 
 /// Pausing, snapshots and `simoxide resume` (docs/guide/snapshots.md).
 mod snap {
-    use super::{Args, End, create, report_end, setup_with_rules};
+    use super::{Args, End, RunInfo, SimTime, Why, create, report_end, setup_with_rules};
     use simoxide_sim::compat::Compat;
     use simoxide_sim::snapshot::{Encoding, Snapshot, SnapshotOptions};
     use simoxide_sim::{
@@ -2389,18 +2711,27 @@ mod snap {
         Some(Watch::new(c))
     }
 
-    /// Writes `s` to `p`, with the state id of the snapshot resumed as its `parent`; the path,
-    /// the number of bytes and the state id.
-    pub fn write(a: &Args, p: &Path, mut s: Snapshot) -> Result<(PathBuf, u64, String), String> {
+    /// Writes `s` to `p`, with the state id of the snapshot resumed as its `parent` and the
+    /// logical end of the interval if it is not the clock (`end`, [`super::header_end`]); the
+    /// path, the number of bytes and the state id.
+    pub fn write(
+        a: &Args,
+        p: &Path,
+        mut s: Snapshot,
+        end: Option<SimTime>,
+    ) -> Result<(PathBuf, u64, String), String> {
         s.header.parent = a.parent.as_ref().map(|(id, _)| id.clone());
+        s.header.interval_end = end;
         let mut bytes = Vec::new();
-        let h = s.write(&mut bytes).map_err(|e| e.to_string())?;
+        let h = s.write(&mut bytes).map_err(crate::report::sim_err)?;
         std::fs::write(p, &bytes).map_err(|e| format!("{}: {e}", p.display()))?;
-        Ok((
+        let w = (
             p.to_path_buf(),
             bytes.len() as u64,
             h.state.unwrap_or_default(),
-        ))
+        );
+        crate::report::snapshot_written(&w);
+        Ok(w)
     }
 
     fn go<C: Compat, F: Flavour>(
@@ -2413,7 +2744,7 @@ mod snap {
         let mut rec;
         let mut sim = match start {
             Ok(cfg) => {
-                let sim = Simulation::<C, F>::create(cm, cfg, out).map_err(|e| e.to_string())?;
+                let sim = Simulation::<C, F>::create(cm, cfg, out).map_err(crate::report::sim_err)?;
                 rec = super::meta::begin(a, &sim, None, || serde_json::Value::Null);
                 sim
             }
@@ -2422,8 +2753,9 @@ mod snap {
                     return Err("--enforce: the snapshot has no scaling policies".into());
                 }
                 let mut sim =
-                    Simulation::<C, F>::restore_snapshot(s, cm, out).map_err(|e| e.to_string())?;
+                    Simulation::<C, F>::restore_snapshot(s, cm, out).map_err(crate::report::sim_err)?;
                 super::timeout(a, &mut sim)?;
+                crate::report::config(sim.state().config());
                 if a.interval {
                     sim.take_measurement_rows();
                 }
@@ -2434,14 +2766,15 @@ mod snap {
         };
         let mut watch = watch(a);
         let status = match (&mut watch, a.pause) {
-            (Some(w), _) => sim.run_watch(w).map_err(|e| e.to_string())?,
-            (None, Some(p)) => sim.run_until(p).map_err(|e| e.to_string())?,
+            (Some(w), _) => sim.run_watch(w).map_err(crate::report::sim_err)?,
+            (None, Some(p)) => sim.run_until(p).map_err(crate::report::sim_err)?,
             (None, None) => Status::Finished,
         };
         if status == Status::Finished {
             let own = sim.state().model().compiled().cloned();
             let generation = sim.state().model().generation();
-            let r = sim.finish().map_err(|e| e.to_string())?;
+            let cfg = sim.state().config().clone();
+            let r = sim.finish().map_err(crate::report::sim_err)?;
             super::meta::finish(
                 a,
                 rec,
@@ -2456,11 +2789,20 @@ mod snap {
                     paused: false,
                 },
             )?;
-            return Ok(End::Finished(r));
+            let info = RunInfo::of(&cfg, r.main_count);
+            return Ok(End::Finished(r, info));
         }
         let measurements = match a.interval {
             true => sim.take_measurement_rows(),
             false => sim.state().measurements().clone(),
+        };
+        let why = watch
+            .and_then(|w| w.fired().cloned())
+            .map_or(Why::Pause, Why::Condition);
+        let st = sim.state();
+        let last = SimTime {
+            time: st.now_secs(),
+            time_ns: st.now_ns(),
         };
         let snapshot = match &a.snapshot {
             Some(p) => {
@@ -2468,8 +2810,9 @@ mod snap {
                 let sections = carry.sections(&sim, enc)?;
                 let s = sim
                     .snapshot_value(enc, sections)
-                    .map_err(|e| e.to_string())?;
-                Some(write(a, p, s)?)
+                    .map_err(crate::report::sim_err)?;
+                let end = super::header_end(a, &why, &measurements, last);
+                Some(write(a, p, s, end)?)
             }
             None => None,
         };
@@ -2494,7 +2837,8 @@ mod snap {
             events: st.events(),
             measurements,
             snapshot,
-            reason: watch.and_then(|w| w.fired().map(|f| f.reason.clone())),
+            why,
+            info: RunInfo::of(st.config(), st.main_count()),
         })
     }
 
@@ -2570,6 +2914,33 @@ mod snap {
         }
         a2.parent = Some((s.header.state_id(), m.map(|m| m.tuples)));
         a2.start_ns = s.header.time_ns;
+        a2.start_end = s.header.interval_end;
+        a2.start_events = s.header.events;
+        // the behaviour taken from the snapshot: the flavour and mode, the run's configuration
+        a2.restored = vec![
+            "mode",
+            "flavour",
+            "quirks",
+            "seed",
+            "ps_algorithm",
+            "link_throughput",
+            "usage_streams",
+            "fix_double_resume",
+            "load_profile",
+            "max_sim_time",
+            "max_measurements",
+            "max_events",
+            "max_steps",
+            "max_processes",
+            "max_stack_depth",
+            "max_events_per_instant",
+        ];
+        if s.section("spd").is_some() && a.spd_quirks.is_none() {
+            a2.restored.push("spd_quirks");
+        }
+        if a.measurements_scope.is_none() {
+            a2.restored.push("measurements_scope");
+        }
         Ok(a2)
     }
 
@@ -2579,10 +2950,10 @@ mod snap {
         #[allow(unused_mut)]
         let mut out = simoxide_sim::snapshot::describe(&s);
         #[cfg(feature = "spd")]
-        if let Some(d) = simoxide_spd::snapshot::decision_info(&s).map_err(|e| e.to_string())? {
+        if let Some(d) = simoxide_spd::snapshot::decision_info(&s).map_err(crate::report::sim_err)? {
             // one more member of the header object: the run's scaling decisions
             let body = serde_json::to_string_pretty(&d)
-                .map_err(|e| e.to_string())?
+                .map_err(crate::report::sim_err)?
                 .replace('\n', "\n  ");
             let head = out.trim_end().strip_suffix('}').unwrap_or(&out).trim_end();
             out = format!("{head},\n  \"spd_decision\": {body}\n}}\n");
@@ -2615,6 +2986,7 @@ mod snap {
         };
         a2.model_hash = super::model_metadata(&a2, &cm, spd.as_ref())?;
         let a = &a2;
+        crate::report::invocation(a);
         let out = Outputs {
             trace: a.trace.as_deref().map(create).transpose()?,
             tape: a.tape.as_deref().map(create).transpose()?,
@@ -2667,7 +3039,7 @@ mod snap {
 fn profiler(a: &Args) -> Result<Option<pprof::ProfilerGuard<'static>>, String> {
     a.profile
         .as_ref()
-        .map(|_| pprof::ProfilerGuard::new(4999).map_err(|e| e.to_string()))
+        .map(|_| pprof::ProfilerGuard::new(4999).map_err(crate::report::sim_err))
         .transpose()
 }
 
@@ -2676,10 +3048,10 @@ fn write_profile(a: &Args, guard: Option<pprof::ProfilerGuard<'static>>) -> Resu
     let (Some(g), Some(p)) = (guard, &a.profile) else {
         return Ok(());
     };
-    let report = g.report().build().map_err(|e| e.to_string())?;
+    let report = g.report().build().map_err(crate::report::sim_err)?;
     let mut f = std::fs::File::create(p).map_err(|e| format!("{}: {e}", p.display()))?;
     if p.extension().is_some_and(|e| e == "svg") {
-        return report.flamegraph(f).map_err(|e| e.to_string());
+        return report.flamegraph(f).map_err(crate::report::sim_err);
     }
     // folded stacks (root first), one line per distinct stack, frames as name@file:line
     use std::io::Write;
@@ -2696,7 +3068,7 @@ fn write_profile(a: &Args, guard: Option<pprof::ProfilerGuard<'static>>) -> Resu
                 names.push(n);
             }
         }
-        writeln!(f, "{} {n}", names.join(";")).map_err(|e| e.to_string())?;
+        writeln!(f, "{} {n}", names.join(";")).map_err(crate::report::sim_err)?;
     }
     Ok(())
 }
@@ -2803,6 +3175,12 @@ fn main() -> ExitCode {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("error: {e}");
+            // the report of the failure (docs/guide/result-report.md)
+            if let (Some(p), "run" | "resume") = (&a.report, a.cmd.as_str())
+                && let Err(w) = report::write(p, &report::failed(&a, &e))
+            {
+                eprintln!("error: {w}");
+            }
             ExitCode::FAILURE
         }
     }
