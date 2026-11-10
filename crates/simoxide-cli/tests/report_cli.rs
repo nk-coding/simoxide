@@ -404,6 +404,34 @@ fn stop_reasons() {
     assert_eq!(times(&r), (0.0, 29.0, 29.0));
     assert_eq!(r["counters"]["cumulative"]["usage_scenario_runs"], 10);
 
+    // the Slingshot-exact engine has no maximum measurement count (Q32): its run.json's 50 is
+    // not a limit, the run ends at the time
+    let rp = p("ssx.json");
+    let lb = root().join("corpus/x_sl_loadbalancer");
+    ok(&[
+        "run",
+        "--model",
+        lb.to_str().unwrap(),
+        "--flavour",
+        "slingshot-exact",
+        "--quirks",
+        "all",
+        "--max-sim-time",
+        "100",
+        "--report",
+        &rp,
+    ]);
+    let r = json_file(Path::new(&rp));
+    assert_eq!(stop(&r), ("completed", "max_sim_time"));
+    assert_eq!(r["limits"]["max_measurements"], -1);
+    assert_eq!(times(&r).1, 100.0);
+    assert!(
+        r["counters"]["cumulative"]["usage_scenario_runs"]
+            .as_i64()
+            .unwrap()
+            > 50
+    );
+
     // failures: resource limits and the timeout; nothing resumable
     let r = report("max-events", &with(&["--max-events", "100"]), false);
     assert_eq!(r["status"], "failed");

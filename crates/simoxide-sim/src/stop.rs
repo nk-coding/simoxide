@@ -3,7 +3,7 @@
 //! own end ([`completion`]) and the errors that abort a run ([`error`]); pauses are the
 //! callers' (they asked for them).
 
-use crate::{SimConfig, SimError, SimErrorKind};
+use crate::{FlavourConfig, FlavourKind, Quirk, SimConfig, SimError, SimErrorKind};
 
 /// What ended a run: a kind and its cause.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -30,6 +30,19 @@ pub fn completion(end_ns: i64, main_count: i64, cfg: &SimConfig) -> Stop {
         kind: "completed",
         cause,
     }
+}
+
+/// `cfg` as a run of `flavour` applies it: the Slingshot-exact engine and Slingshot's Q32 have
+/// no maximum measurement count (`simTime` is the only stop condition), so it is `-1` there.
+/// Pass this to [`completion`].
+pub fn effective_config(cfg: &SimConfig, flavour: &FlavourConfig) -> SimConfig {
+    let mut c = cfg.clone();
+    if flavour.kind == FlavourKind::SlingshotExact
+        || (flavour.kind == FlavourKind::Slingshot && flavour.quirks.has(Quirk::Q32))
+    {
+        c.max_measurements = -1;
+    }
+    c
 }
 
 /// What an error that aborted a run was: a resource limit of [`crate::Limits`]
@@ -159,5 +172,10 @@ mod tests {
         assert_eq!(c(100_500_000_000, 10), "max_sim_time");
         assert_eq!(c(99_000_000_000, 50), "max_measurements");
         assert_eq!(c(99_000_000_000, 10), "no_events");
+        // the Slingshot-exact engine counts no measurements (Q32)
+        let x = effective_config(&cfg, &FlavourConfig::slingshot_exact());
+        assert_eq!(completion(100_000_000_000, 60, &x).cause, "max_sim_time");
+        let s = effective_config(&cfg, &FlavourConfig::slingshot(crate::Quirks::NONE));
+        assert_eq!(completion(99_000_000_000, 60, &s).cause, "max_measurements");
     }
 }

@@ -1067,7 +1067,7 @@ fn report_end(a: &Args, cm: &CompiledModel, r: End, t0: Instant) -> Result<(), S
         }
     };
     if let Some(p) = &a.report {
-        report::write(p, &report::ended(a, &ended, t0))?;
+        report::write(p, &report::ended(a, &cm.flavour, &ended, t0))?;
     }
     Ok(())
 }
@@ -1287,7 +1287,8 @@ mod spd {
                 r
             }
             None => {
-                let sim = Simulation::<C, F>::create(cm, cfg, out).map_err(crate::report::sim_err)?;
+                let sim =
+                    Simulation::<C, F>::create(cm, cfg, out).map_err(crate::report::sim_err)?;
                 let r = SpdRun::new(sim, spd).map_err(crate::report::sim_err)?;
                 let r = match &hpa {
                     Some(h) => r.with_hpa(h).map_err(crate::report::sim_err)?,
@@ -1389,7 +1390,9 @@ mod spd {
             let snapshot = match &a.snapshot {
                 Some(p) => {
                     let opts = super::snap::options(a);
-                    let mut s = r.snapshot_value(opts.encoding).map_err(crate::report::sim_err)?;
+                    let mut s = r
+                        .snapshot_value(opts.encoding)
+                        .map_err(crate::report::sim_err)?;
                     #[cfg(not(feature = "reconfiguration"))]
                     s.sections.extend(carry.sections(&r.sim, opts.encoding)?);
                     #[cfg(feature = "reconfiguration")]
@@ -1553,9 +1556,13 @@ mod spd {
         #[cfg(not(feature = "reconfiguration"))]
         let mut adj = NoAdjustment;
         let (mut run, snap) = match start {
-            Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(crate::report::sim_err)?, None),
+            Ok(cfg) => (
+                SsxRun::new(cm, cfg, out).map_err(crate::report::sim_err)?,
+                None,
+            ),
             Err(s) => {
-                let mut run = SsxRun::restore_snapshot(s, cm, out).map_err(crate::report::sim_err)?;
+                let mut run =
+                    SsxRun::restore_snapshot(s, cm, out).map_err(crate::report::sim_err)?;
                 run.set_deadline(super::deadline(a)?);
                 (run, Some(s))
             }
@@ -1580,7 +1587,9 @@ mod spd {
         let mut log = JsonlLog::new(sink);
         log.all = a.spd_log_all;
         let mut hooks = match snap {
-            Some(s) => SsxSpd::restore(spd, s, &mut adj, &mut log).map_err(crate::report::sim_err)?,
+            Some(s) => {
+                SsxSpd::restore(spd, s, &mut adj, &mut log).map_err(crate::report::sim_err)?
+            }
             None => SsxSpd::new(spd, &cm.model, &mut adj, &mut log),
         };
         #[cfg(feature = "reconfiguration")]
@@ -1610,7 +1619,9 @@ mod spd {
         let (end, ok, st) = if status == simoxide_sim::Status::Paused {
             let enc = super::snap::options(a).encoding;
             let mut extra = match &a.snapshot {
-                Some(_) => hooks.snapshot_sections(enc).map_err(crate::report::sim_err)?,
+                Some(_) => hooks
+                    .snapshot_sections(enc)
+                    .map_err(crate::report::sim_err)?,
                 None => Vec::new(),
             };
             let (ok, st) = (hooks.adjusted_ok, hooks.state.clone());
@@ -1829,8 +1840,8 @@ mod rules {
             }
             Some(snap) => {
                 // a snapshot without rules: they are added at the resume
-                let mut sim =
-                    Simulation::<C>::restore_snapshot(snap, cm, out).map_err(crate::report::sim_err)?;
+                let mut sim = Simulation::<C>::restore_snapshot(snap, cm, out)
+                    .map_err(crate::report::sim_err)?;
                 if a.interval {
                     sim.take_measurement_rows();
                 }
@@ -2141,7 +2152,8 @@ mod changes {
         ) -> Result<Vec<Section>, String> {
             match &self.qvto {
                 Some(q) if q.is_started() => Ok(vec![
-                    q.snapshot_section(sim, enc).map_err(crate::report::sim_err)?,
+                    q.snapshot_section(sim, enc)
+                        .map_err(crate::report::sim_err)?,
                 ]),
                 _ => Ok(Vec::new()),
             }
@@ -2288,7 +2300,8 @@ mod changes {
         let core = QvtoCore::new().map_err(crate::report::sim_err)?;
         let mut q = QvtoRun::new(&core, config(a)?).map_err(crate::report::sim_err)?;
         if let Some(s) = snap {
-            q.restore_section(&*run, s).map_err(crate::report::sim_err)?;
+            q.restore_section(&*run, s)
+                .map_err(crate::report::sim_err)?;
         }
         let steps = build(a, &core)?
             .apply_to(run, &mut q)
@@ -2617,9 +2630,13 @@ mod ssxrun {
         }
         super::no_runtime_metadata(a)?;
         let (mut run, snap) = match start {
-            Ok(cfg) => (SsxRun::new(cm, cfg, out).map_err(crate::report::sim_err)?, None),
+            Ok(cfg) => (
+                SsxRun::new(cm, cfg, out).map_err(crate::report::sim_err)?,
+                None,
+            ),
             Err(s) => {
-                let mut run = SsxRun::restore_snapshot(s, cm, out).map_err(crate::report::sim_err)?;
+                let mut run =
+                    SsxRun::restore_snapshot(s, cm, out).map_err(crate::report::sim_err)?;
                 run.set_deadline(super::deadline(a)?);
                 (run, Some(s))
             }
@@ -2756,7 +2773,8 @@ mod snap {
         let mut rec;
         let mut sim = match start {
             Ok(cfg) => {
-                let sim = Simulation::<C, F>::create(cm, cfg, out).map_err(crate::report::sim_err)?;
+                let sim =
+                    Simulation::<C, F>::create(cm, cfg, out).map_err(crate::report::sim_err)?;
                 rec = super::meta::begin(a, &sim, None, || serde_json::Value::Null);
                 sim
             }
@@ -2764,8 +2782,8 @@ mod snap {
                 if !a.enforce.is_empty() {
                     return Err("--enforce: the snapshot has no scaling policies".into());
                 }
-                let mut sim =
-                    Simulation::<C, F>::restore_snapshot(s, cm, out).map_err(crate::report::sim_err)?;
+                let mut sim = Simulation::<C, F>::restore_snapshot(s, cm, out)
+                    .map_err(crate::report::sim_err)?;
                 super::timeout(a, &mut sim)?;
                 crate::report::config(sim.state().config());
                 if a.interval {
@@ -2962,7 +2980,9 @@ mod snap {
         #[allow(unused_mut)]
         let mut out = simoxide_sim::snapshot::describe(&s);
         #[cfg(feature = "spd")]
-        if let Some(d) = simoxide_spd::snapshot::decision_info(&s).map_err(crate::report::sim_err)? {
+        if let Some(d) =
+            simoxide_spd::snapshot::decision_info(&s).map_err(crate::report::sim_err)?
+        {
             // one more member of the header object: the run's scaling decisions
             let body = serde_json::to_string_pretty(&d)
                 .map_err(crate::report::sim_err)?

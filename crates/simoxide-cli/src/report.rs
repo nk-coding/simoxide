@@ -7,7 +7,9 @@
 use super::{Args, RunInfo, Why, interval_from, interval_start, later};
 use serde_json::{Value, json};
 use simoxide_sim::snapshot::SimTime;
-use simoxide_sim::{Condition, Measurements, Pause, PsAlgorithm, SimConfig, SimError};
+use simoxide_sim::{
+    Condition, FlavourConfig, Measurements, Pause, PsAlgorithm, SimConfig, SimError,
+};
 use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -292,20 +294,22 @@ pub struct Ended<'a> {
     pub info: &'a RunInfo,
 }
 
-/// The report of a run that paused or finished.
-pub fn ended(a: &Args, e: &Ended, t0: Instant) -> Value {
+/// The report of a run of `flavour` that paused or finished.
+pub fn ended(a: &Args, flavour: &FlavourConfig, e: &Ended, t0: Instant) -> Value {
     let m = e.measurements;
     let info = e.info;
+    // the configuration as the engine applies it (no measurement count with Q32)
+    let cfg = simoxide_sim::stop::effective_config(&info.cfg, flavour);
     let start = interval_start(a, m);
     let end = super::interval_end(a, e.why, m, e.last);
     let stop = match e.why {
         Some(w) => paused_stop(a, w),
-        None => completed_stop(e.last.time_ns, e.main_count, &info.cfg),
+        None => completed_stop(e.last.time_ns, e.main_count, &cfg),
     };
     let from = interval_from(a, m);
     let spd = info.spd.as_ref();
     let delta = |i: usize| spd.map(|s| s.now[i] - s.start[i]);
-    let mut doc = base(a, Some(&info.cfg), spd.map(|s| s.quirks.as_str()));
+    let mut doc = base(a, Some(&cfg), spd.map(|s| s.quirks.as_str()));
     let o = doc.as_object_mut().expect("an object");
     o.insert(
         "status".into(),

@@ -1250,7 +1250,13 @@ fn run_engine(
             let run = SsxRun::new(cm, cfg.clone(), Outputs::default()).map_err(err)?;
             let mut d = Ssx { run, hooks: None };
             let end = drive(job, &mut d, mon, interval);
-            conclude(job, d, end, &cfg, None)
+            conclude(
+                job,
+                d,
+                end,
+                &simoxide_sim::stop::effective_config(&cfg, &cm.flavour),
+                None,
+            )
         }
         #[cfg(feature = "exact")]
         (Mode::Exact, FlavourKind::SimuLizar) => run_plain::<simoxide_sim::Exact, SimuLizar>(
@@ -1319,7 +1325,13 @@ fn run_plain<C: Compat, F: Flavour>(
     });
     let mut d = Plain(sim, rec);
     let end = drive(job, &mut d, mon, interval);
-    Ok(conclude(job, d, end, &cfg, meta.as_ref()))
+    Ok(conclude(
+        job,
+        d,
+        end,
+        &simoxide_sim::stop::effective_config(&cfg, &cm.flavour),
+        meta.as_ref(),
+    ))
 }
 
 /// Scaling policies (`.spd`) and HPA autoscalers.
@@ -1679,7 +1691,13 @@ mod spd {
                 hooks: Some(&mut hooks),
             };
             let end = drive(job, &mut d, mon, interval);
-            let mut r = conclude(job, d, end, &cfg, None);
+            let mut r = conclude(
+                job,
+                d,
+                end,
+                &simoxide_sim::stop::effective_config(&cfg, &cm.flavour),
+                None,
+            );
             r.spd = Some(serde_json::json!({
                 "evaluations": hooks.state.evaluations,
                 "requests": hooks.state.requests,
@@ -1827,7 +1845,13 @@ mod spd {
             rec,
         };
         let end = drive(job, &mut d, mon, interval);
-        Ok(conclude(job, d, end, &cfg, meta))
+        Ok(conclude(
+            job,
+            d,
+            end,
+            &simoxide_sim::stop::effective_config(&cfg, &cm.flavour),
+            meta,
+        ))
     }
 }
 
