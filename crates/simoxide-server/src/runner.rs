@@ -14,10 +14,11 @@
 //! no trace, tape, snapshots or SimuLizar reconfiguration rules.
 
 use crate::job::{HARD_STOP_GRACE, Job, ModelInfo, Outcome, SeriesName, ServerConfig};
-use crate::monitor::{
-    Monitor, NANOS_PER_SEC, PauseWhy, Probe, capped_duration, ns_to_secs, secs_to_ns,
+use crate::monitor::{Monitor, PauseWhy, Probe, capped_duration, ns_to_secs, secs_to_ns};
+use crate::report::{
+    JobStatus, Level, LogSource, ResultSummary, RunInterval, StopKind, StopReason, TimePoint,
+    TupleRange,
 };
-use crate::report::{JobStatus, Level, LogSource, ResultSummary, StopKind, StopReason};
 use crate::request::{
     MAX_PROGRESS_INTERVAL_MS, MIN_PROGRESS_INTERVAL_MS, RUN_JSON, RunOptions, SimulationRequest,
     check_name,
@@ -878,7 +879,15 @@ fn drive<D: Drive>(job: &Job, d: &mut D, mon: &mut Monitor, interval: Duration) 
 
 /// The monitor stopped the run regularly.
 fn completed(kind: StopKind, detail: String) -> End {
-    End::Stopped(JobStatus::Completed, StopReason { kind, detail })
+    let cause = (kind == StopKind::Decision).then_some("decision");
+    End::Stopped(
+        JobStatus::Completed,
+        StopReason {
+            kind,
+            detail,
+            cause,
+        },
+    )
 }
 
 /// A client stopped the run.
@@ -888,6 +897,7 @@ fn cancelled() -> End {
         StopReason {
             kind: StopKind::Cancelled,
             detail: CANCELLED_BY_CLIENT.into(),
+            cause: None,
         },
     )
 }
@@ -929,12 +939,13 @@ fn conclude<D: Drive>(
                 Ok(r) => {
                     let runtime_metadata =
                         runtime(parts, &r.measurements.series, r.end_ns, "finished");
-                    let detail = simulator_stop_detail(&r, cfg);
+                    let (cause, detail) = simulator_stop_detail(&r, cfg);
                     RunEnd {
                         status: JobStatus::Completed,
                         stop: StopReason {
                             kind: StopKind::Simulator,
                             detail,
+                            cause: Some(cause),
                         },
                         error: None,
                         probe: Probe {
@@ -981,18 +992,19 @@ fn conclude<D: Drive>(
     }
 }
 
-/// Which of the simulator's own stops ended a run that it finished itself.
-fn simulator_stop_detail(r: &RunResult, cfg: &SimConfig) -> String {
-    if cfg.max_measurements > 0 && r.main_count >= cfg.max_measurements {
-        format!(
+/// Which of the simulator's own stops ended a run that it finished itself: the cause
+/// (`simoxide_sim::stop::completion`) and in words.
+fn simulator_stop_detail(r: &RunResult, cfg: &SimConfig) -> (&'static str, String) {
+    let cause = simoxide_sim::stop::completion(r.end_ns, r.main_count, cfg).cause;
+    let detail = match cause {
+        "max_measurements" => format!(
             "config.max_measurements: {} usage-scenario runs",
             r.main_count
-        )
-    } else if cfg.max_sim_time > 0 && r.end_ns >= cfg.max_sim_time.saturating_mul(NANOS_PER_SEC) {
-        format!("config.max_sim_time: {} s simulated", cfg.max_sim_time)
-    } else {
-        "no event left".into()
-    }
+        ),
+        "max_sim_time" => format!("config.max_sim_time: {} s simulated", cfg.max_sim_time),
+        _ => "no event left".into(),
+    };
+    (cause, detail)
 }
 
 /// An aborted run: a cancellation, the server's deadline or an error.
@@ -1012,6 +1024,7 @@ fn failed(
             StopReason {
                 kind: StopKind::Cancelled,
                 detail: CANCELLED_BY_CLIENT.into(),
+                cause: None,
             },
             None,
         ),
@@ -1020,6 +1033,7 @@ fn failed(
             StopReason {
                 kind: StopKind::ServerLimit,
                 detail: format!("the server's run-time cap: {}", e.message),
+                cause: None,
             },
             None,
         ),
@@ -1028,6 +1042,7 @@ fn failed(
             StopReason {
                 kind: StopKind::Error,
                 detail: e.to_string(),
+                cause: Some(simoxide_sim::stop::error(&e).cause),
             },
             Some(e.to_string()),
         ),
@@ -1116,6 +1131,11 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
         ),
         None,
     );
+    // the logical end: a `max_sim_time` criterion's time if it ended the run
+    let end_ns = match stop.kind {
+        StopKind::Termination => mon.time_boundary(probe.now_ns).unwrap_or(probe.now_ns),
+        _ => probe.now_ns,
+    };
     let outcome = measurements.map(|m| {
         mon.checkpoint(&m, &probe);
         // the last progress, so that live views end with the final numbers
@@ -1124,6 +1144,15 @@ pub fn run(job: &Arc<Job>, req: SimulationRequest, scfg: &ServerConfig) {
             summary: ResultSummary {
                 stop_reason: stop.clone(),
                 sim_time: ns_to_secs(probe.now_ns),
+                interval: RunInterval {
+                    start: TimePoint::of_ns(0),
+                    end: TimePoint::of_ns(end_ns),
+                    last_event: TimePoint::of_ns(probe.now_ns),
+                    tuples: TupleRange {
+                        from: 0,
+                        to: m.count,
+                    },
+                },
                 events: probe.events,
                 measurements: probe.main_count,
                 tuples: m.count,
@@ -1174,6 +1203,7 @@ fn fail_without_results(job: &Job, source: LogSource, error: String) {
         Some(StopReason {
             kind: StopKind::Error,
             detail: error.clone(),
+            cause: None,
         }),
         Some(error),
         None,
