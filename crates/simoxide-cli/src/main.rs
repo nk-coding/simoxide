@@ -62,6 +62,10 @@ const USAGE: &str = "usage:
              [--pause-on-decision] [--decision-file FILE.json]   (pause before a scaling
              policy's adjustment runs, the recommendation pending in the snapshot; resume it
              with --decide; the file reports the decision; docs/guide/spd.md#decisions)
+             [--summary FILE.json] [--summary-series METRIC[POINT]]... [--summary-stats LIST]
+             (statistics per series of the tuples this invocation recorded, its interval:
+             count, sum, mean, min, max, first, last, initial, time_weighted (default all);
+             series as in --pause-when, default all; docs/guide/snapshots.md#interval-summaries)
   simoxide resume FILE --model <dir> [--run-json run.json] [--trace out.jsonl] [--tape out.jsonl]
              [--measurements out.csv] [--pause-at T ... --snapshot FILE2] [--until T]
              [--pause-when COND]... [--spd-log ...] [--spd-quirks ...] [--rules DIR]
@@ -71,6 +75,7 @@ const USAGE: &str = "usage:
              measurement scope says; --until T = --pause-at T)
              [--measurements-scope cumulative|interval]   (default: the snapshot's; cumulative:
              the rows of the run from time 0, interval: the tuples recorded since the restore)
+             [--summary FILE.json ...]   (as for run: the tuples recorded since the restore)
              [--change FILE.changes]... [--transform X.qvto]...   (change the model before it
              continues, in the given order: a change file, a QVTo transformation run once;
              `reconfiguration` feature; --rules DIR with other rules than the snapshot's replaces
@@ -161,6 +166,12 @@ struct Args {
     interval: bool,
     /// `resume`: the state id and the measurement cursor of the snapshot resumed.
     parent: Option<(String, Option<u64>)>,
+    /// `resume`: the simulation time of the snapshot resumed (ns; 0 for `run`).
+    start_ns: i64,
+    /// `--summary FILE`, `--summary-series SEL`, `--summary-stats LIST`.
+    summary: Option<PathBuf>,
+    summary_series: Vec<simoxide_sim::sim::watch::SeriesSel>,
+    summary_stats: Option<Vec<simoxide_sim::summary::Stat>>,
 }
 
 /// A change step of `resume` (`--change`, `--transform`).
@@ -228,6 +239,10 @@ fn parse_args() -> Result<Args, String> {
         measurements_scope: None,
         interval: false,
         parent: None,
+        start_ns: 0,
+        summary: None,
+        summary_series: Vec::new(),
+        summary_stats: None,
     };
     let secs = |f: &str, v: String| -> Result<i64, String> {
         let t: f64 = v.parse().map_err(|e| format!("{f}: {e}"))?;
@@ -391,6 +406,16 @@ fn parse_args() -> Result<Args, String> {
                     v => return Err(format!("{f}: expected cumulative or interval, got {v}")),
                 }
             }
+            "--summary" => a.summary = Some(val()?.into()),
+            "--summary-series" => a
+                .summary_series
+                .push(simoxide_sim::sim::watch::parse_series_sel(&val()?)?),
+            "--summary-stats" => {
+                a.summary_stats = Some(
+                    simoxide_sim::summary::Stat::parse_list(&val()?)
+                        .map_err(|e| format!("{f}: {e}"))?,
+                )
+            }
             "--snapshot-format" => {
                 a.snapshot_json = match val()?.as_str() {
                     "postcard" => false,
@@ -401,6 +426,9 @@ fn parse_args() -> Result<Args, String> {
             "-h" | "--help" => return Err(USAGE.into()),
             o => return Err(format!("unknown flag {o}\n{USAGE}")),
         }
+    }
+    if a.summary.is_none() && (!a.summary_series.is_empty() || a.summary_stats.is_some()) {
+        return Err("--summary-series and --summary-stats need --summary FILE".into());
     }
     Ok(a)
 }
@@ -575,7 +603,7 @@ fn run(a: &Args) -> Result<(), String> {
         }
         let t0 = Instant::now();
         let r = rules::run(a, &cm, cfg, out, &dir, None)?;
-        return report_end(a, r, t0);
+        return report_end(a, &cm, r, t0);
     }
     let r = match spd {
         Some(s) if a.flavour == simoxide_sim::FlavourKind::SlingshotExact => {
@@ -592,7 +620,7 @@ fn run(a: &Args) -> Result<(), String> {
         }
         None => End::Finished(simoxide_sim::run(&cm, cfg, out).map_err(|e| e.to_string())?),
     };
-    report_end(a, r, t0)
+    report_end(a, &cm, r, t0)
 }
 
 /// How a run (or a resumed one) ended: at its end, or paused with a snapshot written.
@@ -600,6 +628,8 @@ enum End {
     Finished(RunResult),
     Paused {
         now_ns: i64,
+        /// The same in seconds (the engine's clock).
+        now_s: f64,
         events: u64,
         measurements: simoxide_sim::Measurements,
         /// The snapshot written: path, bytes, state id.
@@ -609,19 +639,79 @@ enum End {
     },
 }
 
+/// The first tuple number of this invocation's interval (`None`: unknown).
+fn interval_from(a: &Args, m: &simoxide_sim::Measurements) -> Option<u64> {
+    match &a.parent {
+        Some((_, Some(n))) => Some(*n),
+        Some((_, None)) => a.interval.then(|| m.count - m.rows_held()),
+        None => Some(0),
+    }
+}
+
+/// Writes `--summary`: the interval summary of `m` (the run's measurements at the pause or the
+/// end, `to_ns`), with the state id of the snapshot written, if any
+/// (docs/guide/snapshots.md#interval-summaries).
+fn write_summary(
+    a: &Args,
+    cm: &CompiledModel,
+    m: &simoxide_sim::Measurements,
+    (to, to_ns): (f64, i64),
+    state: Option<&str>,
+) -> Result<(), String> {
+    use simoxide_sim::sim::watch::{ids_named, selects};
+    use simoxide_sim::summary::{self, Interval, Stat};
+    let Some(p) = &a.summary else {
+        return Ok(());
+    };
+    // element names are looked up in the model of --model
+    let sels: Vec<_> = a
+        .summary_series
+        .iter()
+        .map(|s| (s, ids_named(&cm.model.graph, &s.point)))
+        .collect();
+    for (s, ids) in &sels {
+        if !m.series.iter().any(|d| selects(s, ids, d)) {
+            eprintln!(
+                "warning: --summary-series {}[{}] selects no series",
+                s.metric, s.point
+            );
+        }
+    }
+    let select = |d: &simoxide_sim::ir::SeriesDef| {
+        sels.is_empty() || sels.iter().any(|(s, ids)| selects(s, ids, d))
+    };
+    let iv = Interval {
+        tuples_from: interval_from(a, m),
+        tuples_to: m.count,
+        from: m.start_time,
+        to,
+        from_ns: a.start_ns,
+        to_ns,
+    };
+    let stats = a.summary_stats.as_deref().unwrap_or(&Stat::ALL);
+    let mut doc = summary::document(m, &iv, &select, stats);
+    if let Some(o) = doc.as_object_mut() {
+        if let Some((parent, _)) = &a.parent {
+            o.insert("parent".into(), parent.as_str().into());
+        }
+        if let Some(s) = state {
+            o.insert("state".into(), s.into());
+        }
+    }
+    let mut text = serde_json::to_string_pretty(&doc).map_err(|e| e.to_string())?;
+    text.push('\n');
+    std::fs::write(p, text).map_err(|e| format!("{}: {e}", p.display()))
+}
+
 /// Reports a run that ended or paused.
-fn report_end(a: &Args, r: End, t0: Instant) -> Result<(), String> {
+fn report_end(a: &Args, cm: &CompiledModel, r: End, t0: Instant) -> Result<(), String> {
     // the measurement interval of a pause, a resume or a run with --measurements-scope
     let interval = |m: &simoxide_sim::Measurements, paused: bool, state: Option<&str>| {
         if a.cmd != "resume" && a.measurements_scope.is_none() && !paused {
             return;
         }
         let held = m.rows_held();
-        let from = match &a.parent {
-            Some((_, Some(n))) => Some(*n),
-            Some((_, None)) => a.interval.then(|| m.count - held),
-            None => Some(0),
-        };
+        let from = interval_from(a, m);
         let mut line = format!(
             "measurements: scope={} tuples={}..{} rows={held}",
             if a.interval { "interval" } else { "cumulative" },
@@ -639,10 +729,12 @@ fn report_end(a: &Args, r: End, t0: Instant) -> Result<(), String> {
     match r {
         End::Finished(r) => {
             interval(&r.measurements, false, None);
+            write_summary(a, cm, &r.measurements, (r.end_secs, r.end_ns), None)?;
             report(a, r, t0)
         }
         End::Paused {
             now_ns,
+            now_s,
             events,
             measurements,
             snapshot,
@@ -657,7 +749,9 @@ fn report_end(a: &Args, r: End, t0: Instant) -> Result<(), String> {
                     .write_csv(&mut f)
                     .map_err(|e| format!("{}: {e}", p.display()))?;
             }
-            interval(&measurements, true, snapshot.as_ref().map(|s| s.2.as_str()));
+            let state = snapshot.as_ref().map(|s| s.2.as_str());
+            interval(&measurements, true, state);
+            write_summary(a, cm, &measurements, (now_s, now_ns), state)?;
             let snap = match snapshot {
                 Some((p, n, _)) => format!(" snapshot={} ({n} bytes)", p.display()),
                 None => String::new(),
@@ -963,6 +1057,7 @@ mod spd {
             let st = r.sim.state();
             return Ok(End::Paused {
                 now_ns: st.now_ns(),
+                now_s: st.now_secs(),
                 events: st.events(),
                 measurements,
                 snapshot,
@@ -1114,6 +1209,7 @@ mod spd {
             };
             let end = Ok(End::Paused {
                 now_ns: run.now_ns(),
+                now_s: run.now(),
                 events: run.events(),
                 measurements,
                 snapshot,
@@ -1327,6 +1423,7 @@ mod rules {
             let st = run.sim().state();
             let end = End::Paused {
                 now_ns: st.now_ns(),
+                now_s: st.now_secs(),
                 events: st.events(),
                 measurements,
                 snapshot,
@@ -1940,6 +2037,7 @@ mod ssxrun {
         };
         Ok(End::Paused {
             now_ns: run.now_ns(),
+            now_s: run.now(),
             events: run.events(),
             measurements,
             snapshot,
@@ -2061,6 +2159,7 @@ mod snap {
         let st = sim.state();
         Ok(End::Paused {
             now_ns: st.now_ns(),
+            now_s: st.now_secs(),
             events: st.events(),
             measurements,
             snapshot,
@@ -2139,6 +2238,7 @@ mod snap {
             ));
         }
         a2.parent = Some((s.header.state_id(), m.map(|m| m.tuples)));
+        a2.start_ns = s.header.time_ns;
         Ok(a2)
     }
 
@@ -2220,7 +2320,7 @@ mod snap {
         } else {
             plain(a, &cm, Err(&s), out)?
         };
-        report_end(a, r, t0)
+        report_end(a, &cm, r, t0)
     }
 }
 
