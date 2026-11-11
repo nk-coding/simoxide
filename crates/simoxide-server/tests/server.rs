@@ -1023,6 +1023,8 @@ async fn the_queue_is_bounded() {
                       "termination": {"timeout_secs": 60}});
     let (s, running) = call(&app, "POST", "/v1/simulations", Some(long.clone())).await;
     assert_eq!(s, StatusCode::CREATED, "{running}");
+    // it holds the slot from the submit on, before its thread runs
+    assert_ne!(running["status"], "queued", "{running}");
     let (s, queued) = call(&app, "POST", "/v1/simulations", Some(long.clone())).await;
     assert_eq!(s, StatusCode::CREATED, "{queued}");
     assert_eq!(queued["status"], "queued");

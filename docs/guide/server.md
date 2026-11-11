@@ -112,7 +112,7 @@ A simulation's `status` is one of:
 | Status | Meaning |
 |---|---|
 | `queued` | waiting for a free slot (`--max-concurrent`); at most `--max-queued` wait, and a submit beyond them is refused with `429` (try again once a simulation has ended) |
-| `loading` | loading and compiling the model |
+| `loading` | it has a slot: loading and compiling the model |
 | `running` | simulating; progress is published |
 | `completed` | a termination condition, the simulator's own stop condition, the end of the events, or a server cap ended it; results available |
 | `cancelled` | a client stopped it; results so far available (none if it was still queued) |
@@ -541,7 +541,7 @@ print(json.dumps({"files": files, "config": {"max_measurements": -1},
                   "termination": {"timeout_secs": 60, "confidence": {"relative_half_width": 0.02}}}))
 EOF
 curl -s -XPOST localhost:8080/v1/simulations -H 'content-type: application/json' -d @req.json
-# {"id": "sim-1-4f2a91", "status": "queued", ...}
+# {"id": "sim-1-4f2a91", "status": "loading", ...}
 
 curl -s 'localhost:8080/v1/simulations/sim-1-4f2a91?wait=30&until=done&series=false'
 curl -s 'localhost:8080/v1/simulations/sim-1-4f2a91/results?metric=Response'

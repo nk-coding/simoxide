@@ -378,7 +378,8 @@ impl Job {
         self.bump(st);
     }
 
-    /// Takes a queued job for its run (status `loading`); false if it was cancelled first.
+    /// Takes a queued job for its run (status `loading`) when it gets a slot; false if it was
+    /// cancelled first.
     pub(crate) fn claim_for_run(&self) -> bool {
         let mut st = lock_ignoring_poison(&self.state);
         if st.status != JobStatus::Queued {
@@ -668,12 +669,17 @@ impl JobManager {
         Ok(job)
     }
 
-    /// Starts waiting jobs on threads of their own while slots are free.
+    /// Starts waiting jobs on threads of their own while slots are free. A job leaves `queued`
+    /// here, with its slot, not when its thread first runs: a cancel in between would otherwise
+    /// see a queued job that already holds a slot.
     fn start_waiting(self: &Arc<Self>, queue: &mut Queue) {
         while queue.running < self.slots() {
             let Some(Pending { job, request }) = queue.waiting.pop_front() else {
                 return;
             };
+            if !job.claim_for_run() {
+                continue;
+            }
             let (mgr, j) = (self.clone(), job.clone());
             let spawned = std::thread::Builder::new()
                 .name(format!("simoxide-{}", job.id))
@@ -694,9 +700,6 @@ impl JobManager {
     /// The job thread: holds a slot while it runs the job. A panic of the run fails the job.
     fn execute(self: &Arc<Self>, job: &Arc<Job>, req: SimulationRequest) {
         let _slot = RunningSlot(self);
-        if !job.claim_for_run() {
-            return;
-        }
         let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             crate::runner::run(job, req, &self.config)
         }));
