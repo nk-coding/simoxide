@@ -102,6 +102,10 @@ const USAGE: &str = "usage:
              resume: minReplicas, maxReplicas, averageUtilization, tolerance, startupDelay,
              scaleUpStabilization, scaleDownStabilization, downscaleStabilization; also `hpa
              NAME PARAMETER VALUE` lines of change files)
+             [--actions-at clock|boundary]   (when the actions above apply: clock, the
+             default: at the snapshot's clock, the time of its last event; boundary: at the
+             logical end of its interval, the time --pause-at or --pause-before asked for: the
+             clock moves there first; docs/guide/snapshots.md#actions-at-the-boundary)
              [--model-metadata FILE.json] [--runtime-metadata FILE.json]   (as for run: the
              deployment at the restore, the changes of this invocation from --change on)
   simoxide explore FILE --model <dir> --variant NAME=FILE.changes|NAME=X.qvto|NAME ...
@@ -203,6 +207,12 @@ struct Args {
     start_events: u64,
     /// `resume`: the behaviour flags taken from the snapshot (report).
     restored: Vec<&'static str>,
+    /// `--actions-at boundary` (`resume`): the actions at the resume apply at the snapshot's
+    /// logical boundary, not at its clock (docs/guide/snapshots.md, "Actions at the boundary").
+    actions_at_boundary: bool,
+    /// `resume`: where the clock moves before the actions (`--actions-at boundary`, a snapshot
+    /// whose interval ends after its clock, and actions given); `None`: it stays.
+    advance_to: Option<SimTime>,
 }
 
 /// A change step of `resume` (`--change`, `--transform`).
@@ -282,6 +292,8 @@ fn parse_args() -> Result<Args, String> {
         start_end: None,
         start_events: 0,
         restored: Vec::new(),
+        actions_at_boundary: false,
+        advance_to: None,
     };
     let secs = |f: &str, v: String| -> Result<i64, String> {
         let t: f64 = v.parse().map_err(|e| format!("{f}: {e}"))?;
@@ -461,6 +473,13 @@ fn parse_args() -> Result<Args, String> {
                         .map_err(|e| format!("{f}: {e}"))?,
                 )
             }
+            "--actions-at" => {
+                a.actions_at_boundary = match val()?.as_str() {
+                    "clock" => false,
+                    "boundary" => true,
+                    v => return Err(format!("{f}: expected clock or boundary, got {v}")),
+                }
+            }
             "--snapshot-format" => {
                 a.snapshot_json = match val()?.as_str() {
                     "postcard" => false,
@@ -475,7 +494,21 @@ fn parse_args() -> Result<Args, String> {
     if a.summary.is_none() && (!a.summary_series.is_empty() || a.summary_stats.is_some()) {
         return Err("--summary-series and --summary-stats need --summary FILE".into());
     }
+    if a.actions_at_boundary && a.cmd != "resume" {
+        return Err("--actions-at: an option of resume (the actions at the resume)".into());
+    }
     Ok(a)
+}
+
+impl Args {
+    /// Whether this invocation acts on the run before it continues: `--change`, `--transform`
+    /// (and the `hpa` lines of change files), `--enforce`, `--hpa-set`, `--decide`.
+    fn has_actions(&self) -> bool {
+        !self.changes.is_empty()
+            || !self.enforce.is_empty()
+            || !self.hpa_set.is_empty()
+            || self.decide.is_some()
+    }
 }
 
 /// The actions of `--decide`.
@@ -806,7 +839,11 @@ impl Why {
             Err(p) => p,
             Ok(i) => match &a.pause_when[i] {
                 Condition::At(p) => *p,
-                Condition::Elapsed(d) => Pause::After(a.start_ns.saturating_add(*d)),
+                Condition::Elapsed(d) => {
+                    // from the clock at the start: the boundary if the actions moved it there
+                    let base = a.advance_to.map_or(a.start_ns, |t| t.time_ns);
+                    Pause::After(base.saturating_add(*d))
+                }
                 _ => return None,
             },
         };
@@ -861,6 +898,70 @@ fn interval_start(a: &Args, m: &simoxide_sim::Measurements) -> SimTime {
         time: m.start_time,
         time_ns: a.start_ns,
     })
+}
+
+/// A run whose clock `--actions-at boundary` moves: [`simoxide_sim::Simulation`] and the
+/// Slingshot-exact engine's [`simoxide_sim::ssx::SsxRun`].
+trait Clocked {
+    /// `advance_clock` of the engine.
+    fn advance_clock(&mut self, to_ns: i64) -> Result<bool, simoxide_sim::SimError>;
+    /// The clock, in seconds and nanoseconds.
+    fn clock(&self) -> SimTime;
+}
+
+impl<C: simoxide_sim::Compat, F: simoxide_sim::Flavour> Clocked
+    for simoxide_sim::Simulation<'_, C, F>
+{
+    fn advance_clock(&mut self, to_ns: i64) -> Result<bool, simoxide_sim::SimError> {
+        simoxide_sim::Simulation::advance_clock(self, to_ns)
+    }
+    fn clock(&self) -> SimTime {
+        SimTime {
+            time: self.state().now_secs(),
+            time_ns: self.state().now_ns(),
+        }
+    }
+}
+
+impl Clocked for simoxide_sim::ssx::SsxRun<'_> {
+    fn advance_clock(&mut self, to_ns: i64) -> Result<bool, simoxide_sim::SimError> {
+        simoxide_sim::ssx::SsxRun::advance_clock(self, to_ns)
+    }
+    fn clock(&self) -> SimTime {
+        SimTime {
+            time: self.now(),
+            time_ns: self.now_ns(),
+        }
+    }
+}
+
+/// Called by `resume` right before its first action (`--change`, `--transform`, `--enforce`,
+/// `--hpa-set`, `--decide`; nothing without one): with `--actions-at boundary` the clock moves
+/// to the snapshot's logical boundary first ([`Args::advance_to`]). The time the actions apply
+/// goes to the report (`interval.actions`).
+fn actions_start(a: &Args, run: &mut dyn Clocked) -> Result<(), String> {
+    if a.cmd != "resume" || !a.has_actions() {
+        return Ok(());
+    }
+    let clock = run.clock();
+    match a.advance_to {
+        Some(b) => {
+            run.advance_clock(b.time_ns)
+                .map_err(|e| format!("--actions-at boundary: {}", crate::report::sim_err(e)))?;
+            let t = run.clock();
+            eprintln!(
+                "actions at t={} s: the interval boundary (the snapshot's clock: t={} s)",
+                t.time, clock.time
+            );
+        }
+        None if a.actions_at_boundary => eprintln!(
+            "actions at t={} s: the snapshot's interval ends at its clock",
+            clock.time
+        ),
+        None => {}
+    }
+    crate::report::actions_applied(run.clock());
+    Ok(())
 }
 
 /// The later of two times (by nanoseconds, then seconds).
@@ -1252,6 +1353,7 @@ mod spd {
                     }
                     _ => {}
                 }
+                super::actions_start(a, &mut r.sim)?;
                 #[cfg(feature = "reconfiguration")]
                 sets.extend(super::changes::hpa_settings(a)?);
                 sets.extend(hpa_sets(a)?);
@@ -1571,6 +1673,9 @@ mod spd {
         if a.interval && snap.is_some() {
             run.take_measurement_rows();
         }
+        if snap.is_some() {
+            super::actions_start(a, &mut run)?;
+        }
         #[cfg(feature = "reconfiguration")]
         let changed = {
             if let Some(s) = snap {
@@ -1869,6 +1974,7 @@ mod rules {
         if let Some(snap) = restore {
             super::timeout(a, run.sim_mut())?;
             crate::report::config(run.sim().state().config());
+            super::actions_start(a, run.sim_mut())?;
             run = super::changes::with_rules(a, run, snap, rec.as_mut())?;
         }
         let mut watch = super::snap::watch(a);
@@ -2645,6 +2751,9 @@ mod ssxrun {
         if a.interval && snap.is_some() {
             run.take_measurement_rows();
         }
+        if snap.is_some() {
+            super::actions_start(a, &mut run)?;
+        }
         let carry = super::changes::ssx_plain_changes(a, &mut run, snap)?;
         let (status, why) = drive(a, &mut run, None)?;
         if status == Status::Finished {
@@ -2790,6 +2899,7 @@ mod snap {
                     sim.take_measurement_rows();
                 }
                 rec = super::meta::begin(a, &sim, None, || serde_json::Value::Null);
+                super::actions_start(a, &mut sim)?;
                 carry = super::changes::plain(a, &mut sim, Some(s), rec.as_mut())?;
                 sim
             }
@@ -2946,6 +3056,11 @@ mod snap {
         a2.start_ns = s.header.time_ns;
         a2.start_end = s.header.interval_end;
         a2.start_events = s.header.events;
+        // --actions-at boundary: the clock moves to the interval's end before the actions
+        a2.advance_to = s
+            .header
+            .interval_end
+            .filter(|e| a.actions_at_boundary && a.has_actions() && e.time_ns > s.header.time_ns);
         // the behaviour taken from the snapshot: the flavour and mode, the run's configuration
         a2.restored = vec![
             "mode",

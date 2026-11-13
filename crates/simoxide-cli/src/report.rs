@@ -30,6 +30,8 @@ struct Known {
     error: Option<SimError>,
     /// The snapshot written.
     snapshot: Option<(PathBuf, u64, String)>,
+    /// The time the actions of a resume applied (`--actions-at`).
+    actions: Option<SimTime>,
 }
 
 thread_local! {
@@ -49,6 +51,16 @@ pub fn config(c: &SimConfig) {
 /// The snapshot written.
 pub fn snapshot_written(s: &(PathBuf, u64, String)) {
     KNOWN.with(|k| k.borrow_mut().snapshot = Some(s.clone()));
+}
+
+/// The clock at which the actions of a resume (`--change`, `--enforce`, ...) apply.
+pub fn actions_applied(t: SimTime) {
+    KNOWN.with(|k| k.borrow_mut().actions = Some(t));
+}
+
+/// The time the actions of this invocation applied, if it had any.
+fn actions_time() -> Value {
+    KNOWN.with(|k| k.borrow().actions.map_or(Value::Null, time))
 }
 
 /// `e` as the CLI's error message; a [`SimError`] is kept for the report of the failure.
@@ -190,6 +202,13 @@ fn behaviour(a: &Args, cfg: Option<&SimConfig>, spd: Option<&str>) -> Value {
         "spd_quirks": spd,
         "restored": a.restored,
     });
+    if a.cmd == "resume" {
+        v["actions_at"] = json!(if a.actions_at_boundary {
+            "boundary"
+        } else {
+            "clock"
+        });
+    }
     if let Some(c) = cfg {
         v["seed"] = json!(c.seed);
         v["ps_algorithm"] = json!(match c.ps_algorithm {
@@ -341,6 +360,7 @@ pub fn ended(a: &Args, flavour: &FlavourConfig, e: &Ended, t0: Instant) -> Value
             "start": time(start),
             "end": time(end),
             "last_event": time(e.last),
+            "actions": actions_time(),
             "tuples": {"from": from, "to": m.count},
         }),
     );
@@ -456,6 +476,7 @@ pub fn failed(given: &Args, error: &str) -> Value {
             "start": start.map(time),
             "end": end.map(time),
             "last_event": last.map(time),
+            "actions": k.actions.map(time),
             "tuples": {"from": from, "to": null},
         }),
     );

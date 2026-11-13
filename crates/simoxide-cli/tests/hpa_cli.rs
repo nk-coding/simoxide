@@ -172,6 +172,25 @@ fn hpa_runs_pauses_and_resumes() {
             .all(|r| r["desired"].as_i64().unwrap() <= 2),
         "{recs:?}"
     );
+    // --actions-at boundary: the parameters change at 250 s, the clock at the pause is earlier
+    let report = p("at-boundary.json");
+    let err = ok(&[
+        "resume",
+        &snap,
+        "--model",
+        &m,
+        "--hpa-set",
+        "app.averageUtilization=70",
+        "--actions-at",
+        "boundary",
+        "--pause-at",
+        "300",
+        "--report",
+        &report,
+    ]);
+    assert!(err.contains("actions at t=250 s"), "{err}");
+    let r: Value = serde_json::from_str(&std::fs::read_to_string(&report).unwrap()).unwrap();
+    assert_eq!(r["interval"]["actions"]["time_ns"], 250_000_000_000i64);
     // errors: an unknown autoscaler, a run without HPA, the Slingshot-exact engine
     let (good, err) = sx(&[
         "resume",
