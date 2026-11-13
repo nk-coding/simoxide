@@ -2707,6 +2707,6 @@ operation required roles+needed:1
 size of inputvar 0
 
 @file diag.txt 197
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: aName}
 

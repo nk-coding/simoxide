@@ -62,7 +62,10 @@ form a per-thread xor-shift sequence, so the thread's state can be recovered fro
 mode then gives the objects that existed before the run their recorded hashes. Objects the run
 creates take the following values of the sequence, in the order Java requests them, including the
 hashes Java draws as side effects. With `--compare-unstable` the scoreboard also compares the
-unstable outputs.
+unstable outputs. The tapes are not committed: they are in the cache of the recording
+(`target/qvto-testkit/java/<suite>`, `custom` for a `--cases` file), so the comparison needs the
+cache of the recording that wrote the fixture. Without it the unstable outputs are compared without
+replay and mostly differ.
 
 ## Results
 
@@ -77,7 +80,7 @@ Current tree, `cargo conform --suite all` and its variants:
 | **total** | **618** | **589** | **589** | **589 / 584** | **583** + 6 |
 
 - **Compat mode** equals the Java runner on every runnable case. The SPD adjustment corpus also
-  passes with `--compare-unstable` (47 of 47).
+  passes with `--compare-unstable` (47 of 47, with the cache of its recording).
 - **Fast mode** passes every driver's check. The 5 fuzz cases that are not strictly equal print
   hash-ordered collections in their logs (the fuzz suite runs with constant identity hashes on
   both sides, so Java's order there is the bucket order).

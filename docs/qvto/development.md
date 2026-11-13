@@ -108,14 +108,19 @@ change of the cases or of the runner:
 ```sh
 cargo qvto conform record --suite all          # 5 Java runs per case; marks unstable outputs
 cargo qvto conform record --suite all --det    # the det runner's fixtures (ordered mode)
-cargo qvto conform record --suite all --check  # record again, compare with the committed fixtures (outputs marked unstable excepted); writes nothing
+cargo qvto conform record --suite all --check  # record again, compare with the committed fixtures (outputs either side marks unstable excepted); writes nothing
 cargo qvto conform java --suite eclipse --out DIR --save-xmi   # one Java run, full results
 ```
 
-The full results (tapes, XMI) stay in `target/qvto-testkit/java/<suite>`. Compat mode replays the
+The full results (tapes, XMI) stay in `target/qvto-testkit/java/<suite>` (`custom` for a
+`--cases` file; `java-det` for the det runner). Compat mode replays the
 identity hashes of that cache when it is present, so keep it with the fixtures it belongs to. A
 fresh recording may draw other HotSpot seeds, and `interpret_scr17812` replays only with some of
-them. The generators of the cases are in `qvto-testkit/tools/`: `gen_cases.py` for the Eclipse
+them (its dump is marked unstable, like every output that varied between Java runs, so this
+matters with `--compare-unstable` only). Five runs can agree by chance on an output that depends
+on identity hashes; such an output is marked unstable by hand in the bundle (`unstable` line of
+its `result.txt`), as for `interpret_invalidcollectioncast`, `interpret_scr17812` and
+`spd_min_step_0`, which differed in 10 to 30 further runs. The generators of the cases are in `qvto-testkit/tools/`: `gen_cases.py` for the Eclipse
 inventory, `copy-corpus.sh`, `gen-spd-corpus.py`, `add-fuzz-case.py` and
 `gen_external_cases.py`. Run them with `python3 -I` from the QVTo root.
 

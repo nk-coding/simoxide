@@ -292,7 +292,7 @@ Used SPD for transformation {name: Q1 policies}
 Current number of containers 3
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full3_ei_step_minus2
@@ -557,7 +557,7 @@ Used SPD for transformation {name: Q1 policies}
 Current number of containers 3
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full3_ei_step_plus1
@@ -926,7 +926,7 @@ size of inputvar 1
 no allocations for this assembly exist, lets create
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_ccg3_step_minus1
@@ -1204,7 +1204,7 @@ Current number of assemblies 3
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_ccg3_step_plus1
@@ -1510,7 +1510,7 @@ deployed component for context , data: org.eclipse.emf.ecore.impl.DynamicEObject
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_ccg_step_plus1
@@ -1790,7 +1790,7 @@ deployed component for context , data: org.eclipse.emf.ecore.impl.DynamicEObject
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_ccg_step_plus2
@@ -2082,7 +2082,7 @@ deployed component for context , data: org.eclipse.emf.ecore.impl.DynamicEObject
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_ei_step_plus1
@@ -2381,7 +2381,7 @@ size of inputvar 1
 no allocations for this assembly exist, lets create
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_ei_step_plus2
@@ -2717,7 +2717,7 @@ no allocations for this assembly exist, lets create
 no allocations for this assembly exist, lets create
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg2_step_0
@@ -3006,7 +3006,7 @@ Current number of assemblies 2
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg2_step_minus1
@@ -3280,7 +3280,7 @@ Current number of assemblies 2
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg4_step_minus1
@@ -3579,7 +3579,7 @@ Current number of assemblies 4
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg4_step_minus2
@@ -3874,7 +3874,7 @@ Current number of assemblies 4
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg_abs_3
@@ -4183,7 +4183,7 @@ size of inputvar 1
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg_empty
@@ -4453,7 +4453,7 @@ deployed component for context , data: org.eclipse.emf.ecore.impl.DynamicEObject
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg_rel_100
@@ -4743,7 +4743,7 @@ size of inputvar 1
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg_size_clamp
@@ -5052,7 +5052,7 @@ size of inputvar 1
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg_step_0
@@ -5314,7 +5314,7 @@ Current number of assemblies 1
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg_step_plus1
@@ -5603,7 +5603,7 @@ size of inputvar 1
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_sg_step_plus3
@@ -5938,7 +5938,7 @@ size of inputvar 1
 Placement Constraints: Max Assemblies Per Host 2
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_spare_step_plus1
@@ -6203,7 +6203,7 @@ Current number of containers 1
 lets create
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_full_unconfigured_ei
@@ -6463,7 +6463,7 @@ Used SPD for transformation {name: Q1 policies}
 ASSERT [fatal] failed at (BottomUpTransformation.qvto:62) : No ElasticInfrastructureCfg exist with the same unit on which the policy applies. Please configure the elastic environment appropriatly.
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min3_abs_2
@@ -6502,7 +6502,7 @@ Used SPD for transformation {name: Q1 policies}
 Current number of containers 3
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min3_noid_step_minus1
@@ -6541,7 +6541,7 @@ Used SPD for transformation {name: Q1 policies}
 Current number of containers 3
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min3_noid_step_plus1
@@ -6584,7 +6584,7 @@ operation required roles+needed:1
 size of inputvar 0
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min3_rel_minus50
@@ -6624,7 +6624,7 @@ A relative adjustment has been specified with min value: 0, and percentage growt
 Current number of containers 3
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min3_size_clamp_min
@@ -6663,7 +6663,7 @@ Used SPD for transformation {name: Q1 policies}
 Current number of containers 3
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min3_step_minus1
@@ -6702,7 +6702,7 @@ Used SPD for transformation {name: Q1 policies}
 Current number of containers 3
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min3_step_minus5
@@ -6741,7 +6741,7 @@ Used SPD for transformation {name: Q1 policies}
 Current number of containers 3
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min3_step_plus1
@@ -6784,7 +6784,7 @@ operation required roles+needed:1
 size of inputvar 0
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_abs_0
@@ -6822,7 +6822,7 @@ Used SPD for transformation {name: Q1 policies}
 ASSERT [fatal] failed at (AdjustmentCalculator.qvto:83) : The specified goal value has to be greater then 0.
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_abs_1
@@ -6861,7 +6861,7 @@ Used SPD for transformation {name: Q1 policies}
 Current number of containers 1
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_abs_3
@@ -6908,7 +6908,7 @@ size of inputvar 0
 size of inputvar 0
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_no_ei_cfg
@@ -6953,7 +6953,7 @@ org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: at least one Elas
 	at MainTransformation::preconditions(MainTransformation.qvto:101)
 	at MainTransformation::main(MainTransformation.qvto:64)
 @file diag.txt 288
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	0	ERROR	100	at least one ElasticInfrastructureCfg expected in the configuration
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
@@ -6999,7 +6999,7 @@ org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: non null enacted 
 	at MainTransformation::preconditions(MainTransformation.qvto:97)
 	at MainTransformation::main(MainTransformation.qvto:64)
 @file diag.txt 266
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	0	ERROR	100	non null enacted policy expected, terminating
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
@@ -7045,7 +7045,7 @@ org.eclipse.m2m.internal.qvt.oml.evaluator.QvtAssertionFailed: configuration poi
 	at MainTransformation::preconditions(MainTransformation.qvto:91)
 	at MainTransformation::main(MainTransformation.qvto:64)
 @file diag.txt 267
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	0	ERROR	100	configuration points to a different repository
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
@@ -7086,7 +7086,7 @@ A relative adjustment has been specified with min value: 2, and percentage growt
 Current number of containers 1
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_rel_100
@@ -7130,7 +7130,7 @@ operation required roles+needed:1
 size of inputvar 0
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_rel_50_min2
@@ -7178,7 +7178,7 @@ size of inputvar 0
 size of inputvar 0
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_rel_minus50
@@ -7218,7 +7218,7 @@ A relative adjustment has been specified with min value: 0, and percentage growt
 Current number of containers 1
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_size_bad_max
@@ -7256,7 +7256,7 @@ Used SPD for transformation {name: Q1 policies}
 ASSERT [fatal] failed at (AdjustmentCalculator.qvto:51) : The maximum constraint lower or equal to the minimum is not permitted in a group size constraint.
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_size_bad_min
@@ -7294,7 +7294,7 @@ Used SPD for transformation {name: Q1 policies}
 ASSERT [fatal] failed at (AdjustmentCalculator.qvto:50) : A minimum below 1 is not permitted for a group size constraints.
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_size_clamp_max
@@ -7341,11 +7341,11 @@ size of inputvar 0
 size of inputvar 0
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_step_0
-@file result.txt 260
+@file result.txt 274
 id	spd_min_step_0
 load	OK
 params	inout:pcmAllocation,inout:pcmSystem,inout:pcmResourceEnvironment,inout:repository,in:spd,inout:spdSemantic,inout:usageModel
@@ -7355,6 +7355,7 @@ message	Transformation execution completed
 exception	-
 trace-records	8
 verdict	pass
+unstable	dump
 
 @file out.jsonl.digest 728
 sha256	20ae1125a2db19bff08bfe0b3800aceb3075946c2977aa4bd8d63663f8217fa4
@@ -7379,7 +7380,7 @@ Used SPD for transformation {name: Q1 policies}
 Current number of containers 1
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_step_minus1_at_min
@@ -7418,7 +7419,7 @@ Used SPD for transformation {name: Q1 policies}
 Current number of containers 1
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_step_plus1
@@ -7461,7 +7462,7 @@ operation required roles+needed:1
 size of inputvar 0
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 
 @case spd_min_step_plus3
@@ -7512,6 +7513,6 @@ size of inputvar 0
 size of inputvar 0
 
 @file diag.txt 203
-problem	warning	Commons.qvto	91	4031	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
+problem	warning	Commons.qvto	91	4014	229	Mapping operation 'Commons_createAssemblyContextNoAllocation' should be called using '(x)map' keyword
 exec	1	OK	0	Used SPD for transformation {name: Q1 policies}
 

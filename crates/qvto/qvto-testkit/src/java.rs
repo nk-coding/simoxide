@@ -112,17 +112,27 @@ pub fn unstable_outputs(
         .collect()
 }
 
-/// The outputs of each result that a fixture check compares: without the files the result marks
-/// unstable (`dump`: `out.jsonl`, `log`: `log.txt`, `stack`: `stack.txt`) and, when the log is
-/// unstable, without the execution diagnostic's lines in `diag.txt` (`exec`, they repeat the log).
-pub fn stable_part(results: &BTreeMap<String, JavaResult>) -> results::ResultSet {
+/// The outputs of each result that a fixture check compares with `other`'s: without the files
+/// that either side marks unstable (`dump`: `out.jsonl`, or its digest for a case on third-party
+/// models; `log`: `log.txt`; `stack`: `stack.txt`; a hash-dependent output can agree in all runs
+/// of one recording and not in the other's) and, when the log is unstable, without the execution
+/// diagnostic's lines in `diag.txt` (`exec`, they repeat the log). The `unstable` line of
+/// `result.txt` is the recording's finding, not an output, and is not compared either.
+pub fn stable_part(
+    results: &BTreeMap<String, JavaResult>,
+    other: &BTreeMap<String, JavaResult>,
+) -> results::ResultSet {
     results
         .iter()
         .map(|(id, r)| {
-            let unstable = r.unstable();
+            let mut unstable = r.unstable();
+            if let Some(o) = other.get(id) {
+                unstable.extend(o.unstable());
+            }
             let mut files = r.files.clone();
             for (label, f) in [
                 ("dump", "out.jsonl"),
+                ("dump", fixture::DUMP_DIGEST),
                 ("log", "log.txt"),
                 ("stack", "stack.txt"),
             ] {
@@ -136,6 +146,13 @@ pub fn stable_part(results: &BTreeMap<String, JavaResult>) -> results::ResultSet
                 *d = d
                     .lines()
                     .filter(|l| !l.starts_with("exec\t"))
+                    .map(|l| format!("{l}\n"))
+                    .collect();
+            }
+            if let Some(t) = files.get_mut("result.txt") {
+                *t = t
+                    .lines()
+                    .filter(|l| !l.starts_with("unstable\t"))
                     .map(|l| format!("{l}\n"))
                     .collect();
             }
@@ -253,7 +270,10 @@ pub fn record(
                 };
                 let new = fixture::read_bundle(&text)?;
                 let all = results::differences(&committed, &new);
-                differences = results::differences(&stable_part(&committed), &stable_part(&new));
+                differences = results::differences(
+                    &stable_part(&committed, &new),
+                    &stable_part(&new, &committed),
+                );
                 unstable_skipped = all.len() - differences.len();
                 if all.is_empty() {
                     // same cases and files, different bytes (an older bundle layout)
@@ -383,4 +403,44 @@ fn replay(env: &CaseEnv, r: &JavaResult, dir: &Path) -> Outcome {
 /// The cases of a case file that the Java runner runs (runnable ones).
 pub fn runnable(cases: &[Case]) -> impl Iterator<Item = &Case> {
     cases.iter().filter(|c| c.runnable())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn result(unstable: &str, digest: &str) -> JavaResult {
+        let mut files = BTreeMap::new();
+        files.insert(
+            "result.txt".to_string(),
+            format!("id\tt\nverdict\tpass\nunstable\t{unstable}\n"),
+        );
+        files.insert(
+            fixture::DUMP_DIGEST.to_string(),
+            format!("sha256\t{digest}\n"),
+        );
+        JavaResult {
+            id: "t".into(),
+            files,
+        }
+    }
+
+    /// What a check compares of two recordings of one case.
+    fn differences(a: JavaResult, b: JavaResult) -> usize {
+        let a = BTreeMap::from([("t".to_string(), a)]);
+        let b = BTreeMap::from([("t".to_string(), b)]);
+        results::differences(&stable_part(&a, &b), &stable_part(&b, &a)).len()
+    }
+
+    #[test]
+    fn an_unstable_dump_digest_is_not_compared() {
+        // a digested dump marked unstable: its digest is one run's identity-hash order
+        assert_eq!(differences(result("dump", "aa"), result("dump", "bb")), 0);
+        // marked by one recording only (the other's runs happened to agree)
+        assert_eq!(differences(result("", "aa"), result("dump", "bb")), 0);
+        assert_eq!(differences(result("dump", "aa"), result("", "bb")), 0);
+        // a stable digested dump still is
+        assert_eq!(differences(result("log", "aa"), result("log", "bb")), 1);
+        assert_eq!(differences(result("", "aa"), result("", "aa")), 0);
+    }
 }

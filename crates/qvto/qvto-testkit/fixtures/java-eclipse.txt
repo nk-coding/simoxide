@@ -5029,7 +5029,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Parameter declaration in the entry operation is deprecated. 
 
 @case interpret_invalidcollectioncast
-@file result.txt 221
+@file result.txt 235
 id	interpret_invalidcollectioncast
 load	WARNING
 params	in:$model,out:$result
@@ -5041,6 +5041,7 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
+unstable	dump
 
 @file out.jsonl 592
 {"resource":"extent1.xmi","roots":1}
@@ -6965,7 +6966,7 @@ load	0	WARNING	0	OK
 load	1	WARNING	0	Declaring entry operation as a mapping is disallowed. 
 
 @case interpret_scr17812
-@file result.txt 208
+@file result.txt 222
 id	interpret_scr17812
 load	WARNING
 params	in:$model,out:$result
@@ -6977,6 +6978,7 @@ trace-records	1
 check severity 0 0	pass
 check model	pass
 verdict	pass
+unstable	dump
 
 @file out.jsonl 574
 {"resource":"extent1.xmi","roots":1}
