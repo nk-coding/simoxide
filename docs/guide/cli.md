@@ -81,6 +81,7 @@ simoxide resume FILE --model DIR [--run-json F] [--trace F] [--tape F] [--measur
                 [--spd-log F] [--spd-quirks ...] [--rules DIR] [--rules-log F] [--qvto-mode M]
                 [--timeout S] [--change FILE.changes]... [--transform X.qvto]...
                 [--enforce POLICY,...] [--hpa-set NAME.PARAMETER=VALUE]...
+                [--actions-at clock|boundary]
                 [--measurements-scope cumulative|interval]
                 [--decide ACTIONS] [--pause-on-decision] [--decision-file F]
                 [--summary F] [--summary-series METRIC[POINT]]... [--summary-stats LIST]
@@ -105,6 +106,7 @@ run's scaling decisions, once it made one). See [Snapshots](./snapshots.md).
 | `--enforce POLICY,...` | adjust by these scaling policies at the resume, past their triggers and constraints ([Scaling policies](./spd.md#command-line)); not with `slingshot-exact` |
 | `--hpa-set NAME.PARAMETER=VALUE` | change an HPA autoscaler's parameter ([Autoscaling (HPA)](./hpa.md#command-line)) |
 | `--decide ACTIONS` | resolve the snapshot's pending scaling decision: the policies (ids or names) whose adjustments run in its place, in order, as a JSON array (`'["_a","_a"]'`) or a comma list (`_a,_b`); `'[]'` declines; required to resume a pending decision ([Decisions](./spd.md#decisions)) |
+| `--actions-at clock\|boundary` | when the flags above act: `clock` (default) at the snapshot's clock, the time of its last event; `boundary` at the logical end of its interval, the time `--pause-at` or `--pause-before` asked for: the clock moves there first. Nothing moves without such a flag, or after a pause that was not timed ([Actions at the boundary](./snapshots.md#actions-at-the-boundary)) |
 
 The change steps run in the order given. With `--runtime-metadata` the runtime file starts at
 the restore, and each step, each `--decide` action and each enforced adjustment is a change of

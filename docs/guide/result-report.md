@@ -74,9 +74,9 @@ missing or partial. What is not known at the failure is `null` or absent.
 | `simulator` | `name`, `version` (the crate version) and the cargo `features` of the build |
 | `command` | `run` or `resume` |
 | `status` | `paused` (between two events; the run can continue), `finished` (the run is over), `failed` |
-| `behaviour` | the effective flags: `mode`, `flavour`, `quirks` (the Slingshot compat flags as `--quirks` takes them, `none` for none), `spd_quirks` (the SPD interpreter's: `fixed`, `slingshot` or a list; `null` without scaling policies), `measurements_scope`, and from the run's configuration `seed`, `ps_algorithm`, `link_throughput`, `usage_streams`, `fix_double_resume`, `load_profile` (a load profile is active). `restored`: the flags a `resume` took from the snapshot, not from its command line |
+| `behaviour` | the effective flags: `mode`, `flavour`, `quirks` (the Slingshot compat flags as `--quirks` takes them, `none` for none), `spd_quirks` (the SPD interpreter's: `fixed`, `slingshot` or a list; `null` without scaling policies), `measurements_scope`, and from the run's configuration `seed`, `ps_algorithm`, `link_throughput`, `usage_streams`, `fix_double_resume`, `load_profile` (a load profile is active); for `resume`, `actions_at` (`clock` or `boundary`, [Actions at the boundary](./snapshots.md#actions-at-the-boundary)). `restored`: the flags a `resume` took from the snapshot, not from its command line |
 | `limits` | the run's stop conditions and limits: `max_sim_time` (s) and `max_measurements` (`-1` or `0` = off), `max_events`, `max_steps`, `max_processes`, `max_stack_depth`, `max_events_per_instant` (`0` = off); a resumed run's come from the snapshot. They are the values the engine applies: `max_measurements` is `-1` in `slingshot-exact` and with the Slingshot quirk `Q32`, where `max_sim_time` is the only stop condition. This invocation's: `pause` (`{"type": "pause_at" or "pause_before", "time", "time_ns"}`, `{"type": "pause_events", "events"}`, or `null`), `pause_when` (the conditions as given), `pause_on_decision`, `timeout` (s) |
-| `interval` | `start`, `end`, `last_event` (each `{"time", "time_ns"}`) and the tuple cursor `tuples` `{"from", "to"}` ([Interval boundaries](#interval-boundaries)) |
+| `interval` | `start`, `end`, `last_event` (each `{"time", "time_ns"}`), `actions` (when the actions of a resume applied, `--change`, `--enforce` and the like; `null` without them) and the tuple cursor `tuples` `{"from", "to"}` ([Interval boundaries](#interval-boundaries)) |
 | `stop` | why the run stopped: `kind`, `cause`, `detail` (in words), and `condition` or `decision` where they apply ([Stop reasons](#stop-reasons)) |
 | `endpoint_reached` | the interval ended where the invocation asked it to end at the latest: at its requested pause (`stop.kind` `pause`), or at the run's own end (`completed`). `false` when something stopped it earlier: a series or SLO condition, a scaling decision, a limit, an error |
 | `resumable` | a snapshot was written (`outputs.snapshot`) from which the run continues. A snapshot paused at a scaling decision resumes with `--decide` only |
@@ -138,11 +138,22 @@ At a boundary time: with `--pause-at T` the events at `T` belong to the interval
 
 The anchoring does not move the clock: a continuation's first event is after the parent's
 `end`, so the path is the uninterrupted run whatever `end` was, and a run with `--report` is
-the run without it. But what a resume does before its first event (`--change`, `--transform`,
-`--enforce`, `--decide`, `--hpa-set`) acts at the snapshot's clock, the parent's
-`last_event`, which can be before `start`. Its tuples (and events it schedules before `start`)
-belong to the continuation by number, with their own times; the
-[interval summary](./snapshots.md#interval-summaries) counts such a value from `start` on.
+the run without it. What a resume does before its first event (`--change`, `--transform`,
+`--enforce`, `--decide`, `--hpa-set`) acts at `interval.actions`:
+
+- by default (`--actions-at clock`) at the snapshot's clock, the parent's `last_event`, which
+  can be before `start`. Its tuples (and events it schedules before `start`) belong to the
+  continuation by number, with their own times; the
+  [interval summary](./snapshots.md#interval-summaries) counts such a value from `start` on.
+- with `--actions-at boundary` at `start`: the clock moves from the parent's `last_event` to
+  `start` before the actions (nothing happens in between), so they and what they schedule lie
+  in the interval they were chosen for ([Actions at the
+  boundary](./snapshots.md#actions-at-the-boundary)). Without actions nothing moves.
+
+The issue's case continued with `--enforce` (#18): the parent's `last_event` is 49.995 113 990
+s, `end` 50 s; the child's `start` is 50 s either way, and the scale-out (`interval.actions`,
+the runtime file's change time) is at 49.995 113 990 s by default and at 50 s with
+`--actions-at boundary`.
 
 ## Stop reasons
 
