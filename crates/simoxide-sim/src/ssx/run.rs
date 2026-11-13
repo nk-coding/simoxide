@@ -323,6 +323,44 @@ impl<'m> SsxRun<'m> {
         self.e.now
     }
 
+    /// Moves the clock of a run paused between two events forward to `to_ns` (on Slingshot's
+    /// double clock) without dispatching an event, e.g. to the logical end of a snapshot's
+    /// interval before changes are applied at a resume (`simoxide resume --actions-at
+    /// boundary`); [`Simulation::advance_clock`](crate::Simulation::advance_clock) for the other
+    /// engine, with the same rules: never past the next queued event (an error if `to_ns` is
+    /// later) nor past `max_sim_time`, never back (`Ok(false)`), only between two events of a
+    /// started run that is not over. [`SsxRun::now`] is then the moved clock.
+    pub fn advance_clock(&mut self, to_ns: i64) -> Result<bool, SimError> {
+        let fail = |message: String| SimError {
+            message,
+            at_ns: self.now_ns(),
+            kind: SimErrorKind::Model,
+        };
+        if self.error.is_some() || self.e.done || self.e.stopped || self.e.events == 0 {
+            return Err(fail(
+                "the clock can move only between two events of a running simulation".into(),
+            ));
+        }
+        let to = secs(to_ns).min(self.cfg.max_sim_time as f64);
+        let to = match self.e.heap.peek() {
+            Some(top) if top.t < to => {
+                if simoxide_sched::time::span(top.t) < to_ns {
+                    return Err(fail(format!(
+                        "the clock cannot move to {to_ns} ns: an event is pending at {} ns",
+                        simoxide_sched::time::span(top.t)
+                    )));
+                }
+                top.t
+            }
+            _ => to,
+        };
+        if to <= self.e.now {
+            return Ok(false);
+        }
+        self.e.now = to;
+        Ok(true)
+    }
+
     /// Events dispatched so far.
     pub fn events(&self) -> u64 {
         self.e.events

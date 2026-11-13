@@ -596,6 +596,55 @@ impl<'m, C: Compat, F: Flavour> Simulation<'m, C, F> {
         self.st.meas.m.take_rows()
     }
 
+    /// Moves the clock of a run paused between two events forward to `to_ns` (on the flavour's
+    /// clock: [`Clock::from_ns`](simoxide_sched::Clock::from_ns)) without processing an event,
+    /// e.g. to the logical end of a snapshot's interval before changes are applied at a resume
+    /// (`simoxide resume --actions-at boundary`, `docs/guide/snapshots.md`). What happens next
+    /// (a model change, an external note at the current time, the next event) happens at
+    /// `to_ns`. Nothing else changes: resources and windows account for the time that passed
+    /// when they are next updated, as after any gap between two events, so a run whose clock
+    /// moved and that changes nothing continues as without the move.
+    ///
+    /// The clock never moves past the next pending event (an error if `to_ns` is later: the
+    /// events before it would run late) nor past the run's simulated time (`max_sim_time`, the
+    /// end of the run), and never back: `Ok(false)` if it is at or after `to_ns` already. An
+    /// error if the run is not between two events (not started, stopping, finished or failed).
+    pub fn advance_clock(&mut self, to_ns: i64) -> Result<bool, SimError> {
+        let now_ns = F::Clock::to_ns(self.st.now);
+        let fail = |message: String| SimError {
+            message,
+            at_ns: now_ns,
+            kind: SimErrorKind::Model,
+        };
+        if self.st.phase != Phase::Running || self.st.meas.reconf.fin.is_some() {
+            return Err(fail(format!(
+                "the clock can move only between two events of a running simulation (phase {:?})",
+                self.st.phase
+            )));
+        }
+        let mut to = F::Clock::from_ns(to_ns);
+        if self.st.cfg.max_sim_time > 0 {
+            to = to.min(F::Clock::at_secs(self.st.cfg.max_sim_time as f64));
+        }
+        if let Some(next) = self.st.meas.events.next_time()
+            && next < to
+        {
+            if F::Clock::to_ns(next) < to_ns {
+                return Err(fail(format!(
+                    "the clock cannot move to {to_ns} ns: an event is pending at {} ns",
+                    F::Clock::to_ns(next)
+                )));
+            }
+            // the same nanosecond (Slingshot's double clock): not past the event
+            to = next;
+        }
+        if to <= self.st.now {
+            return Ok(false);
+        }
+        self.st.now = to;
+        Ok(true)
+    }
+
     /// Registers interpreter listener `l` (SIM-14; `None`: none). Register it before the run
     /// starts to see every callback (a listener set later sees what happens from then on);
     /// forks, snapshots and resumed runs have none until one is set.
