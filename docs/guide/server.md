@@ -632,6 +632,8 @@ server.
 ## What the server does not do
 
 The server runs what `simoxide run` runs without its file outputs: no event trace, random tape,
-snapshots, pauses with changes, or exploration ([Command line](./cli.md)); SimuLizar's
+snapshots, pauses with changes (so neither `resume --actions-at`: a job's scaling decisions
+are not timed pauses, their actions apply at the decision's time), or exploration
+([Command line](./cli.md)); SimuLizar's
 reconfiguration rules (`--rules`) are not offered either. Use the command line or the
 [library](./library.md) for those.

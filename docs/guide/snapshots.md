@@ -80,6 +80,10 @@ let result = sim.finish()?;
   `snapshot_value(enc, sections)` returns it as a `Snapshot` (header and sections) to add
   sections of one's own. `RunState::serialize(&base, enc)` and `RunState::deserialize(&s, &base)`
   work on a state alone.
+- `Simulation::advance_clock(ns)` (and `SsxRun::advance_clock`) moves the clock of a paused run
+  forward without an event, never past the next event or `max_sim_time`
+  ([Actions at the boundary](#actions-at-the-boundary)); a run whose clock moved and that
+  changes nothing continues as without the move.
 - `Simulation::restore_from(r, &base, outputs)` and `restore_snapshot(&s, &base, outputs)` check
   the format version, the SimOxide version, the mode, the flavour and the model fingerprint
   (`SnapshotError::{Version, SimOxideVersion, Mismatch, Model}`; damage is
@@ -435,9 +439,66 @@ simoxide resume ms-120.snap --model corpus/x_sl_mediastore \
   resume time, after the events already queued for it, and appear in the decision log with
   `"enforced":true` ([Scaling policies](./spd.md#command-line)). Not in the Slingshot-exact
   engine.
+- `--actions-at clock|boundary`: the resume time of these steps. `clock` (default): the
+  snapshot's clock, the time of its last event; `boundary`: the logical start of the new
+  interval, after a timed pause the time it asked for ([next
+  section](#actions-at-the-boundary)).
 - The result is deterministic: the same snapshot and the same changes give the same
   continuation, byte for byte. It equals the uninterrupted run that applies the same changes at
   the pause (`Simulation::apply_changes`, `QvtoRun::invoke`, `RulesHost::replace_rules`).
+
+### Actions at the boundary
+
+A snapshot written at a timed pause has two times ([Interval
+boundaries](./result-report.md#interval-boundaries)): its clock, the time of its last event
+(header `time_ns`), and the logical end of its interval, the time `--pause-at T` or
+`--pause-before T` (also `--until T`, the conditions `time T`, `before T`, `elapsed D`) asked
+for (header `interval_end`, when it is later than the clock). The continuation's interval
+starts at the second. By default a resume applies its actions at the first: `--pause-at 50`
+with the last event at 49.995 s scales out at 49.995 s, inside the interval that ended at 50
+s, and the scale-out can schedule work before 50 s.
+
+```sh
+simoxide resume s50.snap --model M --enforce scaleOut --actions-at boundary --pause-at 51 ...
+# actions at t=50 s: the interval boundary (the snapshot's clock: t=49.995113990540906 s)
+```
+
+With `--actions-at boundary` the clock moves to the boundary first, then the actions run:
+
+- **Actions**: `--change`, `--transform` (and the `hpa` lines of change files), `--enforce`,
+  `--hpa-set`, `--decide`. Rules given with `--rules` act on later events only and do not move
+  the clock. The actions run in the usual order, and what they schedule for "now" (an
+  enforced adjustment, the users a larger population adds) is queued at the boundary, behind
+  the events already queued for it.
+- **Nothing lost or reordered**: no event lies between the clock and the boundary (the next
+  event is after `T` for `--pause-at T`, at or after `T` for `--pause-before T`), and the clock
+  never moves past the next event or past `max_sim_time`. The clock only moves: resources,
+  windows and the scaling policies' state account for the time that passed when they are next
+  used, as after any gap between two events. Times the actions take (the runtime file's
+  change times, the decision log's `t`, an adjustment's request time, the tuples it records,
+  the HPA's view of the changed group and its replica accounting) are the boundary's; so
+  everything measured from them (an HPA's stabilisation windows, the time to the next
+  policy evaluation) starts there. (Enforced and decided adjustments start no policy
+  cooldown, with or without the flag.)
+- **No action, or no timed pause: nothing changes.** The clock moves only for actions: a
+  resume without them is the uninterrupted run byte for byte, with or without the flag. After
+  a pause that was not timed (`--pause-events`, a series or SLO condition, a scaling decision)
+  or with a snapshot of an older build (no `interval_end`), the boundary is the clock: the
+  actions apply there, and the CLI says so (`the snapshot's interval ends at its clock`).
+- **Determinism**: the moved clock is run state. A snapshot written later continues like the
+  run that wrote it, and the continuation equals the uninterrupted run that pauses at the same
+  point, moves its clock to the boundary (`Simulation::advance_clock`,
+  `SsxRun::advance_clock`) and applies the same actions.
+- **Measurements**: tuples are still assigned to intervals by number; with the flag, the
+  actions' tuples have times at or after the interval's start, so the [interval
+  summary](#interval-summaries) and time-weighted values need no special case. An `elapsed D`
+  pause condition counts from the clock the run continues from: the boundary when the clock
+  moved.
+- **Where**: every flavour and engine that takes these actions (SimuLizar, Slingshot,
+  Slingshot-exact with change files and transformations), with scaling policies, HPA
+  autoscalers and reconfiguration rules, in both modes. The [result
+  report](./result-report.md) has the mode (`behaviour.actions_at`) and the time the actions
+  applied (`interval.actions`). `simoxide explore` applies its variants at the clock.
 
 Changes the run cannot take are errors that leave it unchanged:
 

@@ -108,6 +108,10 @@ let (a, b) = (sim.finish()?, resumed.finish()?);
   `simoxide-bench fork` measures both.
 - A fork has the `Limits` of its origin, including the same cancellation flag;
   `Simulation::set_limits` gives it its own.
+- `Simulation::advance_clock(ns)` moves the clock of a paused run forward to a time before its
+  next event without processing one (never past that event or `max_sim_time`), so that changes
+  applied next happen at that time; a run that changes nothing continues as without the move
+  ([Actions at the boundary](./snapshots.md#actions-at-the-boundary)).
 - The same state can be written to a file and continued in another process:
   `Simulation::snapshot_to` and `Simulation::restore_from` (feature `snapshot`), see
   [Snapshots](./snapshots.md).
